@@ -25,7 +25,6 @@ static BOOL bException = FALSE;
 #define USE_OWN_ERROR_MESSAGE_WINDOW
 
 #ifdef IXR_WINDOWS
-#include <dbghelp.h>						// MiniDump flags
 #include <new.h>							// for _set_new_mode
 #include <signal.h>							// for signals
 #endif
@@ -327,6 +326,7 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 										 CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
 										 );
 
+// TODO: windows specific stuff, Linux would require debugging tools and APIs like `libunwind`, `libbfd`, and `gdb`...
 void save_mini_dump			(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	// firstly see if dbghelp.dll is around and has the function we need
