@@ -58,7 +58,7 @@ const Fvector &CPatrolPathParams::point	(u32 index) const
 u32	CPatrolPathParams::level_vertex_id	(u32 index) const
 {
 	VERIFY(m_path->vertex(index));
-	if (!m_path->vertex(index))
+	if (!m_path || !m_path->vertex(index))
 		return u32(-1);
 	return (m_path->vertex(index)->data().level_vertex_id());
 }
@@ -66,7 +66,7 @@ u32	CPatrolPathParams::level_vertex_id	(u32 index) const
 GameGraph::_GRAPH_ID CPatrolPathParams::game_vertex_id	(u32 index) const
 {
 	VERIFY(m_path->vertex(index));
-	if (!m_path->vertex(index))
+	if (!m_path || !m_path->vertex(index))
 		return GameGraph::_GRAPH_ID(-1);
 	return (m_path->vertex(index)->data().game_vertex_id());
 }
