@@ -833,7 +833,7 @@ bool CContentView::BeginDragDropAction(xr_path& FilePath, xr_string& FileName, c
 	if (FilePath.has_extension()) //File DnD
 	{
 		xr_string Extension = FilePath.extension().string().c_str();
-		WeCanDrag = Extension == ".object" || Extension == ".group" || Extension == ".ise";
+		WeCanDrag = Extension == ".object" || Extension == ".group" || Extension == ".ise" || Extension == ".dti";
 
 		if (!ImGui::BeginDragDropSource())
 		{
@@ -854,7 +854,13 @@ bool CContentView::BeginDragDropAction(xr_path& FilePath, xr_string& FileName, c
 				Data.FileName = FilePath;
 			}
 
-			ImGui::SetDragDropPayload("TEST", &Data, sizeof(DragDropData));
+			xr_string PayloadName = "TEST";
+			if (FilePath.xstring().ends_with(".dti"))
+			{
+				PayloadName += "#dti";
+			}
+
+			ImGui::SetDragDropPayload(PayloadName.c_str(), &Data, sizeof(DragDropData));
 		}
 		else 
 		{
