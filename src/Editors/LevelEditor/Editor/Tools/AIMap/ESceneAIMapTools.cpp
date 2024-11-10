@@ -12,26 +12,6 @@
 #define AIMAP_CHUNK_INTERNAL_DATA	0x0008
 #define AIMAP_CHUNK_INTERNAL_DATA2	0x0009
 
-#if 0
-poolSS<SAINode,1024> g_ainode_pool;
-
-void* SAINode::operator new(std::size_t size)
-{
-	return g_ainode_pool.create();
-}
-
-void* SAINode::operator new(std::size_t size, SAINode* src)
-{
-    return 			src;
-}
-
-void SAINode::operator delete(void* ptr)
-{
-    auto node = (SAINode*)ptr;
-	g_ainode_pool.destroy(node);
-}
-#endif 
-
 void SAINode::PointLF(Fvector& D, float patch_size)
 {
 	Fvector	d;	d.set(0,-1,0);
