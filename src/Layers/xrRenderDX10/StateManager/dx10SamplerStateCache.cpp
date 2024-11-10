@@ -183,6 +183,12 @@ void dx10SamplerStateCache::SetMaxAnisotropy( UINT uiMaxAniso)
 	{
 		StateRecord& rec = m_StateArray[i];
 		StateDecs desc;
+
+		if (rec.m_pState == nullptr)
+		{
+			continue;
+		}
+
 		rec.m_pState->GetDesc(&desc);
 		desc.MaxAnisotropy = m_uiMaxAnisotropy;
 		dx10StateUtils::ValidateState(desc);
