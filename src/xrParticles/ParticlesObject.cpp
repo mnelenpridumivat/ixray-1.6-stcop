@@ -2,9 +2,9 @@
 // file: PSObject.cpp
 //----------------------------------------------------
 #include "stdafx.h"
-#pragma hdrstop
-
 #include "ParticlesObject.h"
+#include "ParticlesAsyncManager.h"
+
 #include "../xrEngine/defines.h"
 #include "../Include/xrRender/RenderVisual.h"
 #include "../Include/xrRender/ParticleCustom.h"
@@ -12,10 +12,7 @@
 #include "../xrEngine/IGame_Persistent.h"
 #include "../xrEngine/environment.h"
 
-xr_task_group ParticleObjectTasks;
-
 PARTICLES_API const Fvector zero_vel = {0.f,0.f,0.f};
-xr_list<CParticlesObject*> CParticlesObject::AllParticleObjects;
 
 CParticlesObject::CParticlesObject	(LPCSTR p_name, BOOL bAutoRemove, bool destroy_on_game_load) :
 	inherited				(destroy_on_game_load)
@@ -68,7 +65,7 @@ void CParticlesObject::Init	(LPCSTR p_name, IRender_Sector* S, BOOL bAutoRemove)
 	shedule.t_max			= 50;
 	shedule_register		();
 
-	AllParticleObjects.push_back(this);
+	NeedUpdate = CParticlesAsync::Push(this);
 
 	dwLastTime = Device.dwTimeGlobal;
 }
@@ -76,45 +73,7 @@ void CParticlesObject::Init	(LPCSTR p_name, IRender_Sector* S, BOOL bAutoRemove)
 //----------------------------------------------------
 CParticlesObject::~CParticlesObject()
 {
-	// FX: DX9 выгружает мусор при рестарте девайса
-	// а партиклы могли не обновиться...
-	// Держите пролаг в лицо 
-	WaitForParticles();
-
-	AllParticleObjects.remove(this);
-}
-
-void CParticlesObject::UpdateAllAsync()
-{
-	for (CParticlesObject* particle : AllParticleObjects)
-	{
-		auto UpdateParticle = [particle]()
-		{
-			PROF_THREAD("Particles Worker")
-			u32 dt = Device.dwTimeGlobal - particle->dwLastTime;
-			IParticleCustom* V = smart_cast<IParticleCustom*>(particle->renderable.visual);
-			
-			if (V == nullptr)
-				return;
-
-			PROF_EVENT("Particle OnFrame")
-			V->OnFrame(dt);
-
-			particle->dwLastTime = Device.dwTimeGlobal;
-		};
-
-		if (particle->m_bDead)
-			continue;
-
-		if (psDeviceFlags.test(mtParticles))
-		{
-			ParticleObjectTasks.run(UpdateParticle);
-		}
-		else
-		{
-			UpdateParticle();
-		}
-	}
+	CParticlesAsync::Pop(this);
 }
 
 void CParticlesObject::UpdateSpatial()
@@ -168,6 +127,12 @@ void CParticlesObject::Play(bool bHudMode)
 
 	PerformAllTheWork();
 	m_bStopping = false;
+
+	if (NeedUpdate)
+	{
+		CParticlesAsync::ForceUpdate(this);
+		NeedUpdate = false;
+	}
 }
 
 void CParticlesObject::play_at_pos(const Fvector& pos, BOOL xform)
@@ -183,6 +148,12 @@ void CParticlesObject::play_at_pos(const Fvector& pos, BOOL xform)
 
 	PerformAllTheWork			();
 	m_bStopping					= false;
+
+	if (NeedUpdate)
+	{
+		CParticlesAsync::ForceUpdate(this);
+		NeedUpdate = false;
+	}
 }
 
 void CParticlesObject::Stop(BOOL bDefferedStop)
@@ -214,15 +185,6 @@ void CParticlesObject::PerformAllTheWork()
 
 	// Update
 	UpdateSpatial					();
-}
-
-void CParticlesObject::WaitForParticles()
-{
-	if (psDeviceFlags.test(mtParticles))
-	{
-		PROF_EVENT("Particles Wait")
-		ParticleObjectTasks.wait();
-	}
 }
 
 void CParticlesObject::SetXFORM			(const Fmatrix& m)
