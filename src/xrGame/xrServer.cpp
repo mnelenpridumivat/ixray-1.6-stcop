@@ -1149,8 +1149,8 @@ void xrServer::GetServerInfo( CServerInfo* si )
 	if ( g_pGameLevel )
 	{
 		time = InventoryUtilities::GetGameTimeAsString( InventoryUtilities::etpTimeToMinutes ).c_str();
-		
-		xr_strcpy( tmp256, time );
+		xr_strcpy(tmp256, time);
+
 		if ( g_sv_mp_iDumpStatsPeriod > 0 )
 		{
 			xr_strcat( tmp256, " statistic [" );
@@ -1163,6 +1163,12 @@ void xrServer::GetServerInfo( CServerInfo* si )
 			
 		}
 		si->AddItem( "Game time", tmp256, RGB(205,228,178) );
+
+		// FPS
+		string32 FPSText = {};
+		xr_strcat(FPSText, itoa((int)(1.f / Device.fTimeDelta), tmp, 10));
+		si->AddItem("FPS", FPSText, RGB(205, 228, 178));
+
 	}
 }
 
