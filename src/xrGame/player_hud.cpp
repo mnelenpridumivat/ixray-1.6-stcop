@@ -678,20 +678,24 @@ void player_hud::render_hud()
 	bool b_r0 = (m_attached_items[0] && m_attached_items[0]->need_renderable());
 	bool b_r1 = (m_attached_items[1] && m_attached_items[1]->need_renderable());
 
-	if(b_r0 || b_r1 || m_bhands_visible) {
+	if(b_r0 || b_r1 || m_bhands_visible) 
+	{
 		::Render->set_Transform(&m_transform);
 		::Render->add_Visual(m_model->dcast_RenderVisual(), true);
 	}
 
-	if(b_r0) {
+	if(b_r0) 
+	{
 		m_attached_items[0]->render();
 	}
 
-	if(b_r1) {
+	if(b_r1) 
+	{
 		m_attached_items[1]->render();
 	}
 
-	if(Actor() && m_legs_model) {
+	if(m_show_legs && Actor() && m_legs_model)
+	{
 		bool isClimb = Actor()->GetMovementState(ACTOR_DEFS::EMovementStates::eReal) & mcClimb;
 		if(!isClimb) {
 			auto bHud = ::Render->get_HUD();
@@ -702,17 +706,22 @@ void player_hud::render_hud()
 			m_legs_model->CalculateBones_Invalidate();
 			m_legs_model->CalculateBones(TRUE);
 
-			if(m_legs_model->LL_BoneCount() == actor_model->LL_BoneCount()) {
-				for(u16 i = 0; i < m_legs_model->LL_BoneCount(); ++i) {
+			if(m_legs_model->LL_BoneCount() == actor_model->LL_BoneCount())
+			{
+				for(u16 i = 0; i < m_legs_model->LL_BoneCount(); ++i) 
+				{
 					auto& BoneInstance = m_legs_model->LL_GetBoneInstance(i);
 					BoneInstance.mTransform.set(actor_model->LL_GetBoneInstance(i).mTransform);
 					BoneInstance.mRenderTransform.mul_43(BoneInstance.mTransform, m_legs_model->LL_GetData(i).m2b_transform);
 				}
 			}
-			else {
-				auto setBoneTransform = [actor_model, this](u16 ID, shared_str bonename) {
+			else
+			{
+				auto setBoneTransform = [actor_model, this](u16 ID, shared_str bonename) 
+				{
 					auto BoneID = actor_model->LL_BoneID(bonename);
-					if(BoneID != BI_NONE) {
+					if(BoneID != BI_NONE) 
+					{
 						auto& BoneInstance = m_legs_model->LL_GetBoneInstance(ID);
 						BoneInstance.mTransform.set(actor_model->LL_GetBoneInstance(BoneID).mTransform);
 						BoneInstance.mRenderTransform.mul_43(BoneInstance.mTransform, m_legs_model->LL_GetData(ID).m2b_transform);
@@ -723,13 +732,14 @@ void player_hud::render_hud()
 				setBoneTransform(1, "bip01");
 
 				shared_str bonename;
-				for(u16 i = 0; i < m_legs_model->LL_BoneCount(); ++i) {
+				for(u16 i = 0; i < m_legs_model->LL_BoneCount(); ++i) 
+				{
 					bonename = m_legs_model->LL_BoneName_dbg(i);
 					setBoneTransform(i, bonename);
 				}
 			}
 
-			auto BoneID = m_legs_model->LL_BoneID("bip01_spine");
+			const u16 BoneID = m_legs_model->LL_BoneID("bip01_spine");
 			auto& BoneInstance = m_legs_model->LL_GetData(BoneID);
 			m_legs_model->Bone_Calculate(&BoneInstance, &m_legs_model->LL_GetTransform(BoneInstance.GetParentID()));
 

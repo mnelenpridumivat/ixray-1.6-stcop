@@ -43,11 +43,16 @@
 #include "Inventory.h"
 #include "ShootingObject.h"
 #include "Weapon.h"
-
+#include "player_hud.h"
 
 #include "ai_object_location.h"
 
 using namespace luabind;
+
+void show_legs(bool val)
+{
+	g_player_hud->m_show_legs = val;
+}
 
 void block_action_script(int cmd) {
 	if (g_pGameLevel == nullptr) {
@@ -1144,12 +1149,17 @@ void CLevel::script_register(lua_State* L)
 			def("play", &CHUDAnimItem::PlayHudAnim)
 		];
 
+	module(L, "player_hud")
+	[
+		def("show_legs", &show_legs)
+	];
+
 	module(L, "actor_stats")
-		[
-			def("add_points", &add_actor_points),
-				def("add_points_str", &add_actor_points_str),
-				def("get_points", &get_actor_points)
-		];
+	[
+		def("add_points", &add_actor_points),
+		def("add_points_str", &add_actor_points_str),
+		def("get_points", &get_actor_points)
+	];
 
 	module(L)
 		[
