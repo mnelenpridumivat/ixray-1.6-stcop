@@ -39,13 +39,17 @@ enum
     COMMAND_GRID_NUMBER_OF_SLOTS,
     COMMAND_GRID_SLOT_SIZE,
     
+    COMMAND_ICON_PICKER,
+    COMMAND_ICON_LOAD,
+    COMMAND_ICON_REMOVE,
+
     COMMAND_REFRESH_UI_BAR,
     COMMAND_RESTORE_UI_BAR,
     COMMAND_SAVE_UI_BAR,
 
     COMMAND_MUTE_SOUND,
 
-    // имеют разную реализацию
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     COMMAND_CLEAR,
     COMMAND_LOAD,
     COMMAND_SAVE,

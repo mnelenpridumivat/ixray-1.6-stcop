@@ -49,6 +49,9 @@ CCustomPreferences::CCustomPreferences()
 	// objects
 	object_flags.zero	();
 
+	//other
+	custom_icons.clear();
+
 	string_path AppDataPath = {};
 	FS.update_path(AppDataPath, "$app_data_root$", "");
 
@@ -238,9 +241,9 @@ extern bool bAllowLogCommands;
 void CCustomPreferences::Load()
 {
 	psDeviceFlags.flags = JSONData["editor_prefs"]["device_flags"];
-	psSoundFlags.flags  = JSONData["editor_prefs"]["sound_flags"];
+	psSoundFlags.flags = JSONData["editor_prefs"]["sound_flags"];
 
-	Tools->m_Settings.flags	= JSONData["editor_prefs"]["tools_settings"],Tools->m_Settings.flags;
+	Tools->m_Settings.flags = JSONData["editor_prefs"]["tools_settings"], Tools->m_Settings.flags;
 
 	view_np = JSONData["editor_prefs"]["view_np"];
 	view_fp = JSONData["editor_prefs"]["view_fp"];
@@ -300,7 +303,7 @@ void CCustomPreferences::Load()
 
 	bAllowLogCommands = JSONData["windows"]["log"];
 	// read recent list    
-	for (u32 i=0; i<scene_recent_count; i++)
+	for (u32 i = 0; i < scene_recent_count; i++)
 	{
 		string64 buffer = {};
 		sprintf(buffer, "recent_files_%d", i);
@@ -308,14 +311,19 @@ void CCustomPreferences::Load()
 		std::string fn = JSONData["editor_prefs"][buffer];
 		if (fn.size())
 		{
-			AStringIt it =   std::find(scene_recent_list.begin(), scene_recent_list.end(), fn.c_str() ) ;
-			if (it==scene_recent_list.end())
+			AStringIt it = std::find(scene_recent_list.begin(), scene_recent_list.end(), fn.c_str());
+			if (it == scene_recent_list.end())
 				scene_recent_list.push_back(fn.c_str());
 		}
 	}
 	sWeather = ((std::string)(JSONData["editor_prefs"]["weather"])).c_str();
-	// load shortcuts
 
+	if (JSONData["ContentBrowser"].contains("file_custom_icon"))
+	{
+		custom_icons = JSONData["ContentBrowser"]["file_custom_icon"].get<std::map<std::string, std::string>>();
+	}
+	
+	// load shortcuts
 	LoadShortcuts		(JSONData);
 	UI->LoadSettings	(JSONData);
 }
@@ -389,7 +397,8 @@ void CCustomPreferences::Save()
 
 	JSONData["windows"]["log"]=bAllowLogCommands;
 	JSONData["render"]["render_radius"]=EDevice->RadiusRender;
-
+	
+	JSONData["ContentBrowser"]["file_custom_icon"] = custom_icons;
 	// load shortcuts
 	SaveShortcuts(JSONData);
 	UI->SaveSettings(JSONData);

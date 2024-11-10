@@ -572,6 +572,35 @@ void CContentView::ResetBegin() {
 void CContentView::ResetEnd() {
 }
 
+void CContentView::LoadCustomIcons()
+{
+	if (EPrefs->custom_icons.size() == 0)
+		return;
+
+	for (auto el : EPrefs->custom_icons)
+	{
+		if (Icons.contains(el.second.c_str()))
+		{
+			Icons[el.first.c_str()] = Icons[el.second.c_str()];
+			Icons[el.first.c_str()].UseButtonColor = true;
+		}
+		else
+		{
+			string_path Path = {};
+			sprintf(Path, "%s%s", "ed\\content_browser\\", el.second);
+			Icons[el.first.c_str()] = { EDevice->Resources->_CreateTexture(Path),	true };
+		}
+
+	}
+	
+}
+
+void CContentView::RemoveCustomIcon(const xr_string& icon)
+{
+	if (Icons.contains(icon))
+		Icons.erase(icon);
+}
+
 void CContentView::Init()
 {
 	Icons["Folder"] = {EDevice->Resources->_CreateTexture("ed\\content_browser\\folder"),	true};
@@ -595,6 +624,8 @@ void CContentView::Init()
 	Icons["search"]= {EDevice->Resources->_CreateTexture("ed\\content_browser\\search"),	false};
 
 	MenuIcon = EDevice->Resources->_CreateTexture("ed\\bar\\menu");
+
+	LoadCustomIcons();
 }
 
 bool CContentView::DrawItem(const FileOptData& FilePath, size_t& HorBtnIter, const size_t IterCount)
@@ -1154,6 +1185,22 @@ bool CContentView::DrawContext(const xr_path& Path)
 		DeleteAction(Path);
 	}
 
+	ImGui::Separator();
+
+
+	if (ImGui::BeginMenu("Properties"))
+	{
+		if (ImGui::MenuItem("Change icon"))
+		{
+			ExecCommand(COMMAND_ICON_PICKER, Path.xstring());
+		}
+
+
+		ImGui::EndMenu();
+	}
+
+
+	
 
 	bool ShowConvert = false;
 
@@ -1204,6 +1251,9 @@ bool CContentView::DrawContext(const xr_path& Path)
 
 CContentView::IconData & CContentView::GetTexture(const xr_string & IconPath)
 {
+	if (Icons.contains(IconPath))
+		return Icons[IconPath];
+
 	if (IconPath.Contains(".~"))
 		return Icons["backup"];
 

@@ -2,6 +2,7 @@
 #include "Utils\Cursor3D.h"
 #include "..\xrengine\GameFont.h"
 #include "UI\UIEditLibrary.h"
+#include "Editor/Utils/ContentView.h"
 
 #ifdef _LEVEL_EDITOR
 //.    if (m_Cursor->GetVisible()) RedrawScene();
@@ -66,6 +67,16 @@ CCommandVar CommandLAnimEditor(CCommandVar p1, CCommandVar p2)
 CCommandVar CommandFileMenu(CCommandVar p1, CCommandVar p2)
 {
 	//FHelper.ShowPPMenu(fraLeftBar->pmSceneFile,0);
+	return TRUE;
+}
+CCommandVar CommandLoadCustomIcons(CCommandVar p1, CCommandVar p2)
+{
+	GContentView->LoadCustomIcons();
+	return TRUE;
+}
+CCommandVar CommandRemoveCustomIcon(CCommandVar p1, CCommandVar p2)
+{
+	GContentView->RemoveCustomIcon(p1);
 	return TRUE;
 }
 CCommandVar CLevelTool::CommandEnableTarget(CCommandVar p1, CCommandVar p2)
@@ -1012,6 +1023,8 @@ void CLevelMain::RegisterCommands()
 	REGISTER_CMD_S	    (COMMAND_SELECT_SNAP_OBJECTS,       CommandSelectSnapObjects);
 	REGISTER_CMD_S	    (COMMAND_REFRESH_SNAP_OBJECTS,      CommandRefreshSnapObjects);
 //	REGISTER_CMD_S	    (COMMAND_REFRESH_SOUND_ENVS,        CommandRefreshSoundEnvs);
+	REGISTER_CMD_S	    (COMMAND_ICON_LOAD, CommandLoadCustomIcons);
+	REGISTER_CMD_S	    (COMMAND_ICON_REMOVE, CommandRemoveCustomIcon);
 	REGISTER_CMD_S	    (COMMAND_REFRESH_SOUND_ENV_GEOMETRY,CommandRefreshSoundEnvGeometry);
 	REGISTER_CMD_S	    (COMMAND_SHOWCONTEXTMENU,           CommandShowContextMenu);
 	REGISTER_CMD_S	    (COMMAND_REFRESH_UI_BAR,            CommandRefreshUIBar);
