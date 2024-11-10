@@ -543,3 +543,13 @@ void UIPropertiesItem::DrawProp()
 		break;
 	}
 }
+
+void UIPropertiesItem::SetSelect()
+{
+	IsSelect = true;
+}
+
+void UIPropertiesItem::SetUnselect()
+{
+	IsSelect = false;
+}

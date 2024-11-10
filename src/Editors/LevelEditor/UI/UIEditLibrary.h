@@ -37,6 +37,8 @@ private:
     void GenerateLOD(RStringVec& props, bool bHighQuality);
 
     void RefreshSelected();
+    void PickSurface();
+    void PickCallback();
     void ChangeReference(const RStringVec& items);
     bool SelectionToReference(ListItemsVec* props);
     void ShowProperty();
@@ -50,6 +52,9 @@ private:
     UIPropertiesForm* m_PropsObjects;
     LPCSTR m_Current;
     bool m_Preview;
+    bool m_Dropper;
+
+    xr_string PrevClick;
 
     UIRenderForm View;
 

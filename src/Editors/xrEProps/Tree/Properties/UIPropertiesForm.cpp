@@ -173,6 +173,16 @@ PropItem* UIPropertiesForm::FindItem(const char* name)
 	return nullptr;
 }
 
+UIPropertiesItem* UIPropertiesForm::FindPropItem(const char* path)
+{
+	UIPropertiesItem* Item = static_cast<UIPropertiesItem*>(m_Root.FindItem(path));
+	if (Item)
+	{
+		return Item;
+	}
+	return nullptr;
+}
+
 void UIPropertiesForm::DrawEditText()
 {
 
