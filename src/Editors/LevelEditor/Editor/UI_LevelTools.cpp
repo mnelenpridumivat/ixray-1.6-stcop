@@ -256,7 +256,7 @@ bool CLevelTool::UpdateCamera()
 {
 	if (Scene->IsPlayInEditor())
 	{
-		g_pGameLevel->Cameras().ApplyDevice(VIEWPORT_NEAR);
+		//g_pGameLevel->Cameras().ApplyDevice(VIEWPORT_NEAR);
 
 		extern ENGINE_API float psHUD_FOV;
 		Device.mProject_hud.build_projection(deg2rad(psHUD_FOV), Device.fASPECT,
