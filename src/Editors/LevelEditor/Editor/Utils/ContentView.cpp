@@ -563,7 +563,7 @@ void CContentView::RescanDirectory()
 void CContentView::Destroy()
 {
 	MenuIcon.destroy();
- 	Icons.clear();
+	Icons.clear();
 }
 
 void CContentView::ResetBegin() {
@@ -976,7 +976,7 @@ bool CContentView::DrawItemByTile(const FileOptData& InitFileName, size_t& HorBt
 		return false;
 	}
 
-	ImVec4 TextColor = ImVec4(1, 1, 1, 1);
+	ImVec4 TextColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
 
 	bool RenameThisItem = RenameObject.Active && RenameObject.Path == FilePath;
 
