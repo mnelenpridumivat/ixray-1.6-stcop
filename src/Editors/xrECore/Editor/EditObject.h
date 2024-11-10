@@ -236,6 +236,8 @@ public:
 	xr_string		m_LoadName;
 	int				m_RefCount;
 protected:
+	shared_str		AssignBoneName;
+
 	int				m_ObjectVersion;
 
 	void 			ClearGeometry			();
@@ -323,6 +325,8 @@ public:
 	bool			VerifyBoneParts			();
 	void			OptimizeSMotions		();
 
+	u16				BoneIDByName			(shared_str name);
+
 	bool 			LoadBoneData			(IReader& F);
 	void 			SaveBoneData			(IWriter& F);
 	void			ResetBones				();
@@ -355,7 +359,8 @@ public:
 
 	// pick methods
 	bool 			RayPick					(float& dist, const Fvector& S, const Fvector& D, const Fmatrix& inv_parent, SRayPickInfo* pinf=0);
-#if 1
+
+	void			CreateBone				(shared_str Name);
 	void			AddBone					(CBone* parent_bone);
 	void			DeleteBone				(CBone* bone);
 	void			RenameBone				(CBone* bone, LPCSTR new_name);
@@ -372,7 +377,7 @@ public:
 	void 			SelectBones				(bool bVal);
 	void 			SelectBone				(CBone* b, bool bVal);
 	void			ClampByLimits			(bool bSelOnly);
-#endif
+
 	// change position/orientation methods
 	void 			TranslateToWorld		(const Fmatrix& parent);
 

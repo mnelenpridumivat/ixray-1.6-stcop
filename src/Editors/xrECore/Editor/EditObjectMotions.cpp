@@ -587,3 +587,13 @@ void CEditableObject::OptimizeSMotions()
 
     UI->ProgressEnd(pb);
 }
+
+u16 CEditableObject::BoneIDByName(shared_str name)
+{
+    for (int i = 0; i < m_Bones.size(); i++)
+    {
+        if (m_Bones[i]->Name() == name)
+            return i;
+    }
+    return BI_NONE;
+}

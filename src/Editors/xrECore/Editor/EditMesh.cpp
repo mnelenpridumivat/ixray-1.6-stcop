@@ -1,4 +1,4 @@
-//----------------------------------------------------
+﻿//----------------------------------------------------
 // file: StaticMesh.cpp
 //----------------------------------------------------
 
@@ -242,130 +242,59 @@ void CEditableMesh::GenerateVNormals(const Fmatrix* parent_xform, bool force)
 	UnloadAdjacency();
 }
 
-/*
-void CEditableMesh::GenerateVNormals(const Fmatrix* parent_xform)
+// Автор: VaIerok
+// Если не работает - бить его
+void CEditableMesh::AssignMesh(shared_str to_bone)
 {
-	m_VNormalsRefs++;
-    if (m_VertexNormals)		return;
-	m_VertexNormals				= xr_alloc<Fvector>(m_FaceCount*3);
+	st_VMap* vMap = new st_VMap(to_bone.c_str(), vmtWeight, false);
+	vMap->resize(GetFaceCount() * 3);
 
-	// gen req    
-	GenerateFNormals	();
-	GenerateAdjacency	();
+	for (int i = 0; i < GetFaceCount() * 3; i++)
+		vMap->getW(i) = 1.0f;
 
-	// vertex normals
-	if (m_Flags.is(flSGMask))
+	int vindex = 0;
+	xr_vector<int> DeletedVmapIndexes;
+	for (int i = 0; i < m_VMaps.size(); i++, vindex++)
 	{
-		for (u32 f_i=0; f_i<m_FaceCount; f_i++ )
+		if (m_VMaps[i]->type == vmtWeight)
 		{
-			u32 sg				= m_SmoothGroups[f_i];
-			Fvector& FN 		= m_FaceNormals[f_i];
-			for (int k=0; k<3; k++)
-			{
-				Fvector& N 	= m_VertexNormals[f_i*3+k];
-				IntVec& a_lst=(*m_Adjs)[m_Faces[f_i].pv[k].pindex];
-//
-				typedef itterate_adjacents< itterate_adjacents_params_dynamic<st_FaceVert> > iterate_adj ;
-				iterate_adj::recurse_tri_params p( N, m_SmoothGroups, m_FaceNormals, a_lst, m_Faces, m_FaceCount );
-				iterate_adj::RecurseTri( 0, p );
-//
-				if (sg)
-				{
-					N.set		(0,0,0);
-					
-					VERIFY(a_lst.size());
-					for (IntIt i_it=a_lst.begin(); i_it!=a_lst.end(); i_it++)
-						if (sg&m_SmoothGroups[*i_it]) 
-							N.add	(m_FaceNormals[*i_it]);
-
-                    float len 	= N.magnitude();
-                    if (len>EPS_S)
-					{
-	                    N.div	(len);
-                    }else
-					{
-//.                    	Msg		("!Invalid smooth group found (MAX type). Object: '%s'. Vertex: [%3.2f, %3.2f, %3.2f]",m_Parent->GetName(),VPUSH(m_Vertices[m_Faces[f_i].pv[k].pindex]));
-#ifdef 0
-						Fvector p0;
-                        p0 = m_Vertices[m_Faces[f_i].pv[k].pindex];
-                        Tools->m_DebugDraw.AppendPoint(p0, 0xffff0000, true, true, "invalid vNORMAL");
-#endif
-                        N.set	(m_FaceNormals[a_lst.front()]);
-                    }
-				}else
-				{
-					N.set		(FN);
-				}
-			}
+			Msg("Script: Erase old VMap [%s]", m_VMaps[i]->name.c_str());
+			m_VMaps.erase(m_VMaps.begin() + i);
+			DeletedVmapIndexes.push_back(vindex);
+			i--;
 		}
-	}else{
-		for (u32 f_i=0; f_i<m_FaceCount; f_i++ )
+	}
+	m_VMaps.push_back(vMap);
+
+	for (int j = 0; j < m_VMRefs.size(); j++)
+	{
+		for (int r = 0; r < m_VMRefs[j].count; r++)
 		{
-			u32 sg			= m_SmoothGroups[f_i];
-			Fvector& FN 	= m_FaceNormals[f_i];
-			for (int k=0; k<3; k++)
+			for (int h = 0; h < DeletedVmapIndexes.size(); h++)
 			{
-				Fvector& N 	= m_VertexNormals[f_i*3+k];
-				if (sg!=-1)
+				if (m_VMRefs[j].pts[r].vmap_index == DeletedVmapIndexes[h]);
 				{
-					N.set		(0,0,0);
-					IntVec& a_lst=(*m_Adjs)[m_Faces[f_i].pv[k].pindex];
-//
-				typedef itterate_adjacents< itterate_adjacents_params_dynamic<st_FaceVert> > iterate_adj ;
-				iterate_adj::recurse_tri_params p( N, m_SmoothGroups, m_FaceNormals, a_lst, m_Faces, m_FaceCount );
-				iterate_adj::RecurseTri( 0, p );
-//
-					VERIFY		(a_lst.size());
-					for (IntIt i_it=a_lst.begin(); i_it!=a_lst.end(); i_it++)
-					{
-						if (sg != m_SmoothGroups[*i_it]) 
-							continue;
-						N.add	(m_FaceNormals[*i_it]);
-					}
-                    float len 	= N.magnitude();
-                    if (len>EPS_S)
-					{
-	                    N.div	(len);
-                    }else
-					{
-//.                    	Msg		("!Invalid smooth group found (Maya type). Object: '%s'. Vertex: [%3.2f, %3.2f, %3.2f]",m_Parent->GetName(),VPUSH(m_Vertices[m_Faces[f_i].pv[k].pindex]));
-
-#ifdef 0
-						if(parent_xform)
-                        {
-						Fvector p0;
-                      	parent_xform->transform_tiny(p0, m_Vertices[m_Faces[f_i].pv[k].pindex]);
-                        Tools->m_DebugDraw.AppendPoint(p0, 0xffff0000, true, true, "invalid vNORMAL");
-                        }
-#endif
-
-                        N.set	(m_FaceNormals[a_lst.front()]);
-                    }
-				}
-				else
-				{
-					N.set		(FN);
-                    
-					//IntVec& a_lst=(*m_Adjs)[m_Faces[f_i].pv[k].pindex];
-					//VERIFY(a_lst.size());
-					//for (IntIt i_it=a_lst.begin(); i_it!=a_lst.end(); i_it++)
-					//	N.add	(m_FNormals[*i_it]);
-     //               float len 	= N.magnitude();
-     //               if (len>EPS_S){
-	    //                N.div	(len);
-     //               }else{
-     //               	Msg		("!Invalid smooth group found (No smooth). Object: '%s'. Vertex: [%3.2f, %3.2f, %3.2f]",m_Parent->GetName(),VPUSH(m_Verts[m_Faces[f_i].pv[k].pindex]));
-     //                   N.set	(m_FNormals[a_lst.front()]);
-     //               }
-                    
+					m_VMRefs[j].pts[r].vmap_index = m_VMaps.size() - 1;
+					m_VMRefs[j].pts[r].index = vMap->size() - 1;
 				}
 			}
 		}
 	}
-    UnloadFNormals		();
-    UnloadAdjacency		();
+
+	u16 bone = m_Parent->BoneIDByName(to_bone);
+	m_Parent->GetBone(bone)->SetWMap(to_bone.c_str());
+
+	for (int i = 0; i < m_VMRefs.size(); i++)
+	{
+		m_VMRefs[i].count++;
+		st_VMapPt vMapPt;
+		vMapPt.vmap_index = m_VMaps.size() - 1;
+		vMapPt.index = vMap->size() - 1;
+		m_VMRefs[i].pts = (st_VMapPt*)xr_realloc(m_VMRefs[i].pts, m_VMRefs[i].count * sizeof(st_VMapPt));
+		m_VMRefs[i].pts[m_VMRefs[i].count - 1] = vMapPt;
+	}
 }
-*/
+
 void CEditableMesh::GenerateSVertices(u32 influence)
 {
 	if (!m_Parent->IsSkeleton())return;
@@ -376,16 +305,21 @@ void CEditableMesh::GenerateSVertices(u32 influence)
 	m_SVertices			= xr_alloc<st_SVert>(m_FaceCount*3);
     m_SVertInfl			= influence;
 
-//	CSMotion* active_motion=m_Parent->ResetSAnimation();
     m_Parent->CalculateAnimation(0);
 
     // generate normals
 	GenerateFNormals	();
 	GenerateVNormals	(0);
 
-
 	if (m_Normals)
 		Log("Export custom normals");
+
+	u16 AssingBoneID = BI_NONE;
+
+	if (m_Parent->AssignBoneName.size() > 0)
+	{
+		AssingBoneID = m_Parent->BoneIDByName(m_Parent->AssignBoneName);
+	}
 
     for (u32 f_id=0; f_id<m_FaceCount; f_id++)
 	{
@@ -400,20 +334,27 @@ void CEditableMesh::GenerateSVertices(u32 influence)
 
             const st_VMapPtLst& vmpt_lst 	= m_VMRefs[fv.vmref];
 
-            st_VertexWB		wb;
+            st_VertexWB wb;
             for (u8 vmpt_id=0; vmpt_id!=vmpt_lst.count; ++vmpt_id)
             {
-                const st_VMap& VM 			= *m_VMaps[vmpt_lst.pts[vmpt_id].vmap_index];
+                const st_VMap& VM = *m_VMaps[vmpt_lst.pts[vmpt_id].vmap_index];
                 if (VM.type==vmtWeight)
                 {
-                    wb.push_back			(st_WB(m_Parent->GetBoneIndexByWMap(VM.name.c_str()),VM.getW(vmpt_lst.pts[vmpt_id].index)));
+					if (AssingBoneID != BI_NONE)
+					{
+						wb.push_back(st_WB(AssingBoneID, 1.0f));
+					}
+					else
+					{
+						wb.push_back(st_WB(m_Parent->GetBoneIndexByWMap(VM.name.c_str()), VM.getW(vmpt_lst.pts[vmpt_id].index)));
+					}
 
-                    if (wb.back().bone==BI_NONE)
-                    {
-                        ELog.DlgMsg			(mtError,"Can't find bone assigned to weight map %s",*VM.name);
-                        FATAL				("Editor crashed.");
-                        return;
-                    }
+					if (wb.back().bone == BI_NONE)
+					{
+						ELog.DlgMsg(mtError, "Can't find bone assigned to weight map %s", *VM.name);
+						FATAL("Editor crashed.");
+						return;
+					}
                 }else if(VM.type==vmtUV)
                     SV.uv.set				(VM.getUV(vmpt_lst.pts[vmpt_id].index));
             }
