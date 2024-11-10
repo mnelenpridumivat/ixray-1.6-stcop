@@ -11,6 +11,7 @@
 #	include "../../xrEngine/igame_persistent.h"
 #	include "../../xrEngine/environment.h"
 
+#include <ppl.h>
 
 const float dbgOffset			= 0.f;
 const int	dbgItems			= 128;

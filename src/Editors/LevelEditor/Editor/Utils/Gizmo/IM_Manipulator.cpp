@@ -42,8 +42,10 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 
 		if (lst.size() == 1)
 		{
-			CWayObject* WayPtr = smart_cast<CWayObject*>(lst.front());
-			ObjectMatrix = WayPtr->GetTransform();
+			if (CWayObject* WayPtr = smart_cast<CWayObject*>(lst.front()))
+			{
+				ObjectMatrix = WayPtr->GetTransform();
+			}
 		}
 
 		const bool IsManipulated = ImGuizmo::Manipulate((float*)&Device.mView, (float*)&Device.mProject, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, (float*)&ObjectMatrix, (float*)&DeltaMatrix, PtrMoveSnap);
@@ -119,7 +121,7 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 				lst.front()->GetUTBox(test);
 				Flags |= ImGuizmo::BOUNDS;
 			}
-			if (LTools->CurrentClassID() == OBJCLASS_SHAPE)
+			else if (LTools->CurrentClassID() == OBJCLASS_SHAPE)
 			{
 				CEditShape* Shape = (CEditShape*)lst.front();
 				if (Shape->shapes[0].type == CShapeData::cfBox)

@@ -264,7 +264,7 @@ int CLog::DlgMsg (TMsgDlgType mt, LPCSTR _Format, ...)
     ExecCommand(COMMAND_RENDER_FOCUS);
 
     if (mtConfirmation==mt)	res=MessageDlg(buf, mt,  mbYes | mbNo | mbCancel);
-	if (mtSkip == mt)	res = MessageDlg(buf, mtConfirmation, mbOK | mbSkip);
+	else if (mtSkip == mt)	res = MessageDlg(buf, mtConfirmation, mbOK | mbSkip);
     else                   	res=MessageDlg(buf, mt,  mbOK);
 
     if (mtConfirmation==mt){
