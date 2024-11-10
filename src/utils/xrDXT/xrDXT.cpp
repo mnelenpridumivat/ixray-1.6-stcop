@@ -81,6 +81,7 @@ U8Vec DXT_API DXTUtils::GitPixels(const char* FileName, u32 NewW, u32 NewH)
 
 	RedImageTool::RedImage Img;
 	Img.LoadFromFile(FileName);
+	Img.ClearMipLevels();
 	Img.Convert(RedImageTool::RedTexturePixelFormat::R8G8B8A8);
 	Img.Scale(NewW, NewH, RedImageTool::RedResizeFilter::Cubicbspline);
 	Img.SwapRB();
@@ -97,6 +98,7 @@ DXTUtils::ImageInfo DXT_API DXTUtils::GitPixels(const char* FileName)
 
 	RedImageTool::RedImage Img;
 	Img.LoadFromFile(FileName);
+	Img.ClearMipLevels();
 	Img.Convert(RedImageTool::RedTexturePixelFormat::R8G8B8A8);
 	Img.SwapRB();
 
