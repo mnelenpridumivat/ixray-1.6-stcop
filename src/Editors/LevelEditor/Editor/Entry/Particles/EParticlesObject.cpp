@@ -191,9 +191,10 @@ bool EParticlesObject::LoadStream(IReader& F)
 		m_GameType.LoadStream(F);
     }
 
+    xr_string CopyName = *m_RefName;
     if (!Compile(*m_RefName))
     {
-        ELog.DlgMsg( mtError, "EParticlesObject: '%s' not found in library", *m_RefName );
+        ELog.DlgMsg( mtError, "EParticlesObject: '%s' not found in library", CopyName.c_str());
         return false;
     }
 
