@@ -73,10 +73,13 @@ void UISoundEditorForm::Update()
     }
 }
 
-void UISoundEditorForm::Show()
+void UISoundEditorForm::Show(const xr_string fileKey = "")
 {
     VERIFY(!Form);
 	Form = new UISoundEditorForm();
+
+    if (!fileKey.empty())
+        Form->m_ItemList->SelectItem(fileKey.c_str());
 }
 
 void UISoundEditorForm::HideLib()

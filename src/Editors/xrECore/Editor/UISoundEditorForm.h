@@ -13,7 +13,7 @@ public:
 	virtual void Draw();
 public:
 	static void Update();
-	static void Show();
+	static void Show(const xr_string);
 private:
 
 	void HideLib();
