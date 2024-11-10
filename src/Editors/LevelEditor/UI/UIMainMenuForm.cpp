@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "../xrEUI/xrUITheme.h"
+#include "../xrEUI/Windows/Help.h"
 
 UIMainMenuForm::UIMainMenuForm()
 {
@@ -479,6 +480,22 @@ void UIMainMenuForm::Draw()
 			}
 		   
 		   ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Help", ""))
+		{
+			if (ImGui::MenuItem("Wiki", ""))
+			{
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("About...", ""))
+			{
+				CUIHelp::Instance().Show();
+				UI->Push(&CUIHelp::Instance(), false);
+			}
+
+			ImGui::EndMenu();
 		}
 
 		ImGui::Separator();
