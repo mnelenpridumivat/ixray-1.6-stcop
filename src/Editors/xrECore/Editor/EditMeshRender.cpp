@@ -296,73 +296,66 @@ void CEditableMesh::RenderEdge(const Fmatrix& parent, CSurface* s, u32 color)
     EDevice->ResetNearer();
 }
 //----------------------------------------------------
-
-#define SKEL_MAX_FACE_COUNT 10000
 struct svertRender
 {
 	Fvector		P;
 	Fvector		N;
 	Fvector2 	uv;
 };
+
 void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
 {
-    if (false==IsGeneratedSVertices(RENDER_SKELETON_LINKS))
-    	GenerateSVertices(RENDER_SKELETON_LINKS);
+    if (!IsGeneratedSVertices(RENDER_SKELETON_LINKS))
+        GenerateSVertices(RENDER_SKELETON_LINKS);
 
-	R_ASSERT2(m_SVertices,"SVertices empty!");
-	SurfFacesPairIt sp_it 	= m_SurfFaces.find(S); R_ASSERT(sp_it!=m_SurfFaces.end());
-    IntVec& face_lst 		= sp_it->second;
-	_VertexStream*	Stream	= &RCache.Vertex;
-	u32				vBase;
+    R_ASSERT2(m_SVertices, "SVertices empty!");
+    SurfFacesPairIt sp_it = m_SurfFaces.find(S); R_ASSERT(sp_it != m_SurfFaces.end());
+    IntVec& face_lst = sp_it->second;
+    _VertexStream* Stream = &RCache.Vertex;
+    u32 vBase;
 
-	svertRender*	pv		= (svertRender*)Stream->Lock(SKEL_MAX_FACE_COUNT*3,m_Parent->vs_SkeletonGeom->vb_stride,vBase);
-	Fvector			P0,N0,P1,N1;
-    
-    int f_cnt=0;
-    for (IntIt i_it=face_lst.begin(); i_it!=face_lst.end(); i_it++)
+    size_t FaceCount = face_lst.size();
+    if (S->m_Flags.is(CSurface::sf2Sided))
     {
-        for (int k=0; k<3; k++,pv++)
+        FaceCount *= 2;
+    }
+
+    svertRender* pv = (svertRender*)Stream->Lock(FaceCount * 3, m_Parent->vs_SkeletonGeom->vb_stride, vBase);
+
+    for (IntIt i_it = face_lst.begin(); i_it != face_lst.end(); i_it++)
+    {
+        for (int k = 0; k < 3; k++, pv++)
         {
-        	st_SVert& SV 			= m_SVertices[*i_it*3+k];
-            pv->uv.set				(SV.uv);
-            float total				= SV.bones[0].w;
+            st_SVert& SV = m_SVertices[*i_it * 3 + k];
+            pv->uv.set(SV.uv);
+            float total = SV.bones[0].w;
 
-            const Fmatrix& M		= m_Parent->m_Bones[SV.bones[0].id]->_RenderTransform();
-            M.transform_tiny		(pv->P,SV.offs);
-            M.transform_dir 		(pv->N,SV.norm);
+            const Fmatrix& M = m_Parent->m_Bones[SV.bones[0].id]->_RenderTransform();
+            M.transform_tiny(pv->P, SV.offs);
+            M.transform_dir(pv->N, SV.norm);
 
-            Fvector P,N;
+            Fvector P, N;
 
-            for (u8 cnt=1; cnt<(u8)SV.bones.size(); cnt++)
+            for (u8 cnt = 1; cnt < (u8)SV.bones.size(); cnt++)
             {
-                total			    += SV.bones[cnt].w;
-                const Fmatrix& M     = m_Parent->m_Bones[SV.bones[cnt].id]->_RenderTransform();
-                M.transform_tiny    (P,SV.offs);
-                M.transform_dir     (N,SV.norm);
-                pv->P.lerp		    (pv->P,P,SV.bones[cnt].w/total);
-                pv->N.lerp		    (pv->N,N,SV.bones[cnt].w/total);
+                total += SV.bones[cnt].w;
+                const Fmatrix& M = m_Parent->m_Bones[SV.bones[cnt].id]->_RenderTransform();
+                M.transform_tiny(P, SV.offs);
+                M.transform_dir(N, SV.norm);
+                pv->P.lerp(pv->P, P, SV.bones[cnt].w / total);
+                pv->N.lerp(pv->N, N, SV.bones[cnt].w / total);
             }
         }
-        f_cnt++;
+
         if (S->m_Flags.is(CSurface::sf2Sided))
         {
-        	pv->P.set((pv-1)->P);	pv->N.invert((pv-1)->N);	pv->uv.set((pv-1)->uv); pv++;
-        	pv->P.set((pv-3)->P);	pv->N.invert((pv-3)->N);	pv->uv.set((pv-3)->uv); pv++;
-        	pv->P.set((pv-5)->P);	pv->N.invert((pv-5)->N);	pv->uv.set((pv-5)->uv); pv++;
-	        f_cnt++;
-        }
-        if (f_cnt>=SKEL_MAX_FACE_COUNT-1)
-        {
-            Stream->Unlock		(f_cnt*3,m_Parent->vs_SkeletonGeom->vb_stride);
-            EDevice->DP			(D3DPT_TRIANGLELIST,m_Parent->vs_SkeletonGeom,vBase,f_cnt);
-			pv					= (svertRender*)Stream->Lock(SKEL_MAX_FACE_COUNT*3,m_Parent->vs_SkeletonGeom->vb_stride,vBase);
-            f_cnt				= 0;
+            pv->P.set((pv - 1)->P);	pv->N.invert((pv - 1)->N);	pv->uv.set((pv - 1)->uv); pv++;
+            pv->P.set((pv - 3)->P);	pv->N.invert((pv - 3)->N);	pv->uv.set((pv - 3)->uv); pv++;
+            pv->P.set((pv - 5)->P);	pv->N.invert((pv - 5)->N);	pv->uv.set((pv - 5)->uv); pv++;
         }
     }
-	Stream->Unlock				(f_cnt*3,m_Parent->vs_SkeletonGeom->vb_stride);
-	if (f_cnt)
-    	EDevice->DP		(D3DPT_TRIANGLELIST,m_Parent->vs_SkeletonGeom,vBase,f_cnt);    
+
+    Stream->Unlock(FaceCount * 3, m_Parent->vs_SkeletonGeom->vb_stride);
+    if (FaceCount)
+        EDevice->DP(D3DPT_TRIANGLELIST, m_Parent->vs_SkeletonGeom, vBase, FaceCount);
 }
-//----------------------------------------------------
-
-
