@@ -179,6 +179,9 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 			Scale.y = DeltaMatrixScale.j.magnitude();
 			Scale.z = DeltaMatrixScale.k.magnitude();
 
+			if (Scale.x < 0.05f || Scale.y < 0.05f || Scale.z < 0.05f)
+				return;
+
 			CCustomObject* Obj = lst.front();
 
 			Scale.mul(Obj->GetScale());
