@@ -28,7 +28,7 @@ void ESceneGroupTool::UngroupObjects(bool bUndo)
             if ((*it)->Selected())
             {
             	sel_cnt++;
-            	CGroupObject* obj 	= dynamic_cast<CGroupObject*>(*it); 
+            	CGroupObject* obj 	= smart_cast<CGroupObject*>(*it); 
                 VERIFY(obj);
                 if (obj->CanUngroup(true))
                 {
@@ -52,7 +52,7 @@ BOOL  ESceneGroupTool::_RemoveObject(CCustomObject* object)
 {
 	inherited::_RemoveObject(object);
 
-    CGroupObject* go 	= dynamic_cast<CGroupObject*>(object); 
+    CGroupObject* go 	= smart_cast<CGroupObject*>(object); 
     go->Clear1          ();
     return              TRUE;
 }
@@ -173,7 +173,7 @@ void ESceneGroupTool::ReloadRefsSelectedObject()
         	if ((*it)->Selected())
             {
 			    sel_cnt++;
-            	CGroupObject* obj 	= dynamic_cast<CGroupObject*>(*it); 
+            	CGroupObject* obj 	= smart_cast<CGroupObject*>(*it); 
                 VERIFY				(obj);
                 if (obj->UpdateReference(true))
                 {
@@ -215,7 +215,7 @@ void ESceneGroupTool::SaveSelectedObject()
     {
     	if((*it)->Selected())
         {
-        	obj 		= dynamic_cast<CGroupObject*>(*it);
+        	obj 		= smart_cast<CGroupObject*>(*it);
             
             xr_string fn;
             if(scnt==1)
@@ -268,7 +268,7 @@ void ESceneGroupTool::MakeThumbnail()
         {
         	if ((*it)->Selected())
             {
-	            object				= dynamic_cast<CGroupObject*>(*it);
+	            object				= smart_cast<CGroupObject*>(*it);
                 break;
             }
         }

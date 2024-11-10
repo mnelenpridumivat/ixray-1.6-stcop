@@ -73,7 +73,7 @@ void CPortal::Render(int priority, bool strictB2F)
 		EDevice->RenderNearer(0.0002);
         if (!Selected())	col.mul_rgb(0.5f);
     	// render portal edges
-    	EScenePortalTool* lt = dynamic_cast<EScenePortalTool*>(FParentTools); VERIFY(lt);
+    	EScenePortalTool* lt = smart_cast<EScenePortalTool*>(FParentTools); VERIFY(lt);
         FvectorVec& src_ln 	= (lt->m_Flags.is(EScenePortalTool::flDrawSimpleModel))?m_SimplifyVertices:m_Vertices;
         DU_impl.DrawPrimitiveL	(D3DPT_LINESTRIP, src_ln.size(), src_ln.data(), src_ln.size(), col.get(), true, true);
         EDevice->ResetNearer	();
@@ -109,7 +109,7 @@ bool CPortal::RayPick(float& distance, const Fvector& start, const Fvector& dire
     float range;
     bool bPick=false;
 	p[0].set(m_Center);
-    EScenePortalTool* lt = dynamic_cast<EScenePortalTool*>(FParentTools); VERIFY(lt);
+    EScenePortalTool* lt = smart_cast<EScenePortalTool*>(FParentTools); VERIFY(lt);
     FvectorVec& src=(lt->m_Flags.is(EScenePortalTool::flDrawSimpleModel))?m_SimplifyVertices:m_Vertices;
     for(FvectorIt it=src.begin(); it!=src.end(); it++){
 		p[1].set(*it);

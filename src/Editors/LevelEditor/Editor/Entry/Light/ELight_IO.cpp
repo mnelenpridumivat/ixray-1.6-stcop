@@ -195,7 +195,7 @@ bool CLight::LoadStream(IReader& F)
 
 	if (D3DLIGHT_DIRECTIONAL==m_Type)
     {
-    	ESceneLightTool* lt = dynamic_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
+    	ESceneLightTool* lt = smart_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
         lt->m_SunShadowDir.set(FRotation.x,FRotation.y);
         ELog.DlgMsg( mtError, "CLight: Can't load sun.");
     	return false;

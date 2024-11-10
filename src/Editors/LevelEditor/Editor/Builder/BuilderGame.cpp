@@ -88,7 +88,7 @@ BOOL SceneBuilder::BuildGame()
 
         for (ObjectIt oit=fogs.begin(); oit!=fogs.end(); ++oit)
         {
-            EFogVolume* E 		= dynamic_cast<EFogVolume*>(*oit);
+            EFogVolume* E 		= smart_cast<EFogVolume*>(*oit);
             R_ASSERT			(E);
             u32 grp_id			= E->m_group_id;
             fog_groups[grp_id].push_back(E);

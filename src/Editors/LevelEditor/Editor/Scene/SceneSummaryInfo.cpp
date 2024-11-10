@@ -89,7 +89,7 @@ void SSceneSummary::STextureInfo::Prepare	()
 
 void SSceneSummary::STextureInfo::OnHighlightClick(ButtonValue* sender, bool& bDataModified, bool& bSafe)
 {
-	ButtonValue* V = dynamic_cast<ButtonValue*>(sender); R_ASSERT(V);
+	ButtonValue* V = smart_cast<ButtonValue*>(sender); R_ASSERT(V);
     switch (V->btn_num){
     case 0: Scene->HighlightTexture	((LPCSTR)sender->tag,false,info.width,info.height,false); break;
     case 1: Scene->HighlightTexture	((LPCSTR)sender->tag,true,info.width,info.height,false); break;
@@ -182,7 +182,7 @@ void SSceneSummary::STextureInfo::Export	(IWriter* F, u32& mem_use)
 
 void SSceneSummary::OnFileClick(ButtonValue* sender, bool& bModif, bool& bSafe)
 {
-	ButtonValue* V = dynamic_cast<ButtonValue*>(sender); R_ASSERT(V);
+	ButtonValue* V = smart_cast<ButtonValue*>(sender); R_ASSERT(V);
     switch (V->btn_num){
     case 0:{
     	xr_string fn = Scene->m_LevelOp.m_FNLevelPath.c_str();

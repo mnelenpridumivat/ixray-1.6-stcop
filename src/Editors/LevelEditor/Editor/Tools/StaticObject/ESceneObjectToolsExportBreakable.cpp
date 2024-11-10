@@ -81,7 +81,7 @@ bool ESceneObjectTool::ExportBreakableObjects(SExportStreams* F)
 	    SPBItem* pb = UI->ProgressStart(m_Objects.size(),"Prepare geometry...");
         for (ObjectIt it=m_Objects.begin(); it!=m_Objects.end(); it++){
 	        pb->Inc();
-            CSceneObject* obj 		= dynamic_cast<CSceneObject*>(*it); VERIFY(obj);
+            CSceneObject* obj 		= smart_cast<CSceneObject*>(*it); VERIFY(obj);
             if (obj->IsStatic()){
                 CEditableObject *O 	= obj->GetReference();
                 const Fmatrix& T 	= obj->_Transform();
@@ -192,7 +192,7 @@ bool ESceneObjectTool::ExportClimableObjects(SExportStreams* F)
         for (ObjectIt it=m_Objects.begin(); it!=m_Objects.end(); it++)
         {
 	        pb->Inc();
-            CSceneObject* obj 		= dynamic_cast<CSceneObject*>(*it);
+            CSceneObject* obj 		= smart_cast<CSceneObject*>(*it);
             VERIFY                  (obj);
             if (obj->IsStatic())
             {

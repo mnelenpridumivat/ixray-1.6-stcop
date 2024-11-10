@@ -7,10 +7,10 @@
 bool  TUI_ControlGroupAdd::AfterAppendCallback(TShiftState Shift, CCustomObject* obj)
 {
 	bool result 			= false;
-    ESceneGroupTool* ot		= dynamic_cast<ESceneGroupTool*>(parent_tool);
+    ESceneGroupTool* ot		= smart_cast<ESceneGroupTool*>(parent_tool);
     if (ot->GetCurrentObject())
     {
-        CGroupObject* group	= dynamic_cast<CGroupObject*>(obj); R_ASSERT(group);
+        CGroupObject* group	= smart_cast<CGroupObject*>(obj); R_ASSERT(group);
         LPCSTR short_name	= ot->GetCurrentObject();
         result 				= group->SetReference(short_name);
         if (result){

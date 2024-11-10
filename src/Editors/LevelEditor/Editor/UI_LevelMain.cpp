@@ -343,7 +343,7 @@ CCommandVar CommandShowClipEditor(CCommandVar p1, CCommandVar p2)
 		if(!CO)
 			return TRUE;
 			
-		CSpawnPoint* sp = dynamic_cast<CSpawnPoint*>(CO);
+		CSpawnPoint* sp = smart_cast<CSpawnPoint*>(CO);
 
 		
 		CKinematicsAnimated* KA 	= PKinematicsAnimated(sp->m_SpawnData.m_Visual->visual);

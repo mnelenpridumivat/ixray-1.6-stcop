@@ -24,11 +24,11 @@ void TUI_ControlSectorAdd::AddMesh(){
     if (!sector) return;
     SRayPickInfo pinf;
     if (Scene->RayPickObject( pinf.inf.range, UI->m_CurrentRStart,UI->m_CurrentRDir, OBJCLASS_SCENEOBJECT, &pinf, 0))
-		sector->AddMesh(dynamic_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh);
+		sector->AddMesh(smart_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh);
     else
     if (Scene->RayPickObject( pinf.inf.range, UI->m_CurrentRStart,UI->m_CurrentRDir, OBJCLASS_GROUP, &pinf, 0))
     {
-    	CSceneObject* so = dynamic_cast<CSceneObject*>(pinf.s_obj);
+    	CSceneObject* so = smart_cast<CSceneObject*>(pinf.s_obj);
         if(so)
         {
 			sector->AddMesh(so,pinf.e_mesh);
@@ -42,7 +42,7 @@ void TUI_ControlSectorAdd::DelMesh(){
     if (!sector) return;
     SRayPickInfo pinf;
     if (Scene->RayPickObject( pinf.inf.range, UI->m_CurrentRStart,UI->m_CurrentRDir, OBJCLASS_SCENEOBJECT, &pinf, 0))
-		sector->DelMesh(dynamic_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh);
+		sector->DelMesh(smart_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh);
 }
 
 bool TUI_ControlSectorAdd::AddSector()
@@ -52,7 +52,7 @@ bool TUI_ControlSectorAdd::AddSector()
 	CSector* _O = new CSector((LPVOID)0,namebuffer);
     SRayPickInfo pinf;
     if (Scene->RayPickObject( pinf.inf.range, UI->m_CurrentRStart,UI->m_CurrentRDir, OBJCLASS_SCENEOBJECT, &pinf, 0)&&
-    	(_O->AddMesh(dynamic_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh)))
+    	(_O->AddMesh(smart_cast<CSceneObject*>(pinf.s_obj),pinf.e_mesh)))
     {
         Scene->SelectObjects(false,OBJCLASS_SECTOR);
         Scene->AppendObject( _O );
@@ -81,7 +81,7 @@ bool TUI_ControlSectorAdd::AddSectors()
 	int cnt=0;
     SRayPickInfo pinf;
     if (Scene->RayPickObject( pinf.inf.range, UI->m_CurrentRStart,UI->m_CurrentRDir, OBJCLASS_SCENEOBJECT, &pinf, 0)){
-    	CSceneObject* S 	= dynamic_cast<CSceneObject*>(pinf.s_obj); VERIFY(S);
+    	CSceneObject* S 	= smart_cast<CSceneObject*>(pinf.s_obj); VERIFY(S);
         EditMeshVec* meshes	= S->Meshes();
         for (EditMeshIt it=meshes->begin(); it!=meshes->end(); it++){
             string256 namebuffer;

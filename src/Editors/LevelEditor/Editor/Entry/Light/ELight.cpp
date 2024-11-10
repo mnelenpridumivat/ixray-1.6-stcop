@@ -116,7 +116,7 @@ void CLight::Render(int priority, bool strictB2F)
         }break;
         default: THROW;
         }
-    	ESceneLightTool* lt = dynamic_cast<ESceneLightTool*>(FParentTools);
+    	ESceneLightTool* lt = smart_cast<ESceneLightTool*>(FParentTools);
         VERIFY				(lt);
         
         if (lt->m_Flags.is(ESceneLightTool::flShowControlName))
@@ -195,7 +195,7 @@ void CLight::Update()
 
 LPCSTR CLight::GetLControlName()
 {
-    ESceneLightTool* lt		= dynamic_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
+    ESceneLightTool* lt		= smart_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
     xr_rtoken* lc			= lt->FindLightControl(m_LControl);
 	return lc?*lc->name:0;
 }

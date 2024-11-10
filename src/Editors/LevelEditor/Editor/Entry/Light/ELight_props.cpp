@@ -3,7 +3,7 @@
 
 void 	CLight::OnAutoClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B = dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B = smart_cast<ButtonValue*>(value); R_ASSERT(B);
 	switch(B->btn_num){
     case 0:{
         float P = 0.1f;
@@ -24,7 +24,7 @@ void 	CLight::OnAutoClick(ButtonValue* value, bool& bModif, bool& bSafe)
 
 void 	CLight::OnFuzzyGenerateClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B = dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B = smart_cast<ButtonValue*>(value); R_ASSERT(B);
 	switch(B->btn_num){
     case 0:{
     	OnFuzzyDataChange(value);
@@ -238,7 +238,7 @@ void CLight::FillProp(LPCSTR pref, PropItemVec& items)
     V=PHelper().CreateFloat	(items,	PrepareKey(pref,"Brightness"),		&m_Brightness,-3.f,3.f,0.1f,2);
     V->OnChangeEvent.bind	(this,&CLight::OnPointDataChange);
 
-    ESceneLightTool* lt	= dynamic_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
+    ESceneLightTool* lt	= smart_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
 	PHelper().CreateRToken32(items,PrepareKey(pref,"Light Control"),	&m_LControl, &*lt->lcontrols.begin(), lt->lcontrols.size());
 
     switch(m_Type){

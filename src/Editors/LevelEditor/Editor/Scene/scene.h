@@ -208,7 +208,7 @@ public:
 	IC ESceneToolBase* GetTool(ObjClassID cat) { return m_SceneTools[cat]; }
 	IC u32					ToolCount() { return m_SceneTools.size(); }
 
-	IC ESceneCustomOTool* GetOTool(ObjClassID cat) { return dynamic_cast<ESceneCustomOTool*>(GetTool(cat)); }
+	IC ESceneCustomOTool* GetOTool(ObjClassID cat) { return smart_cast<ESceneCustomOTool*>(GetTool(cat)); }
 
 	IC SceneToolsMapPairIt 	FirstTool() { return m_SceneTools.begin(); }
 	IC SceneToolsMapPairIt 	LastTool() { return m_SceneTools.end(); }

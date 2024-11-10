@@ -6,7 +6,7 @@ bool CLevelSoundManager::Validate()
 {
 	ObjectList& snd_envs = Scene->ListObj(OBJCLASS_SOUND_ENV);
     for (ObjectIt it=snd_envs.begin(); it!=snd_envs.end(); it++){
-    	ESoundEnvironment* E = dynamic_cast<ESoundEnvironment*>(*it); R_ASSERT(E);
+    	ESoundEnvironment* E = smart_cast<ESoundEnvironment*>(*it); R_ASSERT(E);
         if (E->m_EnvInner==E->m_EnvOuter){ 
         	ELog.DlgMsg(mtError,"SoundEnvironment: '%s' inner and outer environment must be different.",E->GetName());
         	return false;
@@ -14,7 +14,7 @@ bool CLevelSoundManager::Validate()
     }
 	ObjectList& snd_src = Scene->ListObj(OBJCLASS_SOUND_SRC);
     for (ObjectIt it=snd_src.begin(); it!=snd_src.end(); it++){
-    	ESoundSource* S = dynamic_cast<ESoundSource*>(*it); R_ASSERT(S);
+    	ESoundSource* S = smart_cast<ESoundSource*>(*it); R_ASSERT(S);
         if (!S->GetSourceWAV()||(0==strlen(S->GetSourceWAV()))){
         	ELog.DlgMsg(mtError,"SoundSource: '%s' hasn't wave.",S->GetName());
         	return false;
@@ -37,7 +37,7 @@ bool CLevelSoundManager::MakeEnvGeometry(CMemoryWriter& F, bool bErrMsg)
     CDB::Collector CP;
 	Fbox aabb; aabb.invalidate();
     for (ObjectIt it = snd_envs.begin(); it != snd_envs.end(); it++) {
-        ESoundEnvironment* E = dynamic_cast<ESoundEnvironment*>(*it); R_ASSERT(E);
+        ESoundEnvironment* E = smart_cast<ESoundEnvironment*>(*it); R_ASSERT(E);
         Fbox bb;
         R_ASSERT(E->GetBox(bb));
         aabb.merge(bb);

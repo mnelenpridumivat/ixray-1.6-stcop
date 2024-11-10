@@ -12,7 +12,7 @@ CCustomObject* EScene::FindObjectByName( LPCSTR name, ObjClassID classfilter )
 		SceneToolsMapPairIt _E = m_SceneTools.end();
 		for (; _I!=_E; ++_I)
 		{
-			ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+			ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
 
 			if (mt&&(0!=(object=mt->FindObjectByName(name))))
 				return object;
@@ -30,7 +30,7 @@ CCustomObject* EScene::FindObjectByName( LPCSTR name, CCustomObject* pass_object
 	SceneToolsMapPairIt _I = m_SceneTools.begin();
 	SceneToolsMapPairIt _E = m_SceneTools.end();
 	for (; _I!=_E; _I++){
-		ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+		ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
 		if (mt&&(0!=(object=mt->FindObjectByName(name,pass_object)))) return object;
 	}
 	return 0;
@@ -42,7 +42,7 @@ bool EScene::FindDuplicateName()
 	SceneToolsMapPairIt _I = m_SceneTools.begin();
 	SceneToolsMapPairIt _E = m_SceneTools.end();
 	for (; _I!=_E; _I++){
-		ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+		ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
 		if (mt){
 			ObjectList& lst = mt->GetObjects(); 
 			for(ObjectIt _F = lst.begin();_F!=lst.end();_F++)

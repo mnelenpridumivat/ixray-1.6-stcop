@@ -32,7 +32,7 @@ bool  TUI_ControlSpawnAdd::Start(TShiftState Shift)
             int cnt 	= Scene->GetQueryObjects(lst,OBJCLASS_SPAWNPOINT,1,1,0);
             if (1!=cnt)	ELog.DlgMsg(mtError,"Select one shape.");
             else{
-                CSpawnPoint* base = dynamic_cast<CSpawnPoint*>(lst.back()); R_ASSERT(base);
+                CSpawnPoint* base = smart_cast<CSpawnPoint*>(lst.back()); R_ASSERT(base);
                 if (base->AttachObject(from)){
                     if (!(Shift&ssAlt)){
                         F->SetAttachObject(false);

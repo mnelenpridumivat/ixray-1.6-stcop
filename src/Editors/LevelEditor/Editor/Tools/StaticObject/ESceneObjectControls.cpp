@@ -11,7 +11,7 @@ bool  TUI_ControlObjectAdd::Start(TShiftState Shift)
 	Fvector p,n;
 	if(!LUI->PickGround(p,UI->m_CurrentRStart,UI->m_CurrentRDir,1,&n)) return false;
     { // pick already executed (see top)
-		ESceneObjectTool* ot = dynamic_cast<ESceneObjectTool*>(parent_tool);
+		ESceneObjectTool* ot = smart_cast<ESceneObjectTool*>(parent_tool);
     	LPCSTR N;
         if (ot->IsAppendRandomActive()&&ot->m_AppendRandomObjects.size()){
         	N = ot->m_AppendRandomObjects[Random.randI(ot->m_AppendRandomObjects.size())].c_str();  

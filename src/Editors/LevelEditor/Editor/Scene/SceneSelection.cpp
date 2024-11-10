@@ -106,7 +106,7 @@ int EScene::ObjCount()
     SceneToolsMapPairIt _I = m_SceneTools.begin();
     SceneToolsMapPairIt _E = m_SceneTools.end();
     for (; _I!=_E; _I++){
-    	ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+    	ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
 		if (mt)
         	cnt+=mt->ObjCount();
     }
@@ -136,7 +136,7 @@ int EScene::LockObjects( bool flag, ObjClassID classfilter, bool bAllowSelection
         SceneToolsMapPairIt _E = m_SceneTools.end();
         for (; _I!=_E; _I++)
             if (_I->second){
-		        ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+		        ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
                 if (mt)				count+=mt->LockObjects(flag, bAllowSelectionFlag, bSelFlag);
             }
     }else{

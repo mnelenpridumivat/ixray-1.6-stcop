@@ -46,7 +46,7 @@ void UISpawnTool::Draw()
 					ObjectList lst;
 					if (Scene->GetQueryObjects(lst, OBJCLASS_SPAWNPOINT, 1, 1, 0)) {
 						for (ObjectIt it = lst.begin(); it != lst.end(); it++) {
-							CSpawnPoint* O = dynamic_cast<CSpawnPoint*>(*it); R_ASSERT(O);
+							CSpawnPoint* O = smart_cast<CSpawnPoint*>(*it); R_ASSERT(O);
 							O->DetachObject();
 						}
 					}

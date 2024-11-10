@@ -1406,7 +1406,7 @@ BOOL SceneBuilder::CompileStatic(bool b_selected_only)
     l_scene_stat= new CSceneStat(m_LevelBox);
 
 // make hemisphere
-	ESceneLightTool* lt = dynamic_cast<ESceneLightTool*>(Scene->GetOTool(OBJCLASS_LIGHT));
+	ESceneLightTool* lt = smart_cast<ESceneLightTool*>(Scene->GetOTool(OBJCLASS_LIGHT));
     LPCSTR h_control	= *lt->FindLightControl(lt->m_HemiControl)->name;
 	BuildHemiLights		(Scene->m_LevelOp.m_LightHemiQuality,h_control);
     if (0!=strcmp(LCONTROL_HEMI,h_control))

@@ -94,7 +94,7 @@ void CCustomObject::AnimationDrawPath()
 
 void 	CCustomObject::OnMotionControlClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B = dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B = smart_cast<ButtonValue*>(value); R_ASSERT(B);
 	switch(B->btn_num){
     case 0:{
 		m_MotionParams->t_current 	= m_MotionParams->min_t;
@@ -195,7 +195,7 @@ void CCustomObject::OnDrawUI()
 }
 void 	CCustomObject::OnMotionCommandsClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B = dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B = smart_cast<ButtonValue*>(value); R_ASSERT(B);
 	switch(B->btn_num){
     case 0:
     	AnimationCreateKey	(m_MotionParams->t_current);
@@ -242,7 +242,7 @@ void 	CCustomObject::OnMotionCommandsClick(ButtonValue* value, bool& bModif, boo
 
 void 	CCustomObject::OnMotionFilesClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B = dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B = smart_cast<ButtonValue*>(value); R_ASSERT(B);
     bModif = false;
     xr_string fn;
 	switch(B->btn_num){

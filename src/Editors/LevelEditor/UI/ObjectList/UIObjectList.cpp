@@ -146,7 +146,7 @@ void UIObjectList::Refresh()
 	Form->m_cur_cls = LTools->CurrentClassID();
 	for (SceneToolsMapPairIt it = Scene->FirstTool(); it != Scene->LastTool(); ++it)
 	{
-		ESceneCustomOTool* ot = dynamic_cast<ESceneCustomOTool*>(it->second);
+		ESceneCustomOTool* ot = smart_cast<ESceneCustomOTool*>(it->second);
 		if (ot && ((Form->m_cur_cls == OBJCLASS_DUMMY) || (it->first == Form->m_cur_cls)))
 		{
 			if (it->first == OBJCLASS_DUMMY)

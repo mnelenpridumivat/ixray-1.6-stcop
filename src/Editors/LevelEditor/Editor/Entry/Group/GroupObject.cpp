@@ -411,7 +411,7 @@ void CGroupObject::FillProp(LPCSTR pref, PropItemVec& items)
 
 void CGroupObject::OnFreezeAllClick(ButtonValue* sender, bool& bModif, bool& bSafe)
 {
-	ButtonValue* V = dynamic_cast<ButtonValue*>(sender);
+	ButtonValue* V = smart_cast<ButtonValue*>(sender);
     BOOL bDoUnique = FALSE;
     switch (V->btn_num)
     {

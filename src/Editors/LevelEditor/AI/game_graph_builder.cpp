@@ -116,7 +116,7 @@ void CGameGraphBuilder::load_graph_points()
 	Msg("Loading graph points");
 	for (auto& Obj : Scene->ListObj(OBJCLASS_SPAWNPOINT))
 	{
-		CSpawnPoint* Spawn = dynamic_cast<CSpawnPoint*>(Obj);
+		CSpawnPoint* Spawn = smart_cast<CSpawnPoint*>(Obj);
 
 		if (!Spawn->m_SpawnData.Valid())
 			continue;

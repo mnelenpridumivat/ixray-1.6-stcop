@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fast_dynamic_cast/fast_dynamic_cast.hpp>
+#define smart_cast fast_dynamic_cast
+
 template <bool _is_pm, typename T>
 struct xr_special_free
 {
@@ -7,7 +10,7 @@ struct xr_special_free
 	{
 		if constexpr (_is_pm)
 		{
-			void* _real_ptr = dynamic_cast<void*>(ptr);
+			void* _real_ptr = smart_cast<void*>(ptr);
 			ptr->~T();
 			Memory.mem_free(_real_ptr);
 		}

@@ -605,7 +605,7 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
             {
                 snap_bb.invalidate	();
                 for (ObjectIt o_it=m_SnapObjects.begin(); o_it!=m_SnapObjects.end(); o_it++){
-                    CSceneObject* 	S = dynamic_cast<CSceneObject*>(*o_it); VERIFY(S);
+                    CSceneObject* 	S = smart_cast<CSceneObject*>(*o_it); VERIFY(S);
                     avg_face_cnt	+= S->GetFaceCount();
                     avg_vert_cnt	+= S->GetVertexCount();
                     mesh_cnt	   	+= S->Meshes()->size();
@@ -621,7 +621,7 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
             Fvector verts[3];
             for (ObjectIt o_it=m_SnapObjects.begin(); o_it!=m_SnapObjects.end(); o_it++)
             {
-                CSceneObject* 		S = dynamic_cast<CSceneObject*>(*o_it); VERIFY(S);
+                CSceneObject* 		S = smart_cast<CSceneObject*>(*o_it); VERIFY(S);
                 CEditableObject*    E = S->GetReference(); VERIFY(E);
                 EditMeshVec& 		_meshes = E->Meshes();
                 for (EditMeshIt m_it=_meshes.begin(); m_it!=_meshes.end(); m_it++)
