@@ -52,11 +52,11 @@ bool CControllerPsyHit::check_start_conditions()
 	if (is_active())
 		return false;
 
+	if (m_man->is_captured_pure())
+		return false;
+
 	if (IsGameTypeSingle())
 	{
-		if (m_man->is_captured_pure())
-			return false;
-
 		if (pActor->Cameras().GetCamEffector(eCEControllerPsyHit))
 			return						false;
 
