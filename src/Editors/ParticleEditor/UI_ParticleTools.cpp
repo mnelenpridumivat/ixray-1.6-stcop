@@ -92,7 +92,7 @@ void CParticleTool::OnDestroy()
 bool CParticleTool::IfModified()
 {
     if (m_bModified){
-        int mr = ELog.DlgMsg(mtConfirmation, "The particles has been modified.\nDo you want to save your changes?");
+        int mr = ELog.DlgMsg(mtConfirmation, mbYes|mbNo|mbCancel, "The particles has been modified.\nDo you want to save your changes?");
         switch(mr){
         case mrYes: if (!ExecCommand(COMMAND_SAVE)) return false; else m_bModified = FALSE; break;
         case mrNo: m_bModified = FALSE; break;

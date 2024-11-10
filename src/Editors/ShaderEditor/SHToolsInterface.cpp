@@ -37,7 +37,7 @@ void ISHTools::Modified()
 bool ISHTools::IfModified()
 {
     if (m_bModified){
-        int mr = ELog.DlgMsg(mtConfirmation, "The '%s' has been modified.\nDo you want to save your changes?",ToolsName());
+        int mr = ELog.DlgMsg(mtConfirmation, mbYes | mbNo | mbCancel, "The '%s' has been modified.\nDo you want to save your changes?",ToolsName());
         switch(mr){
         case mrYes: Save(); m_bModified = FALSE; break;
         case mrNo: m_bModified = FALSE; break;

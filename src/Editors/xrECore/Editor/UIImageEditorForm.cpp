@@ -188,7 +188,7 @@ void UIImageEditorForm::ImportTextures()
 	int new_cnt = ImageLib.GetLocalNewTextures(TextureMap);
 	if (new_cnt)
 	{
-		if (ELog.DlgMsg(mtInformation, "Found %d new texture(s)", new_cnt))
+		if (ELog.DlgMsg(mtInformation, mbOK|mbCancel, "Found %d new texture(s)", new_cnt) == mrOK)
 		{
 			Form = new UIImageEditorForm();
 			Form->texture_map.swap(TextureMap);
@@ -197,7 +197,7 @@ void UIImageEditorForm::ImportTextures()
 	}
 	else
 	{
-		ELog.DlgMsg(mtInformation, "Can't find new textures.");
+		ELog.DlgMsg(mtInformation, mbOK, "Can't find new textures.");
 	}
 }
 

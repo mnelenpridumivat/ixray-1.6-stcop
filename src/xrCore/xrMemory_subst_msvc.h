@@ -1,8 +1,5 @@
 #pragma once
 
-#include <fast_dynamic_cast/fast_dynamic_cast.hpp>
-#define smart_cast fast_dynamic_cast
-
 template <bool _is_pm, typename T>
 struct xr_special_free
 {

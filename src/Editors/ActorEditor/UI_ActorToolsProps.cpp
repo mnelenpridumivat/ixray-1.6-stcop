@@ -182,7 +182,7 @@ void CActorTools::OnMotionEditClick(ButtonValue* V, bool& bModif, bool& bSafe)
 					ELog.DlgMsg(mtInformation, "Select at least one motion.");
 	}break;
 	case 2:{ // save
-	 int mr=ELog.DlgMsg(mtConfirmation, "Save selected motions only?");
+	 int mr=ELog.DlgMsg(mtConfirmation, mbYes|mbNo,"Save selected motions only?");
 		if (mr!=mrCancel){
 			if (EFS.GetSaveName(_smotion_,fn,0,1)){
 				switch (mr){
