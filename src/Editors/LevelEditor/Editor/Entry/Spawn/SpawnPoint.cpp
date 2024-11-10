@@ -62,31 +62,43 @@ void CLE_Visual::OnDrawUI()
 	UIChooseForm::Update();
 }
 
-void CLE_Visual::OnChangeVisual	()
+void CLE_Visual::OnChangeVisual()
 {
-	::Render->model_Delete	(visual,TRUE);
+	::Render->model_Delete(visual, TRUE);
 	if (source->visual_name.size())
 	{
-		visual				= ::Render->model_Create(source->visual_name.c_str());
+		visual = ::Render->model_Create(source->visual_name.c_str());
 
-		if(NULL==visual && !g_tmp_lock)
+		static bool SkipErrors = false;
+
+		if (NULL == visual && !g_tmp_lock)
 		{
-		 xr_string _msg = "Model [" + xr_string(source->visual_name.c_str())+"] not found. Do you want to select it from library?";
-			  int mr = ELog.DlgMsg(mtConfirmation,mbYes |mbNo, _msg.c_str());
-			  LPCSTR _new_val = 0;
-			  g_tmp_lock = true;
-			  if (mr == mrYes)
-			  {
-				  UIChooseForm::SelectItem(smVisual, 1);
-				  EDevice->seqDrawUI.Add(this);
-			  }
+			xr_string _msg = "Model [" + xr_string(source->visual_name.c_str()) + "] not found. Do you want to select it from library?";
 
-			  g_tmp_lock = false;
+			int mr = mrNo;
+			if (!SkipErrors)
+			{
+				mr = ELog.DlgMsg(mtSkip, mbYes | mbNo, _msg.c_str());
+			}
+			LPCSTR _new_val = 0;
+			g_tmp_lock = true;
+
+			if (mr == mrSkip)
+			{
+				SkipErrors = true;
+			}
+			else if (mr == mrYes)
+			{
+				UIChooseForm::SelectItem(smVisual, 1);
+				EDevice->seqDrawUI.Add(this);
+			}
+
+			g_tmp_lock = false;
 
 		}
-		PlayAnimationFirstFrame		();
+		PlayAnimationFirstFrame();
 	}
-	ExecCommand				(COMMAND_UPDATE_PROPERTIES);
+	ExecCommand(COMMAND_UPDATE_PROPERTIES);
 }
 
 void CLE_Visual::PlayAnimation ()
@@ -607,7 +619,7 @@ void  CSpawnPoint::	OnSceneRemove	()
 CSpawnPoint::~CSpawnPoint()
 {
 	if(m_Type == ptEnvMod && m_EM_Ptr)
-    	g_pGamePersistent->Environment().remove_modifier(m_EM_Ptr);
+		g_pGamePersistent->Environment().remove_modifier(m_EM_Ptr);
 
 	xr_delete(m_AttachedObject);
 	OnDeviceDestroy();
@@ -719,24 +731,24 @@ bool CSpawnPoint::GetBox( Fbox& box )
 		box.max.z 	+= RPOINT_SIZE;
 	break;
 	case ptEnvMod: 	
-    	if (Selected()){
-    		switch(m_EM_ShapeType){
-        	case CShapeData::cfSphere:
-        		box.set		(GetPosition(), GetPosition());
-        		box.grow	(m_EM_Radius);
-        	break;
-        	case CShapeData::cfBox:
-        		box.identity();
-            	box.xform	(FTransform);
-        	break;
-        	default:
-        		THROW;
-        	}
-    	}else{
-        	box.set			(GetPosition(), GetPosition());
-            box.grow		(ENVMOD_SIZE);
+		if (Selected()){
+			switch(m_EM_ShapeType){
+			case CShapeData::cfSphere:
+				box.set		(GetPosition(), GetPosition());
+				box.grow	(m_EM_Radius);
+			break;
+			case CShapeData::cfBox:
+				box.identity();
+				box.xform	(FTransform);
+			break;
+			default:
+				THROW;
+			}
+		}else{
+			box.set			(GetPosition(), GetPosition());
+			box.grow		(ENVMOD_SIZE);
 
-        }
+		}
 
 	break;
 	case ptSpawnPoint:
@@ -816,39 +828,39 @@ void CSpawnPoint::OnFrame()
 
 	if(m_Type == ptEnvMod)
 	{
-    	if(Visible())
-        {
-        	if(!m_EM_Ptr)
-            	m_EM_Ptr			= g_pGamePersistent->Environment().new_modifier();
+		if(Visible())
+		{
+			if(!m_EM_Ptr)
+				m_EM_Ptr			= g_pGamePersistent->Environment().new_modifier();
 
-        	m_EM_Ptr->position 		= FPosition;
-        	m_EM_Ptr->radius 		= m_EM_Radius;
-        	m_EM_Ptr->power 		= m_EM_Power;
-        	m_EM_Ptr->far_plane 	= m_EM_ViewDist;
-        	m_EM_Ptr->fog_color 	= u32_3f(m_EM_FogColor);
-        	m_EM_Ptr->fog_density 	= m_EM_FogDensity;
-        	m_EM_Ptr->ambient 		= u32_3f(m_EM_AmbientColor);
-        	m_EM_Ptr->sky_color 	= u32_3f(m_EM_SkyColor);
-        	m_EM_Ptr->hemi_color 	= u32_3f(m_EM_HemiColor);
-        	m_EM_Ptr->use_flags 	= m_EM_Flags;
+			m_EM_Ptr->position 		= FPosition;
+			m_EM_Ptr->radius 		= m_EM_Radius;
+			m_EM_Ptr->power 		= m_EM_Power;
+			m_EM_Ptr->far_plane 	= m_EM_ViewDist;
+			m_EM_Ptr->fog_color 	= u32_3f(m_EM_FogColor);
+			m_EM_Ptr->fog_density 	= m_EM_FogDensity;
+			m_EM_Ptr->ambient 		= u32_3f(m_EM_AmbientColor);
+			m_EM_Ptr->sky_color 	= u32_3f(m_EM_SkyColor);
+			m_EM_Ptr->hemi_color 	= u32_3f(m_EM_HemiColor);
+			m_EM_Ptr->use_flags 	= m_EM_Flags;
 
-        	m_EM_Ptr->shape_type	= m_EM_ShapeType;
+			m_EM_Ptr->shape_type	= m_EM_ShapeType;
 
-        	Fobb obb;
-        	obb.m_translate.set		(FPosition);
-        	obb.m_halfsize.set		(FScale).mul(0.5f);
-        	obb.m_rotate.set		(FTransformR);
-        	m_EM_Ptr->obb			= obb;
-        }
-        else
-        {
-        	if(m_EM_Ptr)
-            {
-            	g_pGamePersistent->Environment().remove_modifier(m_EM_Ptr);
-                m_EM_Ptr			= NULL;
-            }
-        }
-    }
+			Fobb obb;
+			obb.m_translate.set		(FPosition);
+			obb.m_halfsize.set		(FScale).mul(0.5f);
+			obb.m_rotate.set		(FTransformR);
+			m_EM_Ptr->obb			= obb;
+		}
+		else
+		{
+			if(m_EM_Ptr)
+			{
+				g_pGamePersistent->Environment().remove_modifier(m_EM_Ptr);
+				m_EM_Ptr			= NULL;
+			}
+		}
+	}
 
 }
 void CSpawnPoint::RenderSimBox()
@@ -919,20 +931,20 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 						DU_impl.DrawCross(pos,0.25f,Selected()?ENVMOD_SEL_COLOR2:ENVMOD_COLOR,true);
 						if (Selected())
 							switch(m_EM_ShapeType)
-                            {
-                            	case CShapeData::cfSphere:
-                                	DU_impl.DrawSphere(Fidentity,GetPosition(),m_EM_Radius,ENVMOD_SEL_COLOR1,ENVMOD_SEL_COLOR2,true,true);
-                                break;
-                                case CShapeData::cfBox:
-                                {
-                                	Fobb obb;
+							{
+								case CShapeData::cfSphere:
+									DU_impl.DrawSphere(Fidentity,GetPosition(),m_EM_Radius,ENVMOD_SEL_COLOR1,ENVMOD_SEL_COLOR2,true,true);
+								break;
+								case CShapeData::cfBox:
+								{
+									Fobb obb;
 									obb.invalidate();
-                                    obb.m_halfsize.set(0.5f,0.5f,0.5f);
-                                	DU_impl.DrawOBB(FTransform,obb,0x30FFAE00,0x00FFAE00);
-                                }break;
-                                default:
-                                	THROW;
-                            }
+									obb.m_halfsize.set(0.5f,0.5f,0.5f);
+									DU_impl.DrawOBB(FTransform,obb,0x30FFAE00,0x00FFAE00);
+								}break;
+								default:
+									THROW;
+							}
 
 					}break;
 
@@ -1495,9 +1507,9 @@ void CSpawnPoint::FillProp(LPCSTR pref, PropItemVec& items)
 		}break;
 		case ptEnvMod:{
 			static xr_token shape_type[] = {
-            	{"Sphere", 	CShapeData::cfSphere},
-                {"Box", 	CShapeData::cfBox},
-                {0}
+				{"Sphere", 	CShapeData::cfSphere},
+				{"Box", 	CShapeData::cfBox},
+				{0}
 			};
 
 			PHelper().CreateToken8	(items, PrepareKey(pref,"Environment Modificator\\Shape Type"),		&m_EM_ShapeType,	shape_type);

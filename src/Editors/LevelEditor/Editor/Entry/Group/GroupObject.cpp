@@ -218,19 +218,38 @@ bool CGroupObject::LoadStream(IReader& F)
 
 	// objects
     if (tmp_flags.test(1<<0))
-    { //old format, opened group
-        ELog.DlgMsg( mtError, "old format, opened group");
-        return false;
-/*        
+    {
         R_ASSERT(F.find_chunk(GROUPOBJ_CHUNK_OPEN_OBJECT_LIST));
-        u32 cnt 	= F.r_u32();
-        for (u32 k=0; k<cnt; ++k)
+        u32 cnt = F.r_u32();
+        xr_string 	tmp;
+        for (u32 k = 0; k < cnt; k++)
         {
-			m_ObjectsInGroup.resize	(m_ObjectsInGroup.size()+1);
-            F.r_stringZ				(m_ObjectsInGroup.back().ObjectName);
+            F.r_stringZ(tmp);
+
+            string256 namebuffer;
+            Scene->GenObjectName(OBJCLASS_SCENEOBJECT, namebuffer, tmp.c_str());
+            CGroupObject* obj = new CGroupObject((LPVOID)0, namebuffer);
+
+            if (obj->SetReference(tmp.c_str()))
+            {
+                string256 			namebuffer;
+                Scene->GenObjectName(OBJCLASS_SCENEOBJECT, namebuffer, tmp.c_str());
+                obj->SetName(namebuffer);
+            }
+
+            if (!obj->Valid()) 
+            {
+                xr_delete(obj);
+            }
+            else
+            {
+                SGroupObjectItem Obj = {};
+                Obj.pObject = obj;
+                m_ObjectsInGroup.push_back(Obj);
+            }
         }
-*/        
-    }else
+    }
+    else
     {
 	    Scene->ReadObjectsStream(F,GROUPOBJ_CHUNK_OBJECT_LIST, EScene::TAppendObject(this, &CGroupObject::AppendObjectLoadCB),0);
     }

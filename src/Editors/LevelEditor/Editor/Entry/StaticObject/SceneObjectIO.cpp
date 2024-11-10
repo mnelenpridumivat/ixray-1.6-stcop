@@ -188,9 +188,17 @@ bool CSceneObject::LoadStream(IReader& F)
                 }
             }
 
+            static bool SkipErrors = false;
             if (!bRes)
             {
-                ELog.DlgMsg(mtError, "CSceneObject: '%s' not found in library", buf);
+                if (SkipErrors)
+                {
+                    ELog.Msg(mtError, "CSceneObject: '%s' not found in library", buf);
+                }
+                else
+                {
+                    SkipErrors = ELog.DlgMsg(mtSkip, "CSceneObject: '%s' not found in library", buf) == 2;
+                }
             }
 
             Scene->Modified();
