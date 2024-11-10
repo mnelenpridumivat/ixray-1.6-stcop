@@ -6,6 +6,7 @@ CPuddle::CPuddle(LPVOID data, LPCSTR name):
 {
 	Construct(data);
 	FScale.set(1, 0.3f, 1);
+	m_RT_Flags.set(flRT_Visible, true);
 }
 
 void CPuddle::Construct(LPVOID data)
@@ -50,4 +51,9 @@ bool CPuddle::LoadStream(IReader& F)
 void CPuddle::SaveStream(IWriter& F)
 {
 	CEditShape::SaveStream(F);
+}
+
+void CPuddle::OnFrame()
+{
+	CCustomObject::OnFrame();
 }

@@ -41,7 +41,11 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 				break;
 			}
 		}
+
+		if (NodeObject == nullptr)
+			return;
 	}
+	else return;
 
 	Fmatrix DeltaMatrix = Fidentity;
 
@@ -97,22 +101,20 @@ void IM_Manipulator::CommandScale(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatri
 	bool IsSingleObject = lst.size() == 1;
 
 	Fbox test;
-	u32 Flags = ImGuizmo::SCALE;
+	ImGuizmo::OPERATION Flags = ImGuizmo::SCALE;
 
 	if (IsSingleObject)
 	{
 		if (LTools->CurrentClassID() == OBJCLASS_SCENEOBJECT)
 		{
 			lst.front()->GetUTBox(test);
-			Flags |= ImGuizmo::BOUNDS;
 		}
-		else if (LTools->CurrentClassID() == OBJCLASS_SHAPE)
+		else if (LTools->CurrentClassID() == OBJCLASS_SHAPE || LTools->CurrentClassID() == OBJCLASS_PUDDLES)
 		{
 			CEditShape* Shape = (CEditShape*)lst.front();
 			if (Shape->shapes[0].type == CShapeData::cfBox)
 			{
 				test = Shape->m_Box;
-				Flags |= ImGuizmo::BOUNDS;
 			}
 			else
 			{
@@ -130,7 +132,7 @@ void IM_Manipulator::CommandScale(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatri
 	(
 		(float*)&Device.mView,
 		(float*)&Device.mProject,
-		(ImGuizmo::OPERATION)Flags, //ImGuizmo::SCALE | ImGuizmo::BOUNDS,
+		Flags,
 		IsSingleObject ? ImGuizmo::WORLD : ImGuizmo::LOCAL,
 		(float*)&ObjectMatrix,
 		(float*)&DeltaMatrix,
@@ -179,7 +181,6 @@ void IM_Manipulator::CommandScale(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatri
 
 void IM_Manipulator::CommandRotate(Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, ObjectList& lst, const bool IsCSParent)
 {
-
 	float  RotateSnap;
 	float* PtrRotateSnap = LTools->GetSettings(etfASnap) ? &RotateSnap : nullptr;
 
@@ -190,7 +191,14 @@ void IM_Manipulator::CommandRotate(Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, 
 
 	ObjectMatrix.getXYZ(OriginalRotation);
 
-	const bool IsManipulated = ImGuizmo::Manipulate((float*)&Device.mView, (float*)&Device.mProject, ImGuizmo::ROTATE, ImGuizmo::WORLD, (float*)&ObjectMatrix, (float*)&DeltaMatrix, PtrRotateSnap);
+	ImGuizmo::OPERATION Flags = ImGuizmo::ROTATE;
+
+	if (LTools->CurrentClassID() == OBJCLASS_PUDDLES)
+	{
+		Flags = ImGuizmo::ROTATE_Y;
+	}
+
+	const bool IsManipulated = ImGuizmo::Manipulate((float*)&Device.mView, (float*)&Device.mProject, Flags, ImGuizmo::WORLD, (float*)&ObjectMatrix, (float*)&DeltaMatrix, PtrRotateSnap);
 
 	if (IsManipulated)
 	{
@@ -217,7 +225,6 @@ void IM_Manipulator::CommandRotate(Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, 
 
 void IM_Manipulator::CommandMove(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, SAINode* NodeObject)
 {
-
 	float  MoveSnap[3];
 	float* PtrMoveSnap = LTools->GetSettings(etfMSnap) ? MoveSnap : nullptr;
 
@@ -249,13 +256,13 @@ void IM_Manipulator::CommandMove(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatrix
 			}
 		}
 	}
-	else
+	else if (NodeObject != nullptr)
 	{
 		const bool IsManipulated = ImGuizmo::Manipulate((float*)&Device.mView, (float*)&Device.mProject, ImGuizmo::TRANSLATE_Y, ImGuizmo::WORLD, (float*)&ObjectMatrix, (float*)&DeltaMatrix, PtrMoveSnap);
 
 		if (IsManipulated)
 		{
-			if (lst.empty() && NodeObject != nullptr)
+			if (lst.empty())
 			{
 				NodeObject->Pos.y += DeltaMatrix.c.y;
 				NodeObject->Plane.build(NodeObject->Pos, NodeObject->Plane.n);

@@ -225,9 +225,12 @@ BOOL ESceneCustomOTool::RayPick(CCustomObject*& object, float& distance, const F
     object = 0;
     if (Scene->IsPlayInEditor())
         return false;
-    for(ObjectIt _F = m_Objects.begin();_F!=m_Objects.end();_F++)
-        if((*_F)->Visible()&&(*_F)->RayPick(distance,start,direction,pinf))
-            object=*_F;
+    for (CCustomObject* _F : m_Objects)
+    {
+        if (_F->Visible() && _F->RayPick(distance, start, direction, pinf))
+            object = _F;
+    }
+
 	return !!object;
 }
 
