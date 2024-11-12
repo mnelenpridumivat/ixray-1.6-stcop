@@ -559,7 +559,13 @@ bool CHudItem::HudAnimationExist(LPCSTR anim_name)
 
 u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 state)
 {
-	u32 anim_time					= PlayHUDMotion_noCB(M, bMixIn);
+	if (HudItemData() && !HudAnimationExist(M.c_str()))
+	{
+		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M);
+		return 0;
+	}
+
+	u32 anim_time = PlayHUDMotion_noCB(M.c_str(), bMixIn);
 	if (anim_time>0)
 	{
 		m_bStopAtEndAnimIsRunning	= true;
