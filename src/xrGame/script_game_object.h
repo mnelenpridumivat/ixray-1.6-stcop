@@ -838,7 +838,7 @@ public:
 			void        SetActorRunBackCoef(float run_back_coef);
 
 			void IterateFeelTouch(const luabind::functor<bool>& functor);
-
+			bool IsActorLadder() const;
 	doors::door*				m_door;
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION

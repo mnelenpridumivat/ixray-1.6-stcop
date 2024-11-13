@@ -300,6 +300,7 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 
 		.def("location_on_path",			&CScriptGameObject::location_on_path)
 		.def("is_there_items_to_pickup",	&CScriptGameObject::is_there_items_to_pickup)
+		.def("is_ladder",					&CScriptGameObject::IsActorLadder)
 
 		.def("wounded",						(bool (CScriptGameObject::*)() const)(&CScriptGameObject::wounded))
 		.def("wounded",						(void (CScriptGameObject::*)(bool))(&CScriptGameObject::wounded))
