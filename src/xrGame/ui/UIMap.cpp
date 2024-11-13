@@ -529,8 +529,12 @@ bool CUILevelMap::OnMouseAction(float x, float y, EUIMessages mouse_action)
 				MapWnd()->CreateSpotWindow(RealPosition, MapName());
 				return true;
 			}
+			else if (_mapLoc->IsUserDefined())
+			{
+				Level().MapManager().RemoveMapLocation(_mapLoc);
+				return true;
+			}
 		}
-
 	}
 
 	if(mouse_action==WINDOW_MOUSE_MOVE && (FALSE==pInput->iGetAsyncBtnState(0)) )
