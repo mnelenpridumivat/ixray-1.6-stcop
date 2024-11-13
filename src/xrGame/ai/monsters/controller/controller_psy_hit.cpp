@@ -49,17 +49,21 @@ bool CControllerPsyHit::tube_ready () const
 bool CControllerPsyHit::check_start_conditions()
 {
 	CActor* pActor = Actor();
-	if (is_active())				
-		return false;	
+	if (is_active())
+		return false;
 
-	if (IsGameTypeSingle()) {
+	if (m_man->is_captured_pure())
+		return false;
+
+	if (IsGameTypeSingle())
+	{
 		if (pActor->Cameras().GetCamEffector(eCEControllerPsyHit))
 			return						false;
 
-	if ( !see_enemy(pActor) )
+		if (!see_enemy(pActor))
 			return						false;
 
-	if ( !tube_ready() )
+		if (!tube_ready())
 			return						false;
 
 		if (m_object->Position().distance_to(pActor->Position()) < m_min_tube_dist)
@@ -68,7 +72,8 @@ bool CControllerPsyHit::check_start_conditions()
 	else
 	{
 		CActor* pA = const_cast<CActor*>(smart_cast<const CActor*>(m_object->EnemyMan.get_enemy()));
-		if (pA) {
+		if (pA) 
+		{
 			m_curent_actor_id = u16(-1);
 
 			if (pA->Cameras().GetCamEffector(eCEControllerPsyHit))
@@ -88,7 +93,8 @@ bool CControllerPsyHit::check_start_conditions()
 		else
 			return false;
 	}
-	return							true;
+
+	return true;
 }
 
 void CControllerPsyHit::activate()
