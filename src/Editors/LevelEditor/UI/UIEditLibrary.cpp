@@ -235,7 +235,6 @@ void UIEditLibrary::MakeLOD(bool bHighQuality)
 		return;
 	}
 
-	R_ASSERT(res == mrYes);
 	UIChooseForm::SelectItem(smObject, 512, 0);
 	m_SelectLods = true;
 	m_HighQualityLod = true;
