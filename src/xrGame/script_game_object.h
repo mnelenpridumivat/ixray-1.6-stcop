@@ -839,7 +839,7 @@ public:
 			void		SetCharacterIcon(LPCSTR iconName);
 
 			void IterateFeelTouch(const luabind::functor<bool>& functor);
-
+			bool IsActorLadder() const;
 	doors::door*				m_door;
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION

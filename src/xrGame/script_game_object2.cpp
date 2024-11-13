@@ -512,3 +512,15 @@ bool CScriptGameObject::is_there_items_to_pickup	() const
 	}
 	return (!!stalker->memory().item().selected());
 }
+
+bool CScriptGameObject::IsActorLadder() const
+{
+	CActor* actor = smart_cast<CActor*>(&object());
+	if (actor == nullptr)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "ScriptGameObject : attempt to call IsActorLadder method for non-actor object");
+		return false;
+	}
+
+	return actor->is_ladder();
+}
