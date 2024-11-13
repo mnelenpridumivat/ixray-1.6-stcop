@@ -148,10 +148,12 @@ bool EParticlesObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     if(version>=0x0012)
 		m_GameType.LoadLTX(ini, sect_name, false);
 
-    m_RefName		= ini.r_string(sect_name, "ref_name");
+    m_RefName = ini.r_string(sect_name, "ref_name");
+
+    xr_string Copy = *m_RefName;
     if (!Compile(*m_RefName))
     {
-        ELog.DlgMsg( mtError, "EParticlesObject: '%s' not found in library", *m_RefName );
+        ELog.DlgMsg( mtError, "EParticlesObject: '%s' not found in library", Copy.c_str());
         return false;
     }
     return true;
