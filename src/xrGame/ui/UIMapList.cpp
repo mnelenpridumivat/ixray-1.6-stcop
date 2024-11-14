@@ -66,13 +66,11 @@ CUIMapList::CUIMapList(){
 CUIMapList::~CUIMapList()
 {}
 
-void CUIMapList::StartDedicatedServer(){
-	std::string moduleFileName = Platform::GetModuleName();
+void CUIMapList::StartDedicatedServer()
+{
+	xr_path moduleDir = std::filesystem::weakly_canonical(Platform::GetModuleName()).parent_path();
 
-	std::filesystem::path moduleDir = std::filesystem::weakly_canonical(moduleFileName).parent_path();
-	std::string moduleDirStr = moduleDir.string();
-
-	xr_strcpy(g_sLaunchWorkingFolder, moduleDirStr.c_str());
+	xr_strcpy(g_sLaunchWorkingFolder, moduleDir.xstring().c_str());
 			
 	xr_strcpy			(g_sLaunchOnExit_app, g_sLaunchWorkingFolder);
 	xr_strcat			(g_sLaunchOnExit_app, "dedicated\\xrEngine.exe");
