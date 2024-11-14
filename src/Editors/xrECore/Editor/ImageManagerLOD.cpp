@@ -166,12 +166,17 @@ BOOL GetPointColor(SPickQuery::SResult* R, u32& alpha, u32& color)
 //	if (0!=cnt)	C.div(cnt);
     color	= color_rgba(C.x,C.y,C.z,C.w);
 */
-    auto& Layer = surf->m_ImageData->layers.back();
+    auto& Layer = surf->m_ImageData->layers;
 
     if (!Layer.empty())
     {
-        color = Layer[V * surf->m_ImageData->w + U];
+        color = Layer.back()[V * surf->m_ImageData->w + U];
         alpha = color_get_A(color);
+    }
+    else
+    {
+        Msg("! Error creating lod. Try again!");
+        return false;
     }
 
     return TRUE;

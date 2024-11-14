@@ -165,8 +165,14 @@ void CEditorRenderDevice::Clear()
 
 	if (EPrefs)
 	{
-		float color[3] = { color_get_R(EPrefs->scene_clear_color) / 255.f, color_get_G(EPrefs->scene_clear_color) / 255.f, color_get_B(EPrefs->scene_clear_color) / 255.f };
-		ClearColor = color_rgba_f(color[0], color[1], color[2], 1.f);
+		float color[4] = 
+		{ 
+			color_get_R(EPrefs->scene_clear_color) / 255.f, 
+			color_get_G(EPrefs->scene_clear_color) / 255.f,
+			color_get_B(EPrefs->scene_clear_color) / 255.f, 
+			color_get_A(EPrefs->scene_clear_color) / 255.f
+		};
+		ClearColor = color_rgba_f(color[0], color[1], color[2], color[3]);
 	}
 
 	CHK_DX(REDevice->Clear(0, 0, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL | D3DCLEAR_TARGET, ClearColor, 1, 0));
