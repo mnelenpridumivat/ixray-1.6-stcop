@@ -354,9 +354,6 @@ void UIMinimapEditorForm::OpenFile()
 
 	auto ltxFile = new CInifile(fn.c_str(), TRUE);
 
-	xr_vector<shared_str> levels;
-
-	
 	if ((*ltxFile).section_exist("global_map"))
 	{
 		if ((*ltxFile).line_exist("global_map", "texture"))
@@ -370,33 +367,22 @@ void UIMinimapEditorForm::OpenFile()
 
 	}
 
+	if (!(*ltxFile).section_exist("level_maps_single"))
 	{
-		//GetLevels
-
-		if (!(*ltxFile).section_exist("level_maps_single"))
-		{
-			Msg("! !!!");
-			return;
-		}
-		CInifile::Sect& S = (*ltxFile).r_section("level_maps_single");
-		CInifile::SectCIt it = S.Data.begin();
-		CInifile::SectCIt it_e = S.Data.end();
-
-		for (; it != it_e; ++it)
-		{
-			levels.push_back(it->first);
-		}
+		Msg("! The file does not contain the \"level_maps_single\" section.");
+		return;
 	}
+	CInifile::Sect& S = (*ltxFile).r_section("level_maps_single");
+	CInifile::SectCIt it = S.Data.begin();
+	CInifile::SectCIt it_e = S.Data.end();
 
-	for (auto& levelName : levels)
+	for (; it != it_e; ++it)
 	{
-		CInifile::Sect& S = (*ltxFile).r_section(levelName);
-		CInifile::SectCIt it = S.Data.begin();
-		CInifile::SectCIt it_e = S.Data.end();
+		auto& levelName = it->first;
 
 		if (!(*ltxFile).line_exist(levelName, "global_rect"))
 			continue;
-		
+
 		Fvector4 tmp = (ltxFile)->r_fvector4(levelName, "global_rect");
 
 		Element el;
