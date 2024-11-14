@@ -691,7 +691,8 @@ void player_hud::render_hud()
 		m_attached_items[1]->render();
 	}
 
-	if(Actor() && m_legs_model) {
+	if(m_show_legs && Actor() && m_legs_model)
+	{
 		bool isClimb = Actor()->GetMovementState(ACTOR_DEFS::EMovementStates::eReal) & mcClimb;
 		if(!isClimb) {
 			auto bHud = ::Render->get_HUD();
@@ -729,7 +730,7 @@ void player_hud::render_hud()
 				}
 			}
 
-			auto BoneID = m_legs_model->LL_BoneID("bip01_spine");
+			const u16 BoneID = m_legs_model->LL_BoneID("bip01_spine");
 			auto& BoneInstance = m_legs_model->LL_GetData(BoneID);
 			m_legs_model->Bone_Calculate(&BoneInstance, &m_legs_model->LL_GetTransform(BoneInstance.GetParentID()));
 

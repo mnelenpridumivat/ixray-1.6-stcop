@@ -153,7 +153,9 @@ public:
 	void			SetHandsVisible(bool val){m_bhands_visible=val;};
 	bool			GetHandsVisible(){return m_bhands_visible;};
 
-	IKinematics* m_legs_model;
+	IKinematics*	m_legs_model;
+	bool			m_show_legs = true;
+
 private:
 	void			update_inertion		(Fmatrix& trans);
 	void			update_additional	(Fmatrix& trans);
