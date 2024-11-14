@@ -194,12 +194,11 @@ void CTextConsole::OnPaint()
 {
 	RECT wRC;
 	PAINTSTRUCT ps;
-
 	BeginPaint(m_hLogWnd, &ps);
 
 	if (Device.dwFrame % 2)
 	{
-		SDL_GetWindowSize(g_AppInfo.Window, (int*)&wRC.right, (int*)&wRC.bottom);
+		GetClientRect(m_hLogWnd, &wRC);
 		DrawLog(m_hDC_LogWnd_BackBuffer, &wRC);
 	}
 	else
@@ -207,12 +206,15 @@ void CTextConsole::OnPaint()
 		wRC = ps.rcPaint;
 	}
 
-	BitBlt(m_hDC_LogWnd,
+	BitBlt
+	(
+		m_hDC_LogWnd,
 		wRC.left, wRC.top,
 		wRC.right - wRC.left, wRC.bottom - wRC.top,
 		m_hDC_LogWnd_BackBuffer,
 		wRC.left, wRC.top,
-		SRCCOPY);
+		SRCCOPY
+	);
 
 	EndPaint(m_hLogWnd, &ps);
 }
@@ -223,6 +225,7 @@ void CTextConsole::DrawLog(HDC hDC, RECT* pRect)
 	GetTextMetrics(hDC, &tm);
 
 	RECT wRC = *pRect;
+	SDL_GetWindowSize(g_AppInfo.Window, (int*)&wRC.right, (int*)&wRC.bottom);
 	FillRect(hDC, &wRC, m_hBackGroundBrush);
 
 	int Width = wRC.right - wRC.left;
