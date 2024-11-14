@@ -90,7 +90,7 @@ void UIMinimapEditorForm::RenderCanvas()
 		}
 	}
 
-	ImVec2 bg_display_size(m_ImageW * m_Zoom, m_ImageH * m_Zoom);
+	ImVec2 bg_display_size(m_BackgroundRenderSize.x * m_Zoom, m_BackgroundRenderSize.y * m_Zoom);
 	ImGui::GetWindowDrawList()->AddImage(m_BackgroundTexture, canvas_p0 + m_BackgroundPosition, canvas_p0 + m_BackgroundPosition + bg_display_size);
 
 	
@@ -183,10 +183,15 @@ void UIMinimapEditorForm::ShowPreview()
 	xr_string data;
 	string256 buff;
 
+	sprintf(buff, "[level_maps_single]\n        bound_rect    = 0.00, 0.00, %.2f, %.2f\n        texture    = %s\n\n",
+		m_BackgroundRenderSize.x, m_BackgroundRenderSize.y, m_BackgroundTexturePath.c_str());
+
+	data += buff;
+
 	data += "[level_maps_single]\n";
 	for (auto element : elements)
 	{
-		sprintf(buff, "%s    =\n", element.name.c_str());
+		sprintf(buff, "        %s    =\n", element.name.c_str());
 		data += buff;
 	}
 	data += "\n\n";
@@ -275,6 +280,14 @@ void UIMinimapEditorForm::ShowMenu()
 	ImGui::Checkbox("Preview", &PreviewMode);
 	ImGui::Checkbox("Always Draw Border", &m_AlwaysDrawBorder);
 
+	ImGui::Text("Background Size:");
+	ImGui::DragFloat2("##bgs", (float*)&m_BackgroundRenderSize, 1.0f, 128, 1024*4);
+	ImGui::SameLine();
+	if (ImGui::Button("to file size"))
+	{
+		m_BackgroundRenderSize = m_BackgroundSize;
+	}
+
 	ImGui::Text("Items Opacity:");
 	ImGui::DragInt("##op", &m_ItemsOpacity, 1.0f, 1, 255.0f);
 	ImGui::Separator();
@@ -283,7 +296,7 @@ void UIMinimapEditorForm::ShowMenu()
 	{
 		ImGui::Text("Selected item:");
 		/*ImGui::Text("Name:");
-		if (ImGui::InputText("##", (*selectedElement).name.data(), 255))
+		if (ImGui::InputText("##", selectedElement->name.data(), 255))
 		{
 			isEdited = true;
 		}*/
@@ -295,20 +308,20 @@ void UIMinimapEditorForm::ShowMenu()
 			Element copy = (*selectedElement);
 			if (LoadTexture(*selectedElement) == 0)
 			{
-				(*selectedElement).RenderSize = copy.RenderSize;
-				//(*selectedElement).name = copy.name;
+				selectedElement->RenderSize = copy.RenderSize;
+				//selectedElement->name = copy.name;
 				isEdited = true;
 			}
 			
 		}
 
 		ImGui::Text("Position:");
-		if (ImGui::DragFloat2("##position", (float*)&(*selectedElement).position, 1.0f))
+		if (ImGui::DragFloat2("##position", (float*)&selectedElement->position, 1.0f))
 		{
 			if (!isEdited) isEdited = true;
 		}
 		ImGui::Text("Size:");
-		if (ImGui::DragFloat2("##size", (float*)&(*selectedElement).RenderSize, 1.0f, 1.0f, 1024))
+		if (ImGui::DragFloat2("##size", (float*)&selectedElement->RenderSize, 1.0f, 1.0f, 1024))
 		{
 			if (!isEdited) isEdited = true;
 		}
@@ -332,7 +345,7 @@ void UIMinimapEditorForm::ShowMenu()
 		ImGui::SameLine();
 		if (ImGui::Button("Reset size"))
 		{
-			(*selectedElement).RenderSize = (*selectedElement).FileSize;
+			selectedElement->RenderSize = selectedElement->FileSize;
 			isEdited = true;
 		}
 	}
@@ -347,32 +360,35 @@ void UIMinimapEditorForm::OpenFile()
 	}
 	elements.clear();
 
-	ActiveFile = fn.c_str();
-	ActiveFileShort = FS.fix_path(fn.c_str());
-
 	FS.TryLoad(fn.c_str());
 
 	auto ltxFile = new CInifile(fn.c_str(), TRUE);
 
-	if ((*ltxFile).section_exist("global_map"))
+	if (ltxFile->section_exist("global_map"))
 	{
-		if ((*ltxFile).line_exist("global_map", "texture"))
+		if (ltxFile->line_exist("global_map", "texture"))
 		{
-			auto tx = (*ltxFile).r_string("global_map", "texture");
+			auto tx = ltxFile->r_string("global_map", "texture");
 
 			string_path texturePath;
 			sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path, tx);
 			LoadBGClick(texturePath);
 		}
+		if (ltxFile->line_exist("global_map", "bound_rect"))
+		{
+			auto tx = ltxFile->r_fvector4("global_map", "bound_rect");
+			m_BackgroundRenderSize.x = tx.z;
+			m_BackgroundRenderSize.y = tx.w;
+		}
 
 	}
 
-	if (!(*ltxFile).section_exist("level_maps_single"))
+	if (!ltxFile->section_exist("level_maps_single"))
 	{
 		Msg("! The file does not contain the \"level_maps_single\" section.");
 		return;
 	}
-	CInifile::Sect& S = (*ltxFile).r_section("level_maps_single");
+	CInifile::Sect& S = ltxFile->r_section("level_maps_single");
 	CInifile::SectCIt it = S.Data.begin();
 	CInifile::SectCIt it_e = S.Data.end();
 
@@ -380,7 +396,7 @@ void UIMinimapEditorForm::OpenFile()
 	{
 		auto& levelName = it->first;
 
-		if (!(*ltxFile).line_exist(levelName, "global_rect"))
+		if (!ltxFile->line_exist(levelName, "global_rect"))
 			continue;
 
 		Fvector4 tmp = (ltxFile)->r_fvector4(levelName, "global_rect");
@@ -395,12 +411,36 @@ void UIMinimapEditorForm::OpenFile()
 		el.RenderSize.x = tmp.z - tmp.x;
 		el.RenderSize.y = tmp.w - tmp.y;
 
-		string_path texturePath;
-		sprintf(texturePath, "%smap\\map_%s.dds", FS.get_path("$game_textures$")->m_Path, levelName.c_str());
+		string_path texturePath = "";
+		string_path levelLtx;
+		sprintf(levelLtx,"%s%s\\level.ltx", FS.get_path("$level$")->m_Path, levelName.c_str());
+
+		bool find_result = false;
+		if (FS.exist(levelLtx))
+		{
+			CInifile levelLtxFile(levelLtx, TRUE);
+
+			if (levelLtxFile.line_exist("level_map", "texture"))
+			{
+				auto textureFile = levelLtxFile.r_string("level_map", "texture");
+
+				sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path, textureFile);
+			}
+		}
+
+		if (texturePath == "")
+			sprintf(texturePath, "%smap\\map_%s.dds", FS.get_path("$game_textures$")->m_Path, levelName.c_str());
 
 		LoadTexture(el, texturePath);
 		elements.push_back(el);
 	}
+
+	ActiveFile = fn;
+	ActiveFileShort = fn;
+
+	xr_string FSPath = FS.get_path("$fs_root$")->m_Path;
+	if (ActiveFileShort.Contains(FSPath))
+		ActiveFileShort = ActiveFileShort.substr(FSPath.length());
 
 	xr_delete(ltxFile);
 	isEdited = false;
@@ -429,21 +469,21 @@ void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 	auto ltxFile = new CInifile(fn.c_str(), FALSE, TRUE, 1);
 
 	{
-		(*ltxFile).remove_line("global_map", "texture");
-		(*ltxFile).remove_line("global_map", "bound_rect");
+		ltxFile->remove_line("global_map", "texture");
+		ltxFile->remove_line("global_map", "bound_rect");
 
-		(*ltxFile).w_string("global_map", "texture", m_BackgroundTexturePath.c_str());
-		(*ltxFile).w_fvector4("global_map", "bound_rect", Fvector4(0.f, 0.f, m_ImageW, m_ImageH));
+		ltxFile->w_string("global_map", "texture", m_BackgroundTexturePath.c_str());
+		ltxFile->w_fvector4("global_map", "bound_rect", Fvector4(0.f, 0.f, m_BackgroundRenderSize.x, m_BackgroundRenderSize.y));
 	}
 
 	for (auto& element : elements)
 	{
-		(*ltxFile).remove_line("level_maps_single", element.name.c_str());
-		(*ltxFile).w_string("level_maps_single", element.name.c_str(), "");
+		ltxFile->remove_line("level_maps_single", element.name.c_str());
+		ltxFile->w_string("level_maps_single", element.name.c_str(), "");
 		//
-		(*ltxFile).remove_line(element.name.c_str(), "global_rect");
+		ltxFile->remove_line(element.name.c_str(), "global_rect");
 		auto dat = Fvector4(element.position.x, element.position.y, element.RenderSize.x+ element.position.x, element.RenderSize.y + element.position.y);
-		(*ltxFile).w_fvector4(element.name.c_str(), "global_rect", dat);
+		ltxFile->w_fvector4(element.name.c_str(), "global_rect", dat);
 	}
 
 	xr_delete(ltxFile);
@@ -460,14 +500,17 @@ void UIMinimapEditorForm::Draw()
 	if (m_BackgroundTexture == nullptr)
 	{
 		u32 mem = 0;
-		m_BackgroundTexture = RImplementation.texture_load("ui\\ui_nomap2", mem);
-		m_BackgroundTexturePath = "ui\\ui_nomap2";
+		m_BackgroundTexture = RImplementation.texture_load("ui\\ui_nomap", mem);
+		m_BackgroundTexturePath = "ui\\ui_nomap";
+		m_BackgroundSize.x = 512;
+		m_BackgroundSize.y = 512;
+		m_BackgroundRenderSize = m_BackgroundSize;
 	}
 
 	{
 		ImGui::Columns(2, "mapEditor", false);
 
-		float leftColumnWidth = 300.0f;
+		float leftColumnWidth = 320.0f;
 		ImGui::SetColumnWidth(0, leftColumnWidth);
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -603,11 +646,17 @@ void UIMinimapEditorForm::LoadBGClick(const xr_string texture)
 	if (texture == "")
 		fn = FS.fix_path(fn.c_str());
 
+	u32 m_ImageW, m_ImageH, m_ImageA;
+
 	if (Stbi_Load(fn.c_str(), m_ImageData, m_ImageW, m_ImageH, m_ImageA))
 	{
 		isEdited = true;
 
 		xr_string game_texture_dir = FS.get_path("$game_textures$")->m_Path;
+
+		m_BackgroundSize.x = m_ImageW;
+		m_BackgroundSize.y = m_ImageH;
+		m_BackgroundRenderSize = m_BackgroundSize;
 
 		m_BackgroundTexturePath = (fn.find(game_texture_dir) == 0) ? fn.substr(game_texture_dir.size()) : fn;
 		

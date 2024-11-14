@@ -68,11 +68,10 @@ private:
 	ImTextureID					m_BackgroundTexture;
 	ImTextureID					m_TextureRemove;
 	//
-	ImVec2 m_BackgroundPosition;
+	ImVec2		m_BackgroundPosition;
+	ImVec2		m_BackgroundRenderSize;
+	ImVec2		m_BackgroundSize;
 	//
 	U32Vec      m_ImageData;
-	u32         m_ImageW = 128;
-	u32         m_ImageH = 128;
-	u32         m_ImageA;
 	xr_string	m_BackgroundTexturePath;
 };
