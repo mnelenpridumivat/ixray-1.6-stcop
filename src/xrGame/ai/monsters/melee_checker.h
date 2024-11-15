@@ -25,12 +25,12 @@ public:
 			void	init_external			(CBaseMonster *obj) {m_object = obj;}
 	IC		void	load					(LPCSTR section);
 			
-	// инициализировано состояние атаки
+	// РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅРѕ СЃРѕСЃС‚Рѕв‚¬РЅРёРµ Р°С‚Р°РєРё
 	IC		void	init_attack				();
 			void	on_hit_attempt			(bool hit_success);
 
-			// Получить расстояние от fire_bone до врага
-			// Выполнить RayQuery от fire_bone в enemy.center
+			// С•РѕР»СѓС‡РёС‚СЊ СЂР°СЃСЃС‚Рѕв‚¬РЅРёРµ РѕС‚ fire_bone РґРѕ РІСЂР°РіР°
+			// В¬С‹РїРѕР»РЅРёС‚СЊ RayQuery РѕС‚ fire_bone РІ enemy.center
 			float	distance_to_enemy		(const CEntityAlive *enemy);
 
 	IC		float	get_min_distance		();

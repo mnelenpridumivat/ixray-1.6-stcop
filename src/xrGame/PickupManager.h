@@ -5,10 +5,10 @@ class CPickUpManager
 {
 	CActor* Owner;
 
-	//расстояние подсветки предметов
+	//СЂР°СЃСЃС‚РѕСЏРЅРёРµ РїРѕРґСЃРІРµС‚РєРё РїСЂРµРґРјРµС‚РѕРІ
 	float PickupInfoRadius;
 
-	//режим подбирания предметов
+	//СЂРµР¶РёРј РїРѕРґР±РёСЂР°РЅРёСЏ РїСЂРµРґРјРµС‚РѕРІ
 	bool PickupMode;
 	collide::rq_results RQR;
 public:

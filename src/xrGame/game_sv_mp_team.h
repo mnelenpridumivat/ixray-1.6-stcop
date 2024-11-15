@@ -1,20 +1,20 @@
 #pragma once
 
 
-// Вектор имен скинов команды
+// В¬РµРєС‚РѕСЂ РёРјРµРЅ СЃРєРёРЅРѕРІ РєРѕРјР°РЅРґС‹
 using TEAM_SKINS_NAMES = xr_vector<xr_string>;
 using TEAM_SKINS_NAMES_it = TEAM_SKINS_NAMES::iterator;
 
-// Вектор имен скинов команды
+// В¬РµРєС‚РѕСЂ РёРјРµРЅ СЃРєРёРЅРѕРІ РєРѕРјР°РЅРґС‹
 using DEF_ITEMS_LIST = xr_vector<u16>;
 using DEF_ITEMS_LIST_it = DEF_ITEMS_LIST::iterator;
 
-//структура данных по команде
+//СЃС‚СЂСѓРєС‚СѓСЂР° РґР°РЅРЅС‹С… РїРѕ РєРѕРјР°РЅРґРµ
 struct		TeamStruct
 {
-	shared_str			caSection;		// имя секции комманды
-	TEAM_SKINS_NAMES	aSkins;			// список скинов для команды
-	DEF_ITEMS_LIST		aDefaultItems;	// список предметов по умолчанию
+	shared_str			caSection;		// РёРјв‚¬ СЃРµРєС†РёРё РєРѕРјРјР°РЅРґС‹
+	TEAM_SKINS_NAMES	aSkins;			// СЃРїРёСЃРѕРє СЃРєРёРЅРѕРІ РґР»в‚¬ РєРѕРјР°РЅРґС‹
+	DEF_ITEMS_LIST		aDefaultItems;	// СЃРїРёСЃРѕРє РїСЂРµРґРјРµС‚РѕРІ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 
 	//---- Money -------------------
 	s32					m_iM_Start			;
@@ -45,6 +45,6 @@ struct		TeamStruct
 
 };
 
-//массив данных по командам
+//РјР°СЃСЃРёРІ РґР°РЅРЅС‹С… РїРѕ РєРѕРјР°РЅРґР°Рј
 using TEAM_DATA_LIST = xr_deque<TeamStruct>;
 using TEAM_DATA_LIST_it = TEAM_DATA_LIST::iterator;

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "Utils\Cursor3D.h"
 #include "..\xrengine\GameFont.h"
 #include "UI\UIEditLibrary.h"

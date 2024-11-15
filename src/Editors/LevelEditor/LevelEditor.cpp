@@ -1,4 +1,4 @@
-﻿// LevelEditor.cpp : Определяет точку входа для приложения.
+// LevelEditor.cpp : Определяет точку входа для приложения.
 //
 #include "stdafx.h"
 #include "Engine/XrGameManager.h"

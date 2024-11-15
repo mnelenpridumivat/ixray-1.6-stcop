@@ -1,4 +1,4 @@
-﻿// Originally by B.O.R.S.C.H.T. team
+// Originally by B.O.R.S.C.H.T. team
 // see https://bitbucket.org/stalker/xray-csky_borscht_sdk
 
 #pragma once

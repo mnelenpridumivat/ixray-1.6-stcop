@@ -20,7 +20,7 @@ private:
     CUIStatic* UILightLampOff;
 
 public:
-    // Установить
+    // РЈСЃС‚Р°РЅРѕРІРёС‚СЊ
     ~CUICarPanel();
 
     void SetCarHealth(float value);

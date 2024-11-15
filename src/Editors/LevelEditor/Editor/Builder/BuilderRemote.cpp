@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-// !!! использовать prefix если нужно имя !!! (Связано с группами)
+// !!! РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ prefix РµСЃР»Рё РЅСѓР¶РЅРѕ РёРјСЏ !!! (РЎРІСЏР·Р°РЅРѕ СЃ РіСЂСѓРїРїР°РјРё)
 
 
 #define LEVEL_LODS_TEX_NAME "level_lods"
@@ -437,7 +437,7 @@ int SceneBuilder::CalculateSector(const Fvector& P, float R)
         	if (_S->m_sector_num!=m_iDefaultSectorNum) 
             	return _S->m_sector_num;
 	}
-    return m_iDefaultSectorNum; // по умолчанию
+    return m_iDefaultSectorNum; // РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 }
 
 void SceneBuilder::Clear ()

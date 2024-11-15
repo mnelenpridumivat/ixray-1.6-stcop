@@ -1,4 +1,4 @@
-﻿﻿
+﻿
 #include "stdafx.h"
 #include "GameFont.h"
 #include "string_table.h"

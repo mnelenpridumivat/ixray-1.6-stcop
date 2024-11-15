@@ -75,16 +75,16 @@ static void correction_orientation(const Fvector &pos, const Fvector &dir, const
 	Fvector				position_on_plane;
 	Plane_.project		(position_on_plane, pos);
 
-	// находим проекцию точки, лежащей на векторе текущего направления
+	// РЅР°С…РѕРґРёРј РїСЂРѕРµРєС†РёСЋ С‚РѕС‡РєРё, Р»РµР¶Р°С‰РµР№ РЅР° РІРµРєС‚РѕСЂРµ С‚РµРєСѓС‰РµРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ
 	Fvector				dir_point, proj_point;
 	dir_point.mad		(position_on_plane, dir, 1.f);
 	Plane_.project		(proj_point,dir_point);
 
-	// получаем искомый вектор направления
+	// РїРѕР»СѓС‡Р°РµРј РёСЃРєРѕРјС‹Р№ РІРµРєС‚РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ
 	Fvector				target_dir;
 	target_dir.sub		(proj_point,position_on_plane);
 
-	// изменяем текущий угол Эйлера
+	// РёР·РјРµРЅСЏРµРј С‚РµРєСѓС‰РёР№ СѓРіРѕР» Р­Р№Р»РµСЂР°
 	target_angle = target_dir.getP();
 }
 
@@ -144,7 +144,7 @@ void		CDetailManager::cache_Decompress(Slot* S)
 	u32			d_size		= iCeil	(dm_slot_size/density);
 	svector<int,dm_obj_in_slot>		selected;
 
-    u32 p_rnd	= D.sx*D.sz; // нужно для того чтобы убрать полосы(ряды)
+    u32 p_rnd	= D.sx*D.sz; // РЅСѓР¶РЅРѕ РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ СѓР±СЂР°С‚СЊ РїРѕР»РѕСЃС‹(СЂСЏРґС‹)
 	CRandom				r_selection	(0x12071980^p_rnd);
 	CRandom				r_jitter	(0x12071980^p_rnd);
 	CRandom				r_yaw		(0x12071980^p_rnd);
@@ -334,7 +334,7 @@ RDEVICE.Statistic->TEST0.End		();
 #else
 			Item.vis_ID = 0;
 #endif
-			//чтобы (только) листики травы ложились на поверхность террейна
+			//С‡С‚РѕР±С‹ (С‚РѕР»СЊРєРѕ) Р»РёСЃС‚РёРєРё С‚СЂР°РІС‹ Р»РѕР¶РёР»РёСЃСЊ РЅР° РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ С‚РµСЂСЂРµР№РЅР°
 			//	if (Item.vis_ID == 0)
 
 			ground_correction(Item.mRotY, normal);

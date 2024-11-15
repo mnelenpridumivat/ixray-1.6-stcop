@@ -143,7 +143,7 @@ void ESoundThumbnail::OnMaxDistChange(PropValue* sender)
     }
 	if (bChanged){ 
     	/*P->Modified		();
-        P->RefreshForm	();*//*TODO:Это теперь не нужно*/
+        P->RefreshForm	();*//*TODO:Р­С‚Рѕ С‚РµРїРµСЂСЊ РЅРµ РЅСѓР¶РЅРѕ*/
     }
 }
 

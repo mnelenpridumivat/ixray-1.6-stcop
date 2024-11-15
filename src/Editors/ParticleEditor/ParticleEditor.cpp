@@ -1,4 +1,4 @@
-﻿// ParticleEditor.cpp : Определяет точку входа для приложения.
+// ParticleEditor.cpp : Определяет точку входа для приложения.
 //
 #include "stdafx.h"
 #include "../../xrEngine/xr_input.h"

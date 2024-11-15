@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 #define WAYPOINT_SIZE 	1.5f
 #define WAYPOINT_RADIUS WAYPOINT_SIZE*.5f

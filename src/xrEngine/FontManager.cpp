@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "FontManager.h"
 
 #include <freetype/freetype.h>

@@ -80,9 +80,9 @@ void FractionState::update_info()
 	CActor* pActor = smart_cast<CActor*>( Level().CurrentEntity() );
 	if ( pActor )
 	{
-		CHARACTER_COMMUNITY char_ñmm;
-		char_ñmm.set( m_id );
-		m_actor_goodwill = RELATION_REGISTRY().GetCommunityGoodwill( char_ñmm.index(), pActor->object_id() );
+		CHARACTER_COMMUNITY char_Ã±mm;
+		char_Ã±mm.set( m_id );
+		m_actor_goodwill = RELATION_REGISTRY().GetCommunityGoodwill( char_Ã±mm.index(), pActor->object_id() );
 	}
 
 	luabind::functor<void>	m_functor;

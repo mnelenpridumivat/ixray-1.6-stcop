@@ -52,12 +52,12 @@ HWND WINAPI ShowSplash(HINSTANCE hInstance, int nCmdShow)
     HWND hWnd;
 
     // image
-    CImage img; // объект изображения
+    CImage img; // РѕР±СЉРµРєС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 
     // img.Destroy();
-    img.Load(CreateStreamOnResource(MAKEINTRESOURCE(IDB_PNG1), _T("PNG"))); // загружаем сплеш из ресурсов
-    int splashWidth = img.GetWidth();   // фиксируем ширину картинки
-    int splashHeight = img.GetHeight(); // фиксируем высоту картинки
+    img.Load(CreateStreamOnResource(MAKEINTRESOURCE(IDB_PNG1), _T("PNG"))); // Р·Р°РіСЂСѓР¶Р°РµРј СЃРїР»РµС€ РёР· СЂРµСЃСѓСЂСЃРѕРІ
+    int splashWidth = img.GetWidth();   // С„РёРєСЃРёСЂСѓРµРј С€РёСЂРёРЅСѓ РєР°СЂС‚РёРЅРєРё
+    int splashHeight = img.GetHeight(); // С„РёРєСЃРёСЂСѓРµРј РІС‹СЃРѕС‚Сѓ РєР°СЂС‚РёРЅРєРё
 
     // float temp_x_size = 860.f;
     // float temp_y_size = 461.f;
@@ -78,7 +78,7 @@ HWND WINAPI ShowSplash(HINSTANCE hInstance, int nCmdShow)
 
     HBITMAP hBmp = CreateCompatibleBitmap(hdcScreen, splashWidth, splashHeight);
     HBITMAP hBmpOld = (HBITMAP)SelectObject(hDC, hBmp);
-    // рисуем картиночку
+    // СЂРёСЃСѓРµРј РєР°СЂС‚РёРЅРѕС‡РєСѓ
     for (int i = 0; i < img.GetWidth(); i++) 
     {
         for (int j = 0; j < img.GetHeight(); j++)

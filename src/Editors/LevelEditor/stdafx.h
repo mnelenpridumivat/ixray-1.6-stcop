@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../XrECore/stdafx.h"
 #include "../../xrScripts/stdafx.h"
 

@@ -41,10 +41,10 @@ public:
 
 	bool				mechanic_mode; // for inventory upgrades
 	
-	//номер выбранного вопроса
+	//РЅРѕРјРµСЂ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РІРѕРїСЂРѕСЃР°
 	shared_str			m_ClickedQuestionID;
 
-	//список вопросов, которые мы можем задавать персонажу
+	//СЃРїРёСЃРѕРє РІРѕРїСЂРѕСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ РјС‹ РјРѕР¶РµРј Р·Р°РґР°РІР°С‚СЊ РїРµСЂСЃРѕРЅР°Р¶Сѓ
 
 //	Fvector2			m_btn_pos[3];
 	CUI3tButton			UIToTradeButton;
@@ -67,10 +67,10 @@ private:
 	CUIScrollView*			UIQuestionsList;
 	CUIScrollView*			UIAnswersList;
 
-	// Шрифт и цвет текста с именем персонажа
+	// РЋСЂРёС„С‚ Рё С†РІРµС‚ С‚РµРєСЃС‚Р° СЃ РёРјРµРЅРµРј РїРµСЂСЃРѕРЅР°Р¶Р°
 	CGameFont			*m_pNameTextFont;
 	u32					m_iNameTextColor;
-	// Цвет тeкста и шрифт наших реплик
+	// Г·РІРµС‚ С‚eРєСЃС‚Р° Рё С€СЂРёС„С‚ РЅР°С€РёС… СЂРµРїР»РёРє
 	u32					m_uOurReplicsColor;
 
 	void 		OnTradeClicked			(CUIWindow* w, void*);

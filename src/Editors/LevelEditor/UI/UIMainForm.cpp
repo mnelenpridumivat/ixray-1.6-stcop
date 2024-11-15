@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 #include "../xrECore/Editor/EditorChooseEvents.h"
 #include "../xrECore/Editor/UIEditLightAnim.h"

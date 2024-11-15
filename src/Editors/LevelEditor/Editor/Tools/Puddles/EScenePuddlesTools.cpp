@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "EScenePuddlesTools.h"
 #include "../../../UI/Tools/UIPuddlesTool.h"
 

@@ -171,7 +171,7 @@ bool CStateBloodsuckerVampireExecuteAbstract::check_start_conditions()
 {
 	const CEntityAlive	*enemy = this->object->EnemyMan.get_enemy();
 	
-	// проверить дистанцию
+	// РїСЂРѕРІРµСЂРёС‚СЊ РґРёСЃС‚Р°РЅС†РёСЋ
 // 	float dist		= this->object->MeleeChecker.distance_to_enemy	(enemy);
 // 	if ((dist > VAMPIRE_MAX_DIST) || (dist < VAMPIRE_MIN_DIST))	return false;
 
@@ -187,14 +187,14 @@ bool CStateBloodsuckerVampireExecuteAbstract::check_start_conditions()
 	if ( !this->object->MeleeChecker.can_start_melee(enemy) ) 
 		return false;
 
-	// проверить направление на врага
+	// РїСЂРѕРІРµСЂРёС‚СЊ РЅР°РїСЂР°РІР»РµРЅРёРµ РЅР° РІСЂР°РіР°
 	if ( !this->object->control().direction().is_face_target(enemy, PI_DIV_2) ) 
 		return false;
 
 	if ( !this->object->WantVampire() ) 
 		return false;
 	
-	// является ли враг актером
+	// СЏРІР»СЏРµС‚СЃСЏ Р»Рё РІСЂР°Рі Р°РєС‚РµСЂРѕРј
 	if ( !smart_cast<CActor const*>(enemy) )
 		return false;
 
@@ -242,7 +242,7 @@ void CStateBloodsuckerVampireExecuteAbstract::execute_vampire_continue()
 	
 	this->object->sound().play(CAI_Bloodsucker::eVampireSucking);
 
-	// проверить на грави удар
+	// РїСЂРѕРІРµСЂРёС‚СЊ РЅР° РіСЂР°РІРё СѓРґР°СЂ
 	if (time_vampire_started + VAMPIRE_TIME_HOLD < Device.dwTimeGlobal) {
 		m_action = eActionFire;
 	}

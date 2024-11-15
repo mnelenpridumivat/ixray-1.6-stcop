@@ -66,7 +66,7 @@ IC	void IGameGraph::begin(u32 const vertex_id, const_iterator& start, const_iter
 	}
 	else
 	{
-		// FX: TODO: Ğàçáåğèñü!!!Û
+		// FX: TODO: Ğ Ğ°Ğ·Ğ±ĞµÑ€Ğ¸ÑÑŒ!!!Ğ«
 		end = (start = (const CEdge*)(m_edges + vertex(_GRAPH_ID(vertex_id))->edge_offset())) + vertex(_GRAPH_ID(vertex_id))->edge_count();
 	}
 }

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "ContentView.h"
 
 #include "../../utils/xrDXT/xrDXT.h"

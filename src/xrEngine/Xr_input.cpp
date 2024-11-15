@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #pragma hdrstop
 
 #include "xr_input.h"

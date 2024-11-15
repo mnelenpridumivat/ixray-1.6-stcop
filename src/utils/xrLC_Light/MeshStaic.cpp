@@ -78,7 +78,7 @@ void xrLC_GlobalData::vertices_isolate_and_pool_reload()
 				continue;
 			}
 			
-			// Se7kills Ïğîâåğèòü äëÿ ÷åãî íóæíî áûëî 
+			// Se7kills ĞŸÑ€Ğ¾Ğ²ĞµÑ€Ğ¸Ñ‚ÑŒ Ğ´Ğ»Ñ Ñ‡ĞµĞ³Ğ¾ Ğ½ÑƒĞ¶Ğ½Ğ¾ Ğ±Ñ‹Ğ»Ğ¾ 
 			// v.isolate_pool_clear_write(*file);
 			::destroy_vertex(_g_vertices[i], false);
 			++not_empty_verts;
@@ -104,7 +104,7 @@ void xrLC_GlobalData::vertices_isolate_and_pool_reload()
 			Vertex*& v = _g_vertices[i];
 			v = _VertexPool.create();
 
-			// Se7kills Ïğîâåğèòü äëÿ ÷åãî íóæíî áûëî 
+			// Se7kills ĞŸÑ€Ğ¾Ğ²ĞµÑ€Ğ¸Ñ‚ÑŒ Ğ´Ğ»Ñ Ñ‡ĞµĞ³Ğ¾ Ğ½ÑƒĞ¶Ğ½Ğ¾ Ğ±Ñ‹Ğ»Ğ¾ 
 			// v->isolate_pool_clear_read(r_verts);
 		}
 		b_vert_not_register = false;
