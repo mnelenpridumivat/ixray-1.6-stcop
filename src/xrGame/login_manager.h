@@ -11,7 +11,6 @@
 class CGameSpy_Full;
 class CGameSpy_GP;
 class CGameSpy_ATLAS;
-class CGameSpy_Patching;
 
 namespace gamespy_gp
 {
@@ -117,7 +116,6 @@ private:
 
 	CGameSpy_GP*				m_gamespy_gp;
 	CGameSpy_ATLAS*				m_gamespy_atlas;
-	CGameSpy_Patching*			m_gamespy_patching;
 	profile*					m_current_profile;
 
 	shared_str					m_last_email;

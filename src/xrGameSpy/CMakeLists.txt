@@ -2,7 +2,7 @@ project(xrGameSpy)
 set(XGS_SRC_FILES)
 
 # Files import
-file(GLOB XGS_SOURCE_ALL_FILES
+file(GLOB XGS_SOURCE_GS_FILES
     "DistributionFunc.cpp"
     "gamespy/common/gsAvailable.c"
     "gamespy/common/gsCore.c"
@@ -59,7 +59,6 @@ file(GLOB XGS_SOURCE_ALL_FILES
     "Gamespy/natneg/NATify.c"
     "Gamespy/natneg/natneg.c"
     "gamespy/nonport.c"
-    "Gamespy/pt/ptMain.c"
     "gamespy/qr2/qr2.c"
     "gamespy/qr2/qr2regkeys.c"
     "Gamespy/sake/sakeMain.c"
@@ -78,6 +77,9 @@ file(GLOB XGS_SOURCE_ALL_FILES
     "gamespy/serverbrowsing/sb_serverbrowsing.c"
     "gamespy/serverbrowsing/sb_serverlist.c"
     "Gamespy/webservices/AuthService.c"
+)
+
+file(GLOB XGS_SOURCE_GSC_FILES
     "xrGameSpy.cpp"
     "xrGameSpy_ATLAS.cpp"
     "xrGameSpy_Available.cpp"
@@ -85,17 +87,18 @@ file(GLOB XGS_SOURCE_ALL_FILES
     "xrGameSpy_Core.cpp"
     "xrGameSpy_GP.cpp"
     "xrGameSpy_HTTP.cpp"
-    "xrGameSpy_Patching.cpp"
     "xrGameSpy_QR2.cpp"
     "xrGameSpy_SAKE.cpp"
     "xrGameSpy_ServerBrowser.cpp"
 )
 
 # Source groups
-source_group("kernel" FILES ${XGS_SOURCE_ALL_FILES})
+source_group("gsc" FILES ${XGS_SOURCE_GSC_FILES})
+source_group("gamespy" FILES ${XGS_SOURCE_GS_FILES})
 
 # Apply list
-list(APPEND XGS_SRC_FILES ${XGS_SOURCE_ALL_FILES})
+list(APPEND XGS_SRC_FILES ${XGS_SOURCE_GS_FILES})
+list(APPEND XGS_SRC_FILES ${XGS_SOURCE_GSC_FILES})
 
 # Remove unused files
 #list(FILTER XGS_SRC_FILES EXCLUDE REGEX "GameSpy_Patching.cpp$")

@@ -45,7 +45,6 @@
 #include "inventory_upgrade_manager.h"
 
 #include "GameSpy/GameSpy_Full.h"
-#include "GameSpy/GameSpy_Patching.h"
 
 #include "ai_debug_variables.h"
 #include "../xrPhysics/console_vars.h"
@@ -1617,40 +1616,6 @@ public:
 	}
 };
 
-class CCC_GSCheckForUpdates : public IConsole_Command {
-public:
-	CCC_GSCheckForUpdates(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR arguments)
-	{
-		if (!MainMenu()) return;
-
-		if (Engine.External.hGameSpy == 0)
-			return;
-		/*
-		CGameSpy_Available GSA;
-		shared_str result_string;
-		if (!GSA.CheckAvailableServices(result_string))
-		{
-			Msg(*result_string);
-//			return;
-		};
-		CGameSpy_Patching GameSpyPatching;
-		*/
-		bool InformOfNoPatch = true;
-		if (arguments && *arguments) {
-			int bInfo = 1;
-			sscanf(arguments, "%d", &bInfo);
-			InformOfNoPatch = (bInfo != 0);
-		}
-
-		//		GameSpyPatching.CheckForPatch(InformOfNoPatch);
-
-		MainMenu()->GetGS()->GetGameSpyPatching()->CheckForPatch(InformOfNoPatch);
-	}
-};
-
-
-
 class CCC_Net_SV_GuaranteedPacketMode : public CCC_Integer {
 protected:
 	int* value_blin;
@@ -2664,7 +2629,6 @@ void CCC_RegisterCommands()
 	CMD4(CCC_Vector3, "psp_cam_offset_l", &CCameraLook2::m_cam_offset_l, Fvector().set(-1000, -1000, -1000), Fvector().set(1000, 1000, 1000));
 #endif // MASTER_GOLD
 
-	CMD1(CCC_GSCheckForUpdates, "check_for_updates");
 #ifdef DEBUG
 	CMD1(CCC_Crash, "crash");
 	CMD1(CCC_DumpObjects, "dump_all_objects");
