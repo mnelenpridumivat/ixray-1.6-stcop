@@ -24,6 +24,24 @@ namespace DXTUtils
 		static void MakePNG(xr_path From, xr_path To);
 	};
 
+	struct DXT_API Filter
+	{
+		enum EIMF_Type
+		{
+			imf_filter = 0,
+			imf_box,
+			imf_triangle,
+			imf_bell,
+			imf_b_spline,
+			imf_lanczos3,
+			imf_mitchell,
+
+			imf_FORCEDWORD = 0xffffffff
+		};
+
+		static void Process(u32* dst, u32 dstW, u32 dstH, u32* src, u32 srcW, u32 srcH, EIMF_Type FILTER);
+	};
+
 	int DXT_API Compress(const char* out_name, u8* raw_data, u8* normal_map, u32 w, u32 h, u32 pitch, STextureParams* fmt, u32 depth);
 	U8Vec DXT_API GitPixels(const char* FileName, u32 NewW, u32 NewH);
 	ImageInfo DXT_API GitPixels(const char* FileName);

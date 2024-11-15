@@ -6,7 +6,6 @@
 #include "editmesh.h"
 #include "ui_main.h"
 #include "../xrEngine/xrHemisphere.h"
-#include "../xrEngine/xrImage_Resampler.h"
 
 using Fvector4Vec = xr_vector<Fvector4>;
 using Fvector4It = Fvector4Vec::iterator;
@@ -127,7 +126,7 @@ void CreateLODSamples(const Fbox& bbox, U32Vec& tgt_data, u32 tgt_w, u32 tgt_h)
         EDevice->mFullTransform.mul(mP,mV);
         EDevice->MakeScreenshot	(s_pixels,tgt_w*lod_ss_quality,tgt_h*lod_ss_quality);
         d_pixels.resize 		(tgt_w*tgt_h);
-		imf_Process				(d_pixels.data(),tgt_w,tgt_h,s_pixels.data(),tgt_w*lod_ss_quality,tgt_h*lod_ss_quality,imf_box);
+        DXTUtils::Filter::Process				(d_pixels.data(),tgt_w,tgt_h,s_pixels.data(),tgt_w*lod_ss_quality,tgt_h*lod_ss_quality, DXTUtils::Filter::imf_box);
         // copy LOD to final
 		for (u32 y=0; y<tgt_h; y++)
     		CopyMemory			(tgt_data.data()+y*pitch+frame*tgt_w,d_pixels.data()+y*tgt_w,tgt_w*sizeof(u32));

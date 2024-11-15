@@ -2,7 +2,6 @@
 #pragma hdrstop
 
 #include "ImageManager.h"
-#include "../xrEngine/xrImage_Resampler.h"
 #include "ui_main.h"
 #include "EditObject.h"
 #include "../Layers/xrRender/ResourceManager.h"
@@ -84,7 +83,7 @@ void CImageManager::MakeThumbnailImage(ETextureThumbnail* THM, u32* data, u32 w,
 	THM->m_TexParams.width = w;
 	THM->m_TexParams.height= h;
 	THM->m_TexParams.flags.set(STextureParams::flHasAlpha,a);
-	imf_Process(THM->m_Pixels.data(),THUMB_WIDTH,THUMB_HEIGHT,data,THM->_Width(),THM->_Height(),imf_box);
+	DXTUtils::Filter::Process(THM->m_Pixels.data(),THUMB_WIDTH,THUMB_HEIGHT,data,THM->_Width(),THM->_Height(), DXTUtils::Filter::imf_box);
 	THM->VFlip();
 }
 
@@ -488,8 +487,8 @@ BOOL CImageManager::CheckCompliance(LPCSTR fname, int& compl_)
 	u32* pScaled     = (u32*)(xr_malloc((w_2)*(h_2)*4));
 	u32* pRestored   = (u32*)(xr_malloc(w*h*4));
 	try {
-		imf_Process     (pScaled,	w_2,h_2,data.data(),w,h,imf_lanczos3	);
-		imf_Process		(pRestored,	w,h,pScaled,w_2,h_2,imf_filter 		    );
+		DXTUtils::Filter::Process     (pScaled,	w_2,h_2,data.data(),w,h, DXTUtils::Filter::imf_lanczos3	);
+		DXTUtils::Filter::Process		(pRestored,	w,h,pScaled,w_2,h_2, DXTUtils::Filter::imf_filter 		    );
 	} catch (...)
 	{
 		Msg             ("* ERROR: imf_Process");

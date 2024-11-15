@@ -9,7 +9,7 @@
 using namespace DirectX;
 
 #include "../xrRender/tga.h"
-#include "../../xrEngine/xrImage_Resampler.h"
+#include "xrImage_Resampler.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
