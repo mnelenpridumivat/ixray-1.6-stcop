@@ -173,7 +173,7 @@ IC	u32 IReaderBase<T>::find_chunk	(u32 ID, BOOL* bCompressed)
 
 #ifdef FIND_CHUNK_VEC
 
-#include "../xrCore/associative_vector.h"
+#include "associative_vector.h"
 
 struct IReaderBase_Test {
 
@@ -242,7 +242,7 @@ IC	u32 IReaderBase<T>::find_chunk	(u32 ID, BOOL* bCompressed)
 
 #ifdef FIND_CHUNK_MAP
 
-#include "../xrCore/associative_vector.h"
+#include "associative_vector.h"
 
 struct IReaderBase_Test {
 

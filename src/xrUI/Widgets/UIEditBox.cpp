@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "uieditbox.h"
+#include "UIEditBox.h"
 #include "UIFrameLineWnd.h"
 
 

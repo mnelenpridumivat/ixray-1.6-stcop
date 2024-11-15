@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
-#include "xrlight_implicitcalcglobs.h"
-#include "xrLight_implicitdeflector.h"
-#include "xrface.h"
-#include "xrlc_globaldata.h"
+#include "xrLight_ImplicitCalcGlobs.h"
+#include "xrLight_ImplicitDeflector.h"
+#include "xrFace.h"
+#include "xrLC_GlobalData.h"
 
 
 void ImplicitCalcGlobs::Allocate()

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "Scope.h"
 #include "Silencer.h"

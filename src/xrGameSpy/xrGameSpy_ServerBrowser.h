@@ -1,7 +1,7 @@
 #pragma once
 #include "xrGameSpy_MainDefs.h"
 
-#include "GameSpy\ServerBrowsing\sb_serverbrowsing.h"
+#include "gamespy/serverbrowsing/sb_serverbrowsing.h"
 
 extern "C"
 {

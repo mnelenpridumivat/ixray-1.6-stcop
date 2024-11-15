@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "PHdynamicdata.h"
 //#include "Physics.h"
 #include "Level.h"
 #include "../xrEngine/x_ray.h"
-#include "../xrEngine/igame_persistent.h"
+#include "../xrEngine/IGame_Persistent.h"
 
 #include "ai_space.h"
 #include "game_cl_base.h"
@@ -11,10 +11,10 @@
 #include "file_transfer.h"
 #include "HUDManager.h"
 
-#include "../xrPhysics/iphworld.h"
+#include "../xrPhysics/IPHWorld.h"
 
 
-#include "phcommander.h"
+#include "PHCommander.h"
 #include "physics_game.h"
 extern	pureFrame*				g_pNetProcessor;
 

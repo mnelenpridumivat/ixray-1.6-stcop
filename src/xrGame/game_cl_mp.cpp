@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_cl_mp.h"
 #include "../xrEngine/xr_level_controller.h"
 #include "xrMessages.h"
@@ -26,7 +26,7 @@
 
 #include "../xrEngine/string_table.h"
 #include "clsid_game.h"
-#include "mainmenu.h"
+#include "MainMenu.h"
 #include "WeaponKnife.h"
 #include "RegistryFuncs.h"
 #include "../xrGameSpy/xrGameSpy_MainDefs.h"

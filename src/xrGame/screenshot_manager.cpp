@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "screenshot_manager.h"
 #include "Level.h"
 #include "game_cl_mp.h"
@@ -12,8 +12,8 @@
 #ifdef XR_MP_BUILD
 
 #include <ddraw.h>
-#include "../3rd party/cximage/cximage/ximage.h"
-#include "../3rd party/cximage/cximage/xmemfile.h"
+#include "../3rd party/cximage/CxImage/ximage.h"
+#include "../3rd party/cximage/CxImage/xmemfile.h"
 
 void*	cxalloc(size_t size)
 {

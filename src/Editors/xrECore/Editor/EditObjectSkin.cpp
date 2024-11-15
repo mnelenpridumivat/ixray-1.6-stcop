@@ -7,7 +7,7 @@
 
 #include "EditObject.h"
 #include "EditMesh.h"
-#include "d3dutils.h"
+#include "D3DUtils.h"
 #include "../Public/PropertiesListHelper.h"
 #include "ui_main.h"
 

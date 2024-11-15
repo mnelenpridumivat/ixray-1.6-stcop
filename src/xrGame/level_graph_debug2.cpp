@@ -6,18 +6,18 @@
 //	Description : Level graph debug functions
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #ifdef DEBUG
 #ifndef AI_COMPILER
 
 #include "level_graph.h"
-#include "../xrEngine/customhud.h"
+#include "../xrEngine/CustomHUD.h"
 #include "ai_space.h"
 #include "../../xrUI/ui_base.h"
 #include "game_graph.h"
 #include "game_sv_single.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "ai/stalker/ai_stalker.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "cover_point.h"

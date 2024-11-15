@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "WeaponBM16.h"
+#include "weaponBM16.h"
 
 using namespace luabind;
 

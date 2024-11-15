@@ -1,8 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
-#include "etools.h"
+#include "ETools.h"
 
-#include "../../include/xrrender/kinematics.h"
+#include "../../Include/xrRender/Kinematics.h"
 #define ECORE_API 
 #include "../../xrEngine/bone.h"
 

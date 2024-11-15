@@ -1,6 +1,6 @@
 #pragma once
 #include "PHReqComparer.h"
-#include "phcommander.h"
+#include "PHCommander.h"
 #include "../xrScripts/script_engine.h"
 #include "../xrScripts/script_space_forward.h"
 #include "../xrScripts/script_callback_ex.h"

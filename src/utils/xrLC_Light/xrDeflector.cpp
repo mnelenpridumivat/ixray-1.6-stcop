@@ -1,11 +1,11 @@
 #include "stdafx.h"
  
-#include "xrdeflector.h"
+#include "xrDeflector.h"
 #include "xrIsect.h"
-#include "xrlc_globaldata.h"
+#include "xrLC_GlobalData.h"
 
 #include "math.h"
-#include "xrface.h"
+#include "xrFace.h"
  
 XRLC_LIGHT_API u32 c_LMAP_size = 1024;
 

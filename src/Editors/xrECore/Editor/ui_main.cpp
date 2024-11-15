@@ -6,13 +6,13 @@
 #include "../xrEngine/xr_input.h"
 #include "UI_ToolsCustom.h"
 
-#include "UI_Main.h"
-#include "d3dutils.h"
+#include "ui_main.h"
+#include "D3DUtils.h"
 #include "SoundManager.h"
 #include "../Layers/xrRender/PSLibrary.h"
 #include "../Layers/xrRender/dxRenderDeviceRender.h"
 
-#include "UIIconPicker.h"
+#include "UIIConPicker.h"
 #include "UIEditLightAnim.h"
 #include "UIImageEditorForm.h"
 #include "UISoundEditorForm.h"

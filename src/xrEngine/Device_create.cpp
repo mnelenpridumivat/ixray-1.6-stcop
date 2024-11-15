@@ -3,8 +3,8 @@
 //#include "resourcemanager.h"
 #include "../Include/xrRender/DrawUtils.h"
 //#include "xr_effgamma.h"
-#include "render.h"
-#include "../xrcdb/xrxrc.h"
+#include "Render.h"
+#include "../xrCDB/xrXRC.h"
 
 extern XRCDB_API BOOL *cdb_bDebug;
 

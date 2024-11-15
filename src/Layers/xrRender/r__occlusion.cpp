@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include ".\r__occlusion.h"
+#include "r__occlusion.h"
 
 #include "QueryHelper.h"
 

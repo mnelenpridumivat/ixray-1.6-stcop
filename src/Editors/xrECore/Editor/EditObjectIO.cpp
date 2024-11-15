@@ -10,8 +10,8 @@
 #include "../xrEngine/bone.h"
 #include "../xrEngine/motion.h"
 
- #include "exportskeleton.h"
- #include "exportobjectOGF.h"
+#include "ExportSkeleton.h"
+#include "ExportObjectOGF.h"
 
 #if 1
  #include "../Layers/xrRender/Shader.h"

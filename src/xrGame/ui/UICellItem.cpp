@@ -4,7 +4,7 @@
 #include "../inventory_item.h"
 #include "UIDragDropListEx.h"
 #include "../../xrEngine/xr_input.h"
-#include "../level.h"
+#include "../Level.h"
 #include "object_broker.h"
 #include "../../xrUI/UIXmlInit.h"
 #include "../../xrUI/Widgets/UIProgressBar.h"

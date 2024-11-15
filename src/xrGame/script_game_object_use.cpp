@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_game_object.h"
 #include "UsableScriptObject.h"
@@ -16,7 +16,7 @@
 #include "PHCommander.h"
 #include "PHScriptCall.h"
 #include "PHSimpleCalls.h"
-#include "../xrPhysics/iphworld.h"
+#include "../xrPhysics/IPHWorld.h"
 #include "doors_manager.h"
 
 void CScriptGameObject::SetTipText (LPCSTR tip_text)

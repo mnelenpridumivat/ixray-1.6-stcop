@@ -2,7 +2,7 @@
 
 #include "UIEditKeyBind.h"
 #include "../../xrServerEntities/object_broker.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 #include "../UIFontDefines.h"
 
 CUIEditKeyBind::CUIEditKeyBind(bool bPrim)

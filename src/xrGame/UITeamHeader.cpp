@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "UITeamHeader.h"
 #include "UITeamState.h"
 #include "../../xrUI/Widgets/UIStatic.h"

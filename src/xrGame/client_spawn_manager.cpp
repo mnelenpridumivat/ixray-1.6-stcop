@@ -6,13 +6,13 @@
 //	Description : Seniority hierarchy holder
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "client_spawn_manager.h" 
 #include "ai_space.h" 
 #include "../xrScripts/script_engine.h" 
 #include "Level.h"
-#include "gameobject.h"
+#include "GameObject.h"
 #include "script_game_object.h"
 
 CClientSpawnManager::~CClientSpawnManager	()

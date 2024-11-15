@@ -6,8 +6,8 @@
 
 #include "LoginDlg.h"
 #include "HostOrJoinDlg.h"
-#include "..\..\GT2\gt2.h"	// Added by ClassView
-#include "..\..\GT2\gt2Encode.h"
+#include "../../gt2/gt2.h"
+#include "../../gt2/gt2Encode.h"
 #include "WaitingDlg.h"	// Added by ClassView
 
 #if _MSC_VER > 1000

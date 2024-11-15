@@ -2,7 +2,7 @@
 
 using namespace DirectX;
 
-#include "../xrCDB/frustum.h"
+#include "../xrCDB/Frustum.h"
 #include "../xrCore/discord/discord.h"
 
 #pragma warning(disable:4995)
@@ -16,12 +16,12 @@ using namespace DirectX;
 #pragma warning(default:4995)
 
 #include "x_ray.h"
-#include "render.h"
+#include "Render.h"
 
 // must be defined before include of FS_impl.h
 #define INCLUDE_FROM_ENGINE
 #include "../xrCore/FS_impl.h"
-#include "igame_persistent.h"
+#include "IGame_Persistent.h"
 
 ENGINE_API CRenderDevice* DevicePtr = nullptr;
 #ifndef _EDITOR
@@ -180,7 +180,7 @@ static void mt_Thread(void* ptr)
 	Device.mt_bMustExit = FALSE; // Important!!!
 }
 
-#include "igame_level.h"
+#include "IGame_Level.h"
 #endif
 void CRenderDevice::PreCache	(u32 amount, bool b_draw_loadscreen, bool b_wait_user_input)
 {

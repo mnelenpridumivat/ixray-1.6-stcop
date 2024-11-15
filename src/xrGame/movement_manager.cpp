@@ -6,7 +6,7 @@
 //	Description : Movement manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "movement_manager.h"
 #include "movement_manager_space.h"
@@ -18,7 +18,7 @@
 #include "patrol_path_manager.h"
 #include "xrMessages.h"
 #include "ai_object_location.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "location_manager.h"
 #include "level_path_builder.h"
 #include "detail_path_builder.h"

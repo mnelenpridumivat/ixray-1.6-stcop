@@ -3,7 +3,7 @@
 #include "UILanimController.h"
 #include "UIStaticItem.h"
 #include "../../xrScripts/script_export_space.h"
-#include "uilines.h"
+#include "UILines.h"
 
 class CUIFrameWindow;
 class CLAItem;

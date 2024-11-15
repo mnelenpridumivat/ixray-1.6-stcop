@@ -26,14 +26,14 @@
 #define		R_R4	4
 #define		RENDER	R_R1
 
-#include "../xrRender/resourcemanager.h"
+#include "../xrRender/ResourceManager.h"
 
 #include "../../xrEngine/vis_common.h"
-#include "../../xrEngine/render.h"
+#include "../../xrEngine/Render.h"
 #include "../../xrEngine/_d3d_extensions.h"
 
 #ifndef _EDITOR
-#include "../../xrEngine/igame_level.h"
+#include "../../xrEngine/IGame_Level.h"
 
 #include "../../xrParticles/psystem.h"
 #include "../xrRender/xrRender_console.h"
@@ -45,5 +45,5 @@
 #define		TEX_SPOT_ATT	"internal\\internal_light_attclip"
 
 
-#include "../xrRender/blenders\blender.h"
-#include "../xrRender/blenders\blender_clsid.h"
+#include "../xrRender/blenders/Blender.h"
+#include "../xrRender/blenders/Blender_CLSID.h"

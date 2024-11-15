@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "build.h"
-#include "../xrlc_light/xrdeflector.h"
-#include "../xrlc_light/xrface.h"
-#include "../xrlc_light/xrlc_globaldata.h"
+#include "StdAfx.h"
+#include "Build.h"
+#include "../xrLC_Light/xrDeflector.h"
+#include "../xrLC_Light/xrFace.h"
+#include "../xrLC_Light/xrLC_GlobalData.h"
 
 extern void		Detach		(vecFace* S);
 

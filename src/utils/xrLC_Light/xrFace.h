@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../shader_xrlc.h"
+#include "../Shader_xrLC.h"
 //#include "r_light.h"
 
 #include "tcf.h"

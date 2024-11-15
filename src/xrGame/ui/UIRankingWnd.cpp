@@ -17,7 +17,7 @@
 #include "../../xrUI/UIHelper.h"
 #include "UIInventoryUtilities.h"
 
-#include "../actor.h"
+#include "../Actor.h"
 #include "../ai_space.h"
 #include "../alife_simulator.h"
 

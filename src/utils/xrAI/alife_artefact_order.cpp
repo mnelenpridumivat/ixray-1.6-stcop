@@ -6,7 +6,7 @@
 //	Description : ALife artefact demand class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "alife_artefact_order.h"
 
 void SArtefactOrder::load	(NET_Packet &packet)

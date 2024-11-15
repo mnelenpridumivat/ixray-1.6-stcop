@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "uigamesp.h"
+#include "UIGameSP.h"
 #include "Actor.h"
 #include "Level.h"
 #include "../xrEngine/xr_input.h"
@@ -9,11 +9,11 @@
 #include "attachable_item.h"
 #endif
 
-#include "game_cl_Single.h"
-#include "actorcondition.h"
-#include "../xrEngine/xr_ioconsole.h"
+#include "game_cl_single.h"
+#include "ActorCondition.h"
+#include "../xrEngine/XR_IOConsole.h"
 #include "object_broker.h"
-#include "GameTaskManager.h"
+#include "GametaskManager.h"
 #include "GameTask.h"
 
 #include "ui/UIActorMenu.h"

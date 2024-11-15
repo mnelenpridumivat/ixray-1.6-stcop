@@ -6,7 +6,7 @@
 //	Description : buffer vector template class test cases
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
 struct test_struct {
 	shared_str	a;

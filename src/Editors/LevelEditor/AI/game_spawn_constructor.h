@@ -9,12 +9,12 @@
 #pragma once
 
 #include "alife_space.h"
-#include "xrthread.h"
+#include "xrThread.h"
 #include "graph_abstract.h"
 #include "../../xrServerEntities/xrServer_Object_Base.h"
 #include "spawn_constructor_space.h"
 #include "server_entity_wrapper.h"
-#include "../../XrECore/Engine/guid_generator.h"
+#include "../../xrECore/Engine/guid_generator.h"
 class CSE_Abstract;
 class CLevelSpawnConstructor;
 class CSE_ALifeCreatureAbstract;

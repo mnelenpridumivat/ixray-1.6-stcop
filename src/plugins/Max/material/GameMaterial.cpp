@@ -1,8 +1,8 @@
-#include "../kernel/stdafx.h"
+#include "../kernel/Stdafx.h"
 #pragma hdrstop
 
-#include "..\material\GameMaterial.h"
-#include "..\material\BlenderListLoader.h"
+#include "GameMaterial.h"
+#include "BlenderListLoader.h"
 
 #include "macrorec.h"
 

@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "torch.h"
-#include "entity.h"
+#include "StdAfx.h"
+#include "Torch.h"
+#include "Entity.h"
 #include "Actor.h"
 #include "../xrEngine/LightAnimLibrary.h"
 #include "../xrPhysics/PhysicsShell.h"
@@ -9,13 +9,13 @@
 
 #include "Level.h"
 #include "../Include/xrRender/Kinematics.h"
-#include "../xrEngine/camerabase.h"
-#include "../xrengine/xr_collide_form.h"
+#include "../xrEngine/CameraBase.h"
+#include "../xrEngine/xr_collide_form.h"
 #include "Inventory.h"
 #include "game_base_space.h"
 
 #include "UIGameCustom.h"
-#include "actorEffector.h"
+#include "ActorEffector.h"
 #include "CustomOutfit.h"
 #include "ActorHelmet.h"
 

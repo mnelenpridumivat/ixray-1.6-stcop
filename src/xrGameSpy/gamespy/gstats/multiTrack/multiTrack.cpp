@@ -1,7 +1,7 @@
 // multiTrack.cpp : Defines the class behaviors for the application.
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "multiTrack.h"
 #include "multiTrackDlg.h"
 

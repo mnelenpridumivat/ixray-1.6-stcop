@@ -65,7 +65,7 @@ bool det_render_debug = false;
 #endif
 #endif
 
-#include "../../xrEngine/gamemtllib.h"
+#include "../../xrEngine/GameMtlLib.h"
 
 static void correction_orientation(const Fvector &pos, const Fvector &dir, const Fvector &ground_normal, float& target_angle)
 {

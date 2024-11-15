@@ -6,15 +6,15 @@
 //	Description : Object actions
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "object_actions.h"
 #include "Inventory.h"
 #include "ai/stalker/ai_stalker.h"
 #include "../xrEngine/xr_level_controller.h"
 #include "xrMessages.h"
-#include "fooditem.h"
+#include "FoodItem.h"
 #include "Weapon.h"
-#include "weaponmagazined.h"
+#include "WeaponMagazined.h"
 #include "object_handler_space.h"
 #include "stalker_animation_manager.h"
 #include "object_handler_planner.h"

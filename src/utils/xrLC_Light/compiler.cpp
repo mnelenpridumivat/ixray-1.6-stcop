@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "../../xrEngine/xrlevel.h"
+#include "../../xrEngine/xrLevel.h"
 
 #include "../xrForms/xrThread.h"
 
 #include "global_calculation_data.h"
-#include "lightthread.h"
+#include "LightThread.h"
 
 #define NUM_THREADS		CPU::ID.n_threads - 1
 

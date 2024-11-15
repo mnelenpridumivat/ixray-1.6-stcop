@@ -3,7 +3,7 @@
 
 #include "../xrEngine/bone.h"
 #include "../xrEngine/envelope.h"
-#include "..\Editor\UI_ToolsCustom.h"
+#include "UI_ToolsCustom.h"
 
 #define BONE_VERSION					0x0002
 //------------------------------------------------------------------------------

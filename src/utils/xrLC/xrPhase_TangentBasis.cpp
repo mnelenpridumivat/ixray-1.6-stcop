@@ -1,5 +1,5 @@
-#include	"stdafx.h"
-#include	"build.h"
+#include "StdAfx.h"
+#include "Build.h"
 
 #include	"MeshMenderLayerOrdinaryStatic.h"
 #include	"../xrLC_Light/xrLC_GlobalData.h"

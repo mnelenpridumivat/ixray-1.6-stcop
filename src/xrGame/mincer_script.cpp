@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "mincer.h"
+#include "Mincer.h"
 #include "RadioactiveZone.h"
 
 using namespace luabind;

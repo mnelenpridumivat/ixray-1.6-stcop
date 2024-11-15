@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "xrserver.h"
+#include "StdAfx.h"
+#include "xrServer.h"
 #include "xrMessages.h"
 
 void xrServer::SLS_Load	(IReader& fs)

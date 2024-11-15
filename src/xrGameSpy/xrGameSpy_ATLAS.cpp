@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "xrGameSpy_MainDefs.h"
 #include "xrGameSpy_ATLAS.h"
-#include "GameSpy/GP/gp.h"
+#include "gamespy/GP/gp.h"
 
 XRGAMESPY_API gsi_u32 xrGS_wsLoginProfile(const gsi_char * profileNick,
 										  const gsi_char * email,

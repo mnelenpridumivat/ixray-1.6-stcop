@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "../xrLC_Light/xrMU_Model.h"
 #include "OGF_Face.h"
 

@@ -6,11 +6,11 @@
 //	Description : Hit memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "hit_memory_manager.h"
 #include "memory_space_impl.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "ai_object_location.h"
 #include "level_graph.h"
 #include "script_game_object.h"

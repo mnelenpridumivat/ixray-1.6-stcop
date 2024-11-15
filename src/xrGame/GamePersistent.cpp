@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "gamepersistent.h"
-#include "../xrEngine/fmesh.h"
-#include "../xrEngine/xr_ioconsole.h"
-#include "../xrEngine/gamemtllib.h"
+#include "GamePersistent.h"
+#include "../xrEngine/Fmesh.h"
+#include "../xrEngine/XR_IOConsole.h"
+#include "../xrEngine/GameMtlLib.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "MainMenu.h"
 #include "../../xrUI/UICursor.h"
@@ -15,7 +15,7 @@
 
 #include "ActorEffector.h"
 #include "Actor.h"
-#include "spectator.h"
+#include "Spectator.h"
 
 #include "../../xrUI/UItextureMaster.h"
 
@@ -26,7 +26,7 @@
 #include "game_cl_base.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
-#include "UI/UIGameTutorial.h"
+#include "ui/UIGameTutorial.h"
 
 #include "../xrEngine/Application.h"
 #include "ui/UILoadingScreen.h"
@@ -931,7 +931,7 @@ void CGamePersistent::UpdateDof()
 	(m_dof[0].z < m_dof[2].z) ? clamp(m_dof[1].z, m_dof[0].z, m_dof[2].z) : clamp(m_dof[1].z, m_dof[2].z, m_dof[0].z);
 }
 
-#include "ui\uimainingamewnd.h"
+#include "ui/UIMainIngameWnd.h"
 void CGamePersistent::OnSectorChanged(int sector)
 {
 	if(CurrentGameUI())

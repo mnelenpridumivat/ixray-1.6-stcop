@@ -1,7 +1,7 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "fs_registrator.h"
-#include "../xrcore/LocatorApi.h"
+#include "../xrCore/LocatorAPI.h"
 
 using namespace luabind;
 

@@ -1,19 +1,19 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 #ifdef DEBUG
 
 #include "PHDebug.h"
-#include "../xrPhysics/iphworld.h"
+#include "../xrPhysics/IPHWorld.h"
 #endif
 #include "alife_space.h"
 #include "Hit.h"
 #include "PHDestroyable.h"
-#include "car.h"
+#include "Car.h"
 #include "Actor.h"
 #include "cameralook.h"
-#include "camerafirsteye.h"
+#include "CameraFirstEye.h"
 #include "Level.h"
-#include "../xrEngine/cameramanager.h"
+#include "../xrEngine/CameraManager.h"
 
 bool CCar::HUDView() const		
 {

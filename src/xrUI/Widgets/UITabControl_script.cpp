@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
-#include "../../xrUI/Widgets/UITabControl.h"
-#include "../../xrUI/Widgets/UITabButton.h"
+#include "UITabControl.h"
+#include "UITabButton.h"
 
 #include <luabind/luabind.hpp>
 #include <luabind/adopt_policy.hpp>

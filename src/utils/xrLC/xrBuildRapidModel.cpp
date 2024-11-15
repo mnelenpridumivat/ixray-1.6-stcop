@@ -1,12 +1,12 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "cl_collector.h"
-#include "build.h"
+#include "Build.h"
 #include "../xrLC_Light/xrMU_Model.h"
 #include "../xrLC_Light/xrMU_Model_Reference.h"
 
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../../xrcdb/xrcdb.h"
-#include "../xrLC_Light/xrface.h"
+#include "../../xrCDB/xrCDB.h"
+#include "../xrLC_Light/xrFace.h"
 
 //.#include "communicate.h"
 

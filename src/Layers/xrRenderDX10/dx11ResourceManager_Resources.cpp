@@ -3,17 +3,17 @@
 
 #pragma warning(disable:4995)
 #ifndef _EDITOR
-#include "../../xrEngine/render.h"
+#include "../../xrEngine/Render.h"
 #endif
 #pragma warning(default:4995)
 
 #include "../xrRender/ResourceManager.h"
 #include "../xrRender/tss.h"
-#include "../xrRender/blenders/blender.h"
-#include "../xrRender/blenders/blender_recorder.h"
+#include "../xrRender/blenders/Blender.h"
+#include "../xrRender/blenders/Blender_Recorder.h"
 
-#include "../xrRenderDX10/dx10BufferUtils.h"
-#include "../xrRenderDX10/dx10ConstantBuffer.h"
+#include "dx10BufferUtils.h"
+#include "dx10ConstantBuffer.h"
 
 #include "../xrRender/ShaderResourceTraits.h"
 

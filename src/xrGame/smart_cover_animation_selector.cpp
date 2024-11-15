@@ -5,20 +5,20 @@
 //	Description : Animation selector for smart covers
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "smart_cover_animation_selector.h"
 #include "ai/stalker/ai_stalker.h"
 #include "smart_cover_animation_planner.h"
 #include "smart_cover_planner_actions.h"
 #include "script_game_object.h"
-#include "../include/xrrender/kinematicsanimated.h"
+#include "../Include/xrRender/KinematicsAnimated.h"
 #include "stalker_animation_manager.h"
 #include "smart_cover_planner_actions.h"
 #include "stalker_movement_manager_smart_cover.h"
 #include "Inventory.h"
 #include "smart_cover.h"
-#include "huditem.h"
+#include "HudItem.h"
 
 float	g_smart_cover_animation_speed_factor = 1.f;
 

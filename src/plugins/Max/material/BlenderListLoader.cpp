@@ -1,4 +1,4 @@
-#include "../kernel/stdafx.h"
+#include "../kernel/Stdafx.h"
 #pragma hdrstop
 
 #include "BlenderListLoader.h"

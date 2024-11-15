@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "lephysics.h"
+#include "LEPhysics.h"
 #include "../xrEngine/xr_input.h"
 
 EScene* Scene;

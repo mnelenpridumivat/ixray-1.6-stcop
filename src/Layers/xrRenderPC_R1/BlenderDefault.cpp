@@ -6,7 +6,7 @@
 #pragma hdrstop
 
 #include "BlenderDefault.h"
-#include "..\xrRender\uber_deffer.h"
+#include "../xrRender/uber_deffer.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

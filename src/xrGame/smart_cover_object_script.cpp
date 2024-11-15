@@ -6,7 +6,7 @@
 //	Description : smart cover script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "smart_cover.h"
 

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_cl_deathmatch.h"
 #include "Level.h"
 #include "Actor.h"

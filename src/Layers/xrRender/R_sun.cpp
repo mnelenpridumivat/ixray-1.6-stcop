@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "../../xrEngine/igame_persistent.h"
-#include "../../xrEngine/irenderable.h"
-#include "../xrRender/FBasicVisual.h"
+#include "../../xrEngine/IGame_Persistent.h"
+#include "../../xrEngine/IRenderable.h"
+#include "FBasicVisual.h"
 
-#include "../xrRender/R_sun_support.h"
+#include "R_sun_support.h"
 
 using namespace DirectX;
 

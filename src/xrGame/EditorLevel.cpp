@@ -2,15 +2,15 @@
 
 #include "EditorLevel.h"
 #include "../xrPhysics/IPHWorld.h"
-#include "phcommander.h"
+#include "PHCommander.h"
 #include "physics_game.h"
 #include "game_cl_base.h"
 #include "NET_Queue.h"
 #include "file_transfer.h"
-#include "hudmanager.h"
+#include "HUDManager.h"
 #include "Level_Bullet_Manager.h"
 #include "UIGameCustom.h"
-#include "../xrEngine/xr_ioconsole.h"
+#include "../xrEngine/XR_IOConsole.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 
 CLevelEditor::CLevelEditor()

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../shader_xrlc.h"
-#include "../../xrcore/xrPool.h"
+#include "../Shader_xrLC.h"
+#include "../../xrCore/xrPool.h"
 //#include "xrface.h"
-#include "xrfacedefs.h"
-#include "xrdeflectordefs.h"
+#include "xrFaceDefs.h"
+#include "xrDeflectorDefs.h"
 #include "b_build_texture.h"
 #include "base_lighting.h"
 #include "../../Include/Editors/communicate.h"

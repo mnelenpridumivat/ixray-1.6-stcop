@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "helicopter.h"
 #include "script_game_object.h"
@@ -260,7 +260,7 @@ void CHelicopter::PHHit(SHit &H)
 #include "team_hierarchy_holder.h"
 #include "squad_hierarchy_holder.h"
 
-#include "../xrPhysics/extendedgeom.h"
+#include "../xrPhysics/ExtendedGeom.h"
 void CollisionCallbackDead(bool& do_colide,bool bo1,dContact& c,SGameMtl* material_1,SGameMtl* material_2)
 {	
 	do_colide=true; 

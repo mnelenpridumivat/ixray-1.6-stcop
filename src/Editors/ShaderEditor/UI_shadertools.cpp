@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "UI_ShaderTools.h"
+#include "UI_shadertools.h"
 #include "../../xrEngine/GameMtlLib.h"
 
 //------------------------------------------------------------------------------

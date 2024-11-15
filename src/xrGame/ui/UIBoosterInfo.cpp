@@ -3,7 +3,7 @@
 #include "../../xrUI/Widgets/UIStatic.h"
 #include "object_broker.h"
 #include "../EntityCondition.h"
-#include "../actor.h"
+#include "../Actor.h"
 #include "../ActorCondition.h"
 #include "../../xrUI/UIXmlInit.h"
 #include "../../xrUI/UIHelper.h"

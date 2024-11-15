@@ -1,10 +1,10 @@
 #include "stdafx.h"
 
-#include "xrface.h"
+#include "xrFace.h"
 //#include "build.h"
-#include "xrdeflector.h"
-#include "xrLC_globaldata.h"
-#include "lightmap.h"
+#include "xrDeflector.h"
+#include "xrLC_GlobalData.h"
+#include "Lightmap.h"
 
 volatile u32					dwInvalidFaces;//= 0;
 u32		InvalideFaces()

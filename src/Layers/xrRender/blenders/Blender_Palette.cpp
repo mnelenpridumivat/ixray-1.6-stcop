@@ -4,7 +4,7 @@
 #include "Blender.h"
 
 //////////////////////////////////////////////////////////////////////
-#include "blender_clsid.h"
+#include "Blender_CLSID.h"
 IC bool		p_sort			(IBlender* A, IBlender* B)
 {
 	return _stricmp(A->getComment(),B->getComment())<0;
@@ -62,7 +62,7 @@ void		IBlender::CreatePalette(xr_vector<IBlender*> &palette)
 
 #ifndef _EDITOR
 // Engine
-#include "../../../xrEngine/render.h"
+#include "../../../xrEngine/Render.h"
 IBlender*	IBlender::Create	(CLASS_ID cls)
 {
 	return ::RImplementation.blender_create	(cls);
@@ -74,26 +74,26 @@ void		IBlender::Destroy	(IBlender*& B)
 #else
 
 // Editor
-#include "../../xrRenderPC_R1/blenderdefault.h"
-#include "../../xrRenderPC_R1/blender_default_aref.h"
-#include "../../xrRenderPC_R1/blender_vertex.h"
-#include "../../xrRenderPC_R1/blender_vertex_aref.h"
-#include "../blender_screen_set.h"
-#include "../../xrRenderPC_R1/blender_screen_gray.h"
-#include "../blender_editor_wire.h"
-#include "../blender_editor_selection.h"
+#include "../../xrRenderPC_R1/BlenderDefault.h"
+#include "../../xrRenderPC_R1/Blender_default_aref.h"
+#include "../../xrRenderPC_R1/Blender_Vertex.h"
+#include "../../xrRenderPC_R1/Blender_Vertex_aref.h"
+#include "../Blender_Screen_SET.h"
+#include "../../xrRenderPC_R1/Blender_Screen_GRAY.h"
+#include "../Blender_Editor_Wire.h"
+#include "../Blender_Editor_Selection.h"
 //#include "blenders/blender_light.h"
-#include "../../xrRenderPC_R1/blender_LaEmB.h"
-#include "../blender_Lm(EbB).h"
-#include "../blender_BmmD.h"
+#include "../../xrRenderPC_R1/Blender_LaEmB.h"
+#include "../Blender_Lm(EbB).h"
+#include "../Blender_BmmD.h"
 //#include "blenders/blender_B.h"
-#include "../../xrRenderPC_R1/blender_shadow_world.h"
-#include "../../xrRenderPC_R1/blender_blur.h"
-#include "../../xrRenderPC_R1/blender_model.h"
-#include "../blender_model_ebb.h"
-#include "../blender_detail_still.h"
-#include "../blender_tree.h"
-#include "../blender_particle.h"
+#include "../../xrRenderPC_R1/Blender_Shadow_World.h"
+#include "../../xrRenderPC_R1/Blender_Blur.h"
+#include "../../xrRenderPC_R1/Blender_Model.h"
+#include "../Blender_Model_EbB.h"
+#include "../Blender_detail_still.h"
+#include "../Blender_tree.h"
+#include "../Blender_Particle.h"
 
 IBlender*	IBlender::Create	(CLASS_ID cls)
 {	

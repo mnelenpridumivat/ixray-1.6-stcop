@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "light_execute.h"
-#include "xrdeflector.h"
+#include "xrDeflector.h"
 
 void light_execute::run( CDeflector& D )
 {

@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "LightTrack.h"
-#include "../../include/xrRender/RenderVisual.h"
+#include "../../Include/xrRender/RenderVisual.h"
 #include "../../xrEngine/xr_object.h"
 
 #ifdef _EDITOR

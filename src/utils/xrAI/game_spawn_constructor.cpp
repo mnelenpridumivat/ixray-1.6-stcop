@@ -6,12 +6,12 @@
 //	Description : Game spawn constructor
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_spawn_constructor.h"
 #include "object_broker.h"
 #include "level_spawn_constructor.h"
 #include "xrServer_Objects_ALife_All.h"
-#include "xrai.h"
+#include "xrAI.h"
 #include "server_entity_wrapper.h"
 #include "graph_engine.h"
 #include "patrol_path_storage.h"

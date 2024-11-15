@@ -1,10 +1,10 @@
 // ladderTrackDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ladderTrack.h"
 #include "ladderTrackDlg.h"
-#include "waitingDlg.h"
+#include "WaitingDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

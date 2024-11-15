@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "build.h"
-#include "ogf_face.h"
+#include "StdAfx.h"
+#include "Build.h"
+#include "OGF_Face.h"
 //#include "std_classes.h"
-#include "../../xrcore/fs.h"
-#include "../../xrEngine/fmesh.h"
+#include "../../xrCore/FS.h"
+#include "../../xrEngine/Fmesh.h"
 
 using namespace std;
 

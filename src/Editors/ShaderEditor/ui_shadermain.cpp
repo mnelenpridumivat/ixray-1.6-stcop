@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "UI_ShaderMain.h"
-#include "UI_ShaderTools.h"
+#include "ui_shadermain.h"
+#include "UI_shadertools.h"
 #include "../../xrEngine/xr_input.h"
 
 //---------------------------------------------------------------------------

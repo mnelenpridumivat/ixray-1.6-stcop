@@ -3,25 +3,25 @@
 
 #include "ModelPool.h"
 
-#include "../../xrEngine/fmesh.h"
+#include "../../xrEngine/Fmesh.h"
 #include "../../xrEngine/IGame_Persistent.h"
 #ifndef _EDITOR
-    #include "fhierrarhyvisual.h"
+#include "FHierrarhyVisual.h"
     #include "SkeletonAnimated.h"
-	#include "fvisual.h"
-	#include "fprogressive.h"
-	#include "fskinned.h"
-	#include "flod.h"
-    #include "ftreevisual.h"
+#include "FVisual.h"
+#include "FProgressive.h"
+#include "FSkinned.h"
+#include "FLOD.h"
+#include "FTreeVisual.h"
     #include "ParticleGroup.h"
     #include "ParticleEffect.h"
 #else
-    #include "fvisual.h"
-    #include "fprogressive.h"
+#include "FVisual.h"
+#include "FProgressive.h"
     #include "ParticleEffect.h"
     #include "ParticleGroup.h"
-	#include "fskinned.h"
-    #include "fhierrarhyvisual.h"
+#include "FSkinned.h"
+#include "FHierrarhyVisual.h"
     #include "SkeletonAnimated.h"
 #endif
 

@@ -2,12 +2,12 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
-#include "explosive.h"
+#include "Explosive.h"
 
 #include "../xrPhysics/PhysicsShell.h"
-#include "entity.h"
+#include "Entity.h"
 #include "../xrParticles/stdafx.h"
 #include "../xrParticles/ParticlesObject.h"
 
@@ -15,11 +15,11 @@
 #include "Weapon.h"
 
 #include "Actor.h"
-#include "actoreffector.h"
+#include "ActorEffector.h"
 #include "Level.h"
-#include "level_bullet_manager.h"
+#include "Level_Bullet_Manager.h"
 #include "xrMessages.h"
-#include "../xrEngine/gamemtllib.h"
+#include "../xrEngine/GameMtlLib.h"
 
 #ifdef DEBUG
 #	include "../xrEngine/StatGraph.h"
@@ -27,8 +27,8 @@
 #endif
 
 #include "../xrPhysics/MathUtils.h"
-#include "../xrPhysics/iActivationShape.h"
-#include "../xrPhysics/iphworld.h"
+#include "../xrPhysics/IActivationShape.h"
+#include "../xrPhysics/IPHWorld.h"
 #include "game_base_space.h"
 
 #include "../Include/xrRender/Kinematics.h"

@@ -4,10 +4,10 @@
 
 #ifdef _PARTICLE_EDITOR
 
-#include "..\..\Layers\xrRender\ParticleEffect.h"
-#include "..\xrEcore\Editor\ParticleEffectActions.h"
+#include "../../Layers/xrRender/ParticleEffect.h"
+#include "../xrECore/Editor/ParticleEffectActions.h"
 #include "../Public/PropertiesListHelper.h"
-#include "ui_particletools.h"
+#include "UI_ParticleTools.h"
 #include "../xrEProps/FolderLib.h"
              
 BOOL PS::CPEDef::Equal(const CPEDef* pe)

@@ -6,7 +6,7 @@
 
 #pragma once
 #include "GraviArtifact.h"
-#include "../xrEngine/feel_touch.h"
+#include "../xrEngine/Feel_Touch.h"
 #include "PhysicsShellHolder.h"
 
 using GAME_OBJECT_LIST = xr_vector<CPhysicsShellHolder*>;

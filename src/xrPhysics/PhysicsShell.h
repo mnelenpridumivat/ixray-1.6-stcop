@@ -4,10 +4,10 @@
 
 #include "PHDefs.h"
 #include "PhysicsCommon.h"
-#include "icollidevalidator.h"
+#include "ICollideValidator.h"
 #include "../xrEngine/AI/alife_space.h"
 //#include "script_export_space.h"
-#include "../xrEngine/iphysicsshell.h"
+#include "../xrEngine/IPhysicsShell.h"
 #include "../xrEngine/VisMask.h"
 #include "iphysics_scripted.h"
 

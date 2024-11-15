@@ -1,7 +1,7 @@
 #ifndef __GLOBAL_SLOTS_DATA_H__
 #define __GLOBAL_SLOTS_DATA_H__
 
-#include "detailformat.h"
+#include "DetailFormat.h"
 #include "recalculation.h"
  
 

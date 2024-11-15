@@ -2,11 +2,11 @@
 // InfoDocument.cpp
 // InfoDocument - документ, содержащий сюжетную информацию
 ///////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "InfoDocument.h"
 #include "../xrPhysics/PhysicsShell.h"
 #include "PDA.h"
-#include "inventoryowner.h"
+#include "InventoryOwner.h"
 #include "xrServer_Objects_ALife_Items.h"
 
 CInfoDocument::CInfoDocument(void) 

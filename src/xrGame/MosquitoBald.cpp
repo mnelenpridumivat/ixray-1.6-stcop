@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "mosquitobald.h"
+#include "StdAfx.h"
+#include "MosquitoBald.h"
 #include "Level.h"
-#include "physicsshellholder.h"
-#include "../xrengine/xr_collide_form.h"
+#include "PhysicsShellHolder.h"
+#include "../xrEngine/xr_collide_form.h"
 
 CMosquitoBald::CMosquitoBald(void) 
 {

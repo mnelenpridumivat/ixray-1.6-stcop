@@ -6,11 +6,11 @@
 //	Description : Memory space script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "memory_space.h"
 #include "script_game_object.h"
-#include "gameobject.h"
+#include "GameObject.h"
 #include "entity_alive.h"
 #include "danger_object.h"
 

@@ -6,7 +6,7 @@
 //	Description : Level spawn constructor
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "level_spawn_constructor.h"
 #include "level_graph.h"
 #include "graph_engine.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "cl_intersect.h"
 #include "motion_simulator.h"
 #include "compiler.h"

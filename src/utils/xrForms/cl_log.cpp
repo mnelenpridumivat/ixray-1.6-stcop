@@ -1,5 +1,5 @@
 #include "resource.h"
-#include "../../xrcore/xrCore.h"
+#include "../../xrCore/xrCore.h"
 #include <time.h>
 #include <mmsystem.h>
 #include <CommCtrl.h>

@@ -2,10 +2,10 @@
 #ifndef SkeletonCustomH
 #define SkeletonCustomH
 
-#include "fhierrarhyvisual.h"
+#include "FHierrarhyVisual.h"
 #include "../../xrEngine/bone.h"
 #include "../../Include/xrRender/Kinematics.h"
-#include "..\..\xrEngine\VisMask.h"
+#include "../../xrEngine/VisMask.h"
 
 // refs
 class	 CKinematics;

@@ -1,10 +1,10 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 #include "OGF_Face.h"
 #include "vbm.h"
 //#include "std_classes.h"
-#include "../xrlc_light/lightmap.h"
-#include "../xrlc_light/xrface.h"
+#include "../xrLC_Light/Lightmap.h"
+#include "../xrLC_Light/xrFace.h"
 
 #define	TRY(a) try { a; } catch (...) { clMsg("* E: %s", #a); }
 

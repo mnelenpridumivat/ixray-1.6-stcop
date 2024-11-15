@@ -10,7 +10,7 @@
 /*
 #include "FactionState.h"
 
-#include "../actor.h"
+#include "../Actor.h"
 #include "../character_community.h"
 #include "../character_reputation.h"
 #include "../relation_registry.h"

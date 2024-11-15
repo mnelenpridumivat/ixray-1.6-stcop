@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "uidialogwnd.h"
+#include "UIDialogWnd.h"
 #include "../../xrEngine/IGame_Persistent.h"
 #include "../../xrEngine/IGame_UICustom.h"
 

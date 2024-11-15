@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../../../xrengine/device.h"
-#include "ui_camera.h"
+#include "../../../xrEngine/device.h"
+#include "UI_Camera.h"
 #include "../../../Layers/xrRender/HWCaps.h"
-#include "../../../Layers/xrRender/hw.h"
+#include "../../../Layers/xrRender/HW.h"
 #include "../../../xrEngine/pure.h"
-#include "../../../xrCore/ftimer.h"
-#include "estats.h"
-#include "../../../xrEngine/shader_xrlc.h"
-#include "../../../Layers/xrRender/shader.h"
+#include "../../../xrCore/FTimer.h"
+#include "EStats.h"
+#include "../../../xrEngine/Shader_xrLC.h"
+#include "../../../Layers/xrRender/Shader.h"
 #include "../../../Layers/xrRender/R_Backend.h"
 
 //---------------------------------------------------------------------------

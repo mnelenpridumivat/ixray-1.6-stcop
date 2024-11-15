@@ -6,10 +6,10 @@
 //#include "xrLC_GlobalData.h"
 #include "light_point.h"
 //#include "xrDeflector.h"
-#include "../../xrcdb/xrcdb.h"
-#include "../shader_xrlc.h"
+#include "../../xrCDB/xrCDB.h"
+#include "../Shader_xrLC.h"
 #include "mu_model_face.h"
-#include "xrface.h"
+#include "xrFace.h"
 #include "xrLC_GlobalData.h"
 
 void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);

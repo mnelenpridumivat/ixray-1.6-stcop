@@ -1,10 +1,10 @@
 #include "stdafx.h"
 
-#include "xrdeflector.h"
+#include "xrDeflector.h"
 #include "cl_intersect.h"
-#include "xrlc_globaldata.h"
+#include "xrLC_GlobalData.h"
 #include "light_point.h"
-#include "xrface.h"
+#include "xrFace.h"
 
 void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 {

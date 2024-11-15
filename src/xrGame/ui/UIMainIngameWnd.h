@@ -1,7 +1,7 @@
 #pragma once
 #include "UIGameLog.h"
 
-#include "../hudsound.h"
+#include "../HudSound.h"
 #include "../../xrEngine/AI/alife_space.h"
 #include "../EntityCondition.h"
 #include "UICarPanel.h"

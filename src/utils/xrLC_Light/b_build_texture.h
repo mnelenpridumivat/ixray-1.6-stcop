@@ -1,5 +1,5 @@
 #pragma once
-#include "Etextureparams.h"
+#include "ETextureParams.h"
 struct  b_BuildTexture : public b_texture
 {
 	STextureParams	THM;

@@ -8,7 +8,7 @@
  ** Portions from Vorbize, (c) Kenneth Arnold <kcarnold-xiph@arnoldnet.net>
  ** and libvorbis examples, (c) Monty <monty@xiph.org>
  **/
-#include "stdafx.h"
+#include "StdAfx.h"
 
 
 #include <stdlib.h>

@@ -10,7 +10,7 @@
  **/
 
 /* Platform support routines  - win32, OS/2, unix */
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "platform.h"
 #include "encode.h"

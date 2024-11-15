@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 
 #include	"animation_script_callback.h"
 #include	"../xrScripts/script_callback_ex.h"
-#include	"gameobject.h"
+#include "GameObject.h"
 #include	"game_object_space.h"
 #include	"../Include/xrRender/KinematicsAnimated.h"
 

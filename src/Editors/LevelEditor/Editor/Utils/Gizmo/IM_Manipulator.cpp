@@ -6,7 +6,7 @@
 #include "IM_Manipulator.h"
 #include "../xrEUI/imgui.h"
 #include "../xrEUI/ImGuizmo.h"
-#include "../../scene/scene.h"
+#include "../../Scene/scene.h"
 #include "../../UI_LevelTools.h"
 #include "../../Entry/CustomObject.h"
 

@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "elight_def.h"
+#include "StdAfx.h"
+#include "ELight_def.h"
 
 
 
-#include "build.h"
+#include "Build.h"
 
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrFace.h"
 
 
 #include "../xrLC_Light/xrMU_Model.h"

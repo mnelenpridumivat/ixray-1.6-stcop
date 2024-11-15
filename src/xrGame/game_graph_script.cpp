@@ -6,7 +6,7 @@
 //	Description : Game graph class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include <luabind/luabind.hpp>
 #include <luabind/iterator_policy.hpp>
 #include "game_graph.h"

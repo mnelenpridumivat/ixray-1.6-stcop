@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_cl_capture_the_artefact.h"
 
 #include "Level.h"

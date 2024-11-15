@@ -5,7 +5,7 @@
 //	Description : Smart cover evaluators classes
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "smart_cover_evaluators.h"
 #include "stalker_property_evaluators.h"

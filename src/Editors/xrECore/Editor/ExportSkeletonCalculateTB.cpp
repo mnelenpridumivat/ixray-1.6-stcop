@@ -11,8 +11,8 @@
 //
 #include "../../xrCore/xrCore.h"
 
-#include "../../../Layers/xrRender/hwcaps.h"
-#include "../../../Layers/xrRender/hw.h"
+#include "../../../Layers/xrRender/HWCaps.h"
+#include "../../../Layers/xrRender/HW.h"
 #include "../../../xrEngine/pure.h"
 class CGameFont;
 
@@ -33,7 +33,7 @@ DEFINE_VECTOR(shared_str,RStrVec,RStrVecIt);
 
 #include "ExportSkeleton.h"
 
-#include "../engine/nvMeshMender.h"
+#include "../Engine/NVMeshMender.h"
 #include	"../../common/NvMender2003/nvMeshMender.cpp"
 #include	"../../common/NvMender2003/nvMeshMender.h"
 #include	"../../common/NvMender2003/mender_input_output.h"

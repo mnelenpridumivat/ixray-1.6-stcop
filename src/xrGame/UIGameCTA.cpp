@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "UIGameCTA.h"
 
 #include "UITeamPanels.h"
@@ -18,7 +18,7 @@
 #include "../xrEngine/xr_level_controller.h"
 
 #include "object_broker.h"
-#include "weaponknife.h"
+#include "WeaponKnife.h"
 
 #include "ui/UISkinSelector.h"
 #include "../xrEngine/string_table.h"

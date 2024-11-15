@@ -7,7 +7,7 @@
  **
  ** AIFF/AIFC support from OggSquish, (c) 1994-1996 Monty <xiphmont@xiph.org>
  **/
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include <stdlib.h>
 #include <stdio.h>

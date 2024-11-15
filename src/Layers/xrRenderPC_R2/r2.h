@@ -8,18 +8,18 @@
 #include "../xrRender/r__types.h"
 #include "r2_rendertarget.h"
 
-#include "../xrRender/hom.h"
-#include "../xrRender/detailmanager.h"
-#include "../xrRender/modelpool.h"
-#include "../xrRender/wallmarksengine.h"
+#include "../xrRender/HOM.h"
+#include "../xrRender/DetailManager.h"
+#include "../xrRender/ModelPool.h"
+#include "../xrRender/WallmarksEngine.h"
 
-#include "smap_allocator.h"
-#include "../xrRender/light_db.h"
+#include "SMAP_Allocator.h"
+#include "../xrRender/Light_DB.h"
 #include "../xrRender/LightTrack.h"
 #include "../xrRender/r_sun_cascades.h"
 
-#include "../../xrEngine/irenderable.h"
-#include "../../xrEngine/fmesh.h"
+#include "../../xrEngine/IRenderable.h"
+#include "../../xrEngine/Fmesh.h"
 #include <d3dcommon.h>
 
 

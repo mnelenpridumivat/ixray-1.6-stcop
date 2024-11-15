@@ -1,16 +1,16 @@
 #include "stdafx.h"
 
-#include "xrlight_implicit.h"
+#include "xrLight_Implicit.h"
 #include "xrLight_ImplicitDeflector.h"
-#include "xrlight_implicitrun.h"
+#include "xrLight_ImplicitRun.h"
 
 #include "tga.h"
 
 #include "light_point.h"
-#include "xrdeflector.h"
+#include "xrDeflector.h"
 #include "xrLC_GlobalData.h"
-#include "xrface.h"
-#include "xrlight_implicitcalcglobs.h"
+#include "xrFace.h"
+#include "xrLight_ImplicitCalcGlobs.h"
 
 #include "../../xrCDB/xrCDB.h"
 

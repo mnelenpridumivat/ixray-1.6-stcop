@@ -5,10 +5,10 @@
 #include "../../xrUI/Widgets/UIListBox.h"
 #include "../../xrUI/Widgets/UIFrameWindow.h"
 #include "../../xrUI/UIXmlInit.h"
-#include "../level.h"
+#include "../Level.h"
 #include "../game_cl_base.h"
 #include "../game_cl_teamdeathmatch.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 
 CUIVote::CUIVote()
 {

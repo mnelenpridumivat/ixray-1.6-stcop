@@ -7,7 +7,7 @@
 #endif
 
 #include <limits>
-#include "..\..\XrCore\xrCore.h"
+#include "../../xrCore/xrCore.h"
 #ifdef XREPROPS_EXPORTS
 inline void not_implemented()
 {
@@ -17,18 +17,18 @@ inline void not_implemented()
 }
 #endif
 
-#include "..\xrEUI\stdafx.h"
-#include "..\..\xrEngine\stdafx.h"
-#include "..\Public\xrEProps.h"
+#include "../xrEUI/stdafx.h"
+#include "../../xrEngine/stdafx.h"
+#include "../Public/xrEProps.h"
 #include "ChooseTypes.H"
 #include "FolderLib.h"
-#include "Tree\Base\UITreeItem.h"
+#include "Tree/Base/UITreeItem.h"
 #include "ItemListHelper.h"
 #include "UITextForm.h"
 #include "UINumericVectorForm.h"
-#include "Tree\Properties\UIPropertiesItem.h"
-#include "Tree\Properties\UIPropertiesForm.h"
-#include "Tree\ItemList\UIItemListForm.h"
-#include "Tree\Choose\UIChooseFormItem.h"
-#include "Tree\Choose\UIChooseForm.h"
+#include "Tree/Properties/UIPropertiesItem.h"
+#include "Tree/Properties/UIPropertiesForm.h"
+#include "Tree/ItemList/UIItemListForm.h"
+#include "Tree/Choose/UIChooseFormItem.h"
+#include "Tree/Choose/UIChooseForm.h"
 #include "UIKeyPressForm.h"

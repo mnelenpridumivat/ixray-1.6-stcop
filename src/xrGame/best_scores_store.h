@@ -2,7 +2,7 @@
 #define BEST_SCORES_SYSTEM_INCLUDED
 
 #include "../xrCore/associative_vector.h"
-#include "../xrGameSpy/GameSpy/sake/sake.h"
+#include "../xrGameSpy/gamespy/sake/sake.h"
 #include "profile_data_types.h"
 
 class CGameSpy_Full;

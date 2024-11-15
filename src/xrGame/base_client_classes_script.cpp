@@ -6,11 +6,11 @@
 //	Description : XRay base client classes script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "base_client_classes.h"
 #include "base_client_classes_wrappers.h"
-#include "../xrEngine/feel_sound.h"
+#include "../xrEngine/Feel_Sound.h"
 //#include "../Include/xrRender/RenderVisual.h"
 #include "../Include/xrRender/RenderVisual.h"
 #include "../Include/xrRender/Kinematics.h"

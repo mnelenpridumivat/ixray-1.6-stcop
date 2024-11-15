@@ -2,18 +2,18 @@
 // script_game_object_inventory_owner.сpp :	функции для inventory owner
 //////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_game_object.h"
 #include "InventoryOwner.h"
-#include "Pda.h"
+#include "PDA.h"
 #include "xrMessages.h"
 #include "character_info.h"
-#include "gametask.h"
+#include "GameTask.h"
 #include "Actor.h"
 #include "Level.h"
 #include "../xrEngine/date_time.h"
-#include "uigamesp.h"
+#include "UIGameSP.h"
 #include "restricted_object.h"
 #include "../xrScripts/script_engine.h"
 #include "attachable_item.h"
@@ -21,15 +21,15 @@
 #include "../xrEngine/string_table.h"
 #include "alife_registry_wrappers.h"
 #include "relation_registry.h"
-#include "custommonster.h"
-#include "actorcondition.h"
+#include "CustomMonster.h"
+#include "ActorCondition.h"
 #include "level_graph.h"
-#include "huditem.h"
-#include "ui/UItalkWnd.h"
+#include "HudItem.h"
+#include "ui/UITalkWnd.h"
 #include "Inventory.h"
-#include "infoportion.h"
-#include "AI/Monsters/BaseMonster/base_monster.h"
-#include "weaponmagazined.h"
+#include "InfoPortion.h"
+#include "ai/monsters/basemonster/base_monster.h"
+#include "WeaponMagazined.h"
 #include "ai/stalker/ai_stalker.h"
 #include "agent_manager.h"
 #include "agent_member_manager.h"
@@ -45,7 +45,7 @@
 #include "doors_manager.h"
 #include "doors_door.h"
 #include "Torch.h"
-#include "physicobject.h"
+#include "PhysicObject.h"
 
 bool CScriptGameObject::GiveInfoPortion(LPCSTR info_id)
 {
@@ -724,7 +724,7 @@ LPCSTR CScriptGameObject::sound_voice_prefix () const
 	return pInventoryOwner->SpecificCharacter().sound_voice_prefix();
 }
 
-#include "GameTaskManager.h"
+#include "GametaskManager.h"
 ETaskState CScriptGameObject::GetGameTaskState	(LPCSTR task_id)
 {
 	shared_str shared_name				= task_id;

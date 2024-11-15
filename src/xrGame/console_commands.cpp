@@ -1,12 +1,12 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "../xrEngine/xr_ioconsole.h"
+#include "../xrEngine/XR_IOConsole.h"
 #include "../xrEngine/xr_ioc_cmd.h"
-#include "../xrEngine/customhud.h"
-#include "../xrEngine/fdemorecord.h"
-#include "../xrEngine/fdemoplay.h"
+#include "../xrEngine/CustomHUD.h"
+#include "../xrEngine/FDemoRecord.h"
+#include "../xrEngine/FDemoPlay.h"
 #include "xrMessages.h"
-#include "xrserver.h"
+#include "xrServer.h"
 #include "Level.h"
 #include "ai_debug.h"
 #include "alife_simulator.h"
@@ -23,11 +23,11 @@
 #include "../xrScripts/script_process.h"
 #include "xrServer_Objects.h"
 #include "ui/UIMainIngameWnd.h"
-#include "../xrPhysics/iphworld.h"
+#include "../xrPhysics/IPHWorld.h"
 #include "../xrEngine/string_table.h"
 #include "autosave_manager.h"
 #include "ai_space.h"
-#include "ai/monsters/BaseMonster/base_monster.h"
+#include "ai/monsters/basemonster/base_monster.h"
 #include "../xrEngine/date_time.h"
 #include "mt_config.h"
 #include "ui/UIOptConCom.h"
@@ -44,7 +44,7 @@
 #include "character_hit_animations_params.h"
 #include "inventory_upgrade_manager.h"
 
-#include "GameSpy/GameSpy_Full.h"
+#include "gamespy/GameSpy_Full.h"
 
 #include "ai_debug_variables.h"
 #include "../xrPhysics/console_vars.h"
@@ -2160,7 +2160,7 @@ public:
 	}
 };
 
-#include "../include/xrrender/particles_systems_library_interface.hpp"
+#include "../Include/xrRender/particles_systems_library_interface.hpp"
 #include "../Layers/xrRender/PSLibrary.h"
 #include "GamePersistent.h"
 class CCC_Particle_TEST : public IConsole_Command

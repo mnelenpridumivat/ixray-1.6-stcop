@@ -1,7 +1,7 @@
 #pragma once
 
-#include "..\..\xrServerEntities\gametype_chooser.h"
-#include "WaveForm.H"
+#include "../../xrServerEntities/gametype_chooser.h"
+#include "WaveForm.h"
 
 
 #pragma pack( push,1 )
@@ -47,7 +47,7 @@ using PropItemIt = PropItemVec::iterator;
 //------------------------------------------------------------------------------
 #ifdef _EDITOR
 #ifndef ImTextureID
-#include "..\xrEUI\stdafx.h"
+#include "../xrEUI/stdafx.h"
 #endif
 #include "../xrEProps/ChooseTypes.H"
 #else

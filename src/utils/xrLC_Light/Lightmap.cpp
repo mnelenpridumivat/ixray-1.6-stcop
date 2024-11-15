@@ -8,7 +8,7 @@
 #include "xrDeflector.h"
 #include "xrDXTC.h"
 #include "xrImage_Filter.h"
-#include "xrface.h"
+#include "xrFace.h"
 #include "ETextureParams.h"
 #include <xrLC_GlobalData.h>
 

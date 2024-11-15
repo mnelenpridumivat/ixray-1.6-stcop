@@ -8,7 +8,7 @@ class CMotionDef;
 
 #include "actor_defs.h"
 #include "inventory_space.h"
-#include "hudsound.h"
+#include "HudSound.h"
 #include "InertionData.h"
 
 struct attachable_hud_item;

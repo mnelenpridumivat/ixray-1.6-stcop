@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 #include "stdafx.h"
-#include "UIIconPicker.h"
+#include "UIIConPicker.h"
 UIIconPicker* UIIconPicker::Form = nullptr;
 
 UIIconPicker::UIIconPicker()

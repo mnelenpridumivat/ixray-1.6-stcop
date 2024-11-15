@@ -3,7 +3,7 @@
 #include "UISoundEditorForm.h"
 #include "SoundManager.h"
 #include "../../../xrSound/stdafx.h"
-#include "../../../xrSound/soundrender_source.h"
+#include "../../../xrSound/SoundRender_Source.h"
 UISoundEditorForm *UISoundEditorForm::Form = nullptr;
 
 UISoundEditorForm::UISoundEditorForm()

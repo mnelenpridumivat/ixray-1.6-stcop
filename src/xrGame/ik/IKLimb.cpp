@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "IKLimb.h"
 
-#include "../../include/xrrender/Kinematics.h"
+#include "../../Include/xrRender/Kinematics.h"
 
 #include "gameobject.h"
 

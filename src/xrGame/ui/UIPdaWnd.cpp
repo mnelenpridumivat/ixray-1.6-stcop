@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "UIPdaWnd.h"
-#include "../Pda.h"
+#include "../PDA.h"
 
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../../xrUI/UIXmlInit.h"
 #include "UIInventoryUtilities.h"
 
-#include "../level.h"
+#include "../Level.h"
 #include "UIGameCustom.h"
 
 #include "../../xrUI/Widgets/UIStatic.h"

@@ -1,13 +1,13 @@
-#include "stdafx.h"
-#include "weaponrpg7.h"
+#include "StdAfx.h"
+#include "WeaponRPG7.h"
 #include "xrServer_Objects_ALife_Items.h"
-#include "explosiverocket.h"
-#include "entity.h"
+#include "ExplosiveRocket.h"
+#include "Entity.h"
 #include "Level.h"
 #include "player_hud.h"
-#include "hudmanager.h"
-#include "inventory.h"
-#include "inventoryOwner.h"
+#include "HUDManager.h"
+#include "Inventory.h"
+#include "InventoryOwner.h"
 
 CWeaponRPG7::CWeaponRPG7()
 {

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "actor_mp_client.h"
 #include "CharacterPhysicsSupport.h"
 #include "Inventory.h"

@@ -6,7 +6,7 @@
 //	Description : ALife human brain class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "alife_human_brain.h"
 

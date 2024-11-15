@@ -5,7 +5,7 @@
 #include "UIGameCustom.h"
 #include "../../xrUI/UIXmlInit.h"
 #include "../game_cl_mp.h"
-#include "../level.h"
+#include "../Level.h"
 #include "../../xrEngine/string_table.h"
 
 CUISpeechMenu::CUISpeechMenu(LPCSTR section_name)

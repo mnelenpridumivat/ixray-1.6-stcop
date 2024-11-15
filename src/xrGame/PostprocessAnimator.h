@@ -4,7 +4,7 @@
 
 #include "../xrEngine/envelope.h"
 #include "../xrEngine/EffectorPP.h"
-#include "../xrEngine/cameramanager.h"
+#include "../xrEngine/CameraManager.h"
 
 #ifndef _PP_EDITOR_
 	class CEffectorController;

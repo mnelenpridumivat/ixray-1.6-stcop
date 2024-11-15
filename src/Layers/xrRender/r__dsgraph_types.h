@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../xrCore/fixedmap.h"
+#include "../../xrCore/FixedMap.h"
 
 //#define USE_DOUG_LEA_ALLOCATOR_FOR_RENDER
 

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ZoneCampfire.h"
 #include "../xrParticles/stdafx.h"
 #include "../xrParticles/ParticlesObject.h"

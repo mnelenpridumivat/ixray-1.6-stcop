@@ -2,16 +2,16 @@
 
 #include "UIInventoryUtilities.h"
 
-#include "uicharacterinfo.h"
-#include "../actor.h"
-#include "../level.h"
+#include "UICharacterInfo.h"
+#include "../Actor.h"
+#include "../Level.h"
 #include "../../xrServerEntities/character_info.h"
 #include "../relation_registry.h"
 
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../../xrUI/UIXmlInit.h"
 
-#include "../../xrUI/Widgets/uistatic.h"
+#include "../../xrUI/Widgets/UIStatic.h"
 #include "../../xrUI/Widgets/UIScrollView.h"
 
 

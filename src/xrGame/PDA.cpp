@@ -1,11 +1,11 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "pda.h"
+#include "PDA.h"
 #include "../xrPhysics/PhysicsShell.h"
 #include "Entity.h"
 #include "Actor.h"
 
-#include "xrserver.h"
+#include "xrServer.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "Level.h"
 

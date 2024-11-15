@@ -1,13 +1,13 @@
 #include "stdafx.h"
 
 #include "xrLC_GlobalData.h"
-#include "xrface.h"
-#include "xrdeflector.h"
-#include "lightmap.h"
+#include "xrFace.h"
+#include "xrDeflector.h"
+#include "Lightmap.h"
 #include "mu_model_face.h"
-#include "xrmu_model.h"
-#include "xrmu_model_reference.h"
-#include "../../xrcdb/xrcdb.h"
+#include "xrMU_Model.h"
+#include "xrMU_Model_Reference.h"
+#include "../../xrCDB/xrCDB.h"
 
 bool g_using_smooth_groups = true;
 bool g_smooth_groups_by_faces = false;

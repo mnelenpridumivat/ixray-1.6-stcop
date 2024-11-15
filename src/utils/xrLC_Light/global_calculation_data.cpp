@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "global_calculation_data.h"
 
-#include "../shader_xrlc.h"
+#include "../Shader_xrLC.h"
 
 global_claculation_data	gl_data;
 

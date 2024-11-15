@@ -6,7 +6,7 @@
 //	Description : XRay Script game object script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_game_object.h"
 #include "alife_space.h"
@@ -28,9 +28,9 @@
 #include "script_zone.h"
 #include "relation_registry.h"
 #include "GameTask.h"
-#include "car.h"
+#include "Car.h"
 #include "ZoneCampfire.h"
-#include "physicobject.h"
+#include "PhysicObject.h"
 #include "Artefact.h"
 #include "sight_manager_space.h"
 #include "../xrScripts/exports/script_ini_file.h"

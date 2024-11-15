@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "../xrEngine/GameMtlLib.h"
+#include "GameMtlLib.h"
 
 void DestroySounds(SoundVec& lst)
 {

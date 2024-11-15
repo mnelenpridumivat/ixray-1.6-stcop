@@ -13,7 +13,7 @@
 
 #include "SkeletonX.h"
 #include "SkeletonCustom.h"
-#include "../../xrEngine/fmesh.h"
+#include "../../xrEngine/Fmesh.h"
 void  xrSkin1W_x86(	vertRender*		D,
 								vertBoned1W*	S,
 								u32				vCount,

@@ -5,7 +5,7 @@
 #include "../../xrUI/Widgets/UIEditBox.h"
 #include "../../xrUI/Widgets/UISpinNum.h"
 #include "../../xrUI/Widgets/UICheckButton.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 #include "../../xrUI/Widgets/UIDialogWnd.h"
 
 CUIMpServerAdm::CUIMpServerAdm()

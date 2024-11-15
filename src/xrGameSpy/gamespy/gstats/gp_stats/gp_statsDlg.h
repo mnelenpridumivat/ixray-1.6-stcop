@@ -8,7 +8,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CGp_statsDlg dialog

@@ -23,7 +23,7 @@
 #include "../sc.h"
 //#include "atlas_Competition_Race_Sample_App_v1.h" // Admin Site generated Header file
 #include "atlas_sc_race_v1.h" // Admin Site generated Header file
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 
 
 //{{AFX_INSERT_LOCATION}}

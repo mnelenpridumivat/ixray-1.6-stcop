@@ -9,7 +9,7 @@
 #include "UIHelperGame.h"
 #include "../xrUI/UIXmlInit.h"
 
-#include "UI/UIDragDropReferenceList.h"
+#include "ui/UIDragDropReferenceList.h"
 
 CUIDragDropListEx* UIHelperGame::CreateDragDropListEx(CUIXml& xml, LPCSTR ui_path, CUIWindow* parent)
 {

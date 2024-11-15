@@ -1,7 +1,7 @@
 // ladderTrack.cpp : Defines the class behaviors for the application.
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ladderTrack.h"
 #include "ladderTrackDlg.h"
 

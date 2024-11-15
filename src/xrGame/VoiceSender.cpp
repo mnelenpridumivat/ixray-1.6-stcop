@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "VoiceSender.h"
 #include "game_cl_mp.h"
 #include"game_sv_mp.h"

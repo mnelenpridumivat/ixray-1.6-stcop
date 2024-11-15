@@ -9,7 +9,7 @@
 #pragma once
 
 #include "space_restrictor.h"
-#include "../xrEngine/feel_touch.h"
+#include "../xrEngine/Feel_Touch.h"
 #include "../xrScripts/script_space_forward.h"
 #include "../xrScripts/script_export_space.h"
 

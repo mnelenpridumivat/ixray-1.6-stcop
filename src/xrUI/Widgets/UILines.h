@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UILine.h"
-#include "../../xrUI/uiabstract.h"
+#include "../uiabstract.h"
 
 class UI_API CUILines :
 	public CDeviceResetNotifier 

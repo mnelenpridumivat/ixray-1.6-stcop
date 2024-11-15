@@ -19,7 +19,7 @@
 #include "UIPdaWnd.h"
 #include "UICharacterInfo.h"
 
-#include "../actor.h"
+#include "../Actor.h"
 #include "../ai_space.h"
 #include "../../xrServerEntities/script_engine.h"
 

@@ -4,8 +4,8 @@
 #include "SHGameMtlTools.h"
 #include "../Public/PropertiesListHelper.h"
 #include "ui_shadermain.h"
-#include "../xrEProps/folderlib.h"
-#include "UI_ShaderTools.h"
+#include "../xrEProps/FolderLib.h"
+#include "UI_shadertools.h"
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------

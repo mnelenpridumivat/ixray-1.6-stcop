@@ -5,7 +5,7 @@
 
 #include "light_point.h"
 #include "fitter.h"
-#include "xrface.h"
+#include "xrFace.h"
 #include "xrLC_GlobalData.h"
 template <typename T, typename T2>
 T	simple_optimize				(xr_vector<T>& A, xr_vector<T>& B, T2& _scale, T2& _bias)

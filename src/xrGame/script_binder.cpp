@@ -6,7 +6,7 @@
 //	Description : Script objects binder
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "ai_space.h"
 #include "../xrScripts/script_engine.h"
@@ -14,7 +14,7 @@
 #include "xrServer_Objects_ALife.h"
 #include "script_binder_object.h"
 #include "script_game_object.h"
-#include "gameobject.h"
+#include "GameObject.h"
 #include "Level.h"
 
 // comment next string when commiting

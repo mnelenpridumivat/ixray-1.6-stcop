@@ -1,11 +1,11 @@
 
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 
 #include "xrPhase_MergeLM_Rect.h"
-#include "../xrlc_light/xrdeflector.h"
-#include "../xrlc_light/xrlc_globaldata.h"
-#include "../xrlc_light/lightmap.h"
+#include "../xrLC_Light/xrDeflector.h"
+#include "../xrLC_Light/xrLC_GlobalData.h"
+#include "../xrLC_Light/Lightmap.h"
 // Surface access
 extern void _InitSurface	();
 extern BOOL _rect_place		(L_rect &r, lm_layer*		D);

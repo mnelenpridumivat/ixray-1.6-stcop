@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "weaponmagazinedwgrenade.h"
-#include "entity.h"
+#include "StdAfx.h"
+#include "WeaponMagazinedWGrenade.h"
+#include "Entity.h"
 #include "GrenadeLauncher.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "ExplosiveRocket.h"
@@ -13,7 +13,7 @@
 #include "player_hud.h"
 #include "Actor_Flags.h"
 #include "Inventory.h"
-#include "inventoryOwner.h"
+#include "InventoryOwner.h"
 
 #ifdef DEBUG
 #	include "phdebug.h"

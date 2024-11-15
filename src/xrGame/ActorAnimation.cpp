@@ -1,11 +1,11 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Actor.h"
 #include "ActorAnimation.h"
 #include "actor_anim_defs.h"
 #include "Weapon.h"
 #include "WeaponKnife.h"
 #include "Inventory.h"
-#include "missile.h"
+#include "Missile.h"
 #include "Level.h"
 #ifdef DEBUG
 #include "PHDebug.h"

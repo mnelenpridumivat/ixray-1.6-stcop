@@ -1,10 +1,10 @@
 // ScRaceSampleDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ScRaceSample.h"
 #include "ScRaceSampleDlg.h"
-#include "waitingDlg.h"
+#include "WaitingDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -9,7 +9,7 @@
 #define SMART_COVER_ANIMATION_SELECTOR_H_INCLUDED
 
 #include "smart_cover_detail.h"
-#include "../include/xrRender/KinematicsAnimated.h"
+#include "../Include/xrRender/KinematicsAnimated.h"
 #include "smart_cover_animation_planner.h"
 
 class CAI_Stalker;

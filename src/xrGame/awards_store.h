@@ -3,7 +3,7 @@
 
 #include "../xrCore/associative_vector.h"
 #include "profile_data_types.h"
-#include "../xrGameSpy/GameSpy/sake/sake.h"
+#include "../xrGameSpy/gamespy/sake/sake.h"
 #include "gsc_dsigned_ltx.h"
 
 class CGameSpy_Full;

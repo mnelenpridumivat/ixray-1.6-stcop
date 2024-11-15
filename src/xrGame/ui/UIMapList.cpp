@@ -9,7 +9,7 @@
 #include "UIMapInfo.h"
 #include "../../xrUI/Widgets/UIComboBox.h"
 #include "../../xrUI/Widgets/UIListBoxItem.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 #include "../../xrEngine/string_table.h"
 
 #include "object_broker.h"
@@ -308,7 +308,7 @@ void CUIMapList::SetServerParams(LPCSTR params){
 	m_srv_params = params;
 }
 
-#include "../../xrUI/Widgets/uilistboxitem.h"
+#include "../../xrUI/Widgets/UIListBoxItem.h"
 void CUIMapList::AddWeather(const shared_str& WeatherType, const shared_str& WeatherTime, u32 _id)
 {
 	R_ASSERT2					(m_pWeatherSelector, "m_pWeatherSelector == nullptr");

@@ -6,10 +6,10 @@
 //	Description : Attachable item
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "physicsshellholder.h"
+#include "StdAfx.h"
+#include "PhysicsShellHolder.h"
 #include "attachable_item.h"
-#include "inventoryowner.h"
+#include "InventoryOwner.h"
 #include "Inventory.h"
 #include "../xrEngine/xr_input.h"
 #include "../../xrUI/ui_base.h"

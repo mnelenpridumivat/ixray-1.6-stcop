@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------------
 //  Texmaps
 //-----------------------------------------------------------------------------
-#include "../kernel/stdafx.h"
+#include "../kernel/Stdafx.h"
 #pragma hdrstop
 
-#include	"texmaps.h"
-#include	"..\kernel\resources.h"
+#include "TexMaps.h"
+#include "../kernel/resources.h"
 
 extern TCHAR *GetString(int id);
 

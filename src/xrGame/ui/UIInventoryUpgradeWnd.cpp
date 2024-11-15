@@ -14,9 +14,9 @@
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../../xrUI/UIXmlInit.h"
 
-#include "../actor.h"
+#include "../Actor.h"
 #include "../../xrScripts/script_process.h"
-#include "../inventory.h"
+#include "../Inventory.h"
 
 #include "ai_space.h"
 #include "alife_simulator.h"

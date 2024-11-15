@@ -6,7 +6,7 @@
 //	Description : Defines the entry point for the DLL application.
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "object_factory.h"
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../xrEngine/xr_level_controller.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "mp_config_sections.h"
 #include "Weapon.h"
 

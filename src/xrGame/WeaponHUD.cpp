@@ -2,10 +2,10 @@
 //					могут держать в руках персонажи, также используется
 //					для синхронизации анимаций с видом от 3-го лица
 //////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "WeaponHUD.h"
 #include "Weapon.h"
-#include "../xrEngine/Motion.h"
+#include "../xrEngine/motion.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "Level.h"
 #include "../xrPhysics/MathUtils.h"

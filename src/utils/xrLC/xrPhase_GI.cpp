@@ -1,13 +1,13 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "xrHemisphere.h"
-#include "build.h"
+#include "Build.h"
 
 #include "../xrForms/xrThread.h"
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrFace.h"
 
-#include "../../xrcore/xrSyncronize.h"
-#include "../../xrcdb/xrcdb.h"
+#include "../../xrCore/xrSyncronize.h"
+#include "../../xrCDB/xrCDB.h"
 
 
 #define	GI_THREADS		2

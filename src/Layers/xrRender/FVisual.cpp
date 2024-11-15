@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "../../xrEngine/fmesh.h"
-#include "fvisual.h"
+#include "../../xrEngine/Fmesh.h"
+#include "FVisual.h"
 
 #ifdef USE_DX11
 #include "../xrRenderDX10/dx10BufferUtils.h"

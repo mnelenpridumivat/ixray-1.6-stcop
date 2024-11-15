@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "PropSlimTools.h"
 #include "object.h"
 #include "object_sliding.h"

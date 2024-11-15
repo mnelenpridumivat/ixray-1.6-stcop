@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "gameobject.h"
+#include "GameObject.h"
 #include "../xrScripts/script_export_space.h"
 
 namespace smart_cover {

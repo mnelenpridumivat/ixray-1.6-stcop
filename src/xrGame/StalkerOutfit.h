@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "customoutfit.h"
+#include "CustomOutfit.h"
 #include "../xrScripts/script_export_space.h"
 
 class CStalkerOutfit : 

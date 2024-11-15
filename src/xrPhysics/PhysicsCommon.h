@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DisablingParams.h"
-#include "physicsexternalcommon.h"
+#include "PhysicsExternalCommon.h"
 
 extern	XRPHYSICS_API	const float	default_l_limit					;
 extern	XRPHYSICS_API	const float	default_w_limit					;

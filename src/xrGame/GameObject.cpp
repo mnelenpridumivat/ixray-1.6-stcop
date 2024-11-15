@@ -1,11 +1,11 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "GameObject.h"
 #include "../Include/xrRender/RenderVisual.h"
 #include "../xrPhysics/PhysicsShell.h"
 #include "ai_space.h"
 #include "CustomMonster.h" 
-#include "physicobject.h"
+#include "PhysicObject.h"
 #include "HangingLamp.h"
 #include "../xrPhysics/PhysicsShell.h"
 #include "game_sv_single.h"
@@ -708,7 +708,7 @@ void CGameObject::u_EventSend(NET_Packet& P, u32 dwFlags )
 	Level().Send(P, dwFlags);
 }
 
-#include "bolt.h"
+#include "Bolt.h"
 void CGameObject::OnH_B_Chield()
 {
 	inherited::OnH_B_Chield();

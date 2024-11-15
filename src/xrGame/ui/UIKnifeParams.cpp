@@ -2,7 +2,7 @@
 #include "pch_script.h"
 #include "UIKnifeParams.h"
 #include "../../xrUI/UIXmlInit.h"
-#include "../level.h"
+#include "../Level.h"
 #include "game_base_space.h"
 #include "../ai_space.h"
 #include "../../xrScripts/script_engine.h"

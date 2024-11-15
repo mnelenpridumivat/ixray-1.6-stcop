@@ -6,10 +6,10 @@
 //	Description : Danger manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "danger_manager.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "memory_space.h"
 #include "memory_manager.h"
 #include "enemy_manager.h"

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "gameobject.h"
+#include "GameObject.h"
 #include "restriction_space.h"
 #include "../xrScripts/script_export_space.h"
 

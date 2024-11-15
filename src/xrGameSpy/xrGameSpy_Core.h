@@ -2,7 +2,7 @@
 #define XRGAMESPY_CORE
 
 #include "xrGameSpy_MainDefs.h"
-#include "GameSpy/common/gsCore.h"
+#include "gamespy/common/gsCore.h"
 
 extern "C"
 {

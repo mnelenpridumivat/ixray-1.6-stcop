@@ -1,5 +1,5 @@
 // file: targasaver.cpp
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 
 #include "tga.h"

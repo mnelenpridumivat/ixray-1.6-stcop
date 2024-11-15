@@ -6,17 +6,17 @@
 //	Description : ALife Simulator
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "alife_simulator.h"
 #include "xrServer_Objects_ALife.h"
 #include "ai_space.h"
 #include "../xrEngine/IGame_Persistent.h"
 #include "../xrScripts/script_engine.h"
-#include "mainmenu.h"
+#include "MainMenu.h"
 #include "object_factory.h"
 #include "alife_object_registry.h"
-#include "../xrEngine/xr_ioconsole.h"
+#include "../xrEngine/XR_IOConsole.h"
 
 #ifdef DEBUG
 #	include "moving_objects.h"

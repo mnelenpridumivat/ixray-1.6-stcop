@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "xrmu_model.h"
+#include "xrMU_Model.h"
 
 #include "mu_model_face.h"
 #include "vector_clear.h"
-#include "../../xrcore/xrPool.h"
+#include "../../xrCore/xrPool.h"
 
 xrMU_Model::xrMU_Model() : m_lod_ID(u16(-1)) 
 {

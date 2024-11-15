@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../xrcdb/xrCDB.h"
+#include "../../xrCDB/xrCDB.h"
 #include "../../xrEngine/xrLevel.h"
 #include "AIMapExport.h"
 #include "Shader_xrLC.h"
 #include "../../Include/Editors/communicate.h"
-#include "Etextureparams.h"
+#include "ETextureParams.h"
 
 // base patch used all the time up to merging
 const u32 InvalidNode		= (1<<24)-1;

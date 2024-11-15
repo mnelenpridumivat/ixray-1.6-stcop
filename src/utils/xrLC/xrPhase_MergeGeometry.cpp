@@ -1,7 +1,7 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
-#include "build.h"
-#include "../xrlc_light/xrface.h"
+#include "Build.h"
+#include "../xrLC_Light/xrFace.h"
 
 extern void Detach		(vecFace* S);
 

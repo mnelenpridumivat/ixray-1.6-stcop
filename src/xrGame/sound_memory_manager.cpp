@@ -6,7 +6,7 @@
 //	Description : Sound memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "sound_memory_manager.h"
 #include "memory_manager.h"
@@ -14,7 +14,7 @@
 #include "visual_memory_manager.h"
 #include "enemy_manager.h"
 #include "memory_space_impl.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "ai_object_location.h"
 #include "level_graph.h"
 #include "sound_user_data_visitor.h"
