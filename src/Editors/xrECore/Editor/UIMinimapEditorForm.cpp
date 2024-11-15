@@ -9,6 +9,10 @@ UIMinimapEditorForm::UIMinimapEditorForm()
 
 	isEdited = false;
 	ActiveFile.clear();
+
+	string_path fn = {};
+	FS.update_path(fn, _game_config_, "game_maps_single.ltx");
+	ReloadMapInfo(fn);
 }
 
 UIMinimapEditorForm::~UIMinimapEditorForm()
@@ -208,13 +212,9 @@ void UIMinimapEditorForm::ShowPreview()
 	ImGui::End();
 }
 
-
-
 void UIMinimapEditorForm::ShowMenu() 
 {
-	ImGui::Text((isEdited) ? "[Edited]" :" ");
-	ImGui::SameLine();
-
+	ImGui::Text((isEdited) ? " [Edited] View" : " View");
 	ImGui::Separator();
 	if (ImGui::BeginMenu("File"))
 	{
@@ -239,6 +239,11 @@ void UIMinimapEditorForm::ShowMenu()
 		if (ImGui::MenuItem("Open"))
 		{
 			OpenFile();
+		}
+
+		if (ImGui::MenuItem("Reload"))
+		{
+			ReloadMapInfo(ActiveFile);
 		}
 		ImGui::EndMenu();
 	}
@@ -271,15 +276,24 @@ void UIMinimapEditorForm::ShowMenu()
 			SelectElement(elements[elements.size() - 1]);
 		}
 	}
-	if (ImGui::MenuItem("Reset zoom&pos")) 
+
+	ImGui::Separator();
+	if (ImGui::MenuItem("Reset pos"))
 	{
-		m_Zoom = 1.f;
 		m_BackgroundPosition.x = 0;
 		m_BackgroundPosition.y = 0;
 	}
+
+	if (ImGui::MenuItem("Reset zoom")) 
+	{
+		m_Zoom = 1.f;
+	}
+
+	ImGui::Separator();
 	ImGui::Checkbox("Preview", &PreviewMode);
 	ImGui::Checkbox("Always Draw Border", &m_AlwaysDrawBorder);
 
+	ImGui::Separator();
 	ImGui::Text("Background Size:");
 	ImGui::DragFloat2("##bgs", (float*)&m_BackgroundRenderSize, 1.0f, 128, 1024*4);
 	ImGui::SameLine();
@@ -288,7 +302,7 @@ void UIMinimapEditorForm::ShowMenu()
 		m_BackgroundRenderSize = m_BackgroundSize;
 	}
 
-	ImGui::Text("Items Opacity:");
+	ImGui::Text("Items Opacity:"); ImGui::SameLine();
 	ImGui::DragInt("##op", &m_ItemsOpacity, 1.0f, 1, 255.0f);
 	ImGui::Separator();
 
@@ -360,6 +374,11 @@ void UIMinimapEditorForm::OpenFile()
 	}
 	elements.clear();
 
+	ReloadMapInfo(fn);
+}
+
+void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
+{
 	FS.TryLoad(fn.c_str());
 
 	auto ltxFile = new CInifile(fn.c_str(), TRUE);
@@ -413,7 +432,7 @@ void UIMinimapEditorForm::OpenFile()
 
 		string_path texturePath = "";
 		string_path levelLtx;
-		sprintf(levelLtx,"%s%s\\level.ltx", FS.get_path("$level$")->m_Path, levelName.c_str());
+		sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, levelName.c_str());
 
 		bool find_result = false;
 		if (FS.exist(levelLtx))
@@ -515,7 +534,7 @@ void UIMinimapEditorForm::Draw()
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
-		float menuSizeY = 440.f;
+		float menuSizeY = 450.f;
 		ImVec2 elementsListSize = ImVec2(windowSize.x, windowSize.y - menuSizeY);
 		ImVec2 menuSize = ImVec2(windowSize.x, menuSizeY - 10.f);
 
@@ -530,7 +549,7 @@ void UIMinimapEditorForm::Draw()
 
 		ImGui::NextColumn();
 
-		ImGui::BeginChild("Canvas");
+		ImGui::BeginChild("Canvas", ImVec2(0, 0), true);
 		RenderCanvas();
 		ImGui::EndChild();
 	}
@@ -549,13 +568,12 @@ void UIMinimapEditorForm::Update()
 			if (ImGui::Begin("MinimapEditor", &Form->bOpen))
 			{
 				Form->Draw();
-				ImGui::End();
 			}
 			else
 			{
 				Form->bOpen = false;
-				ImGui::CloseCurrentPopup();
 			}
+			ImGui::End();
 			ImGui::PopStyleVar();
 		}
 		else

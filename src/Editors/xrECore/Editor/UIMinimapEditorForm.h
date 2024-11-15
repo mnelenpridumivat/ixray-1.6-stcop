@@ -47,6 +47,8 @@ private:
 	void SaveFile(bool);
 	void OpenFile();
 
+	void ReloadMapInfo(const xr_string& fn);
+
 	xr_vector<Element> elements;
 
 	bool m_AlwaysDrawBorder = false;
