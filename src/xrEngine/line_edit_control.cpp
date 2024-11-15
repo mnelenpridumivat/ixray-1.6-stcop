@@ -262,6 +262,7 @@ void line_edit_control::assign_char_pairs(init_mode mode) {
 	create_char_pair(SDL_SCANCODE_5, '5', '%');
 	create_char_pair(SDL_SCANCODE_6, '6', '^');
 	create_char_pair(SDL_SCANCODE_7, '7', '&');
+	create_char_pair(SDL_SCANCODE_8, '8', '*');
 	create_char_pair(SDL_SCANCODE_9, '9', '(');
 
 	for (int i = 0; i < 26; ++i) {
