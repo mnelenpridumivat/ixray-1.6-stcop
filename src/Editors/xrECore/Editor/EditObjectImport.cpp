@@ -6,18 +6,7 @@
 #pragma hdrstop
 
 #include "EditObject.h"
-#include "LW_SHADERDEF.h"
 #include "EditMesh.h"
-
-extern "C" 
-{
-#include "lwo2.h"
-};
-
-#include "../Layers/xrRender/ResourceManager.h"
-
-extern "C" __declspec(dllimport) lwObject* LWO_ImportObject(char* filename, lwObject* new_obj);
-extern "C" __declspec(dllimport) void LWO_CloseFile(lwObject* new_obj);
 
 using VMIndexLink = xr_map<void*, int>;
 using VMIndexLinkIt = VMIndexLink::iterator;
