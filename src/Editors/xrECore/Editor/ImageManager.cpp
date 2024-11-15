@@ -3,7 +3,6 @@
 
 #include "ImageManager.h"
 #include "../xrEngine/xrImage_Resampler.h"
-#include "..\Engine\Image.h"
 #include "ui_main.h"
 #include "EditObject.h"
 #include "../Layers/xrRender/ResourceManager.h"
@@ -270,38 +269,36 @@ bool CImageManager::LoadTextureData(LPCSTR src_name, U32Vec& data, u32& w, u32& 
 //------------------------------------------------------------------------------
 void CImageManager::SafeCopyLocalToServer(FS_FileSet& files)
 {
-	string_path 		p_import, p_textures;
-	string_path 		src_name, dest_name;
-	FS.update_path	   	(p_import,_import_,"");
-	FS.update_path	   	(p_textures,_textures_,"");
+	string_path p_import, p_textures;
+	string_path src_name, dest_name;
+	FS.update_path(p_import,_import_,"");
+	FS.update_path(p_textures,_textures_,"");
 
 	FS_FileSetIt it	= files.begin();
-	FS_FileSetIt _E 	= files.end();
-	for (; it!=_E; it++){
-				xr_string fn;
+	FS_FileSetIt _E = files.end();
+
+	for (; it != _E; it++)
+	{
+		xr_string fn;
 
 		// copy sources
-		fn 				 = it->name;
-		xr_strconcat		(src_name, p_import, fn.c_str());
-		UpdateFileName	 (fn);
+		fn = it->name;
+		xr_strconcat(src_name, p_import, fn.c_str());
+		UpdateFileName(fn);
 
-		xr_strconcat(dest_name, p_textures, EFS.ChangeFileExt(fn,".tga").c_str() );
+		xr_strconcat(dest_name, p_textures, EFS.ChangeFileExt(fn, ".tga").c_str());
 
-		if (0==strcmp(strext(src_name),".tga")){
-			FS.file_copy(src_name,dest_name);
-		}else{
-			// convert to TGA
-			U32Vec data;
-			u32 w,h,a;
-			R_ASSERT	(Stbi_Load(src_name,data,w,h,a));
-			CXImage* I 	= new CXImage();
-			I->Create	(w,h,data.data());
-			I->Vflip	();
-			I->SaveTGA	(dest_name);
-			xr_delete	(I);
+		if (0 == strcmp(strext(src_name), ".tga"))
+		{
+			FS.file_copy(src_name, dest_name);
 		}
-		FS.set_file_age		(dest_name, FS.get_file_age(src_name));
-		EFS.MarkFile		(src_name,true);
+		else
+		{
+			// convert to TGA
+			DXTUtils::Converter::MakeTGA(src_name, dest_name);
+		}
+		FS.set_file_age(dest_name, xr_chrono_to_time_t(std::chrono::system_clock::now()));
+		EFS.MarkFile(src_name, true);
 	}
 }    
 //------------------------------------------------------------------------------

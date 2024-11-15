@@ -20,6 +20,7 @@ namespace DXTUtils
 	struct DXT_API Converter
 	{
 		static void MakeTGA(xr_path From, xr_path To);
+		static void MakeTGA(u32 w, u32 h, U32Vec& From, xr_path To);
 		static void MakePNG(xr_path From, xr_path To);
 	};
 

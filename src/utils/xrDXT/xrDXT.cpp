@@ -19,6 +19,24 @@ void DXTUtils::Converter::MakeTGA(xr_path From, xr_path To)
 	}
 }
 
+void DXTUtils::Converter::MakeTGA(u32 w, u32 h, U32Vec& From, xr_path To)
+{
+	RedImageTool::RedImage Surface;
+	Surface.Create(w, h);
+
+	for (u32 y = 0; y < h; y++)
+	{
+		for (u32 x = 0; x < w;x++)
+		{
+			Surface.SetPixel(From[y * w + x], x, y);
+		}
+	}
+
+	Surface.Convert(RedImageTool::RedTexturePixelFormat::R8G8B8A8);
+	Surface.SwapRB();
+	Surface.SaveToTga(To.xstring().data());
+}
+
 void DXTUtils::Converter::MakePNG(xr_path From, xr_path To)
 {
 	RedImageTool::RedImage Surface;
