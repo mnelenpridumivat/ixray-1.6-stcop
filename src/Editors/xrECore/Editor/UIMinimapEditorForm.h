@@ -13,6 +13,8 @@ private:
 		ImVec2 FileSize;
 		ImTextureID	texture;
 		bool selected = false;
+		bool locked = false;
+		bool hidden = false;
 	};
 
 	template<typename T>

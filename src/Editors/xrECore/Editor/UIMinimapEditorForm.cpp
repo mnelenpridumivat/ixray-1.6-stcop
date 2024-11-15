@@ -47,9 +47,17 @@ void UIMinimapEditorForm::ShowElementList() {
 
 	for (int i = 0; i < elements.size(); i++) 
 	{
+		//tyt bi iconki
+		xr_string status = "  ";
+
+		if (elements[i].hidden)
+			status[0] = 'H';
+		else if (elements[i].locked)
+			status[0] = 'L';
+
 		ImGui::PushID(i);
 		bool is_selected = elements[i].selected;
-		if (ImGui::Selectable(elements[i].name.c_str(), is_selected)) 
+		if (ImGui::Selectable((status + elements[i].name).c_str(), is_selected))
 		{
 			SelectElement(elements[i]);
 		}
@@ -101,6 +109,9 @@ void UIMinimapEditorForm::RenderCanvas()
 	for (int i = 0; i < elements.size(); i++) {
 		auto& element = elements[i];
 
+		if (element.hidden)
+			continue;
+
 		ImVec2 element_screen_pos = canvas_p0 + m_BackgroundPosition + element.position * m_Zoom;
 		ImVec2 element_screen_size = element.RenderSize;
 		element_screen_size *= m_Zoom;
@@ -110,7 +121,11 @@ void UIMinimapEditorForm::RenderCanvas()
 
 		if (element.selected || m_AlwaysDrawBorder)
 		{
-			ImU32 col = (element.selected) ? IM_COL32(200, 255, 200, 255) : IM_COL32(255, 255, 255, 100);
+			int op_col = (element.locked) ? 150 : 255;
+			
+			ImU32 col = (element.selected) ?
+				IM_COL32(255, 130, 130, op_col) :
+				IM_COL32(255, 255, 255, 100);
 
 			ImVec2 top_left = element_screen_pos - ImVec2(handle_size / 2, handle_size / 2);
 			ImVec2 bottom_right = element_screen_pos + ImVec2(handle_size / 2, handle_size / 2) + element_screen_size;
@@ -133,7 +148,7 @@ void UIMinimapEditorForm::RenderCanvas()
 			}
 		}
 
-		if (element.selected) 
+		if (element.selected && !element.locked) 
 		{
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) 
 			{
@@ -314,9 +329,14 @@ void UIMinimapEditorForm::ShowMenu()
 		{
 			isEdited = true;
 		}*/
+		ImGui::Checkbox("Locked", &selectedElement->locked);
+		ImGui::SameLine();
+		ImGui::Checkbox("Hidden", &selectedElement->hidden);
 
 		ImGui::Text("Texture:");
 		ImGui::SameLine();
+
+		ImGui::BeginDisabled(selectedElement->locked);
 		if (ImGui::Button("Change"))
 		{
 			Element copy = (*selectedElement);
@@ -362,6 +382,7 @@ void UIMinimapEditorForm::ShowMenu()
 			selectedElement->RenderSize = selectedElement->FileSize;
 			isEdited = true;
 		}
+		ImGui::EndDisabled();
 	}
 }
 
@@ -372,13 +393,14 @@ void UIMinimapEditorForm::OpenFile()
 	{
 		return;
 	}
-	elements.clear();
 
 	ReloadMapInfo(fn);
 }
 
 void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 {
+	elements.clear();
+
 	FS.TryLoad(fn.c_str());
 
 	auto ltxFile = new CInifile(fn.c_str(), TRUE);
@@ -455,11 +477,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 	}
 
 	ActiveFile = fn;
-	ActiveFileShort = fn;
-
-	xr_string FSPath = FS.get_path("$fs_root$")->m_Path;
-	if (ActiveFileShort.Contains(FSPath))
-		ActiveFileShort = ActiveFileShort.substr(FSPath.length());
+	ActiveFileShort = FS.fix_path(fn);
 
 	xr_delete(ltxFile);
 	isEdited = false;
@@ -467,7 +485,6 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 {
-
 	xr_string fn;
 	if (saveCurrent)
 	{
@@ -534,17 +551,17 @@ void UIMinimapEditorForm::Draw()
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
-		float menuSizeY = 450.f;
+		float menuSizeY = 470.f;
 		ImVec2 elementsListSize = ImVec2(windowSize.x, windowSize.y - menuSizeY);
 		ImVec2 menuSize = ImVec2(windowSize.x, menuSizeY - 10.f);
 
-		ImGui::BeginChild("Elements List", elementsListSize, true);
-		ShowElementList();
-		ImGui::EndChild();
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+		
 		ImGui::BeginChild("Menu", menuSize, true);
 		ShowMenu();
+		ImGui::EndChild();
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+		ImGui::BeginChild("Elements List", elementsListSize, true);
+		ShowElementList();
 		ImGui::EndChild();
 
 		ImGui::NextColumn();
@@ -621,10 +638,6 @@ int UIMinimapEditorForm::LoadTexture(Element& el, const xr_string texture)
 	el.path = fn;
 	el.FileSize.x = W;
 	el.FileSize.y = H;
-
-	// map_somename -> somename
-	auto ck_map = xr_path(fn).stem().string();
-	el.name = (ck_map.find(prefix) == 0) ? ck_map.substr(prefix.size()).c_str() : xr_path(fn).stem().string().c_str();
 
 	ID3DTexture2D* pTexture = nullptr;
 	{
