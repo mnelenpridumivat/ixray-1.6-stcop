@@ -112,11 +112,11 @@ bool ETextureThumbnail::Load(LPCSTR src_name, LPCSTR path)
     D->close		();
 */
 
-    R_ASSERT		(F->find_chunk(THM_CHUNK_TYPE));
+    R_ASSERT(F->find_chunk_thm(THM_CHUNK_TYPE, src_name));
     m_Type		= THMType(F->r_u32());
     R_ASSERT		(m_Type==ETTexture);
 
-    m_TexParams.Load(*F);
+    m_TexParams.Load(*F, src_name);
     m_Age 			= FS.get_file_age(fn);
 
     FS.r_close		(F);

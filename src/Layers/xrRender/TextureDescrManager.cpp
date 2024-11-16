@@ -50,12 +50,12 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 		xr_strcpy			(fn,(*It).name.c_str());
 		fix_texture_thm_name(fn);
 
-		bool FoundedChunk = !!F->find_chunk(THM_CHUNK_TYPE);
+		bool FoundedChunk = !!F->find_chunk_thm(THM_CHUNK_TYPE, fn);
 		R_ASSERT2(FoundedChunk, "Not found chunk THM_CHUNK_TYPE");
 
 		F->r_u32			();
 		tp.Clear			();
-		tp.Load				(*F);
+		tp.Load(*F, fn);
 		FS.r_close			(F);
 		if (STextureParams::ttImage		== tp.type ||
 			STextureParams::ttTerrain	== tp.type ||
