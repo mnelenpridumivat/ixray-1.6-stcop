@@ -298,49 +298,18 @@ bool CObjectHandler::can_use_dynamic_lights	()
 	// flAiUseTorchDynamicLights == 1
 	return						(!!g_uCommonFlags.test(1));
 }
-
-void CObjectHandler::set_inertia		(const CWeapon &weapon, const u32 &action_id, const u32 &aim_time) const
-{
-	//typedef CObjectHandlerPlanner::CSActionBase	operator_type;
-	//_condition_type				operator_id = m_planner->uid(weapon.ID(),action_id);
-	//operator_type				*action = m_planner->get_operator(operator_id);
-	//VERIFY						(action);
-	//action->set_inertia_time	(aim_time);
-}
-
 void CObjectHandler::aim_time			(const CWeapon &weapon, const u32 &aim_time) const
 {
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAim1,			aim_time);
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAim2,			aim_time);
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAimingReady1,	aim_time);
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAimingReady2,	aim_time);
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAimForceFull1,	aim_time);
-	set_inertia					(weapon, ObjectHandlerSpace::eWorldOperatorAimForceFull2,	aim_time);
+	m_planner->SetAimTime(&weapon,aim_time);
 }
 
 u32 CObjectHandler::aim_time			(const CWeapon &weapon) const
 {
-	//_condition_type				operator_id = m_planner->uid(weapon.ID(),ObjectHandlerSpace::eWorldOperatorAim1);
-	//typedef CObjectHandlerPlanner::CSActionBase	operator_type;
-	//operator_type				*aim = m_planner->get_operator(operator_id);
-	//VERIFY						(aim);
-	//return						(aim->inertia_time());
-	return 500;
+	return m_planner->GetAimTime(&weapon);
 }
 
-bool CObjectHandler::is_weapon_going_to_be_strapped	( CGameObject const* object ) const
+bool CObjectHandler::is_weapon_going_to_be_strapped	(const CGameObject * object ) const
 {
-	//CObjectHandlerPlanner const&					planner = this->planner();
-	//typedef xr_vector<typename GraphEngineSpace::CWorldProperty>	properties_type;
-	//GraphEngineSpace::CWorldProperty const strap_property				( planner.uid( object->ID(), ObjectHandlerSpace::eWorldPropertyIdleStrap), true );
-	//properties_type const& properties				= planner.target_state().conditions();
-	//properties_type::const_iterator const properties_end	= properties.end();
-	//properties_type::const_iterator const found		= std::lower_bound( properties.begin(), properties_end, strap_property );
-	//
-	//if ( found == properties_end )
-	//	return					false;
-
-	//return						*found == strap_property;
-	return false;
+	return m_planner->IsWeaponGoingToBeStrapped(object);
 }
 #endif

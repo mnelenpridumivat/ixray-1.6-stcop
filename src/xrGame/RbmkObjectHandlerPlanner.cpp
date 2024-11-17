@@ -131,7 +131,13 @@ public:
 
 	virtual bool GetProperty() const override
 	{
+
 		CAI_Stalker* StalkerOwner = GetOwner();
+
+		if(*TargetObject)
+		{
+			return false;
+		}
 
 		PIItem I = StalkerOwner->inventory().ActiveItem();
 		if (!I) return (true);
@@ -139,19 +145,15 @@ public:
 		if (!I->cast_hud_item() || I->cast_hud_item()->IsHidden()) return (true);
 
 		if (I->cast_hud_item() && I->cast_hud_item()->IsShowing()) return (true);
-
-		return (false);
+		return false;
 	}
+	CGameObject** TargetObject;
 };
 
 class FRbmkObjectActionBase : public FRbmkGoapAction
 {
 public:
 	CAI_Stalker* GetOwner() const { return reinterpret_cast<CAI_Stalker*>(Owner->Owner); }
-
-	FRbmkObjectActionBase(const shared_str& Name): FRbmkGoapAction(Name)
-	{
-	}
 	virtual void Active() override
 	{
 		if(bAimed1)
@@ -164,17 +166,12 @@ public:
 	bool* bAimed1 = nullptr;
 	bool* bAimed2= nullptr;
 	CInventoryItemObject* ItemObject = nullptr;
-	uint16 ObjectID = -1;
-	shared_str StateName = "None";
 };
 
 
 class FRbmkObjectActionWeaponBase : public FRbmkObjectActionBase
 {
 public:
-	FRbmkObjectActionWeaponBase(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 	
 	
 
@@ -196,9 +193,6 @@ public:
 class FRbmkObjectActionShow : public FRbmkObjectActionBase
 {
 public:
-	FRbmkObjectActionShow(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -259,9 +253,6 @@ public:
 class FRbmkObjectActionHide : public FRbmkObjectActionBase
 {
 public:
-	FRbmkObjectActionHide(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 
 	virtual void Update() override
 	{
@@ -300,9 +291,6 @@ public:
 class FRbmkObjectActionDrop : public FRbmkObjectActionBase
 {
 public:
-	FRbmkObjectActionDrop(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -321,9 +309,6 @@ public:
 class FRbmkObjectActionStrapping : public FRbmkObjectActionWeaponBase
 {
 public:
-	FRbmkObjectActionStrapping(const shared_str& Name): FRbmkObjectActionWeaponBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -381,9 +366,6 @@ public:
 class FRbmkObjectActionStrappingToIdle : public FRbmkObjectActionWeaponBase
 {
 public:
-	FRbmkObjectActionStrappingToIdle(const shared_str& Name): FRbmkObjectActionWeaponBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -438,10 +420,6 @@ public:
 class FRbmkObjectActionUnstrapping : public FRbmkObjectActionWeaponBase
 {
 public:
-	FRbmkObjectActionUnstrapping(const shared_str& Name): FRbmkObjectActionWeaponBase(Name)
-	{
-	}
-
 	virtual void Active() override
 	{
 		FRbmkObjectActionWeaponBase::Active();
@@ -497,14 +475,11 @@ public:
 class FRbmkObjectActionAim : public FRbmkObjectActionWeaponBase
 {
 public:
-	explicit FRbmkObjectActionAim(const shared_str& Name): FRbmkObjectActionWeaponBase(Name), Timer(0)
-	{
-	}
-
-	FRbmkObjectActionAim& SetValue(bool* InAimed, bool InNeedValue)
+	FRbmkObjectActionAim& SetValue(bool* InAimed, bool InNeedValue,uint32* InAimTime)
 	{
 		bAimed = InAimed;
 		bNeedValue = InNeedValue;
+		AimTime = InAimTime;
 		return *this;
 	}
 
@@ -539,17 +514,14 @@ public:
 
 	bool* bAimed = nullptr;
 	bool bNeedValue = false;
-	uint32 Timer;
+	uint32 Timer = 0;
+	uint32* AimTime = nullptr;
 };
 
 
 class FRbmkObjectActionQueueWait : public FRbmkObjectActionWeaponBase
 {
 public:
-	explicit FRbmkObjectActionQueueWait(const shared_str& Name): FRbmkObjectActionWeaponBase(Name),  Timer(0)
-	{
-	}
-
 	FRbmkObjectActionQueueWait& SetValue(uint32* InQueueInterval)
 	{
 		QueueInterval = InQueueInterval;
@@ -581,16 +553,13 @@ public:
 		}
 	}
 	uint32*QueueInterval = nullptr;
-	uint32 Timer;
+	uint32 Timer = 0;
 };
 
 
 class FRbmkObjectActionFire : public FRbmkObjectActionBase
 {
 public:
-	explicit FRbmkObjectActionFire(const shared_str& Name): FRbmkObjectActionBase(Name), Timer(0)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -632,9 +601,6 @@ public:
 class FRbmkObjectActionFireNoReload : public FRbmkObjectActionBase
 {
 public:
-	explicit FRbmkObjectActionFireNoReload(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -679,16 +645,12 @@ public:
 	}
 
 	bool bFired = false;
-	bool* bQueueWait = nullptr;
 };
 
 
 class FRbmkObjectActionReload : public FRbmkObjectActionBase
 {
 public:
-	explicit FRbmkObjectActionReload(const shared_str& Name): FRbmkObjectActionBase(Name)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -747,26 +709,7 @@ public:
 
 	virtual void Update() override
 	{
-		CAI_Stalker* StalkerOwner = GetOwner();
-		VERIFY(StalkerOwner->inventory().ActiveItem());
-		VERIFY(StalkerOwner->inventory().ActiveItem()->object().ID() == ItemObject->ID());
-		if (bFired)
-		{
-			if (!StalkerOwner->can_kill_member()) return;
-			StalkerOwner->inventory().Action(kWPN_FIRE, CMD_STOP);
-			//		m_fired					= false;
-			return;
-		}
 
-		if (StalkerOwner->can_kill_member()) return;
-
-		CWeapon* weapon = smart_cast<CWeapon*>(StalkerOwner->inventory().ActiveItem());
-		if (!weapon || (weapon->GetState() != CWeapon::eFire)) StalkerOwner->inventory().Action(kWPN_FIRE, CMD_START);
-		if (weapon && (weapon->GetState() == CWeapon::eFire)) bFired = true;
-	}
-
-	virtual void End() override
-	{
 		CAI_Stalker* StalkerOwner = GetOwner();
 
 		CWeapon* weapon = smart_cast<CWeapon*>(StalkerOwner->inventory().ActiveItem());
@@ -784,17 +727,11 @@ public:
 
 		StalkerOwner->inventory().Action(kWPN_RELOAD,CMD_START);
 	}
-
-	bool bFired = false;
-	bool* bQueueWait = nullptr;
 };
 
 class FRbmkObjectActionThrowMissile : public FRbmkObjectActionBase
 {
 public:
-	explicit FRbmkObjectActionThrowMissile(const shared_str& Name): FRbmkObjectActionBase(Name),  Timer(0), InertiaTime(0)
-	{
-	}
 
 	virtual void Active() override
 	{
@@ -836,461 +773,548 @@ public:
 		}
 	}
 
-	uint32 Timer;
-	uint32 InertiaTime;
+	uint32 Timer = 0;
+	uint32 InertiaTime = 0;
+};
+class FRbmkObjectActionObjectActions: public FRbmkGoapAction
+{
+public:
+	FRbmkGoapPlanner	GoapPlanner;
+	void Update() override
+	{
+		GoapPlanner.Update();
+	}
+	void End() override
+	{
+		GoapPlanner.Clear();
+	}
+};
+class FRbmkObjectActionWeaponActions: public FRbmkObjectActionObjectActions
+{
+public:
+
+	void SetWeapon(CWeapon* Weapon)
+	{
+		GoapPlanner.Owner  = Owner->Owner;
+		auto AddObjectProperty = [this,Weapon]<class C>(const char* InName)
+		{
+			shared_str Name = InName;
+			C* Property = GoapPlanner.AddProperty<C>(Name);
+			Property->ItemObject = Weapon;
+			return Name;
+		};
+
+		auto AddMemberProperty = [this,Weapon](const char* InName, bool& Member, bool Equality = true)
+		{
+			shared_str Name = InName;
+			FRbmkGoapPropertyMember* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyMember>(Name);
+			Property->Value = &Member;
+			Property->Equality = Equality;
+			return Name;
+		};
+
+		auto AddConstProperty = [this,Weapon](const char* InName, bool Value)
+		{
+			shared_str Name = InName;
+			FRbmkGoapPropertyConst* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyConst>(Name);
+			Property->Value = Value;
+			return Name;
+		};
+
+		auto AddObjectAction = [this,Weapon]<class C>(const char* InName)->C&
+		{
+			shared_str Name = InName;
+			C& Action = GoapPlanner.AddAction<C>(Name);
+			Action.ItemObject = Weapon;
+			Action.bAimed1 = bAimed1;
+			Action.bAimed2 = bAimed2;
+			return Action;
+		};
+		
+		shared_str NAME_Hidden = AddObjectProperty.template operator()<FRbmkObjectPropertyWeaponHidden>("Hidden");
+
+		shared_str NAME_Aimed1 = AddMemberProperty("Aimed1", *bAimed1);
+		shared_str NAME_Aimed2 = AddMemberProperty("Aimed2", *bAimed2);
+		shared_str NAME_Strapped = AddMemberProperty("Strapped", *bStrapped);
+		shared_str NAME_Strapped2Idle = AddMemberProperty("Strapped2Idle", *bStrapped2Idle);
+
+		shared_str NAME_Ammo1 = AddObjectProperty.template operator()<FRbmkObjectPropertyAmmo>("Ammo1");
+		shared_str NAME_Ammo2 = AddConstProperty("Ammo2", false);
+		shared_str NAME_Empty1 = AddObjectProperty.template operator()<FRbmkObjectPropertyEmpty>("Empty1");
+		shared_str NAME_Empty2 = AddConstProperty("Empty2", false);
+		shared_str NAME_Ready1 = AddObjectProperty.template operator()<FRbmkObjectPropertyReady>("Ready1");
+		shared_str NAME_Ready2 = AddConstProperty("Ready2", false);
+		shared_str NAME_Full1 = AddObjectProperty.template operator()<FRbmkObjectPropertyFull>("Full1");
+		shared_str NAME_Full2 = AddConstProperty("Full2", false);
+		shared_str NAME_QueueWait1 = AddObjectProperty.template operator()<FRbmkObjectPropertyQueue>("Queue1");
+		shared_str NAME_QueueWait2 = AddObjectProperty.template operator()<FRbmkObjectPropertyQueue>("Queue2");
+
+		shared_str NAME_Switch1 = AddConstProperty("Switch1", true);
+		shared_str NAME_Switch2 = AddConstProperty("Switch2", false);
+		shared_str NAME_Firing1 = AddConstProperty("Firing1", false);
+		shared_str NAME_FiringNoReload = AddConstProperty("FiringNoReload", false);
+		shared_str NAME_Firing2 = AddConstProperty("Firing2", false);
+		shared_str NAME_Idle = AddConstProperty("Idle", false);
+		shared_str NAME_IdleStrap = AddConstProperty("IdleStrap", false);
+		shared_str NAME_Dropped = AddConstProperty("Dropped", false);
+		shared_str NAME_Aiming1 = AddConstProperty("Aiming1", false);
+		shared_str NAME_Aiming2 = AddConstProperty("Aiming2", false);
+		shared_str NAME_AimingReady1 = AddConstProperty("AimingReady1", false);
+		shared_str NAME_AimingReady2 = AddConstProperty("AimingReady2", false);
+		shared_str NAME_AimForceFull1 = AddConstProperty("AimForceFull1", false);
+		shared_str NAME_AimForceFull2 = AddConstProperty("AimForceFull2", false);
+		shared_str NAME_Hide = AddConstProperty("Hide", false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionShow>("Show")
+			.AddCondition(NAME_Hidden, true)
+			.AddEffect(NAME_Hidden, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionHide>("Hide")
+			.SetUseEnough(bUseEnough)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Hidden, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false)
+			.AddEffect(NAME_Hide, true);
+
+		AddObjectAction.template operator()<FRbmkObjectActionDrop>("Drop")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Dropped, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// idle
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Idle")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Idle, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionStrapping>("Strapping")
+			.SetValue(bStrapped, bStrapped2Idle)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddEffect(NAME_Strapped2Idle, true)
+			.AddEffect(NAME_Strapped, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionStrappingToIdle>("StrappingToIdle")
+			.SetValue(bStrapped2Idle)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, true)
+			.AddCondition(NAME_Strapped2Idle, true)
+			.AddEffect(NAME_Strapped2Idle, false);
+
+
+		AddObjectAction.template operator()<FRbmkObjectActionUnstrapping>("Unstrapping")
+			.SetValue(bStrapped, bStrapped2Idle)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, true)
+			.AddEffect(NAME_Strapped, false)
+			.AddEffect(NAME_Strapped2Idle, true);
+
+
+		AddObjectAction.template operator()<FRbmkObjectActionStrappingToIdle>("UnstrappingToIdle")
+			.SetValue(bStrapped2Idle)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, true)
+			.AddEffect(NAME_Strapped2Idle, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Strapped")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Strapped, true)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddCondition(NAME_IdleStrap, false)
+			.AddEffect(NAME_IdleStrap, true);
+
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("Aim1")
+			.SetValue(bAimed1, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed1, true)
+			.AddEffect(NAME_Aiming1, true)
+			.AddEffect(NAME_Aimed2, false);
+
+		// aim2
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("Aim2")
+			.SetValue(bAimed2, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed2, true)
+			.AddEffect(NAME_Aiming2, true)
+			.AddEffect(NAME_Aimed1, false);
+
+		// aim_queue1
+		AddObjectAction.template operator()<FRbmkObjectActionQueueWait>("AimQueue1")
+			.SetValue(QueueInterval)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_QueueWait1, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_QueueWait1, true)
+			.AddEffect(NAME_Aimed2, false);
+
+		// aim_queue2
+		AddObjectAction.template operator()<FRbmkObjectActionQueueWait>("AimQueue2")
+			.SetValue(QueueInterval)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_QueueWait2, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_QueueWait2, true)
+			.AddEffect(NAME_Aimed1, false);
+
+		// fire1
+		AddObjectAction.template operator()<FRbmkObjectActionFire>("Fire1")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ready1, true)
+			.AddCondition(NAME_Empty1, false)
+			.AddCondition(NAME_Aimed1, true)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_QueueWait1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Firing1, true);
+
+		// fire no reload
+		AddObjectAction.template operator()<FRbmkObjectActionFireNoReload>("FireNoReload")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_FiringNoReload, true);
+
+		// fire2
+		AddObjectAction.template operator()<FRbmkObjectActionFire>("Fire2")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ready2, true)
+			.AddCondition(NAME_Empty2, false)
+			.AddCondition(NAME_Aimed2, true)
+			.AddCondition(NAME_Switch2, true)
+			.AddCondition(NAME_QueueWait2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Firing2, true);
+
+		// reload1
+		AddObjectAction.template operator()<FRbmkObjectActionReload>("Reload1")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ready1, false)
+			.AddCondition(NAME_Ammo1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Empty1, false)
+			.AddEffect(NAME_Ready1, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// reload2
+		AddObjectAction.template operator()<FRbmkObjectActionReload>("Reload2")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ready2, false)
+			.AddCondition(NAME_Ammo2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Empty2, false)
+			.AddEffect(NAME_Ready2, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// force_reload1
+		AddObjectAction.template operator()<FRbmkObjectActionReload>("ForceReload1")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Full1, false)
+			.AddCondition(NAME_Ammo1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Empty1, false)
+			.AddEffect(NAME_Ready1, true)
+			.AddEffect(NAME_Full1, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// force_reload2
+		AddObjectAction.template operator()<FRbmkObjectActionReload>("ForceReload2")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Full2, false)
+			.AddCondition(NAME_Ammo2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Empty2, false)
+			.AddEffect(NAME_Ready2, true)
+			.AddEffect(NAME_Full2, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// switch1
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Switch1")
+			.AddCondition(NAME_Switch1, false)
+			.AddCondition(NAME_Switch2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Switch1, true)
+			.AddEffect(NAME_Switch2, false)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		// switch2
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Switch2")
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_Switch2, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Switch1, false)
+			.AddEffect(NAME_Switch2, true)
+			.AddEffect(NAME_Aimed1, false)
+			.AddEffect(NAME_Aimed2, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("AimingReady1")
+			.SetValue(bAimed1, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_Ready1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed1, true)
+			.AddEffect(NAME_AimingReady1, true)
+			.AddEffect(NAME_Aimed2, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("AimingReady2")
+			.SetValue(bAimed2, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed2, true)
+			.AddEffect(NAME_AimingReady2, true)
+			.AddEffect(NAME_Aimed1, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("AimForceFull1")
+			.SetValue(bAimed1, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch1, true)
+			.AddCondition(NAME_Ready1, true)
+			.AddCondition(NAME_Full1, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed1, true)
+			.AddEffect(NAME_AimForceFull1, true)
+			.AddEffect(NAME_Aimed2, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionAim>("AimForceFull2")
+			.SetValue(bAimed2, true,&AimTime)
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Switch2, true)
+			.AddCondition(NAME_Ready2, true)
+			.AddCondition(NAME_Full2, true)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Aimed2, true)
+			.AddEffect(NAME_AimForceFull2, true)
+			.AddEffect(NAME_Aimed1, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("FakeGetAmmo1")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ammo1, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Ammo1, true);
+
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("FakeGetAmmo2")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_Ammo2, false)
+			.AddCondition(NAME_Strapped, false)
+			.AddCondition(NAME_Strapped2Idle, false)
+			.AddEffect(NAME_Ammo2, true);
+			
+		GoapPlanner.SetTarget(NAME_Hide,true);
+	}
+	bool*				bAimed1;
+	bool*				bAimed2;
+	bool*				bStrapped;
+	bool*				bStrapped2Idle;
+	bool*				bUseEnough;
+	uint32*				QueueInterval;
+	uint32				AimTime = 500;
 };
 
-FRbmkObjectHandlerPlanner::FRbmkObjectHandlerPlanner(void* InOwner): GoapPlanner(InOwner), bAimed1(false), bAimed2(false), bStrapped(false), bStrapped2Idle(false), bUseEnough(false), MinQueueSize(0), MaxQueueSize(0), MinQueueInterval(0), MaxQueueInterval(0),  QueueInterval(0), NextTimeChange(0)
+
+class FRbmkObjectActionMissileActions: public FRbmkObjectActionObjectActions
 {
+public:
+	void SetMissile(CMissile* Missile)
+	{
+		GoapPlanner.Owner  = Owner->Owner;
+		auto AddObjectProperty = [this,Missile]<class C>(const char* InName)
+		{
+			shared_str Name = InName;
+			C* Property = GoapPlanner.AddProperty<C>(Name);
+			Property->ItemObject = Missile;
+			return Name;
+		};
+
+		auto AddConstProperty = [this,Missile](const char* InName, bool Value)
+		{
+			shared_str Name = InName;
+			FRbmkGoapPropertyConst* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyConst>(Name);
+			Property->Value = Value;
+			return Name;
+		};
+
+		auto AddObjectAction = [this,Missile]<class C>(const char* InName)->C&
+		{
+			shared_str Name = InName;
+			C& Action = GoapPlanner.AddAction<C>(Name);
+			Action.ItemObject = Missile;
+			Action.bAimed2 = bAimed2;
+			Action.bAimed2 = bAimed2;
+			return Action;
+		};
+
+		shared_str NAME_Hidden = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileHidden>("Hidden");
+		shared_str NAME_ThrowStarted = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileThrowStarted>("ThrowStarted");
+		shared_str NAME_Throw = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileThrowEnd>("ThrowEnd");
+		shared_str NAME_Dropped = AddConstProperty("Dropped", false);
+		shared_str NAME_Firing1 = AddConstProperty("Firing1", false);
+		shared_str NAME_Idle = AddConstProperty("Idle", false);
+		shared_str NAME_Hide = AddConstProperty("Hide", false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionShow>("Show")
+			.AddCondition(NAME_Hidden, true)
+			.AddEffect(NAME_Hidden, false);
+
+		AddObjectAction.template operator()<FRbmkObjectActionHide>("Hide")
+			.SetUseEnough(bUseEnough)
+			.AddCondition(NAME_Hidden, false)
+			.AddEffect(NAME_Hide, true)
+			.AddEffect(NAME_Hidden, true);
+
+		AddObjectAction.template operator()<FRbmkObjectActionDrop>("Drop")
+			.AddCondition(NAME_Hidden, false)
+			.AddEffect(NAME_Dropped, true);
+
+		// idle
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Idle")
+			.AddCondition(NAME_Hidden, false)
+			.AddEffect(NAME_Idle, true)
+			.AddEffect(NAME_ThrowStarted, false)
+			.AddEffect(NAME_Firing1, false);
+
+		// fire start
+
+		AddObjectAction.template operator()<FRbmkObjectActionThrowMissile>("ThrowStart")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_ThrowStarted, false)
+			.AddEffect(NAME_ThrowStarted, true);
+
+		// fire throw
+
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Throwing")
+			.AddCondition(NAME_Hidden, false)
+			.AddCondition(NAME_ThrowStarted, true)
+			.AddCondition(NAME_Throw, false)
+			.AddEffect(NAME_Throw, true);
+
+		AddObjectAction.template operator()<FRbmkObjectActionBase>("Threaten")
+			.AddCondition(NAME_Throw, true)
+			.AddCondition(NAME_Firing1, false)
+			.AddEffect(NAME_Firing1, true);
+
+		GoapPlanner.SetTarget(NAME_Hide,true);
+	}
+	bool*				bUseEnough;
+	bool*				bAimed1;
+	bool*				bAimed2;
+};
+
+class FRbmkObjectPropertyCurrentObject  final : public FRbmkGoapProperty
+{
+public:
+	
+	CAI_Stalker* GetOwner() const { return reinterpret_cast<CAI_Stalker*>(Owner->Owner); }
+	virtual bool GetProperty() const override
+	{
+		CAI_Stalker* StalkerOwner = GetOwner();
+
+		if(ItemObject == StalkerOwner->inventory().ActiveItem())
+		{
+			return true;
+		}
+		if(StalkerOwner->inventory().ActiveItem() == nullptr)
+		{
+			return *TargetObject == ItemObject;
+		}
+		return false;
+	}
+
+	CHudItemObject* ItemObject;
+	CGameObject**TargetObject;
+};
+
+FRbmkObjectHandlerPlanner::FRbmkObjectHandlerPlanner(void* InOwner): bAimed1(false), bAimed2(false), bStrapped(false), bStrapped2Idle(false), bUseEnough(false), MinQueueSize(0), MaxQueueSize(0), MinQueueInterval(0), MaxQueueInterval(0),  QueueInterval(0), NextTimeChange(0)
+{
+	GoapPlanner.Owner = InOwner;
 }
 
 void FRbmkObjectHandlerPlanner::AddObject(CWeapon* Weapon)
 {
-	auto AddObjectProperty = [this,Weapon]<class C>(const char* InName)
-	{
-		shared_str Name;
-		Name.printf(InName, static_cast<int32>(Weapon->ID()));
-		C* Property = GoapPlanner.AddProperty<C>(Name);
-		Property->ItemObject = Weapon;
-		ItemProperties[Weapon].push_back(Property);
-		return Name;
-	};
+	static shared_str NAME_Target = "Target";
+	shared_str NAME_Weapon; NAME_Weapon.printf("Weapon_%d", static_cast<int32>(Weapon->ID()));
 
-	auto AddMemberProperty = [this,Weapon](const char* InName, bool& Member, bool Equality = true)
-	{
-		shared_str Name;
-		Name.printf(InName, static_cast<int32>(Weapon->ID()));
-		FRbmkGoapPropertyMember* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyMember>(Name);
-		Property->Value = &Member;
-		Property->Equality = Equality;
-		ItemProperties[Weapon].push_back(Property);
-		return Name;
-	};
+	FRbmkObjectPropertyCurrentObject*PropertyWeapon =  GoapPlanner.AddProperty<FRbmkObjectPropertyCurrentObject>(NAME_Weapon);
+	PropertyWeapon->ItemObject = Weapon;
+	PropertyWeapon->TargetObject = &TargetObject;
 
-	auto AddConstProperty = [this,Weapon](const char* InName, bool Value)
-	{
-		shared_str Name;
-		Name.printf(InName, static_cast<int32>(Weapon->ID()));
-		FRbmkGoapPropertyConst* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyConst>(Name);
-		Property->Value = Value;
-		ItemProperties[Weapon].push_back(Property);
-		return Name;
-	};
-
-	auto AddObjectAction = [this,Weapon]<class C>(const char* InName)->C&
-	{
-		shared_str Name;
-		Name.printf("%s_%d",InName, static_cast<int32>(Weapon->ID()));
-		C& Action = GoapPlanner.AddAction<C>(Name);
-		Action.ItemObject = Weapon;
-		Action.ObjectID = Weapon->ID();
-		Action.StateName = InName;
-		Action.bAimed1 = &bAimed1;
-		Action.bAimed2 = &bAimed2;
-		ItemActions[Weapon].push_back(&Action);
-		return Action;
-	};
-	
-	static shared_str NAME_NoItems = "NoItems";
-	shared_str NAME_Hidden = AddObjectProperty.template operator()<FRbmkObjectPropertyWeaponHidden>("Hidden_%d");
-
-	shared_str NAME_Aimed1 = AddMemberProperty("Aimed1_%d", bAimed1);
-	shared_str NAME_Aimed2 = AddMemberProperty("Aimed2_%d", bAimed2);
-	shared_str NAME_Strapped = AddMemberProperty("Strapped_%d", bStrapped);
-	shared_str NAME_Strapped2Idle = AddMemberProperty("Strapped2Idle_%d", bStrapped2Idle);
-
-	shared_str NAME_Ammo1 = AddObjectProperty.template operator()<FRbmkObjectPropertyAmmo>("Ammo1_%d");
-	shared_str NAME_Ammo2 = AddConstProperty("Ammo2_%d", false);
-	shared_str NAME_Empty1 = AddObjectProperty.template operator()<FRbmkObjectPropertyEmpty>("Empty1_%d");
-	shared_str NAME_Empty2 = AddConstProperty("Empty2_%d", false);
-	shared_str NAME_Ready1 = AddObjectProperty.template operator()<FRbmkObjectPropertyReady>("Ready1_%d");
-	shared_str NAME_Ready2 = AddConstProperty("Ready2_%d", false);
-	shared_str NAME_Full1 = AddObjectProperty.template operator()<FRbmkObjectPropertyFull>("Full1_%d");
-	shared_str NAME_Full2 = AddConstProperty("Full2_%d", false);
-	shared_str NAME_QueueWait1 = AddObjectProperty.template operator()<FRbmkObjectPropertyQueue>("Queue1_%d");
-	shared_str NAME_QueueWait2 = AddObjectProperty.template operator()<FRbmkObjectPropertyQueue>("Queue2_%d");
-
-	shared_str NAME_Switch1 = AddConstProperty("Switch1_%d", true);
-	shared_str NAME_Switch2 = AddConstProperty("Switch2_%d", false);
-	shared_str NAME_Firing1 = AddConstProperty("Firing1_%d", false);
-	shared_str NAME_FiringNoReload = AddConstProperty("FiringNoReload_%d", false);
-	shared_str NAME_Firing2 = AddConstProperty("Firing2_%d", false);
-	shared_str NAME_Idle = AddConstProperty("Idle_%d", false);
-	shared_str NAME_IdleStrap = AddConstProperty("IdleStrap_%d", false);
-	shared_str NAME_Dropped = AddConstProperty("Dropped_%d", false);
-	shared_str NAME_Aiming1 = AddConstProperty("Aiming1_%d", false);
-	shared_str NAME_Aiming2 = AddConstProperty("Aiming2_%d", false);
-	shared_str NAME_AimingReady1 = AddConstProperty("AimingReady1_%d", false);
-	shared_str NAME_AimingReady2 = AddConstProperty("AimingReady2_%d", false);
-	shared_str NAME_AimForceFull1 = AddConstProperty("AimForceFull1_%d", false);
-	shared_str NAME_AimForceFull2 = AddConstProperty("AimForceFull2_%d", false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionShow>("Show")
-		.AddCondition(NAME_Hidden, true)
-		.AddCondition(NAME_NoItems, true)
-		.AddEffect(NAME_NoItems, false)
-		.AddEffect(NAME_Hidden, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionHide>("Hide")
-		.SetUseEnough(&bUseEnough)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_NoItems, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_NoItems, true)
-		.AddEffect(NAME_Hidden, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionDrop>("Drop")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Dropped, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// idle
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Idle")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Idle, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionStrapping>("Strapping")
-		.SetValue(&bStrapped, &bStrapped2Idle)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddEffect(NAME_Strapped2Idle, true)
-		.AddEffect(NAME_Strapped, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionStrappingToIdle>("StrappingToIdle")
-		.SetValue(&bStrapped2Idle)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, true)
-		.AddCondition(NAME_Strapped2Idle, true)
-		.AddEffect(NAME_Strapped2Idle, false);
-
-
-	AddObjectAction.template operator()<FRbmkObjectActionUnstrapping>("Unstrapping")
-		.SetValue(&bStrapped, &bStrapped2Idle)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, true)
-		.AddEffect(NAME_Strapped, false)
-		.AddEffect(NAME_Strapped2Idle, true);
-
-
-	AddObjectAction.template operator()<FRbmkObjectActionStrappingToIdle>("UnstrappingToIdle")
-		.SetValue(&bStrapped2Idle)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, true)
-		.AddEffect(NAME_Strapped2Idle, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Strapped")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Strapped, true)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddCondition(NAME_IdleStrap, false)
-		.AddEffect(NAME_IdleStrap, true);
-
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("Aim1")
-		.SetValue(&bAimed1, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed1, true)
-		.AddEffect(NAME_Aiming1, true)
-		.AddEffect(NAME_Aimed2, false);
-
-	// aim2
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("Aim2")
-		.SetValue(&bAimed2, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed2, true)
-		.AddEffect(NAME_Aiming2, true)
-		.AddEffect(NAME_Aimed1, false);
-
-	// aim_queue1
-	AddObjectAction.template operator()<FRbmkObjectActionQueueWait>("AimQueue1")
-		.SetValue(&QueueInterval)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_QueueWait1, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_QueueWait1, true)
-		.AddEffect(NAME_Aimed2, false);
-
-	// aim_queue2
-	AddObjectAction.template operator()<FRbmkObjectActionQueueWait>("AimQueue2")
-		.SetValue(&QueueInterval)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_QueueWait2, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_QueueWait2, true)
-		.AddEffect(NAME_Aimed1, false);
-
-	// fire1
-	AddObjectAction.template operator()<FRbmkObjectActionFire>("Fire1")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ready1, true)
-		.AddCondition(NAME_Empty1, false)
-		.AddCondition(NAME_Aimed1, true)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_QueueWait1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Firing1, true);
-
-	// fire no reload
-	AddObjectAction.template operator()<FRbmkObjectActionFireNoReload>("FireNoReload")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_FiringNoReload, true);
-
-	// fire2
-	AddObjectAction.template operator()<FRbmkObjectActionFire>("Fire2")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ready2, true)
-		.AddCondition(NAME_Empty2, false)
-		.AddCondition(NAME_Aimed2, true)
-		.AddCondition(NAME_Switch2, true)
-		.AddCondition(NAME_QueueWait2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Firing2, true);
-
-	// reload1
-	AddObjectAction.template operator()<FRbmkObjectActionReload>("Reload1")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ready1, false)
-		.AddCondition(NAME_Ammo1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Empty1, false)
-		.AddEffect(NAME_Ready1, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// reload2
-	AddObjectAction.template operator()<FRbmkObjectActionReload>("Reload2")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ready2, false)
-		.AddCondition(NAME_Ammo2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Empty2, false)
-		.AddEffect(NAME_Ready2, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// force_reload1
-	AddObjectAction.template operator()<FRbmkObjectActionReload>("ForceReload1")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Full1, false)
-		.AddCondition(NAME_Ammo1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Empty1, false)
-		.AddEffect(NAME_Ready1, true)
-		.AddEffect(NAME_Full1, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// force_reload2
-	AddObjectAction.template operator()<FRbmkObjectActionReload>("ForceReload2")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Full2, false)
-		.AddCondition(NAME_Ammo2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Empty2, false)
-		.AddEffect(NAME_Ready2, true)
-		.AddEffect(NAME_Full2, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// switch1
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Switch1")
-		.AddCondition(NAME_Switch1, false)
-		.AddCondition(NAME_Switch2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Switch1, true)
-		.AddEffect(NAME_Switch2, false)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	// switch2
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Switch2")
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_Switch2, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Switch1, false)
-		.AddEffect(NAME_Switch2, true)
-		.AddEffect(NAME_Aimed1, false)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("AimingReady1")
-		.SetValue(&bAimed1, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_Ready1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed1, true)
-		.AddEffect(NAME_AimingReady1, true)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("AimingReady2")
-		.SetValue(&bAimed2, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed2, true)
-		.AddEffect(NAME_AimingReady2, true)
-		.AddEffect(NAME_Aimed1, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("AimForceFull1")
-		.SetValue(&bAimed1, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch1, true)
-		.AddCondition(NAME_Ready1, true)
-		.AddCondition(NAME_Full1, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed1, true)
-		.AddEffect(NAME_AimForceFull1, true)
-		.AddEffect(NAME_Aimed2, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionAim>("AimForceFull2")
-		.SetValue(&bAimed2, true)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Switch2, true)
-		.AddCondition(NAME_Ready2, true)
-		.AddCondition(NAME_Full2, true)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Aimed2, true)
-		.AddEffect(NAME_AimForceFull2, true)
-		.AddEffect(NAME_Aimed1, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("FakeGetAmmo1")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ammo1, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Ammo1, true);
-
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("FakeGetAmmo2")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_Ammo2, false)
-		.AddCondition(NAME_Strapped, false)
-		.AddCondition(NAME_Strapped2Idle, false)
-		.AddEffect(NAME_Ammo2, true);
+	FRbmkObjectActionWeaponActions&Action = GoapPlanner.AddAction<FRbmkObjectActionWeaponActions>(NAME_Weapon);
+	Action.QueueInterval	=	&QueueInterval;
+	Action.bAimed1			=	&bAimed1;
+	Action.bAimed2			=	&bAimed2;
+	Action.bStrapped		=	&bStrapped;
+	Action.bStrapped2Idle	=	&bStrapped2Idle;
+	Action.bUseEnough		=	&bUseEnough;
+	Action.SetWeapon(Weapon);
+	Action.AddCondition(NAME_Weapon,true);
+	Action.AddCondition(NAME_Target,false);
+	Action.AddEffect(NAME_Target,true);
+	ItemActions.insert_or_assign(Weapon,&Action);
+	ItemProperties.insert_or_assign(Weapon,PropertyWeapon);
 }
+
+
 
 void FRbmkObjectHandlerPlanner::AddObject(CMissile* Missile)
 {
-	auto AddObjectProperty = [this,Missile]<class C>(const char* InName)
-	{
-		shared_str Name;
-		Name.printf(InName, static_cast<int32>(Missile->ID()));
-		C* Property = GoapPlanner.AddProperty<C>(Name);
-		Property->ItemObject = Missile;
-		ItemProperties[Missile].push_back(Property);
-		return Name;
-	};
+	static shared_str NAME_Target = "Target";
+	shared_str NAME_Missile; NAME_Missile.printf("Missile_%d", static_cast<int32>(Missile->ID()));
 
-	auto AddConstProperty = [this,Missile](const char* InName, bool Value)
-	{
-		shared_str Name;
-		Name.printf(InName, static_cast<int32>(Missile->ID()));
-		FRbmkGoapPropertyConst* Property = GoapPlanner.AddProperty<FRbmkGoapPropertyConst>(Name);
-		Property->Value = Value;
-		ItemProperties[Missile].push_back(Property);
-		return Name;
-	};
+	FRbmkObjectPropertyCurrentObject*PropertyWeapon =  GoapPlanner.AddProperty<FRbmkObjectPropertyCurrentObject>(NAME_Missile);
+	PropertyWeapon->ItemObject = Missile;
+	PropertyWeapon->TargetObject = &TargetObject;
 
-	auto AddObjectAction = [this,Missile]<class C>(const char* InName)->C&
-	{
-		shared_str Name;
-		Name.printf("%s_%d",InName, static_cast<int32>(Missile->ID()));
-		C& Action = GoapPlanner.AddAction<C>(Name);
-		Action.ItemObject = Missile;
-		Action.ObjectID = Missile->ID();
-		Action.StateName = InName;
-		Action.bAimed2 = &bAimed2;
-		Action.bAimed2 = &bAimed2;
-		ItemActions[Missile].push_back(&Action);
-		return Action;
-	};
-
-	static shared_str NAME_NoItems = "NoItems";
-	shared_str NAME_Hidden = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileHidden>("Hidden_%d");
-	shared_str NAME_ThrowStarted = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileThrowStarted>("ThrowStarted_%d");
-	shared_str NAME_Throw = AddObjectProperty.template operator()<FRbmkObjectPropertyMissileThrowEnd>("ThrowEnd_%d");
-	shared_str NAME_Dropped = AddConstProperty("Dropped_%d", false);
-	shared_str NAME_Firing1 = AddConstProperty("Firing1_%d", false);
-	shared_str NAME_Idle = AddConstProperty("Idle_%d", false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionShow>("Show")
-		.AddCondition(NAME_Hidden, true)
-		.AddCondition(NAME_NoItems, true)
-		.AddEffect(NAME_NoItems, false)
-		.AddEffect(NAME_Hidden, false);
-
-	AddObjectAction.template operator()<FRbmkObjectActionHide>("Hide").SetUseEnough(&bUseEnough)
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_NoItems, false)
-		.AddEffect(NAME_NoItems, true)
-		.AddEffect(NAME_Hidden, true);
-
-	AddObjectAction.template operator()<FRbmkObjectActionDrop>("Drop")
-		.AddCondition(NAME_Hidden, false)
-		.AddEffect(NAME_Dropped, true);
-
-	// idle
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Idle")
-		.AddCondition(NAME_Hidden, false)
-		.AddEffect(NAME_Idle, true)
-		.AddEffect(NAME_ThrowStarted, false)
-		.AddEffect(NAME_Firing1, false);
-
-	// fire start
-
-	AddObjectAction.template operator()<FRbmkObjectActionThrowMissile>("ThrowStart")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_ThrowStarted, false)
-		.AddEffect(NAME_ThrowStarted, true);
-
-	// fire throw
-
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Throwing")
-		.AddCondition(NAME_Hidden, false)
-		.AddCondition(NAME_ThrowStarted, true)
-		.AddCondition(NAME_Throw, false)
-		.AddEffect(NAME_Throw, true);
-
-	AddObjectAction.template operator()<FRbmkObjectActionBase>("Threaten")
-		.AddCondition(NAME_Throw, true)
-		.AddCondition(NAME_Firing1, false)
-		.AddEffect(NAME_Firing1, true);
+	FRbmkObjectActionMissileActions&Action = GoapPlanner.AddAction<FRbmkObjectActionMissileActions>(NAME_Missile);
+	Action.bUseEnough		=	&bUseEnough;
+	Action.bAimed1			=	&bAimed1;
+	Action.bAimed2			=	&bAimed2;
+	Action.SetMissile(Missile);
+	Action.AddCondition(NAME_Missile,true);
+	Action.AddCondition(NAME_Target,false);
+	Action.AddEffect(NAME_Target,true);
+	ItemActions.insert_or_assign(Missile,&Action);
+	ItemProperties.insert_or_assign(Missile,PropertyWeapon);
 }
 
 void FRbmkObjectHandlerPlanner::RemoveObject(CObject* Item)
@@ -1298,25 +1322,31 @@ void FRbmkObjectHandlerPlanner::RemoveObject(CObject* Item)
 	auto Actions = ItemActions.find(Item);
 	if (Actions != ItemActions.end())
 	{
-		for (FRbmkGoapAction* Action : Actions->second)
-		{
-			GoapPlanner.RemoveAction(Action);
-		}
+		GoapPlanner.RemoveAction( Actions->second);
 		ItemActions.erase(Actions);
 	}
 	auto Properties = ItemProperties.find(Item);
 	if (Properties != ItemProperties.end())
 	{
-		for (FRbmkGoapProperty* Property : Properties->second)
-		{
-			GoapPlanner.RemoveProperty(Property);
-		}
+		GoapPlanner.RemoveProperty(Properties->second);
 		ItemProperties.erase(Properties);
+	}
+	
+	if(TargetObject == Item)
+	{
+		TargetObject = nullptr;
+		SetGoap(MonsterSpace::eObjectActionIdle,nullptr,0,0,0,0);
+		bAimed1 = false;
+		bAimed2 = false;
+		bStrapped = false;
+		bStrapped2Idle = false;
+		bUseEnough = false;
 	}
 }
 
 void FRbmkObjectHandlerPlanner::SetGoap(MonsterSpace::EObjectAction ObjectAction, CGameObject* InGameObject, u32 InMinQueueSize, u32 InMaxQueueSize, u32 InMinQueueInterval, u32 InMaxQueueInterval)
 {
+	CGameObject* LastTargetObject = TargetObject;
 	if (InGameObject && (MonsterSpace::eObjectActionDeactivate != ObjectAction))
 	{
 		CWeapon* Weapon = smart_cast<CWeapon*>(InGameObject);
@@ -1329,61 +1359,74 @@ void FRbmkObjectHandlerPlanner::SetGoap(MonsterSpace::EObjectAction ObjectAction
 	{
 		ObjectAction = MonsterSpace::eObjectActionDeactivate;
 	}
+	
+	TargetObject = InGameObject;
 
 	shared_str ActionName;
 	switch (ObjectAction)
 	{
 	case MonsterSpace::eObjectActionSwitch1:
-		ActionName.printf("Switch1_%d", InGameObject->ID());
+		ActionName.printf("Switch1");
 		break;
 	case MonsterSpace::eObjectActionSwitch2:
-		ActionName.printf("Switch2_%d", InGameObject->ID());
+		ActionName.printf("Switch2");
 		break;
 	case MonsterSpace::eObjectActionAim1:
-		ActionName.printf("AimingReady1_%d", InGameObject->ID());
+		ActionName.printf("AimingReady1");
 		break;
 	case MonsterSpace::eObjectActionAim2:
-		ActionName.printf("Aiming2_%d", InGameObject->ID());
+		ActionName.printf("Aiming2");
 		break;
 	case MonsterSpace::eObjectActionFire1:
-		ActionName.printf("Firing1_%d", InGameObject->ID());
+		ActionName.printf("Firing1");
 		break;
 	case MonsterSpace::eObjectActionFireNoReload:
-		ActionName.printf("FiringNoReload1_%d", InGameObject->ID());
+		ActionName.printf("FiringNoReload1");
 		break;
 	case MonsterSpace::eObjectActionFire2:
-		ActionName.printf("Firing2_%d", InGameObject->ID());
+		ActionName.printf("Firing2");
 		break;
 	case MonsterSpace::eObjectActionIdle:
-		ActionName.printf("Idle_%d", InGameObject->ID());
+		ActionName.printf("Idle");
 		break;
 	case MonsterSpace::eObjectActionStrapped:
-		ActionName.printf("IdleStrap_%d", InGameObject->ID());
+		ActionName.printf("IdleStrap");
 		break;
 	case MonsterSpace::eObjectActionDrop:
-		ActionName.printf("Dropped_%d", InGameObject->ID());
+		ActionName.printf("Dropped");
 		break;
 	case MonsterSpace::eObjectActionActivate:
-		ActionName.printf("Idle_%d", InGameObject->ID());
+		ActionName.printf("Idle");
 		break;
 	case MonsterSpace::eObjectActionDeactivate:
 		ActionName.printf("NoItemsIdle");
+		TargetObject = nullptr;
 		break;
 	case MonsterSpace::eObjectActionAimReady1:
-		ActionName.printf("AimingReady1_%d", InGameObject->ID());
+		ActionName.printf("AimingReady1");
 		break;
 	case MonsterSpace::eObjectActionAimReady2:
-		ActionName.printf("AimingReady2_%d", InGameObject->ID());
+		ActionName.printf("AimingReady2");
 		break;
 	case MonsterSpace::eObjectActionAimForceFull1:
-		ActionName.printf("AimForceFull1_%d", InGameObject->ID());
+		ActionName.printf("AimForceFull1");
 		break;
 	case MonsterSpace::eObjectActionAimForceFull2:
-		ActionName.printf("AimForceFull2_%d", InGameObject->ID());
+		ActionName.printf("AimForceFull2");
 		break;
 	default: {NODEFAULT; break;}
 	}
-	GoapPlanner.SetTarget(ActionName,true);
+	if(LastTargetObject&&LastTargetObject!=TargetObject)
+	{
+		if (auto Actions = ItemActions.find(LastTargetObject);Actions != ItemActions.end())
+		{
+			Actions->second->GoapPlanner.SetTarget("Hide",true);
+		}
+	}
+	if (auto Actions = ItemActions.find(InGameObject);Actions != ItemActions.end())
+	{
+		Actions->second->GoapPlanner.SetTarget(ActionName,true);
+	}
 
 	if (!InGameObject || (InMinQueueSize < 0))
 		return;
@@ -1422,34 +1465,75 @@ void FRbmkObjectHandlerPlanner::SetGoap(MonsterSpace::EObjectAction ObjectAction
 
 uint16 FRbmkObjectHandlerPlanner::CurrentActionObjectID() const
 {
-	if(GoapPlanner.GetCurrentAction())
-	{
-		FRbmkObjectActionBase* ObjectActionBase = static_cast<FRbmkObjectActionBase*>(GoapPlanner.GetCurrentAction());
-		return ObjectActionBase->ObjectID;
-	}
-	return 0xFFFF;
+	return TargetObject?TargetObject->ID():0xFFFF;
 }
 
 shared_str FRbmkObjectHandlerPlanner::CurrentActionStateName() const
 {
-	if(GoapPlanner.GetCurrentAction())
+	static shared_str NAME_NoItems = "NoItems";
+	if(FRbmkGoapAction* CurrentAction = GoapPlanner.GetCurrentAction())
 	{
-		FRbmkObjectActionBase* ObjectActionBase = static_cast<FRbmkObjectActionBase*>(GoapPlanner.GetCurrentAction());
-		return ObjectActionBase->StateName;
+		if(CurrentAction->Name == NAME_NoItems)
+		{
+			return NAME_NoItems;
+		}
+		FRbmkObjectActionWeaponActions* ActionWeaponActions = static_cast<FRbmkObjectActionWeaponActions*>(CurrentAction);
+		if(FRbmkGoapAction* SubCurrentAction =  ActionWeaponActions->GoapPlanner.GetCurrentAction())
+		{
+			return SubCurrentAction->Name;
+		}
 	}
-	return "";
+	return NAME_NoItems;
+}
+
+bool FRbmkObjectHandlerPlanner::IsWeaponGoingToBeStrapped(const CGameObject* GameObject) const
+{
+	static shared_str NAME_IdleStrap = "IdleStrap";
+	if (auto Actions = ItemActions.find(const_cast<CGameObject*>(GameObject));Actions != ItemActions.end())
+	{
+		bool Value;
+		const FRbmkObjectActionObjectActions* ActionWeaponActions = Actions->second;
+		return ActionWeaponActions->GoapPlanner.GetTarget(&Value) == NAME_IdleStrap&&Value;
+
+	}
+	return false;
+}
+
+uint32 FRbmkObjectHandlerPlanner::GetAimTime(const CWeapon* GameObject) const
+{
+	static shared_str NAME_IdleStrap = "IdleStrap";
+	if (auto Actions = ItemActions.find(const_cast<CWeapon*>(GameObject));Actions != ItemActions.end())
+	{
+		const FRbmkObjectActionWeaponActions* ActionWeaponActions = static_cast<FRbmkObjectActionWeaponActions*>( Actions->second);
+		return ActionWeaponActions->AimTime;
+	}
+	return 500;
+}
+
+void FRbmkObjectHandlerPlanner::SetAimTime(const CWeapon* GameObject, uint32 NewAimTime)
+{
+	static shared_str NAME_IdleStrap = "IdleStrap";
+	if (auto Actions = ItemActions.find(const_cast<CWeapon*>(GameObject));Actions != ItemActions.end())
+	{
+		FRbmkObjectActionWeaponActions* ActionWeaponActions = static_cast<FRbmkObjectActionWeaponActions*>( Actions->second);
+		ActionWeaponActions->AimTime = NewAimTime;
+	}
 }
 
 void FRbmkObjectHandlerPlanner::Initialize()
 {
+	
+	static shared_str NAME_Target = "Target";
 	static shared_str NAME_NoItems = "NoItems";
-	GoapPlanner.AddProperty<FRbmkObjectPropertyNoItems>(NAME_NoItems);
-	GoapPlanner.AddProperty<FRbmkGoapPropertyConst>("NoItemsIdle")->Value = false;
+	GoapPlanner.AddProperty<FRbmkObjectPropertyNoItems>(NAME_NoItems)->TargetObject = &TargetObject;
+	GoapPlanner.AddProperty<FRbmkGoapPropertyConst>(NAME_Target)->Value = false;
 
 	GoapPlanner.AddAction<FRbmkObjectActionBase>(NAME_NoItems)
 		.AddCondition(NAME_NoItems, true)
-		.AddCondition("NoItemsIdle", false)
-		.AddEffect("NoItemsIdle", true);
+		.AddCondition(NAME_Target, false)
+		.AddEffect(NAME_Target, true);
+
+	GoapPlanner.SetTarget(NAME_Target,true);
 	
 	SetGoap(MonsterSpace::eObjectActionIdle,0,0,0,0,0);
 }

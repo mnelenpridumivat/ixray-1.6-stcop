@@ -44,4 +44,4 @@ extern void DestroyImGuiInGame();
 #undef min
 #undef max
 
-#define USE_OLD_OBJECT_PLANNER 1
+#define USE_OLD_OBJECT_PLANNER 0
