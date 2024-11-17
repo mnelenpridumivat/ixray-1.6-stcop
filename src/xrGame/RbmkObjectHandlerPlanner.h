@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "GOAP/RbmkGoapPlanner.h"
 
 class FRbmkObjectActionObjectActions;

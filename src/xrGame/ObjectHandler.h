@@ -1,7 +1,7 @@
 #pragma once
 
 #if !USE_OLD_OBJECT_PLANNER
-#include "inventoryowner.h"
+#include "InventoryOwner.h"
 #include "graph_engine_space.h"
 
 namespace MonsterSpace {

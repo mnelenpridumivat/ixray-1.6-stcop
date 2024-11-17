@@ -1,9 +1,9 @@
-﻿#include "RbmkObjectHandlerPlanner.h"
+#include "RbmkObjectHandlerPlanner.h"
 
 #include "Inventory.h"
 #include "stalker_animation_manager.h"
 #include "Weapon.h"
-#include "weaponmagazined.h"
+#include "WeaponMagazined.h"
 #include "ai/stalker/ai_stalker.h"
 
 

@@ -1,18 +1,18 @@
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #if !USE_OLD_OBJECT_PLANNER
 #include "ObjectHandler.h"
 #include "ObjectHandlerSpace.h"
 #include "ai_monster_space.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "weaponmagazined.h"
+#include "WeaponMagazined.h"
 #include "ai/stalker/ai_stalker.h"
 #include "Inventory.h"
-#include "torch.h"
+#include "Torch.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "enemy_manager.h"
 #include "ai_object_location.h"
-#include "effectorshot.h"
+#include "EffectorShot.h"
 #include "RbmkObjectHandlerPlanner.h"
 
 CObjectHandler::CObjectHandler		(CAI_Stalker *object)
