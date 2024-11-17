@@ -330,7 +330,7 @@ void CUIThemeManager::SaveTo()
 		return;
 
 	xr_string jfn;
-	if (EFS.GetSaveName("$app_data_root$", jfn, 0, 6, "*.json"))
+	if (EFS.GetSaveName("$themes$", jfn, 0, 6, "*.json"))
 	{
 		json JSONData = {};
 		ImVec4* colors = ImGui::GetStyle().Colors;
@@ -378,7 +378,7 @@ void CUIThemeManager::LoadFrom()
 {
 	json JSONData = {};
 	xr_string jfn;
-	if (EFS.GetOpenName("$app_data_root$", jfn, false, NULL, 6, "*.json"))
+	if (EFS.GetOpenName("$themes$", jfn, false, NULL, 6, "*.json"))
 	{
 		std::ifstream f(jfn.c_str());
 		f >> JSONData;
