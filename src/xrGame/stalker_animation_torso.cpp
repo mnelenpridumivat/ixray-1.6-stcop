@@ -6,18 +6,22 @@
 //	Description : Torso animations for monster "Stalker"
 ////////////////////////////////////////////////////////////////////////////
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "stalker_animation_manager.h"
 #include "ai/stalker/ai_stalker.h"
 #include "Inventory.h"
 #include "Weapon.h"
-#include "Missile.h"
-#include "object_handler_space.h"
-#include "object_handler_planner.h"
+#include "missile.h"
+#include "ObjectHandlerSpace.h"
 #include "stalker_movement_manager_smart_cover.h"
-#include "EntityCondition.h"
+#include "entitycondition.h"
+#include "RbmkObjectHandlerPlanner.h"
 #include "stalker_animation_data.h"
 #include "stalker_animation_manager_impl.h"
+
+#if USE_OLD_OBJECT_PLANNER
+#include "Legacy/object_handler_planner.h"
+#endif
 
 const u32	need_look_back_time_interval= 2000;
 
@@ -106,6 +110,7 @@ MotionID CStalkerAnimationManager::unknown_object_animation(u32 slot, const EBod
 	// stalker shortcuts
 	const CAI_Stalker				&stalker = object();
 	const stalker_movement_manager_smart_cover	&movement = stalker.movement();
+#if USE_OLD_OBJECT_PLANNER
 	u32								id = stalker.CObjectHandler::planner().current_action_state_id();
 
 	switch (id) {
@@ -143,6 +148,67 @@ MotionID CStalkerAnimationManager::unknown_object_animation(u32 slot, const EBod
 		case ObjectHandlerSpace::eWorldOperatorUnstrapping2Idle	:
 			return					(animation_stand[12].A[1]);
 	}
+#else
+	shared_str								CurrentStateName = stalker.m_planner->CurrentActionStateName();
+
+	static shared_str NAME_Fire1 = "Fire1";
+	static shared_str NAME_Fire2 = "Fire2";
+	static shared_str NAME_Aim1 = "Aim1";
+	static shared_str NAME_Aim2 = "Aim2";
+	static shared_str NAME_AimingReady1 = "AimingReady1";
+	static shared_str NAME_AimingReady2 = "AimingReady2";
+	static shared_str NAME_AimQueue1 = "AimQueue1";
+	static shared_str NAME_AimQueue2 = "AimQueue2";
+	static shared_str NAME_Strapping2Idle = "StrappingToIdle";
+	static shared_str NAME_Strapping = "Strapping";
+	static shared_str NAME_Unstrapping2Idle = "UnstrappingToIdle";
+	static shared_str NAME_Unstrapping = "Unstrapping";
+	
+	if(CurrentStateName == NAME_Fire1||
+	CurrentStateName == NAME_Fire2||
+	CurrentStateName == NAME_Aim1||
+	CurrentStateName == NAME_Aim2||
+	CurrentStateName == NAME_AimingReady1||
+	CurrentStateName == NAME_AimingReady2||
+	CurrentStateName == NAME_AimQueue1||
+	CurrentStateName == NAME_AimQueue2
+	)
+	{
+			if (standing())
+				return				(aim_animation(slot,animation,0));
+
+			if (eMovementTypeWalk == movement.movement_type()) {
+				if ((body_state == eBodyStateStand) && (slot == 2) && need_look_back())
+					return			(animation[13 + m_looking_back - 1].A[1]);
+				else
+					return			(aim_animation(slot,animation,0));
+			}
+
+			if ((body_state == eBodyStateStand) && (slot == 2) && need_look_back())
+				return				(animation[13 + m_looking_back - 1].A[0]);
+
+			VERIFY					(eMovementTypeRun == movement.movement_type());
+			return					(aim_animation(slot,animation,3));
+		}
+
+else if (CurrentStateName == NAME_Strapping)
+	{
+		return					(animation_stand[11].A[0]);
+	}
+	else if (CurrentStateName == NAME_Unstrapping)
+	{
+		return					(animation_stand[12].A[0]);
+	}
+	else if (CurrentStateName == NAME_Strapping2Idle	)
+	{
+		return					(animation_stand[11].A[1]);
+	}
+	else if (CurrentStateName == NAME_Unstrapping2Idle)
+	{
+		return					(animation_stand[12].A[1]);
+	}
+
+#endif
 
 	if (eMentalStateFree == movement.mental_state()) {
 		VERIFY3								(

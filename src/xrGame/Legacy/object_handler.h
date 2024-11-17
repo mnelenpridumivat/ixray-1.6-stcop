@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "InventoryOwner.h"
+#include "inventoryowner.h"
 #include "graph_engine_space.h"
 
 namespace MonsterSpace {

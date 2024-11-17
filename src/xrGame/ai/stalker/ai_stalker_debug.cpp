@@ -8,6 +8,9 @@
 
 #include "stdafx.h"
 #include "pch_script.h"
+#if USE_OLD_OBJECT_PLANNER
+#include "Legacy/object_handler_planner.h"
+#endif
 
 #ifdef DEBUG_DRAW
 #include "ai_stalker.h"
@@ -25,7 +28,6 @@
 #include "../../Weapon.h"
 #include "../../sound_player.h"
 #include "../../Inventory.h"
-#include "../../object_handler_planner.h"
 #include "../../stalker_movement_manager_smart_cover.h"
 #include "../../movement_manager_space.h"
 #include "../../patrol_path_manager.h"
@@ -45,7 +47,6 @@
 #include "../../../xrEngine/CameraBase.h"
 #include "../../mt_config.h"
 #include "../../WeaponMagazined.h"
-#include "../../object_handler_space.h"
 #include "../../debug_renderer.h"
 #include "../../CharacterPhysicsSupport.h"
 #include "../../smart_cover_animation_selector.h"
@@ -480,6 +481,7 @@ void CAI_Stalker::debug_text			()
 	DBG_OutText	("%s%sitem to spawn       : %s",indent,indent,item_to_spawn().size() ? *item_to_spawn() : "no item to spawn");
 	DBG_OutText	("%s%sammo in box to spawn: %d",indent,indent,item_to_spawn().size() ? ammo_in_box_to_spawn() : 0);
 	
+#if USE_OLD_OBJECT_PLANNER
 	CWeaponMagazined					*weapon = smart_cast<CWeaponMagazined*>(inventory().ActiveItem());
 	if (weapon) {
 		CObjectHandlerPlanner			&planner = CObjectHandler::planner();
@@ -495,7 +497,7 @@ void CAI_Stalker::debug_text			()
 			).inertia_time()
 		);
 	}
-	
+#endif	
 	if (inventory().ActiveItem()) {
 		DBG_OutText	("%s%sactive item",indent,indent);
 		DBG_OutText	("%s%s%sobject         : %s",indent,indent,indent,inventory().ActiveItem() ? *inventory().ActiveItem()->object().cName() : "");
@@ -511,10 +513,11 @@ void CAI_Stalker::debug_text			()
 
 	string256							temp;
 
+#if USE_OLD_OBJECT_PLANNER
 	const CObjectHandlerPlanner			&objects = planner();
 	xr_strconcat(temp,indent,indent);
 	draw_planner						(objects,temp,indent,"root");
-
+#endif
 	DBG_TextOutSet		(330,up_indent);
 	
 	// brain

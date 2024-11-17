@@ -24,7 +24,11 @@
 #include "player_hud.h"
 #include "CustomDetector.h"
 
-ENGINE_API	bool	g_dedicated_server;
+#if USE_OLD_OBJECT_PLANNER
+#include "Legacy/object_handler_planner.h"
+#endif
+
+ENGINE_API bool	g_dedicated_server;
 
 CUIXml*				pWpnScopeXml = nullptr;
 
@@ -783,7 +787,6 @@ void CWeaponMagazined::switch2_Idle	()
 
 #ifdef DEBUG
 #include "ai/stalker/ai_stalker.h"
-#include "object_handler_planner.h"
 #endif
 void CWeaponMagazined::switch2_Fire	()
 {
@@ -797,6 +800,7 @@ void CWeaponMagazined::switch2_Fire	()
 	if (ii != io->inventory().ActiveItem())
 		Msg					("! not an active item, item %s, owner %s, active item %s",*cName(),*H_Parent()->cName(),io->inventory().ActiveItem() ? *io->inventory().ActiveItem()->object().cName() : "no_active_item");
 
+#if USE_OLD_OBJECT_PLANNER
 	if ( !(io && (ii == io->inventory().ActiveItem())) ) 
 	{
 		CAI_Stalker			*stalker = smart_cast<CAI_Stalker*>(H_Parent());
@@ -806,6 +810,7 @@ void CWeaponMagazined::switch2_Fire	()
 			stalker->planner().show_target_world_state	();
 		}
 	}
+#endif
 #else
 	if (!io)
 		return;

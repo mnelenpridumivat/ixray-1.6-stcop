@@ -6,11 +6,12 @@
 //	Description : Object handler action planner weapon handling
 ////////////////////////////////////////////////////////////////////////////
 
-#include "StdAfx.h"
+#include "stdafx.h"
+
+#if USE_OLD_OBJECT_PLANNER
 #include "object_handler_planner.h"
 #include "object_property_evaluators.h"
 #include "object_actions.h"
-#include "object_handler_space.h"
 #include "Weapon.h"
 #include "object_handler_planner_impl.h"
 #include "ai/stalker/ai_stalker.h"
@@ -384,3 +385,4 @@ void CObjectHandlerPlanner::add_operators		(CWeapon *weapon)
 	this->action(uid(id,eWorldOperatorQueueWait1)).set_inertia_time(300);
 	this->action(uid(id,eWorldOperatorQueueWait2)).set_inertia_time(300);
 }
+#endif

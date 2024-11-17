@@ -21,8 +21,6 @@
 #include "Inventory.h"
 #include "CustomZone.h"
 #include "patrol_path_manager.h"
-#include "object_handler_planner.h"
-#include "object_handler_space.h"
 #include "memory_manager.h"
 #include "visual_memory_manager.h"
 #include "sound_memory_manager.h"
