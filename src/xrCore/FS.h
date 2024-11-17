@@ -217,7 +217,7 @@ public:
 
 	u32 			find_chunk  (u32 ID, BOOL* bCompressed);
 
-	u32				find_chunk_thm(const u32 ID, const char* dbg_name)
+	u32				find_chunk_thm(const u32 ID, const char* dbg_name, bool* is_valid = nullptr)
 	{
 		u32 dwSize{}, dwType{};
 		bool success{};
@@ -253,11 +253,15 @@ public:
 						if (pos + length != size) // not the last chunk in the file?
 						{
 							bool ok = true;
-							if (pos + length > size - 8) ok = false; // size too large?
+							if (pos + length > size - 8) {
+								ok = false; // size too large?
+							}
 							if (ok)
 							{
 								impl().seek(pos + length);
-								if ((r_u32() & 0x7ffffff0) != 0x810) ok = false; // size too small?
+								if ((r_u32() & 0x7ffffff0) != 0x810) {
+									ok = false; // size too small?
+								}
 							}
 							if (!ok) // size incorrect?
 							{
@@ -265,8 +269,13 @@ public:
 								while (pos + length < size) // find correct size, up to eof
 								{
 									impl().seek(pos + length);
-									if (pos + length <= size - 8 && (r_u32() & 0x7ffffff0) == 0x810) break; // found start of next section
+									if (pos + length <= size - 8 && (r_u32() & 0x7ffffff0) == 0x810) {
+										break; // found start of next section
+									}
 									length++;
+								}
+								if (is_valid) {
+									*is_valid = false;
 								}
 								Msg("!![%s] THM [%s] chunk [%u] fixed, wrong size = [%u], correct size = [%u]", __FUNCTION__, dbg_name, ID, dwSize, length);
 							}
@@ -360,8 +369,13 @@ public:
 	IC void*		pointer		()	const		{	return &(data[Pos]);	};
 	IC void			advance		(int cnt)		{	
 		Pos+=cnt;
-		if (!((Pos <= Size) && (Pos >= 0)))
+#ifdef DEBUG
+		if (!((Pos <= Size) && (Pos >= 0))) {
 			Msg("! Error advance! Pos+cnt<=Size");
+		}
+#else 
+		VERIFY((Pos <= Size) && (Pos >= 0));
+#endif
 	};
 
 public:

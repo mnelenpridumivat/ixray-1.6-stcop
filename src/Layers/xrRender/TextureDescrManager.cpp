@@ -50,12 +50,13 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 		xr_strcpy			(fn,(*It).name.c_str());
 		fix_texture_thm_name(fn);
 
-		bool FoundedChunk = !!F->find_chunk_thm(THM_CHUNK_TYPE, fn);
+		bool ValidChunk = true;
+		bool FoundedChunk = !!F->find_chunk_thm(THM_CHUNK_TYPE, fn, &ValidChunk);
 		R_ASSERT2(FoundedChunk, "Not found chunk THM_CHUNK_TYPE");
 
 		F->r_u32			();
 		tp.Clear			();
-		tp.Load(*F, fn);
+		tp.Load(*F, fn, &ValidChunk);
 		FS.r_close			(F);
 		if (STextureParams::ttImage		== tp.type ||
 			STextureParams::ttTerrain	== tp.type ||
@@ -105,6 +106,17 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 			}
 
 		}
+
+		if (!ValidChunk) {
+			FS.update_path(fn, initial, (*It).name.c_str());
+			IWriter* thm_fixer = FS.w_open(fn);
+			thm_fixer->open_chunk(THM_CHUNK_TYPE);
+			thm_fixer->w_u32(1);
+			thm_fixer->close_chunk();
+			tp.Save(*thm_fixer);
+			FS.w_close(thm_fixer);
+		}
+
 	}
 }
 

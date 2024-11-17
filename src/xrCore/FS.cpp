@@ -337,8 +337,13 @@ IReader*	IReader::open_chunk_iterator	(u32& ID, IReader* _prev)
 
 void	IReader::r	(void *p,int cnt)
 {
-	if (!(Pos + cnt <= Size))
+#ifdef DEBUG
+	if (!((Pos <= Size) && (Pos >= 0))) {
 		Msg("! Error r! Pos+cnt<=Size");
+	}
+#else 
+	VERIFY((Pos <= Size) && (Pos >= 0));
+#endif
 	CopyMemory		(p,pointer(),cnt);
 	advance			(cnt);
 #ifdef DEBUG

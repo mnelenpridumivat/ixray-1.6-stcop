@@ -66,9 +66,9 @@ xr_token					tbmode_token							[ ]={
 	{ 0,					0											}
 };
 
-void STextureParams::Load(IReader& F, const char* dbg_name)
+void STextureParams::Load(IReader& F, const char* dbg_name, bool* is_valid)
 {
-    bool FoundedChunk = !!F.find_chunk_thm(THM_CHUNK_TEXTUREPARAM, dbg_name);
+    bool FoundedChunk = !!F.find_chunk_thm(THM_CHUNK_TEXTUREPARAM, dbg_name, is_valid);
     R_ASSERT2(FoundedChunk, "Not found chunk THM_CHUNK_TEXTUREPARAM");
 
     F.r					(&fmt,sizeof(ETFormat));
@@ -80,21 +80,21 @@ void STextureParams::Load(IReader& F, const char* dbg_name)
     width		= F.r_u32();
     height		= F.r_u32();
 
-    if (F.find_chunk_thm(THM_CHUNK_TEXTURE_TYPE, dbg_name)) {
+    if (F.find_chunk_thm(THM_CHUNK_TEXTURE_TYPE, dbg_name, is_valid)) {
         type	= (ETType)F.r_u32();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_DETAIL_EXT, dbg_name)) {
+    if (F.find_chunk_thm(THM_CHUNK_DETAIL_EXT, dbg_name, is_valid)) {
         F.r_stringZ(detail_name);
         detail_scale = F.r_float();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_MATERIAL, dbg_name)) {
+    if (F.find_chunk_thm(THM_CHUNK_MATERIAL, dbg_name, is_valid)) {
     	material		= (ETMaterial)F.r_u32		();
 	    material_weight = F.r_float	();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_BUMP, dbg_name)) {
+    if (F.find_chunk_thm(THM_CHUNK_BUMP, dbg_name, is_valid)) {
 	    bump_virtual_height	= F.r_float				();
 	    bump_mode			= (ETBumpMode)F.r_u32	();
         if (bump_mode<STextureParams::tbmNone){
@@ -103,11 +103,13 @@ void STextureParams::Load(IReader& F, const char* dbg_name)
     	F.r_stringZ			(bump_name);
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_EXT_NORMALMAP, dbg_name))
-	    F.r_stringZ			(ext_normal_map_name);
+    if (F.find_chunk_thm(THM_CHUNK_EXT_NORMALMAP, dbg_name, is_valid)) {
+        F.r_stringZ(ext_normal_map_name);
+    }
 
-    if (F.find_chunk_thm(THM_CHUNK_FADE_DELAY, dbg_name))
-		fade_delay			= F.r_u8();
+    if (F.find_chunk_thm(THM_CHUNK_FADE_DELAY, dbg_name, is_valid)) {
+        fade_delay = F.r_u8();
+    }
 }
 
 
