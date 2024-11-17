@@ -622,8 +622,7 @@ bool FRbmkGoapPlanner::Search()
 			}
 		}
 
-		FRbmkGoapParameters*NewGoapParameters =  new FRbmkGoapParameters(std::move(From));
-		return CacheParameters.insert(Iterator,xr_unique_ptr<FRbmkGoapParameters>(NewGoapParameters))->get();
+		return CacheParameters.insert(Iterator, xr_make_unique<FRbmkGoapParameters>(std::move(From)))->get();
 	};
 
 	auto IsFinalNode = [this,&TargetParameters](const FRbmkGoapParameters& Node)

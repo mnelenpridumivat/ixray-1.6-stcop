@@ -95,7 +95,7 @@ public:
 		void															Clear					();
 
 		void*															Owner;
-		std::vector<xr_unique_ptr<FRbmkGoapProperty>>					Properties;
+		xr_vector<xr_unique_ptr<FRbmkGoapProperty>>					Properties;
 		bool															NeedRefresh = false;
 		xr_vector<std::pair<FRbmkGoapProperty*,bool>>					CacheProperties;
 private:
@@ -103,7 +103,7 @@ private:
 		bool															Search				();
 
 
-		std::vector<xr_unique_ptr<FRbmkGoapAction>>						Actions;
+		xr_vector<xr_unique_ptr<FRbmkGoapAction>>						Actions;
 		FRbmkGoapParameter												Target;
 
 		FRbmkGoapAction*												CurrentAction;
@@ -113,7 +113,7 @@ private:
 		 *** For A* ***
 		 *************************************************************/
 		xr_vector<FRbmkGoapAction*>										Path;
-		std::vector<xr_unique_ptr<FRbmkGoapParameters>>					CacheParameters;
+		xr_vector<xr_unique_ptr<FRbmkGoapParameters>>					CacheParameters;
 		xr_vector<std::pair<int32_t, FRbmkGoapParameters*>>				TempPriorityNode;
 		xr_hash_map<FRbmkGoapParameters*, FRbmkGoapParameters*>			TempCameFrom;
 		xr_hash_map<FRbmkGoapParameters*, int32_t>						TempCostSoFar;
