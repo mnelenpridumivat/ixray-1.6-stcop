@@ -248,7 +248,7 @@ void SPHBonesData::net_Load(NET_Packet &P)
 
 	// VisMask init 
 	u64 _low = P.r_u64(); // Left (0...64)
-	u64 _high = 0; // Right(64..128)
+	u64 _high = u64(-1); // Right(64..128)
 
 	root_bone = P.r_u16();
 	Fvector _mn, _mx;
