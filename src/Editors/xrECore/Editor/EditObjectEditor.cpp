@@ -126,6 +126,10 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 		{
 			if (psDeviceFlags.is(rsEdgedFaces) && (1 == priority) && (false == strictB2F))
 				RenderEdge(parent);
+
+			if (IsSkeleton())
+				::Render->shader_option_skinning(4);
+
 			size_t s_id = 0;
 			for (SurfaceIt s_it = m_Surfaces.begin(); s_it != m_Surfaces.end(); s_it++)
 			{
@@ -158,6 +162,8 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 				}
 				s_id++;
 			}
+
+			::Render->shader_option_skinning(-1);
 		}
 	}
 }
@@ -286,13 +292,24 @@ void CEditableObject::OnDeviceDestroy()
 	DefferedUnloadRP();
 }
 
+D3DVERTEXELEMENT9 dwDecl_4W[] =	// 28bytes
+{
+	{ 0, 0,		D3DDECLTYPE_FLOAT4,		D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_POSITION,		0 },	// : p					: 2	: -12..+12
+	{ 0, 16,	D3DDECLTYPE_FLOAT4,	D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_NORMAL,		0 },	// : n.xyz, w = weight0	: 1	:  -1..+1, w=0..1
+	{ 0, 32,	D3DDECLTYPE_FLOAT4,	D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_TANGENT,		0 },	// : T.xyz, w = weight1	: 1	:  -1..+1, w=0..1
+	{ 0, 48,	D3DDECLTYPE_FLOAT4,	D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_BINORMAL,		0 },	// : B.xyz,	w = weight2	: 1	:  -1..+1, w=0..1
+	{ 0, 64,	D3DDECLTYPE_FLOAT2,		D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_TEXCOORD,		0 },	// : xy(tc)				: 2	: -16..+16
+	{ 0, 72,	D3DDECLTYPE_FLOAT4,	D3DDECLMETHOD_DEFAULT, 	D3DDECLUSAGE_TEXCOORD,		1 },	// : indices			: 1	:  0..255
+	D3DDECL_END()
+};
+
 void CEditableObject::DefferedLoadRP()
 {
 	if (m_LoadState.is(LS_RBUFFERS)) return;
 
 	// skeleton
 	if (IsSkeleton())
-		vs_SkeletonGeom.create(FVF_SV,RCache.Vertex.Buffer(),RCache.Index.Buffer());
+		vs_SkeletonGeom.create(dwDecl_4W,RCache.Vertex.Buffer(),RCache.Index.Buffer());
 
 //*/
 	// создать LOD shader

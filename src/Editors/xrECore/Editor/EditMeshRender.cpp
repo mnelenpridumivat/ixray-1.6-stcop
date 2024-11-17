@@ -273,9 +273,12 @@ void CEditableMesh::RenderEdge(const Fmatrix& parent, CSurface* s, u32 color)
 //----------------------------------------------------
 struct svertRender
 {
-	Fvector		P;
-	Fvector		N;
-	Fvector2 	uv;
+	Fvector3 P; float __pad0; // (float,float,float,1) - quantized	// short4
+	Fvector3 N; float weight0; // (nx,ny,nz,weight0)			// DWORD
+	Fvector3 T; float weight1; // (tx,ty,tz,weight1)				// DWORD
+	Fvector3 B; float weight2; // (bx,by,bz,weight2)				// DWORD
+	Fvector2 uv; // (u,v)  					// short2
+	Fvector4 ind; // (x=m-index0, y=m-index1, z=m-index2, w=m-index3)  	// DWORD
 };
 
 void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
@@ -289,6 +292,104 @@ void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
 	if (sp_it == m_SurfFaces.end())
 		return;
 
+	// set model shader from surface (active shader in editor device)
+	ref_shader shader = EDevice->GetShader();
+	RCache.set_Shader(shader);
+
+	// transfer matrices
+	ref_constant array = RCache.get_c("sbones_array");
+
+	const BoneVec& boneVec = m_Parent->m_Bones;
+	u16 count = (u16)std::min(75ull, boneVec.size());
+	for (u16 mid = 0; mid < count; mid++)
+	{
+		u32 id = u32(mid * 3);
+		const Fmatrix& M = boneVec[mid]->_RenderTransform();
+		RCache.set_ca(&*array, id + 0, M._11, M._21, M._31, M._41);
+		RCache.set_ca(&*array, id + 1, M._12, M._22, M._32, M._42);
+		RCache.set_ca(&*array, id + 2, M._13, M._23, M._33, M._43);
+	}
+
+	RCache.set_ca(&*array, 225, Fidentity._11, Fidentity._21, Fidentity._31, Fidentity._41);
+	RCache.set_ca(&*array, 226, Fidentity._12, Fidentity._22, Fidentity._32, Fidentity._42);
+	RCache.set_ca(&*array, 227, Fidentity._13, Fidentity._23, Fidentity._33, Fidentity._43);
+
+#if 1
+	IntVec& face_lst = sp_it->second;
+	_VertexStream* Stream = &RCache.Vertex;
+	u32 vBase;
+
+	size_t FaceCount = face_lst.size();
+	if (S->m_Flags.is(CSurface::sf2Sided))
+	{
+		FaceCount *= 2;
+	}
+
+	svertRender* pv = (svertRender*)Stream->Lock(FaceCount * 3, m_Parent->vs_SkeletonGeom->vb_stride, vBase);
+
+	for (IntIt i_it = face_lst.begin(); i_it != face_lst.end(); i_it++)
+	{
+		for (int k = 0; k < 3; k++, pv++)
+		{
+			st_SVert& SV = m_SVertices[*i_it * 3 + k];
+			pv->uv = SV.uv;
+			pv->P = SV.offs;
+			pv->N = SV.norm;
+		
+			u8 bone_count = (u8)SV.bones.size();
+			float total = SV.bones[0].w;
+			float max_weight = SV.bones[0].w + SV.bones[1 % bone_count].w + SV.bones[2 % bone_count].w;
+			u16 max_bone_id = std::max(SV.bones[0].id, std::max(SV.bones[1 % bone_count].id,
+				std::max(SV.bones[2 % bone_count].id, SV.bones[3 % bone_count].id)));
+		
+			if (max_bone_id >= 75)
+			{
+				const Fmatrix& M = m_Parent->m_Bones[SV.bones[0].id]->_RenderTransform();
+				M.transform_tiny(pv->P, SV.offs);
+				M.transform_dir(pv->N, SV.norm);
+
+				Fvector P, N;
+
+				for (u8 cnt = 1; cnt < bone_count; cnt++)
+				{
+					total += SV.bones[cnt].w;
+
+					const Fmatrix& M = m_Parent->m_Bones[SV.bones[cnt].id]->_RenderTransform();
+					M.transform_tiny(P, SV.offs);
+					M.transform_dir(N, SV.norm);
+					pv->P.lerp(pv->P, P, SV.bones[cnt].w / total);
+					pv->N.lerp(pv->N, N, SV.bones[cnt].w / total);
+				}
+
+				pv->weight0 = pv->weight1 = pv->weight2 = 0.25f;
+				pv->ind.x = pv->ind.y = pv->ind.z = pv->ind.w =( 75.f * 3.f / 255.f);
+			}
+			else
+			{
+				pv->weight0 = SV.bones[0].w / max_weight;
+				pv->weight1 = SV.bones[1 % bone_count].w / max_weight;
+				pv->weight2 = SV.bones[2 % bone_count].w / max_weight;
+				pv->ind.x = (float)SV.bones[0].id * 3.f / 255.f;
+				pv->ind.y = (float)SV.bones[1 % bone_count].id * 3.f / 255.f;
+				pv->ind.z = (float)SV.bones[2 % bone_count].id * 3.f / 255.f;
+				pv->ind.w = (float)SV.bones[3 % bone_count].id * 3.f / 255.f;
+			}
+		}
+
+		if (S->m_Flags.is(CSurface::sf2Sided))
+		{
+			pv->P.set((pv - 1)->P);	pv->N.invert((pv - 1)->N);	pv->uv.set((pv - 1)->uv); pv++;
+			pv->P.set((pv - 3)->P);	pv->N.invert((pv - 3)->N);	pv->uv.set((pv - 3)->uv); pv++;
+			pv->P.set((pv - 5)->P);	pv->N.invert((pv - 5)->N);	pv->uv.set((pv - 5)->uv); pv++;
+		}
+	}
+
+	Stream->Unlock(FaceCount * 3, m_Parent->vs_SkeletonGeom->vb_stride);
+	if (FaceCount)
+		EDevice->DP(D3DPT_TRIANGLELIST, m_Parent->vs_SkeletonGeom, vBase, FaceCount);
+#endif
+
+#if 0
 	IntVec& face_lst = sp_it->second;
 	_VertexStream* Stream = &RCache.Vertex;
 	u32 vBase;
@@ -337,4 +438,5 @@ void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
 	Stream->Unlock(FaceCount * 3, m_Parent->vs_SkeletonGeom->vb_stride);
 	if (FaceCount)
 		EDevice->DP(D3DPT_TRIANGLELIST, m_Parent->vs_SkeletonGeom, vBase, FaceCount);
+#endif
 }
