@@ -200,6 +200,7 @@ void UITopBarForm::Draw()
 			if (ImGui::BeginPopup("test"))
 			{
 				ImGui::Checkbox("Verify space restrictors",&m_VerifySpaceRestrictors);
+				ImGui::Checkbox("Build artefact spawn positions",&((CLevelPreferences*)EPrefs)->PIEArtSpawnPos);
 				ImGui::EndPopup();
 			}
 		}
