@@ -17,6 +17,7 @@ public:
 
 public:
 
+	bool PIEArtSpawnPos = false;
 	bool OpenObjectList;
 	bool OpenProperties;
 	bool OpenWorldProperties;

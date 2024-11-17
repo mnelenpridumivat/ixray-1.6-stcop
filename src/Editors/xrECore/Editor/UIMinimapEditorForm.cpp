@@ -221,20 +221,30 @@ void UIMinimapEditorForm::ShowPreview()
 	xr_string data;
 	string256 buff;
 
-	sprintf(buff, "[level_maps_single]\n        bound_rect    = 0.00, 0.00, %.2f, %.2f\n        texture    = %s\n\n",
-		m_BackgroundRenderSize.x, m_BackgroundRenderSize.y, m_BackgroundTexturePath.c_str());
+	shared_str sect_name = m_mp_mode ? "level_maps_mp" : "level_maps_single";
+	sprintf
+	(
+		buff, 
+		"[%s]\n        bound_rect    = 0.00, 0.00, %.2f, %.2f\n        texture    = %s\n\n",
+		sect_name.c_str(),
+		m_BackgroundRenderSize.x, m_BackgroundRenderSize.y, 
+		m_BackgroundTexturePath.c_str()
+	);
 
 	data += buff;
 
-	data += "[level_maps_single]\n";
-	for (auto element : elements)
+	data += "[";
+	data += sect_name.c_str();
+	data += "]\n";
+
+	for (const auto& element : elements)
 	{
 		sprintf(buff, "        %s    =\n", element.name.c_str());
 		data += buff;
 	}
 	data += "\n\n";
 
-	for (auto element : elements)
+	for (const auto& element : elements)
 	{
 		sprintf(buff, "[%s]\n        global_rect    = %.2f, %.2f, %.2f, %.2f\n", element.name.c_str(),element.position.x, 
 			element.position.y, element.position.x + element.RenderSize.x, element.position.y + element.RenderSize.y);
@@ -542,12 +552,23 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 	}
 
-	if (!ltxFile->section_exist("level_maps_single"))
+	shared_str SectName = "level_maps_single";
+	if (!ltxFile->section_exist(SectName))
 	{
-		Msg("! The file does not contain the \"level_maps_single\" section.");
-		return;
+		shared_str SectNameMp = "level_maps_mp";
+		if (!ltxFile->section_exist(SectNameMp))
+		{
+			m_mp_mode = false;
+			Msg("! The file does not contain the \"%s\" section.", SectName.c_str());
+			return;
+		}
+		else
+		{
+			SectName = SectNameMp;
+			m_mp_mode = true;
+		}
 	}
-	CInifile::Sect& S = ltxFile->r_section("level_maps_single");
+	CInifile::Sect& S = ltxFile->r_section(SectName);
 	CInifile::SectCIt it = S.Data.begin();
 	CInifile::SectCIt it_e = S.Data.end();
 
@@ -632,8 +653,9 @@ void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 	}
 
 	//old levels check
+	shared_str sect_name = m_mp_mode ? "level_maps_mp" : "level_maps_single";
 	{
-		CInifile::Sect& S = ltxFile->r_section("level_maps_single");
+		CInifile::Sect& S = ltxFile->r_section(sect_name);
 		CInifile::SectCIt it = S.Data.begin();
 		CInifile::SectCIt it_e = S.Data.end();
 
@@ -649,14 +671,14 @@ void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 			}
 
 			if (!res)
-				ltxFile->remove_line("level_maps_single", levelName.c_str());
+				ltxFile->remove_line(sect_name.c_str(), levelName.c_str());
 		}
 	}
 
 	for (auto& element : elements)
 	{
-		ltxFile->remove_line("level_maps_single", element.name.c_str());
-		ltxFile->w_string("level_maps_single", element.name.c_str(), "");
+		ltxFile->remove_line(sect_name.c_str(), element.name.c_str());
+		ltxFile->w_string(sect_name.c_str(), element.name.c_str(), "");
 		//
 		ltxFile->remove_line(element.name.c_str(), "global_rect");
 		auto dat = Fvector4(element.position.x, element.position.y, element.RenderSize.x+ element.position.x, element.RenderSize.y + element.position.y);
@@ -724,7 +746,7 @@ void UIMinimapEditorForm::Update()
 		if (!Form->IsClosed())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(500, 500));
-			if (ImGui::Begin("MinimapEditor", &Form->bOpen))
+			if (ImGui::Begin("Minimap Editor", &Form->bOpen))
 			{
 				Form->Draw();
 			}

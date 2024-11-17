@@ -5,13 +5,12 @@
 //	Author		: Dmitriy Iassenev
 //	Description : Object handler action planner missile handling
 ////////////////////////////////////////////////////////////////////////////
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#if USE_OLD_OBJECT_PLANNER
 #include "object_handler_planner.h"
 #include "object_property_evaluators.h"
 #include "object_actions.h"
-#include "object_handler_space.h"
-#include "Missile.h"
+#include "missile.h"
 #include "object_handler_planner_impl.h"
 #include "ai/stalker/ai_stalker.h"
 
@@ -96,3 +95,4 @@ void CObjectHandlerPlanner::add_operators		(CMissile *missile)
 
 	this->action(uid(id,eWorldOperatorThrowIdle)).set_inertia_time	(2000);
 }
+#endif

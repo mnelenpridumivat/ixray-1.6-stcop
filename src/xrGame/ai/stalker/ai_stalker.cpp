@@ -35,8 +35,7 @@
 #include "../../detail_path_manager.h"
 #include "../../agent_manager.h"
 #include "../../agent_corpse_manager.h"
-#include "../../object_handler_planner.h"
-#include "../../object_handler_space.h"
+#include "../../ObjectHandlerSpace.h"
 #include "../../memory_manager.h"
 #include "../../sight_manager.h"
 #include "../../ai_object_location.h"
@@ -48,6 +47,7 @@
 #include "../../stalker_sound_data.h"
 #include "../../stalker_sound_data_visitor.h"
 #include "ai_stalker_space.h"
+#include "RbmkObjectHandlerPlanner.h"
 #include "../../mt_config.h"
 #include "../../EffectorShot.h"
 #include "../../visual_memory_manager.h"
@@ -61,6 +61,9 @@
 #include "smart_cover_animation_selector.h"
 #include "smart_cover_animation_planner.h"
 #include "smart_cover_planner_target_selector.h"
+#if USE_OLD_OBJECT_PLANNER
+#include "Legacy/object_handler_planner.h"
+#endif
 
 #ifdef DEBUG
 #	include "../../alife_simulator.h"
@@ -74,7 +77,10 @@ using namespace StalkerSpace;
 
 extern int g_AI_inactive_time;
 
-CAI_Stalker::CAI_Stalker			() :
+CAI_Stalker::CAI_Stalker			():
+#if !USE_OLD_OBJECT_PLANNER
+CObjectHandler(this),
+#endif
 	m_sniper_update_rate			(false),
 	m_sniper_fire_mode				(false),
 	m_take_items_enabled			(true),
@@ -461,9 +467,11 @@ void CAI_Stalker::Die				(CObject* who)
 		else
 			sound().play			(eStalkerSoundDie);
 	}
-	
+#if USE_OLD_OBJECT_PLANNER
 	m_hammer_is_clutched			= m_clutched_hammer_enabled && !CObjectHandler::planner().m_storage.property(ObjectHandlerSpace::eWorldPropertyStrapped) && !::Random.randI(0,2);
-
+#else
+	m_hammer_is_clutched			= m_clutched_hammer_enabled && m_planner->bStrapped && !::Random.randI(0,2);
+#endif
 	inherited::Die					(who);
 	
 	//запретить использование слотов в инвенторе
@@ -898,11 +906,17 @@ void CAI_Stalker::UpdateCL()
 	START_PROFILE("client_update")
 	VERIFY2						(PPhysicsShell()||getEnabled(), *cName());
 
-	if (g_Alive()) 
+	if (g_Alive())
 	{
-		if (g_mt_config.test(mtObjectHandler) && CObjectHandler::planner().initialized())
+
+#if USE_OLD_OBJECT_PLANNER
+		if (g_mt_config.test(mtObjectHandler) && CObjectHandler::planner().initialized()) 
+#else
+		if (g_mt_config.test(mtObjectHandler) &&m_planner->GoapPlanner.GetCurrentAction())
+#endif
 		{
 			auto f = xr_make_delegate(this,&CAI_Stalker::update_object_handler);
+
 #ifdef DEBUG
 			xr_vector<xr_delegate<void()> >::const_iterator I = std::find(Device.seqParallel.begin(),Device.seqParallel.end(),f);
 			VERIFY							(I == Device.seqParallel.end());
@@ -990,8 +1004,13 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 	PROF_EVENT_DYNAMIC(cNameSect_str())
 	VERIFY2				(getEnabled()||PPhysicsShell(), *cName());
 
-	if (!CObjectHandler::planner().initialized()) {
-		START_PROFILE("object_handler")
+#if USE_OLD_OBJECT_PLANNER
+	if (!CObjectHandler::planner().initialized()) 
+#else
+	if (!m_planner->GoapPlanner.GetCurrentAction())
+#endif
+	{
+		START_PROFILE("stalker/client_update/object_handler")
 		update_object_handler			();
 		STOP_PROFILE
 	}
@@ -1415,5 +1434,5 @@ bool CAI_Stalker::can_fire_right_now							( )
 
 bool CAI_Stalker::unlimited_ammo()
 {
-	return infinite_ammo() && CObjectHandler::planner().object().g_Alive();
+	return infinite_ammo() && g_Alive();
 }

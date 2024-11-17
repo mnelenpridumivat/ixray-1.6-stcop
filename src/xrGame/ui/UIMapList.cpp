@@ -72,15 +72,17 @@ void CUIMapList::StartDedicatedServer()
 
 	xr_strcpy(g_sLaunchWorkingFolder, moduleDir.xstring().c_str());
 			
-	xr_strcpy			(g_sLaunchOnExit_app, g_sLaunchWorkingFolder);
-	xr_strcat			(g_sLaunchOnExit_app, "dedicated\\xrEngine.exe");
+	xr_strcpy           (g_sLaunchOnExit_app, "\"");
+	xr_strcat           (g_sLaunchOnExit_app, g_sLaunchWorkingFolder);
+	xr_strcat			(g_sLaunchOnExit_app, "xrServer.exe\"");
 
-	xr_strcpy			(g_sLaunchOnExit_params, g_sLaunchOnExit_app);
-	xr_strcat			(g_sLaunchOnExit_params, " -i -fsltx ..\\fsgame.ltx -nosound -");
+	xr_strcat			(g_sLaunchOnExit_params, " -i -fsltx fsgame.ltx -ltx -nosound -");
 	xr_strcat			(g_sLaunchOnExit_params, GetCommandLine(""));
+
 	Msg					("Going to quit before starting dedicated server");
 	Msg					("Working folder is:%s", g_sLaunchWorkingFolder);
 	Msg					("%s %s",g_sLaunchOnExit_app, g_sLaunchOnExit_params);
+
 	Console->Execute	("quit");
 }
 
@@ -196,8 +198,9 @@ EGameIDs CUIMapList::GetCurGameType()
 #endif
 }
 
-const char* CUIMapList::GetCommandLine(LPCSTR player_name){
-
+//Функция для создания обычного сервера через игру
+const char* CUIMapList::GetCommandLine(LPCSTR player_name)
+{
 	CUIListBoxItem* itm				= m_pList2->GetItemByIDX(0);
 	if (!itm)	
 		return						nullptr;
@@ -209,40 +212,77 @@ const char* CUIMapList::GetCommandLine(LPCSTR player_name){
 	m_command = "start server(";
 	m_command += M.map_name.c_str();
 	m_command += "/";
-	m_command += GameTypeToString(GetCurGameType(),true);
+	m_command += GameTypeToString(GetCurGameType(), true);
 	m_command += m_srv_params;
 	m_command += "/ver=";
 	m_command += M.map_ver.c_str();
 	m_command += "/estime=";
-	
-	u32 id		= m_pWeatherSelector->m_list_box.GetSelectedItem()->GetTAG();
 
-	m_command	+= m_mapWeather[id].weather_time.c_str();
-	m_command	+= ")";
+	u32 id = m_pWeatherSelector->m_list_box.GetSelectedItem()->GetTAG();
 
+	m_command += m_mapWeather[id].weather_time.c_str();
+	m_command += ")";
 
-	m_command	+= " client(localhost/name=";
-	if (player_name == nullptr || 0 == xr_strlen(player_name))
-	{
-		string64	player_name2;
-		GetPlayerName_FromRegistry( player_name2, sizeof(player_name2) );
-
-		if ( xr_strlen(player_name2) == 0 )
-		{
-			xr_strcpy( player_name2, xr_strlen(Core.UserName) ? Core.UserName : Core.CompName );
-		}
-		VERIFY( xr_strlen(player_name2) );
-		
-		m_command += player_name2;
-	}
-	else
-	{
-		m_command += player_name;
-	}
-	m_command	  += ")";
+	m_command += " client(localhost/name=";
+	m_command += GetPlayerName(player_name);
+	m_command += ")";
 
     return m_command.c_str();
 }
+
+//функция для создания выделенного сервера из игры
+const char* CUIMapList::GetCommandLineDedicated(LPCSTR player_name) 
+{
+	CUIListBoxItem* itm = m_pList2->GetItemByIDX(0);
+	if (!itm)
+		return						nullptr;
+
+	u32 _idx = (u32)(__int64)(itm->GetData());
+	const SGameTypeMaps::SMapItm& M = GetMapNameInt(GetCurGameType(), _idx);
+
+	m_command.clear();
+	m_command = "start server \"";
+	m_command += M.map_name.c_str();
+	m_command += "/";
+	m_command += GameTypeToString(GetCurGameType(), true);
+	m_command += m_srv_params;
+	m_command += "/ver=";
+	m_command += M.map_ver.c_str();
+	m_command += "/estime=";
+
+	u32 id = m_pWeatherSelector->m_list_box.GetSelectedItem()->GetTAG();
+
+	m_command += m_mapWeather[id].weather_time.c_str();
+	m_command += "\"";
+
+	m_command += " client \"localhost/name=";
+	m_command += GetPlayerName(player_name);
+	m_command += "\"";
+
+	return m_command.c_str();
+}
+
+const char* CUIMapList::GetPlayerName(const LPCSTR player_name) {
+	static string256 final_name;
+	if (player_name == nullptr || 0 == xr_strlen(player_name)) {
+		string64 player_name2;
+		GetPlayerName_FromRegistry(player_name2, sizeof(player_name2));
+
+		if (xr_strlen(player_name2) == 0) {
+			xr_strcpy(player_name2, xr_strlen(Core.UserName) ? Core.UserName : Core.CompName);
+		}
+
+		VERIFY(xr_strlen(player_name2)); 
+
+		xr_strcpy(final_name, player_name2); 
+	}
+	else {
+		xr_strcpy(final_name, player_name);
+	}
+
+	return final_name;
+}
+
 #include "../UIGameCustom.h"
 void CUIMapList::LoadMapList()
 {

@@ -18,8 +18,6 @@
 #include "enemy_manager.h"
 #include "ai_monster_space.h"
 #include "stalker_decision_space.h"
-#include "object_handler_space.h"
-#include "object_handler_planner.h"
 #include "smart_cover_animation_planner.h"
 #include "property_storage.h"
 #include "stalker_movement_manager_smart_cover.h"
@@ -49,7 +47,6 @@ using smart_cover::lookout_2_idle_transition;
 using smart_cover::animation_planner;
 using namespace MonsterSpace;
 using namespace StalkerDecisionSpace;
-using namespace ObjectHandlerSpace;
 
 loophole_action_base::loophole_action_base	(CAI_Stalker *object, LPCSTR action_name) :
 	inherited	(object, action_name)

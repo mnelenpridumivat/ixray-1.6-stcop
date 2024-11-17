@@ -32,8 +32,7 @@
 #include "../../agent_member_manager.h"
 #include "../../agent_location_manager.h"
 #include "../../danger_cover_location.h"
-#include "../../object_handler_planner.h"
-#include "../../object_handler_space.h"
+#include "../../ObjectHandlerSpace.h"
 #include "../../visual_memory_manager.h"
 #include "../../Weapon.h"
 #include "ai_stalker_space.h"
@@ -53,6 +52,10 @@
 #include "../../Inventory.h"
 
 #include "../../trajectories.h"
+
+#if USE_OLD_OBJECT_PLANNER
+#include "Legacy/object_handler_planner.h"
+#endif
 
 using namespace StalkerSpace;
 
@@ -736,8 +739,8 @@ bool CAI_Stalker::zoom_state			() const
 
 	if ((movement().movement_type() != eMovementTypeStand) && (movement().body_state() != eBodyStateCrouch) && !movement().path_completed())
 		return				(false);
-
-	switch (CObjectHandler::planner().current_action_state_id()) {
+#if USE_OLD_OBJECT_PLANNER
+		switch (CObjectHandler::planner().current_action_state_id()) {
 		case ObjectHandlerSpace::eWorldOperatorAim1 :
 		case ObjectHandlerSpace::eWorldOperatorAim2 :
 		case ObjectHandlerSpace::eWorldOperatorAimingReady1 :
@@ -752,7 +755,37 @@ bool CAI_Stalker::zoom_state			() const
 		case ObjectHandlerSpace::eWorldOperatorForceReload2 :
 			return			(true);
 	}
-
+#else
+	static shared_str NAME_Fire1 = "Fire1";
+	static shared_str NAME_Fire2 = "Fire2";
+	static shared_str NAME_Aim1 = "Aim1";
+	static shared_str NAME_Aim2 = "Aim2";
+	static shared_str NAME_AimingReady1 = "AimingReady1";
+	static shared_str NAME_AimingReady2 = "AimingReady2";
+	static shared_str NAME_AimQueue1 = "AimQueue1";
+	static shared_str NAME_AimQueue2 = "AimQueue2";
+	static shared_str NAME_Reload1 = "Reload1";
+	static shared_str NAME_Reload2 = "Reload2";
+	static shared_str NAME_ForceReload1 = "ForceReload1";
+	static shared_str NAME_ForceReload2 = "ForceReload2";
+	
+	shared_str CurrentStateName = m_planner->CurrentActionStateName();
+	if(
+		CurrentStateName == NAME_Aim1||
+		CurrentStateName == NAME_Aim2||
+		CurrentStateName == NAME_AimingReady1||
+		CurrentStateName == NAME_AimingReady2||
+		CurrentStateName == NAME_AimQueue1||
+		CurrentStateName == NAME_AimQueue2||
+		CurrentStateName == NAME_Fire1||
+		CurrentStateName == NAME_Reload1||
+		CurrentStateName == NAME_Reload2||
+		CurrentStateName == NAME_ForceReload1||
+		CurrentStateName == NAME_ForceReload2)
+	{
+		return (true);
+	}
+#endif
 	return					(false);
 }
 
