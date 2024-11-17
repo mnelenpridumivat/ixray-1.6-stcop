@@ -186,7 +186,7 @@ void CScenePhyscs::DestroyObjectSpace	()
 
   }
 
- void CScenePhyscs::GenerateCFrom(CObjectSpace* To, CDB::build_callback cb)
+ void CScenePhyscs::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
  {
 
      bool bResult = true;

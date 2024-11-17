@@ -305,7 +305,7 @@ void EScene::Clear(BOOL bEditableToolsOnly)
 	m_CreateTime = time(NULL);
 
 	m_SaveCache.free();
-	m_cfrom_builder.clear();
+	m_cform_builder.clear();
 	m_level_graph.clear();
 	m_game_graph.clear();
 	m_RTFlags.set(flIsBuildedAIMap | flIsBuildedGameGraph | flIsBuildedCForm, FALSE);
@@ -752,9 +752,9 @@ void EScene::Stop()
 	g_pGamePersistent->Environment().Invalidate();
 }
 
-void EScene::LoadCFrom(CObjectSpace* Space, CDB::build_callback cb)
+void EScene::LoadCForm(CObjectSpace* Space, CDB::build_callback cb)
 {
-	m_cfrom_builder.Load(Space, cb);
+	m_cform_builder.Load(Space, cb);
 }
 
 IReader* EScene::LoadSpawn()
@@ -819,7 +819,7 @@ bool EScene::BuildCForm()
 {
 	if (!m_RTFlags.is(flIsBuildedCForm))
 	{
-		if (!m_cfrom_builder.build())
+		if (!m_cform_builder.build())
 		{
 			Msg("! CForm is empty!");
 			return false;
