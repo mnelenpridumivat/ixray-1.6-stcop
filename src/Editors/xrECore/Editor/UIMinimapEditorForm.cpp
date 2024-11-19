@@ -174,7 +174,7 @@ void UIMinimapEditorForm::RenderCanvas()
 			is_mapItemHovered = inside;
 		}
 
-		if (inside && !element.EdLocked)
+		if (inside && !element.EdLocked && (is_hovered || m_EditMode != None))
 		{
 			move_zone = ckCursorZone((image_min.x + resize_off), (image_max.x - resize_off), 
 				(image_min.y + resize_off), (image_max.y - resize_off));
@@ -244,7 +244,7 @@ void UIMinimapEditorForm::RenderCanvas()
 				y2, 5.f);
 		}
 
-		if (!element.EdLocked)
+		if (!element.EdLocked && (is_hovered || m_EditMode != None))
 		{
 			if (resize_mode == 1 || m_saveResizeMode == 1)
 			{
@@ -288,7 +288,7 @@ void UIMinimapEditorForm::RenderCanvas()
 				isEdited = true;
 			}
 
-			if ((inside || m_EditMode != None) && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+			if ((is_hovered || m_EditMode != None) && (inside || m_EditMode != None) && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 				ImVec2 mouse_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
 
 				if (m_EditMode == None || m_EditMode == Move)
@@ -377,8 +377,8 @@ void UIMinimapEditorForm::RenderCanvas()
 
 			string_path dbg_info;
 			sprintf(dbg_info,
-				"= Debug Info =\nname\t = %s\nposition = %.3f : %.3f \n\nCursor inside: %d\nCursor - move zone: %d\nresize_mode = %d\nresize_or = %d\nm_EditMode = %d",
-				element.name.c_str(), element.position.x, element.position.y, inside, move_zone, m_saveResizeMode, m_saveResizeOr, m_EditMode
+				"= Debug Info =\nname\t = %s\nposition = %.3f : %.3f \n(convas) is_hovered = %d\nCursor inside: %d\nCursor - move zone: %d\nresize_mode = %d\nresize_or = %d\nm_EditMode = %d",
+				element.name.c_str(), element.position.x, element.position.y, is_hovered, inside, move_zone, m_saveResizeMode, m_saveResizeOr, m_EditMode
 			);
 			ImGui::GetWindowDrawList()->AddText(element_screen_pos+ImVec2(10.f*m_Zoom,10.f * m_Zoom), IM_COL32(255, 255, 255, 255), dbg_info);
 		}
@@ -608,7 +608,7 @@ void UIMinimapEditorForm::ShowMenu()
 	}
 
 	ImGui::Text("Items Opacity:"); ImGui::SameLine();
-	ImGui::DragInt("##op", &m_ItemsOpacity, 1.0f, 1, 255.0f);
+	ImGui::SliderInt("##opt", &m_ItemsOpacity, 1, 255, "%d");
 	ImGui::Separator();
 
 	if (selectedElement)
