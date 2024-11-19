@@ -588,3 +588,15 @@ void CNightVisionEffector::PlaySounds(EPlaySounds which)
 	default: NODEFAULT;
 	}
 }
+
+bool CTorch::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	return true;
+	/*auto torch = smart_cast<CTorch*>(other);
+	VERIFY(torch);
+	return torch->GetCurrentChargeLevel() == GetCurrentChargeLevel();*/
+}

@@ -231,6 +231,10 @@ protected:
 	CParticlesObject*				m_pParticle;
 	Fmatrix							m_particleXFORM;
 
+	// TODO: Reimplement flares feature
+	u32 FlaresPairsDropCount = 0;
+	u32 RequestedDropFlaresCount = 0;
+
 	void							StartFlame					();
 	void							UpdateHeliParticles			();
 	void							DieHelicopter				();
@@ -346,6 +350,8 @@ public:
 	float					GetSafeAltitude					()				{return m_movement.GetSafeAltitude();};
 	float					GetHeliHealth					() const		{return inherited::GetfHealth();}
 	float					SetHeliHealth					(float value)	{return inherited::SetfHealth(value);}
+
+	void DropFlares();
 
 #ifdef DEBUG_DRAW
 public:

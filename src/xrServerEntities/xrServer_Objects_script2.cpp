@@ -14,6 +14,8 @@ void CSE_PHSkeleton::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(CSE_PHSkeleton);
+
 void CSE_AbstractVisual::script_register(lua_State *L)
 {
 	module(L)[
@@ -26,3 +28,5 @@ void CSE_AbstractVisual::script_register(lua_State *L)
 		.def	("getStartupAnimation",		&CSE_AbstractVisual::getStartupAnimation)
 	];
 }
+
+SCRIPT_EXPORT3(CSE_AbstractVisual, CSE_Visual, CSE_Abstract);

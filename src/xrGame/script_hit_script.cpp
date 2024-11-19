@@ -43,3 +43,5 @@ void CScriptHit::script_register(lua_State *L)
 			.def("bone",						&CScriptHit::set_bone_name)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptHit);

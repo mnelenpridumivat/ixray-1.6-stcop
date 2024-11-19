@@ -43,6 +43,8 @@ public:
 	virtual	bool			UseBy(CEntityAlive* npc);
 	virtual float			Weight() const;
 
+	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+
 	IC bool Empty() const { return GetRemainingUses() == 0; };
 	IC bool CanDelete() const { return m_bRemoveAfterUse == 1; };
 	IC bool CanConsumeCharge() const { return m_bConsumeChargeOnUse == 1; };

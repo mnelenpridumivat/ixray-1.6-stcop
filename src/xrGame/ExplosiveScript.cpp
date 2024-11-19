@@ -14,3 +14,5 @@ void CExplosive::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(CExplosive);
+

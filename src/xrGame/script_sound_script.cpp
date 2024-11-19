@@ -54,3 +54,5 @@ void CScriptSound::script_register(lua_State *L)
 			.def("attach_tail",					&CScriptSound::AttachTail)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptSound);

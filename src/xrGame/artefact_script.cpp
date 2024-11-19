@@ -15,6 +15,7 @@
 #include "RustyHairArtifact.h"
 #include "GalantineArtifact.h"
 #include "cta_game_artefact.h"
+#include "ArtCombiner.h"
 
 using namespace luabind;
 
@@ -40,6 +41,9 @@ void CArtefact::script_register(lua_State *L)
 		class_<CElectricBall		,CArtefact>("CElectricBall").def		(constructor<>()),
 		class_<CRustyHairArtefact	,CArtefact>("CRustyHairArtefact").def	(constructor<>()),
 		class_<CGalantineArtefact	,CArtefact>("CGalantineArtefact").def	(constructor<>()),
-		class_<CGraviArtefact		,CArtefact>("CGraviArtefact").def		(constructor<>())
+		class_<CGraviArtefact		,CArtefact>("CGraviArtefact").def		(constructor<>()),
+		class_<CArtCombiner, CArtefact>("CArtCombiner").def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CArtefact, CObjectScript);

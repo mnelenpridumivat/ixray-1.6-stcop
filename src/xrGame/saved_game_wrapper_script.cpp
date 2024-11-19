@@ -35,3 +35,5 @@ void CSavedGameWrapper::script_register	(lua_State *L)
 		def("valid_saved_game",		(bool (*)(LPCSTR))(&valid_saved_game))
 	];
 }
+
+SCRIPT_EXPORT1(CSavedGameWrapper);

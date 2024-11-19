@@ -26,3 +26,5 @@ void CALifeSmartTerrainTask::script_register(lua_State *L)
 			.def("position",		&CALifeSmartTerrainTask::position)
 	];
 }
+
+SCRIPT_EXPORT1(CALifeSmartTerrainTask);

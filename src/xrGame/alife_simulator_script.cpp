@@ -482,6 +482,8 @@ void CALifeSimulator::script_register			(lua_State *L)
 	}
 }
 
+SCRIPT_EXPORT1(CALifeSimulator);
+
 #if 0//def DEBUG
 struct dummy {
     int count;

@@ -127,3 +127,5 @@ void CEF_Storage::script_register(lua_State *L)
 			.def("evaluate",	(float (*)(CEF_Storage*,LPCSTR,CSE_ALifeObject*,CSE_ALifeObject*,CSE_ALifeObject*,CSE_ALifeObject*))(&evaluate))
 	];
 }
+
+SCRIPT_EXPORT1(CEF_Storage);

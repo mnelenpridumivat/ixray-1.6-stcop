@@ -23,6 +23,8 @@ void CSE_ALifeInventoryItem::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(CSE_ALifeInventoryItem);
+
 void CSE_ALifeItem::script_register(lua_State *L)
 {
 	module(L)[
@@ -36,6 +38,8 @@ void CSE_ALifeItem::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT3(CSE_ALifeItem, CSE_ALifeDynamicObjectVisual, CSE_ALifeInventoryItem);
+
 void CSE_ALifeItemTorch::script_register(lua_State *L)
 {
 	module(L)[
@@ -46,6 +50,8 @@ void CSE_ALifeItemTorch::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT2(CSE_ALifeItemTorch, CSE_ALifeItem);
 
 void CSE_ALifeItemAmmo::script_register(lua_State *L)
 {
@@ -58,6 +64,21 @@ void CSE_ALifeItemAmmo::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CSE_ALifeItemAmmo, CSE_ALifeItem);
+
+void CSE_ALifeItemFuel::script_register(lua_State* L)
+{
+	module(L)[
+		luabind_class_item1(
+			CSE_ALifeItemFuel,
+			"cse_alife_item_fuel",
+			CSE_ALifeItem
+		)
+	];
+}
+
+SCRIPT_EXPORT2(CSE_ALifeItemFuel, CSE_ALifeItem);
+
 void CSE_ALifeItemWeapon::script_register(lua_State *L)
 {
 	module(L)[
@@ -66,9 +87,22 @@ void CSE_ALifeItemWeapon::script_register(lua_State *L)
 			"cse_alife_item_weapon",
 			CSE_ALifeItem
 		)
+		.enum_("addon_flag")
+		[
+			value("eWeaponAddonGrenadeLauncher", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAddonGrenadeLauncher)),
+			value("eWeaponAddonScope", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAddonScope)),
+			value("eWeaponAddonSilencer", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAddonSilencer)),
+			//value("eWeaponAddonLaserDesignator", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAddonLaserDesignator)),
+			//value("eWeaponAddonTacticalTorch", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAddonTacticalTorch)),
+			value("eAddonAttachable", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonStatus::eAddonAttachable)),
+			value("eAddonDisabled", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonStatus::eAddonDisabled)),
+			value("eAddonPermanent", static_cast<int>(CSE_ALifeItemWeapon::EWeaponAddonStatus::eAddonPermanent))
+		]
 		.def("clone_addons",						&CSE_ALifeItemWeapon::clone_addons)
 	];
 }
+
+SCRIPT_EXPORT2(CSE_ALifeItemWeapon, CSE_ALifeItem);
 
 void CSE_ALifeItemWeaponShotGun::script_register(lua_State *L)
 {
@@ -81,6 +115,8 @@ void CSE_ALifeItemWeaponShotGun::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CSE_ALifeItemWeaponShotGun, CSE_ALifeItemWeapon);
+
 void CSE_ALifeItemWeaponAutoShotGun::script_register(lua_State *L)
 {
 	module(L)[
@@ -91,6 +127,8 @@ void CSE_ALifeItemWeaponAutoShotGun::script_register(lua_State *L)
 			)
 	];
 }
+
+SCRIPT_EXPORT2(CSE_ALifeItemWeaponAutoShotGun, CSE_ALifeItemWeapon);
 
 void CSE_ALifeItemDetector::script_register(lua_State *L)
 {
@@ -103,6 +141,8 @@ void CSE_ALifeItemDetector::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CSE_ALifeItemDetector, CSE_ALifeItem);
+
 void CSE_ALifeItemArtefact::script_register(lua_State *L)
 {
 	module(L)[
@@ -113,3 +153,5 @@ void CSE_ALifeItemArtefact::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT2(CSE_ALifeItemArtefact, CSE_ALifeItem);

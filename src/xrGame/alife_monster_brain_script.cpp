@@ -29,3 +29,5 @@ void CALifeMonsterBrain::script_register	(lua_State *L)
 			.def("can_choose_alife_tasks",	(void (CALifeMonsterBrain::*)(bool))&CALifeMonsterBrain::can_choose_alife_tasks)
 	];
 }
+
+SCRIPT_EXPORT1(CALifeMonsterBrain);

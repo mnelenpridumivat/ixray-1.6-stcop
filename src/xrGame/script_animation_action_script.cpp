@@ -51,3 +51,5 @@ void CScriptAnimationAction::script_register(lua_State *L)
 			.def("completed",					(bool (CScriptAnimationAction::*)())(&CScriptAnimationAction::completed))
 	];
 }
+
+SCRIPT_EXPORT1(CScriptAnimationAction);

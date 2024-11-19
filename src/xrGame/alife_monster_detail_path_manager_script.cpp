@@ -29,3 +29,5 @@ void CALifeMonsterDetailPathManager::script_register	(lua_State *L)
 			.def("failed",		&CALifeMonsterDetailPathManager::failed)
 	];
 }
+
+SCRIPT_EXPORT1(CALifeMonsterDetailPathManager);

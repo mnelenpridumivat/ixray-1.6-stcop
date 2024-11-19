@@ -81,6 +81,17 @@ bool  CCustomDetector::CheckCompatibility(CHudItem* itm)
 	return true;
 }
 
+bool CCustomDetector::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	auto art_det = smart_cast<CCustomDetector*>(other);
+	VERIFY(art_det);
+	return art_det->GetCurrentChargeLevel() == GetCurrentChargeLevel();
+}
+
 void CCustomDetector::HideDetector(bool bFastMode)
 {
 	const CHUDState::EHudStates CurrentState = (CHUDState::EHudStates) GetState();

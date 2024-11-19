@@ -24,6 +24,7 @@ class CUIMessageBoxEx;
 class CUIPropertiesBox;
 class CTrade;
 class CUIProgressBar;
+class CScriptGameObject;
 
 namespace inventory { namespace upgrade {
 	class Upgrade;
@@ -341,6 +342,12 @@ public:
 	void				PutAllToPartner			(CUIWindow* w, void* d);
 	void						TakeAllFromInventoryBox		();
 	void						UpdateConditionProgressBars	();
+
+	CScriptGameObject* GetCurrentItemAsGameObject();
+	void						HighlightSectionInSlot(pcstr section, EDDListType type, u16 slot_id = 0);
+	void						HighlightForEachInSlot(const luabind::functor<bool>& functor, EDDListType type, u16 slot_id);
+
+	void						RefreshCurrentItemCell();
 
 	IC	UIHint*					get_hint_wnd				() { return m_hint_wnd; }
 	DECLARE_SCRIPT_REGISTER_FUNCTION

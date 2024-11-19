@@ -52,3 +52,5 @@ void CPhraseDialogExporter::script_register(lua_State *L)
 		.def("SetScriptText",		&CDialogScriptHelper::SetScriptText)
 	];
 }
+
+SCRIPT_EXPORT1(CPhraseDialogExporter);

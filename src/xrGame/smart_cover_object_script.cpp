@@ -20,3 +20,5 @@ void smart_cover::object::script_register	(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT_NAME2(smart_cover::object, smart_cover_object, CObjectScript);

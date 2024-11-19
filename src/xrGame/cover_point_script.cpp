@@ -28,3 +28,5 @@ void CCoverPoint::script_register(lua_State *L)
 			.def("is_smart_cover",		&CCoverPoint__is_smart_cover)
 	];
 }
+
+SCRIPT_EXPORT1(CCoverPoint);

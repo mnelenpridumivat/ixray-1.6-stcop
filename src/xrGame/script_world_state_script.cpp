@@ -30,3 +30,5 @@ void CScriptWorldStateWrapper::script_register(lua_State *L)
 			.def(const_self == CScriptWorldState())
 	];
 }
+
+SCRIPT_EXPORT1(CScriptWorldStateWrapper);

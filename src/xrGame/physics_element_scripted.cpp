@@ -30,3 +30,5 @@ void cphysics_element_scripted::script_register(lua_State *L)
 			.def("global_transform",			&global_transform)
 		];
 }
+
+SCRIPT_EXPORT1(cphysics_element_scripted);

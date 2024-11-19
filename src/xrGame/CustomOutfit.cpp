@@ -363,3 +363,15 @@ void CCustomOutfit::AddBonesProtection(LPCSTR bones_section)
 	if ( parent && parent->Visual() && m_BonesProtectionSect.size() )
 		m_boneProtection->add(bones_section, smart_cast<IKinematics*>( parent->Visual() ) );
 }
+
+bool CCustomOutfit::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	return true;
+	/*auto outfit = smart_cast<CCustomOutfit*>(other);
+	VERIFY(outfit);
+	return fsimilar(outfit->GetFilterCondition(), GetFilterCondition(), 0.01f);*/
+}

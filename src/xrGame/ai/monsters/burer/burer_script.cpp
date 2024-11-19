@@ -13,3 +13,5 @@ void CBurer::script_register(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CBurer, CObjectScript);

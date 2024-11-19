@@ -35,7 +35,9 @@ void profile_store::script_register	(lua_State *L)
 				value("bst_score_types_count",		int(bst_score_types_count))
 			]
 	];
-}; 
+};
+
+SCRIPT_EXPORT1(profile_store);
 
 
 } //namespace gamespy_profile

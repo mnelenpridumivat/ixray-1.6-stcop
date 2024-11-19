@@ -36,6 +36,8 @@ public:
 	template <typename T>
 	IC		const CVertex	*point			(const Fvector &position, const T &evaluator) const;
 	IC		const CVertex	*point			(const Fvector &position) const;
+	CPatrolPoint add_point(Fvector);
+	CPatrolPoint point(u32);
 
 #ifdef DEBUG
 public:

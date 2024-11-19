@@ -113,6 +113,8 @@ void CSE_ALifeMonsterAbstract::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT3(CSE_ALifeMonsterAbstract, CSE_ALifeCreatureAbstract, CSE_ALifeSchedulable);
+
 void CSE_ALifeHumanAbstract::script_register(lua_State *L)
 {
 	module(L)[
@@ -131,6 +133,8 @@ void CSE_ALifeHumanAbstract::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT3(CSE_ALifeHumanAbstract, CSE_ALifeTraderAbstract, CSE_ALifeMonsterAbstract);
+
 void CSE_ALifePsyDogPhantom::script_register(lua_State *L)
 {
 	module(L)[
@@ -141,3 +145,5 @@ void CSE_ALifePsyDogPhantom::script_register(lua_State *L)
 			)
 	];
 }
+
+SCRIPT_EXPORT2(CSE_ALifePsyDogPhantom, CSE_ALifeMonsterBase);

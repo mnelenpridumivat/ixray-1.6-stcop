@@ -65,3 +65,5 @@ void CScriptReader::script_register(lua_State *L)
 			.def("r_eof",			&r_eof_semi				)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptReader);

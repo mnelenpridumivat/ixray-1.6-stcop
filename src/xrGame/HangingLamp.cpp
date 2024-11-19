@@ -315,6 +315,16 @@ void CHangingLamp::TurnOff	()
 		
 }
 
+void CHangingLamp::Toggle()
+{
+	if (m_bState) {
+		TurnOff();
+	}
+	else {
+		TurnOn();
+	}
+}
+
 //void CHangingLamp::Hit(float P,Fvector &dir, CObject* who,s16 element,
 //					   Fvector p_in_object_space, float impulse, ALife::EHitType hit_type)
 void	CHangingLamp::Hit					(SHit* pHDS)
@@ -412,5 +422,8 @@ void CHangingLamp::script_register(lua_State *L)
 			.def(luabind::constructor<>())
 			.def("turn_on",		&CHangingLamp::TurnOn)
 			.def("turn_off",	&CHangingLamp::TurnOff)
+			.def("toggle", &CHangingLamp::Toggle)
 	];
 }
+
+SCRIPT_EXPORT2(CHangingLamp, CObjectScript);

@@ -1235,3 +1235,5 @@ void CLevel::script_register(lua_State* L)
 				def("translate_string", &translate_string)
 		];
 }
+
+SCRIPT_EXPORT1(CLevel);

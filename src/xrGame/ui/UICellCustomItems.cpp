@@ -43,7 +43,13 @@ CUIInventoryCellItem::CUIInventoryCellItem(CInventoryItem* itm)
 
 bool CUIInventoryCellItem::EqualTo(CUICellItem* itm)
 {
-	CUIInventoryCellItem* ci = smart_cast<CUIInventoryCellItem*>( itm );
+	CUIInventoryCellItem* ci = smart_cast<CUIInventoryCellItem*>(itm);
+	if (!itm)
+	{
+		return false;
+	}
+	return object()->CheckInventoryIconItemSimilarity(ci->object());
+	/*CUIInventoryCellItem* ci = smart_cast<CUIInventoryCellItem*>(itm);
 	if ( !itm )
 	{
 		return false;
@@ -60,7 +66,7 @@ bool CUIInventoryCellItem::EqualTo(CUICellItem* itm)
 	{
 		return false;
 	}
-	return true;
+	return true;*/
 }
 
 bool CUIInventoryCellItem::IsHelperOrHasHelperChild()

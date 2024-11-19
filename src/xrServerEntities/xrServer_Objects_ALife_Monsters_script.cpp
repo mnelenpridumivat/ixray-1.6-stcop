@@ -67,6 +67,8 @@ void CSE_ALifeTraderAbstract::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(CSE_ALifeTraderAbstract);
+
 void CSE_ALifeTrader::script_register(lua_State *L)
 {
 	module(L)[
@@ -79,6 +81,8 @@ void CSE_ALifeTrader::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT3(CSE_ALifeTrader, CSE_ALifeDynamicObjectVisual, CSE_ALifeTraderAbstract);
+
 void CSE_ALifeCustomZone::script_register(lua_State *L)
 {
 	module(L)[
@@ -90,6 +94,8 @@ void CSE_ALifeCustomZone::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT3(CSE_ALifeCustomZone, CSE_ALifeDynamicObject, CSE_Shape);
 
 void CSE_ALifeAnomalousZone::script_register(lua_State *L)
 {
@@ -105,6 +111,8 @@ void CSE_ALifeAnomalousZone::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CSE_ALifeAnomalousZone, CSE_ALifeCustomZone);
+
 void CSE_ALifeMonsterRat::script_register(lua_State *L)
 {
 	module(L)[
@@ -116,3 +124,5 @@ void CSE_ALifeMonsterRat::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT3(CSE_ALifeMonsterRat, CSE_ALifeMonsterAbstract, CSE_ALifeInventoryItem);

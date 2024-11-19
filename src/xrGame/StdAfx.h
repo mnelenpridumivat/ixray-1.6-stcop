@@ -33,6 +33,7 @@
 #include "../xrEngine/AI/game_graph.h"
 #include "../xrEngine/AI/game_level_cross_table.h"
 #include "../xrEngine/AI/level_graph.h"
+#include "base_client_classes.h"
 
 #ifndef _EDITOR
 #	include "pch_script.h"

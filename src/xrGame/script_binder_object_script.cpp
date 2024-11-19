@@ -36,3 +36,5 @@ void CScriptBinderObject::script_register(lua_State *L)
 			.def("net_Relcase",					&CScriptBinderObject::net_Relcase,		&CScriptBinderObjectWrapper::net_Relcase_static)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptBinderObject);

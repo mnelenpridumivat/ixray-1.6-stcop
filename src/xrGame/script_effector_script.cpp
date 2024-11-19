@@ -74,3 +74,5 @@ void CScriptEffector::script_register(lua_State *L)
 			.def("process",	 					&CScriptEffector::process,	&CScriptEffectorWrapper::process_static)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptEffector);

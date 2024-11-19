@@ -91,3 +91,5 @@ void CActor::script_register(lua_State* L)
 			]
 		];
 }
+
+SCRIPT_EXPORT2(CActor, CObjectScript);

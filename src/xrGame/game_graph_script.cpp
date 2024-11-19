@@ -78,3 +78,5 @@ void CGameGraph::script_register		(lua_State *L)
 			.def("level_vertex_id",	&CVertex::level_vertex_id)
 	];
 }
+
+SCRIPT_EXPORT2(CGameGraph, CObjectScript);

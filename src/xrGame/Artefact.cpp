@@ -674,3 +674,22 @@ void CArtefact::OnHiddenItem ()
 	SetState					(eHidden);
 	SetNextState				(eHidden);
 }
+
+bool CArtefact::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	auto artefact = smart_cast<CArtefact*>(other);
+	VERIFY(artefact);
+	/*if (!fsimilar(artefact->GetCurrentChargeLevel(), GetCurrentChargeLevel(), 0.01f))
+	{
+		return false;
+	}
+	if (artefact->GetCurrentAfRank() != GetCurrentAfRank())
+	{
+		return false;
+	}*/
+	return true;
+}

@@ -39,3 +39,5 @@ void CActionBase<CScriptGameObject>::script_register(lua_State *L)
 #endif
 	];
 }
+
+SCRIPT_EXPORT1(CScriptActionBase);

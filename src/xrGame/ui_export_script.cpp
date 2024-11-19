@@ -87,3 +87,5 @@ void UIRegistrator::script_register(lua_State *L)
 
 	CMapManager::script_register(L);
 }
+
+SCRIPT_EXPORT1(UIRegistrator);

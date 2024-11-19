@@ -13,3 +13,5 @@ void CPseudoGigant::script_register(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CPseudoGigant, CObjectScript);

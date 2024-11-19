@@ -8,6 +8,7 @@
 
 #include "StdAfx.h"
 #include "pch_script.h"
+#include "SamZone.h"
 #include "script_zone.h"
 #include "smart_zone.h"
 
@@ -23,11 +24,17 @@ void CScriptZone::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CScriptZone, DLL_PureScript);
+
 void CSmartZone::script_register(lua_State *L)
 {
 	module(L)
 	[
 		class_<CSmartZone,DLL_Pure>("ce_smart_zone")
+			.def(constructor<>()),
+		class_<CSamZone, CSmartZone>("CSamZone")
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CSmartZone, DLL_PureScript);

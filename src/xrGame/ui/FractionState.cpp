@@ -70,6 +70,8 @@ void FractionState::script_register( lua_State* L )
 	];
 }
 
+SCRIPT_EXPORT1(FractionState);
+
 void FractionState::update_info()
 {
 	if ( m_id.size() == 0 )

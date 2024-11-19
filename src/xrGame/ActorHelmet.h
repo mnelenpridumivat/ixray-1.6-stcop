@@ -31,6 +31,8 @@ public:
 
 	float					HitThroughArmor			(float hit_power, s16 element, float ap, bool& add_wound, ALife::EHitType hit_type);
 
+	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+
 	float					m_fPowerLoss;
 	float					m_fHealthRestoreSpeed;
 	float 					m_fRadiationRestoreSpeed;
