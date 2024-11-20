@@ -310,7 +310,7 @@ void CUIThemeManager::Save()
 	FastJSonWriteImColorAlt(log_color_default);
 	FastJSonWriteImColorAlt(log_color_error);
 	FastJSonWriteImColorAlt(log_color_warning);
-	FastJSonWriteImColorAlt(log_color_default);
+	FastJSonWriteImColorAlt(log_color_debug);
 
 	JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 	JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -361,7 +361,7 @@ void CUIThemeManager::SaveTo()
 		FastJSonWriteImColorAlt(log_color_default);
 		FastJSonWriteImColorAlt(log_color_error);
 		FastJSonWriteImColorAlt(log_color_warning);
-		FastJSonWriteImColorAlt(log_color_default);
+		FastJSonWriteImColorAlt(log_color_debug);
 
 		JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 		JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -416,7 +416,7 @@ void CUIThemeManager::LoadFrom()
 		FastJSonReadImColorAlt(log_color_default);
 		FastJSonReadImColorAlt(log_color_error);
 		FastJSonReadImColorAlt(log_color_warning);
-		FastJSonReadImColorAlt(log_color_default);
+		FastJSonReadImColorAlt(log_color_debug);
 
 
 		if (JSONData["Theme"].contains("InactiveAlpha"))
@@ -483,7 +483,7 @@ void CUIThemeManager::Load()
 	FastJSonReadImColorAlt(log_color_default);
 	FastJSonReadImColorAlt(log_color_error);
 	FastJSonReadImColorAlt(log_color_warning);
-	FastJSonReadImColorAlt(log_color_default);
+	FastJSonReadImColorAlt(log_color_debug);
 
 
 	if (JSONData["Theme"].contains("InactiveAlpha"))
