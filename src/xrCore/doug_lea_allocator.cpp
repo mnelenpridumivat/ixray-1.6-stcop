@@ -9,7 +9,7 @@
 
 #define USE_DL_PREFIX
 
-#include "DougLea/dlmalloc.h"
+#include "memory/doug_lea_memory_allocator.h"
 
 doug_lea_allocator::doug_lea_allocator(LPCSTR arena_id)
 {
