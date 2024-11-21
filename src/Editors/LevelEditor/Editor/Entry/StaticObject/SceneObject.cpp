@@ -222,8 +222,16 @@ CEditableObject* CSceneObject::UpdateReference()
             CSurface* surf = new CSurface();
             surf->CopyFrom(m_pReference->Surfaces()[i]);
             m_Surfaces.push_back(surf);
-            if(surf->IsVoid())
+            if (surf->IsVoid())
+            {
+                if (m_pReference->IsSkeleton())
+                    ::Render->shader_option_skinning(4);
+
                 surf->OnDeviceCreate();
+
+                if (m_pReference->IsSkeleton())
+                    ::Render->shader_option_skinning(-1);
+            }
         }
     } 
     return m_pReference;
