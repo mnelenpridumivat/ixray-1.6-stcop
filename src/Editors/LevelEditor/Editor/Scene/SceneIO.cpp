@@ -366,8 +366,8 @@ void EScene::SaveLTX(LPCSTR map_name, bool bForUndo, bool bForceSaveAll)
 		ini.w_string		("level_tag","owner",m_OwnerName.c_str());
 		ini.w_u32			("level_tag","create_time",m_CreateTime);
 
-		ini.w_fvector3		("camera","hpb",UI->CurrentView().m_Camera.GetHPB());
-		ini.w_fvector3		("camera","pos",UI->CurrentView().m_Camera.GetPosition());
+		ini.w_fvector3		("camera","hpb",UI->Views[0].m_Camera.GetHPB());
+		ini.w_fvector3		("camera","pos",UI->Views[0].m_Camera.GetPosition());
 
 		for(ObjectIt SO=m_ESO_SnapObjects.begin(); SO!=m_ESO_SnapObjects.end(); ++SO)
 		{
@@ -805,9 +805,8 @@ bool EScene::LoadLTX(LPCSTR map_name, bool bUndo)
 		Fvector hpb, pos;
 		pos					= ini.r_fvector3("camera","pos");
 		hpb					= ini.r_fvector3("camera","hpb");
-		UI->CurrentView().m_Camera.Set(hpb,pos);
-		UI->CurrentView().m_Camera.SetStyle(UI->CurrentView().m_Camera.GetStyle());
-		UI->CurrentView().m_Camera.SetStyle(UI->CurrentView().m_Camera.GetStyle());
+		UI->Views[0].m_Camera.Set(hpb,pos);
+		UI->Views[0].m_Camera.SetStyle(UI->Views[0].m_Camera.GetStyle());
 
 		m_GUID.LoadLTX			(ini,"guid","guid");
 
