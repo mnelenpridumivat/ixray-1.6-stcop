@@ -1,3 +1,4 @@
+#include "alife_object_registry.h"
 ////////////////////////////////////////////////////////////////////////////
 //	Module 		: alife_object_registry_רעהרעף.h
 //	Created 	: 15.01.2003
@@ -8,25 +9,32 @@
 
 #pragma once
 
-IC	void CALifeObjectRegistry::add		(CSE_ALifeDynamicObject *object)
+
+
+IC void CALifeObjectRegistry::add(CSE_ALifeDynamicObject* object)
 {
 	if (objects().find(object->ID) != objects().end()) {
-		THROW2					((*(objects().find(object->ID))).second == object,"The specified object is already presented in the Object Registry!");
-		THROW2					((*(objects().find(object->ID))).second != object,"Object with the specified ID is already presented in the Object Registry!");
+		THROW2((*(objects().find(object->ID))).second == object, "The specified object is already presented in the Object Registry!");
+		THROW2((*(objects().find(object->ID))).second != object, "Object with the specified ID is already presented in the Object Registry!");
 	}
 
-	m_objects.insert			(std::make_pair(object->ID,object));
+	m_objects.insert(std::make_pair(object->ID, object));
+
+	m_objects_as_vec.push_back(object);
+	m_object_id_to_vec_pos[object->ID] = m_objects_as_vec.size() - 1;
 }
 
-IC	void CALifeObjectRegistry::remove	(const ALife::_OBJECT_ID &id, bool no_assert)
+IC void CALifeObjectRegistry::remove(const ALife::_OBJECT_ID& id, bool no_assert)
 {
 	OBJECT_REGISTRY::iterator	I = m_objects.find(id);
 	if (I == m_objects.end()) {
-		THROW2					(no_assert,"The specified object hasn't been found in the Object Registry!");
+		THROW2(no_assert, "The specified object hasn't been found in the Object Registry!");
 		return;
 	}
 
-	m_objects.erase				(I);
+	m_objects.erase(I);
+	m_objects_as_vec.erase(m_objects_as_vec.begin() + m_object_id_to_vec_pos[id]);
+	m_object_id_to_vec_pos.erase(id);
 }
 
 IC	CSE_ALifeDynamicObject *CALifeObjectRegistry::object	(const ALife::_OBJECT_ID &id, bool no_assert) const
@@ -55,4 +63,9 @@ IC	const CALifeObjectRegistry::OBJECT_REGISTRY &CALifeObjectRegistry::objects	()
 IC	CALifeObjectRegistry::OBJECT_REGISTRY &CALifeObjectRegistry::objects		()
 {
 	return						(m_objects);
+}
+
+inline const xr_vector<CSE_ALifeDynamicObject*> CALifeObjectRegistry::objects_vec() const
+{
+	return m_objects_as_vec;
 }

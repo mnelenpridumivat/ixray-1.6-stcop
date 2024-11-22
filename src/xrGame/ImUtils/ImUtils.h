@@ -307,17 +307,24 @@ enum eSelectedType {
 	kSelectedType_Count
 };
 
-struct {
+// todo: statistics must be counting on Level and xr_offline side (when an object adds or deletes)!!!! Don't calculate it dynamically due to clipping feature for optimization of iteration (you're unable to do that fast, because you can't iterate through whole array)
+struct CImGuiGameSearchManager {
 
+	bool is_initialized = false;
 	bool show_alive_creatures = {};
 	int selected_type = {};
-	char search_string[256] = {};
-	char category_names[(eSelectedType::kSelectedType_Count)][32] = {};
-	const char* combo_items[(eSelectedType::kSelectedType_Count)] = {};
-	int counts[(eSelectedType::kSelectedType_Count)]{};
-
+	const char* pTranslatedLabel_SmartCover{};
+	const char* pTranslatedLabel_SmartTerrain{};
+	const char* pTranslatedLabel_Stalker{};
+	const char* pTranslatedLabel_Car{};
+	const char* pTranslatedLabel_LevelChanger{};
+	const char* pTranslatedLabel_Artefact{};
 	xr_hash_map<eSelectedType, CLASS_ID> type_to_class;
 	xr_hash_map<CLASS_ID, eSelectedType> class_to_type;
+	char search_string[256] = {};
+	const char* combo_items[(eSelectedType::kSelectedType_Count)] = {};
+	int counts[(eSelectedType::kSelectedType_Count)]{};
+	char category_names[(eSelectedType::kSelectedType_Count)][32] = {};
 
 	eSelectedType convertCLSIDToType(CLASS_ID id) {
 		eSelectedType result = eSelectedType::kSelectedType_Count;
@@ -348,7 +355,7 @@ struct {
 		return nullptr;
 	}
 
-	bool filter(CLASS_ID id) {
+	bool valid(CLASS_ID id) {
 
 		bool result{};
 
@@ -420,7 +427,7 @@ struct {
 	{
 		if (g_pClsidManager == nullptr)
 			return;
-		
+
 		type_to_class[eSelectedType::kSelectedType_SmartTerrain] = g_pClsidManager->smart_terrain;
 		type_to_class[eSelectedType::kSelectedType_SmartCover] = g_pClsidManager->smart_cover;
 		type_to_class[eSelectedType::kSelectedType_LevelChanger] = g_pClsidManager->level_changer;
@@ -478,7 +485,7 @@ struct {
 			const char* pStr = convertTypeToString(i);
 			char result[32]{};
 
-			if (pStr==nullptr && type_to_class.find(eSelectedType(i)) != type_to_class.end())
+			if (pStr == nullptr && type_to_class.find(eSelectedType(i)) != type_to_class.end())
 			{
 				char name[16]{};
 				CLASS_ID id = type_to_class.at(eSelectedType(i));
@@ -512,13 +519,80 @@ struct {
 			}
 			else
 			{
-				pStr = "unknown";
+				// unable to obtain the pointer of string, so we just mark it as warning to developers
+				if (pStr == nullptr)
+					pStr = "FAILED_TO_TRANSLATE";
 			}
 
 			memcpy_s(pPtr, sizeof(category_names[i]), pStr, strlen(pStr));
 
 			combo_items[i] = pPtr;
 		}
+
+		initTranslatedLabels();
+
+
+		is_initialized = true;
+	}
+
+
+private:
+	// pre-caching naming for fast accessing and reducing requests to StringTable manager, it is slow...
+	void initTranslatedLabels()
+	{
+		if (g_pClsidManager == nullptr)
+			return;
+		
+		// if we unable to get info from StringTable manager we get a persistent pointer from .text section of dll so it is just string defines on "stack", see getDefaultNameOfSelectedType
+
+		pTranslatedLabel_Artefact = getTranslatedString(eSelectedType::kSelectedType_Artefact);
+		pTranslatedLabel_Car = getTranslatedString(eSelectedType::kSelectedType_Car);
+		pTranslatedLabel_LevelChanger = getTranslatedString(eSelectedType::kSelectedType_LevelChanger);
+		pTranslatedLabel_SmartCover = getTranslatedString(eSelectedType::kSelectedType_SmartCover);
+		pTranslatedLabel_SmartTerrain = getTranslatedString(eSelectedType::kSelectedType_SmartTerrain);
+		pTranslatedLabel_Stalker = getTranslatedString(eSelectedType::kSelectedType_Stalker);
+	}
+
+	const char* getDefaultNameOfSelectedType(eSelectedType type)
+	{
+		switch (type)
+		{
+		case eSelectedType::kSelectedType_SmartCover:
+			return "default_Smart Cover";
+		case eSelectedType::kSelectedType_SmartTerrain:
+			return "default_Smart Terrain";
+		case eSelectedType::kSelectedType_Stalker:
+			return "default_Stalker";
+		case eSelectedType::kSelectedType_Car:
+			return "default_Car";
+		case eSelectedType::kSelectedType_LevelChanger:
+			return "default_LevelChanger";
+		case eSelectedType::kSelectedType_Artefact:
+			return "default_Artefact";
+		default:
+			return "DEFAULT_NAME_FAILED_TO_TRANSLATE";
+		}
+	}
+
+	const char* getTranslatedString(eSelectedType type)
+	{
+		char name[16]{};
+		CLASS_ID id = type_to_class.at(type);
+		CLSID2TEXT(id, name);
+
+		for (int i = 0; i < 16; ++i)
+		{
+			if (name[i] == 32)
+			{
+				name[i] = '\0';
+			}
+		}
+
+		const char* pResult = nullptr;
+
+		pResult = g_pStringTable ? g_pStringTable->translate(name).c_str() : getDefaultNameOfSelectedType(type);
+
+		return pResult;
 	}
 } imgui_search_manager;
 
