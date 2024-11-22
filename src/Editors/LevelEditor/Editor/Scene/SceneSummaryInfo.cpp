@@ -428,14 +428,14 @@ void EScene::CollectSummaryInfo	()
     s_summary.Prepare				();
 }
 
-void EScene::ShowSummaryInfo		()
+void EScene::ShowSummaryInfo()
 {
-	PropItemVec items;
+    PropItemVec items;
     // fill items
-    s_summary.FillProp				(items);
+    s_summary.FillProp(items);
 
-   /* m_SummaryInfo->ShowProperties	();
-	m_SummaryInfo->AssignItems		(items);*/
+    LTools->GetProperties()->ClearProperties();
+    LTools->GetProperties()->AssignItems(items);
 }
 
 void EScene::ExportSummaryInfo	(LPCSTR f_name)
