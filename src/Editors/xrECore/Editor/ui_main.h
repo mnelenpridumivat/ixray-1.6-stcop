@@ -253,6 +253,7 @@ public:
     // Progress load
     volatile bool IsLoading = false;
     volatile float ProgressStatus = 0.f;
+    xr_string ProgressStatusName;
 
     // Render form
     ref_rt RT;

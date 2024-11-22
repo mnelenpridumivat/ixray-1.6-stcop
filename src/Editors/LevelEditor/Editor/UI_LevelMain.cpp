@@ -1325,10 +1325,11 @@ void CLevelMain::ResetStatus()
 void CLevelMain::SetStatus(LPCSTR s, bool bOutLog)
 {
 	VERIFY(m_bReady);
-  /*  if (fraBottomBar->paStatus->Caption!=s){
-		fraBottomBar->paStatus->Caption=s; fraBottomBar->paStatus->Repaint();
-		if (bOutLog&&s&&s[0]) ELog.Msg(mtInformation,s);
-	}*/
+
+	if (bOutLog && s && s[0])
+		ELog.Msg(mtInformation, s);
+
+	UI->ProgressStatusName = s;
 }
 void CLevelMain::ProgressDraw()
 {

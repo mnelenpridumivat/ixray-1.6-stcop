@@ -272,14 +272,15 @@ void UIRenderForm::Draw()
 	{
 		if (UI->IsLoading)
 		{
-			ImGui::SetCursorPos({ 10, ImGui::GetWindowHeight() - 40 });
-
-			if (ImGui::BeginChild("##renderloader", { 300, 35 }))
+			ImGui::SetCursorPos({ 10, ImGui::GetWindowHeight() - 75 });
+			ImGui::SetNextWindowBgAlpha(0.6f);
+			if (ImGui::BeginChild("##renderloader", { 300, 65 }, true))
 			{
-				ImGui::ProgressBar(UI->ProgressStatus / 100.f, {280, 30});
+				ImGui::Text(UI->ProgressStatusName.c_str());
+				ImGui::ProgressBar(UI->ProgressStatus / 100.f, {280, 25});
 			}
 			ImGui::EndChild();
-		}
+		} 
 	}
 
 	ImGui::End();
