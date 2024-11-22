@@ -153,7 +153,7 @@ namespace
         auto hdr = reinterpret_cast<const DDS_HEADER*>(ddsData + sizeof(uint32_t));
 
         // Verify header to validate DDS file
-        if (hdr->size != sizeof(DDS_HEADER) ||
+        if (hdr->size != sizeof(DDS_HEADER) &&
             hdr->ddspf.size != sizeof(DDS_PIXELFORMAT))
         {
             return E_FAIL;
