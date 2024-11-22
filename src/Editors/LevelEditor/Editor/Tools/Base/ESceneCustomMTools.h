@@ -47,6 +47,10 @@ public:
     UIToolCustom*       pForm = nullptr;
 	TUI_CustomControl* FindControl(int subtarget, int action);
 protected:
+    // For loading event 
+    volatile bool IsLoaded = false;
+
+protected:
     void            	AddControl				(TUI_CustomControl* c);
     void            	UpdateControl			();
 public:

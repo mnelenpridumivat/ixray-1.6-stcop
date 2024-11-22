@@ -163,6 +163,9 @@ const int	MAX_R_VERTEX	= 4096;
 
 void ESceneWallmarkTool::OnRender(int priority, bool strictB2F)
 {
+    if (!IsLoaded)
+        return;
+
 	if (!m_Flags.is(flDrawWallmark))return;
     if (marks.empty())				return;
 
@@ -420,6 +423,8 @@ bool ESceneWallmarkTool::LoadStream(IReader& F)
 	    slot->items.erase	(new_end,slot->items.end());
     }
     
+    IsLoaded = true;
+
     return true;
 }
 

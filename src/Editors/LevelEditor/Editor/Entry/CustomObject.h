@@ -44,6 +44,9 @@ protected:
 	SAnimParams*	m_MotionParams;
 	COMotion*		m_Motion;
 
+	// For loading event 
+	volatile bool IsLoaded = false;
+
 	// private animation methods
 	void 			AnimationOnFrame	();
 	void 			AnimationDrawPath	();

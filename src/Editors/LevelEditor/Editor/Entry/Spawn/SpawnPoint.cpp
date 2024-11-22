@@ -32,6 +32,9 @@ const u32 RP_COLORS[MAX_TEAM]={0xff0000,0x00ff00,0x0000ff,0xffff00,0x00ffff,0xff
 #define ENVMOD_COLOR 0x00DF8E00
 #define ENVMOD_SEL_COLOR1 0x30FFBE10
 #define ENVMOD_SEL_COLOR2 0x00FFBE10
+
+xrCriticalSection mLuaEnter;
+
 // CLE_Visual
 CLE_Visual::CLE_Visual(CSE_Visual* src)
 {
@@ -474,6 +477,8 @@ void CSpawnPoint::SSpawnData::FillProp(LPCSTR pref, PropItemVec& items)
 
 void CSpawnPoint::SSpawnData::Render(bool bSelected, const Fmatrix& parent,int priority, bool strictB2F)
 {
+	xrCriticalSectionGuard guard(mLuaEnter);
+
 	if (m_Visual&&m_Visual->visual)
 		::RImplementation.model_Render	(m_Visual->visual,parent,priority,strictB2F,1.f);
 
@@ -490,8 +495,6 @@ void CSpawnPoint::SSpawnData::Render(bool bSelected, const Fmatrix& parent,int p
 		xr_vector<CLE_Visual*>::iterator it_e 	= m_VisualHelpers.end();
 		Fmatrix M;
 		u32 idx = 0;
-
-		xrCriticalSectionGuard guard(mLuaEnter);
 
 		for(;it!=it_e;++it,++idx)
 		{
@@ -812,6 +815,11 @@ Fvector u32_3f(u32);
 
 void CSpawnPoint::OnFrame()
 {
+	if (dwFrameUpdate == Device.dwFrame)
+		return;
+
+	dwFrameUpdate = Device.dwFrame;
+
 	inherited::OnFrame();
 	if (m_AttachedObject) 		m_AttachedObject->OnFrame	();
 	if (m_SpawnData.Valid())
@@ -880,19 +888,22 @@ void CSpawnPoint::RenderSimBox()
 	u32 clr = 0x06005000;
 	DU_impl.DrawIdentBox(true,false,clr,clr);
 }
+
 void CSpawnPoint::Render( int priority, bool strictB2F )
 {
+	if (!IsLoaded)
+		return;
 
-	Fmatrix SaveTransform =   FTransformRP;
+	Fmatrix SaveTransform = FTransformRP;
 
-	if( m_physics_shell )
+	if (m_physics_shell)
 	{
-		UpdateObjectXform( FTransformRP );
-		RenderSimBox( );
+		UpdateObjectXform(FTransformRP);
+		RenderSimBox();
 	}
+
 	inherited::Render			(priority, strictB2F);
 	Scene->SelectLightsForObject(this);
-
 	
 	// render attached object
 	if (m_AttachedObject)
@@ -1011,6 +1022,9 @@ bool CSpawnPoint::FrustumPick(const CFrustum& frustum)
 
 bool CSpawnPoint::RayPick(float& distance, const Fvector& start, const Fvector& direction, SRayPickInfo* pinf)
 {
+	if (!IsLoaded)
+		return false;
+
 	bool bPick 	= false;
 	if (m_AttachedObject){
 		bPick 	= m_AttachedObject->RayPick(distance, start, direction, pinf);
@@ -1093,6 +1107,7 @@ bool CSpawnPoint::OnAppendObject(CCustomObject* object)
 
 bool CSpawnPoint::LoadLTX(CInifile& ini, LPCSTR sect_name)
 {
+	xrCriticalSectionGuard guard(mLuaEnter);
 
 	u32 version = ini.r_u32(sect_name, "version");
 
@@ -1163,6 +1178,8 @@ bool CSpawnPoint::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	if (shape)
 		SetScale 	( shape->GetScale());
 	
+	IsLoaded = true;
+
 	return true;
 }
 

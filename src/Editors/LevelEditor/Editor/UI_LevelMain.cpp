@@ -178,74 +178,90 @@ CCommandVar CommandUnloadLevelPart(CCommandVar p1, CCommandVar p2)
 		return			Scene->UnloadLevelPart(temp_fn.c_str(),p1);
 	return				TRUE;
 }
+
+static xr_task_group LoaderEvent;
+
 CCommandVar CommandLoad(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() )
+	LoaderEvent.wait();
+
+	if (!Scene->locked())
 	{
 		if (!p1.IsString())
 		{
-			xr_string temp_fn	= LTools->m_LastFileName.c_str();
-			if (EFS.GetOpenName	(_maps_, temp_fn ))
-				return 			ExecCommand(COMMAND_LOAD,temp_fn);
-		}else
+			xr_string temp_fn = LTools->m_LastFileName.c_str();
+			if (EFS.GetOpenName(_maps_, temp_fn))
+				return 			ExecCommand(COMMAND_LOAD, temp_fn);
+		}
+		else
 		{
-			xr_string temp_fn		= p1;
-			xr_strlwr				(temp_fn);
+			xr_string temp_fn = p1;
+			xr_strlwr(temp_fn);
 
 			if (!Scene->IfModified())
 				return FALSE;
-			
-			UI->SetStatus			("Level loading...");
-			ExecCommand				(COMMAND_CLEAR);
+
+			UI->SetStatus("Level loading...");
+			ExecCommand(COMMAND_CLEAR);
 			FS.TryLoad(temp_fn.c_str());
-			IReader* R = FS.r_open	(temp_fn.c_str());
+			IReader* R = FS.r_open(temp_fn.c_str());
 			if (!R)return false;
 			char ch;
 			R->r(&ch, sizeof(ch));
-			bool is_ltx = (ch=='[');
+			bool is_ltx = (ch == '[');
 			FS.r_close(R);
-			bool res;
-			LTools->m_LastFileName	= temp_fn.c_str();
+			LTools->m_LastFileName = temp_fn.c_str();
 
-			if(is_ltx)
-				res = Scene->LoadLTX(temp_fn.c_str(), false);
-			else
-				res = Scene->Load(temp_fn.c_str(), false);
+			LoaderEvent.run
+			(
+				[temp_fn, is_ltx]
+				{
+					bool Result = (is_ltx) ? Scene->LoadLTX(temp_fn.c_str(), false) : Scene->Load(temp_fn.c_str(), false);
 
-			if (res)
-			{
-				UI->ResetStatus		();
-				Scene->UndoClear	();
-				
-				BOOL bk1 			= Scene->m_RTFlags.test(EScene::flRT_Unsaved);
-				BOOL bk2 			= Scene->m_RTFlags.test(EScene::flRT_Modified);
+					if (Result)
+					{
+						UI->ResetStatus();
+						Scene->UndoClear();
 
-				Scene->UndoSave		();
+						BOOL bk1 = Scene->m_RTFlags.test(EScene::flRT_Unsaved);
+						BOOL bk2 = Scene->m_RTFlags.test(EScene::flRT_Modified);
 
-				 Scene->m_RTFlags.set(EScene::flRT_Unsaved,bk1);
-				 Scene->m_RTFlags.set(EScene::flRT_Modified,bk2);
+						Scene->UndoSave();
 
-				ExecCommand			(COMMAND_CLEAN_LIBRARY);
-				ExecCommand			(COMMAND_UPDATE_CAPTION);
-				ExecCommand			(COMMAND_CHANGE_ACTION,etaSelect);
-				EPrefs->AppendRecentFile(temp_fn.c_str());
-			}else
-			{
-				ELog.DlgMsg	( mtError, "Can't load map '%s'", temp_fn.c_str() );
-				LTools->m_LastFileName = "";
-			}
-			// update props
-			ExecCommand			(COMMAND_UPDATE_PROPERTIES);
-			UI->RedrawScene		();             
+						Scene->m_RTFlags.set(EScene::flRT_Unsaved, bk1);
+						Scene->m_RTFlags.set(EScene::flRT_Modified, bk2);
+
+						ExecCommand(COMMAND_CLEAN_LIBRARY);
+						ExecCommand(COMMAND_UPDATE_CAPTION);
+						ExecCommand(COMMAND_CHANGE_ACTION, etaSelect);
+						EPrefs->AppendRecentFile(temp_fn.c_str());
+					}
+					else
+					{
+						ELog.DlgMsg(mtError, "Can't load map '%s'", temp_fn.c_str());
+						LTools->m_LastFileName = "";
+					}
+					// update props
+					ExecCommand(COMMAND_UPDATE_PROPERTIES);
+					UI->RedrawScene();
+				}
+			);
 		}
-	} else {
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+
+		return TRUE;
+	}
+	else
+	{
+		ELog.DlgMsg(mtError, "Scene sharing violation");
 		return FALSE;
 	}
 	return TRUE;
 }
+
 CCommandVar CommandSaveBackup(CCommandVar p1, CCommandVar p2)
 {
+	LoaderEvent.wait();
+
 	string_path 	fn;
 	xr_strconcat(fn,Core.CompName,"_",Core.UserName,"_backup.level");
 	FS.update_path	(fn,_maps_,fn);
@@ -253,6 +269,8 @@ CCommandVar CommandSaveBackup(CCommandVar p1, CCommandVar p2)
 }
 CCommandVar CommandSave(CCommandVar p1, CCommandVar p2)
 {
+	LoaderEvent.wait();
+
 	if( !Scene->locked() )
 	{
 		if (p2==1)
@@ -297,6 +315,8 @@ CCommandVar CommandSave(CCommandVar p1, CCommandVar p2)
 
 CCommandVar CommandClear(CCommandVar p1, CCommandVar p2)
 {
+	LoaderEvent.wait();
+
 	if( !Scene->locked() ){
 		if (!Scene->IfModified()) return TRUE;
 		UI->CurrentView().m_Camera.Reset	();

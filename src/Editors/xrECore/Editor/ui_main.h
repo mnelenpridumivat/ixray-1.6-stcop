@@ -250,6 +250,11 @@ public:
     void CloseConsole();
 
 public:
+    // Progress load
+    volatile bool IsLoading = false;
+    volatile float ProgressStatus = 0.f;
+
+    // Render form
     ref_rt RT;
     ref_rt RTPostion;
     ref_rt RTNormal;
