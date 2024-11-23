@@ -20,19 +20,9 @@
 
 extern bool shared_str_initialized;
 
-#ifdef __BORLANDC__
-    #	include "d3d9.h"
-    #	include "d3dx9.h"
-    #	include "D3DX_Wrapper.h"
-    #	pragma comment(lib,"EToolsB.lib")
-    #	define DEBUG_INVOKE	DebugBreak()
-        static BOOL			bException	= TRUE;
-#else
-    #	define DEBUG_INVOKE	__debugbreak();
-        static BOOL			bException	= FALSE;
-
-	#	define USE_OWN_ERROR_MESSAGE_WINDOW
-#endif
+#define DEBUG_INVOKE	__debugbreak();
+static BOOL bException = FALSE;
+#define USE_OWN_ERROR_MESSAGE_WINDOW
 
 #ifdef IXR_WINDOWS
 #include <dbghelp.h>						// MiniDump flags
@@ -466,7 +456,6 @@ void format_message	(LPSTR buffer, const u32 &buffer_size)
 
 #ifndef _EDITOR
     #include <errorrep.h>
-    #pragma comment( lib, "faultrep.lib" )
 #endif
 
 #include "StackTrace/StackTrace.h"
