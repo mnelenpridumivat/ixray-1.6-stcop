@@ -37,7 +37,11 @@ void CUIThemeManager::Draw()
 		ImGui::SeparatorText("General");
 		ImGui::ColorEdit4("Default Color", (float*)&colors[ImGuiCol_WindowBg]);
 		ImGui::ColorEdit4("Header Color", (float*)&colors[ImGuiCol_MenuBarBg]);
+
+		ImGui::SeparatorText("Text");
 		ImGui::ColorEdit4("Text Color", (float*)&colors[ImGuiCol_Text]);
+		ImGui::ColorEdit4("Text Disabled Color", (float*)&colors[ImGuiCol_TextDisabled]);
+		ImGui::ColorEdit4("Text Selected Background", (float*)&colors[ImGuiCol_TextSelectedBg]);
 
 		ImGui::SeparatorText("Properties");
 		ImGui::ColorEdit4("Header Color ##", (float*)&colors[ImGuiCol_TableHeaderBg]);
@@ -74,6 +78,12 @@ void CUIThemeManager::Draw()
 		ImGui::ColorEdit4("Warning message", (float*)&log_color_warning);
 		ImGui::ColorEdit4("Debug message", (float*)&log_color_debug);
 		ImGui::ColorEdit4("Default message", (float*)&log_color_default);
+
+		ImGui::SeparatorText("Plot");
+		ImGui::ColorEdit4("Plot Lines", (float*)&colors[ImGuiCol_PlotLines]);
+		ImGui::ColorEdit4("Plot Lines Hovered", (float*)&colors[ImGuiCol_PlotLinesHovered]);
+		ImGui::ColorEdit4("Plot Histogram", (float*)&colors[ImGuiCol_PlotHistogram]);
+		ImGui::ColorEdit4("Plot Histogram Hovered", (float*)&colors[ImGuiCol_PlotHistogramHovered]);
 
 		ImGui::SeparatorText("Fonts");
 		FS_FileSet Files;
@@ -128,7 +138,6 @@ void CUIThemeManager::InitDefault(bool Forced)
 {
 	ImVec4* colors = ImGui::GetStyle().Colors;
 
-	colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 	colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
 	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
@@ -150,11 +159,6 @@ void CUIThemeManager::InitDefault(bool Forced)
 	colors[ImGuiCol_Tab] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
 	colors[ImGuiCol_DockingPreview] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
 	colors[ImGuiCol_DockingEmptyBg] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
 	colors[ImGuiCol_DragDropTarget] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
 	colors[ImGuiCol_NavHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 0.70f);
@@ -195,6 +199,8 @@ void CUIThemeManager::InitDefault(bool Forced)
 	colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
 	colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
 	colors[ImGuiCol_TableHeaderBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
 	colors[ImGuiCol_TableBorderStrong] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
 	colors[ImGuiCol_TableBorderLight] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
@@ -219,6 +225,10 @@ void CUIThemeManager::InitDefault(bool Forced)
 	log_color_error = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 	log_color_warning = ImVec4(1.00f, 1.00f, 0.00f, 1.00f);
 	log_color_debug = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
 
 	IsLoaded = true;
 }
@@ -311,6 +321,12 @@ void CUIThemeManager::Save()
 	FastJSonWriteImColorAlt(log_color_error);
 	FastJSonWriteImColorAlt(log_color_warning);
 	FastJSonWriteImColorAlt(log_color_debug);
+	FastJSonWriteImColor(ImGuiCol_TextDisabled);
+	FastJSonWriteImColor(ImGuiCol_TextSelectedBg);
+	FastJSonWriteImColor(ImGuiCol_PlotLines);
+	FastJSonWriteImColor(ImGuiCol_PlotLinesHovered);
+	FastJSonWriteImColor(ImGuiCol_PlotHistogram);
+	FastJSonWriteImColor(ImGuiCol_PlotHistogramHovered);
 
 	JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 	JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -362,6 +378,12 @@ void CUIThemeManager::SaveTo()
 		FastJSonWriteImColorAlt(log_color_error);
 		FastJSonWriteImColorAlt(log_color_warning);
 		FastJSonWriteImColorAlt(log_color_debug);
+		FastJSonWriteImColor(ImGuiCol_TextDisabled);
+		FastJSonWriteImColor(ImGuiCol_TextSelectedBg);
+		FastJSonWriteImColor(ImGuiCol_PlotLines);
+		FastJSonWriteImColor(ImGuiCol_PlotLinesHovered);
+		FastJSonWriteImColor(ImGuiCol_PlotHistogram);
+		FastJSonWriteImColor(ImGuiCol_PlotHistogramHovered);
 
 		JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 		JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -417,6 +439,12 @@ void CUIThemeManager::LoadFrom()
 		FastJSonReadImColorAlt(log_color_error);
 		FastJSonReadImColorAlt(log_color_warning);
 		FastJSonReadImColorAlt(log_color_debug);
+		FastJSonReadImColor(ImGuiCol_TextDisabled);
+		FastJSonReadImColor(ImGuiCol_TextSelectedBg);
+		FastJSonReadImColor(ImGuiCol_PlotLines);
+		FastJSonReadImColor(ImGuiCol_PlotLinesHovered);
+		FastJSonReadImColor(ImGuiCol_PlotHistogram);
+		FastJSonReadImColor(ImGuiCol_PlotHistogramHovered);
 
 
 		if (JSONData["Theme"].contains("InactiveAlpha"))
@@ -484,7 +512,12 @@ void CUIThemeManager::Load()
 	FastJSonReadImColorAlt(log_color_error);
 	FastJSonReadImColorAlt(log_color_warning);
 	FastJSonReadImColorAlt(log_color_debug);
-
+	FastJSonReadImColor(ImGuiCol_TextDisabled);
+	FastJSonReadImColor(ImGuiCol_TextSelectedBg);
+	FastJSonReadImColor(ImGuiCol_PlotLines);
+	FastJSonReadImColor(ImGuiCol_PlotLinesHovered);
+	FastJSonReadImColor(ImGuiCol_PlotHistogram);
+	FastJSonReadImColor(ImGuiCol_PlotHistogramHovered);
 
 	if (JSONData["Theme"].contains("InactiveAlpha"))
 	{
