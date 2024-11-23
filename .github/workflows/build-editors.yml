@@ -149,6 +149,7 @@ jobs:
             gamedata/
             rawdata/
             .xrignore
+            ActorEditorLevel.cform
             fs*.ltx
           include-hidden-files: true
 
@@ -201,5 +202,6 @@ jobs:
             gamedata/
             rawdata/
             .xrignore
+            ActorEditorLevel.cform
             fs*.ltx
           include-hidden-files: true
