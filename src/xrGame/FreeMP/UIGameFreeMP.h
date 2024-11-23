@@ -1,6 +1,8 @@
 #pragma once
+
 #include "UIGameMP.h"
 
+class CUITextWnd;
 class game_cl_freemp;
 
 class CUIGameFMP :
