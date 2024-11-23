@@ -16,6 +16,9 @@ void RegisterExpressionDelegates();
 
 CInifile* pGameGlobals = nullptr;
 
+extern void RegisterImGuiInGame();
+
+
 extern "C" 
 {
 	DLL_API void __cdecl xrGameInitialize()
@@ -25,6 +28,10 @@ extern "C"
 		CCC_RegisterInput();
 
 		RegisterExpressionDelegates();
+
+#ifdef DEBUG_DRAW
+		RegisterImGuiInGame();
+#endif
 
 		string_path GameGlobals = {};
 		FS.update_path(GameGlobals, "$game_config$", "game_global.ltx");

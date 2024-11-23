@@ -152,7 +152,8 @@ public:
 	xr_vector<IRender_Sector*>		detectSectors_frustum	(CSector* sector, CFrustum* _frustum);
 	int								translateSector			(IRender_Sector* pSector);
 	virtual IRender_Target*			getTarget				();
-	
+	virtual SurfaceParams getSurface(const char* nameTexture) override;
+
 	// Main 
 	virtual void					flush					();
 	virtual void					set_Object				(IRenderable*		O	);
