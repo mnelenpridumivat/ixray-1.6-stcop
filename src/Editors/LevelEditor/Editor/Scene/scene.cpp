@@ -121,6 +121,8 @@ void EScene::AppendObject( CCustomObject* object, bool bUndo )
 		object->Select	(true);
 		UndoSave();
 	}
+
+	object->SetLoadedState();
 }
 
 bool EScene::RemoveObject( CCustomObject* object, bool bUndo, bool bDeleting )

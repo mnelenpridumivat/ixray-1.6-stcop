@@ -239,7 +239,8 @@ CEditableObject* CSceneObject::UpdateReference()
                     ::Render->shader_option_skinning(-1);
             }
         }
-    } 
+    }
+
     return m_pReference;
 }
 

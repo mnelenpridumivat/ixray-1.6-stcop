@@ -125,6 +125,8 @@ public:
 	void  	OnNumChangeRotation	(PropValue* sender);
 	void  	OnNumChangeScale	(PropValue* sender);
 
+	void	SetLoadedState();
+
 	virtual void	DeleteThis		(){m_RT_Flags.set(flRT_NeedSelfDelete,TRUE);}
 public:
 					CCustomObject	(LPVOID data, LPCSTR name);

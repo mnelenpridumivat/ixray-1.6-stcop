@@ -636,14 +636,31 @@ CCommandVar CommandOptions(CCommandVar p1, CCommandVar p2)
 
 CCommandVar CommandBuild(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to build level?"))
-			return				Builder.Compile(false);
-	}else{
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+	if (!Scene->locked())
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to build level?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.Compile(false);
+
+				}
+			);
+
+			return true;
+		}
 	}
-	return 						FALSE;
+	else
+	{
+		ELog.DlgMsg(mtError, "Scene sharing violation");
+	}
+	return FALSE;
 }
+
 CCommandVar CommandUpdateGizmo(CCommandVar p1, CCommandVar p2)
 {
 	// LTools->GetGimzo()->bApplyUpdatePos = true;
@@ -665,56 +682,134 @@ CCommandVar CommandMakeAIMap(CCommandVar p1, CCommandVar p2)
 	}
 	return 						FALSE;
 }
+
 CCommandVar CommandMakeGame(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to export game?"))
-			return				Builder.MakeGame( );
-	}else{
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+	if (!Scene->locked())
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to export game?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.MakeGame();
+				}
+			);
+
+			return true;
+		}
+	}
+	else {
+		ELog.DlgMsg(mtError, "Scene sharing violation");
 	}
 	return 						FALSE;
 }
+
 CCommandVar CommandMakePuddles(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to export puddles?"))
-			return				Builder.MakePuddles( );
-	}else{
+	if (!Scene->locked()) 
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to export puddles?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.MakePuddles();
+				}
+			);
+
+			return true;
+		}
+	}
+	else {
 		ELog.DlgMsg( mtError, "Scene sharing violation" );
 	}
-	return 						FALSE;
+	return FALSE;
 }
+
 CCommandVar CommandMakeDetails(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to export details?"))
-			return 				Builder.MakeDetails();
-	}else{
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+	if (!Scene->locked())
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to export details?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.MakeDetails();
+				}
+			);
+
+			return true;
+		}
+	}
+	else
+	{
+		ELog.DlgMsg(mtError, "Scene sharing violation");
 	}
 	return 						FALSE;
 }
+
 CCommandVar CommandMakeHOM(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to export HOM?"))
-			return				Builder.MakeHOM();
-	}else{
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+	if (!Scene->locked()) 
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to export HOM?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.MakeHOM();
+				}
+			);
+
+			return true;
+		}
+	}
+	else 
+	{
+		ELog.DlgMsg(mtError, "Scene sharing violation");
 	}
 	return 						FALSE;
 }
+
 CCommandVar CommandMakeSOM(CCommandVar p1, CCommandVar p2)
 {
-	if( !Scene->locked() ){
-		if (mrYes==ELog.DlgMsg(mtConfirmation, mbYes |mbNo, "Are you sure to export Sound Occlusion Model?"))
-			return				Builder.MakeSOM();
-	}else{
-		ELog.DlgMsg( mtError, "Scene sharing violation" );
+	if (!Scene->locked()) 
+	{
+		if (mrYes == ELog.DlgMsg(mtConfirmation, mbYes | mbNo, "Are you sure to export Sound Occlusion Model?"))
+		{
+			LoaderEvent.wait();
+
+			LoaderEvent.run
+			(
+				[]()
+				{
+					Builder.MakeSOM();
+				}
+			);
+
+			return true;
+		}
+	}
+	else {
+		ELog.DlgMsg(mtError, "Scene sharing violation");
 	}
 	return 						FALSE;
 }
+
 CCommandVar CommandInvertSelectionAll(CCommandVar p1, CCommandVar p2)
 {
 	if( !Scene->locked() ){
