@@ -9,6 +9,17 @@
 #include "NET_Messages.h"
 #include "NET_Compressor.h"
 
+// #define USE_DIRECT_PLAY
+
+IC bool UseDirectPlay()
+{
+#ifdef USE_DIRECT_PLAY
+	return true;
+#else
+	return false;
+#endif // USE_DIRECT_PLAY
+}
+
 XRNETSERVER_API extern ClientID BroadcastCID;
 
 XRNETSERVER_API extern Flags32	psNET_Flags;
