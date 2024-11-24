@@ -174,6 +174,7 @@ target_link_libraries(xrECore PUBLIC xrAbstractions)
 target_link_libraries(xrECore PUBLIC xrPhysics)
 target_link_libraries(xrECore PUBLIC xrDXT)
 target_link_libraries(xrECore PUBLIC MagicFM)
+target_link_libraries(xrECore PUBLIC NvMender2003)
 target_link_libraries(xrECore PUBLIC "d3d9.lib")
 target_link_libraries(xrECore PUBLIC "d3dcompiler.lib")
 
