@@ -66,20 +66,23 @@ jobs:
       - name: Configure plugins
         run: |
           cmake `
-            --preset ${{ matrix.preset }}-${{ matrix.platform }}-${{ runner.os }}
+            -S . `
+            -B build/${{ matrix.platform }}/${{ matrix.preset }}-${{ runner.os }} `
+            -G "Visual Studio 17 2022" `
+            -DIXRAY_PLUGINS=ON
 
       - name: Build plugins
         run: |
           cmake `
-            --build `
-            --preset ${{ matrix.preset }}-${{ matrix.platform }}-${{ runner.os }}-${{ matrix.config }}
+            --build build/${{ matrix.platform }}/${{ matrix.preset }}-${{ runner.os }} `
+            --target MayaTools `
+            --config ${{ matrix.config }}
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
           name: plugins-binaries-${{ matrix.system }}-${{ matrix.platform }}-${{ matrix.config }}-${{ github.sha }}
           path: |
-            build/${{ matrix.platform }}/${{ matrix.preset }}-${{ runner.os }}/bin/${{ matrix.config }}/*.dlu
             build/${{ matrix.platform }}/${{ matrix.preset }}-${{ runner.os }}/bin/${{ matrix.config }}/*.mll
             build/${{ matrix.platform }}/${{ matrix.preset }}-${{ runner.os }}/bin/${{ matrix.config }}/*.dll
 
