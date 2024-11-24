@@ -63,7 +63,7 @@ void dxRainRender::Render(CEffect_Rain &owner)
 	float		factor_visual	= factor/2.f+.5f;
 	Fvector3	f_rain_color	= g_pGamePersistent->Environment().CurrentEnv->rain_color;
 
-#ifdef RENDER != R_R1
+#if RENDER != R_R1
 	f_rain_color.mul(0.9f);
 	factor_visual *= 0.8f;
 #endif // RENDER != R_R1
