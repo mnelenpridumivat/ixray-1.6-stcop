@@ -5,6 +5,12 @@
 static FS_FileSet modif_map;
 UIEditLibrary* UIEditLibrary::Form = nullptr;
 
+static void ViewportFocusCallback()
+{
+	LUI->EndEState(esEditScene);
+	LUI->BeginEState(esEditLibrary);
+}
+
 UIEditLibrary::UIEditLibrary()
 {
 	m_ObjectList = new UIItemListForm();
@@ -16,6 +22,8 @@ UIEditLibrary::UIEditLibrary()
 	m_Preview = false;
 	m_SelectLods = false;
 	m_RealTexture = nullptr;
+
+	View.OnFocusCallback = ViewportFocusCallback;
 }
 
 void UIEditLibrary::OnItemFocused(ListItem* item)
@@ -309,12 +317,23 @@ void UIEditLibrary::DrawRightBar()
 
 			if (ImGui::Button("Make Thumbnail", ImVec2(-1, 0)))
 			{
-				OnMakeThmClick();
+				UI->RedrawScene(false);
 
-				for (auto Item : m_ObjectList->m_SelectedItems)
+				UI->CommandList[TUI::ECommandListID::CurrentFrame].push_back([this]
 				{
-					OnItemFocused(Item);
-				}
+					UI->ViewID = View.ViewportID;
+					View.OnFocusCallback();
+				});
+				
+				UI->CommandList[TUI::ECommandListID::NextFrame].push_back([this]
+				{
+					OnMakeThmClick();
+
+					for (auto Item : m_ObjectList->m_SelectedItems)
+					{
+						OnItemFocused(Item);
+					}
+				});
 			}
 			if (ImGui::IsItemHovered())
 				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -451,7 +470,7 @@ void UIEditLibrary::RefreshSelected()
 
 	if (m_Preview)
 	{
-		if (m_ObjectList->m_SelectedItems.empty())
+		if (!m_ObjectList->m_SelectedItems.empty())
 		{
 			ListItemsVec vec;
 			for (ListItem* ListItem : m_ObjectList->m_SelectedItems)
@@ -496,6 +515,7 @@ void UIEditLibrary::ShowProperty()
 }
 
 #include "../xrECore/Editor/ExportObjectOGF.h"
+#include <imgui_internal.h>
 
 void UIEditLibrary::ExportOneOBJ(CEditableObject* EO)
 {
@@ -674,6 +694,16 @@ void UIEditLibrary::Draw()
 		return;
 	}
 
+	ImGuiID FormDockId = ImGui::GetWindowDockID();
+
+	if (m_Preview && FormDockId != 0 && FormDockId == View.DockId)
+	{
+		ImGuiID NewDock = ImGui::DockBuilderSplitNode(FormDockId, ImGuiDir_Down, 0.5f, nullptr, &FormDockId);
+		ImGui::DockBuilderDockWindow(View.ViewportName, NewDock);
+		ImGui::DockBuilderFinish(FormDockId);
+		ELog.DlgMsg(mtInformation, "! The Object Library cannot be blocked by the viewport.");
+	}
+
 	{
 		ImGui::BeginGroup();
 
@@ -692,6 +722,11 @@ void UIEditLibrary::Draw()
 
 	ImGui::PopStyleVar(1);
 	ImGui::End();
+
+	if (m_Preview)
+	{
+		View.Draw();
+	}
 }
 
 void UIEditLibrary::ImportClick()
