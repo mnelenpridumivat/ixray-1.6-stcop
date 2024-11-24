@@ -574,7 +574,11 @@ bool CActor::CanAccelerate()
 bool CActor::CanRun()
 {
 	const static bool isSprintWhileOverweightDisabled = EngineExternal()[EEngineExternalGame::DisableSprintWhileOverweight];
-	bool can_run		= !IsZoomAimingMode() && !(mstate_real&mcLookout) && (isSprintWhileOverweightDisabled && inventory().TotalWeight() < (MaxWalkWeight() - 10.0f) );
+	bool can_run = !IsZoomAimingMode() && !(mstate_real & mcLookout);
+	if (isSprintWhileOverweightDisabled)
+	{
+		can_run = !IsZoomAimingMode() && !(mstate_real & mcLookout) && (inventory().TotalWeight() < (MaxWalkWeight() - 10.0f));
+	}
 	return can_run;
 }
 
