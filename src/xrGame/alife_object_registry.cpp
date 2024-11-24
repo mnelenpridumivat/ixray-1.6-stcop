@@ -25,7 +25,6 @@ CALifeObjectRegistry::~CALifeObjectRegistry	()
 	for (I = B; I != E; ++I)
 		xr_delete					((*I).second);
 
-	m_object_id_to_vec_pos.clear();
 	m_objects_as_vec.clear();
 }
 

@@ -21,7 +21,6 @@ IC void CALifeObjectRegistry::add(CSE_ALifeDynamicObject* object)
 	m_objects.insert(std::make_pair(object->ID, object));
 
 	m_objects_as_vec.push_back(object);
-	m_object_id_to_vec_pos[object->ID] = m_objects_as_vec.size() - 1;
 }
 
 IC void CALifeObjectRegistry::remove(const ALife::_OBJECT_ID& id, bool no_assert)
@@ -33,8 +32,11 @@ IC void CALifeObjectRegistry::remove(const ALife::_OBJECT_ID& id, bool no_assert
 	}
 
 	m_objects.erase(I);
-	m_objects_as_vec.erase(m_objects_as_vec.begin() + m_object_id_to_vec_pos[id]);
-	m_object_id_to_vec_pos.erase(id);
+	auto to_delete = std::find_if(m_objects_as_vec.begin(), m_objects_as_vec.end(), [id](const CSE_ALifeDynamicObject* pObject) {
+		return pObject->ID == id;
+		});
+
+	m_objects_as_vec.erase(to_delete);
 }
 
 IC	CSE_ALifeDynamicObject *CALifeObjectRegistry::object	(const ALife::_OBJECT_ID &id, bool no_assert) const
