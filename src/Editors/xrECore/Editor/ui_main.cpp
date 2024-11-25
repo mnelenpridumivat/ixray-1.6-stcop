@@ -549,6 +549,7 @@ void TUI::Redraw()
 				if (m_SelectionRect) 	DU_impl.DrawSelectionRect(m_SelStart, m_SelEnd);
 
 				// draw axis
+				if (psDeviceFlags.test(rsDrawAxis) && !psDeviceFlags.test(rsDisableAxisCube))
 				DU_impl.DrawAxis(UI->CurrentView().m_Camera.GetTransform());
 
 
@@ -593,7 +594,6 @@ void TUI::Redraw()
 
 				Draw();
 
-				EDevice->SetRS(D3DRS_FILLMODE, EDevice->dwFillMode);
 				UI->EndFrame();
 				EDevice->End();
 			}

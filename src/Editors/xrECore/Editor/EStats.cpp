@@ -16,7 +16,7 @@ CEStats::CEStats()
     dwLevelSelFaceCount = 0;
     dwLevelSelVertexCount = 0;
 
-    pFont = g_FontManager->GetFont("stat_font", CGameFont::fsDeviceIndependent);// new CGameFont("stat_font", CGameFont::fsDeviceIndependent);
+    pFont = g_FontManager->GetFont("sdk_font_statistic", CGameFont::fsDeviceIndependent);// new CGameFont("stat_font", CGameFont::fsDeviceIndependent);
 }
 
 CEStats::~CEStats() {}
@@ -69,15 +69,18 @@ void CEStats::Show()
     // Show them
     if (psDeviceFlags.is(rsStatistic))
     {
+        lastDPS_verts = DPS.verts;
+        lastDPS_polys = DPS.polys;
+        lastDPS_calls = DPS.calls;
+
+#if 0
+
         //auto& env = g_pGamePersistent->Environment();
         //float time = g_pGameLevel ? g_pGameLevel->GetEnvironmentGameDayTimeSec() : env.GetGameTime();
         //u32   hours, minutes, seconds;
         //env.SplitTime(time, hours, minutes, seconds);
 
         CGameFont& F = *pFont;
-
-        constexpr float f_base_size = 12.0f;
-        F.SetHeight(f_base_size);
 
         if (bIsLevelEditor)
             F.OutSet(30, ImGui::GetFrameHeight() * 1.5);
@@ -91,7 +94,7 @@ void CEStats::Show()
         F.SetColor(0xFFFFFFFF);
         F.OutNext("FPS/RFPS:     %3.1f/%3.1f", fFPS, fRFPS);
         F.OutSkip();
-        F.SetColor(0xC8DCAFFF);
+        F.SetColor(0xDDDDDDDD);
         F.OutNext("TPS:          %2.2f M", fTPS);
         F.OutNext("VERT:         %d", DPS.verts);
         F.OutNext("POLY:         %d", DPS.polys);
@@ -123,6 +126,7 @@ void CEStats::Show()
         // F.OutNext(" Sel Faces: %d", dwLevelSelFaceCount);
         // F.OutNext(" Sel Verts: %d", dwLevelSelVertexCount);
         //UI->OnStats(EDevice->pSystemFont);
+#endif
     }
 
     {
