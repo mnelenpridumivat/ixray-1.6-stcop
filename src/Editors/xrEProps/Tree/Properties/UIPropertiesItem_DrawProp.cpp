@@ -235,10 +235,10 @@ void UIPropertiesItem::DrawProp()
 
 		PItem->BeforeEdit<U32Value, u32>(edit_val);
 		u32 a = color_get_A(edit_val);
-		float color[3] = { color_get_B(edit_val) / 255.f, color_get_G(edit_val) / 255.f, color_get_R(edit_val) / 255.f };
+		float color[3] = { color_get_R(edit_val) / 255.f, color_get_G(edit_val) / 255.f, color_get_B(edit_val) / 255.f };
 		if (ImGui::ColorEdit3("##value", color))
 		{
-			edit_val = color_rgba_f(color[2], color[1], color[0], 1.f);
+			edit_val = color_rgba_f(color[0], color[1], color[2], 1.f);
 			edit_val = subst_alpha(edit_val, a);
 			if (PItem->AfterEdit<U32Value, u32>(edit_val))
 				if (PItem->ApplyValue<U32Value, u32>(edit_val)) {
@@ -275,12 +275,12 @@ void UIPropertiesItem::DrawProp()
 		Fvector edit_val = V->GetValue();
 
 		PItem->BeforeEdit<VectorValue, Fvector>(edit_val);
-		float color[3] = { edit_val[0],edit_val[0],edit_val[0] };
+		float color[3] = { edit_val[0],edit_val[1],edit_val[2] };
 		if (ImGui::ColorEdit3("##value", color))
 		{
 			edit_val[0] = color[0];
-			edit_val[0] = color[1];
-			edit_val[0] = color[2];
+			edit_val[1] = color[1];
+			edit_val[2] = color[2]; 
 			if (PItem->AfterEdit<VectorValue, Fvector>(edit_val))
 				if (PItem->ApplyValue<VectorValue, Fvector>(edit_val))
 				{
