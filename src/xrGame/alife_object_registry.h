@@ -18,7 +18,6 @@ public:
 protected:
 	OBJECT_REGISTRY					m_objects;
 
-	xr_hash_map<ALife::_OBJECT_ID, size_t> m_object_id_to_vec_pos;
 	// todo: see search manager, random access iterator must be for using clipper, sadly maps are not usable for this due to linear complexity (and so clipper is useless in such containers)
 	// todo: needed to be refactored because Level contains objects as vector so it is better to have vector and some unordered_set for searching id if we want to make searching faster than std::find of vector?
 	xr_vector<CSE_ALifeDynamicObject*> m_objects_as_vec;
