@@ -8,7 +8,8 @@ extern PARTICLES_API const Fvector zero_vel;
 class PARTICLES_API CParticlesObject :
 	public CPS_Instance
 {
-	typedef CPS_Instance	inherited;
+	friend class CParticlesAsync;
+	using inherited =  CPS_Instance;
 
 	u32					dwLastTime;
 	void				Init				(LPCSTR p_name, IRender_Sector* S, BOOL bAutoRemove);
@@ -17,8 +18,7 @@ class PARTICLES_API CParticlesObject :
 protected:
 	bool				m_bLooped;			//флаг, что система зациклена
 	bool				m_bStopping;		//вызвана функция Stop()
-
-	static				xr_list<CParticlesObject*> AllParticleObjects;
+	bool				NeedUpdate = false;
 
 protected:
 	virtual				~CParticlesObject	();
@@ -49,9 +49,6 @@ public:
 	void				SetAutoRemove		(bool auto_remove);
 
 	const shared_str	Name				();
-
-	static void			WaitForParticles	();
-	static void			UpdateAllAsync		();
 
 public:
 	static CParticlesObject*	Create		(LPCSTR p_name, BOOL bAutoRemove=TRUE, bool remove_on_game_load = true)
