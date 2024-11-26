@@ -295,6 +295,22 @@ public:
 		return *this;	
 	}
 
+	ICF	SelfRef GetNormalizedCopy(void)
+	{
+#ifdef FS_DEBUG
+		VERIFY(square_magnitude() > std::numeric_limits<T>::min());
+#endif
+		Self Copy(*this);
+		return Copy.normalize();
+	}
+
+	// Safe-Normalize
+	ICF	Self	GetSafeNormalizedCopy(void)
+	{
+		Self Copy(*this);
+		return Copy.normalize_safe();
+	}
+
 	// Normalize
 	ICF	SelfRef	normalize(const Self &v) 
 	{
@@ -528,6 +544,15 @@ typedef _vector3<s32>		Ivector3;
 
 template <class T>
 BOOL	_valid			(const _vector3<T>& v)	{ return _valid((T)v.x) && _valid((T)v.y) && _valid((T)v.z);	}
+
+template <class T>
+inline constexpr _vector3<T> lerp(const _vector3<T>& _val_a, const _vector3<T>& _val_b, const float& _factor)
+{
+	T x = (_val_a.x * (1.0 - _factor)) + (_val_b.x * _factor);
+	T y = (_val_a.y * (1.0 - _factor)) + (_val_b.y * _factor);
+	T z = (_val_a.z * (1.0 - _factor)) + (_val_b.z * _factor);
+	return { x, y, z };
+}
 
 //////////////////////////////////////////////////////////////////////////
 #pragma warning(push)

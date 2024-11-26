@@ -1,5 +1,7 @@
 #pragma once
 #include "GOAP/RbmkGoapPlanner.h"
+#include "inventory_item.h"
+#include "ai_monster_space.h"
 
 class FRbmkObjectActionObjectActions;
 class CAI_Stalker;

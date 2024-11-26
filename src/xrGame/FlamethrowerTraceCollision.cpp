@@ -19,12 +19,18 @@ void FlamethrowerTrace::CPoint::UpdateAir(float delta_time)
 		GravityVelocity += GravityAcceleration * delta_time;
 		Fvector OldPos = PointPosition;
 		PointPosition = (PointPosition + PointDirection * Velocity * delta_time) - Fvector{0.0f, GravityVelocity* delta_time, 0.0f};
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 		PointDirection = (PointPosition - OldPos).GetNormalizedCopy();
+#endif
 		collide::rq_results storage;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 		collide::ray_defs RD(OldPos, PointPosition, CDB::OPT_FULL_TEST, collide::rqtBoth);
+#endif
 		TraceData data;
 		data.TracedObj = this;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 		if (Level().ObjectSpace.RayQuery(storage, RD, FlamethrowerTrace::CPoint::hit_callback, &data, FlamethrowerTrace::CPoint::test_callback, nullptr) && !data.Penetrate)
+#endif
 		{
 			PointPosition = OldPos + PointDirection * data.HitDist;
 			State = ETraceState::AirToGround;
@@ -154,10 +160,14 @@ void FlamethrowerTrace::CPoint::Update(float DeltaTime)
 bool FlamethrowerTrace::CPoint::VerifySpawnPos(const Fvector& Position, const Fvector& Direction, Fvector& HitPos)
 {
 	collide::rq_results storage;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	collide::ray_defs RD(PointPosition-PointDirection, PointPosition, CDB::OPT_FULL_TEST, collide::rqtBoth);
+#endif
 	TraceData data;
 	data.TracedObj = this;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	if (Level().ObjectSpace.RayQuery(storage, RD, FlamethrowerTrace::CPoint::hit_callback, &data, FlamethrowerTrace::CPoint::test_callback, nullptr))
+#endif
 	{
 		HitPos = PointPosition + PointDirection * (data.HitDist - 1.0f);
 		return false;
@@ -195,7 +205,9 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 	Size.x = GetCurrentRadius() * m_RadiusCollisionCoeff.x;
 	Size.y = GetCurrentRadius() * m_RadiusCollisionCoeff.y;
 	Size.z = GetCurrentRadius() * m_RadiusCollisionCoeff.z;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	m_particle_size_handle.Set(Size);
+#endif
 
 	if (!IsCollided()&&AttachPoint->IsCollided())
 	{
@@ -207,10 +219,10 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 		CParticlesObject::Destroy(m_particles);
 		m_particles_ground = CParticlesObject::Create(*m_sFlameParticlesGround, false);
 		m_particles_ground->Play(false);
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 		m_particle_alpha_handle = m_particles_ground->GetFloatHandle("AlphaHandle");
 		m_particle_size_handle = m_particles_ground->GetVectorHandle("SizeHandle");
-		//m_particle_alpha_handle = m_particles_ground->GetAlphaHandle(0);
-		//m_particle_size_handle = m_particles_ground->GetSizeHandle(0);
+#endif
 		particles_pos.c.set(AttachPoint->GetPosition());
 		particles_pos.c.sub(CollidedParticlePivot);
 		m_particles_ground->SetXFORM(particles_pos);
@@ -231,17 +243,21 @@ void FlamethrowerTrace::CCollision::Update_AirToGround(float DeltaTime)
 		interpTime = 1.0f;
 	}
 	const float AlphaValue = 1.0f -std::pow(1.0f - interpTime, 2.0f);
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	if (m_particle_alpha_handle.IsValid()) {
 		m_particle_alpha_handle.Set(AlphaValue);
 	}
+#endif
 	RadiusCurrent = std::max(RadiusOnCollide, AlphaValue * m_RadiusCollided);
 	PAPI::pVector Size;
 	Size.x = RadiusCurrent * m_RadiusCollisionCollidedCoeff.x;
 	Size.y = RadiusCurrent * m_RadiusCollisionCollidedCoeff.y;
 	Size.z = RadiusCurrent * m_RadiusCollisionCollidedCoeff.z;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	if (m_particle_size_handle.IsValid()) {
 		m_particle_size_handle.Set(Size);
 	}
+#endif
 
 	auto Position = AttachPoint->GetPosition();
 	Position.x -= CollidedParticlePivot.x * Size.x;
@@ -270,10 +286,12 @@ void FlamethrowerTrace::CCollision::Update_End(float DeltaTime)
 		return;
 	}
 	const float AlphaValue = 1.0f - std::pow(1.0f - interpTime, 2.0f);
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	if(m_particle_alpha_handle.IsValid())
 	{
 		m_particle_alpha_handle.Set(AlphaValue);
 	}
+#endif
 }
 
 FlamethrowerTrace::CCollision::CCollision(FlamethrowerTrace::CManager* Manager) : Manager(Manager)
@@ -392,10 +410,10 @@ void FlamethrowerTrace::CCollision::Activate()
 {
 	m_State = ETraceState::Air;
 	m_particles = CParticlesObject::Create(*m_sFlameParticles, false);
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	m_particle_alpha_handle = m_particles->GetFloatHandle("AlphaHandle");
 	m_particle_size_handle = m_particles->GetVectorHandle("SizeHandle");
-	//m_particle_alpha_handle = m_particles->GetAlphaHandle(0);
-	//m_particle_size_handle = m_particles->GetSizeHandle(0);
+#endif
 	m_particles->Play(false);
 	RadiusCurrent = m_RadiusMin;
 }
@@ -407,7 +425,9 @@ void FlamethrowerTrace::CCollision::Deactivate()
 	m_time_on_collide = 0.0f;
 	RadiusOnCollide = 0.0f;
 	AttachPoint = nullptr;
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	m_particle_alpha_handle.Reset();
+#endif
 	if (m_particles) {
 		m_particles->Stop();
 		CParticlesObject::Destroy(m_particles);
@@ -563,7 +583,9 @@ FlamethrowerTrace::CManager::CManager(CFlamethrower* flamethrower) : m_flamethro
 {
 
 #ifdef DEBUG
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	Level().BulletManager().MarkFlamethrowerTraceToDraw(this);
+#endif
 #endif
 }
 
@@ -598,7 +620,9 @@ void FlamethrowerTrace::CManager::feel_touch_new(CObject* O)
 void FlamethrowerTrace::CManager::feel_touch_delete(CObject* O)
 {
 	Touch::feel_touch_delete(O);
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	Overlapped.remove(smart_cast<CCustomMonster*>(O));
+#endif
 }
 
 BOOL FlamethrowerTrace::CManager::feel_touch_contact(CObject* O)
@@ -631,11 +655,13 @@ void FlamethrowerTrace::CManager::Load(LPCSTR section)
 	ActiveCollisions.clear();
 	InactiveCollisions.clear();
 	int StartNum = pSettings->r_u16(section, "trace_collision_num_start");
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	for (int i = 0; i < StartNum; ++i) {
 		auto NewCollision = xr_new<FlamethrowerTrace::CCollision>(this);
 		NewCollision->Load(section);
 		InactiveCollisions.push_back(NewCollision);
 	}
+#endif
 }
 
 void FlamethrowerTrace::CManager::save(NET_Packet& output_packet)
@@ -783,7 +809,9 @@ void FlamethrowerTrace::CManager::RegisterOverlapped(CCustomMonster* enemy)
 
 void FlamethrowerTrace::CManager::UnregisterOverlapped(CCustomMonster* enemy)
 {
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	Overlapped.remove(enemy);
+#endif
 }
 
 const FlamethrowerTrace::CManager::FOverlappedObjects& FlamethrowerTrace::CManager::GetOverlapped()

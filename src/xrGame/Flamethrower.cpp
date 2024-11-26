@@ -2,6 +2,84 @@
 #include "pch_script.h"
 
 #include "Flamethrower.h"
+
+#ifdef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
+
+void	CFlamethrower::OnMagazineEmpty(){}
+void	CFlamethrower::switch2_Idle(){}
+void	CFlamethrower::switch2_Fire(){}
+void	CFlamethrower::switch2_Empty() {}
+void	CFlamethrower::switch2_Reload(){}
+void	CFlamethrower::switch2_Hiding(){}
+void	CFlamethrower::switch2_Hidden(){}
+void	CFlamethrower::switch2_Showing() {}
+void    CFlamethrower::switch2_Unmis() {}
+void	CFlamethrower::OnShot() {}
+void	CFlamethrower::StopShooting(){}
+void	CFlamethrower::OnEmptyClick(){}
+void	CFlamethrower::OnAnimationEnd(u32 state) {}
+void	CFlamethrower::OnStateSwitch(u32 S) {}
+void	CFlamethrower::UpdateSounds() {}
+bool	CFlamethrower::TryReload() { return false; }
+void	CFlamethrower::ReloadMagazine() {}
+void	CFlamethrower::state_FireCharge(float dt) {}
+void	CFlamethrower::state_Fire(float dt){}
+void	CFlamethrower::state_Idle(float dt){}
+void	CFlamethrower::state_MagEmpty(float dt) {}
+void	CFlamethrower::state_Misfire(float dt) {}
+CFlamethrower::CFlamethrower(ESoundTypes eSoundType) {}
+CFlamethrower::~CFlamethrower() {}
+void	CFlamethrower::Load(LPCSTR section) {}
+bool    CFlamethrower::UseScopeTexture() { return false; }
+void	CFlamethrower::SetDefaults() {}
+void	CFlamethrower::FireStart() {}
+void	CFlamethrower::FireEnd() {}
+void	CFlamethrower::Reload() {}
+void	CFlamethrower::UpdateCL() {}
+void	CFlamethrower::net_Destroy() {}
+void	CFlamethrower::net_Export(NET_Packet& P){}
+void	CFlamethrower::net_Import(NET_Packet& P){}
+void	CFlamethrower::OnH_A_Chield() {}
+bool	CFlamethrower::Attach(PIItem pIItem, bool b_send_event) { return false; }
+bool	CFlamethrower::Detach(const char* item_section_name, bool b_spawn_item) { return false; }
+bool	CFlamethrower::DetachScope(const char* item_section_name, bool b_spawn_item) { return false; }
+bool	CFlamethrower::CanAttach(PIItem pIItem) { return false; }
+bool	CFlamethrower::CanDetach(const char* item_section_name) { return false; }
+void	CFlamethrower::InitAddons() {}
+bool	CFlamethrower::Action(u16 cmd, u32 flags) { return false; }
+bool	CFlamethrower::IsAmmoAvailable() { return false; }
+void	CFlamethrower::UnloadMagazine(bool spawn_ammo) {}
+int     CFlamethrower::CheckAmmoBeforeReload(u8& v_ammoType) { return 0; }
+void	CFlamethrower::OnMotionMark(u32 state, const motion_marks& M) {}
+bool	CFlamethrower::GetBriefInfo(II_BriefInfo& info) { return false; }
+BOOL	CFlamethrower::IsMisfire() const { return false; }
+void	CFlamethrower::OnZoomIn() {}
+void	CFlamethrower::OnZoomOut() {}
+void	CFlamethrower::save(NET_Packet& output_packet) {}
+void	CFlamethrower::load(IReader& input_packet) {}
+void	CFlamethrower::SpawnFuelCanister(float Condition, LPCSTR ammoSect, u32 ParentID) {}
+bool	CFlamethrower::install_upgrade_impl(LPCSTR section, bool test) { return false; }
+void	CFlamethrower::PlayAnimShow() {}
+void	CFlamethrower::PlayAnimHide() {}
+void	CFlamethrower::PlayAnimReload() {}
+void	CFlamethrower::PlayAnimIdle() {}
+void	CFlamethrower::PlayAnimShoot() {}
+void	CFlamethrower::PlayReloadSound() {}
+void	CFlamethrower::PlayAnimBore() {}
+void	CFlamethrower::PlayAnimIdleSprint() {}
+void	CFlamethrower::PlayAnimIdleMoving() {}
+void    CFlamethrower::SetAnimFlag(u32 flag, LPCSTR anim_name) {}
+bool CFlamethrower::WeaponSoundExist(LPCSTR section, LPCSTR sound_name, bool log) const { return false; }
+float	CFlamethrower::GetWeaponDeterioration() { return 0.0f; }
+void	CFlamethrower::FireBullet(const Fvector& pos,
+	const Fvector& dir,
+	float fire_disp,
+	const CCartridge& cartridge,
+	u16 parent_id,
+	u16 weapon_id,
+	bool send_hit) {}
+	
+#else
 #include "actor.h"
 #include "../xrParticles/ParticlesObject.h"
 #include "scope.h"
@@ -565,8 +643,8 @@ void CFlamethrower::UpdateCL()
 		case eShowing:
 		case eHiding:
 		case eReload:
-		//case eSprintStart:
-		//case eSprintEnd:
+		case eSprintStart:
+		case eSprintEnd:
 		case eIdle:
 		{
 			if (m_keep_charge) {
@@ -595,7 +673,7 @@ void CFlamethrower::UpdateCL()
 			break;
 		}
 		case eMisfire:		state_Misfire(dt);	break;
-		//case eMagEmpty:		state_MagEmpty(dt);	break;
+		case eMagEmpty:		state_MagEmpty(dt);	break;
 		case eHidden:		break;
 		}
 	}
@@ -666,10 +744,10 @@ void CFlamethrower::state_Fire(float dt)
 		CInventoryOwner* io = smart_cast<CInventoryOwner*>(H_Parent());
 		if (nullptr == io->inventory().ActiveItem())
 		{
-			Msg("current_state", GetState());
-			Msg("next_state", GetNextState());
-			Msg("item_sect", cNameSect().c_str());
-			Msg("H_Parent", H_Parent()->cNameSect().c_str());
+			Log("current_state", GetState());
+			Log("next_state", GetNextState());
+			Log("item_sect", cNameSect().c_str());
+			Log("H_Parent", H_Parent()->cNameSect().c_str());
 		}
 
 		CEntity* E = smart_cast<CEntity*>(H_Parent());
@@ -779,8 +857,8 @@ void CFlamethrower::SetDefaults()
 void CFlamethrower::OnShot()
 {
 	// ���� ����� ����� - ������������� ���
-	/*if (ParentIsActor() && GameConstants::GetStopActorIfShoot())
-		Actor()->set_state_wishful(Actor()->get_state_wishful() & (~mcSprint));*/
+	if (ParentIsActor() && GameConstants::GetStopActorIfShoot())
+		Actor()->set_state_wishful(Actor()->get_state_wishful() & (~mcSprint));
 
 	// Camera	
 	AddShotEffector();
@@ -788,7 +866,7 @@ void CFlamethrower::OnShot()
 	// Animation
 	PlayAnimShoot();
 
-	//HUD_VisualBulletUpdate();
+	HUD_VisualBulletUpdate();
 
 	// Shell Drop
 	Fvector vel;
@@ -806,7 +884,7 @@ void CFlamethrower::OnShot()
 	if (m_sounds.FindSoundItem("sndPumpGun", false))
 		PlaySound("sndPumpGun", get_LastFP());
 
-	/*if (ParentIsActor())
+	if (ParentIsActor())
 	{
 		luabind::functor<void> funct;
 		if (ai().script_engine().functor("mfs_functions.on_actor_shoot", funct))
@@ -819,22 +897,22 @@ void CFlamethrower::OnShot()
 			m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
 			return;
 		}
-	}*/
+	}
 
-	/*string128 sndName;
+	string128 sndName;
 	strconcat(sizeof(sndName), sndName, m_sSndShotCurrent.c_str(), (iAmmoElapsed == 1) ? "Last" : "");
 
 	if (m_sounds.FindSoundItem(sndName, false)) {
 		m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
 	}
-	else {*/
+	else {
 		m_sounds.PlaySound(m_sSndShotCurrent.c_str(), get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
-	//}
+	}
 
 	TraceManager->LaunchTrace(m_vStartPos, m_vStartDir);
 
 	// ��� ��������
-	/*if (IsSilencerAttached() == false)
+	if (IsSilencerAttached() == false)
 	{
 		bool bIndoor = false;
 		if (H_Parent() != nullptr)
@@ -851,7 +929,7 @@ void CFlamethrower::OnShot()
 			PlaySound("sndReflect", get_LastFP());
 			HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
 		}
-	}*/
+	}
 
 	CGameObject* object = smart_cast<CGameObject*>(H_Parent());
 	if (object)
@@ -1873,3 +1951,5 @@ bool CFlamethrower::WeaponSoundExist(LPCSTR section, LPCSTR sound_name, bool log
 		m_bNeedBulletInGun = false;
 	}
 }*/
+
+#endif

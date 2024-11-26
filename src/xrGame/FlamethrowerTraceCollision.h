@@ -1,11 +1,18 @@
 #pragma once
 
+#include "StdAfx.h"
+
+#include "../xrCore/_stl_extensions.h"
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 #include "../xrCore/xr_deque.h"
 #include "../xrCore/xr_defines.h"
+#endif
 #include "../xrEngine/feel_touch.h"
 #include "../xrCore/_types.h"
+#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 #include "../../xrParticles/particle_param_handle.h"
 #include "../xrCore/xr_smart_pointers.h"
+#endif
 
 class CBulletManager;
 
@@ -32,7 +39,7 @@ namespace FlamethrowerTrace
 		End,
 		MAX
 	};
-	
+
 	//DEFINE_DEQUE(CCollision*, FCollisionsDeque, FCollisionsDequeIt);
 	
 	class CPoint
@@ -155,8 +162,8 @@ namespace FlamethrowerTrace
 		CParticlesObject* m_particles = nullptr;
 		CParticlesObject* m_particles_ground = nullptr;
 
-		PAPI::Handle<float> m_particle_alpha_handle;
-		PAPI::Handle<PAPI::pVector> m_particle_size_handle;
+		//PAPI::Handle<float> m_particle_alpha_handle;
+		//PAPI::Handle<PAPI::pVector> m_particle_size_handle;
 
 		struct FlamethrowerTraceData {
 			CCollision* TracedObj = nullptr;
@@ -180,7 +187,7 @@ namespace FlamethrowerTrace
 		//#endif
 
 		CCollision(CManager* Manager);
-		~CCollision();
+		virtual ~CCollision();
 
 		void Load(LPCSTR section);
 
@@ -229,8 +236,11 @@ namespace FlamethrowerTrace
 		CFlamethrower* m_flamethrower;
 		shared_str CollisionSection;
 	
-		DEFINE_VECTOR(CCustomMonster*, FOverlappedObjects, FOverlappedObjectsIt);
-		DEFINE_VECTOR(CCollision*, FCollisions, FCollisionsIt);
+		using FOverlappedObjects = xr_vector<CCustomMonster*>;
+		using FCollisions = xr_vector<CCollision*>;
+
+		//DEFINE_VECTOR(CCustomMonster*, FOverlappedObjects, FOverlappedObjectsIt);
+		//DEFINE_VECTOR(CCollision*, FCollisions, FCollisionsIt);
 	
 		FOverlappedObjects Overlapped;
 		//FCollisionsDeque CollisionsPool;

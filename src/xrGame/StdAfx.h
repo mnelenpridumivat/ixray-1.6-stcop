@@ -46,3 +46,5 @@ extern void DestroyImGuiInGame();
 #undef max
 
 #define USE_OLD_OBJECT_PLANNER 0
+
+#define TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
