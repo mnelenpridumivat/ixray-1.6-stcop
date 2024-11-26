@@ -26,6 +26,7 @@
 #include "alife_object_registry.h"
 #include "CustomOutfit.h"
 #include "Bolt.h"
+#include "actor_mp_server.h"
 
 CInventoryOwner::CInventoryOwner			()
 {

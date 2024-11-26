@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#if 0
 #include <mimalloc.h>
 #include "memory_alloc_mimalloc.h"
 
@@ -24,3 +25,4 @@ CMemAllocMimalloc* CMemAllocMimalloc::Create()
 	static CMemAllocMimalloc gMemPure;
 	return &gMemPure;
 }
+#endif

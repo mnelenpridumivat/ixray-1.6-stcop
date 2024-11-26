@@ -44,6 +44,9 @@ protected:
 	SAnimParams*	m_MotionParams;
 	COMotion*		m_Motion;
 
+	// For loading event 
+	volatile bool IsLoaded = false;
+
 	// private animation methods
 	void 			AnimationOnFrame	();
 	void 			AnimationDrawPath	();
@@ -121,6 +124,8 @@ public:
 	void  	OnNumChangePosition	(PropValue* sender);
 	void  	OnNumChangeRotation	(PropValue* sender);
 	void  	OnNumChangeScale	(PropValue* sender);
+
+	void	SetLoadedState();
 
 	virtual void	DeleteThis		(){m_RT_Flags.set(flRT_NeedSelfDelete,TRUE);}
 public:

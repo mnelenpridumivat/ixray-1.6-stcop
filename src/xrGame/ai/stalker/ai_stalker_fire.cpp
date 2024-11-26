@@ -55,6 +55,9 @@
 
 #if USE_OLD_OBJECT_PLANNER
 #include "Legacy/object_handler_planner.h"
+#else
+#include "GOAP/RbmkGoapPlanner.h"
+#include "../../RbmkObjectHandlerPlanner.h"
 #endif
 
 using namespace StalkerSpace;

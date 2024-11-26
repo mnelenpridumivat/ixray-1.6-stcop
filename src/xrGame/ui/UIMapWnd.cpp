@@ -150,6 +150,10 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 		for (;it!=end; it++)
 		{
 			shared_str map_name		= it->first;
+
+			if (!pGameIni->line_exist(map_name, "global_rect"))
+				continue;
+
 			xr_strlwr				(map_name);
 			R_ASSERT2				(m_GameMaps.end() == m_GameMaps.find(map_name), "Duplicate level name not allowed");
 			

@@ -90,6 +90,9 @@ bool CSceneObject::IsRender()
 
 void CSceneObject::Render(int priority, bool strictB2F)
 {
+    if (!IsLoaded)
+        return;
+
 	inherited::Render(priority,strictB2F);
     if (!m_pReference) return;
 #ifdef _LEVEL_EDITOR    
@@ -171,6 +174,9 @@ bool CSceneObject::SpherePick(const Fvector& center, float radius)
 
 bool CSceneObject::RayPick(float& dist, const Fvector& S, const Fvector& D, SRayPickInfo* pinf)
 {
+    if (!IsLoaded)
+        return false;
+
 	if (!m_pReference) return false;
     if (::Render->occ_visible(m_TBBox))
 		if (m_pReference->RayPick(dist, S, D, _ITransform(), pinf)){
@@ -222,10 +228,19 @@ CEditableObject* CSceneObject::UpdateReference()
             CSurface* surf = new CSurface();
             surf->CopyFrom(m_pReference->Surfaces()[i]);
             m_Surfaces.push_back(surf);
-            if(surf->IsVoid())
+            if (surf->IsVoid())
+            {
+                if (m_pReference->IsSkeleton())
+                    ::Render->shader_option_skinning(4);
+
                 surf->OnDeviceCreate();
+
+                if (m_pReference->IsSkeleton())
+                    ::Render->shader_option_skinning(-1);
+            }
         }
-    } 
+    }
+
     return m_pReference;
 }
 

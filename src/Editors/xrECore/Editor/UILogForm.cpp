@@ -51,7 +51,7 @@ void UILogForm::Hide()
 
 void UILogForm::Update()
 {
-	static bool FistRun = false;
+	static bool FirstRun = false;
 	if (bAllowLogCommands)
 	{
 		bool NeedCopy = false;
@@ -125,9 +125,9 @@ void UILogForm::Update()
 			{
 				os_clipboard::copy_to_clipboard(CopyLog.c_str());
 			}
-			if (bAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()|| FistRun==false)ImGui::SetScrollHereY();
-
-			FistRun = true;
+			if (bAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()|| FirstRun==false)
+				ImGui::SetScrollHereY();
+			FirstRun = true;
 		}
 		ImGui::EndChild();
 		ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue ;
@@ -144,7 +144,7 @@ void UILogForm::Update()
 	}
 	else
 	{
-		FistRun = false;
+		FirstRun = false;
 	}
 }
 

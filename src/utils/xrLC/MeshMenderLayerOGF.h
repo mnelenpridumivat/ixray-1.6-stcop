@@ -1,9 +1,8 @@
-#ifndef _MESH_MENDER_LAYER_OGF_H_
-#define _MESH_MENDER_LAYER_OGF_H_
+#pragma once
 
-#include "../../common/NvMender2003/NVMeshMender.h"
-#include	"../../common/NvMender2003/mender_input_output.h"
-#include	"../../common/NvMender2003/remove_isolated_verts.h"
+#include <NVMeshMender.h>
+#include <mender_input_output.h>
+#include <remove_isolated_verts.h>
 
 #include	"OGF_Face.h"
 
@@ -42,10 +41,3 @@ IC const u16 &face_vertex( const OGF_Face &F, u32 vertex_index )
 	VERIFY( vertex_index < 3 );
 	return F.v[vertex_index];
 }
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-#endif

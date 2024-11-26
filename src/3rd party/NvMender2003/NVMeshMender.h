@@ -89,7 +89,7 @@ How to use MeshMender:
 #pragma warning( disable : 4786)
 #pragma warning( disable : 4100)
 
-#include "directx/d3dx9.h"
+#include <d3dx9.h>
 //#include <map>
 //#include <set>
 //#include <vector>
@@ -119,7 +119,7 @@ class MeshMender
 					  D3DFVF_TEXCOORDSIZE3( 1 ) |
 					  D3DFVF_TEXCOORDSIZE3( 2 )
 			};
-			Vertex::Vertex():pos(0.0f ,0.0f ,0.0f )
+			Vertex():pos(0.0f ,0.0f ,0.0f )
 										,normal(0.0f ,0.0f ,0.0f )
 										,s(0.0f )
 										,t(0.0f )

@@ -64,6 +64,8 @@ void game_cl_freemp::net_import_update(NET_Packet& P)
 
 void game_cl_freemp::shedule_Update(u32 dt)
 {
+	game_cl_GameState::shedule_Update(dt);
+
 	if (!local_player)
 		return;
 
@@ -134,24 +136,6 @@ LPCSTR game_cl_freemp::GetGameScore(string32& score_dest)
 	s32 frags = local_player ? local_player->frags() : 0;
 	xr_sprintf(score_dest, "[%d]", frags);
 	return score_dest;
-}
-
-BOOL game_sv_freemp::OnTouch(u16 eid_who, u16 eid_what, BOOL bForced)
-{
-	CSE_ActorMP* e_who = smart_cast<CSE_ActorMP*>(m_server->ID_to_entity(eid_who));
-	if (!e_who)
-		return TRUE;
-
-	CSE_Abstract* e_entity = m_server->ID_to_entity(eid_what);
-	if (!e_entity)
-		return FALSE;
-
-	if (e_entity->m_tClassID == CLSID_OBJECT_PLAYERS_BAG)
-	{
-		return OnTouchPlayersBag(e_who, e_entity);
-	}
-
-	return TRUE;
 }
 
 bool IsGameTypeSingleCompatible()

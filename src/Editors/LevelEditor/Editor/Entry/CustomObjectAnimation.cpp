@@ -58,7 +58,7 @@ void CCustomObject::AnimationDrawPath()
 {
     // motion path
 	VERIFY (m_Motion);
-#ifdef _EDITOR
+
 	if (EPrefs->object_flags.is(epoDrawAnimPath)){
         float fps 				= m_Motion->FPS();
         float min_t				= (float)m_Motion->FrameStart()/fps;
@@ -89,7 +89,6 @@ void CCustomObject::AnimationDrawPath()
             }
         }
     }
-#endif    
 }
 
 void 	CCustomObject::OnMotionControlClick(ButtonValue* value, bool& bModif, bool& bSafe)
