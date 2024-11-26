@@ -42,6 +42,8 @@ CArtefact::CArtefact()
 	m_detectorObj				= nullptr;
 	m_additional_weight			= 0.0f;
 	has_detector_visibling		= false;
+
+	m_bInContainer = false;
 }
 
 
@@ -692,4 +694,9 @@ bool CArtefact::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 		return false;
 	}*/
 	return true;
+}
+
+bool CArtefact::IsInContainer()
+{
+	return m_bInContainer;
 }

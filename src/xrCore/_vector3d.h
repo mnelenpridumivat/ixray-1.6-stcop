@@ -37,23 +37,105 @@ public:
 	ICF SelfRef	add(const Self &a, const Self &v)		{ x=a.x+v.x;y=a.y+v.y;	z=a.z+v.z;		return *this;	};
 	ICF SelfRef	add(const Self &a, T s)					{ x=a.x+s;  y=a.y+s;	z=a.z+s;		return *this;	};
 
+	ICF	Self operator+(const Self& v)
+	{
+		auto Copy(*this);
+		return Copy.add(v);
+	};
+	ICF	SelfRef operator+=(const Self& v)
+	{
+		return add(v);
+	};
+	ICF	Self operator+(T s)
+	{
+		auto Copy(*this);
+		return Copy.add(s);
+	};
+	ICF	SelfRef operator+=(T s)
+	{
+		return add(s);
+	};
+
 	ICF	SelfRef	sub(const Self &v)						{ x-=v.x;	y-=v.y;		z-=v.z;			return *this;	};
 	ICF SelfRef	sub(T s)								{ x-=s;		y-=s;		z-=s;			return *this;	};
 	ICF	SelfRef	sub(const Self &a, const Self &v)		{ x=a.x-v.x;y=a.y-v.y;	z=a.z-v.z;		return *this;	};
 	ICF SelfRef	sub(const Self &a, T s)					{ x=a.x-s;  y=a.y-s;	z=a.z-s;		return *this;	};
+
+	ICF	Self operator-(const Self& v)
+	{
+		auto Copy(*this);
+		return Copy.sub(v);
+	};
+	ICF	SelfRef operator-=(const Self& v)
+	{
+		return sub(v);
+	};
+	ICF	Self operator-(T s)
+	{
+		auto Copy(*this);
+		return Copy.sub(s);
+	};
+	ICF	SelfRef operator-=(T s)
+	{
+		return sub(s);
+	};
 
 	ICF	SelfRef	mul(const Self &v)						{ x*=v.x;	y*=v.y;		z*=v.z;			return *this;	};
 	ICF SelfRef	mul(T s)								{ x*=s;		y*=s;		z*=s;			return *this;	};
 	ICF	SelfRef	mul(const Self &a, const Self &v)		{ x=a.x*v.x;y=a.y*v.y;	z=a.z*v.z;		return *this;	};
 	ICF SelfRef	mul(const Self &a, T s)					{ x=a.x*s;  y=a.y*s;	z=a.z*s;		return *this;	};
 
+	ICF	Self operator*(const Self& v)
+	{
+		auto Copy(*this);
+		return Copy.mul(v);
+	};
+	ICF	SelfRef operator*=(const Self& v)
+	{
+		return mul(v);
+	};
+	ICF	Self operator*(T s)
+	{
+		auto Copy(*this);
+		return Copy.mul(s);
+	};
+	ICF	SelfRef operator*=(T s)
+	{
+		return mul(s);
+	};
+
 	ICF	SelfRef	div(const Self &v)						{ x/=v.x;	y/=v.y;  z/=v.z;			return *this;	};
 	ICF SelfRef	div(T s)								{ x/=s;		y/=s;    z/=s;				return *this;	};
 	ICF	SelfRef	div(const Self &a, const Self &v)		{ x=a.x/v.x;y=a.y/v.y;	z=a.z/v.z;		return *this;	};
 	ICF SelfRef	div(const Self &a, T s)					{ x=a.x/s;  y=a.y/s;	z=a.z/s;		return *this;	};
 
+	ICF	Self operator/(T s)
+	{
+		auto Copy(*this);
+		return Copy.div(s);
+	};
+	ICF	SelfRef operator/=(T s)
+	{
+		return div(s);
+	};
+	ICF	Self operator/(const Self& v)
+	{
+		auto Copy(*this);
+		return Copy.div(v);
+	};
+	ICF	SelfRef operator/=(const Self& v)
+	{
+		return div(v);
+	};
+
 	IC	SelfRef	invert()								{ x=-x; y=-y; z=-z;						return *this;	}
 	IC	SelfRef	invert(const Self &a)					{ x=-a.x; y=-a.y; z=-a.z;				return *this;	}
+
+	ICF	Self operator-()
+	{
+		auto Copy(*this);
+		return Copy.invert();
+	};
 
 	IC	SelfRef	min(const Self &v1,const Self &v2)		{ x = _min(v1.x,v2.x); y = _min(v1.y,v2.y); z = _min(v1.z,v2.z);	return *this;	}
 	IC	SelfRef	min(const Self &v)						{ x = _min(x,v.x);	y = _min(y,v.y);	z = _min(z,v.z);			return *this;	}

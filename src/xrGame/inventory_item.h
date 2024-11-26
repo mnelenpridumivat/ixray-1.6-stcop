@@ -30,6 +30,8 @@ class CWeapon;
 class CPhysicsShellHolder;
 class NET_Packet;
 class CEatableItem;
+class CFlamethrower;
+class CFlameCanister;
 struct SPHNetState;
 struct net_update_IItem;
 
@@ -278,14 +280,16 @@ private:
 public:
 	virtual CInventoryItem		*cast_inventory_item		()	{return this;}
 	virtual CAttachableItem		*cast_attachable_item		()	{return this;}
-	virtual CPhysicsShellHolder	*cast_physics_shell_holder	()	{return 0;}
-	virtual CEatableItem		*cast_eatable_item			()	{return 0;}
-	virtual CWeapon				*cast_weapon				()	{return 0;}
-	virtual CFoodItem			*cast_food_item				()	{return 0;}
-	virtual CMissile			*cast_missile				()	{return 0;}
-	virtual CHudItem			*cast_hud_item				()	{return 0;}
-	virtual CWeaponAmmo			*cast_weapon_ammo			()	{return 0;}
-	virtual CGameObject			*cast_game_object			()  {return 0;}
+	virtual CPhysicsShellHolder	*cast_physics_shell_holder	()	{return nullptr;}
+	virtual CEatableItem		*cast_eatable_item			()	{return nullptr;}
+	virtual CWeapon				*cast_weapon				()	{return nullptr;}
+	virtual CFoodItem			*cast_food_item				()	{return nullptr;}
+	virtual CMissile			*cast_missile				()	{return nullptr;}
+	virtual CHudItem			*cast_hud_item				()	{return nullptr;}
+	virtual CWeaponAmmo			*cast_weapon_ammo			()	{return nullptr;}
+	virtual CFlameCanister* cast_flame_canister() { return nullptr; }
+	virtual CGameObject			*cast_game_object			()  {return nullptr;}
+	virtual CFlamethrower* cast_flamethrower() { return nullptr; }
 
 	////////// upgrades //////////////////////////////////////////////////
 public:

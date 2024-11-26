@@ -4,9 +4,9 @@
 #include "level.h"
 #include "Actor.h"
 
-float af_from_container_charge_level = 1.0f;
-int af_from_container_rank = 1;
-CArtContainer* m_LastAfContainer = nullptr;
+//float af_from_container_charge_level = 1.0f;
+//int af_from_container_rank = 1;
+//CArtContainer* m_LastAfContainer = nullptr;
 
 CArtContainer::CArtContainer()
 {
@@ -46,7 +46,7 @@ void CArtContainer::load(IReader& packet)
 
     for (u32 i = 0; i < numArtefacts; ++i)
     {
-        CArtefact* artefact = xr_new<CArtefact>();
+        CArtefact* artefact = new CArtefact();
         shared_str section;
 
         load_data(section, packet);
@@ -66,7 +66,7 @@ bool CArtContainer::CanStoreArt(CArtefact* art)
 
 void CArtContainer::PutArtefactToContainer(const CArtefact& artefact)
 {
-    CArtefact* af = xr_new<CArtefact>(artefact);
+    CArtefact* af = new CArtefact(artefact);
 
     af->m_bInContainer = true;
 
@@ -84,9 +84,9 @@ void CArtContainer::TakeArtefactFromContainer(CArtefact* artefact)
 
             Level().spawn_item(item_to_spawn->cNameSect().c_str(), Actor()->Position(), false, Actor()->ID());
 
-            af_from_container_charge_level = artefact->GetCurrentChargeLevel();
-            af_from_container_rank = artefact->GetCurrentAfRank();
-            m_LastAfContainer = this;
+            //af_from_container_charge_level = artefact->GetCurrentChargeLevel();
+            //af_from_container_rank = artefact->GetCurrentAfRank();
+            //m_LastAfContainer = this;
 
             return;
         }

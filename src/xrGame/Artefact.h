@@ -107,6 +107,9 @@ public:
 	float							m_fJumpSpeed;
 	float							m_fWalkAccel;
 	CHitImmunity 					m_ArtefactHitImmunities;
+
+	bool							m_bInContainer;
+
 public:
 	enum EAFHudStates {
 		eActivating = eLastBaseState+1,
@@ -126,6 +129,8 @@ public:
 	virtual void					OnStateSwitch		(u32 S);
 	virtual void					OnAnimationEnd		(u32 state);
 	virtual bool					IsHidden			()	const	{return GetState()==eHidden;}
+
+	bool							IsInContainer();
 
 	// optimization FAST/SLOW mode
 	u32						o_render_frame				;

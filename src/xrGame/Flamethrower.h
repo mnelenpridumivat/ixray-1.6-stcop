@@ -1,7 +1,8 @@
 #pragma once
 
-#include "ai_sounds.h"
+#include "../xrSound/ai_sounds.h"
 #include "weapon.h"
+#include "FlameCanister.h"
 
 namespace FlamethrowerTrace
 {

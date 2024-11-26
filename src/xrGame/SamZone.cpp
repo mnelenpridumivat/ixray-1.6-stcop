@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "SamZone.h"
 
-#include "ai_sounds.h"
+#include "../xrSound/ai_sounds.h"
 #include "ai_space.h"
 #include "MissileSam.h"
-#include "script_engine.h"
+#include "../xrScripts/script_engine.h"
 #include "xrMessages.h"
 
 void CSamZone::shedule_Update(u32 time_delta)

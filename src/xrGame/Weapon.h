@@ -45,7 +45,8 @@ public:
 	virtual void			net_Import			(NET_Packet& P);
 	
 	virtual CWeapon			*cast_weapon			()					{return this;}
-	virtual CWeaponMagazined*cast_weapon_magazined	()					{return 0;}
+	virtual CWeaponMagazined*cast_weapon_magazined	()					{return nullptr;}
+	virtual CFlamethrower* cast_flamethrower() override { return nullptr; }
 
 
 	//serialization
@@ -124,7 +125,7 @@ public:
 	BOOL					IsUpdating			();
 
 
-	BOOL					IsMisfire			() const;
+	virtual BOOL					IsMisfire			() const;
 	BOOL					CheckForMisfire		();
 
 
@@ -246,7 +247,7 @@ protected:
 	InertionData	m_zoom_inertion;
 public:
 
-	IC bool					IsZoomEnabled		()	const		{return m_zoom_params.m_bZoomEnabled;}
+	virtual IC bool					IsZoomEnabled		()	const		{return m_zoom_params.m_bZoomEnabled;}
 	virtual	void			ZoomInc				();
 	virtual	void			ZoomDec				();
 	virtual void			OnZoomIn			();
@@ -346,7 +347,7 @@ protected:
 	virtual void			FireEnd				();
 
 	virtual void			Reload				();
-			void			StopShooting		();
+	virtual void			StopShooting		();
     
 
 	// обработка визуализации выстрела

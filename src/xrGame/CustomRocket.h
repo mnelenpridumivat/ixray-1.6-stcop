@@ -118,6 +118,8 @@ protected:
 			void			PlayContact();
 	static	void			ObjectContactCallback(bool& do_colide,bool bo1,dContact& c,SGameMtl * /*material_1*/,SGameMtl * /*material_2*/);
 
+	virtual bool IsEngineInfinite() { return false; }
+
 
 	//////////////////////////////////////////////////////////////////////////
 	//	Lights

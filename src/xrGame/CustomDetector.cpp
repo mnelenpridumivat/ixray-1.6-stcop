@@ -87,9 +87,10 @@ bool CCustomDetector::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 	{
 		return false;
 	}
-	auto art_det = smart_cast<CCustomDetector*>(other);
+	return true;
+	/*auto art_det = smart_cast<CCustomDetector*>(other);
 	VERIFY(art_det);
-	return art_det->GetCurrentChargeLevel() == GetCurrentChargeLevel();
+	return art_det->GetCurrentChargeLevel() == GetCurrentChargeLevel();*/
 }
 
 void CCustomDetector::HideDetector(bool bFastMode)

@@ -3,28 +3,28 @@
 
 #include "Flamethrower.h"
 #include "actor.h"
-#include "ParticlesObject.h"
+#include "../xrParticles/ParticlesObject.h"
 #include "scope.h"
 #include "silencer.h"
 #include "GrenadeLauncher.h"
-#include "LaserDesignator.h"
-#include "TacticalTorch.h"
+//#include "LaserDesignator.h"
+//#include "TacticalTorch.h"
 #include "inventory.h"
 #include "InventoryOwner.h"
 #include "xrserver_objects_alife_items.h"
 #include "ActorEffector.h"
 #include "EffectorZoomInertion.h"
-#include "xr_level_controller.h"
+#include "../xrEngine/xr_level_controller.h"
 #include "UIGameCustom.h"
 #include "object_broker.h"
-#include "string_table.h"
+#include "../xrEngine/string_table.h"
 #include "MPPlayersBag.h"
-#include "ui/UIXmlInit.h"
-#include "ui/UIStatic.h"
+#include "../xrUI/UIXmlInit.h"
+#include "../xrUI/Widgets/UIStatic.h"
 #include "game_object_space.h"
-#include "script_callback_ex.h"
+#include "../xrScripts/script_callback_ex.h"
 #include "script_game_object.h"
-#include "AdvancedXrayGameConstants.h"
+//#include "AdvancedXrayGameConstants.h"
 #include "FlameCanister.h"
 #include "FlamethrowerTraceCollision.h"
 #include "ai_object_location.h"
@@ -565,8 +565,8 @@ void CFlamethrower::UpdateCL()
 		case eShowing:
 		case eHiding:
 		case eReload:
-		case eSprintStart:
-		case eSprintEnd:
+		//case eSprintStart:
+		//case eSprintEnd:
 		case eIdle:
 		{
 			if (m_keep_charge) {
@@ -595,7 +595,7 @@ void CFlamethrower::UpdateCL()
 			break;
 		}
 		case eMisfire:		state_Misfire(dt);	break;
-		case eMagEmpty:		state_MagEmpty(dt);	break;
+		//case eMagEmpty:		state_MagEmpty(dt);	break;
 		case eHidden:		break;
 		}
 	}
@@ -666,10 +666,10 @@ void CFlamethrower::state_Fire(float dt)
 		CInventoryOwner* io = smart_cast<CInventoryOwner*>(H_Parent());
 		if (nullptr == io->inventory().ActiveItem())
 		{
-			Log("current_state", GetState());
-			Log("next_state", GetNextState());
-			Log("item_sect", cNameSect().c_str());
-			Log("H_Parent", H_Parent()->cNameSect().c_str());
+			Msg("current_state", GetState());
+			Msg("next_state", GetNextState());
+			Msg("item_sect", cNameSect().c_str());
+			Msg("H_Parent", H_Parent()->cNameSect().c_str());
 		}
 
 		CEntity* E = smart_cast<CEntity*>(H_Parent());
@@ -779,8 +779,8 @@ void CFlamethrower::SetDefaults()
 void CFlamethrower::OnShot()
 {
 	// ���� ����� ����� - ������������� ���
-	if (ParentIsActor() && GameConstants::GetStopActorIfShoot())
-		Actor()->set_state_wishful(Actor()->get_state_wishful() & (~mcSprint));
+	/*if (ParentIsActor() && GameConstants::GetStopActorIfShoot())
+		Actor()->set_state_wishful(Actor()->get_state_wishful() & (~mcSprint));*/
 
 	// Camera	
 	AddShotEffector();
@@ -788,7 +788,7 @@ void CFlamethrower::OnShot()
 	// Animation
 	PlayAnimShoot();
 
-	HUD_VisualBulletUpdate();
+	//HUD_VisualBulletUpdate();
 
 	// Shell Drop
 	Fvector vel;
@@ -806,7 +806,7 @@ void CFlamethrower::OnShot()
 	if (m_sounds.FindSoundItem("sndPumpGun", false))
 		PlaySound("sndPumpGun", get_LastFP());
 
-	if (ParentIsActor())
+	/*if (ParentIsActor())
 	{
 		luabind::functor<void> funct;
 		if (ai().script_engine().functor("mfs_functions.on_actor_shoot", funct))
@@ -819,22 +819,22 @@ void CFlamethrower::OnShot()
 			m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
 			return;
 		}
-	}
+	}*/
 
-	string128 sndName;
+	/*string128 sndName;
 	strconcat(sizeof(sndName), sndName, m_sSndShotCurrent.c_str(), (iAmmoElapsed == 1) ? "Last" : "");
 
 	if (m_sounds.FindSoundItem(sndName, false)) {
 		m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
 	}
-	else {
+	else {*/
 		m_sounds.PlaySound(m_sSndShotCurrent.c_str(), get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
-	}
+	//}
 
 	TraceManager->LaunchTrace(m_vStartPos, m_vStartDir);
 
 	// ��� ��������
-	if (IsSilencerAttached() == false)
+	/*if (IsSilencerAttached() == false)
 	{
 		bool bIndoor = false;
 		if (H_Parent() != nullptr)
@@ -851,7 +851,7 @@ void CFlamethrower::OnShot()
 			PlaySound("sndReflect", get_LastFP());
 			HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
 		}
-	}
+	}*/
 
 	CGameObject* object = smart_cast<CGameObject*>(H_Parent());
 	if (object)

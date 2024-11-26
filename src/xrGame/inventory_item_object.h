@@ -30,6 +30,7 @@ public:
 	virtual CHudItem		*cast_hud_item					()	{return 0;}
 	virtual CWeaponAmmo		*cast_weapon_ammo				()	{return 0;}
 	virtual CGameObject		*cast_game_object				()  {return this;};
+	virtual CFlamethrower* cast_flamethrower() override { return nullptr; }
 
 public:
 	virtual void	Load					(LPCSTR section);
