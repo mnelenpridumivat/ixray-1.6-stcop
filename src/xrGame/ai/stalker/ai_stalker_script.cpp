@@ -172,4 +172,4 @@ void CAI_Stalker::script_register(lua_State *L)
 	];
 }
 
-SCRIPT_EXPORT2(CAI_Stalker, CObjectScript);
+SCRIPT_EXPORT3(CAI_Stalker, CScriptActionPlanner, CObjectScript);

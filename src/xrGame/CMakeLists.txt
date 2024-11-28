@@ -78,6 +78,9 @@ file(GLOB_RECURSE XGM_SOURCE_AI_RATS_FILES "ai/monsters/rats/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_SNORK_FILES "ai/monsters/snork/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_TUSH_FILES "ai/monsters/tushkano/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_ZOMB_FILES "ai/monsters/zombie/*.*")
+file(GLOB_RECURSE XGM_SOURCE_AI_ANOM_PGIG_FILES "ai/monsters/anomal_pseudogigant/*.*")
+
+file(GLOB_RECURSE XGM_SOURCE_AI_POLT_ABILITIES_FILES "ai/monsters/abilities/poltergeist/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
@@ -107,6 +110,10 @@ source_group("ai/monsters/rats" FILES ${XGM_SOURCE_AI_RATS_FILES})
 source_group("ai/monsters/snork" FILES ${XGM_SOURCE_AI_SNORK_FILES})
 source_group("ai/monsters/tushkano" FILES ${XGM_SOURCE_AI_TUSH_FILES})
 source_group("ai/monsters/zombie" FILES ${XGM_SOURCE_AI_ZOMB_FILES})
+source_group("ai/monsters/anomal_pseudogigant" FILES ${XGM_SOURCE_AI_ANOM_PGIG_FILES})
+
+source_group("ai/monsters/abilities/poltergeist" FILES ${XGM_SOURCE_AI_POLT_ABILITIES_FILES})
+
 source_group("alife" FILES ${XGM_SOURCE_ALIFE_FILES})
 source_group("script" FILES ${XGM_SOURCE_SCRIPT_FILES})
 source_group("server" FILES ${XGM_SOURCE_SERV_FILES})

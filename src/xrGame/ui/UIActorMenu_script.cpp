@@ -33,6 +33,8 @@
 
 #include "../InventoryBox.h"
 
+#include "script_ui_registrator.h"
+
 using namespace luabind;
 
 CUIActorMenu* GetActorMenu()
@@ -244,4 +246,4 @@ void CUIActorMenu::script_register(lua_State *L)
 	];
 }
 
-SCRIPT_EXPORT2(CUIActorMenu, CUIWindow);
+SCRIPT_EXPORT2(CUIActorMenu, UIRegistrator);

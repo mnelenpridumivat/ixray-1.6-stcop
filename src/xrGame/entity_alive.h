@@ -31,6 +31,18 @@ public:
 	u32						m_use_timeout;
 	u8						m_squad_index;
 
+	// EMI events (affect on electronic devices)
+protected:
+	xr_vector<CObject*> AffectedEmiZones = {};
+
+public:
+
+	IC void SetInEmi(CObject* Zone) { AffectedEmiZones.push_back(Zone); }
+	IC void SetOutEmi(CObject* Zone) { std::erase(AffectedEmiZones, Zone); }
+	IC bool IsInEmi() { return !AffectedEmiZones.empty(); }
+
+	// end EMI events
+
 private:
 	bool					m_is_agresive;
 	bool					m_is_start_attack;

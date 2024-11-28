@@ -94,7 +94,7 @@ void CSE_ALifeMountedWeapon::script_register(lua_State *L)
 	];
 }
 
-SCRIPT_EXPORT1(CSE_ALifeMountedWeapon, CSE_ALifeDynamicObjectVisual);
+SCRIPT_EXPORT2(CSE_ALifeMountedWeapon, CSE_ALifeDynamicObjectVisual);
 
 void CSE_ALifeTeamBaseZone::script_register(lua_State *L)
 {
@@ -107,5 +107,5 @@ void CSE_ALifeTeamBaseZone::script_register(lua_State *L)
 	];
 }
 
-SCRIPT_EXPORT1(CSE_ALifeTeamBaseZone, CSE_ALifeSpaceRestrictor);
+SCRIPT_EXPORT2(CSE_ALifeTeamBaseZone, CSE_ALifeSpaceRestrictor);
 
