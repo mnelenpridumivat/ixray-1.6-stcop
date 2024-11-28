@@ -140,7 +140,7 @@ void CRender::ScreenshotImpl(ScreenshotMode mode, LPCSTR name, CMemoryWriter* me
         FS.w_close(fs);
 
         // hq
-        if (Core.ParamsData.test(ECoreParams::ss_tga))
+        if (ps_screenshot_format == 1)
         {
             xr_sprintf(buf, sizeof(buf), "ssq_%s_%s_(%s).tga", Core.UserName, timestamp(t_stemp), (g_pGameLevel) ? g_pGameLevel->name().c_str() : "mainmenu");
 
