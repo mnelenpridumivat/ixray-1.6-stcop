@@ -69,6 +69,7 @@ u32			ps_screenshot_format = 0;			//	=	0;
 xr_token							screenshot_format_token[] = {
 	{ "ss_jpg",						0												},
 	{ "ss_tga",						1												},
+	{ "ss_png",						2												},
 	{ 0,							0												}
 };
 

@@ -80,7 +80,7 @@ void CRender::ScreenshotImpl(ScreenshotMode mode, LPCSTR name, CMemoryWriter* me
         auto scratchImage = std::make_unique<ScratchImage>();
         auto saved = std::make_unique<Blob>();
         CaptureTexture(RDevice, RContext, pSrcTexture, *scratchImage);
-        if (ps_screenshot_format == 0)
+        if (ps_screenshot_format == 0) // jpg screenshots - default one
         {
             xr_sprintf(buf, sizeof(buf), "ss_%s_%s_(%s).jpg", Core.UserName, timestamp(t_stemp), (g_pGameLevel) ? g_pGameLevel->name().c_str() : "mainmenu");
             SaveToWICMemory(*scratchImage->GetImage(0, 0, 0), WIC_FLAGS::WIC_FLAGS_NONE, GUID_ContainerFormatJpeg, *saved);
@@ -90,11 +90,21 @@ void CRender::ScreenshotImpl(ScreenshotMode mode, LPCSTR name, CMemoryWriter* me
             FS.w_close(fs);
 
         }
-        else if (ps_screenshot_format == 1)
+        else if (ps_screenshot_format == 1) // tga screenshots
         {
             xr_sprintf(buf, sizeof(buf), "ss_%s_%s_(%s).tga", Core.UserName, timestamp(t_stemp), (g_pGameLevel) ? g_pGameLevel->name().c_str() : "mainmenu");
 
             SaveToTGAMemory(*scratchImage->GetImage(0, 0, 0), TGA_FLAGS::TGA_FLAGS_NONE, *saved);
+
+            auto fs = FS.w_open("$screenshots$", buf); R_ASSERT(fs);
+            fs->w(saved->GetBufferPointer(), (u32)saved->GetBufferSize());
+            FS.w_close(fs);
+        }
+        else if (ps_screenshot_format == 2) // png screenshots
+        {
+            xr_sprintf(buf, sizeof(buf), "ss_%s_%s_(%s).png", Core.UserName, timestamp(t_stemp), (g_pGameLevel) ? g_pGameLevel->name().c_str() : "mainmenu");
+
+            SaveToWICMemory(*scratchImage->GetImage(0, 0, 0), WIC_FLAGS::WIC_FLAGS_NONE, GUID_ContainerFormatPng, *saved);
 
             auto fs = FS.w_open("$screenshots$", buf); R_ASSERT(fs);
             fs->w(saved->GetBufferPointer(), (u32)saved->GetBufferSize());

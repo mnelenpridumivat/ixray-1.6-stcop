@@ -345,4 +345,7 @@
     <string id="ss_tga">
         <text>.tga</text>
     </string>
+    <string id="ss_png">
+        <text>.png</text>
+    </string>
 </string_table>
