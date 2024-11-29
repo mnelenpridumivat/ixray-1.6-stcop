@@ -288,5 +288,5 @@ bool CAnomalPseudoGigant::check_start_conditions(ControlCom::EControlType type)
 	if (m_shield_active) {
 		return false;
 	}
-	inherited::check_start_conditions(type);
+	return inherited::check_start_conditions(type);
 }

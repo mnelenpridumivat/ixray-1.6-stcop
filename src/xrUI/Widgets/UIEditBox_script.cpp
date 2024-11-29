@@ -21,3 +21,5 @@ void CUIEditBox::script_register(lua_State *L)
 		.def("InitTexture",			&CUIEditBox::InitTexture)
 	];
 }
+
+SCRIPT_EXPORT2(CUIEditBox, CUIWindow);

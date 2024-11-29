@@ -429,6 +429,8 @@ void CUIMMShniaga::script_register(lua_State* L)
 	];
 }
 
+SCRIPT_EXPORT2(CUIMMShniaga, CUIWindow);
+
 bool b_shniaganeed_pp = true;
 void CUIMMShniaga::SetVisibleMagnifier(bool f)
 {

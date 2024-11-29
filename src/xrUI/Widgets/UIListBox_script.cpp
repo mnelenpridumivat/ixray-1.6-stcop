@@ -56,3 +56,5 @@ void CUIListBox::script_register(lua_State *L)
 		.def(							constructor<float>())
 	];
 }
+
+SCRIPT_EXPORT2(CUIListBox, CUIWindow);

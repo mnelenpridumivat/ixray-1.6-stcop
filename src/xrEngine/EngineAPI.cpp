@@ -19,6 +19,7 @@ void __cdecl dummy		(void)	{
 CEngineAPI::CEngineAPI	()
 {
 	hGame			= 0;
+	hUI = 0;
 	hRender			= 0;
 	pCreate			= 0;
 	pDestroy		= 0;
@@ -134,6 +135,21 @@ void CEngineAPI::Initialize(void)
 		}
 	}
 
+	// UI
+	{
+		LPCSTR g_ui = "xrUI.dll";
+		Msg("Loading DLL: %s", g_ui);
+		hUI = LoadLibraryA(g_ui);
+		if (0 == hUI)	R_CHK(GetLastError());
+		R_ASSERT2(hUI, "Game DLL raised exception during loading or there is no game DLL at all");
+
+		using xrUIInitialize = void();
+		xrUIInitialize* pxrUIInitialize = (xrUIInitialize*)GetProcAddress(hUI, "xrUIInitialize");
+		R_ASSERT(pxrUIInitialize);
+
+		pxrUIInitialize();
+	}
+
 	// GameSpy
 	{
 		LPCSTR g_name = "xrGameSpy.dll";
@@ -149,6 +165,7 @@ void CEngineAPI::Initialize(void)
 void CEngineAPI::Destroy(void)
 {
 	if (hGame)				{ FreeLibrary(hGame);	hGame	= 0; }
+	if (hUI) { FreeLibrary(hUI); hUI = 0; }
 	if (hRender)			{ FreeLibrary(hRender); hRender = 0; }
 
 	pCreate					= 0;

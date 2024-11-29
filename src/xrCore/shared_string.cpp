@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "shared_string.h"
 
-XRCORE_API str_container* g_pStringContainer = nullptr;
+//XRCORE_API str_container* g_pStringContainer = nullptr;
 
 shared_str& __cdecl shared_str::printf(const char* format, ...)
 {
@@ -244,6 +244,12 @@ u32 str_container::stat_economy()
 	return			u32(counter);
 }
 
+str_container& str_container::GetInstance()
+{
+	static str_container cont;
+	return cont;
+}
+
 str_container::~str_container()
 {
 	clean();
@@ -251,3 +257,21 @@ str_container::~str_container()
 	xr_delete(impl);
 }
 
+/*str_container_handle::~str_container_handle()
+{
+	xr_delete(pStringContainer);
+}
+
+str_container_handle& str_container_handle::GetInstance()
+{
+	static str_container_handle handle;
+	return handle;
+}
+
+str_container* str_container_handle::get_container()
+{
+	if (!pStringContainer) {
+		pStringContainer = new str_container();
+	}
+	return pStringContainer;
+}*/

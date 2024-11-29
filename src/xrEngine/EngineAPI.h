@@ -50,6 +50,7 @@ class ENGINE_API		CEngineAPI
 {
 private:
 	HMODULE				hGame;
+	HMODULE				hUI;
 	HMODULE				hRender;
 
 public:

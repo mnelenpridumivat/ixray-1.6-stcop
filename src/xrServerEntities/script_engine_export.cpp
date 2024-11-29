@@ -28,25 +28,27 @@
 #	include "ui/UIActorMenu.h"
 #endif
 
-void register_script_class_rec(script_exporter_key_base* class_key, lua_State* L) {
-	auto& data = get_script_export_container()[class_key];
-	if (data.inited) {
+void register_script_class_rec(script_exporter_key_base class_key, lua_State* L) {
+	auto& container = get_script_export_container();
+	auto data = container.find(class_key);
+	VERIFY(data != container.end());
+	if (data->second->inited) {
 		return;
 	}
-	for (auto& elem : data.dependencies) {
+	for (auto& elem : data->second->dependencies) {
 		register_script_class_rec(elem, L);
 	}
-	data.exporter->script_register(L);
-	data.inited = true;
+	data->second->exporter->script_register(L);
+	data->second->inited = true;
 }
 
 void export_classes	(lua_State *L)
 {
-
-	for (auto& elem : get_script_export_container()) {
-		elem.second.inited = false;
+	auto& container = get_script_export_container();
+	for (auto& elem : container) {
+		elem.second->inited = false;
 	}
-	for (auto& elem : get_script_export_container()) {
+	for (auto& elem : container) {
 		register_script_class_rec(elem.first, L);
 	}
 

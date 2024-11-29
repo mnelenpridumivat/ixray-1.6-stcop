@@ -152,7 +152,7 @@ static void full_memory_stats()
 #ifdef SEVERAL_ALLOCATORS
 	u32		_render = ::Render->memory_usage();
 #endif // SEVERAL_ALLOCATORS
-	int		_eco_strings = (int)g_pStringContainer->stat_economy();
+	int		_eco_strings = (int)str_container::GetInstance().stat_economy();
 	int		_eco_smem = (int)g_pSharedMemoryContainer->stat_economy();
 	u32		m_base = 0, c_base = 0, m_lmaps = 0, c_lmaps = 0;
 

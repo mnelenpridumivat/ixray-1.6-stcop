@@ -390,3 +390,5 @@ void CMapManager::script_register(lua_State* L)
 			//.def("GetOwnerTaskID", &CMapLocation::GetOwnerTaskID)
 	];
 }
+
+SCRIPT_EXPORT1(CMapManager);

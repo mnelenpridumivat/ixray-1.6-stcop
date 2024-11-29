@@ -34,8 +34,17 @@ class XRCORE_API str_container
 private:
 	xrCriticalSection cs;
 	str_container_impl* impl;
-public:
+
 	str_container();
+
+public:
+	str_container(const str_container& other) = delete;
+	str_container(str_container&& other) = delete;
+	str_container& operator=(const str_container& other) = delete;
+	str_container& operator=(str_container&& other) = delete;
+
+	static str_container& GetInstance();
+
 	~str_container();
 
 	str_value* dock(str_c value);
@@ -44,11 +53,33 @@ public:
 	void dump(IWriter* W);
 	void verify();
 	u32  stat_economy();
-#ifdef PROFILE_CRITICAL_SECTIONS
-	str_container() :cs(MUTEX_PROFILE_ID(str_container)) {}
-#endif // PROFILE_CRITICAL_SECTIONS
+//#ifdef PROFILE_CRITICAL_SECTIONS
+//	str_container() :cs(MUTEX_PROFILE_ID(str_container)) {}
+//#endif // PROFILE_CRITICAL_SECTIONS
 };
-XRCORE_API extern str_container* g_pStringContainer;
+
+/*class XRCORE_API str_container_handle {
+
+	str_container* pStringContainer = nullptr;
+
+	str_container_handle(){}
+
+public:
+	~str_container_handle();
+
+	str_container_handle(const str_container_handle& other) = delete;
+	str_container_handle(str_container_handle&& other) = delete;
+	str_container_handle& operator=(const str_container_handle& other) = delete;
+	str_container_handle& operator=(str_container_handle&& other) = delete;
+
+	static str_container_handle& GetInstance();
+
+	str_container* get_container();
+
+};*/
+
+//#define g_pStringContainer str_container_handle::GetInstance().get_container()
+//XRCORE_API extern str_container* g_pStringContainer;
 
 //////////////////////////////////////////////////////////////////////////
 class XRCORE_API shared_str
@@ -57,7 +88,7 @@ class XRCORE_API shared_str
 protected:
 	void _dec() { if (0 == p_) return;	p_->dwReference--; 	if (0 == p_->dwReference)	p_ = 0; }
 public:
-	void _set(str_c rhs) { str_value* v = g_pStringContainer->dock(rhs); if (0 != v) v->dwReference++; _dec(); p_ = v; }
+	void _set(str_c rhs) { str_value* v = str_container::GetInstance().dock(rhs); if (0 != v) v->dwReference++; _dec(); p_ = v; }
 	void _set(shared_str const& rhs) { str_value* v = rhs.p_; if (0 != v) v->dwReference++; _dec(); p_ = v; }
 
 	const str_value* _get()	const { return p_; }

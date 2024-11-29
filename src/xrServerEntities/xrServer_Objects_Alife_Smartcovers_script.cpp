@@ -33,4 +33,4 @@ void CSE_SmartCover::script_register(lua_State *L)
 	];
 }
 
-SCRIPT_EXPORT1(CSE_SmartCover, CSE_ALifeDynamicObject);
+SCRIPT_EXPORT2(CSE_SmartCover, CSE_ALifeDynamicObject);

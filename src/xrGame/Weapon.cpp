@@ -275,16 +275,19 @@ void CWeapon::Load		(LPCSTR section)
 	m_zoom_inertion.OriginOffset = READ_IF_EXISTS(pSettings, r_float, hud_sect, "inertion_aim_origin_offset", ORIGIN_OFFSET * 0.5f);
 	m_zoom_inertion.TendtoSpeed = READ_IF_EXISTS(pSettings, r_float, hud_sect, "inertion_aim_tendto_speed", TENDTO_SPEED);
 	
-	if(pSettings->line_exist(section, "flame_particles_2"))
+	if (pSettings->line_exist(section, "flame_particles_2")) {
 		m_sFlameParticles2 = pSettings->r_string(section, "flame_particles_2");
+	}
 
 	// load ammo classes
 	m_ammoTypes.clear	(); 
 	LPCSTR				S = pSettings->r_string(section,"ammo_class");
+	VERIFY(S);
 	if (S && S[0]) 
 	{
 		string128		_ammoItem;
 		int				count		= _GetItemCount	(S);
+		VERIFY(count);
 		for (int it=0; it<count; ++it)	
 		{
 			_GetItem				(S,it,_ammoItem);

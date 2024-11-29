@@ -57,3 +57,5 @@ void CUIOptionsManagerScript::script_register(lua_State *L)
 			.def("NeedVidRestart",		&CUIOptionsManagerScript::NeedVidRestart )
 		];
 }
+
+SCRIPT_EXPORT1(CUIOptionsManagerScript);
