@@ -300,7 +300,7 @@ void CCustomDetector::UpfateWork()
 	m_ui->update			();
 }
 
-void CCustomDetector::UpdateHudAdditonal(Fmatrix& trans)
+void CCustomDetector::UpdateHudAdditional(Fmatrix& trans)
 {
 	if (m_pInventory)
 	{
@@ -312,7 +312,7 @@ void CCustomDetector::UpdateHudAdditonal(Fmatrix& trans)
 		}
 	}
 
-	CHudItem::UpdateHudAdditonal(trans);
+	CHudItem::UpdateHudAdditional(trans);
 }
 
 void CCustomDetector::UpdateVisibility()

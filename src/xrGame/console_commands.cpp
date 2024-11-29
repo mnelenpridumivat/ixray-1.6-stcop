@@ -2272,6 +2272,11 @@ void CCC_RegisterCommands()
 
 	CMD1(CCC_MemStats, "stat_memory");
 	// game
+	psActorFlags.set(AF_SIMPLE_PDA, TRUE);
+	psActorFlags.set(AF_3D_PDA, TRUE);
+
+	CMD3(CCC_Mask, "g_3d_pda", &psActorFlags, AF_3D_PDA);
+	CMD3(CCC_Mask, "g_simple_pda", &psActorFlags, AF_SIMPLE_PDA);
 	CMD3(CCC_Mask, "g_crouch_toggle", &psActorFlags, AF_CROUCH_TOGGLE);
 	CMD1(CCC_GameDifficulty, "g_game_difficulty");
 

@@ -159,6 +159,8 @@ public:
 private:
 	void			update_inertion		(Fmatrix& trans);
 	void			update_additional	(Fmatrix& trans);
+public:
+	bool			inertion_allowed();
 private:
 	const Fvector&	attach_rot			() const;
 	const Fvector&	attach_pos			() const;
@@ -180,6 +182,28 @@ private:
 	bool								m_binverted;
 	int									item_idx_priority;
 	void  LeftArmCallback(CBoneInstance* B);
+
+	static void _BCL Thumb0Callback(CBoneInstance* B);
+	static void _BCL Thumb01Callback(CBoneInstance* B);
+	static void _BCL Thumb02Callback(CBoneInstance* B);
+
+public:
+	Fvector target_thumb0rot, target_thumb01rot, target_thumb02rot;
+	Fvector thumb0rot, thumb01rot, thumb02rot;
+
+	void reset_thumb(bool bForce)
+	{
+		if (bForce)
+		{
+			thumb0rot.set(0.f, 0.f, 0.f);
+			thumb01rot.set(0.f, 0.f, 0.f);
+			thumb02rot.set(0.f, 0.f, 0.f);
+		}
+
+		target_thumb0rot.set(0.f, 0.f, 0.f);
+		target_thumb01rot.set(0.f, 0.f, 0.f);
+		target_thumb02rot.set(0.f, 0.f, 0.f);
+	}
 };
 
 extern player_hud* g_player_hud;

@@ -12,6 +12,11 @@
 #include "specific_character.h"
 #include "alife_registry_wrappers.h"
 #include "../xrScripts/script_engine.h"
+#include <UIPdaWnd.h>
+#include <UIGameCustom.h>
+
+#include "player_hud.h"
+#include "Inventory.h"
 
 
 CPda::CPda(void)						
@@ -235,4 +240,513 @@ void CPda::PlayScriptFunction()
 		R_ASSERT(ai().script_engine().functor(m_functor_str.c_str(), m_functor));
 		m_functor();
 	}
+}
+
+void CPda::JoystickCallback(CBoneInstance* B)
+{
+	CPda* Pda = static_cast<CPda*>(B->callback_param());
+	CUIPdaWnd* pda = &CurrentGameUI()->PdaMenu();
+
+	static float fAvgTimeDelta = Device.fTimeDelta;
+	fAvgTimeDelta = _inertion(fAvgTimeDelta, Device.fTimeDelta, 0.8f);
+
+	Fvector& target = pda->target_joystickrot;
+	Fvector& current = pda->joystickrot;
+	float& target_press = pda->target_buttonpress;
+	float& press = pda->buttonpress;
+
+	if (!target.similar(current, .0001f))
+	{
+		Fvector diff;
+		diff = target;
+		diff.sub(current);
+		diff.mul(fAvgTimeDelta / .1f);
+		current.add(diff);
+	}
+	else
+		current.set(target);
+
+	if (!fsimilar(target_press, press, .0001f))
+	{
+		float prev_press = press;
+
+		float diff = target_press;
+		diff -= press;
+		diff *= (fAvgTimeDelta / .1f);
+		press += diff;
+
+		if (prev_press == 0.f && press < 0.f)
+			Pda->m_sounds.PlaySound("sndButtonPress", B->mTransform.c, Pda->H_Root(), !!Pda->GetHUDmode());
+		else if (prev_press < -.001f && press >= -.001f)
+			Pda->m_sounds.PlaySound("sndButtonRelease", B->mTransform.c, Pda->H_Root(), !!Pda->GetHUDmode());
+	}
+	else
+		press = target_press;
+
+	Fmatrix rotation;
+	rotation.identity();
+	rotation.rotateX(current.x);
+
+	Fmatrix rotation_y;
+	rotation_y.identity();
+	rotation_y.rotateY(current.y);
+	rotation.mulA_43(rotation_y);
+
+	rotation_y.identity();
+	rotation_y.rotateZ(current.z);
+	rotation.mulA_43(rotation_y);
+
+	rotation.translate_over(0.f, press, 0.f);
+
+	B->mTransform.mulB_43(rotation);
+}
+
+void CPda::OnStateSwitch(u32 S)
+{
+	inherited::OnStateSwitch(S);
+
+	if (!ParentIsActor())
+		return;
+
+	switch (S)
+	{
+	case eShowing:
+	{
+		g_player_hud->attach_item(this);
+		g_pGamePersistent->devices_shader_data.pda_display_factor = 0.f;
+
+		m_sounds.PlaySound((hasEnoughBatteryPower() && m_psy_factor < 1.0f) ? "sndShow" : "sndShowEmpty", Position(), H_Root(), !!GetHUDmode(), false);
+		PlayHUDMotion((!m_bNoticedEmptyBattery && m_psy_factor < 1.0f) ? "anm_show" : "anm_show_empty", false, this, GetState());
+
+		if (auto pda = CurrentGameUI() && &CurrentGameUI()->PdaMenu() ? &CurrentGameUI()->PdaMenu() : nullptr)
+			pda->ResetJoystick(true);
+
+		SetPending(true);
+		target_screen_switch = Device.fTimeGlobal + m_screen_on_delay;
+	}
+	break;
+	case eHiding:
+	{
+		m_sounds.PlaySound((hasEnoughBatteryPower() && m_psy_factor < 1.0f) ? "sndHide" : "sndHideEmpty", Position(), H_Root(), !!GetHUDmode(), false);
+		PlayHUDMotion((!m_bNoticedEmptyBattery && m_psy_factor < 1.0f) ? "anm_hide" : "anm_hide_empty", true, this, GetState());
+		SetPending(true);
+		m_bZoomed = false;
+		CurrentGameUI()->PdaMenu().Enable(false);
+		g_player_hud->reset_thumb(false);
+		CurrentGameUI()->PdaMenu().ResetJoystick(false);
+		if (joystick != BI_NONE && HudItemData())
+			HudItemData()->m_model->LL_GetBoneInstance(joystick).reset_callback();
+		target_screen_switch = Device.fTimeGlobal + m_screen_off_delay;
+	}
+	break;
+	case eHidden:
+	{
+		m_bZoomed = false;
+		m_fZoomfactor = 0.f;
+		CUIPdaWnd* pda = &CurrentGameUI()->PdaMenu();
+
+		if (CurrentGameUI() && CurrentGameUI()->TopInputReceiver() == pda)
+			CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+
+		if (pda->IsShown())
+		{
+			if (psActorFlags.test(AF_3D_PDA))
+				pda->Enable(true);
+			else
+				pda->HideDialog();
+		}
+
+		g_player_hud->reset_thumb(true);
+		SetPending(false);
+	}
+	break;
+	case eIdle:
+	{
+		PlayAnimIdle();
+
+		if (m_joystick_bone && joystick == BI_NONE && HudItemData())
+			joystick = HudItemData()->m_model->LL_BoneID(m_joystick_bone);
+
+		if (joystick != BI_NONE && HudItemData())
+		{
+			CBoneInstance* bi = &HudItemData()->m_model->LL_GetBoneInstance(joystick);
+			if (bi)
+				bi->set_callback(bctCustom, JoystickCallback, this);
+		}
+	}
+	break;
+	case eEmptyBattery:
+	{
+		SetPending(true);
+		m_sounds.PlaySound("sndEmptyBattery", Position(), H_Root(), !!GetHUDmode(), false);
+		PlayHUDMotion("anm_empty", true, this, GetState());
+		m_bNoticedEmptyBattery = true;
+	}
+	}
+}
+
+void CPda::OnAnimationEnd(u32 state)
+{
+	inherited::OnAnimationEnd(state);
+	switch (state)
+	{
+	case eShowing:
+	{
+		if (!hasEnoughBatteryPower() && !m_bNoticedEmptyBattery)
+		{
+			SwitchState(eEmptyBattery);
+			return;
+		}
+		SetPending(false);
+		SwitchState(eIdle);
+	}
+	break;
+	case eHiding:
+	{
+		SetPending(false);
+		SwitchState(eHidden);
+		g_player_hud->detach_item(this);
+	}
+	break;
+	case eEmptyBattery:
+	{
+		SetPending(false);
+		SwitchState(eIdle);
+	}
+	break;
+	}
+}
+
+void CPda::UpdateHudAdditional(Fmatrix& trans)
+{
+	CActor* pActor = smart_cast<CActor*>(H_Parent());
+	if (!pActor)
+		return;
+
+	attachable_hud_item* hi = HudItemData();
+	R_ASSERT(hi);
+
+	Fvector curr_offs, curr_rot;
+
+	//curr_offs = g_player_hud->m_adjust_mode ? g_player_hud->m_adjust_offset[0][1] : hi->m_measures.m_hands_offset[0][1];
+	//curr_rot = g_player_hud->m_adjust_mode ? g_player_hud->m_adjust_offset[1][1] : hi->m_measures.m_hands_offset[1][1];
+
+	curr_offs = hi->m_measures.m_hands_offset[0][1];//pos,aim
+	curr_rot = hi->m_measures.m_hands_offset[1][1];//rot,aim
+
+	curr_offs.mul(m_fZoomfactor);
+	curr_rot.mul(m_fZoomfactor);
+
+	Fmatrix hud_rotation;
+	hud_rotation.identity();
+	hud_rotation.rotateX(curr_rot.x);
+
+	Fmatrix hud_rotation_y;
+	hud_rotation_y.identity();
+	hud_rotation_y.rotateY(curr_rot.y);
+	hud_rotation.mulA_43(hud_rotation_y);
+
+	hud_rotation_y.identity();
+	hud_rotation_y.rotateZ(curr_rot.z);
+	hud_rotation.mulA_43(hud_rotation_y);
+
+	hud_rotation.translate_over(curr_offs);
+	trans.mulB_43(hud_rotation);
+
+	if (m_bZoomed)
+		m_fZoomfactor += Device.fTimeDelta / .25f;
+	else
+		m_fZoomfactor -= Device.fTimeDelta / .25f;
+
+	clamp(m_fZoomfactor, 0.f, 1.f);
+
+	if (!g_player_hud->inertion_allowed())
+		return;
+
+	static float fAvgTimeDelta = Device.fTimeDelta;
+	fAvgTimeDelta = _inertion(fAvgTimeDelta, Device.fTimeDelta, 0.8f);
+
+	u8 idx = m_bZoomed ? 1 : 0;
+
+	float fYMag = pActor->fFPCamYawMagnitude;
+	float fPMag = pActor->fFPCamPitchMagnitude;
+
+	//============= Инерция оружия =============//
+	// Параметры инерции
+	float fInertiaSpeedMod = lerp(
+		hi->m_measures.m_inertion_params.m_tendto_speed,
+		hi->m_measures.m_inertion_params.m_tendto_speed_aim,
+		m_fZoomfactor);
+
+	float fInertiaReturnSpeedMod = lerp(
+		hi->m_measures.m_inertion_params.m_tendto_ret_speed,
+		hi->m_measures.m_inertion_params.m_tendto_ret_speed_aim,
+		m_fZoomfactor);
+
+	float fInertiaMinAngle = lerp(
+		hi->m_measures.m_inertion_params.m_min_angle,
+		hi->m_measures.m_inertion_params.m_min_angle_aim,
+		m_fZoomfactor);
+
+	Fvector4 vIOffsets; // x = L, y = R, z = U, w = D
+	vIOffsets.x = lerp(
+		hi->m_measures.m_inertion_params.m_offset_LRUD.x,
+		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.x,
+		m_fZoomfactor);
+	vIOffsets.y = lerp(
+		hi->m_measures.m_inertion_params.m_offset_LRUD.y,
+		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.y,
+		m_fZoomfactor);
+	vIOffsets.z = lerp(
+		hi->m_measures.m_inertion_params.m_offset_LRUD.z,
+		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.z,
+		m_fZoomfactor);
+	vIOffsets.w = lerp(
+		hi->m_measures.m_inertion_params.m_offset_LRUD.w,
+		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.w,
+		m_fZoomfactor);
+
+	// Высчитываем инерцию из поворотов камеры
+	bool bIsInertionPresent = m_fLR_InertiaFactor != 0.0f || m_fUD_InertiaFactor != 0.0f;
+	if (abs(fYMag) > fInertiaMinAngle || bIsInertionPresent)
+	{
+		float fSpeed = fInertiaSpeedMod;
+		if (fYMag > 0.0f && m_fLR_InertiaFactor > 0.0f ||
+			fYMag < 0.0f && m_fLR_InertiaFactor < 0.0f)
+		{
+			fSpeed *= 2.f; //--> Ускоряем инерцию при движении в противоположную сторону
+		}
+
+		m_fLR_InertiaFactor -= (fYMag * fAvgTimeDelta * fSpeed); // Горизонталь (м.б. > |1.0|)
+	}
+
+	if (abs(fPMag) > fInertiaMinAngle || bIsInertionPresent)
+	{
+		float fSpeed = fInertiaSpeedMod;
+		if (fPMag > 0.0f && m_fUD_InertiaFactor > 0.0f ||
+			fPMag < 0.0f && m_fUD_InertiaFactor < 0.0f)
+		{
+			fSpeed *= 2.f; //--> Ускоряем инерцию при движении в противоположную сторону
+		}
+
+		m_fUD_InertiaFactor -= (fPMag * fAvgTimeDelta * fSpeed); // Вертикаль (м.б. > |1.0|)
+	}
+
+	clamp(m_fLR_InertiaFactor, -1.0f, 1.0f);
+	clamp(m_fUD_InertiaFactor, -1.0f, 1.0f);
+
+	// Плавное затухание инерции (основное, но без линейной никогда не опустит инерцию до полного 0.0f)
+	m_fLR_InertiaFactor *= clampr(1.f - fAvgTimeDelta * fInertiaReturnSpeedMod, 0.0f, 1.0f);
+	m_fUD_InertiaFactor *= clampr(1.f - fAvgTimeDelta * fInertiaReturnSpeedMod, 0.0f, 1.0f);
+
+	// Минимальное линейное затухание инерции при покое (горизонталь)
+	if (fYMag == 0.0f)
+	{
+		float fRetSpeedMod = (fYMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.075f);
+		if (m_fLR_InertiaFactor < 0.0f)
+		{
+			m_fLR_InertiaFactor += fAvgTimeDelta * fRetSpeedMod;
+			clamp(m_fLR_InertiaFactor, -1.0f, 0.0f);
+		}
+		else
+		{
+			m_fLR_InertiaFactor -= fAvgTimeDelta * fRetSpeedMod;
+			clamp(m_fLR_InertiaFactor, 0.0f, 1.0f);
+		}
+	}
+
+	// Минимальное линейное затухание инерции при покое (вертикаль)
+	if (fPMag == 0.0f)
+	{
+		float fRetSpeedMod = (fPMag == 0.0f ? 1.0f : 0.75f) * (fInertiaReturnSpeedMod * 0.075f);
+		if (m_fUD_InertiaFactor < 0.0f)
+		{
+			m_fUD_InertiaFactor += fAvgTimeDelta * fRetSpeedMod;
+			clamp(m_fUD_InertiaFactor, -1.0f, 0.0f);
+		}
+		else
+		{
+			m_fUD_InertiaFactor -= fAvgTimeDelta * fRetSpeedMod;
+			clamp(m_fUD_InertiaFactor, 0.0f, 1.0f);
+		}
+	}
+
+	// Применяем инерцию к худу
+	float fLR_lim = (m_fLR_InertiaFactor < 0.0f ? vIOffsets.x : vIOffsets.y);
+	float fUD_lim = (m_fUD_InertiaFactor < 0.0f ? vIOffsets.z : vIOffsets.w);
+
+	curr_offs = { fLR_lim * -1.f * m_fLR_InertiaFactor, fUD_lim * m_fUD_InertiaFactor, 0.0f };
+
+	hud_rotation.identity();
+	hud_rotation.translate_over(curr_offs);
+	trans.mulB_43(hud_rotation);
+}
+
+void CPda::UpdateXForm()
+{
+	CInventoryItem::UpdateXForm();
+}
+
+void CPda::OnActiveItem()
+{
+	if (!ParentIsActor())
+		return;
+
+	SwitchState(eShowing);
+}
+
+void CPda::OnHiddenItem()
+{
+	if (!ParentIsActor())
+		return;
+
+	SwitchState(eHiding);
+}
+
+void CPda::OnMoveToRuck(const SInvItemPlace& prev)
+{
+	inherited::OnMoveToRuck(prev);
+
+	if (!ParentIsActor())
+		return;
+
+	if (prev.type == eItemPlaceSlot)
+	{
+		SwitchState(eHidden);
+		if (joystick != BI_NONE && HudItemData())
+			HudItemData()->m_model->LL_GetBoneInstance(joystick).reset_callback();
+		g_player_hud->detach_item(this);
+	}
+	CUIPdaWnd* pda = &CurrentGameUI()->PdaMenu();
+	if (pda->IsShown()) pda->HideDialog();
+	StopCurrentAnimWithoutCallback();
+	SetPending(false);
+}
+
+void CPda::UpdateCL()
+{
+	inherited::UpdateCL();
+	if (!ParentIsActor())
+		return;
+
+	UpdateLights();
+
+	const u32 state = GetState();
+	const bool enoughBatteryPower = hasEnoughBatteryPower();
+	const bool b_main_menu_is_active = (g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive());
+
+	// For battery icon
+	const float condition = GetCondition();
+	const auto pda = &CurrentGameUI()->PdaMenu();
+	pda->m_power = condition;
+
+	if (!psActorFlags.test(AF_3D_PDA))
+	{
+		if (state != eHidden)
+			Actor()->inventory().Activate(NO_ACTIVE_SLOT);
+		return;
+	}
+
+	if (pda->IsShown())
+	{
+		// Hide PDA UI on low condition (battery) or when the item is hidden.
+		if (!enoughBatteryPower || state == eHidden)
+		{
+			CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+			pda->HideDialog();
+			m_bZoomed = false;
+
+			if (state == eIdle)
+				SwitchState(eEmptyBattery);
+		}
+		else
+		{
+			// Force update PDA UI if it's disabled (no input) and check for deferred enable or zoom in.
+			if (!pda->IsEnabled())
+			{
+				pda->Update();
+				if (m_bZoomed)
+					pda->Enable(true);
+			}
+
+			// Turn on "power saving" on low battery charge (dims the screen).
+			if (IsUsingCondition() && condition < m_fPowerSavingCharge)
+			{
+				/*if (!m_bPowerSaving)
+				{
+					luabind::functor<void> funct;
+					if (ai().script_engine().functor("pda.on_low_battery", funct))
+						funct();
+					m_bPowerSaving = true;
+				}*/
+			}
+
+			// Turn off "power saving" if battery has sufficient charge.
+			else if (m_bPowerSaving)
+				m_bPowerSaving = false;
+		}
+	}
+	else
+	{
+		// Show PDA UI if possible
+		if (!b_main_menu_is_active && state != eHiding && state != eHidden && enoughBatteryPower)
+		{
+			pda->ShowDialog(false); // Don't hide indicators
+			CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+			m_bNoticedEmptyBattery = false;
+			if (!m_bZoomed)
+				pda->Enable(false);
+		}
+	}
+
+	if (state != eHidden)
+	{
+		// Adjust screen brightness (smooth)
+		if (m_bPowerSaving)
+		{
+			if (g_pGamePersistent->devices_shader_data.pda_displaybrightness > m_fDisplayBrightnessPowerSaving)
+				g_pGamePersistent->devices_shader_data.pda_displaybrightness -= Device.fTimeDelta / .25f;
+		}
+		else
+			g_pGamePersistent->devices_shader_data.pda_displaybrightness = 1.f;
+
+		clamp(g_pGamePersistent->devices_shader_data.pda_displaybrightness, m_fDisplayBrightnessPowerSaving, 1.f);
+
+		// Screen "Glitch" factor
+		g_pGamePersistent->devices_shader_data.pda_psy_influence = m_psy_factor;
+
+		// Update Display Visibility (turn on/off)
+		if (target_screen_switch < Device.fTimeGlobal)
+		{
+			if (!enoughBatteryPower || state == eHiding)
+				// Change screen transparency (towards 0 = not visible).
+				g_pGamePersistent->devices_shader_data.pda_display_factor -= Device.fTimeDelta / .25f;
+			else
+				// Change screen transparency (towards 1 = fully visible).
+				g_pGamePersistent->devices_shader_data.pda_display_factor += Device.fTimeDelta / .75f;
+		}
+
+		clamp(g_pGamePersistent->devices_shader_data.pda_display_factor, 0.f, 1.f);
+	}
+
+	/*if (m_bZoomed)
+	{
+		ps_ssfx_wpn_dof_1 = GameConstants::GetSSFX_FocusDoF();
+		ps_ssfx_wpn_dof_2 = GameConstants::GetSSFX_FocusDoF().z;
+		SSFX_PDA_DoF_active = true;
+	}
+	else
+	{
+		if (SSFX_PDA_DoF_active)
+		{
+			ps_ssfx_wpn_dof_1 = GameConstants::GetSSFX_DefaultDoF();
+			ps_ssfx_wpn_dof_2 = GameConstants::GetSSFX_DefaultDoF().z;
+			SSFX_PDA_DoF_active = false;
+		}
+	}*/
+
+	luabind::functor<bool> m_functor;
+
+	if (ai().script_engine().functor("pda.check_surge", m_functor))
+		m_functor();
 }

@@ -316,7 +316,7 @@ protected:
 
 	u8 GetCurrentHudOffsetIdx() const;
 
-	virtual void			UpdateHudAdditonal		(Fmatrix&);
+	virtual void			UpdateHudAdditional		(Fmatrix&);
 	IC		void			UpdateFireDependencies	()			{ if (dwFP_Frame==Device.dwFrame) return; UpdateFireDependencies_internal(); };
 
 	virtual void			LoadFireParams		(LPCSTR section);

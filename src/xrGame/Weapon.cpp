@@ -1894,7 +1894,7 @@ u8 CWeapon::GetCurrentHudOffsetIdx() const {
 		return 1;
 }
 
-void CWeapon::UpdateHudAdditonal		(Fmatrix& trans)
+void CWeapon::UpdateHudAdditional		(Fmatrix& trans)
 {
 	auto pActor = smart_cast<const CActor*>(H_Parent());
 	if(!pActor)		return;
