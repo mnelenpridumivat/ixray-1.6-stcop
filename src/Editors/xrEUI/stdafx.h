@@ -21,3 +21,8 @@ using ImTextureID = IDirect3DBaseTexture9*;
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include "imgui.h"
+
+namespace ImGui
+{
+	XREUI_API bool HyperLink(const char* label, const char* url, bool underlineWhenHoveredOnly = false);
+}

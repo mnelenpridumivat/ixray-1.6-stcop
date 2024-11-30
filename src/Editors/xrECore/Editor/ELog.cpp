@@ -37,7 +37,7 @@ CLog ELog;
 //----------------------------------------------------
 inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 {
-	SDL_MessageBoxFlags Flags = SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT;
+	int Flags = SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT;
 	const char* Title = "";
 	switch (mt)
 	{
@@ -45,15 +45,15 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 		break;
 	case mtError:
 		Title = "Error";
-		Flags = SDL_MESSAGEBOX_ERROR;
+		Flags = Flags | SDL_MESSAGEBOX_ERROR;
 		break;
 	case mtInformation:
 		Title = "Info";
-		Flags = SDL_MESSAGEBOX_INFORMATION;
+		Flags = Flags | SDL_MESSAGEBOX_INFORMATION;
 		break;
 	case mtConfirmation:
 		Title = "Warning";
-		Flags = SDL_MESSAGEBOX_WARNING;
+		Flags = Flags | SDL_MESSAGEBOX_WARNING;
 		break;
 	default:
 		R_ASSERT(0);
