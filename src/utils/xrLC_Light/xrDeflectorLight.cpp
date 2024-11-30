@@ -3,7 +3,6 @@
 #include "xrdeflector.h"
 #include "cl_intersect.h"
 #include "xrlc_globaldata.h"
-#include "xrImage_Resampler.h"
 #include "light_point.h"
 #include "xrface.h"
 
@@ -613,21 +612,18 @@ BOOL	__stdcall rms_test	(lm_layer& lm, u32 w, u32 h, u32 rms)
 	xr_vector<u32>	pScaled_hemi;	pScaled_hemi.resize		(w*h);
 	xr_vector<u32>	pRestored_hemi;	pRestored_hemi.resize	(lm.width*lm.height);
 
-	try{
+	try 
+	{
 		// rgb + sun
-		imf_Process	(&*pScaled_base.begin(),	w,			h,			&*pOriginal_base.begin(),	lm.width,lm.height,imf_lanczos3	);
-		imf_Process	(&*pRestored_base.begin(),	lm.width,	lm.height,	&*pScaled_base.begin(),		w,h,imf_filter					);
+		DXTUtils::Filter::Process(&*pScaled_base.begin(), w, h, &*pOriginal_base.begin(), lm.width, lm.height, DXTUtils::Filter::imf_lanczos3);
+		DXTUtils::Filter::Process(&*pRestored_base.begin(), lm.width, lm.height, &*pScaled_base.begin(), w, h, DXTUtils::Filter::imf_filter);
+
 		// hemi
-		//.
-		/*
-		if ((lm.width/2>1)&&(lm.height/2>1)){
-			imf_Process	(&*pRestored_hemi.begin(),	lm.width/2,	lm.height/2,&*pOriginal_hemi.begin(),	lm.width,lm.height,		imf_lanczos3	);
-			imf_Process	(&*pOriginal_hemi.begin(),	lm.width,	lm.height,	&*pRestored_hemi.begin(),	lm.width/2,	lm.height/2,imf_filter		);
-		}
-		*/
-		imf_Process	(&*pScaled_hemi.begin(),	w,			h,			&*pOriginal_hemi.begin(),	lm.width,lm.height,imf_lanczos3	);
-		imf_Process	(&*pRestored_hemi.begin(),	lm.width,	lm.height,	&*pScaled_hemi.begin(),		w,h,imf_filter					);
-	}catch (...){
+		DXTUtils::Filter::Process(&*pScaled_hemi.begin(), w, h, &*pOriginal_hemi.begin(), lm.width, lm.height, DXTUtils::Filter::imf_lanczos3);
+		DXTUtils::Filter::Process(&*pRestored_hemi.begin(), lm.width, lm.height, &*pScaled_hemi.begin(), w, h, DXTUtils::Filter::imf_filter);
+	}
+	catch (...)
+	{
 		clMsg	("* ERROR: imf_Process");
 		return	FALSE;
 	}
