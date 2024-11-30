@@ -7,6 +7,7 @@
 #include "Level.h"
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "Actor.h"
+#include "actor_mp_client.h"
 #include "../xrEngine/XR_IOConsole.h"
 #include "../xrEngine/IGame_Persistent.h"
 #include "../xrEngine/date_time.h"
@@ -73,7 +74,7 @@ game_sv_mp::game_sv_mp() :inherited()
 
 game_sv_mp::~game_sv_mp()
 {
-	xr_delete(m_alife_simulator);
+	delete_data(m_alife_simulator);
 	xr_delete(m_strWeaponsData);
 }
 

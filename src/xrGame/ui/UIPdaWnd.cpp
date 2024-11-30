@@ -76,24 +76,20 @@ void CUIPdaWnd::Init()
 	m_btn_close				= UIHelper::Create3tButton( uiXml, "close_button", this );
 	m_hint_wnd				= UIHelper::CreateHint( uiXml, "hint_wnd" );
 
-
-	if ( IsGameTypeSingle() )
-	{
-		pUITaskWnd					= new CUITaskWnd();
-		pUITaskWnd->hint_wnd		= m_hint_wnd;
-		pUITaskWnd->Init			();
+	pUITaskWnd					= new CUITaskWnd();
+	pUITaskWnd->hint_wnd		= m_hint_wnd;
+	pUITaskWnd->Init			();
 
 //-		pUIFactionWarWnd				= new CUIFactionWarWnd();
 //-		pUIFactionWarWnd->hint_wnd		= m_hint_wnd;
 //-		pUIFactionWarWnd->Init			();
 
-		pUIRankingWnd					= new CUIRankingWnd();
-		pUIRankingWnd->Init				();
+	pUIRankingWnd					= new CUIRankingWnd();
+	pUIRankingWnd->Init				();
 
-		pUILogsWnd						= new CUILogsWnd();
-		pUILogsWnd->Init				();
+	pUILogsWnd						= new CUILogsWnd();
+	pUILogsWnd->Init				();
 
-	}
 
 	UITabControl					= new CUITabControl();
 	UITabControl->SetAutoDelete		(true);
@@ -185,16 +181,27 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 //-	{
 //-		m_pActiveDialog = pUIFactionWarWnd;
 //-	}
-	else if ( section == "eptRanking" )
+	/*
+	if (IsGameTypeSingle())
 	{
-		m_pActiveDialog = pUIRankingWnd;
+	    if (section == "eptRanking")
+	{
+		    m_pActiveDialog = pUIRankingWnd;
+	    }
+	}
+	*/
+	else if (section == "eptRanking")
+	{
+		if (IsGameTypeSingle()) {
+			m_pActiveDialog = pUIRankingWnd;
+		}
 	}
 	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
 	}
 
-	R_ASSERT						(m_pActiveDialog);
+	R_ASSERT2                       (m_pActiveDialog, "active dialog is not initialized");
 	UIMainPdaFrame->AttachChild		(m_pActiveDialog);
 	m_pActiveDialog->Show			(true);
 

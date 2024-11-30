@@ -68,8 +68,6 @@ void game_sv_freemp::AddMoneyToPlayer(game_PlayerState* ps, s32 amount)
 	signal_Syncronize();
 }
 
-
-
 void game_sv_freemp::OnTransferMoney(NET_Packet& P, ClientID const& clientID)
 {
 	ClientID to;
@@ -261,6 +259,8 @@ void game_sv_freemp::RespawnPlayer(ClientID id_who, bool NoSpectator)
 	if (!pA) return;
 
 	SpawnWeapon4Actor(pA->ID, "mp_players_rukzak", 0, ps->pItemList);
+	SpawnWeapon4Actor(pA->ID, "device_pda", 0, ps->pItemList);
+
 }
 
 void game_sv_freemp::OnDetach(u16 eid_who, u16 eid_what)
@@ -320,8 +320,23 @@ void game_sv_freemp::OnEvent(NET_Packet& P, u16 type, u32 time, ClientID sender)
 
 void game_sv_freemp::Update()
 {
+	inherited::Update();
+
 	if (Phase() != GAME_PHASE_INPROGRESS)
 	{
 		OnRoundStart();
 	}
+}
+
+BOOL game_sv_freemp::OnTouch(u16 eid_who, u16 eid_what, BOOL bForced)
+{
+	CSE_ActorMP* e_who = smart_cast<CSE_ActorMP*>(m_server->ID_to_entity(eid_who));
+	if (!e_who)
+		return TRUE;
+
+	CSE_Abstract* e_entity = m_server->ID_to_entity(eid_what);
+	if (!e_entity)
+		return FALSE;
+
+	return TRUE;
 }
