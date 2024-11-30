@@ -214,7 +214,6 @@ void UIRenderForm::Draw()
 
 		if (ImGui::IsItemFocused())
 		{
-
 			if ((ImGui::IsMouseDown(ImGuiMouseButton_Left) || ImGui::IsMouseDown(ImGuiMouseButton_Right)) && !m_mouse_down&& cursor_in_zone)
 			{
 				UI->MousePress(TShiftState(ShiftState), mouse_pos.x - canvas_pos.x, mouse_pos.y - canvas_pos.y);
@@ -236,6 +235,11 @@ void UIRenderForm::Draw()
 				UI->MouseMove(TShiftState(ShiftState), mouse_pos.x - canvas_pos.x, mouse_pos.y - canvas_pos.y);
 				m_mouse_move = true;
 				m_shiftstate_down = m_shiftstate_down||( ShiftState & (ssShift | ssCtrl | ssAlt));
+			}
+
+			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && OnClickCallback)
+			{
+				OnClickCallback();
 			}
 		}
 		else  if (m_mouse_down)

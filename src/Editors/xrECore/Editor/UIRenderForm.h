@@ -20,6 +20,7 @@ public:
 	IC void		SetToolBarEvent(TOnRenderToolBar e) { m_OnToolBar = e; }
 
 	xr_delegate<void()> OnFocusCallback;
+	xr_delegate<void()> OnClickCallback;
 	int ViewportID = 0;
 	string32 ViewportName;
 private:

@@ -27,7 +27,23 @@ void UIPropertiesItem::Draw()
 	if (Items.size())
 	{
 		ImGuiTreeNodeFlags FloderFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+		if (IsSelect)
+		{
+			ImVec4 TextColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
+			TextColor.x = 1;
+			TextColor.y = 0.1;
+			TextColor.z = 0.1;
+			TextColor.w = 0.7f;
+
+			ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
+		}
+
 		bool open = ImGui::TreeNodeEx(Name.c_str(), FloderFlags);
+
+		if (IsSelect)
+		{
+			ImGui::PopStyleColor();
+		}
 		ImGui::TableNextColumn();
 		DrawItem();
 		if (open)

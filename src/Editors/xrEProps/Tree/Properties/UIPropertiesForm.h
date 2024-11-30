@@ -10,6 +10,7 @@ public:
 	virtual void Draw();
 	void AssignItems(PropItemVec& items);
 	PropItem* FindItem(const char* path);
+	UIPropertiesItem* FindPropItem(const char* path);
 	PropItem* FindItemOfName(shared_str name);
 	void ClearProperties();
 	IC void SetReadOnly(bool enable) { m_Flags.set(plReadOnly, enable); }

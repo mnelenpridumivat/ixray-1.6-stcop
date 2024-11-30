@@ -376,6 +376,10 @@ void UIEditLibrary::DrawRightBar()
 
 		if (ImGui::Checkbox("Preview", &m_Preview))
 			OnPreviewClick();
+		ImGui::SameLine();
+
+		if (ImGui::Checkbox("Dropper", &m_Dropper))
+			PickSurface();
 
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -503,6 +507,51 @@ void UIEditLibrary::RefreshSelected()
 	}
 
 	UI->RedrawScene();
+}
+
+void UIEditLibrary::PickSurface()
+{
+	if (m_Dropper)
+	{
+		View.OnClickCallback.bind(this, &UIEditLibrary::PickCallback);
+		return;
+	}
+
+	View.OnClickCallback.clear();
+}
+
+void UIEditLibrary::PickCallback()
+{
+	Fvector StartDir;
+	Fvector StartPos;
+
+	UIPropertiesItem* Itm = m_PropsObjects->FindPropItem(PrevClick.c_str());
+	if (Itm != nullptr)
+	{
+		Itm->SetUnselect();
+	}
+
+	UI->CurrentView().m_Camera.MouseRayFromPoint(StartPos, StartDir, View.GetMousePos());
+
+	for (CSceneObject* Obj : m_pEditObjects)
+	{
+		float dis = UI->ZFar();
+		SRayPickInfo pinf;
+		Obj->RayPick(dis, StartPos, StartDir, &pinf);
+
+		if (pinf.e_mesh == nullptr)
+			continue;
+
+		CSurface* surf = pinf.e_mesh->GetSurfaceByFaceID(pinf.inf.id);
+		PrevClick = AnsiString("Surfaces\\") + AnsiString(surf->_Name());
+
+		UIPropertiesItem* Itm = m_PropsObjects->FindPropItem(PrevClick.c_str());
+		
+		if (Itm == nullptr)
+			continue;
+		
+		Itm->SetSelect();
+	}
 }
 
 /// ---------------------------------------------------------------------------

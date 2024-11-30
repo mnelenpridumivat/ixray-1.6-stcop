@@ -10,8 +10,13 @@ public:
 	void DrawRoot();
 	void DrawItem();
 	void DrawProp();
+	void SetSelect();
+	void SetUnselect();
+
 protected:
 	virtual UITreeItem* CreateItem(shared_str Name);
+
 private:
 	void RemoveMixed();
+	bool IsSelect = false;
 };
