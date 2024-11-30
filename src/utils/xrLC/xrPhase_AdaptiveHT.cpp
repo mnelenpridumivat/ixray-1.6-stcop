@@ -5,9 +5,9 @@
 #include "../xrLC_Light/light_point.h"
 #include "../xrLC_Light/xrDeflector.h"
 #include "../xrLC_Light/xrFace.h"
+#include "../xrLC_Light/face_smoth_flags.h"
 
 #include "../../xrCDB/xrCDB.h"
-#include "../../common/face_smoth_flags.h"
 #include "../xrForms/xrThread.h"
 
 const	float	aht_max_edge	= c_SS_maxsize/2.5f;	// 2.0f;			// 2 m

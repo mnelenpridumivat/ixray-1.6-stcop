@@ -1,8 +1,7 @@
-#ifndef	_MESH_MENDER_LAYER_ORDINARY_STATIC_H_
-#define	_MESH_MENDER_LAYER_ORDINARY_STATIC_H_
+#pragma once
 
-#include "../../common/NvMender2003/NVMeshMender.h"
-#include	"../../common/NvMender2003/mender_input_output.h"
+#include <NVMeshMender.h>
+#include <mender_input_output.h>
 
 #include "../xrLC_Light/xrFace.h"
 
@@ -27,5 +26,3 @@ IC void	set_face( Face &out_face, const MeshMender::Vertex in_vertices[3] )
 		out_face.basis_binormal[v].set( cv_vector( binormal, in_vertices[v].binormal ) ); 		
 	}
 }
-
-#endif

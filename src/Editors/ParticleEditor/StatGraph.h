@@ -1,12 +1,6 @@
-//---------------------------------------------------------------------------
-#ifndef StatGraphH
-#define StatGraphH
-//---------------------------------------------------------------------------
-#ifdef _EDITOR
+#pragma once
+
 class CStatGraph
-#else
-class ENGINE_API CStatGraph
-#endif
 	: public pureRender
 {
 public:
@@ -168,4 +162,3 @@ public:
 		m_Markers.erase(m_Markers.begin()+ID);
 	}
 };
-#endif

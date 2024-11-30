@@ -34,10 +34,9 @@ DEFINE_VECTOR(shared_str,RStrVec,RStrVecIt);
 #include "ExportSkeleton.h"
 
 #include "../Engine/NVMeshMender.h"
-#include	"../../common/NvMender2003/nvMeshMender.cpp"
-#include	"../../common/NvMender2003/nvMeshMender.h"
-#include	"../../common/NvMender2003/mender_input_output.h"
-#include	"../../common/NvMender2003/remove_isolated_verts.h"
+#include <NVMeshMender.h>
+#include <mender_input_output.h>
+#include <remove_isolated_verts.h>
 
 void 	CExportSkeleton::SSplit::OptimizeTextureCoordinates()
 {
