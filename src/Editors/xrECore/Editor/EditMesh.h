@@ -101,6 +101,7 @@ public:
 	IC const Fvector2& getUV	(int idx) const			{VERIFY(type==vmtUV);		return (Fvector2&)vm[idx*dim];}
 	IC Fvector2&    getUV		(int idx)				{VERIFY(type==vmtUV);		return (Fvector2&)vm[idx*dim];}
 	IC const float&	getW		(int idx) const			{VERIFY(type==vmtWeight);	return vm[idx];}
+	IC float&		getW		(int idx)				{VERIFY(type==vmtWeight);	return vm[idx];}
 	IC const FloatVec& getVM	()	const				{return vm;}
 	IC float*		getVMdata	()						{return &*vm.begin();}
 	IC float*		getVMdata	(int start)				{return &*(vm.begin()+start*dim);}
@@ -226,15 +227,17 @@ class ECORE_API CEditableMesh
 	CEditableObject*	m_Parent;
 
 	void            GenerateCFModel		();
-	void 			GenerateRenderBuffers();
 	void			UnloadCForm     	();
-#if 1
-	void 			UnloadRenderBuffers	();
-#endif
+
 public:
 	static 			BOOL m_bDraftMeshMode;
+
+	void 			GenerateRenderBuffers();
+	void 			UnloadRenderBuffers();
+
 	void 			GenerateFNormals	();
 	void 			GenerateVNormals	(const Fmatrix* parent_xform, bool force = false);
+	void			AssignMesh			(shared_str to_bone);
 	void            GenerateSVertices	(u32 influence);
 	void 			GenerateAdjacency	();
 

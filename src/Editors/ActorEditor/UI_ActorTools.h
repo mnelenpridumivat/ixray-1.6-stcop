@@ -191,7 +191,6 @@ protected:
 	void				GenerateLOD(bool hq) { m_Flags.set(hq? flGenerateLODHQ: flGenerateLODLQ, TRUE); }
   //  void   	PMMotionItemClick		(TObject *Sender);
 	
-	void				RealUpdateProperties	();
 
 	void				PrepareLighting			();
 	bool				VerifyMotionRefs		();
@@ -236,6 +235,7 @@ public:
 	void  		OnItemModified		(void); 
 
 	virtual LPCSTR		GetInfo				();
+	void				RealUpdateProperties();
 	
 	virtual void		ZoomObject			(BOOL bSelOnly);
 

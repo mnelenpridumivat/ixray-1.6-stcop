@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "../xrECore/Editor/EditMesh.h"
+
 extern ECORE_API BOOL g_force16BitTransformQuant;
 extern ECORE_API BOOL g_force32BitTransformQuant;
 
@@ -108,7 +110,30 @@ void UILeftBarForm::Draw()
 		//	ImGui::TreePop();
 		}
 	}
+
+	if (ATools->CurrentObject() != nullptr)
+	{
+		if (!ATools->CurrentObject()->m_objectFlags.test(CEditableObject::eoDynamic))
+		{
+			if (ImGui::Button("Make dynamic"))
+			{
+				ATools->CurrentObject()->CreateBone("idle");
+
+				for (EditMeshIt mesh_it = ATools->CurrentObject()->FirstMesh(); mesh_it != ATools->CurrentObject()->LastMesh(); mesh_it++)
+				{
+					CEditableMesh* pMesh = *mesh_it;
+					pMesh->AssignMesh("idle");
+					//pMesh->UnloadRenderBuffers();
+					//pMesh->GenerateRenderBuffers();
+				}
+
+				ATools->RealUpdateProperties();
+			}
+		}
+	}
+
 	ImGui::End();
+
 
 	if (ImGui::Begin("Item Properties", 0))
 	{
