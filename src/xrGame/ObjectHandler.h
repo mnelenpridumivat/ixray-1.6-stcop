@@ -1,7 +1,7 @@
 #pragma once
 
 #if !USE_OLD_OBJECT_PLANNER
-#include "inventoryowner.h"
+#include "InventoryOwner.h"
 #include "graph_engine_space.h"
 
 namespace MonsterSpace {
@@ -70,8 +70,6 @@ public:
 			bool					weapon_unstrapped		(CWeapon *weapon) const;
 			bool			is_weapon_going_to_be_strapped	( CGameObject const* object ) const;
 
-private:
-			void					set_inertia				(const CWeapon &weapon, const u32 &action_id, const u32 &aim_time) const;
 
 public:
 	virtual bool					can_use_dynamic_lights	();

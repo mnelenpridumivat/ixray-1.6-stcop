@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "RbmkGoapPlanner.h"
 
 #include "ai/monsters/state.h"
@@ -35,7 +36,7 @@ bool FRbmkGoapPropertyMember::GetProperty() const
 	return false;
 }
 
-FRbmkGoapAction::FRbmkGoapAction(const shared_str& InName):Owner(nullptr),Name(InName)
+FRbmkGoapAction::FRbmkGoapAction():Owner(nullptr)
 {
 }
 
@@ -86,10 +87,42 @@ void FRbmkGoapParameters::Add(const shared_str& Name, bool Value)
 
 void FRbmkGoapParameters::Add(const FRbmkGoapParameters& InParameters)
 {
-	for(const FRbmkGoapParameter &Parameter:InParameters.Parameters)
+	auto WithIterator = InParameters.Parameters.begin();
+	const auto WithIteratorEnd = InParameters.Parameters.end();
+
+	auto Iterator = Parameters.begin();
+	auto IteratorEnd = Parameters.end();
+	while(WithIterator != WithIteratorEnd && Iterator != IteratorEnd)
 	{
-		Add(Parameter.Name,Parameter.Value);
+		if(Iterator->Name < WithIterator->Name)
+		{
+			++Iterator;
+		}
+		else if(WithIterator->Name < Iterator->Name)
+		{
+			InvalidHash = true;
+			Iterator = Parameters.insert(Iterator,*WithIterator);
+			IteratorEnd = Parameters.end();
+			++WithIterator;
+		}
+		else 
+		{
+			VERIFY(WithIterator->Name == Iterator->Name);
+			
+			InvalidHash |= Iterator->Value !=  WithIterator->Value;
+			Iterator->Value = WithIterator->Value;
+
+			++WithIterator;
+			++Iterator;
+		}
 	}
+	while(WithIterator != WithIteratorEnd )
+	{
+		InvalidHash = true;
+		Parameters.push_back(*WithIterator);
+		++WithIterator;
+	}
+
 }
 
 void FRbmkGoapParameters::Add(const FRbmkGoapParameters& Parameters, FRbmkGoapPlanner* ValuesFrom)
@@ -127,16 +160,12 @@ void FRbmkGoapParameters::Add(const FRbmkGoapParameters& Parameters, FRbmkGoapPl
 void FRbmkGoapParameters::SubFromCache(FRbmkGoapPlanner* From)
 {
 	auto Iterator = Parameters.begin();
-	const auto IteratorEnd = Parameters.end();
+	auto IteratorEnd = Parameters.end();
 	auto PropertiesIterator = From->CacheProperties.begin();
 	auto PropertiesIteratorEnd = From->CacheProperties.end();
 	while(PropertiesIterator != PropertiesIteratorEnd && Iterator != IteratorEnd)
 	{
 		if(Iterator->Name < PropertiesIterator->first->Name)
-		{
-			++Iterator;
-		}
-		else if(PropertiesIterator->first->Name < Iterator->Name)
 		{
 			From->AddCacheProperty(Iterator->Name);
 			PropertiesIterator = std::lower_bound(From->CacheProperties.begin(),From->CacheProperties.end(),Iterator->Name,
@@ -146,12 +175,17 @@ void FRbmkGoapParameters::SubFromCache(FRbmkGoapPlanner* From)
 			});
 			PropertiesIteratorEnd = From->CacheProperties.end();
 		}
+		else if(PropertiesIterator->first->Name < Iterator->Name)
+		{
+			++PropertiesIterator;
+		}
 		else 
 		{
 			VERIFY(PropertiesIterator->first->Name == Iterator->Name);
 			if(PropertiesIterator->second == Iterator->Value)
 			{
 				Iterator  = Parameters.erase(Iterator);
+				IteratorEnd = Parameters.end();
 				InvalidHash = true;
 			}
 			else
@@ -206,6 +240,7 @@ bool FRbmkGoapParameters::operator<(const FRbmkGoapParameters& Right) const
 	return false;
 }
 
+
 bool FRbmkGoapParameters::operator==(const FRbmkGoapParameters& Right) const
 {
 	if(Parameters.size() != Right.Parameters.size())
@@ -231,7 +266,7 @@ bool FRbmkGoapParameters::operator==(const FRbmkGoapParameters& Right) const
 	return true;
 }
 
-bool FRbmkGoapParameters::NotContradict(const FRbmkGoapParameters& With, FRbmkGoapPlanner* AppendFrom, bool FromCache)
+bool FRbmkGoapParameters::NotContradict(const FRbmkGoapParameters& With, FRbmkGoapPlanner* AppendFrom) const
 {
 	auto WithIterator = With.Parameters.begin();
 	const auto WithIteratorEnd = With.Parameters.end();
@@ -257,18 +292,12 @@ bool FRbmkGoapParameters::NotContradict(const FRbmkGoapParameters& With, FRbmkGo
 			}
 			VERIFY(PropertiesIterator->get()->Name == WithIterator->Name);
 
-			if(FromCache)
+			if(WithIterator->Value != AppendFrom->FindOrAddCacheProperty(PropertiesIterator->get()))
 			{
-				Iterator = Parameters.insert(Iterator,{WithIterator->Name,  AppendFrom->FindOrAddCacheProperty(PropertiesIterator->get())});
+				return false;
 			}
-			else
-			{
-				Iterator = Parameters.insert(Iterator,{WithIterator->Name,  PropertiesIterator->get()->GetProperty()});
-			}
-
-			IteratorEnd = Parameters.end();
 			++PropertiesIterator;
-			InvalidHash = true;
+			++WithIterator;
 		}
 		else 
 		{
@@ -284,7 +313,6 @@ bool FRbmkGoapParameters::NotContradict(const FRbmkGoapParameters& With, FRbmkGo
 
 	if(Iterator == IteratorEnd&& WithIterator != WithIteratorEnd)
 	{
-		bool Result = true;
 		while(WithIterator != WithIteratorEnd)
 		{
 			VERIFY(PropertiesIterator != PropertiesIteratorEnd);
@@ -295,25 +323,14 @@ bool FRbmkGoapParameters::NotContradict(const FRbmkGoapParameters& With, FRbmkGo
 			}
 			VERIFY(PropertiesIterator->get()->Name == WithIterator->Name);
 
-			if(FromCache)
+			if(WithIterator->Value != AppendFrom->FindOrAddCacheProperty(PropertiesIterator->get()))
 			{
-				Parameters.push_back({WithIterator->Name,AppendFrom->FindOrAddCacheProperty(PropertiesIterator->get())});
-			}
-			else
-			{
-				Parameters.push_back({WithIterator->Name,PropertiesIterator->get()->GetProperty()});
+				return false;
 			}
 
-			VERIFY(WithIterator->Name == Parameters.back().Name);
-			if(WithIterator->Value != Parameters.back().Value)
-			{
-				Result = false;
-			}
 			++WithIterator;
 			++PropertiesIterator;
 		}
-		InvalidHash = true;
-		return Result;
 	}
 	return true;
 }
@@ -381,7 +398,7 @@ bool FRbmkGoapParameters::AllMatch(const FRbmkGoapParameters& In) const
 }
 
 
-FRbmkGoapPlanner::FRbmkGoapPlanner(void* InOwner): Owner(InOwner), CurrentAction(nullptr)
+FRbmkGoapPlanner::FRbmkGoapPlanner(): Owner(nullptr), CurrentAction(nullptr)
 {
 }
 
@@ -463,6 +480,15 @@ void FRbmkGoapPlanner::SetTarget(const shared_str& Name, bool Value)
 	Target.Value = Value;
 }
 
+const shared_str& FRbmkGoapPlanner::GetTarget(bool* OutValue) const
+{
+	if(OutValue)
+	{
+		*OutValue = Target.Value;
+	}
+	return Target.Name;
+}
+
 void FRbmkGoapPlanner::Update()
 {
 	if(!ActualCurrentAction())
@@ -470,6 +496,10 @@ void FRbmkGoapPlanner::Update()
 		if(!Search())
 		{
 			PrintError();
+			return;
+		}
+		if(!Path.empty()&&CurrentAction == Path.back())
+		{
 			return;
 		}
 		if(CurrentAction)
@@ -516,6 +546,15 @@ void FRbmkGoapPlanner::AddCacheProperty(const shared_str& name)
 	FindOrAddCacheProperty(Names2Properties[name]);
 }
 
+void FRbmkGoapPlanner::Clear()
+{
+	if(CurrentAction)
+	{
+		CurrentAction->End();
+		CurrentAction = nullptr;
+	}
+}
+
 
 bool FRbmkGoapPlanner::ActualCurrentAction()
 {
@@ -528,13 +567,36 @@ bool FRbmkGoapPlanner::ActualCurrentAction()
 		NeedRefresh = false;
 		return false;
 	}
-	FRbmkGoapParameters CheckCacheParameters;
-	if(CheckCacheParameters.NotContradict(CurrentParameters,this,false))
+
 	{
-		return true;
+		auto WithIterator = Properties.begin();
+		const auto WithIteratorEnd = Properties.end();
+		auto Iterator = CurrentParameters.Parameters.begin();
+		const auto IteratorEnd = CurrentParameters.Parameters.end();
+		while(WithIterator != WithIteratorEnd && Iterator != IteratorEnd)
+		{
+			if(Iterator->Name < WithIterator->get()->Name)
+			{
+				++Iterator;
+			}
+			else if( WithIterator->get()->Name < Iterator->Name)
+			{
+				++WithIterator;
+			}
+			else 
+			{
+				VERIFY( WithIterator->get()->Name == Iterator->Name);
+				if(WithIterator->get()->GetProperty() != Iterator->Value)
+				{
+					return false;
+				}
+				++WithIterator;
+				++Iterator;
+			}
+		}
 	}
 
-	return false;
+	return true;
 }
 
 bool FRbmkGoapPlanner::Search()
@@ -544,7 +606,7 @@ bool FRbmkGoapPlanner::Search()
 	
 	auto GetParametersPtr = [this](FRbmkGoapParameters& From)
 	{
-	//	From.SubFromCache(this);
+		//From.SubFromCache(this);
 		From.ResetHash();
 
 		const auto Iterator = std::lower_bound(CacheParameters.begin(),CacheParameters.end(), From,
@@ -576,16 +638,11 @@ bool FRbmkGoapPlanner::Search()
 
 	auto GetNeighbor = [this,&GetParametersPtr](const FRbmkGoapParameters* CurrentNode, const FRbmkGoapAction* Action,FRbmkGoapParameters*& OutParameters)->bool
 	{
-		if(CurrentNode->NotContradict(Action->Conditions))
+		if(CurrentNode->NotContradict(Action->Conditions,this))
 		{
-			/*FRbmkGoapParameters SearchCacheParameters;
-			SearchCacheParameters.Add(*CurrentNode);
-			if(SearchCacheParameters.NotContradict(Action->Conditions,this))
-			{
-				
-			}*/
 			FRbmkGoapParameters NewParameters;
 			NewParameters.Add(*CurrentNode);
+			NewParameters.Add(Action->Conditions);
 			NewParameters.Add(Action->Effects);
 			OutParameters = GetParametersPtr(NewParameters);
 			if(OutParameters==CurrentNode)
@@ -604,7 +661,7 @@ bool FRbmkGoapPlanner::Search()
 
 	auto DistanceNode = [this,&TargetParameters](FRbmkGoapParameters* CurrentNode)
 	{
-		return CurrentNode->NotContradict(*TargetParameters)?0:1;
+		return CurrentNode->NotContradict(*TargetParameters,this)?0:1;
 	};
 
 	TempPriorityNode.clear();
@@ -614,7 +671,6 @@ bool FRbmkGoapPlanner::Search()
 	TempEdges.clear();
 	Path.clear();
 	CacheProperties.clear();
-
 	{
 		FRbmkGoapParameters NewTargetParameters;
 		NewTargetParameters.Add(Target.Name,Target.Value);
@@ -633,7 +689,8 @@ bool FRbmkGoapPlanner::Search()
 	TempCameFrom.insert({StartParameters, StartParameters});
 	TempCostSoFar.insert( {StartParameters, 0});
 
-
+	int32 IteratorsCount  = 0;
+	static int32 IteratorsMaxCount  = 0;
 	while (!TempPriorityNode.empty())
 	{
 		FRbmkGoapParameters* CurrentNode = TempPriorityNode.back().second;
@@ -649,10 +706,11 @@ bool FRbmkGoapPlanner::Search()
 				CurrentParameters.Add(Path.back()->Effects,this);
 				NextNode = TempCameFrom[NextNode];
 			}
+			IteratorsMaxCount = _max(IteratorsMaxCount,IteratorsCount);
 			return true;
 		}
-
-
+		
+		IteratorsCount++;
 		for (const xr_unique_ptr<FRbmkGoapAction>& Action : Actions )
 		{
 			FRbmkGoapParameters* Neighbor;
@@ -696,7 +754,10 @@ bool FRbmkGoapPlanner::Search()
 					TempEdges.insert({Neighbor,Action.get()});
 				}
 			}
+			else
+			{
+			}
 		}
 	}
 	return false;
-};
+}

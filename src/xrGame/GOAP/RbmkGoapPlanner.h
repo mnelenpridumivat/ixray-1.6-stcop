@@ -45,7 +45,7 @@ struct FRbmkGoapParameters
 	void							ResetHash		();
 	bool							operator<		(const FRbmkGoapParameters&Right) const;
 	bool							operator==		(const FRbmkGoapParameters&Right) const;
-	bool							NotContradict	(const FRbmkGoapParameters&With,FRbmkGoapPlanner* AppendFrom, bool FromCache = true);
+	bool							NotContradict	(const FRbmkGoapParameters&With,FRbmkGoapPlanner* AppendFrom) const;
 	bool							NotContradict	(const FRbmkGoapParameters&With) const;
 	bool							AllMatch		(const FRbmkGoapParameters&In) const;
 
@@ -57,7 +57,7 @@ struct FRbmkGoapParameters
 class FRbmkGoapAction
 {
 public:
-								FRbmkGoapAction		(const shared_str& Name);
+								FRbmkGoapAction		();
 	virtual						~FRbmkGoapAction	();
 	virtual void				Active				();
 	virtual void				Update				();
@@ -73,7 +73,7 @@ public:
 class FRbmkGoapPlanner
 {
 public:
-																		FRbmkGoapPlanner		(void* InOwner);
+																		FRbmkGoapPlanner		();
 																		~FRbmkGoapPlanner		();
 
 	void																AddProperty				(FRbmkGoapProperty* InProperty);
@@ -81,16 +81,18 @@ public:
 		void															RemoveProperty			(FRbmkGoapProperty* InProperty);
 	
 		void															AddAction				(FRbmkGoapAction* InAction);
-		template<class C> C&											AddAction				(const shared_str& Name) { C* Action = new C(Name); AddAction(Action); return *Action; }
+		template<class C> C&											AddAction				(const shared_str& Name) { C* Action = new C(); Action->Name = Name; AddAction(Action); return *Action; }
 		void															RemoveAction			(FRbmkGoapAction* InProperty);
 
 		void															SetTarget				(const shared_str&Name ,bool Value);
+		const shared_str&												GetTarget				(bool *OutValue = nullptr) const;
 		void															Update					();
 		void															PrintError				();
 		bool															IsReached				() const { return Path.size() < 2;}
 		FRbmkGoapAction*												GetCurrentAction		() const {return CurrentAction;}
 		bool															FindOrAddCacheProperty	( FRbmkGoapProperty*Property);
 		void															AddCacheProperty		(const shared_str& name);
+		void															Clear					();
 
 		void*															Owner;
 		std::vector<xr_unique_ptr<FRbmkGoapProperty>>					Properties;
