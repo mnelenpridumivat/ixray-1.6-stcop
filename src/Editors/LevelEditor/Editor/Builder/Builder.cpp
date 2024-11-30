@@ -176,9 +176,12 @@ BOOL SceneBuilder::MakePuddles()
 
         RtlZeroMemory(buff, sizeof(buff));
 
-        sprintf(buff, "position= %0.3f, %0.3f, %0.3f", Object->FPosition.x, Object->FPosition.y, Object->FPosition.z);
+        sprintf(buff, "position = %0.3f, %0.3f, %0.3f", Object->FPosition.x, Object->FPosition.y, Object->FPosition.z);
         F->w_string(buff);
-        F->w_string("rotation = 0");
+        RtlZeroMemory(buff, sizeof(buff));
+
+        sprintf(buff, "rotation = %0.3f", Object->FRotation.y);
+        F->w_string(buff);
         RtlZeroMemory(buff, sizeof(buff));
 
         sprintf(buff, "max_height = %0.3f", Object->FScale.y);

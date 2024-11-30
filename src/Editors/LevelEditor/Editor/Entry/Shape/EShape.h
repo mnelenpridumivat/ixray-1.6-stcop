@@ -37,7 +37,7 @@ public:
     virtual bool	CanAttach		() {return true;}
     
     // pick functions
-	virtual bool 	RayPick		(float& distance, const Fvector& start, const Fvector& direction, SRayPickInfo* pinf = NULL);
+	virtual bool 	RayPick		(float& distance, const Fvector& start, const Fvector& direction, SRayPickInfo* pinf = NULL) override;
     virtual bool 	FrustumPick	(const CFrustum& frustum);
 
     // placement functions

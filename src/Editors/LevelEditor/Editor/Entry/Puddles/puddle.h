@@ -19,6 +19,7 @@ public:
   	virtual bool 	LoadStream			(IReader&);
   	virtual bool 	LoadLTX				(CInifile& ini, LPCSTR sect_name);
 	virtual void 	SaveStream			(IWriter&);
+	virtual void	OnFrame				() override;
   	virtual void 	SaveLTX				(CInifile& ini, LPCSTR sect_name);
 
 	virtual void 	OnUpdateTransform() override;
