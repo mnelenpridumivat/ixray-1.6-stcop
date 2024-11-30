@@ -194,40 +194,38 @@ void CTextConsole::OnPaint()
 {
 	RECT wRC;
 	PAINTSTRUCT ps;
-	BeginPaint( m_hLogWnd, &ps );
+	BeginPaint(m_hLogWnd, &ps);
 
-	if ( /*m_bNeedUpdate*/ Device.dwFrame % 2 )
+	if (Device.dwFrame % 2)
 	{
-//		m_dwLastUpdateTime = Device.dwTimeGlobal;
-//		m_bNeedUpdate = false;
-		
-		GetClientRect( m_hLogWnd, &wRC );
-		DrawLog( m_hDC_LogWnd_BackBuffer, &wRC );
+		GetClientRect(m_hLogWnd, &wRC);
+		DrawLog(m_hDC_LogWnd_BackBuffer, &wRC);
 	}
 	else
 	{
 		wRC = ps.rcPaint;
 	}
-	
-	
-	BitBlt(	m_hDC_LogWnd,
-			wRC.left, wRC.top,
-			wRC.right - wRC.left, wRC.bottom - wRC.top,
-			m_hDC_LogWnd_BackBuffer,
-			wRC.left, wRC.top,
-			SRCCOPY); //(FullUpdate) ? SRCCOPY : NOTSRCCOPY);
-/*
-	Msg ("URect - %d:%d - %d:%d", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
-*/
-	EndPaint( m_hLogWnd, &ps );
+
+	BitBlt
+	(
+		m_hDC_LogWnd,
+		wRC.left, wRC.top,
+		wRC.right - wRC.left, wRC.bottom - wRC.top,
+		m_hDC_LogWnd_BackBuffer,
+		wRC.left, wRC.top,
+		SRCCOPY
+	);
+
+	EndPaint(m_hLogWnd, &ps);
 }
 
-void CTextConsole::DrawLog(HDC hDC, RECT* pRect) {
+void CTextConsole::DrawLog(HDC hDC, RECT* pRect)
+{
 	TEXTMETRIC tm;
 	GetTextMetrics(hDC, &tm);
 
 	RECT wRC = *pRect;
-	GetClientRect(m_hLogWnd, &wRC);
+	SDL_GetWindowSize(g_AppInfo.Window, (int*)&wRC.right, (int*)&wRC.bottom);
 	FillRect(hDC, &wRC, m_hBackGroundBrush);
 
 	int Width = wRC.right - wRC.left;
@@ -330,13 +328,7 @@ void CTextConsole::DrawLog(HDC hDC, RECT* pRect) {
 		}
 	}
 }
-/*
-void CTextConsole::IR_OnKeyboardPress( int dik ) !!!!!!!!!!!!!!!!!!!!!
-{
-	m_bNeedUpdate = true;
-	inherited::IR_OnKeyboardPress( dik );
-}
-*/
+
 void CTextConsole::OnFrame()
 {
 	inherited::OnFrame();
