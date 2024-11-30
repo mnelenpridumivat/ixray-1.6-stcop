@@ -546,10 +546,10 @@ void UIMinimapEditorForm::Update()
 		if (!Form->IsClosed())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(500, 500));
-			if (ImGui::BeginPopupModal("MinimapEditor", &Form->bOpen, 0, true))
+			if (ImGui::Begin("MinimapEditor", &Form->bOpen))
 			{
 				Form->Draw();
-				ImGui::EndPopup();
+				ImGui::End();
 			}
 			else
 			{
@@ -562,7 +562,6 @@ void UIMinimapEditorForm::Update()
 		{
 			xr_delete(Form);
 		}
-
 	}
 }
 
