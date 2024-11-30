@@ -2,6 +2,8 @@
 // see https://bitbucket.org/stalker/xray-csky_borscht_sdk
 
 #pragma once
+struct SAINode;
+
 class IM_Manipulator
 {
 public:
@@ -10,5 +12,11 @@ public:
     IM_Manipulator(): m_active(false) {}
 
     void Render(float canvasX, float canvasY, float canvasWidth, float canvasHeight);
+
+private:
+    void CommandScale(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, bool& retFlag);
+    void CommandRotate(Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, ObjectList& lst, const bool IsCSParent);
+    void CommandMove(ObjectList& lst, Fmatrix& ObjectMatrix, Fmatrix& DeltaMatrix, SAINode* NodeObject);
 };
+
 extern IM_Manipulator imManipulator;
