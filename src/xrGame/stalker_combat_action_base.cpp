@@ -6,17 +6,14 @@
 //	Description : Stalker base combat action
 ////////////////////////////////////////////////////////////////////////////
 
-#include "StdAfx.h"
-#include "pch_script.h"
+#include "stdafx.h"
 #include "stalker_combat_action_base.h"
 #include "ai/stalker/ai_stalker.h"
-#include "script_game_object.h"
 #include "sound_player.h"
 #include "ai/stalker/ai_stalker_space.h"
 #include "memory_manager.h"
 #include "enemy_manager.h"
 #include "stalker_movement_manager_smart_cover.h"
-#include "object_handler.h"
 #include "agent_manager.h"
 #include "agent_member_manager.h"
 #include "agent_enemy_manager.h"

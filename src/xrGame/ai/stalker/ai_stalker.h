@@ -9,7 +9,7 @@
 #pragma once
 
 #include "../../CustomMonster.h"
-#include "../../object_handler.h"
+#include "../../ObjectHandler.h"
 #include "../../AI_PhraseDialogManager.h"
 #include "../../step_manager.h"
 #include "../../../xrScripts/script_export_space.h"

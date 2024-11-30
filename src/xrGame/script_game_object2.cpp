@@ -13,7 +13,6 @@
 #include "../xrScripts/script_engine.h"
 #include "Explosive.h"
 #include "script_zone.h"
-#include "object_handler.h"
 #include "script_hit.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "PDA.h"

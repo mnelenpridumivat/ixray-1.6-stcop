@@ -5,27 +5,27 @@
 //	Author		: Dmitriy Iassenev
 //	Description : Object handler
 ////////////////////////////////////////////////////////////////////////////
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#if USE_OLD_OBJECT_PLANNER
 #include "pch_script.h"
 #include "object_handler.h"
-#include "object_handler_space.h"
+#include "ObjectHandlerSpace.h"
 #include "object_handler_planner.h"
 #include "ai_monster_space.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "WeaponMagazined.h"
+#include "weaponmagazined.h"
 #include "ef_storage.h"
 #include "ef_pattern.h"
 #include "ai/stalker/ai_stalker.h"
 #include "Inventory.h"
-#include "Torch.h"
+#include "torch.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "memory_manager.h"
 #include "enemy_manager.h"
 #include "ai_object_location.h"
 #include "stalker_animation_manager.h"
 #include "object_handler_planner_impl.h"
-#include "EffectorShot.h"
+#include "effectorshot.h"
 
 CObjectHandler::CObjectHandler		()
 {
@@ -345,3 +345,4 @@ bool CObjectHandler::is_weapon_going_to_be_strapped	( CGameObject const* object 
 
 	return						*found == strap_property;
 }
+#endif

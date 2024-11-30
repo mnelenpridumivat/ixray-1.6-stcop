@@ -12,7 +12,6 @@
 #include "script_game_object.h"
 #include "stalker_movement_manager_smart_cover.h"
 #include "sight_manager.h"
-#include "object_handler.h"
 #include "movement_manager_space.h"
 #include "detail_path_manager.h"
 #include "stalker_decision_space.h"

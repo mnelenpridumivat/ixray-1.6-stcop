@@ -6,17 +6,17 @@
 //	Description : Object handler action planner
 ////////////////////////////////////////////////////////////////////////////
 
-#include "StdAfx.h"
+#include "stdafx.h"
+#if USE_OLD_OBJECT_PLANNER
 #include "object_handler_planner.h"
 #include "object_property_evaluators.h"
 #include "object_actions.h"
 #include "ai_monster_space.h"
-#include "object_handler_space.h"
 #include "ai/stalker/ai_stalker.h"
 #include "Inventory.h"
 #include "object_handler_planner_impl.h"
-#include "WeaponMagazined.h"
-#include "Missile.h"
+#include "weaponmagazined.h"
+#include "missile.h"
 #include "ai_monster_space.h"
 
 using namespace ObjectHandlerSpace;
@@ -315,3 +315,4 @@ void CObjectHandlerPlanner::update			()
 #endif
 	inherited::update		();
 }
+#endif

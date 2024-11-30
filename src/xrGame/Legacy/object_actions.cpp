@@ -5,17 +5,17 @@
 //	Author		: Dmitriy Iassenev
 //	Description : Object actions
 ////////////////////////////////////////////////////////////////////////////
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#if USE_OLD_OBJECT_PLANNER
 #include "object_actions.h"
 #include "Inventory.h"
 #include "ai/stalker/ai_stalker.h"
 #include "../xrEngine/xr_level_controller.h"
 #include "xrMessages.h"
-#include "FoodItem.h"
+#include "fooditem.h"
 #include "Weapon.h"
-#include "WeaponMagazined.h"
-#include "object_handler_space.h"
+#include "weaponmagazined.h"
+#include "../ObjectHandlerSpace.h"
 #include "stalker_animation_manager.h"
 #include "object_handler_planner.h"
 
@@ -883,6 +883,11 @@ void CObjectActionAim::execute				()
 		m_weapon->StopedAfterQueueFired(false);
 }
 
+void CObjectActionAim::finalize()
+{
+	CObjectActionMember::finalize();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // CObjectActionIdle
 //////////////////////////////////////////////////////////////////////////
@@ -922,18 +927,18 @@ void CObjectActionIdleMissile::initialize	()
 	VERIFY						(object().inventory().ActiveItem());
 	VERIFY						(object().inventory().ActiveItem()->object().ID() == m_item->object().ID());
 
-	m_storage->set_property		(
-		object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyThrowStarted),
-		false
-	);
-	m_storage->set_property		(
-		object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyThrowIdle),
-		false
-	);
-	m_storage->set_property		(
-		object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyFiring1),
-		false
-	);
+	//m_storage->set_property		(
+	//	object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyThrowStarted),
+	//	false
+	//);
+	//m_storage->set_property		(
+	//	object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyThrowIdle),
+	//	false
+	//);
+	//m_storage->set_property		(
+	//	object().planner().uid(m_item->object().ID(),ObjectHandlerSpace::eWorldPropertyFiring1),
+	//	false
+	//);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -980,3 +985,4 @@ void CObjectActionThrowMissile::execute		()
 	if (completed())
 		object().inventory().Action	(kWPN_ZOOM,CMD_STOP);
 }
+#endif
