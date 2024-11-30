@@ -7,12 +7,14 @@ class UIMinimapEditorForm:
 private:
 	struct Element {
 		xr_string name;
-		xr_string path;
 		ImVec2 position;
 		ImVec2 RenderSize;
 		ImVec2 FileSize;
-		ImTextureID	texture;
+		ImTextureID	Texture;
+		xr_string TexturePath;
 		bool selected = false;
+		bool locked = false;
+		bool hidden = false;
 	};
 
 	template<typename T>
@@ -44,12 +46,18 @@ private:
 	void UnselectAllElements();
 	void SelectElement(Element&);
 
+	void CreateElementPopup();
+
 	void SaveFile(bool);
 	void OpenFile();
 
 	void ReloadMapInfo(const xr_string& fn);
+	void ReloadLevelsList();
+
+	bool GetTextureFromLevelLtx(const xr_string, xr_string&);
 
 	xr_vector<Element> elements;
+	xr_vector<xr_string> levels;
 
 	bool m_AlwaysDrawBorder = false;
 	bool isDragging = false;
@@ -66,6 +74,9 @@ private:
 	xr_string ActiveFile;
 	xr_string ActiveFileShort;
 	bool isEdited;
+
+	Element CreatingData;
+	bool showMPLevels = false;
 private:
 	ImTextureID					m_BackgroundTexture;
 	ImTextureID					m_TextureRemove;

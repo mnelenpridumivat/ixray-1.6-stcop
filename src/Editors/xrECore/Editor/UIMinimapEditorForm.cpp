@@ -10,6 +10,8 @@ UIMinimapEditorForm::UIMinimapEditorForm()
 	isEdited = false;
 	ActiveFile.clear();
 
+	ReloadLevelsList();
+
 	string_path fn = {};
 	FS.update_path(fn, _game_config_, "game_maps_single.ltx");
 	ReloadMapInfo(fn);
@@ -18,13 +20,30 @@ UIMinimapEditorForm::UIMinimapEditorForm()
 UIMinimapEditorForm::~UIMinimapEditorForm()
 {
 	for (auto& element : elements)
-		if (element.texture) element.texture->Release();
+		if (element.Texture) element.Texture->Release();
 
 	if (m_BackgroundTexture)m_BackgroundTexture->Release();
 	selectedElement = nullptr;
 
 	elements.clear();
 }
+
+void UIMinimapEditorForm::ReloadLevelsList()
+{
+	levels.clear();
+	FS_FileSet lst;
+	if (FS.file_list(lst, _game_levels_, FS_ListFolders | FS_RootOnly)) {
+		FS_FileSetIt	it = lst.begin();
+		FS_FileSetIt	_E = lst.end();
+		for (; it != _E; it++) 
+		{
+			xr_string level = it->name;
+			level.erase(std::remove(level.begin(), level.end(), '\\'), level.end());
+			levels.push_back(level);
+		}
+	}
+}
+
 void UIMinimapEditorForm::UnselectAllElements()
 {
 	for (auto& other_element : elements) {
@@ -47,9 +66,17 @@ void UIMinimapEditorForm::ShowElementList() {
 
 	for (int i = 0; i < elements.size(); i++) 
 	{
+		//tyt bi iconki
+		xr_string status = "  ";
+
+		if (elements[i].hidden)
+			status[0] = 'H';
+		else if (elements[i].locked)
+			status[0] = 'L';
+
 		ImGui::PushID(i);
 		bool is_selected = elements[i].selected;
-		if (ImGui::Selectable(elements[i].name.c_str(), is_selected)) 
+		if (ImGui::Selectable((status + elements[i].name).c_str(), is_selected))
 		{
 			SelectElement(elements[i]);
 		}
@@ -101,16 +128,23 @@ void UIMinimapEditorForm::RenderCanvas()
 	for (int i = 0; i < elements.size(); i++) {
 		auto& element = elements[i];
 
+		if (element.hidden)
+			continue;
+
 		ImVec2 element_screen_pos = canvas_p0 + m_BackgroundPosition + element.position * m_Zoom;
 		ImVec2 element_screen_size = element.RenderSize;
 		element_screen_size *= m_Zoom;
 		float handle_size = 5.0f * m_Zoom;
 
-		ImGui::GetWindowDrawList()->AddImage(element.texture, element_screen_pos, element_screen_pos + element_screen_size, ImVec2(0,0), ImVec2(1, 1), IM_COL32(255, 255, 255, m_ItemsOpacity));
+		ImGui::GetWindowDrawList()->AddImage(element.Texture, element_screen_pos, element_screen_pos + element_screen_size, ImVec2(0,0), ImVec2(1, 1), IM_COL32(255, 255, 255, m_ItemsOpacity));
 
 		if (element.selected || m_AlwaysDrawBorder)
 		{
-			ImU32 col = (element.selected) ? IM_COL32(200, 255, 200, 255) : IM_COL32(255, 255, 255, 100);
+			int op_col = (element.locked) ? 150 : 255;
+			
+			ImU32 col = (element.selected) ?
+				IM_COL32(255, 130, 130, op_col) :
+				IM_COL32(255, 255, 255, 100);
 
 			ImVec2 top_left = element_screen_pos - ImVec2(handle_size / 2, handle_size / 2);
 			ImVec2 bottom_right = element_screen_pos + ImVec2(handle_size / 2, handle_size / 2) + element_screen_size;
@@ -133,7 +167,7 @@ void UIMinimapEditorForm::RenderCanvas()
 			}
 		}
 
-		if (element.selected) 
+		if (element.selected && !element.locked) 
 		{
 			if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) 
 			{
@@ -211,7 +245,101 @@ void UIMinimapEditorForm::ShowPreview()
 
 	ImGui::End();
 }
+//
 
+
+void UIMinimapEditorForm::CreateElementPopup()
+{
+	if (ImGui::BeginPopup("Add Location"))
+	{
+		ImGui::Text(" = Add Location =");
+
+		if (ImGui::Checkbox("Show mp_ levels", &showMPLevels))
+		{
+			if (!showMPLevels && CreatingData.name.rfind("mp_", 0) == 0)
+				CreatingData.name.clear();
+		}
+
+		if (ImGui::BeginCombo("Level Name", CreatingData.name.data())) 
+		{
+			for (auto level : levels)
+			{
+				if (!showMPLevels && level.rfind("mp_", 0) == 0)
+					continue;
+
+				bool used = false;
+				for (auto element : elements)
+				{
+					if (element.name == level)
+					{
+						used = true;
+						break;
+					}
+				}
+				
+				if (used)
+					continue;
+
+				if (ImGui::Selectable(level.c_str(), (level == CreatingData.name))) 
+				{
+					GetTextureFromLevelLtx(level, CreatingData.TexturePath);
+					CreatingData.name = level;
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+		ImGui::Text("Level texture:");
+		ImGui::SameLine();
+		ImGui::Text(CreatingData.TexturePath.c_str());
+
+		ImGui::NewLine();
+
+		ImGui::BeginDisabled(CreatingData.TexturePath.empty() || CreatingData.name.empty());
+
+		if (ImGui::Button("Add"))
+		{
+			Element el_new;
+			el_new.position = ImVec2(0, 0);
+			el_new.name = CreatingData.name;
+			el_new.TexturePath = CreatingData.TexturePath;
+			el_new.Texture = nullptr;
+
+			string_path p;
+			if (!el_new.TexturePath.empty())
+				sprintf(p, "%s%s.dds", FS.get_path(_game_textures_)->m_Path, CreatingData.TexturePath.c_str());
+
+
+			if (LoadTexture(el_new, p) != 0)
+			{
+				u32 mem = 0;
+				el_new.Texture = RImplementation.texture_load("ed\\ed_nodata", mem);
+				el_new.FileSize = ImVec2(512,512);
+			}
+			el_new.RenderSize = ImVec2(512, 512);
+			elements.push_back(el_new);
+
+			CreatingData.name.clear();
+			CreatingData.TexturePath.clear();
+
+			isEdited = true;
+			SelectElement(elements[elements.size() - 1]);
+		}
+
+		ImGui::EndDisabled();
+
+		if (ImGui::Button("Clear"))
+		{
+			CreatingData.TexturePath.clear();
+			CreatingData.name.clear();
+			if (CreatingData.Texture)
+				CreatingData.Texture->Release();
+			CreatingData.Texture = nullptr;
+		}
+
+		ImGui::EndPopup();
+	}
+}
 void UIMinimapEditorForm::ShowMenu() 
 {
 	ImGui::Text((isEdited) ? " [Edited] View" : " View");
@@ -252,29 +380,13 @@ void UIMinimapEditorForm::ShowMenu()
 	{
 		LoadBGClick();
 	}
+
+	CreateElementPopup();
+
 	if (ImGui::MenuItem("Add Location"))
 	{
-		Element test;
-		//test.name = "Test";
-		test.texture = nullptr;
-		test.position = ImVec2(0, 0);
-		test.FileSize = ImVec2(100, 100);
-
-		int res = LoadTexture(test);
-
-		if (res == 2)
-		{
-			u32 mem = 0;
-			test.texture = RImplementation.texture_load("ed\\ed_nodata", mem);
-		}
-
-		if (res != 1)
-		{
-			test.RenderSize = test.FileSize;
-			elements.push_back(test);
-			isEdited = true;
-			SelectElement(elements[elements.size() - 1]);
-		}
+		ImGui::OpenPopup("Add Location");
+		
 	}
 
 	ImGui::Separator();
@@ -314,9 +426,14 @@ void UIMinimapEditorForm::ShowMenu()
 		{
 			isEdited = true;
 		}*/
+		ImGui::Checkbox("Locked", &selectedElement->locked);
+		ImGui::SameLine();
+		ImGui::Checkbox("Hidden", &selectedElement->hidden);
 
 		ImGui::Text("Texture:");
 		ImGui::SameLine();
+
+		ImGui::BeginDisabled(selectedElement->locked);
 		if (ImGui::Button("Change"))
 		{
 			Element copy = (*selectedElement);
@@ -345,9 +462,9 @@ void UIMinimapEditorForm::ShowMenu()
 			auto it = elements.begin();
 			for (; it != elements.end(); ++it) {
 				if (&(*it) == selectedElement) {
-					if (it->texture)
-						it->texture->Release();
-					it->texture = nullptr;
+					if (it->Texture)
+						it->Texture->Release();
+					it->Texture = nullptr;
 
 					elements.erase(it);
 					selectedElement = nullptr;
@@ -362,6 +479,7 @@ void UIMinimapEditorForm::ShowMenu()
 			selectedElement->RenderSize = selectedElement->FileSize;
 			isEdited = true;
 		}
+		ImGui::EndDisabled();
 	}
 }
 
@@ -372,13 +490,35 @@ void UIMinimapEditorForm::OpenFile()
 	{
 		return;
 	}
-	elements.clear();
 
 	ReloadMapInfo(fn);
 }
 
+//vnedrit v ReloadMapInfo
+bool UIMinimapEditorForm::GetTextureFromLevelLtx(const xr_string level_name, xr_string& dest )
+{
+	string_path levelLtx;
+	sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, level_name.c_str());
+
+	bool find_result = false;
+	if (!FS.exist(levelLtx))
+		return false;
+
+	CInifile levelLtxFile(levelLtx, TRUE);
+
+	if (!levelLtxFile.line_exist("level_map", "texture"))
+		return false;
+	
+	auto textureFile = levelLtxFile.r_string("level_map", "texture");
+	dest = textureFile;
+
+	return true;
+	
+}
 void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 {
+	elements.clear();
+
 	FS.TryLoad(fn.c_str());
 
 	auto ltxFile = new CInifile(fn.c_str(), TRUE);
@@ -422,10 +562,11 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 		Element el;
 		el.name = levelName.c_str();
-		el.texture = nullptr;
+		el.Texture = nullptr;
 		el.selected = false;
 		el.position.x = tmp.x;
 		el.position.y = tmp.y;
+		el.TexturePath = "";
 
 		el.RenderSize.x = tmp.z - tmp.x;
 		el.RenderSize.y = tmp.w - tmp.y;
@@ -442,7 +583,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 			if (levelLtxFile.line_exist("level_map", "texture"))
 			{
 				auto textureFile = levelLtxFile.r_string("level_map", "texture");
-
+				el.TexturePath = textureFile;
 				sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path, textureFile);
 			}
 		}
@@ -455,11 +596,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 	}
 
 	ActiveFile = fn;
-	ActiveFileShort = fn;
-
-	xr_string FSPath = FS.get_path("$fs_root$")->m_Path;
-	if (ActiveFileShort.Contains(FSPath))
-		ActiveFileShort = ActiveFileShort.substr(FSPath.length());
+	ActiveFileShort = FS.fix_path(fn);
 
 	xr_delete(ltxFile);
 	isEdited = false;
@@ -467,7 +604,6 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 {
-
 	xr_string fn;
 	if (saveCurrent)
 	{
@@ -493,6 +629,28 @@ void UIMinimapEditorForm::SaveFile(bool saveCurrent)
 
 		ltxFile->w_string("global_map", "texture", m_BackgroundTexturePath.c_str());
 		ltxFile->w_fvector4("global_map", "bound_rect", Fvector4(0.f, 0.f, m_BackgroundRenderSize.x, m_BackgroundRenderSize.y));
+	}
+
+	//old levels check
+	{
+		CInifile::Sect& S = ltxFile->r_section("level_maps_single");
+		CInifile::SectCIt it = S.Data.begin();
+		CInifile::SectCIt it_e = S.Data.end();
+
+		for (; it != it_e; ++it)
+		{
+			auto& levelName = it->first;
+
+			bool res = false;
+			for (auto& element : elements)
+			{
+				if (levelName == element.name.c_str())
+					res = true;
+			}
+
+			if (!res)
+				ltxFile->remove_line("level_maps_single", levelName.c_str());
+		}
 	}
 
 	for (auto& element : elements)
@@ -534,17 +692,17 @@ void UIMinimapEditorForm::Draw()
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
-		float menuSizeY = 450.f;
+		float menuSizeY = 470.f;
 		ImVec2 elementsListSize = ImVec2(windowSize.x, windowSize.y - menuSizeY);
 		ImVec2 menuSize = ImVec2(windowSize.x, menuSizeY - 10.f);
 
-		ImGui::BeginChild("Elements List", elementsListSize, true);
-		ShowElementList();
-		ImGui::EndChild();
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+		
 		ImGui::BeginChild("Menu", menuSize, true);
 		ShowMenu();
+		ImGui::EndChild();
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+		ImGui::BeginChild("Elements List", elementsListSize, true);
+		ShowElementList();
 		ImGui::EndChild();
 
 		ImGui::NextColumn();
@@ -552,6 +710,7 @@ void UIMinimapEditorForm::Draw()
 		ImGui::BeginChild("Canvas", ImVec2(0, 0), true);
 		RenderCanvas();
 		ImGui::EndChild();
+
 	}
 	
 	
@@ -614,22 +773,23 @@ int UIMinimapEditorForm::LoadTexture(Element& el, const xr_string texture)
 		return 2;
 	}
 
-	if (el.texture)
-		el.texture->Release();
-	el.texture = nullptr;
+	if (el.Texture)
+		el.Texture->Release();
+	el.Texture = nullptr;
 
-	el.path = fn;
+	if (texture == "")
+	{
+		el.TexturePath = FS.fix_path(fn);
+	}
+
+	//el.path = fn;
 	el.FileSize.x = W;
 	el.FileSize.y = H;
-
-	// map_somename -> somename
-	auto ck_map = xr_path(fn).stem().string();
-	el.name = (ck_map.find(prefix) == 0) ? ck_map.substr(prefix.size()).c_str() : xr_path(fn).stem().string().c_str();
 
 	ID3DTexture2D* pTexture = nullptr;
 	{
 		R_CHK(REDevice->CreateTexture(W, H, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &pTexture, 0));
-		el.texture = pTexture;
+		el.Texture = pTexture;
 		{
 			D3DLOCKED_RECT rect;
 			R_CHK(pTexture->LockRect(0, &rect, 0, D3DLOCK_DISCARD));
