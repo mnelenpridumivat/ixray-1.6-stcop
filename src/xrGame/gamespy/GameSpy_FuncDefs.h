@@ -9,7 +9,7 @@
 #include "../../xrGameSpy/GameSpy/gcdkey/gcdkeys.h"
 #include "../../xrGameSpy/GameSpy/serverbrowsing/sb_serverbrowsing.h"
 
-#include "../../xrGameSpy/GameSpy/pt/pt.h"
+//#include "../../xrGameSpy/GameSpy/pt/pt.h"
 #include "../../xrGameSpy/GameSpy/gp/gp.h"
 #include "../../xrGameSpy/GameSpy/sake/sake.h"
 #include "../../xrGameSpy/GameSpy/sc/sc.h"

@@ -1,7 +1,6 @@
 #pragma once
 
 class CGameSpy_Available;
-class CGameSpy_Patching;
 class CGameSpy_HTTP;
 class CGameSpy_Browser;
 class CGameSpy_GP;
@@ -22,7 +21,6 @@ public:
 	~CGameSpy_Full	();
 
 	CGameSpy_Available*	GetGameSpyAvailable	() const { return m_pGSA; };
-	CGameSpy_Patching*	GetGameSpyPatching	() const { return m_pGS_Patching; };
 	CGameSpy_HTTP*		GetGameSpyHTTP		() const { return m_pGS_HTTP; };
 	CGameSpy_Browser*	GetGameSpyBrowser	() const { return m_pGS_SB; };
 	CGameSpy_GP*		GetGameSpyGP		() const { return m_pGS_GP; };
@@ -36,7 +34,6 @@ public:
 private:
 
 	CGameSpy_Available*	m_pGSA;
-	CGameSpy_Patching*	m_pGS_Patching;
 	CGameSpy_HTTP*		m_pGS_HTTP;
 	CGameSpy_Browser*	m_pGS_SB;
 	CGameSpy_GP*		m_pGS_GP;

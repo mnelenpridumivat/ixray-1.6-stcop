@@ -2,7 +2,6 @@
 #include "GameSpy_Full.h"
 
 #include "GameSpy_Available.h"
-#include "GameSpy_Patching.h"
 #include "GameSpy_HTTP.h"
 #include "GameSpy_Browser.h"
 #include "GameSpy_GP.h"
@@ -15,7 +14,6 @@
 CGameSpy_Full::CGameSpy_Full()	
 {
 	m_pGSA	= nullptr;
-	m_pGS_Patching = nullptr;
 	m_pGS_HTTP = nullptr;
 	m_pGS_SB = nullptr;
 	m_pGS_GP = nullptr;
@@ -37,7 +35,6 @@ CGameSpy_Full::CGameSpy_Full()
 	if (Engine.External.hGameSpy != 0)
 	{
 		CoreInitialize();
-		m_pGS_Patching = new CGameSpy_Patching();
 		m_pGS_HTTP = new CGameSpy_HTTP();
 		m_pGS_SB = new CGameSpy_Browser();
 		m_pGS_GP = new CGameSpy_GP();
@@ -51,7 +48,6 @@ CGameSpy_Full::~CGameSpy_Full()
 	if (Engine.External.hGameSpy != 0)
 	{
 		delete_data(m_pGSA);
-		delete_data(m_pGS_Patching);
 		delete_data(m_pGS_HTTP);
 		delete_data(m_pGS_SB);
 		delete_data(m_pGS_GP);
