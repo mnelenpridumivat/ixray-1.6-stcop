@@ -266,6 +266,23 @@ void UIRenderForm::Draw()
 
 		HandleDragDrop(canvas_pos);
 	}
+
+	// MainViewport
+	if (ViewportID == 0)
+	{
+		if (UI->IsLoading)
+		{
+			ImGui::SetCursorPos({ 10, ImGui::GetWindowHeight() - 75 });
+			ImGui::SetNextWindowBgAlpha(0.6f);
+			if (ImGui::BeginChild("##renderloader", { 300, 65 }, true))
+			{
+				ImGui::Text(UI->ProgressStatusName.c_str());
+				ImGui::ProgressBar(UI->ProgressStatus / 100.f, {280, 25});
+			}
+			ImGui::EndChild();
+		} 
+	}
+
 	ImGui::End();
 }
 

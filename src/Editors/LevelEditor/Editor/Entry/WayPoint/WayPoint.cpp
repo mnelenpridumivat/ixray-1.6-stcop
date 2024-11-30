@@ -33,6 +33,7 @@ void CWayPoint::GetBox(Fbox& bb)
     bb.min.x-=WAYPOINT_RADIUS;
     bb.min.z-=WAYPOINT_RADIUS;
 }
+
 void CWayPoint::Render(LPCSTR parent_name, bool bParentSelect)
 {
 	Fvector pos;
@@ -528,7 +529,9 @@ void CWayObject::Move(Fvector& amount)
 
 void CWayObject::Render(int priority, bool strictB2F)
 {
-//	inherited::Render(priority, strictB2F);
+    if (!IsLoaded)
+        return;
+
     if ((1==priority)&&(false==strictB2F)){
         RCache.set_xform_world(Fidentity);
         EDevice->SetShader		(EDevice->m_WireShader);
@@ -618,7 +621,9 @@ bool CWayObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
         }
     }
 
-    m_Type			= EWayType(ini.r_u32(sect_name, "type"));
+    m_Type = EWayType(ini.r_u32(sect_name, "type"));
+
+    IsLoaded = true;
 
     return true;
 }

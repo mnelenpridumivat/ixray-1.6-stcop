@@ -194,6 +194,12 @@ void CCustomObject::OnNumChangeScale(PropValue* sender)
 {
 	NumSetScale		(EScale);
 }
+
+void CCustomObject::SetLoadedState()
+{
+    IsLoaded = true;
+}
+
 void CCustomObject::OnNameChange(PropValue* sender)
 {
     SetName(EName.c_str());
