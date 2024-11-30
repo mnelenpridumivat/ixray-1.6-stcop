@@ -38,7 +38,7 @@ IC	shared_str CGameSpawnConstructor::actor_level_name()
 			temp,
 			*game_graph().header().level(
 				game_graph().vertex(
-					dynamic_cast<CSE_ALifeObject*>(m_actor)->m_tGraphID
+					smart_cast<CSE_ALifeObject*>(m_actor)->m_tGraphID
 				)->level_id()).name(),
 			".spawn"
 		)

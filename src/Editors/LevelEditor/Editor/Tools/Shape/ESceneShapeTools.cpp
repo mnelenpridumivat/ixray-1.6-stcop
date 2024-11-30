@@ -32,7 +32,7 @@ void ESceneShapeTool::OnEditLevelBounds(bool recalc)
     
     for(; it!=it_e; ++it)
     {
-    	CEditShape* es = dynamic_cast<CEditShape*>(*it);
+    	CEditShape* es = smart_cast<CEditShape*>(*it);
         R_ASSERT(es);
         if(es->m_shape_type==eShapeLevelBound)
         {
@@ -44,7 +44,7 @@ void ESceneShapeTool::OnEditLevelBounds(bool recalc)
     
 	if(!level_shape)    
     {
-		level_shape 			= dynamic_cast<CEditShape*>(CreateObject(NULL, "level_bbox"));
+		level_shape 			= smart_cast<CEditShape*>(CreateObject(NULL, "level_bbox"));
         level_shape->m_shape_type=eShapeLevelBound;
     	Fmatrix 				M;	
         M.identity				();

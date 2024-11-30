@@ -105,7 +105,7 @@ bool CSector::GetBox( Fbox& box )
 
 void CSector::Render(int priority, bool strictB2F)
 {
-    ESceneSectorTool* lt = dynamic_cast<ESceneSectorTool*>(FParentTools); VERIFY(lt);
+    ESceneSectorTool* lt = smart_cast<ESceneSectorTool*>(FParentTools); VERIFY(lt);
 	if (2==priority)
     {
         if (true==strictB2F)

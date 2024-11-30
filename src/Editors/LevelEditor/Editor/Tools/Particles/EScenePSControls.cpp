@@ -6,7 +6,7 @@
 
 bool  TUI_ControlPSAdd::AfterAppendCallback(TShiftState Shift, CCustomObject* obj)
 {
-	EParticlesObject* pg= dynamic_cast<EParticlesObject*>(obj); R_ASSERT(pg);
+	EParticlesObject* pg= smart_cast<EParticlesObject*>(obj); R_ASSERT(pg);
     LPCSTR ref_name		= ((UIParticlesTool*)parent_tool->pForm)->Current();
     if (!ref_name){
     	ELog.DlgMsg(mtInformation,"Nothing selected.");

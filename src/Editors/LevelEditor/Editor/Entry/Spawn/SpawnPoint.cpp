@@ -362,7 +362,7 @@ bool CSpawnPoint::SSpawnData::ExportGame(SExportStreams* F, CSpawnPoint* owner)
 		return false;
 	}
 	if (cform){
-		CEditShape* shape		= dynamic_cast<CEditShape*>(owner->m_AttachedObject); R_ASSERT(shape);
+		CEditShape* shape		= smart_cast<CEditShape*>(owner->m_AttachedObject); R_ASSERT(shape);
 		shape->ApplyScale		();
 		owner->SetScale( 			 shape->GetScale());
 		cform->assign_shapes	(&*shape->GetShapes().begin(),shape->GetShapes().size());
@@ -402,7 +402,7 @@ void CSpawnPoint::SSpawnData::PreExportSpawn(CSpawnPoint* owner)
 		;
 	}
 	if (cform) {
-		CEditShape* shape = dynamic_cast<CEditShape*>(owner->m_AttachedObject); R_ASSERT(shape);
+		CEditShape* shape = smart_cast<CEditShape*>(owner->m_AttachedObject); R_ASSERT(shape);
 		shape->ApplyScale();
 		owner->SetScale(shape->GetScale());
 		cform->assign_shapes(&*shape->GetShapes().begin(), shape->GetShapes().size());
@@ -412,7 +412,7 @@ void CSpawnPoint::SSpawnData::PreExportSpawn(CSpawnPoint* owner)
 
 void CSpawnPoint::SSpawnData::OnAnimControlClick(ButtonValue* value, bool& bModif, bool& bSafe)
 {
-	ButtonValue* B				= dynamic_cast<ButtonValue*>(value); R_ASSERT(B);
+	ButtonValue* B				= smart_cast<ButtonValue*>(value); R_ASSERT(B);
 	switch(B->btn_num)
 	{
 //		"First,Play,Pause,Stop,Last",
@@ -659,7 +659,7 @@ bool CSpawnPoint::AttachObject(CCustomObject* obj)
 			bAllowed = !!m_SpawnData.m_Data->shape();
 		break;
 //        case OBJCLASS_SCENEOBJECT:
-//	    	bAllowed = !!dynamic_cast<xrSE_Visualed*>(m_SpawnData.m_Data);
+//	    	bAllowed = !!smart_cast<xrSE_Visualed*>(m_SpawnData.m_Data);
 //        break;
 		}
 	}
@@ -750,7 +750,7 @@ bool CSpawnPoint::GetBox( Fbox& box )
 					
 				box.xform	(transform);
 			}else{
-				CEditShape* shape	= dynamic_cast<CEditShape*>(m_AttachedObject);
+				CEditShape* shape	= smart_cast<CEditShape*>(m_AttachedObject);
 				if (shape&&!shape->GetShapes().empty()){
 					CShapeData::ShapeVec& SV	= shape->GetShapes();
 					box.invalidate();
@@ -893,7 +893,7 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 			RCache.set_xform_world(FTransformRP);
 			if (m_SpawnData.Valid()){
 				// render icon
-				ESceneSpawnTool* st	= dynamic_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
+				ESceneSpawnTool* st	= smart_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
 				ref_shader s 	   	= st->GetIcon(m_SpawnData.m_Data->name());
 				DU_impl.DrawEntity		(0xffffffff,s);
 			}else{
@@ -901,7 +901,7 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 				{
 					case ptRPoint:
 					{
-						ESceneSpawnTool* st	= dynamic_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
+						ESceneSpawnTool* st	= smart_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
 						if( NULL==st->get_draw_visual(m_RP_TeamID, m_RP_Type, m_GameType) )
 						{
 							float k = 1.f/(float(m_RP_TeamID+1)/float(MAX_TEAM));
@@ -940,7 +940,7 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 				}
 			}
 		}else{
-			ESceneSpawnTool* st = dynamic_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
+			ESceneSpawnTool* st = smart_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
 			if (st->m_Flags.is(ESceneSpawnTool::flShowSpawnType))
 			{
 				xr_string s_name;
@@ -981,7 +981,7 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 	
 	if(m_Type==ptRPoint)
 	{
-		ESceneSpawnTool* st		= dynamic_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
+		ESceneSpawnTool* st		= smart_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
 		CEditableObject* v		= st->get_draw_visual(m_RP_TeamID, m_RP_Type, m_GameType); 
 		if(v)
 			v->Render				(FTransformRP, priority, strictB2F);
@@ -1066,7 +1066,7 @@ bool CSpawnPoint::OnAppendObject(CCustomObject* object)
 	object->m_pOwnerObject	= this;
 	Scene->RemoveObject		(object, false, false);
 
-	CEditShape* sh = dynamic_cast<CEditShape*>(m_AttachedObject);
+	CEditShape* sh = smart_cast<CEditShape*>(m_AttachedObject);
 	if(m_SpawnData.Valid())
 	{
 		if(pSettings->line_exist(m_SpawnData.m_Data->name(),"shape_transp_color"))
@@ -1147,7 +1147,7 @@ bool CSpawnPoint::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	UpdateTransform	();
 
 	// BUG fix
-	CEditShape* shape	= dynamic_cast<CEditShape*>(m_AttachedObject);
+	CEditShape* shape	= smart_cast<CEditShape*>(m_AttachedObject);
 	if (shape)
 		SetScale 	( shape->GetScale());
 	
@@ -1270,7 +1270,7 @@ bool CSpawnPoint::LoadStream(IReader& F)
 	UpdateTransform	();
 
 	// BUG fix
-	CEditShape* shape	= dynamic_cast<CEditShape*>(m_AttachedObject);
+	CEditShape* shape	= smart_cast<CEditShape*>(m_AttachedObject);
 	if (shape) 	SetScale(shape->GetScale());
 	
 	return true;
@@ -1413,7 +1413,7 @@ void CSpawnPoint::OnFillRespawnItemProfile(ChooseValue* val)
 
 void CSpawnPoint::OnFillChooseItems		(ChooseValue* val)
 {
-	ESceneSpawnTool* st 		= dynamic_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
+	ESceneSpawnTool* st 		= smart_cast<ESceneSpawnTool*>(FParentTools); VERIFY(st);
 	CLASS_ID cls_id				= m_SpawnData.m_ClassID;
 	ESceneSpawnTool::ClassSpawnMapIt cls_it = st->m_Classes.find(cls_id); VERIFY(cls_it!=st->m_Classes.end());
 	*val->m_Items				= cls_it->second;
@@ -1421,7 +1421,7 @@ void CSpawnPoint::OnFillChooseItems		(ChooseValue* val)
 
 shared_str CSpawnPoint::SectionToEditor(shared_str nm)
 {
-	ESceneSpawnTool* st 		= dynamic_cast<ESceneSpawnTool*>(FParentTools); 			VERIFY(st);
+	ESceneSpawnTool* st 		= smart_cast<ESceneSpawnTool*>(FParentTools); 			VERIFY(st);
 	ESceneSpawnTool::ClassSpawnMapIt cls_it = st->m_Classes.find(m_SpawnData.m_ClassID);	VERIFY(cls_it!=st->m_Classes.end());
 	for (ESceneSpawnTool::SSVecIt ss_it=cls_it->second.begin(); ss_it!=cls_it->second.end(); ++ss_it)
 		if (nm.equal(ss_it->hint)) return ss_it->name;
@@ -1430,7 +1430,7 @@ shared_str CSpawnPoint::SectionToEditor(shared_str nm)
 
 shared_str CSpawnPoint::EditorToSection(shared_str nm)
 {
-	ESceneSpawnTool* st  	= dynamic_cast<ESceneSpawnTool*>(FParentTools); 			VERIFY(st);
+	ESceneSpawnTool* st  	= smart_cast<ESceneSpawnTool*>(FParentTools); 			VERIFY(st);
 	ESceneSpawnTool::ClassSpawnMapIt cls_it = st->m_Classes.find(m_SpawnData.m_ClassID);	VERIFY(cls_it!=st->m_Classes.end());
 	for (ESceneSpawnTool::SSVecIt ss_it=cls_it->second.begin(); ss_it!=cls_it->second.end(); ++ss_it)
 		if (nm.equal(ss_it->name)) return ss_it->hint;
@@ -1575,7 +1575,7 @@ bool CSpawnPoint::OnChooseQuery(LPCSTR specific)
 	 CSE_Abstract* SEAbstract = m_SpawnData.GetEntity();
 	 if (SEAbstract)
 	 {
-		 return dynamic_cast<CSE_ALifeGraphPoint*>(SEAbstract)!=nullptr;
+		 return smart_cast<CSE_ALifeGraphPoint*>(SEAbstract)!=nullptr;
 	 }
 	 return false;
  }

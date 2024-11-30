@@ -114,7 +114,7 @@ CSE_Abstract* CLevelSpawnConstructor::create_object(IReader* chunk)
 
 void CLevelSpawnConstructor::add_graph_point(CSE_Abstract* abstract)
 {
-	CSE_ALifeGraphPoint* graph_point = dynamic_cast<CSE_ALifeGraphPoint*>(abstract);
+	CSE_ALifeGraphPoint* graph_point = smart_cast<CSE_ALifeGraphPoint*>(abstract);
 	R_ASSERT(graph_point);
 	m_graph_points.push_back(graph_point);
 }
@@ -138,7 +138,7 @@ void CLevelSpawnConstructor::add_space_restrictor(CSE_ALifeDynamicObject* dynami
 {
 	if (!dynamic_object)
 		return;
-	CSE_ALifeSpaceRestrictor* space_restrictor = dynamic_cast<CSE_ALifeSpaceRestrictor*>(dynamic_object);
+	CSE_ALifeSpaceRestrictor* space_restrictor = smart_cast<CSE_ALifeSpaceRestrictor*>(dynamic_object);
 	if (!space_restrictor)
 		return;
 
@@ -153,7 +153,7 @@ void CLevelSpawnConstructor::add_space_restrictor(CSE_ALifeDynamicObject* dynami
 
 void CLevelSpawnConstructor::add_level_changer(CSE_Abstract* abstract)
 {
-	CSE_ALifeLevelChanger* level_changer = dynamic_cast<CSE_ALifeLevelChanger*>(abstract);
+	CSE_ALifeLevelChanger* level_changer = smart_cast<CSE_ALifeLevelChanger*>(abstract);
 	R_ASSERT(level_changer);
 	m_game_spawn_constructor->add_level_changer(level_changer);
 	m_level_changers.push_back(level_changer);
@@ -192,7 +192,7 @@ bool CLevelSpawnConstructor::load_objects()
 
 	for (auto& Obj : Scene->ListObj(OBJCLASS_SPAWNPOINT))
 	{
-		CSpawnPoint* Spawn = dynamic_cast<CSpawnPoint*>(Obj);
+		CSpawnPoint* Spawn = smart_cast<CSpawnPoint*>(Obj);
 		if (!Spawn->m_SpawnData.Valid())
 			continue;
 
@@ -217,13 +217,13 @@ bool CLevelSpawnConstructor::load_objects()
 			continue;
 		}*/
 
-		CSE_ALifeObject* alife_object = dynamic_cast<CSE_ALifeObject*>(abstract);
+		CSE_ALifeObject* alife_object = smart_cast<CSE_ALifeObject*>(abstract);
 		if (!alife_object)
 		{
 			continue;
 		}
 
-		CSE_ALifeCreatureActor* actor = dynamic_cast<CSE_ALifeCreatureActor*>(alife_object);
+		CSE_ALifeCreatureActor* actor = smart_cast<CSE_ALifeCreatureActor*>(alife_object);
 		if (actor)
 		{
 			if (m_actor)
@@ -236,14 +236,14 @@ bool CLevelSpawnConstructor::load_objects()
 
 		m_spawns.push_back(alife_object);
 
-		CSE_ALifeDynamicObject* dynamic_object = dynamic_cast<CSE_ALifeDynamicObject*>(alife_object);
+		CSE_ALifeDynamicObject* dynamic_object = smart_cast<CSE_ALifeDynamicObject*>(alife_object);
 		if (dynamic_object)
 		{
 			add_story_object(dynamic_object);
 			add_space_restrictor(dynamic_object);
 		}
 
-		if (dynamic_cast<CSE_ALifeLevelChanger*>(alife_object))
+		if (smart_cast<CSE_ALifeLevelChanger*>(alife_object))
 			add_level_changer(abstract);
 
 		//		if (xr_strlen(alife_object->m_spawn_control))
@@ -612,7 +612,7 @@ void CLevelSpawnConstructor::generate_artefact_spawn_positions_worker()
 	{
 		size_t Index = InterlockedDecrement(&m_generate_artefact_spawn_positions_worker_counter);
 		CSE_ALifeObject* Object = m_spawns[Index];
-		CSE_ALifeAnomalousZone* zone = dynamic_cast<CSE_ALifeAnomalousZone*>(Object);
+		CSE_ALifeAnomalousZone* zone = smart_cast<CSE_ALifeAnomalousZone*>(Object);
 		if (!zone)
 			continue;
 		CSE_Abstract* Abstract = Object;
@@ -758,13 +758,13 @@ void CLevelSpawnConstructor::update_artefact_spawn_positions()
 	for (; I != E; ++I)
 	{
 		CSE_Abstract* abstract = (*I);
-		CSE_ALifeObject* alife_object = dynamic_cast<CSE_ALifeObject*>(abstract);
+		CSE_ALifeObject* alife_object = smart_cast<CSE_ALifeObject*>(abstract);
 		//		R_ASSERT3						(level_graph().valid_vertex_id(alife_object->m_tNodeID),"Invalid node for object ",alife_object->name_replace());
 		R_ASSERT2(alife_object, "Non-ALife object!");
 		VERIFY(game_graph().vertex(alife_object->m_tGraphID)->level_id() == m_level.id());
 		//		alife_object->m_spawn_control	= "";
 		;
-		if (CSE_ALifeAnomalousZone* zone = dynamic_cast<CSE_ALifeAnomalousZone*>(alife_object))
+		if (CSE_ALifeAnomalousZone* zone = smart_cast<CSE_ALifeAnomalousZone*>(alife_object))
 		{
 			zone->m_artefact_position_offset = level_point_count;
 			level_point_count += zone->m_artefact_spawn_count;

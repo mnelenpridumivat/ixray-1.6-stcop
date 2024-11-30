@@ -7,7 +7,7 @@
 
 bool  TUI_ControlShapeAdd::AfterAppendCallback(TShiftState Shift, CCustomObject* obj)
 {
-	CEditShape* shape 	= dynamic_cast<CEditShape*>(obj); R_ASSERT(shape);
+	CEditShape* shape 	= smart_cast<CEditShape*>(obj); R_ASSERT(shape);
     UIShapeTool* F 		= (UIShapeTool*)parent_tool->pForm;
 	if (F->IsSphereMode()){
     	Fsphere S;	S.identity();
@@ -28,13 +28,13 @@ bool  TUI_ControlShapeAdd::Start(TShiftState Shift)
     UIShapeTool* F 		= (UIShapeTool*)parent_tool->pForm;
     if (F->IsAttachShape())
     {
-		CEditShape* from = dynamic_cast<CEditShape*>(Scene->RayPickObject(UI->ZFar(),UI->m_CurrentRStart, UI->m_CurrentRDir, OBJCLASS_SHAPE, 0, 0));
+		CEditShape* from = smart_cast<CEditShape*>(Scene->RayPickObject(UI->ZFar(),UI->m_CurrentRStart, UI->m_CurrentRDir, OBJCLASS_SHAPE, 0, 0));
         if (from){
             ObjectList lst;
             int cnt 		= Scene->GetQueryObjects(lst,OBJCLASS_SHAPE,1,1,0);
             if (1!=cnt)		ELog.DlgMsg(mtError,"Select one shape.");
             else{
-                CEditShape* base = dynamic_cast<CEditShape*>(lst.back()); R_ASSERT(base);
+                CEditShape* base = smart_cast<CEditShape*>(lst.back()); R_ASSERT(base);
                 if (base!=from){
 	                base->Attach(from);
     	            if (!(Shift&ssAlt)){

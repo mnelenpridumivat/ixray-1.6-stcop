@@ -172,7 +172,7 @@ void ESceneObjectTool::HighlightTexture(LPCSTR tex_name, bool allow_ratio, u32 t
 {
 	if (tex_name&&tex_name[0]){
         for (ObjectIt a_it=m_Objects.begin(); a_it!=m_Objects.end(); a_it++){
-            CSceneObject* s_obj		= dynamic_cast<CSceneObject*>(*a_it);
+            CSceneObject* s_obj		= smart_cast<CSceneObject*>(*a_it);
             if (s_obj->Visible()){
                 CEditableObject* e_obj	= s_obj->GetReference(); VERIFY(e_obj);
                 SurfaceVec& s_vec		= e_obj->Surfaces();

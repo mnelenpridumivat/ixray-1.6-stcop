@@ -62,7 +62,7 @@ void CGlow::Render(int priority, bool strictB2F)
     if ((1==priority)&&(true==strictB2F))
     {
     	if (!m_bDefLoad) OnDeviceCreate();
-        ESceneGlowTool* gt 		= dynamic_cast<ESceneGlowTool*>(FParentTools);
+        ESceneGlowTool* gt 		= smart_cast<ESceneGlowTool*>(FParentTools);
         VERIFY					(gt);
         RCache.set_xform_world	(Fidentity);
 

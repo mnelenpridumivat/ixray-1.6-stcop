@@ -172,7 +172,7 @@ void CCustomObject::Scale( Fvector& amount)
 
 bool CCustomObject::OnObjectNameAfterEdit(PropValue* sender, shared_str& edit_val)
 {
-	RTextValue* V = dynamic_cast<RTextValue*>(sender); VERIFY(V);
+	RTextValue* V = smart_cast<RTextValue*>(sender); VERIFY(V);
     if(0==edit_val.size())
     	return false;
     xr_string temp = edit_val.c_str();

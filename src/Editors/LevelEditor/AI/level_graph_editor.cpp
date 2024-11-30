@@ -128,7 +128,7 @@ CLevelGraphEditor::~CLevelGraphEditor()
 
 bool CLevelGraphEditor::build()
 {
-	ESceneAIMapTool* AIMapTool = dynamic_cast<ESceneAIMapTool*>(Scene->GetTool(OBJCLASS_AIMAP));
+	ESceneAIMapTool* AIMapTool = smart_cast<ESceneAIMapTool*>(Scene->GetTool(OBJCLASS_AIMAP));
 	g_params = AIMapTool->AIParams();
 	if (AIMapTool->Nodes().size() == 0)
 	{

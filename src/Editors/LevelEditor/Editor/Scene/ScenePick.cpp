@@ -8,7 +8,7 @@ int EScene::FrustumPick( const CFrustum& frustum, ObjClassID classfilter, Object
         SceneToolsMapPairIt _I = m_SceneTools.begin();
         SceneToolsMapPairIt _E = m_SceneTools.end();
         for (; _I!=_E; _I++){
-            ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+            ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
             if (mt) 		count+=mt->FrustumPick(ol,frustum);
         }
     }else{
@@ -27,7 +27,7 @@ int EScene::SpherePick( const Fvector& center, float radius, ObjClassID classfil
         SceneToolsMapPairIt _I = m_SceneTools.begin();
         SceneToolsMapPairIt _E = m_SceneTools.end();
         for (; _I!=_E; _I++){
-            ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+            ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
             if (mt) 		count+=mt->SpherePick(ol,center, radius);
         }
     }else{
@@ -96,7 +96,7 @@ CCustomObject *EScene::RayPickObject(float nearest_dist, const Fvector& start, c
             SceneToolsMapPairIt _I = m_SceneTools.begin();
             SceneToolsMapPairIt _E = m_SceneTools.end();
             for (; _I!=_E; _I++){
-                ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+                ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
                 if (mt&&mt->RayPick(obj,nearest_dist,start,direction,pinf)) nearest_object = obj;
             }
         }else{
@@ -114,7 +114,7 @@ int EScene::GetQueryObjects(ObjectList& lst, ObjClassID classfilter, int iSel, i
         SceneToolsMapPairIt _E = m_SceneTools.end();
         for (; _I!=_E; ++_I)
         {
-            ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(_I->second);
+            ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(_I->second);
             if (mt) mt->GetQueryObjects(lst, iSel, iVis, iLock);
         }
     }else{
@@ -163,7 +163,7 @@ int EScene::BoxPickObjects(const Fbox& box, SBoxPickInfoVec& pinf, ObjectList* l
 {
 	if (lst){
         for(ObjectIt _F=lst->begin();_F!=lst->end();_F++){
-            CSceneObject* _S = dynamic_cast<CSceneObject*>(*_F); 
+            CSceneObject* _S = smart_cast<CSceneObject*>(*_F); 
             if (_S) _S->BoxPick(box,pinf);
         }
     }

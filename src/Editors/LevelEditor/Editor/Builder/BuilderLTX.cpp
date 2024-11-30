@@ -54,7 +54,7 @@ BOOL SceneBuilder::BuildLTX()
 		ObjectList& shapes 			= Scene->ListObj(OBJCLASS_SHAPE);
         for (ObjectIt sit=shapes.begin(); sit!=shapes.end(); ++sit)
         {
-            CEditShape* E 		= dynamic_cast<CEditShape*>(*sit);
+            CEditShape* E 		= smart_cast<CEditShape*>(*sit);
             R_ASSERT			(E);
             if(E->m_shape_type==eShapeLevelBound)
             {

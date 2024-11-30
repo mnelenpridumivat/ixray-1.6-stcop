@@ -82,7 +82,7 @@ void EScene::Render( const Fmatrix& camera )
             	// before render
             	t_it->second->BeforeRender(); 
                 // sort tools
-                ESceneCustomOTool* mt = dynamic_cast<ESceneCustomOTool*>(t_it->second);
+                ESceneCustomOTool* mt = smart_cast<ESceneCustomOTool*>(t_it->second);
                 if (mt)           	object_tools.insert(mt);
                 scene_tools.insert	(t_it->second);
             }

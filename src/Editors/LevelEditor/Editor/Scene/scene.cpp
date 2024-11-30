@@ -103,7 +103,7 @@ void EScene::AppendObject( CCustomObject* object, bool bUndo )
 		break;
 
 	case OBJCLASS_SPAWNPOINT:
-		CSpawnPoint* Spawn = dynamic_cast<CSpawnPoint*>(object);
+		CSpawnPoint* Spawn = smart_cast<CSpawnPoint*>(object);
 		if (Spawn && Spawn->IsGraphPoint())
 		{
 			m_RTFlags.set(flIsBuildedGameGraph, FALSE);
@@ -135,7 +135,7 @@ bool EScene::RemoveObject( CCustomObject* object, bool bUndo, bool bDeleting )
 		UI->RedrawScene();
 		break;
 	case OBJCLASS_SPAWNPOINT:
-		CSpawnPoint* Spawn = dynamic_cast<CSpawnPoint*>(object);
+		CSpawnPoint* Spawn = smart_cast<CSpawnPoint*>(object);
 		if (Spawn && Spawn->IsGraphPoint())
 		{
 			m_RTFlags.set(flIsBuildedGameGraph, FALSE);
@@ -196,7 +196,7 @@ int EScene::MultiRenameObjects()
 		SceneToolsMapPairIt t_end 	= m_SceneTools.end();
 		for (; t_it!=t_end; t_it++)
 		{
-			ESceneCustomOTool* ot	= dynamic_cast<ESceneCustomOTool*>(t_it->second);
+			ESceneCustomOTool* ot	= smart_cast<ESceneCustomOTool*>(t_it->second);
 			if (ot&&(t_it->first!=OBJCLASS_DUMMY))
 				cnt					+= ot->MultiRenameObjects	();
 		}
@@ -362,7 +362,7 @@ void EScene::Modified()
 		{
 			for (CCustomObject* Obj : lst)
 			{
-				CSpawnPoint* Spawn = dynamic_cast<CSpawnPoint*>(Obj);
+				CSpawnPoint* Spawn = smart_cast<CSpawnPoint*>(Obj);
 				if (Spawn&&Spawn->IsGraphPoint())
 				{
 					m_RTFlags.set(flIsBuildedGameGraph, FALSE);
@@ -584,7 +584,7 @@ void EScene::SelectLightsForObject(CCustomObject* obj)
 	if(!t)
 		return;
 
-	ESceneLightTool* lt 		= dynamic_cast<ESceneLightTool*>(t);
+	ESceneLightTool* lt 		= smart_cast<ESceneLightTool*>(t);
 	VERIFY						(lt);
 	lt->SelectLightsForObject	(obj);
 }

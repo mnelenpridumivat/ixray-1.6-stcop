@@ -248,7 +248,7 @@ void CreatePhysicsShellsSelected()
     ObjectList lst;
     if (Scene->GetQueryObjects(lst,OBJCLASS_SPAWNPOINT,1,1,0)){
     	for (ObjectIt it=lst.begin(); it!=lst.end(); it++){
-	        CSpawnPoint* O = dynamic_cast<CSpawnPoint*>(*it); R_ASSERT(O);
+	        CSpawnPoint* O = smart_cast<CSpawnPoint*>(*it); R_ASSERT(O);
             if(O->Selected()&&O->ObjectKinematics())
         				O->CreatePhysicsShell(&O->FTransform);
         }
@@ -259,7 +259,7 @@ void   CScenePhyscs::	UseSimulatePoses	()
    ObjectList lst;
     if (Scene->GetQueryObjects(lst,OBJCLASS_SPAWNPOINT,1,1,0)){
     	for (ObjectIt it=lst.begin(); it!=lst.end(); it++){
-	        CSpawnPoint* O = dynamic_cast<CSpawnPoint*>(*it); R_ASSERT(O);
+	        CSpawnPoint* O = smart_cast<CSpawnPoint*>(*it); R_ASSERT(O);
             if(O->Selected())
             	O->UseSimulatePose();
        }
@@ -271,7 +271,7 @@ void DestroyPhysicsShells()
     ObjectList lst;
     if (Scene->GetQueryObjects(lst,OBJCLASS_SPAWNPOINT,-1,-1,0)){
     	for (ObjectIt it=lst.begin(); it!=lst.end(); it++){
-	        CSpawnPoint* O = dynamic_cast<CSpawnPoint*>(*it); R_ASSERT(O);
+	        CSpawnPoint* O = smart_cast<CSpawnPoint*>(*it); R_ASSERT(O);
             O->DeletePhysicsShell();
         }
     }

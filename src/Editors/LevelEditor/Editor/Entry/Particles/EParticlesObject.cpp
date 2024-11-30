@@ -28,7 +28,7 @@ void EParticlesObject::Construct(LPVOID data)
 
 EParticlesObject::~EParticlesObject()
 {
-    auto model = dynamic_cast<IRenderVisual*>(m_Particles);
+    auto model = smart_cast<IRenderVisual*>(m_Particles);
 	::Render->model_Delete	(model);
     m_Particles = nullptr;
 }
@@ -89,7 +89,7 @@ void EParticlesObject::Render(int priority, bool strictB2F)
             }
         }
         if (m_Particles)
-        	::RImplementation.model_Render(dynamic_cast<IRenderVisual*>(m_Particles), _Transform(),priority,strictB2F,1.f);
+        	::RImplementation.model_Render(smart_cast<IRenderVisual*>(m_Particles), _Transform(),priority,strictB2F,1.f);
     }
 }
 
@@ -251,13 +251,13 @@ bool EParticlesObject::ExportGame(SExportStreams* F)
 
 bool EParticlesObject::Compile(LPCSTR ref_name)
 {
-    auto model = dynamic_cast<IRenderVisual*>(m_Particles);
+    auto model = smart_cast<IRenderVisual*>(m_Particles);
     ::Render->model_Delete(model);
     m_Particles = nullptr;
     if (ref_name)
     {
     	IRenderVisual* base = ::Render->model_CreateParticles(ref_name);
-		m_Particles 		= dynamic_cast<IParticleCustom*>(base);
+		m_Particles 		= smart_cast<IParticleCustom*>(base);
         if (m_Particles){
 			UpdateTransform	();
 		    m_RefName		= ref_name;
@@ -279,7 +279,7 @@ void EParticlesObject::OnRefChange(PropValue* V)
 
 void EParticlesObject::OnControlClick(ButtonValue* sender, bool& bModif, bool& bSafe)
 {
-	ButtonValue* V = dynamic_cast<ButtonValue*>(sender); R_ASSERT(V);
+	ButtonValue* V = smart_cast<ButtonValue*>(sender); R_ASSERT(V);
     switch (V->btn_num){
     case 0: Play();	break;
     case 1: Stop();	break;

@@ -20,7 +20,7 @@ void CPatrolPathStorage::load_editor(const ILevelGraph* level_graph, const IGame
 {
 	for (auto& Obj : Scene->ListObj(OBJCLASS_WAY))
 	{
-		CWayObject* Way = dynamic_cast<CWayObject*>(Obj);
+		CWayObject* Way = smart_cast<CWayObject*>(Obj);
 		shared_str	patrol_name =Way->GetName();
 		const_iterator			I = m_registry.find(patrol_name);
 		VERIFY3(I == m_registry.end(), "Duplicated patrol path found", *patrol_name);
