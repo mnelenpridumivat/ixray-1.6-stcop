@@ -44,7 +44,24 @@ int DXT_API DXTUtils::Compress(const char* out_name, u8* raw_data, u8* normal_ma
 			case STextureParams::kMIPFilterBox:
 			case STextureParams::kMIPFilterTriangle:
 			case STextureParams::kMIPFilterKaiser:
+			{
+				if (fmt->fmt == STextureParams::tfBC7)
+				{
+					// FX: Dirty hack for nvtt
+					fmt->fmt = STextureParams::tfRGBA;
+
+					int RetCode = DXTCompressImageNVTT(out_name, raw_data, w, h, pitch, fmt, depth);
+
+					RedImageTool::RedImage Img;
+					Img.LoadFromFile(out_name);
+					Img.Convert(RedImageTool::RedTexturePixelFormat::BC7);
+					Img.SaveToDds(out_name);
+
+					return RetCode;
+				}
+
 				return DXTCompressImageNVTT(out_name, raw_data, w, h, pitch, fmt, depth);
+			}
 
 			case STextureParams::kMIPFilterPoint:
 			case STextureParams::kMIPFilterCubic:
