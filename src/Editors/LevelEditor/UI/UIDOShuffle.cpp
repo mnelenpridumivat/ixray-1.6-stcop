@@ -78,11 +78,7 @@ void UIDOShuffle::Draw()
 			{
 				xr_string fname;
 				if (EFS.GetOpenName(_detail_objects_, fname)) {
-					if (DM->ImportColorIndices(fname.c_str())) {
-						DM->InvalidateSlots();
-						FillData();
-						bModif = true;
-					}
+					LoadFromStream(fname);
 				}
 			}
 			ImGui::SameLine();
@@ -173,6 +169,16 @@ void UIDOShuffle::Draw()
 			m_ChooseObject = false;
 		}
 		UIChooseForm::Update();
+	}
+}
+
+void UIDOShuffle::LoadFromStream(xr_string& fname)
+{
+	if (Form->DM->ImportColorIndices(fname.c_str()))
+	{
+		Form->DM->InvalidateSlots();
+		Form->FillData();
+		Form->bModif = true;
 	}
 }
 

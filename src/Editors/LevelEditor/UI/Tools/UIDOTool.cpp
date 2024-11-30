@@ -64,6 +64,37 @@ void UIDOTool::Draw()
 		ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
 		ImGui::TreePop();
 	}
+
+	HandleDragDrop();
+}
+
+void UIDOTool::HandleDragDrop()
+{
+	if (!ImGui::BeginDragDropTarget())
+		return;
+
+	auto ImData = ImGui::AcceptDragDropPayload("TEST#dti");
+
+	if (ImData == nullptr)
+	{
+		ImGui::EndDragDropTarget();
+		return;
+	}
+
+	struct DragDropData
+	{
+		xr_string FileName;
+	} Data = *(DragDropData*)ImData->Data;
+
+
+	if (Data.FileName.ends_with(".dti"))
+	{
+		m_DOShuffle = true; 
+		UIDOShuffle::Show(DM);
+		UIDOShuffle::LoadFromStream(Data.FileName);
+	}
+
+	ImGui::EndDragDropTarget();
 }
 
 void UIDOTool::OnDrawUI()
