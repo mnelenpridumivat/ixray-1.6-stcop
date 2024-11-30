@@ -69,6 +69,8 @@ public:
 	virtual void ResetBegin();
 	virtual void ResetEnd();
 
+	void RemoveCustomIcon(const xr_string&);
+	void LoadCustomIcons();
 private:
 	bool DrawItem(const FileOptData& FilePath, size_t& HorBtnIter, const size_t IterCount);
 	bool DrawItemByList(const FileOptData& FilePath, size_t& HorBtnIter, const size_t IterCount);

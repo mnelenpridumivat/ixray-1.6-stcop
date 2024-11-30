@@ -12,6 +12,7 @@
 #include "../Layers/xrRender/PSLibrary.h"
 #include "../Layers/xrRender/dxRenderDeviceRender.h"
 
+#include "UIIconPicker.h"
 #include "UIEditLightAnim.h"
 #include "UIImageEditorForm.h"
 #include "UISoundEditorForm.h"
@@ -911,6 +912,7 @@ void TUI::OnDrawUI()
 	UIImageEditorForm::Update();
 	UISoundEditorForm::Update();
 	UIMinimapEditorForm::Update();
+	UIIconPicker::Update();
 	UILogForm::Update();
 	EDevice->seqDrawUI.Process(rp_DrawUI);
 }

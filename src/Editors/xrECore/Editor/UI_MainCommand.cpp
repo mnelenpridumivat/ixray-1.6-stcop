@@ -6,6 +6,7 @@
 #include "ui_main.h"
 #include "UI_ToolsCustom.h"
 
+#include "UIIConPicker.h"
 #include "UIEditLightAnim.h"
 #include "UIImageEditorForm.h"
 #include "UIMinimapEditorForm.h"
@@ -382,7 +383,11 @@ CCommandVar 	CommandUseSimulatePositions(CCommandVar p1, CCommandVar p2)
 	return				TRUE;
 }
 
-
+CCommandVar 	CommandIconPicker(CCommandVar p1, CCommandVar p2)
+{
+	UIIconPicker::Show(p1);
+	return				TRUE;
+}
 
 CCommandVar 	CommandSetSettings(CCommandVar p1, CCommandVar p2)
 {
@@ -726,6 +731,7 @@ void TUI::RegisterCommands()
 	REGISTER_CMD_S	    (COMMAND_EVICT_OBJECTS,      	CommandEvictObjects);
 	REGISTER_CMD_S	    (COMMAND_EVICT_TEXTURES,     	CommandEvictTextures);
 	REGISTER_CMD_S	    (COMMAND_CHECK_MODIFIED,     	CommandCheckModified);
+	REGISTER_CMD_S	    (COMMAND_ICON_PICKER,   		CommandIconPicker);
 	REGISTER_CMD_SE	    (COMMAND_SHOW_PROPERTIES,    	"Show Properties",		CommandShowProperties, false);
 	REGISTER_CMD_S	    (COMMAND_UPDATE_PROPERTIES,  	CommandUpdateProperties);
 	REGISTER_CMD_S	    (COMMAND_REFRESH_PROPERTIES, 	CommandRefreshProperties);

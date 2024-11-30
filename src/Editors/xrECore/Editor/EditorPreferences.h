@@ -83,6 +83,7 @@ public:
 	xr_string		Compiler_xrLC;
 	xr_string		Compiler_xrDO;
 
+	std::map<std::string, std::string> custom_icons;
 protected:
 	void 			OnKeyboardCommonFileClick	(ButtonValue* value, bool& bModif, bool& bSafe);
 	void 	        OnClose();
