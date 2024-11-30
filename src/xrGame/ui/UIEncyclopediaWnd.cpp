@@ -206,14 +206,16 @@ bool CUIEncyclopediaWnd::HasArticle(shared_str id)
 
 void CUIEncyclopediaWnd::DeleteArticles()
 {
-	UIIdxList->RemoveAll();
+	UIIdxList->Clear();
+	//UIIdxList->RemoveAll();
 	delete_data			(m_ArticlesDB);
 }
 
 void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem *pTVItem)
 {
-	UIInfoList->ScrollToBegin();
-	UIInfoList->Clear();
+	//UIInfoList->ScrollToBegin();
+	//UIInfoList->Clear();
+	UIIdxList->Clear();
 
 	if(!pTVItem) return;
 
@@ -221,10 +223,10 @@ void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem *pTVItem)
 	if (!pTVItem->IsRoot())
 	{
 
-		CUIEncyclopediaArticleWnd*	article_info = xr_new<CUIEncyclopediaArticleWnd>();
+		CUIEncyclopediaArticleWnd*	article_info = new CUIEncyclopediaArticleWnd();
 		article_info->Init			("encyclopedia_item.xml","encyclopedia_wnd:objective_item");
 		article_info->SetArticle	(m_ArticlesDB[pTVItem->GetValue()]);
-		UIInfoList->AddWindow		(article_info, true);
+		UIIdxList->AddWindow		(article_info, true);
 
 		// Пометим как прочитанную
 		if (!pTVItem->IsArticleReaded())
@@ -256,7 +258,7 @@ void CUIEncyclopediaWnd::AddArticle(shared_str article_id, bool bReaded)
 	// Добавляем элемент
 	m_ArticlesDB.resize(m_ArticlesDB.size() + 1);
 	CEncyclopediaArticle*& a = m_ArticlesDB.back();
-	a = xr_new<CEncyclopediaArticle>();
+	a = new CEncyclopediaArticle();
 	a->Load(article_id);
 
 

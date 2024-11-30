@@ -145,8 +145,8 @@ void CInventoryItem::Load(LPCSTR section)
 
 	u32 inv_grid_x = pSettings->r_u32(m_object->cNameSect(), "inv_grid_x");
 	u32 inv_grid_y = pSettings->r_u32(m_object->cNameSect(), "inv_grid_y");
-	u32 inv_grid_width = pSettings->r_u32(m_object->cNameSect(), "inv_grid_width");
-	u32 inv_grid_height = pSettings->r_u32(m_object->cNameSect(), "inv_grid_height");
+	u32 inv_grid_width = READ_IF_EXISTS(pSettings, r_u32, m_object->cNameSect(), "inv_grid_width", 1);
+	u32 inv_grid_height = READ_IF_EXISTS(pSettings, r_u32, m_object->cNameSect(), "inv_grid_height", 1);
 
 	m_inv_rect.set(inv_grid_x, inv_grid_y, inv_grid_width, inv_grid_height);
 	

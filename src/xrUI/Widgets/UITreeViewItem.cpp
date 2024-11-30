@@ -37,7 +37,7 @@ CUITreeViewItem::CUITreeViewItem()
 	UIBkg.InitTexture(treeItemBackgroundTexture);
 	UIBkg.TextureOff();
 	UIBkg.SetTextureOffset(-20, 0);
-	UIBkg.EnableTextHighlighting(false);
+	//UIBkg.EnableTextHighlighting(false);
 
 	m_bManualSetColor = false;
 }
@@ -78,7 +78,7 @@ void CUITreeViewItem::OnRootChanged()
 			str.replace(pos, 1, "+");
 
 //		inherited::SetText(str.c_str());
-		GetSelectedItem()->m_text.SetText(str.c_str());
+		GetSelectedItem()->SetText(str.c_str());
 	}
 	else
 	{
@@ -95,7 +95,7 @@ void CUITreeViewItem::OnRootChanged()
 			str.replace(pos, 1, " ");
 
 //		inherited::SetText(str.c_str());
-		GetSelectedItem()->m_text.SetText(str.c_str());
+		GetSelectedItem()->SetText(str.c_str());
 	}
 }
 
@@ -122,7 +122,7 @@ void CUITreeViewItem::OnOpenClose()
 	}
 
 //	inherited::SetText(str.c_str());
-	GetSelectedItem()->m_text.SetText(str.c_str());
+	GetSelectedItem()->SetText(str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ void CUITreeViewItem::SetText(LPCSTR str)
 	}
 
 //	inherited::SetText(s.c_str());
-	GetSelectedItem()->m_text.SetText(s.c_str());
+	GetSelectedItem()->SetText(s.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -442,6 +442,11 @@ void CUITreeViewItem::CheckParentMark(CUITreeViewItem *pOwner)
 	}
 }
 
+
+bool CUITreeViewItem::IsArticleReaded() const { 
+	return m_bArticleRead; 
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Standalone function for tree hierarchy creation
 //////////////////////////////////////////////////////////////////////////
@@ -468,7 +473,7 @@ void CreateTreeBranch(shared_str nesting, shared_str leafName, CUIListBox *pList
 
 			for (GroupTree_it it2 = it; it2 != cont.end(); ++it2)
 			{
-				pNewItem = xr_new<CUITreeViewItem>();
+				pNewItem = new CUITreeViewItem();
 				pItemToIns->AddItem(pNewItem);
 				pNewItem->SetFont(pRootFnt);
 				pNewItem->SetText(*(*it2));
@@ -558,7 +563,7 @@ void CreateTreeBranch(shared_str nesting, shared_str leafName, CUIListBox *pList
 	// Прошли все существующее дерево, и не нашли? Тогда добавляем новую иерархию
 	if (!pTVItemChilds)
 	{
-		pTVItemChilds = xr_new<CUITreeViewItem>();
+		pTVItemChilds = new CUITreeViewItem();
 		pTVItemChilds->SetFont(pRootFont);
 		pTVItemChilds->SetText(*groupTree.front());
 		pTVItemChilds->SetReadedColor(rootColor);
@@ -577,11 +582,11 @@ void CreateTreeBranch(shared_str nesting, shared_str leafName, CUIListBox *pList
 	// Cначала проверяем нет ли записи с таким названием, и добавляем если нет
 	//	if (!pTVItemChilds->Find(*name))
 	//	{
-	pTVItem		= xr_new<CUITreeViewItem>();
+	pTVItem		= new CUITreeViewItem();
 	pTVItem->SetFont(pLeafFont);
 	pTVItem->SetReadedColor(leafColor);
 	pTVItem->SetText(*g_pStringTable->translate(*leafName));
-//	pTVItem->SetValue(leafProperty);
+	pTVItem->SetValue(leafProperty);
 	pTVItem->SetSelectedTAG(leafProperty);
 	pTVItemChilds->AddItem(pTVItem);
 	pTVItem->MarkArticleAsRead(markRead);

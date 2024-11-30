@@ -1221,6 +1221,10 @@ u32	GameID()
 	return Game().Type();
 }
 
+LPCSTR get_user_name() {
+	return Core.UserName;
+}
+
 #include "CustomDetectorZones.h"
 CZoneList* CLevel::create_hud_zones_list()
 {

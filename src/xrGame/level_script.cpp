@@ -44,6 +44,7 @@
 #include "ShootingObject.h"
 #include "Weapon.h"
 #include "player_hud.h"
+#include "SamZone.h"
 
 #include "ai_object_location.h"
 
@@ -883,6 +884,7 @@ void spawn_section(LPCSTR sSection, Fvector3 vPosition, u32 LevelVertexID, u16 P
 }
 
 #include "HUDManager.h"
+#include <CustomTimer.h>
 //ability to get the target game_object at crosshair
 CScriptGameObject* g_get_target_obj()
 {
@@ -995,6 +997,70 @@ namespace level_nearest
 	}
 }
 
+void create_custom_timer(LPCSTR name, int start_value, int mode = 0)
+{
+	CTimerManager::GetInstance().CreateTimer(name, start_value, mode);
+}
+
+void bind_timer(LPCSTR function, const CBinderParams& params, int start_value, int mode = 0)
+{
+	CBinderManager::GetInstance().CreateBinder(function, params, start_value, mode);
+}
+
+void bind_timer_no_params(LPCSTR function, int start_value, int mode = 0)
+{
+	CBinderManager::GetInstance().CreateBinder(function, CBinderParams(), start_value, mode);
+}
+
+void start_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().StartTimer(name);
+}
+
+void stop_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().StopTimer(name);
+}
+
+void reset_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().ResetTimer(name);
+}
+
+void delete_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().DeleteTimer(name);
+}
+
+int get_custom_timer(LPCSTR name)
+{
+	return CTimerManager::GetInstance().GetTimerValue(name);
+}
+
+void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
+{
+	if (!launch_object)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is NULL!");
+		return;
+	}
+	auto sam = smart_cast<CSamZone*>(&launch_object->object());
+	if (!sam)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is not a CSamZone!");
+		return;
+	}
+	if (!target)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "target_sam: target is NULL!");
+		return;
+	}
+	if (OnClient()) {
+		return;
+	}
+	sam->LaunchMissile(&target->object());
+}
+
 #pragma optimize("s",on)
 void CLevel::script_register(lua_State* L)
 {
@@ -1002,8 +1068,44 @@ void CLevel::script_register(lua_State* L)
 		.def_readonly("fog_density", &CEnvDescriptor::fog_density)
 		.def_readonly("far_plane", &CEnvDescriptor::far_plane),
 
-		class_<CEnvironment>("CEnvironment")
+	class_<CEnvironment>("CEnvironment")
 		.def("current", current_environment);
+
+	module(L)
+	[
+		class_<CBinderParam>("CBinderParam")
+			.def(constructor<>())
+			.def(constructor<const CBinderParam&>())
+			.def(constructor<LPCSTR>())
+			.def(constructor<double>())
+			.enum_("type")
+			[
+				value("string", static_cast<int>(EBinderParamType::eBinderParamString)),
+				value("u64", static_cast<int>(EBinderParamType::eBinderParamU64)),
+				value("s64", static_cast<int>(EBinderParamType::eBinderParamS64)),
+				value("double", static_cast<int>(EBinderParamType::eBinderParamDouble))
+			]
+			.def("get_type", &CBinderParam::GetType)
+			.def("get_string", &CBinderParam::GetString)
+			.def("get_u64", &CBinderParam::GetU64)
+			.def("get_s64", &CBinderParam::GetS64)
+			.def("get_double", &CBinderParam::GetDouble)
+			.def("set_string", &CBinderParam::SetString)
+			.def("set_u64", &CBinderParam::SetU64)
+			.def("set_s64", &CBinderParam::SetS64)
+			.def("set_double", &CBinderParam::SetDouble)
+	];
+
+	module(L)
+	[
+		class_<CBinderParams>("CBinderParams")
+			.def(constructor<>())
+			.def("add", &CBinderParams::Add)
+			.def("insert", &CBinderParams::Insert)
+			.def("remove", &CBinderParams::Remove)
+			.def("get", &CBinderParams::Get)
+			.def("size", &CBinderParams::Size)
+	];
 
 	module(L, "level")
 		[
@@ -1134,7 +1236,20 @@ void CLevel::script_register(lua_State* L)
 				def("get_active_cam", &get_active_cam),
 				def("set_active_cam", &set_active_cam),
 				def("get_start_time", &get_start_time),
-				def("valid_vertex", &valid_vertex)
+				def("valid_vertex", &valid_vertex),
+
+				def("create_custom_timer", &create_custom_timer),
+				def("start_custom_timer", &start_custom_timer),
+				def("stop_custom_timer", &stop_custom_timer),
+				def("reset_custom_timer", &reset_custom_timer),
+				def("delete_custom_timer", &delete_custom_timer),
+				def("get_custom_timer", &get_custom_timer),
+
+				def("bind_timer", &bind_timer),
+
+				def("get_user_name", &get_user_name),
+
+				def("launch_sam", &launch_sam)
 		],
 
 		module(L, "nearest")

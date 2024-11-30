@@ -43,6 +43,19 @@ public:
 
 	// end EMI events
 
+
+protected:
+
+	// Force ignore on PDA
+	bool IgnoreOnPDA = false;
+
+public:
+
+	IC void SetIgnoreOnPDA(bool Ignore) { IgnoreOnPDA = Ignore; }
+	IC bool IsIgnoreOnPDA() { return IgnoreOnPDA; }
+
+	// end force ignore on PDA
+
 private:
 	bool					m_is_agresive;
 	bool					m_is_start_attack;

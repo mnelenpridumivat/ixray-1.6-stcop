@@ -23,12 +23,17 @@ class UI_API CUITreeViewItem:
 	int				iTextShift;
 	// Кому мы пренадлежим
 	CUITreeViewItem *pOwner;
+	//произвольное число, приписанное объекту
+	int m_iValue;
 public:
 	void			SetRoot(bool set);
 	bool			IsRoot() const						{ return isRoot; }
 
 	// Устанавливаем смещение текста
 	void			SetTextShift(int delta)				{ iTextShift += delta; }
+
+	int GetValue() { return m_iValue; }
+	void SetValue(int value) { m_iValue = value; }
 
 	// Владелец
 	CUITreeViewItem * GetOwner() const					{ return pOwner; }
@@ -84,7 +89,7 @@ public:
 
 	// Устанавливаем цвет текста в зависимости от того, прочитан ли артикл
 	void	MarkArticleAsRead(bool value);
-	bool	IsArticleReaded() { return m_bArticleRead; }
+	bool	IsArticleReaded() const;
 	// Цвет текста когда артикл не прочитан и не прочитан
 	void	SetReadedColor(u32 cl)		{ m_uReadedColor = cl;		}
 	void	SetUnreadedColor(u32 cl)	{ m_uUnreadedColor = cl;	}

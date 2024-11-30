@@ -17,6 +17,7 @@
 
 #include "player_hud.h"
 #include "Inventory.h"
+#include "../xrEngine/LightAnimLibrary.h"
 
 
 CPda::CPda(void)						
@@ -24,6 +25,14 @@ CPda::CPda(void)
 	m_idOriginalOwner		= u16(-1);
 	m_SpecificChracterOwner = nullptr;
 	TurnOff					();
+	m_bZoomed = false;
+	joystick = BI_NONE;
+	target_screen_switch = 0.f;
+	m_fLR_CameraFactor = 0.f;
+	m_fLR_MovingFactor = 0.f;
+	m_fLR_InertiaFactor = 0.f;
+	m_fUD_InertiaFactor = 0.f;
+	m_bNoticedEmptyBattery = false;
 }
 
 CPda::~CPda() 
@@ -54,7 +63,66 @@ void CPda::Load(LPCSTR section)
 	inherited::Load(section);
 
 	m_fRadius = pSettings->r_float(section,"radius");
-	m_functor_str = READ_IF_EXISTS(pSettings,r_string,section,"play_function",""); 
+	m_functor_str = READ_IF_EXISTS(pSettings,r_string,section,"play_function","");
+	m_fDisplayBrightnessPowerSaving = READ_IF_EXISTS(pSettings, r_float, section, "power_saving_brightness", .6f);
+	m_fPowerSavingCharge = READ_IF_EXISTS(pSettings, r_float, section, "power_saving_charge", .15f);
+	m_joystick_bone = READ_IF_EXISTS(pSettings, r_string, section, "joystick_bone", nullptr);
+	m_sounds.LoadSound(section, "snd_draw", "sndShow", true);
+	m_sounds.LoadSound(section, "snd_holster", "sndHide", true);
+	m_sounds.LoadSound(section, "snd_draw_empty", "sndShowEmpty", true);
+	m_sounds.LoadSound(section, "snd_holster_empty", "sndHideEmpty", true);
+	m_sounds.LoadSound(section, "snd_btn_press", "sndButtonPress");
+	m_sounds.LoadSound(section, "snd_btn_release", "sndButtonRelease");
+	m_sounds.LoadSound(section, "snd_empty", "sndEmptyBattery", true);
+	m_screen_on_delay = READ_IF_EXISTS(pSettings, r_float, section, "screen_on_delay", 0.f);
+	m_screen_off_delay = READ_IF_EXISTS(pSettings, r_float, section, "screen_off_delay", 0.f);
+	m_thumb_rot[0] = READ_IF_EXISTS(pSettings, r_float, section, "thumb_rot_x", 0.f);
+	m_thumb_rot[1] = READ_IF_EXISTS(pSettings, r_float, section, "thumb_rot_y", 0.f);
+
+	m_bLightsEnabled = READ_IF_EXISTS(pSettings, r_string, section, "light_enabled", false);
+
+	if (!pda_light && m_bLightsEnabled && psActorFlags.test(AF_3D_PDA))
+	{
+		pda_light = ::Render->light_create();
+		pda_light->set_shadow(READ_IF_EXISTS(pSettings, r_string, section, "light_shadow", false));
+
+		m_bVolumetricLights = READ_IF_EXISTS(pSettings, r_bool, section, "volumetric_lights", false);
+		m_fVolumetricQuality = READ_IF_EXISTS(pSettings, r_float, section, "volumetric_quality", 1.0f);
+		m_fVolumetricDistance = READ_IF_EXISTS(pSettings, r_float, section, "volumetric_distance", 0.3f);
+		m_fVolumetricIntensity = READ_IF_EXISTS(pSettings, r_float, section, "volumetric_intensity", 0.5f);
+
+		m_iLightType = READ_IF_EXISTS(pSettings, r_u8, section, "light_type", 1);
+		light_lanim = LALib.FindItem(READ_IF_EXISTS(pSettings, r_string, section, "color_animator", ""));
+
+		const Fcolor clr = READ_IF_EXISTS(pSettings, r_fcolor, section, "light_color", (Fcolor{ 1.0f, 0.0f, 0.0f, 1.0f }));
+
+		fBrightness = clr.intensity();
+		pda_light->set_color(clr);
+
+		const float range = READ_IF_EXISTS(pSettings, r_float, section, "light_range", 1.f);
+
+		pda_light->set_range(range);
+		pda_light->set_hud_mode(true);
+		pda_light->set_type(static_cast<IRender_Light::LT>(m_iLightType));
+		pda_light->set_cone(deg2rad(READ_IF_EXISTS(pSettings, r_float, section, "light_spot_angle", 1.f)));
+		pda_light->set_texture(READ_IF_EXISTS(pSettings, r_string, section, "spot_texture", nullptr));
+
+		pda_light->set_volumetric(m_bVolumetricLights);
+		pda_light->set_volumetric_quality(m_fVolumetricQuality);
+		pda_light->set_volumetric_distance(m_fVolumetricDistance);
+		pda_light->set_volumetric_intensity(m_fVolumetricIntensity);
+
+		//Glow
+		m_bGlowEnabled = READ_IF_EXISTS(pSettings, r_string, section, "glow_enabled", false);
+
+		if (!pda_glow && m_bGlowEnabled)
+		{
+			pda_glow = ::Render->glow_create();
+			pda_glow->set_texture(READ_IF_EXISTS(pSettings, r_string, section, "glow_texture", nullptr));
+			pda_glow->set_color(clr);
+			pda_glow->set_radius(READ_IF_EXISTS(pSettings, r_float, section, "glow_radius", 0.3f));
+		}
+	}
 }
 
 void CPda::shedule_Update(u32 dt)	
@@ -78,13 +146,69 @@ void CPda::shedule_Update(u32 dt)
 	}
 }
 
+void CPda::UpdateLights()
+{
+	if (pda_light && psActorFlags.test(AF_3D_PDA))
+	{
+		const u32 state = GetState();
+
+		if (!pda_light->get_active() && (state == eShowing || state == eIdle))
+		{
+			pda_light->set_active(true);
+
+			if (pda_glow && !pda_glow->get_active() && m_bGlowEnabled)
+				pda_glow->set_active(true);
+		}
+		else if (pda_light->get_active() && (state == eHiding || state == eHidden))
+		{
+			pda_light->set_active(false);
+
+			if (pda_glow && pda_glow->get_active() && m_bGlowEnabled)
+				pda_glow->set_active(false);
+		}
+
+		if (pda_light->get_active() && HudItemData())
+		{
+			if (GetHUDmode())
+			{
+				firedeps fd;
+				HudItemData()->setup_firedeps(fd);
+				pda_light->set_position(fd.vLastFP2);
+
+				if (pda_glow && pda_glow->get_active())
+					pda_glow->set_position(fd.vLastFP2);
+			}
+
+			// calc color animator
+			if (light_lanim)
+			{
+				int frame{};
+				u32 clr = light_lanim->CalculateRGB(Device.fTimeGlobal, frame);
+				Fcolor fclr;
+				fclr.set(clr);
+				pda_light->set_color(fclr);
+			}
+		}
+	}
+}
+
 void CPda::UpdateActiveContacts	()
 {
 	m_active_contacts.resize(0);
+	auto Owner = smart_cast<CEntityAlive*>(GetOwnerObject());
+	//VERIFY(Owner);
+	if (Owner && Owner->IsInEmi())
+	{
+		return;
+	}
 	xr_vector<CObject*>::iterator it= feel_touch.begin();
 	for(;it!=feel_touch.end();++it){
 		CEntityAlive* pEA = smart_cast<CEntityAlive*>(*it);
-		if(!!pEA->g_Alive() && !pEA->cast_base_monster() && !pEA->cast_car())
+		if(!!pEA->g_Alive() 
+			&& !pEA->cast_base_monster() 
+			&& !pEA->cast_car()
+			&& !pEA->IsInEmi()
+			&& !pEA->IsIgnoreOnPDA())
 		{
 			m_active_contacts.push_back(*it);
 		}

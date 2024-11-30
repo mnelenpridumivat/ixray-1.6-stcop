@@ -417,6 +417,7 @@ public:
 IC CLevel&				Level()		{ return *((CLevel*) g_pGameLevel);			}
 IC game_cl_GameState&	Game()		{ return *Level().game;					}
 	u32					GameID();
+	LPCSTR get_user_name();
 
 
 #ifdef DEBUG
