@@ -104,6 +104,7 @@ void SAINode::LoadStream(IReader& F, ESceneAIMapTool* tools)
     F.r				(&np,sizeof(np)); 	tools->UnpackPosition(Pos,np,tools->m_AIBBox,tools->m_Params);
 	Plane.build		(Pos,Plane.n);
     flags.assign	(F.r_u8());
+
 }
 
 void SAINode::SaveStream(IWriter& F, ESceneAIMapTool* tools)
@@ -275,60 +276,60 @@ void ESceneAIMapTool::SaveLTX(CInifile& ini, int id)
 
 bool ESceneAIMapTool::LoadStream(IReader& F)
 {
-	inherited::LoadStream	(F);
+    inherited::LoadStream(F);
 
-	u16 version = 0;
+    u16 version = 0;
 
-    R_ASSERT(F.r_chunk(AIMAP_CHUNK_VERSION,&version));
-    if( version!=AIMAP_VERSION ){
-        ELog.DlgMsg( mtError, "AI-Map: Unsupported version.");
+    R_ASSERT(F.r_chunk(AIMAP_CHUNK_VERSION, &version));
+    if (version != AIMAP_VERSION) {
+        ELog.DlgMsg(mtError, "AI-Map: Unsupported version.");
         return false;
     }
 
     R_ASSERT(F.find_chunk(AIMAP_CHUNK_FLAGS));
-    F.r				(&m_Flags,sizeof(m_Flags));
+    F.r(&m_Flags, sizeof(m_Flags));
 
     R_ASSERT(F.find_chunk(AIMAP_CHUNK_BOX));
-    F.r				(&m_AIBBox,sizeof(m_AIBBox));
+    F.r(&m_AIBBox, sizeof(m_AIBBox));
 
     R_ASSERT(F.find_chunk(AIMAP_CHUNK_PARAMS));
-    F.r				(&m_Params,sizeof(m_Params));
+    F.r(&m_Params, sizeof(m_Params));
 
     R_ASSERT(F.find_chunk(AIMAP_CHUNK_NODES));
-    m_Nodes.resize	(F.r_u32());
-	for (AINodeIt it=m_Nodes.begin(); it!=m_Nodes.end(); it++){
-    	*it			= new SAINode();
-    	(*it)->LoadStream	(F,this);
+    m_Nodes.resize(F.r_u32());
+    for (AINodeIt it = m_Nodes.begin(); it != m_Nodes.end(); it++) {
+        *it = new SAINode();
+        (*it)->LoadStream(F, this);
     }
-	DenumerateNodes	();
+    DenumerateNodes();
 
-    if (F.find_chunk(AIMAP_CHUNK_INTERNAL_DATA)){
-    	m_VisRadius	= F.r_float();
-    	m_BrushSize	= F.r_u32();
+    if (F.find_chunk(AIMAP_CHUNK_INTERNAL_DATA)) {
+        m_VisRadius = F.r_float();
+        m_BrushSize = F.r_u32();
     }
-    if (F.find_chunk(AIMAP_CHUNK_INTERNAL_DATA2)){
-    	m_SmoothHeight	= F.r_float();
+    if (F.find_chunk(AIMAP_CHUNK_INTERNAL_DATA2)) {
+        m_SmoothHeight = F.r_float();
     }
 
-	// snap objects
-    if (F.find_chunk(AIMAP_CHUNK_SNAP_OBJECTS)){
-    	shared_str 	buf;
-		int cnt 	= F.r_u32();
-        if (cnt){
-	        for (int i=0; i<cnt; i++){
-    	    	F.r_stringZ	(buf);
-        	    CCustomObject* O = Scene->FindObjectByName(buf.c_str(),OBJCLASS_SCENEOBJECT);
-            	if (!O)		ELog.Msg(mtError,"AI-Map: Can't find snap object '%s'.",buf.c_str());
-	            else		m_SnapObjects.push_back(O);
-    	    }
+    // snap objects
+    if (F.find_chunk(AIMAP_CHUNK_SNAP_OBJECTS)) {
+        shared_str 	buf;
+        int cnt = F.r_u32();
+        if (cnt) {
+            for (int i = 0; i < cnt; i++) {
+                F.r_stringZ(buf);
+                CCustomObject* O = Scene->FindObjectByName(buf.c_str(), OBJCLASS_SCENEOBJECT);
+                if (!O)		ELog.Msg(mtError, "AI-Map: Can't find snap object '%s'.", buf.c_str());
+                else		m_SnapObjects.push_back(O);
+            }
         }
     }
 
-    hash_FillFromNodes		();
+    hash_FillFromNodes();
 
+    IsLoaded = true;
     return true;
 }
-
 
 bool ESceneAIMapTool::LoadSelection(IReader& F)
 {

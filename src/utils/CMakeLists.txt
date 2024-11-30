@@ -2,7 +2,7 @@
 set(IXRAY_FOLDER_UTILS FOLDER "Utils")
 
 # Compressor
-if(IXRAY_USE_COMPRESSOR OR IXRAY_UTILS AND NOT IXRAY_PLUGINS)
+if(IXRAY_USE_COMPRESSOR OR IXRAY_UTILS)
     add_subdirectory("xrCompress")
     set_target_properties(xrCompress PROPERTIES ${IXRAY_FOLDER_UTILS})
 endif()

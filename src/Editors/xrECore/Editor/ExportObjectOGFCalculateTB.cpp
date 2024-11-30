@@ -2,11 +2,12 @@
 #pragma hdrstop
 
 #include "ExportObjectOGF.h"
-#include	"../../common/NvMender2003/nvMeshMender.h"
+#include <NVMeshMender.h>
+
 IC void set_vertex(MeshMender::Vertex& out_vertex, const SOGFVert& in_vertex);
 
-#include	"../../common/NvMender2003/mender_input_output.h"
-#include	"../../common/NvMender2003/remove_isolated_verts.h"
+#include <mender_input_output.h>
+#include <remove_isolated_verts.h>
 
 //--------------------------------------------------------------------------------
 IC void set_vertex(MeshMender::Vertex& out_vertex, const SOGFVert& in_vertex)

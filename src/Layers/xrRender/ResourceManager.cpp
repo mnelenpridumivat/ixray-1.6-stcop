@@ -277,10 +277,15 @@ Shader*		CResourceManager::Create	(IBlender*	B,		LPCSTR s_shader,	LPCSTR s_textu
 	}
 }
 
-Shader*		CResourceManager::Create	(LPCSTR s_shader,	LPCSTR s_textures,	LPCSTR s_constants,	LPCSTR s_matrices)
+#ifdef _EDITOR
+static xrCriticalSection ResSafe;
+#endif
+
+Shader* CResourceManager::Create	(LPCSTR s_shader,	LPCSTR s_textures,	LPCSTR s_constants,	LPCSTR s_matrices)
 {
-//#ifndef DEDICATED_SERVER
-#ifndef _EDITOR
+#ifdef _EDITOR
+	xrCriticalSectionGuard guard(ResSafe);
+#else
 	if (!g_dedicated_server)
 #endif
 	{

@@ -184,16 +184,14 @@ void dx10SamplerStateCache::SetMaxAnisotropy( UINT uiMaxAniso)
 		StateRecord& rec = m_StateArray[i];
 		StateDecs desc;
 
-		if (rec.m_pState == nullptr)
+		if (rec.m_pState != nullptr)
 		{
-			continue;
+			rec.m_pState->GetDesc(&desc);
+			desc.MaxAnisotropy = m_uiMaxAnisotropy;
+			dx10StateUtils::ValidateState(desc);
+			rec.m_pState->Release();
+			CreateState(desc, &rec.m_pState);
 		}
-
-		rec.m_pState->GetDesc(&desc);
-		desc.MaxAnisotropy = m_uiMaxAnisotropy;
-		dx10StateUtils::ValidateState(desc);
-		rec.m_pState->Release();
-		CreateState(desc, &rec.m_pState);
 	}
 }
 
@@ -214,11 +212,15 @@ void dx10SamplerStateCache::SetMipLodBias(float mipMapLodBias) {
 	{
 		StateRecord& rec = m_StateArray[i];
 		StateDecs desc;
-		rec.m_pState->GetDesc(&desc);
-		desc.MipLODBias = m_mipLodBias;
-		dx10StateUtils::ValidateState(desc);
-		rec.m_pState->Release();
-		CreateState(desc, &rec.m_pState);
+
+		if (rec.m_pState != nullptr)
+		{
+			rec.m_pState->GetDesc(&desc);
+			desc.MipLODBias = m_mipLodBias;
+			dx10StateUtils::ValidateState(desc);
+			rec.m_pState->Release();
+			CreateState(desc, &rec.m_pState);
+		}
 	}
 }
 

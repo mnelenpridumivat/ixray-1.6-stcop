@@ -25,6 +25,9 @@ void RenderSearchManagerWindow()
 	if (g_pClsidManager == nullptr)
 		return;
 
+	if (imgui_search_manager.is_initialized == false)
+		return;
+
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, kGeneralAlphaLevelForImGuiWindows));
 	if (ImGui::Begin("Search Manager"), &Engine.External.EditorStates[static_cast<u8>(EditorUI::Game_SearchManager)])
 	{
@@ -36,12 +39,12 @@ void RenderSearchManagerWindow()
 		ImGui::Text("Level: %s", Level().name().c_str());
 
 		ImGui::Text("All: %d", imgui_search_manager.counts[(eSelectedType::kSelectedType_All)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_SmartCover), imgui_search_manager.counts[(eSelectedType::kSelectedType_SmartCover)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_SmartTerrain), imgui_search_manager.counts[(eSelectedType::kSelectedType_SmartTerrain)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_Stalker), imgui_search_manager.counts[(eSelectedType::kSelectedType_Stalker)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_Car), imgui_search_manager.counts[(eSelectedType::kSelectedType_Car)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_LevelChanger), imgui_search_manager.counts[(eSelectedType::kSelectedType_LevelChanger)]);
-		ImGui::Text("%s: %d", imgui_search_manager.convertTypeToString(eSelectedType::kSelectedType_Artefact), imgui_search_manager.counts[(eSelectedType::kSelectedType_Artefact)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_SmartCover, imgui_search_manager.counts[(eSelectedType::kSelectedType_SmartCover)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_SmartTerrain, imgui_search_manager.counts[(eSelectedType::kSelectedType_SmartTerrain)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_Stalker, imgui_search_manager.counts[(eSelectedType::kSelectedType_Stalker)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_Car, imgui_search_manager.counts[(eSelectedType::kSelectedType_Car)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_LevelChanger, imgui_search_manager.counts[(eSelectedType::kSelectedType_LevelChanger)]);
+		ImGui::Text("%s: %d", imgui_search_manager.pTranslatedLabel_Artefact, imgui_search_manager.counts[(eSelectedType::kSelectedType_Artefact)]);
 
 		char colh_monsters[24]{};
 		sprintf_s(colh_monsters, sizeof(colh_monsters), "Monsters: %d", imgui_search_manager.counts[eSelectedType::kSelectedType_Monster_All]);
@@ -94,96 +97,200 @@ void RenderSearchManagerWindow()
 				ImGui::SeparatorText(category_name_separator);
 
 				auto size = Level().Objects.o_count();
+				auto filter_string_size = strlen(imgui_search_manager.search_string);
 
-				for (auto i = 0; i < size; ++i)
+				if (filter_string_size)
 				{
-					auto* pObject = Level().Objects.o_get_by_iterator(i);
-
-					if (pObject && pObject->H_Parent() == nullptr)
+					for (auto i = 0; i < size; ++i)
 					{
-						imgui_search_manager.count(pObject->CLS_ID);
+						auto* pObject = Level().Objects.o_get_by_iterator(i);
 
-						if (imgui_search_manager.filter(pObject->CLS_ID))
+						if (pObject && pObject->H_Parent() == nullptr)
 						{
-							auto filter_string_size = strlen(imgui_search_manager.search_string);
+							// statistics for search manager must be refactored and counting when object adds or deletes from online/offline, later
+						//	imgui_search_manager.count(pObject->CLS_ID);
 
-							CGameObject* pCasted = smart_cast<CGameObject*>(pObject);
-							bool passed_filter{ true };
-							if (filter_string_size)
+							if (imgui_search_manager.valid(pObject->CLS_ID))
 							{
-								if (pCasted && pObject)
+								CGameObject* pCasted = smart_cast<CGameObject*>(pObject);
+								bool passed_filter{ true };
+								if (filter_string_size)
 								{
-									std::string_view cname = pObject->cName().c_str();
-									std::string_view translate_name = Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str();
-
-									if (cname.find(imgui_search_manager.search_string) == xr_string::npos && translate_name.find(imgui_search_manager.search_string) == xr_string::npos)
+									if (pCasted && pObject)
 									{
-										passed_filter = false;
-									}
-								}
-							}
+										std::string_view cname = pObject->cName().c_str();
+										std::string_view translate_name = Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str();
 
-							if (pCasted)
-							{
-								if (imgui_search_manager.show_alive_creatures)
-								{
-									CEntity* pEntity = smart_cast<CEntity*>(pCasted);
-
-									if (pEntity)
-									{
-										if (!pEntity->g_Alive())
+										if (cname.find(imgui_search_manager.search_string) == xr_string::npos && translate_name.find(imgui_search_manager.search_string) == xr_string::npos)
 										{
 											passed_filter = false;
 										}
 									}
 								}
-							}
-
-							if (passed_filter)
-							{
-								xr_string name = pObject->cName().c_str();
 
 								if (pCasted)
 								{
-									name += " ";
-									name += "[";
-									name += Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str());
-									name += "]";
-								}
-								name += "##InGame_SM_";
-								name += std::to_string(i);
-
-								if (ImGui::Button(name.c_str()))
-								{
-									CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
-
-									if (pActor)
+									if (imgui_search_manager.show_alive_creatures)
 									{
-										xr_string cmd;
-										cmd = "set_actor_position ";
-										cmd += cmd.ToString(pObject->Position().x);
-										cmd += ",";
-										cmd += cmd.ToString(pObject->Position().y);
-										cmd += ",";
-										cmd += cmd.ToString(pObject->Position().z);
+										CEntity* pEntity = smart_cast<CEntity*>(pCasted);
 
-										execute_console_command_deferred(Console, cmd.c_str());
+										if (pEntity)
+										{
+											if (!pEntity->g_Alive())
+											{
+												passed_filter = false;
+											}
+										}
+										else
+										{
+											passed_filter = false;
+										}
 									}
 								}
 
-								if (ImGui::BeginItemTooltip())
+								if (passed_filter)
 								{
-									ImGui::Text("system name: [%s]", pObject->cName().c_str());
-									ImGui::Text("section name: [%s]", pObject->cNameSect().c_str());
-									ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str());
-									ImGui::Text("position: %f %f %f", pObject->Position().x, pObject->Position().y, pObject->Position().z);
+									xr_string name = pObject->cName().c_str();
 
-									ImGui::EndTooltip();
+									if (pCasted)
+									{
+										name += " ";
+										name += "[";
+										name += Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str());
+										name += "]";
+									}
+									name += "##InGame_SM_";
+									name += std::to_string(i);
+
+									if (ImGui::Button(name.c_str()))
+									{
+										CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
+
+										if (pActor)
+										{
+											xr_string cmd;
+											cmd = "set_actor_position ";
+											cmd += cmd.ToString(pObject->Position().x);
+											cmd += ",";
+											cmd += cmd.ToString(pObject->Position().y);
+											cmd += ",";
+											cmd += cmd.ToString(pObject->Position().z);
+
+											execute_console_command_deferred(Console, cmd.c_str());
+										}
+									}
+
+									if (ImGui::BeginItemTooltip())
+									{
+										ImGui::Text("system name: [%s]", pObject->cName().c_str());
+										ImGui::Text("section name: [%s]", pObject->cNameSect().c_str());
+										ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str());
+										ImGui::Text("position: %f %f %f", pObject->Position().x, pObject->Position().y, pObject->Position().z);
+
+										ImGui::EndTooltip();
+									}
 								}
 							}
 						}
 					}
 				}
+				else
+				{
+					ImGuiListClipper clipper;
+					clipper.Begin(size);
+
+					while (clipper.Step())
+					{
+						int real_count = 0;
+						int supposed_to_be_displayed = clipper.DisplayEnd - clipper.DisplayStart;
+
+						for (size_t i = clipper.DisplayStart; i < size; ++i)
+						{
+							if (real_count >= supposed_to_be_displayed)
+								break;
+
+							auto* pObject = Level().Objects.o_get_by_iterator(i);
+
+							if (pObject && pObject->H_Parent() == nullptr)
+							{
+								// statistics for search manager must be refactored and counting when object adds or deletes from online/offline, later
+							//	imgui_search_manager.count(pObject->CLS_ID);
+
+								if (imgui_search_manager.valid(pObject->CLS_ID))
+								{
+									CGameObject* pCasted = smart_cast<CGameObject*>(pObject);
+									bool passed_filter = true;
+
+									if (pCasted)
+									{
+										if (imgui_search_manager.show_alive_creatures)
+										{
+											CEntity* pEntity = smart_cast<CEntity*>(pCasted);
+
+											if (pEntity)
+											{
+												if (!pEntity->g_Alive())
+												{
+													passed_filter = false;
+												}
+											}
+											else
+											{
+												passed_filter = false;
+											}
+										}
+									}
+
+									if (passed_filter)
+									{
+										++real_count;
+										xr_string name = pObject->cName().c_str();
+
+										if (pCasted)
+										{
+											name += " ";
+											name += "[";
+											name += Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str());
+											name += "]";
+										}
+										name += "##InGame_SM_";
+										name += std::to_string(i);
+
+										if (ImGui::Button(name.c_str()))
+										{
+											CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
+
+											if (pActor)
+											{
+												xr_string cmd;
+												cmd = "set_actor_position ";
+												cmd += cmd.ToString(pObject->Position().x);
+												cmd += ",";
+												cmd += cmd.ToString(pObject->Position().y);
+												cmd += ",";
+												cmd += cmd.ToString(pObject->Position().z);
+
+												execute_console_command_deferred(Console, cmd.c_str());
+											}
+										}
+
+										if (ImGui::BeginItemTooltip())
+										{
+											ImGui::Text("system name: [%s]", pObject->cName().c_str());
+											ImGui::Text("section name: [%s]", pObject->cNameSect().c_str());
+											ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str());
+											ImGui::Text("position: %f %f %f", pObject->Position().x, pObject->Position().y, pObject->Position().z);
+
+											ImGui::EndTooltip();
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+
 
 				ImGui::EndTabItem();
 			}
@@ -200,38 +307,149 @@ void RenderSearchManagerWindow()
 				memcpy_s(category_name_separator, sizeof(category_name_separator), pTranslatedCategoryName, translate_str_len);
 				ImGui::SeparatorText(category_name_separator);
 
-				const auto& objects = ai().alife().objects().objects();
-				for (const auto& it : objects)
+				const auto& objects = ai().alife().objects().objects_vec();
+				size_t total_amount = objects.size();
+
+				auto filter_string_size = strlen(imgui_search_manager.search_string);
+
+				// todo: think about filtering for offline objects, because they can be REAL huge up to 32k...
+				// filtering is slow because it is linear, possible variants for optimization: unordered_map for names and name_replace
+				// possible suggestions: filter when button is pressed (but you need to remember the result and render only cache version (the result of filtering), not whole vector), create additional cache structures like filter by location and etc
+				if (filter_string_size)
 				{
-					auto* pServerObject = it.second;
-
-					if (pServerObject)
+					for (size_t i = 0; i < total_amount; ++i)
 					{
-						if (pServerObject->ID_Parent == 0xffff)
+						CSE_ALifeDynamicObject* pServerObject = objects[i];
+
+						if (pServerObject)
 						{
-							imgui_search_manager.count(pServerObject->m_tClassID);
-
-							if (imgui_search_manager.filter(pServerObject->m_tClassID))
+							if (pServerObject->ID_Parent == 0xffff)
 							{
-								xr_string name;
-
-								name = pServerObject->name_replace();
-								if (ImGui::Button(name.c_str()))
+								if (imgui_search_manager.valid(pServerObject->m_tClassID))
 								{
-									CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
+									bool passed_filter = true;
 
-									if (pActor)
+									CSE_Abstract* pAbstract = dynamic_cast<CSE_Abstract*>(pServerObject);
+
+									if (pAbstract && pServerObject)
 									{
-										xr_string cmd;
-										cmd = "set_actor_position ";
-										cmd += cmd.ToString(pServerObject->Position().x);
-										cmd += ",";
-										cmd += cmd.ToString(pServerObject->Position().y);
-										cmd += ",";
-										cmd += cmd.ToString(pServerObject->Position().z);
+										bool filter_by_cname = true;
+										bool filter_by_s_name = true;
+										if (pServerObject->name_replace())
+										{
+											std::string_view cname = pServerObject->name_replace();
+											const xr_string& translated_by_cname = Platform::ANSI_TO_UTF8(g_pStringTable->translate(cname.data()).c_str());
+											if (cname.find(imgui_search_manager.search_string) == std::string_view::npos && translated_by_cname.find(imgui_search_manager.search_string) == xr_string::npos)
+											{
+												filter_by_cname = false;
+											}
+										}
+										else
+										{
+											filter_by_cname = false;
+										}
+										
+										if (pAbstract->s_name.c_str())
+										{
+											std::string_view s_name = pAbstract->s_name.c_str();
 
-										execute_console_command_deferred(Console, cmd.c_str());
+											const xr_string& translated_by_s_name = Platform::ANSI_TO_UTF8(g_pStringTable->translate(s_name.data()).c_str());
+
+											if (s_name.find(imgui_search_manager.search_string) == std::string_view::npos && translated_by_s_name.find(imgui_search_manager.search_string) == xr_string::npos)
+											{
+												filter_by_s_name = false;
+											}
+										}
+										else
+										{
+											filter_by_s_name = false;
+										}
+										
+										passed_filter = filter_by_cname || filter_by_s_name;
 									}
+									
+									char button_name[128];
+									sprintf_s(button_name, "%s [%s]", pServerObject->name_replace() ? pServerObject->name_replace() : "", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pAbstract->s_name).c_str()).c_str());
+
+									if (passed_filter)
+									{
+										if (ImGui::Button(button_name))
+										{
+											CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
+
+											if (pActor)
+											{
+												xr_string cmd;
+												cmd = "set_actor_position ";
+												cmd += cmd.ToString(pServerObject->Position().x);
+												cmd += ",";
+												cmd += cmd.ToString(pServerObject->Position().y);
+												cmd += ",";
+												cmd += cmd.ToString(pServerObject->Position().z);
+
+												execute_console_command_deferred(Console, cmd.c_str());
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					ImGuiListClipper clipper;
+					clipper.Begin(total_amount);
+
+					while (clipper.Step())
+					{
+						int real_count = 0;
+						int supposed_to_be_displayed = clipper.DisplayEnd - clipper.DisplayStart;
+
+						for (size_t i = clipper.DisplayStart; i < total_amount; ++i)
+						{
+							if (real_count >= supposed_to_be_displayed)
+								break;
+
+							auto* pServerObject = objects[i];
+
+							if (pServerObject)
+							{
+								if (pServerObject->ID_Parent == 0xffff)
+								{
+									// statistics for search manager must be refactored and counting when object adds or deletes from online/offline, later
+					//				imgui_search_manager.count(pServerObject->m_tClassID);
+
+									if (imgui_search_manager.valid(pServerObject->m_tClassID))
+									{
+										xr_string name;
+
+										name = pServerObject->name_replace() ? pServerObject->name_replace() : pServerObject->name();
+										CSE_Abstract* pAbstract = smart_cast<CSE_Abstract*>(pServerObject);
+
+										char button_name[128];
+										sprintf_s(button_name, "%s [%s]", pServerObject->name_replace() ? pServerObject->name_replace() : "", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pAbstract->s_name).c_str()).c_str());
+
+										if (ImGui::Button(button_name))
+										{
+											CActor* pActor = smart_cast<CActor*>(Level().CurrentEntity());
+
+											if (pActor)
+											{
+												xr_string cmd;
+												cmd = "set_actor_position ";
+												cmd += cmd.ToString(pServerObject->Position().x);
+												cmd += ",";
+												cmd += cmd.ToString(pServerObject->Position().y);
+												cmd += ",";
+												cmd += cmd.ToString(pServerObject->Position().z);
+
+												execute_console_command_deferred(Console, cmd.c_str());
+											}
+										}
+										++real_count;
+									}
+
 								}
 							}
 						}

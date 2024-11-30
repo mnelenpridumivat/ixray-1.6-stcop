@@ -6,87 +6,34 @@
 #include "../xrEngine/string_table.h"
 #include <clsid_game.h>
 
-struct clsid_manager;
-extern clsid_manager* g_pClsidManager;
-
 struct clsid_manager
 {
-	void add_mp_stuff(CLASS_ID id) {
-		if (!is_item(id))
-			mp_stuffs.insert(id);
-	}
-	bool is_mp_stuff(CLASS_ID id) {
-		return mp_stuffs.find(id) != mp_stuffs.end();
-	}
+	void add_mp_stuff(CLASS_ID id);
+	bool is_mp_stuff(CLASS_ID id);
 
-	void add_item(CLASS_ID id) {
-		if (!is_item(id))
-			items.insert(id);
-	}
-	bool is_item(CLASS_ID id) {
-		return items.find(id) != items.end();
-	}
+	void add_item(CLASS_ID id);
+	bool is_item(CLASS_ID id);
 
-	void add_outfit(CLASS_ID id) {
-		if (!is_outfit(id))
-			outfits.insert(id);
-	}
-	bool is_outfit(CLASS_ID id) {
-		return outfits.find(id) != outfits.end();
-	}
+	void add_outfit(CLASS_ID id);
+	bool is_outfit(CLASS_ID id);
 
-	void add_ammo(CLASS_ID id) {
-		if (!is_ammo(id))
-			ammo.insert(id);
-	}
-	bool is_ammo(CLASS_ID id) {
-		return ammo.find(id) != ammo.end();
-	}
+	void add_ammo(CLASS_ID id);
+	bool is_ammo(CLASS_ID id);
 
-	void add_weapon(CLASS_ID id) {
-		if (!is_weapon(id))
-			weapons.insert(id);
-	}
+	void add_weapon(CLASS_ID id);
+	bool is_weapon(CLASS_ID id);
 
-	bool is_weapon(CLASS_ID id) {
-		return weapons.find(id) != weapons.end();
-	}
+	void add_monster(CLASS_ID id);
+	bool is_monster(CLASS_ID id);
 
-	void add_monster(CLASS_ID id) {
-		if (!is_monster(id))
-			monsters.insert(id);
-	}
+	void add_addon(CLASS_ID id);
+	bool is_addon(CLASS_ID id);
 
-	bool is_monster(CLASS_ID id) {
-		return monsters.find(id) != monsters.end();
-	}
+	void add_artefact(CLASS_ID id);
+	bool is_artefact(CLASS_ID id);
 
-	void add_addon(CLASS_ID id) {
-		if (!is_addon(id))
-			addons.insert(id);
-	}
-
-	bool is_addon(CLASS_ID id) {
-		return addons.find(id) != addons.end();
-	}
-
-	void add_artefact(CLASS_ID id) {
-		if (!is_artefact(id))
-			artefacts.insert(id);
-	}
-
-	bool is_artefact(CLASS_ID id) {
-		return artefacts.find(id) != artefacts.end();
-	}
-
-	void add_vehicle(CLASS_ID id) {
-		if (!is_vehicle(id))
-			vehicles.insert(id);
-	}
-
-	bool is_vehicle(CLASS_ID id) {
-		return vehicles.find(id) != vehicles.end();
-	}
+	void add_vehicle(CLASS_ID id);
+	bool is_vehicle(CLASS_ID id);
 
 	const xr_set<CLASS_ID>& get_items(void) const { return items; }
 	const xr_set<CLASS_ID>& get_outfits(void) const { return outfits; }
@@ -98,19 +45,7 @@ struct clsid_manager
 	const xr_set<CLASS_ID>& get_vehicles(void) const { return vehicles; }
 	const xr_set<CLASS_ID>& get_mp_stuffs(void) const { return mp_stuffs; }
 
-	const char* translateCLSID(CLASS_ID id) {
-		char name[16]{};
-		CLSID2TEXT(id, name);
-
-		for (int i = 0; i < 16; ++i)
-		{
-			if (name[i] == 32)
-			{
-				name[i] = '\0';
-			}
-		}
-		return g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
-	}
+	const char* translateCLSID(CLASS_ID id);
 
 	// reminder: information took from class_registrator.script because it overloads existed classes (clsids)
 	CLASS_ID artefact_s = TEXT2CLSID("SCRPTART");
@@ -307,220 +242,38 @@ enum eSelectedType {
 	kSelectedType_Count
 };
 
-struct {
+// todo: statistics must be counting on Level and xr_offline side (when an object adds or deletes)!!!! Don't calculate it dynamically due to clipping feature for optimization of iteration (you're unable to do that fast, because you can't iterate through whole array)
+struct CImGuiGameSearchManager {
 
+	bool is_initialized = false;
 	bool show_alive_creatures = {};
 	int selected_type = {};
-	char search_string[256] = {};
-	char category_names[(eSelectedType::kSelectedType_Count)][32] = {};
-	const char* combo_items[(eSelectedType::kSelectedType_Count)] = {};
-	int counts[(eSelectedType::kSelectedType_Count)]{};
-
+	const char* pTranslatedLabel_SmartCover{};
+	const char* pTranslatedLabel_SmartTerrain{};
+	const char* pTranslatedLabel_Stalker{};
+	const char* pTranslatedLabel_Car{};
+	const char* pTranslatedLabel_LevelChanger{};
+	const char* pTranslatedLabel_Artefact{};
 	xr_hash_map<eSelectedType, CLASS_ID> type_to_class;
 	xr_hash_map<CLASS_ID, eSelectedType> class_to_type;
+	char search_string[256] = {};
+	const char* combo_items[(eSelectedType::kSelectedType_Count)] = {};
+	int counts[(eSelectedType::kSelectedType_Count)]{};
+	char category_names[(eSelectedType::kSelectedType_Count)][32] = {};
 
-	eSelectedType convertCLSIDToType(CLASS_ID id) {
-		eSelectedType result = eSelectedType::kSelectedType_Count;
+	eSelectedType convertCLSIDToType(CLASS_ID id);
+	const char* convertTypeToString(int type);
+	bool valid(CLASS_ID id);
+	void count(CLASS_ID id);
+	void init();
 
-		if (class_to_type.find(id) != class_to_type.end())
-			result = class_to_type.at(id);
 
-		return result;
-	}
-
-	const char* convertTypeToString(int type) {
-		switch (static_cast<eSelectedType>(type))
-		{
-		case eSelectedType::kSelectedType_All:
-		{
-			return "All";
-		}
-		case eSelectedType::kSelectedType_Monster_All:
-		{
-			return "Monster - All";
-		}
-		case eSelectedType::kSelectedType_Weapon_All:
-		{
-			return "Weapon - All";
-		}
-		}
-
-		return nullptr;
-	}
-
-	bool filter(CLASS_ID id) {
-
-		bool result{};
-
-		if (selected_type == eSelectedType::kSelectedType_All)
-		{
-			result = true;
-			return result;
-		}
-
-		if (selected_type == eSelectedType::kSelectedType_Monster_All)
-		{
-			if (g_pClsidManager && g_pClsidManager->is_monster(id))
-			{
-				result = true;
-				return result;
-			}
-		}
-
-		if (selected_type == eSelectedType::kSelectedType_Weapon_All)
-		{
-			if (g_pClsidManager && g_pClsidManager->is_weapon(id))
-			{
-				result = true;
-				return result;
-			}
-		}
-
-		if (class_to_type.find(id) != class_to_type.end())
-		{
-			result = selected_type == class_to_type.at(id);
-		}
-
-		return result;
-	}
-
-	void count(CLASS_ID id) {
-		counts[(eSelectedType::kSelectedType_All)] += 1;
-
-		if (g_pClsidManager == nullptr)
-		{
-			return;
-		}
-
-		if (g_pClsidManager->is_monster(id))
-		{
-			counts[eSelectedType::kSelectedType_Monster_All] += 1;
-
-			if (class_to_type.find(id) != class_to_type.end())
-				counts[class_to_type.at(id)] += 1;
-
-		}
-		else if (g_pClsidManager->is_weapon(id))
-		{
-			counts[eSelectedType::kSelectedType_Weapon_All] += 1;
-
-			if (class_to_type.find(id) != class_to_type.end())
-				counts[class_to_type.at(id)] += 1;
-		}
-		else
-		{
-			if (class_to_type.find(id) != class_to_type.end())
-			{
-				counts[class_to_type.at(id)] += 1;
-			}
-		}
-	}
-
-	void init()
-	{
-		if (g_pClsidManager == nullptr)
-			return;
-		
-		type_to_class[eSelectedType::kSelectedType_SmartTerrain] = g_pClsidManager->smart_terrain;
-		type_to_class[eSelectedType::kSelectedType_SmartCover] = g_pClsidManager->smart_cover;
-		type_to_class[eSelectedType::kSelectedType_LevelChanger] = g_pClsidManager->level_changer;
-		type_to_class[eSelectedType::kSelectedType_Artefact] = g_pClsidManager->artefact;
-		type_to_class[eSelectedType::kSelectedType_Stalker] = g_pClsidManager->stalker;
-		type_to_class[eSelectedType::kSelectedType_Car] = g_pClsidManager->car;
-
-		type_to_class[eSelectedType::kSelectedType_Monster_BloodSucker] = g_pClsidManager->monster_bloodsucker;
-		type_to_class[eSelectedType::kSelectedType_Monster_Boar] = g_pClsidManager->monster_boar;
-		type_to_class[eSelectedType::kSelectedType_Monster_Dog] = g_pClsidManager->monster_dog;
-		type_to_class[eSelectedType::kSelectedType_Monster_Flesh] = g_pClsidManager->monster_flesh;
-		type_to_class[eSelectedType::kSelectedType_Monster_PseudoDog] = g_pClsidManager->monster_pseudodog;
-		type_to_class[eSelectedType::kSelectedType_Monster_Burer] = g_pClsidManager->monster_burer;
-		type_to_class[eSelectedType::kSelectedType_Monster_Cat] = g_pClsidManager->monster_cat;
-		type_to_class[eSelectedType::kSelectedType_Monster_Chimera] = g_pClsidManager->monster_chimera;
-		type_to_class[eSelectedType::kSelectedType_Monster_Controller] = g_pClsidManager->monster_controller;
-		type_to_class[eSelectedType::kSelectedType_Monster_Izlom] = g_pClsidManager->monster_izlom;
-		type_to_class[eSelectedType::kSelectedType_Monster_Poltergeist] = g_pClsidManager->monster_poltergeist;
-		type_to_class[eSelectedType::kSelectedType_Monster_PseudoGigant] = g_pClsidManager->monster_pseudogigant;
-		type_to_class[eSelectedType::kSelectedType_Monster_Zombie] = g_pClsidManager->monster_zombie;
-		type_to_class[eSelectedType::kSelectedType_Monster_Snork] = g_pClsidManager->monster_snork;
-		type_to_class[eSelectedType::kSelectedType_Monster_Tushkano] = g_pClsidManager->monster_tushkano;
-		type_to_class[eSelectedType::kSelectedType_Monster_PsyDog] = g_pClsidManager->monster_psydog;
-		type_to_class[eSelectedType::kSelectedType_Monster_PsyDogPhantom] = g_pClsidManager->monster_psydogphantom;
-
-		type_to_class[eSelectedType::kSelectedType_Weapon_Binocular] = g_pClsidManager->weapon_binocular;
-		type_to_class[eSelectedType::kSelectedType_Weapon_Knife] = g_pClsidManager->weapon_knife;
-		type_to_class[eSelectedType::kSelectedType_Weapon_BM16] = g_pClsidManager->weapon_bm16;
-		type_to_class[eSelectedType::kSelectedType_Weapon_Groza] = g_pClsidManager->weapon_groza;
-		type_to_class[eSelectedType::kSelectedType_Weapon_SVD] = g_pClsidManager->weapon_svd;
-		type_to_class[eSelectedType::kSelectedType_Weapon_AK74] = g_pClsidManager->weapon_ak74;
-		type_to_class[eSelectedType::kSelectedType_Weapon_LR300] = g_pClsidManager->weapon_lr300;
-		type_to_class[eSelectedType::kSelectedType_Weapon_HPSA] = g_pClsidManager->weapon_hpsa;
-		type_to_class[eSelectedType::kSelectedType_Weapon_PM] = g_pClsidManager->weapon_pm;
-		type_to_class[eSelectedType::kSelectedType_Weapon_RG6] = g_pClsidManager->weapon_rg6;
-		type_to_class[eSelectedType::kSelectedType_Weapon_RPG7] = g_pClsidManager->weapon_rpg7;
-		type_to_class[eSelectedType::kSelectedType_Weapon_Shotgun] = g_pClsidManager->weapon_shotgun;
-		type_to_class[eSelectedType::kSelectedType_Weapon_AutoShotgun] = g_pClsidManager->weapon_autoshotgun;
-		type_to_class[eSelectedType::kSelectedType_Weapon_SVU] = g_pClsidManager->weapon_svu;
-		type_to_class[eSelectedType::kSelectedType_Weapon_USP45] = g_pClsidManager->weapon_usp45;
-		type_to_class[eSelectedType::kSelectedType_Weapon_VAL] = g_pClsidManager->weapon_val;
-		type_to_class[eSelectedType::kSelectedType_Weapon_VINTOREZ] = g_pClsidManager->weapon_vintorez;
-		type_to_class[eSelectedType::kSelectedType_Weapon_WALTHER] = g_pClsidManager->weapon_walther;
-		type_to_class[eSelectedType::kSelectedType_Weapon_Magazine] = g_pClsidManager->weapon_magazine;
-		type_to_class[eSelectedType::kSelectedType_Weapon_StationaryMachineGun] = g_pClsidManager->weapon_stationary_machine_gun;
-
-		for (const std::pair<eSelectedType, CLASS_ID>& pair : type_to_class)
-		{
-			class_to_type[pair.second] = pair.first;
-		}
-
-		for (int i = 0; i < (eSelectedType::kSelectedType_Count); ++i)
-		{
-			char* pPtr = &category_names[i][0];
-			const char* pStr = convertTypeToString(i);
-			char result[32]{};
-
-			if (pStr==nullptr && type_to_class.find(eSelectedType(i)) != type_to_class.end())
-			{
-				char name[16]{};
-				CLASS_ID id = type_to_class.at(eSelectedType(i));
-				CLSID2TEXT(id, name);
-
-				for (int i = 0; i < 16; ++i)
-				{
-					if (name[i] == 32)
-					{
-						name[i] = '\0';
-					}
-				}
-				const char* pTranslatedName = g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
-
-				if (g_pClsidManager && g_pClsidManager->is_monster(id))
-				{
-					memcpy_s(result, sizeof(result), "Monster - ", sizeof("Monster - "));
-					memcpy_s(&result[0] + sizeof("Monster -"), sizeof(result) - sizeof("Monster -"), pTranslatedName, strlen(pTranslatedName));
-				}
-				else if (g_pClsidManager && g_pClsidManager->is_weapon(id))
-				{
-					memcpy_s(result, sizeof(result), "Weapon - ", sizeof("Weapon - "));
-					memcpy_s(&result[0] + sizeof("Weapon -"), sizeof(result) - sizeof("Weapon -"), pTranslatedName, strlen(pTranslatedName));
-				}
-				else
-				{
-					memcpy_s(result, sizeof(result), pTranslatedName, strlen(pTranslatedName));
-				}
-
-				pStr = result;
-			}
-			else
-			{
-				pStr = "unknown";
-			}
-
-			memcpy_s(pPtr, sizeof(category_names[i]), pStr, strlen(pStr));
-
-			combo_items[i] = pPtr;
-		}
-	}
-} imgui_search_manager;
+private:
+	// pre-caching naming for fast accessing and reducing requests to StringTable manager, it is slow...
+	void initTranslatedLabels();
+	const char* getDefaultNameOfSelectedType(eSelectedType type);
+	const char* getTranslatedString(eSelectedType type);
+};
 
 constexpr float kGeneralAlphaLevelForImGuiWindows = 0.5f;
 
@@ -537,3 +290,6 @@ void DestroySpawnManagerWindow();
 
 void RegisterImGuiInGame();
 void execute_console_command_deferred(CConsole* c, LPCSTR string_to_execute);
+
+extern clsid_manager* g_pClsidManager;
+extern CImGuiGameSearchManager imgui_search_manager;

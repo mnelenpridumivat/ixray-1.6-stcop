@@ -108,6 +108,8 @@ bool CSceneObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
         if (!bRes) break;
     }while(0);
 
+    IsLoaded = true;
+
     return bRes;
 }
 

@@ -525,21 +525,27 @@ bool CInifile::save_as	(LPCSTR new_fname)
 	return				(true);
 }
 
-BOOL	CInifile::section_exist( LPCSTR S )const
+BOOL CInifile::section_exist(LPCSTR S) const
 {
+	if (S == nullptr)
+		return false;
+
 	RootCIt I = std::lower_bound(DATA.begin(), DATA.end(), S, sect_pred);
-	return (I!=DATA.end() && xr_strcmp(*(*I)->Name,S)==0);
+	return (I != DATA.end() && xr_strcmp(*(*I)->Name, S) == 0);
 }
 
-BOOL	CInifile::line_exist( LPCSTR S, LPCSTR L )const
+BOOL CInifile::line_exist( LPCSTR S, LPCSTR L )const
 {
+	if (S == nullptr || L == nullptr)
+		return false;
+
 	if (!section_exist(S)) return FALSE;
 	Sect&	I = r_section(S);
 	SectCIt A = std::lower_bound(I.Data.begin(),I.Data.end(),L,item_pred);
 	return (A!=I.Data.end() && xr_strcmp(*A->first,L)==0);
 }
 
-u32		CInifile::line_count(LPCSTR Sname)const
+u32	CInifile::line_count(LPCSTR Sname)const
 {
 	Sect&	S = r_section(Sname);
 	SectCIt	I = S.Data.begin();

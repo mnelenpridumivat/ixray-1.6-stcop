@@ -3,6 +3,7 @@
 enum class EEngineExternalUI {
 	HQIcons,
 	DisableCharacterInfo,
+	DisableInventoryGrid,
 	None
 };
 
@@ -22,7 +23,8 @@ enum class EEngineExternalGame
 	EnableMonstersInventory,
 	EnableWeaponInertion,
 	EnableWeaponCollision,
-	EnableArtefactDegradation
+	EnableArtefactDegradation,
+	DisableSprintWhileOverweight
 };
 
 enum class EEngineExternalRender {

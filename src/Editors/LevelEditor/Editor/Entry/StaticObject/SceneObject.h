@@ -1,6 +1,7 @@
 #pragma once
 
-class CSceneObject : public CCustomObject
+class CSceneObject : 
+	public CCustomObject
 {
 	shared_str		m_ReferenceName;
 	CEditableObject*m_pReference;

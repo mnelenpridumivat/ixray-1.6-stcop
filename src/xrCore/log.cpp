@@ -51,6 +51,10 @@ void xrLogger::Msg(LPCSTR Msg, va_list argList)
 {
 	string4096	formattedMessage;
 	int MsgSize = _vsnprintf(formattedMessage, sizeof(formattedMessage) - 1, Msg, argList);
+
+	if (MsgSize < 0)
+		return;
+
 	formattedMessage[MsgSize] = 0;
 
 #ifdef IXR_LINUX

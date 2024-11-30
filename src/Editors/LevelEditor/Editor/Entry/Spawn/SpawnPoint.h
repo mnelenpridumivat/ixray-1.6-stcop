@@ -47,8 +47,6 @@ public:
     };
 	struct SSpawnData: public ISE_AbstractLEOwner
 	{
-        xrCriticalSection mLuaEnter;
-
 		CLASS_ID		m_ClassID;
         shared_str 		m_Profile;
 		CSE_Abstract*	m_Data;
@@ -183,4 +181,6 @@ private:
     virtual void 	OnUpdateTransform();
 private:
     void			RenderSimBox	();
+
+    xr_atomic_u32 dwFrameUpdate = 0;
 };

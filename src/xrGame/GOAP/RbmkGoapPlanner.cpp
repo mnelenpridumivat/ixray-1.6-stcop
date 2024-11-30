@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "RbmkGoapPlanner.h"
 
 #include "ai/monsters/state.h"

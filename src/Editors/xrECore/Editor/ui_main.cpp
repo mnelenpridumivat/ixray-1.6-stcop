@@ -794,33 +794,30 @@ void TUI::OnDestroy()
 	EDevice->ShutDown();    
 }
 
-SPBItem* TUI::ProgressStart		(float max_val, LPCSTR text)
+SPBItem* TUI::ProgressStart(float max_val, LPCSTR text)
 {
 	VERIFY(m_bReady);
-	SPBItem* item 				= new SPBItem(text,"",max_val);
-	m_ProgressItems.push_back	(item);
-	ELog.Msg					(mtInformation,text);
-	ProgressDraw				();
-	//if (!m_HConsole)
-	//{
-	//    AllocConsole();
-	//    m_HConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	//}
+	SPBItem* item = new SPBItem(text, "", max_val);
+	m_ProgressItems.push_back(item);
+	ELog.Msg(mtInformation, text);
+	ProgressDraw();
+
+	IsLoading = true;
+
 	return item;
 }
-void TUI::ProgressEnd			(SPBItem*& pbi)
+
+void TUI::ProgressEnd(SPBItem*& pbi)
 {
 	VERIFY(m_bReady);
-	if (pbi){
-		PBVecIt it=std::find(m_ProgressItems.begin(),m_ProgressItems.end(),pbi); VERIFY(it!=m_ProgressItems.end());
-		m_ProgressItems.erase	(it);
-		xr_delete				(pbi);
-		ProgressDraw			();
-		//if (m_ProgressItems.size() == 0)
-		//{
-		//    FreeConsole();
-		//    m_HConsole = 0;
-		//}
+	if (pbi) 
+	{
+		PBVecIt it = std::find(m_ProgressItems.begin(), m_ProgressItems.end(), pbi); VERIFY(it != m_ProgressItems.end());
+		m_ProgressItems.erase(it);
+		xr_delete(pbi);
+		ProgressDraw();
+
+		IsLoading = false;
 	}
 }
 
@@ -833,13 +830,7 @@ void TUI::ProgressDraw()
 		float 		p, m;
 		pbi->GetInfo(txt, p, m);
 		// progress
-		int val = fis_zero(m) ? 0 : (int)((p / m) * 100);
-		//string2048 out;
-		//xr_sprintf(out, sizeof(out), "[%d%%]%s\r\n", val, txt.c_str());
-		//Msg("[%d%%]%s\r\n", val, txt.c_str());
-	   // DWORD  dw;
-	   // SetConsoleTextAttribute(m_HConsole, 10);
-	   // ::WriteConsoleA(m_HConsole, out, xr_strlen(out), &dw, NULL);
+		ProgressStatus = fis_zero(m) ? 0 : (int)((p / m) * 100);
 	}
 }
 

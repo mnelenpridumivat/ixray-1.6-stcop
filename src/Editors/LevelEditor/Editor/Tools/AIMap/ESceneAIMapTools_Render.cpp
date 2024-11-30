@@ -45,6 +45,9 @@ BOOL ai_map_shown = TRUE;
 static const u32 block_size = 0x2000;
 void ESceneAIMapTool::OnRender(int priority, bool strictB2F)
 {
+    if (!IsLoaded)
+        return;
+
 	if (m_Flags.is(flHideNodes) || !ai_map_shown) return;
     if (1==priority){
         if (false==strictB2F){

@@ -84,6 +84,9 @@ void EDetailManager::InitRender()
 
 void EDetailManager::OnRender(int priority, bool strictB2F)
 {
+    if (!IsLoaded)
+        return;
+
 	if (dtSlots){
     	if (1==priority){
         	if (false==strictB2F){
@@ -369,6 +372,8 @@ bool EDetailManager::LoadStream(IReader& F)
     }
 
     InvalidateCache		();
+
+    IsLoaded = true;
 
     return true;
 }

@@ -3,7 +3,7 @@
 #include "../xrQSlim/src/MxStdModel.h"
 #include "../xrQSlim/src/MxQSlim.h"
 #include "../../xrCDB/xrCDB.h"
-#include "../../common/face_smoth_flags.h"
+#include "../xrLC_Light/face_smoth_flags.h"
 
 #define MAX_DECIMATE_ERROR 0.0005f
 #define COMPACTNESS_RATIO  0.001f

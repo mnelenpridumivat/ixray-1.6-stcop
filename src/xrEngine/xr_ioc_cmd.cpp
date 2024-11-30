@@ -84,7 +84,13 @@ class CCC_Quit : public IConsole_Command
 {
 public:
 	CCC_Quit(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) {
+	virtual void Execute(LPCSTR args) 
+	{
+		if (Device.IsEditorMode())
+		{
+			Msg("This command cannot be executed in Editors.");
+			return;
+		}
 		Console->Hide();
 		g_pEventManager->Event.Defer("KERNEL:disconnect");
 		g_pEventManager->Event.Defer("KERNEL:quit");
@@ -436,6 +442,11 @@ public:
 
 	virtual void Execute(LPCSTR args)
 	{
+		if (Device.IsEditorMode())
+		{
+			Msg("This command cannot be used in Editors.");
+			return;
+		}
 		CCC_Float::Execute		(args);
 		//Device.Gamma.Gamma		(ps_gamma);
 		Device.m_pRender->setGamma(ps_gamma);

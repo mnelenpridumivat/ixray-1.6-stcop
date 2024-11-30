@@ -813,7 +813,10 @@ HRESULT	CRender::shader_compile(
 		sh_name[len] = '0'; ++len;
 	}
 
-	if (0 == m_skinning) {
+	xr_string SkinMode = "";
+
+	if (0 == m_skinning) 
+	{
 		defines[def_it].Name = "SKIN_0";
 		defines[def_it].Definition = "1";
 		def_it++;
