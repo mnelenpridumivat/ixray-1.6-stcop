@@ -12,9 +12,10 @@ private:
 		ImVec2 FileSize;
 		ImTextureID	Texture;
 		xr_string TexturePath;
-		bool selected = false;
-		bool locked = false;
-		bool hidden = false;
+		
+		bool EdSelected = false;
+		bool EdLocked = false;
+		bool EdHidden = false;
 	};
 
 	template<typename T>
@@ -23,6 +24,13 @@ private:
 		if (value > max) return max;
 		return value;
 	}
+
+	enum EdMode
+	{
+		None =0,
+		Move,
+		Resize,
+	};
 public:
 	UIMinimapEditorForm();
 	virtual ~UIMinimapEditorForm();
@@ -59,6 +67,8 @@ private:
 	xr_vector<Element> elements;
 	xr_vector<xr_string> levels;
 
+	bool m_DebugView = false;
+
 	bool m_AlwaysDrawBorder = false;
 	bool isDragging = false;
 	bool PreviewMode = false;
@@ -77,6 +87,10 @@ private:
 
 	Element CreatingData;
 	bool showMPLevels = false;
+
+	EdMode m_EditMode = None;
+	int m_saveResizeMode	= 0;
+	int m_saveResizeOr		= 0;
 private:
 	ImTextureID					m_BackgroundTexture;
 	ImTextureID					m_TextureRemove;
