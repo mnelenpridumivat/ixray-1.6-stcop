@@ -126,6 +126,10 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 		{
 			if (psDeviceFlags.is(rsEdgedFaces) && (1 == priority) && (false == strictB2F))
 				RenderEdge(parent);
+
+			if (IsSkeleton())
+				::Render->shader_option_skinning(4);
+
 			size_t s_id = 0;
 			for (SurfaceIt s_it = m_Surfaces.begin(); s_it != m_Surfaces.end(); s_it++)
 			{
@@ -158,6 +162,8 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 				}
 				s_id++;
 			}
+
+			::Render->shader_option_skinning(-1);
 		}
 	}
 }
@@ -292,7 +298,7 @@ void CEditableObject::DefferedLoadRP()
 
 	// skeleton
 	if (IsSkeleton())
-		vs_SkeletonGeom.create(FVF_SV,RCache.Vertex.Buffer(),RCache.Index.Buffer());
+		vs_SkeletonGeom.create((D3DVERTEXELEMENT9*)g_dwDeclSkinning4W,RCache.Vertex.Buffer(),RCache.Index.Buffer());
 
 //*/
 	// создать LOD shader

@@ -273,9 +273,12 @@ void CEditableMesh::RenderEdge(const Fmatrix& parent, CSurface* s, u32 color)
 //----------------------------------------------------
 struct svertRender
 {
-	Fvector		P;
-	Fvector		N;
-	Fvector2 	uv;
+	Fvector3 P; float pad0;
+	Fvector3 N; float weight0;
+	Fvector3 T; float weight1;
+	Fvector3 B; float weight2;
+	Fvector2 uv;
+	uint32_t ind;
 };
 
 void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
@@ -288,6 +291,28 @@ void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
 
 	if (sp_it == m_SurfFaces.end())
 		return;
+
+	// set model shader from surface (active shader in editor device)
+	ref_shader shader = EDevice->GetShader();
+	RCache.set_Shader(shader);
+
+	// transfer matrices
+	ref_constant array = RCache.get_c("sbones_array");
+
+	const BoneVec& boneVec = m_Parent->m_Bones;
+	u16 count = (u16)std::min(75ull, boneVec.size());
+	for (u16 mid = 0; mid < count; mid++)
+	{
+		u32 id = u32(mid * 3);
+		const Fmatrix& M = boneVec[mid]->_RenderTransform();
+		RCache.set_ca(&*array, id + 0, M._11, M._21, M._31, M._41);
+		RCache.set_ca(&*array, id + 1, M._12, M._22, M._32, M._42);
+		RCache.set_ca(&*array, id + 2, M._13, M._23, M._33, M._43);
+	}
+
+	RCache.set_ca(&*array, 225, Fidentity._11, Fidentity._21, Fidentity._31, Fidentity._41);
+	RCache.set_ca(&*array, 226, Fidentity._12, Fidentity._22, Fidentity._32, Fidentity._42);
+	RCache.set_ca(&*array, 227, Fidentity._13, Fidentity._23, Fidentity._33, Fidentity._43);
 
 	IntVec& face_lst = sp_it->second;
 	_VertexStream* Stream = &RCache.Vertex;
@@ -306,23 +331,48 @@ void CEditableMesh::RenderSkeleton(const Fmatrix&, CSurface* S)
 		for (int k = 0; k < 3; k++, pv++)
 		{
 			st_SVert& SV = m_SVertices[*i_it * 3 + k];
-			pv->uv.set(SV.uv);
+			pv->uv = SV.uv;
+			pv->P = SV.offs;
+			pv->N = SV.norm;
+		
+			u8 bone_count = (u8)SV.bones.size();
 			float total = SV.bones[0].w;
-
-			const Fmatrix& M = m_Parent->m_Bones[SV.bones[0].id]->_RenderTransform();
-			M.transform_tiny(pv->P, SV.offs);
-			M.transform_dir(pv->N, SV.norm);
-
-			Fvector P, N;
-
-			for (u8 cnt = 1; cnt < (u8)SV.bones.size(); cnt++)
+			float max_weight = SV.bones[0].w + SV.bones[1 % bone_count].w + SV.bones[2 % bone_count].w;
+			u16 max_bone_id = std::max(SV.bones[0].id, std::max(SV.bones[1 % bone_count].id,
+				std::max(SV.bones[2 % bone_count].id, SV.bones[3 % bone_count].id)));
+		
+			if (max_bone_id >= 75)
 			{
-				total += SV.bones[cnt].w;
-				const Fmatrix& M = m_Parent->m_Bones[SV.bones[cnt].id]->_RenderTransform();
-				M.transform_tiny(P, SV.offs);
-				M.transform_dir(N, SV.norm);
-				pv->P.lerp(pv->P, P, SV.bones[cnt].w / total);
-				pv->N.lerp(pv->N, N, SV.bones[cnt].w / total);
+				const Fmatrix& M = m_Parent->m_Bones[SV.bones[0].id]->_RenderTransform();
+				M.transform_tiny(pv->P, SV.offs);
+				M.transform_dir(pv->N, SV.norm);
+
+				Fvector P, N;
+
+				for (u8 cnt = 1; cnt < bone_count; cnt++)
+				{
+					total += SV.bones[cnt].w;
+
+					const Fmatrix& M = m_Parent->m_Bones[SV.bones[cnt].id]->_RenderTransform();
+					M.transform_tiny(P, SV.offs);
+					M.transform_dir(N, SV.norm);
+					pv->P.lerp(pv->P, P, SV.bones[cnt].w / total);
+					pv->N.lerp(pv->N, N, SV.bones[cnt].w / total);
+				}
+
+				pv->weight0 = pv->weight1 = pv->weight2 = 0.25f;
+				pv->ind = color_rgba(75 * 3, 75 * 3, 75 * 3, 75 * 3);
+			}
+			else
+			{
+				pv->weight0 = SV.bones[0].w / max_weight;
+				pv->weight1 = SV.bones[1 % bone_count].w / max_weight;
+				pv->weight2 = SV.bones[2 % bone_count].w / max_weight;
+				pv->ind = color_rgba(
+					SV.bones[0].id * 3, 
+					SV.bones[1 % bone_count].id * 3,
+					SV.bones[2 % bone_count].id * 3,
+					SV.bones[3 % bone_count].id * 3);
 			}
 		}
 

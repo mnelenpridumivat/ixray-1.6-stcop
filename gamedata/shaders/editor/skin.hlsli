@@ -55,9 +55,9 @@ float4 u_position(float4 v)
 } // -12..+12
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// uniform float4 	sbones_array	[256-22] : register(vs,c22);
+// uniform float4 	sbones_array	[256-22];
 //   Igor: Max number of bones per mesh - 64. 3 registers per bone.
-uniform float4 sbones_array[65 * 3] : register(vs, c22);
+uniform float4 sbones_array[230];
 float3 skinning_dir(float3 dir, float3 m0, float3 m1, float3 m2)
 {
     float3 U = unpack_normal(dir);
