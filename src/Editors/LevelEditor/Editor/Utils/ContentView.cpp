@@ -1091,9 +1091,8 @@ bool CContentView::DrawContext(const xr_path& Path)
 		return false;
 	}
 
-	bool ShowOpen = Path.has_extension() && Path.extension().string() == ".level";
 
-	if (ShowOpen)
+	if (Path.has_extension() && Path.extension().string() == ".level")
 	{
 		if (ImGui::MenuItem("Open"))
 		{
@@ -1121,51 +1120,72 @@ bool CContentView::DrawContext(const xr_path& Path)
 		ImGui::Separator();
 	}
 
-	//if (!ShowOpen) //Actions are temporarily unavailable for levels. The logic is not worked out
+	if (Path.has_extension() && Path.extension().string() == ".wav")
 	{
-		if (ImGui::MenuItem("Cut"))
+		if (ImGui::MenuItem("Open"))
 		{
-			CutAction(Path);
+			ExecCommand(COMMAND_SOUND_EDITOR, xr_path(Path.stem()).xstring());
 		}
-		if (ImGui::MenuItem("Copy"))
-		{
-			CopyAction(Path);
-		}
-		if (ImGui::MenuItem("Rename"))
-		{
-			RenameActionActivate(Path);
-		}
-		if (ImGui::MenuItem("Delete"))
-		{
-			DeleteAction(Path);
-		}
+
+		ImGui::Separator();
 	}
 
-	bool ShowConvert = Path.has_extension() && (Path.extension().string() == ".dds" || Path.extension().string() == ".tga" || Path.extension().string() == ".png");
 
-	if (ShowConvert)
+	if (ImGui::MenuItem("Cut"))
+	{
+		CutAction(Path);
+	}
+	if (ImGui::MenuItem("Copy"))
+	{
+		CopyAction(Path);
+	}
+	if (ImGui::MenuItem("Rename"))
+	{
+		RenameActionActivate(Path);
+	}
+	if (ImGui::MenuItem("Delete"))
+	{
+		DeleteAction(Path);
+	}
+
+
+	bool ShowConvert = false;
+
+	const xr_set<xr_string> supportedExtensionsConvert = { ".dds", ".tga", ".png", ".wav" };
+
+	if (Path.has_extension() && supportedExtensionsConvert.count(xr_path(Path.extension()).xstring()) > 0)
 	{
 		ImGui::Separator();
 
-		if (ImGui::BeginMenu("Convert"))
+		if (auto ex = xr_path(Path.extension()).xstring(); ImGui::BeginMenu("Convert"))
 		{
-			if (Path.extension().string() != ".tga" && ImGui::MenuItem("TGA"))
+			if ((ex == ".dds" || ex == ".png") && ImGui::MenuItem("TGA"))
 			{
-				xr_string OutFile = Path.xstring();
-				OutFile.erase(OutFile.length() - 3);
-				OutFile.append("tga");
+				xr_path OutFile = Path;
+				OutFile.replace_extension(".tga");
 
 				DXTUtils::Converter::MakeTGA(Path, OutFile);
 
 			}
 
-			if (Path.extension().string() != ".png" && ImGui::MenuItem("PNG"))
+			if ((ex == ".dds" || ex == ".tga") && ImGui::MenuItem("PNG"))
 			{
-				xr_string OutFile = Path.xstring();
-				OutFile.erase(OutFile.length() - 3);
-				OutFile.append("png");
+				xr_path OutFile = Path;
+				OutFile.replace_extension(".png");
 
 				DXTUtils::Converter::MakePNG(Path, OutFile);
+			}
+
+			if (ex == ".wav" && ImGui::MenuItem("OGG"))
+			{
+				xr_path OutFile = Path;
+				OutFile.replace_extension(".ogg");
+				
+				xr_string stem = xr_path(Path.stem());
+				ESoundThumbnail* pTHM = new ESoundThumbnail(stem.c_str());
+				
+				SndLib->MakeGameSound(pTHM, Path.xstring().c_str(), OutFile.xstring().c_str());
+				xr_delete(pTHM);
 			}
 
 			ImGui::EndMenu();

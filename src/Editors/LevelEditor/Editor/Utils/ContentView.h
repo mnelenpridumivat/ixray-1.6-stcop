@@ -118,7 +118,7 @@ private:
 	xr_string CurrentDir;
 	xr_string RootDir;
 	xr_string LogsDir;
-	ImVec2 BtnSize = { 64, 64 };
+	ImVec2 BtnSize{};
 
 	xr_hash_map<xr_string, IconData> Icons;
 

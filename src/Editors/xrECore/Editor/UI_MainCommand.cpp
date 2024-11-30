@@ -391,7 +391,7 @@ CCommandVar 	CommandSetSettings(CCommandVar p1, CCommandVar p2)
 }             
 CCommandVar 	CommandSoundEditor(CCommandVar p1, CCommandVar p2)
 {
-	UISoundEditorForm::Show();
+	UISoundEditorForm::Show(p1);
   //  TfrmSoundLib::EditLib(xr_string("Sound Editor"));
 	return				TRUE;
 }
