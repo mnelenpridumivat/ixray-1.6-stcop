@@ -181,7 +181,7 @@ void xrDebug::show_dialog(const std::string& message, bool& ignore_always)
 
 	const SDL_MessageBoxData messageboxdata = 
 	{
-		SDL_MESSAGEBOX_ERROR,		/* .flags */
+		SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,		/* .flags */
 		nullptr,					/* .window */
 		"Fatal Error",				/* .title */
 		message.c_str(),			/* .message */

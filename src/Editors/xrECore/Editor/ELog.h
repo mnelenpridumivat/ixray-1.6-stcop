@@ -13,21 +13,26 @@ enum TMsgDlgType
 	mtSkip = 8,
 
 };
+
 enum TMsgDlgButtons
 {
-	mbYes=1,
-	mbNo=2,
-	mbCancel=4,
-	mbOK = 8,
-	mbSkip = 16,
-	mrNone = 0,
+	mbYes		= 1 << 0,
+	mbNo		= 1 << 1,
+	mbCancel	= 1 << 2,
+	mbOK		= 1 << 3,
+	mbSkip		= 1 << 4,
+
+	// Values
+	mrNone		= 0,
 	mrYes,
 	mrNo,
 	mrCancel,
 	mrOK,
 	mrSkip,
 };
-class ECORE_API CLog{
+
+class ECORE_API CLog
+{
 public:
 	bool 		in_use;
 public:

@@ -310,6 +310,7 @@ struct EPATargetColor : public EParticleAction
 {
 					EPATargetColor();
     virtual void	Compile		(IWriter& F);
+    virtual void 	Load        (IReader& F);
 };
 
 struct EPATargetSize : public EParticleAction

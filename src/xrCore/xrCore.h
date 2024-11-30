@@ -24,8 +24,9 @@
 #ifndef DEBUG
 	#pragma inline_depth	( 254 )
 	#pragma inline_recursion( on )
-	#pragma intrinsic	(abs, fabs, fmod, sin, cos, tan, asin, acos, atan, sqrt, exp, log, log10, strcat)
 #endif
+
+#pragma intrinsic(abs, fabs, fmod, sin, cos, tan, asin, acos, atan, sqrt, exp, log, log10, strcat)
 
 #include <filesystem>
 #include <time.h>
@@ -54,6 +55,10 @@
 #include <stdarg.h>
 #include <math.h>
 #include <fcntl.h>
+
+// FSD
+#include <fast_dynamic_cast/fast_dynamic_cast.hpp>
+#define smart_cast fast_dynamic_cast
 
 // stl
 #pragma warning (push)
@@ -206,6 +211,3 @@ namespace Platform
 }
 
 extern XRCORE_API xrCore Core;
-
-#include <fast_dynamic_cast/fast_dynamic_cast.hpp>
-#define smart_cast fast_dynamic_cast

@@ -9,7 +9,8 @@
 #include "../../xrParticles/noise.h"
 
 using namespace PAPI; 
-#define PARTICLE_ACTION_VERSION		0x0001
+#define PARTICLE_ACTION_VERSION_MIN 0x0000
+#define PARTICLE_ACTION_VERSION_MAX 0x0001
 //---------------------------------------------------------------------------
 xr_token2					actions_token		[ ]={
 	{ "Avoid",				"Steer particles away from a domain of space.", 			                PAAvoidID				},        
@@ -86,48 +87,34 @@ EParticleAction* pCreateEActionImpl(PAPI::PActionEnum type)
 	return pa;
 }
 //---------------------------------------------------------------------------
-void 	EParticleAction::Render		(const Fmatrix& parent)
+void EParticleAction::Render(const Fmatrix& parent)
 {
-	for (PDomainMapIt it=domains.begin(); it!=domains.end(); it++)
-		it->second.Render		(it->second.clr,parent);
+	for (PDomainMapIt it = domains.begin(); it != domains.end(); it++)
+		it->second.Render(it->second.clr, parent);
 }
-void 	EParticleAction::Load		(IReader& F)
+
+void EParticleAction::Load(IReader& F)
 {
-	u32 vers		= F.r_u32();
+	u32 vers = F.r_u32();
+	R_ASSERT(vers <= PARTICLE_ACTION_VERSION_MAX && vers >= PARTICLE_ACTION_VERSION_MIN);
 
-	if (vers == 0)
-	{
-	}
-	else R_ASSERT(vers==PARTICLE_ACTION_VERSION);
+	F.r_stringZ(actionName);
+	flags.assign(F.r_u32());
 
-	F.r_stringZ		(actionName);
-	flags.assign	(F.r_u32());
+	for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
+		f_it->second.val = F.r_float();
 
+	for (PVectorMapIt v_it = vectors.begin(); v_it != vectors.end(); v_it++)	
+		F.r_fvector3(v_it->second.val);
 
-	if (vers == 0 && smart_cast<EPATargetColor*>(this))
-	{
-		constexpr int Count = 2;
-		int Iter = 0;
-		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
-		{
-			if (Iter >= Count)
-				break;
+	for (PDomainMapIt d_it = domains.begin(); d_it != domains.end(); d_it++)	
+		d_it->second.Load(F);
 
-			f_it->second.val = F.r_float();
+	for (PBoolMapIt b_it = bools.begin(); b_it != bools.end(); b_it++)
+		b_it->second.val = F.r_u8();
 
-			Iter++;
-		}
-	}
-	else
-	{
-		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
-			f_it->second.val = F.r_float();
-	}
-
-	for (PVectorMapIt 	v_it=vectors.begin();	v_it!=vectors.end(); 	v_it++)	F.r_fvector3(v_it->second.val);
-	for (PDomainMapIt 	d_it=domains.begin(); 	d_it!=domains.end(); 	d_it++)	d_it->second.Load	(F);
-	for (PBoolMapIt 	b_it=bools.begin();  	b_it!=bools.end(); 		b_it++)	b_it->second.val	= F.r_u8();
-	for (PIntMapIt 		i_it=ints.begin(); 		i_it!=ints.end(); 		i_it++)	i_it->second.val	= F.r_s32();
+	for (PIntMapIt i_it = ints.begin(); i_it != ints.end(); i_it++)
+		i_it->second.val = F.r_s32();
 }
 
 void EParticleAction::Load2(CInifile& ini, const shared_str& sect)
@@ -179,7 +166,7 @@ void EParticleAction::Load2(CInifile& ini, const shared_str& sect)
 }
 void 	EParticleAction::Save		(IWriter& F)
 {
-	F.w_u32			(PARTICLE_ACTION_VERSION);
+	F.w_u32			(PARTICLE_ACTION_VERSION_MAX);
 	F.w_stringZ		(actionName);
 	F.w_u32			(flags.get());
 	for (PFloatMapIt 	f_it=floats.begin(); 	f_it!=floats.end(); 	f_it++)	F.w_float	(f_it->second.val);
@@ -191,7 +178,7 @@ void 	EParticleAction::Save		(IWriter& F)
 
 void EParticleAction::Save2(CInifile& ini, const shared_str& sect)
 {
-	ini.w_u32			(sect.c_str(), "version",		PARTICLE_ACTION_VERSION);
+	ini.w_u32			(sect.c_str(), "version", PARTICLE_ACTION_VERSION_MAX);
 	ini.w_string		(sect.c_str(), "action_name",	actionName.c_str());
 	ini.w_u32			(sect.c_str(), "flags",			flags.get());
 	
@@ -1101,7 +1088,42 @@ EPATargetColor::EPATargetColor		():EParticleAction(PAPI::PATargetColorID)
 	appendFloat						("TimeFrom",		0.0f, 0.0f, 1.0f);     
 	appendFloat						("TimeTo",			1.0f, 0.0f, 1.0f);     
 }
-void	EPATargetColor::Compile	  	(IWriter& F)
+
+void EPATargetColor::Load(IReader& F)
+{
+	u32 vers = F.r_u32();
+	R_ASSERT(vers <= PARTICLE_ACTION_VERSION_MAX && vers >= PARTICLE_ACTION_VERSION_MIN);
+
+	F.r_stringZ(actionName);
+	flags.assign(F.r_u32());
+
+	if (vers == 0)
+	{
+		constexpr int Count = 2;
+		int Iter = 0;
+		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
+		{
+			if (Iter >= Count)
+				break;
+
+			f_it->second.val = F.r_float();
+
+			Iter++;
+		}
+	}
+	else
+	{
+		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
+			f_it->second.val = F.r_float();
+	}
+
+	for (PVectorMapIt v_it = vectors.begin(); v_it != vectors.end(); v_it++)	F.r_fvector3(v_it->second.val);
+	for (PDomainMapIt d_it = domains.begin(); d_it != domains.end(); d_it++)	d_it->second.Load(F);
+	for (PBoolMapIt b_it = bools.begin(); b_it != bools.end(); b_it++)	b_it->second.val = F.r_u8();
+	for (PIntMapIt i_it = ints.begin(); i_it != ints.end(); i_it++)	i_it->second.val = F.r_s32();
+}
+
+void EPATargetColor::Compile(IWriter& F)
 {
 	pTargetColor(F,_vector("Color").val, _float("Alpha").val, _float("Scale").val, _float("TimeFrom").val, _float("TimeTo").val);
 }
