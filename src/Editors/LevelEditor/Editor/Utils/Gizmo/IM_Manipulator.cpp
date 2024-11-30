@@ -40,20 +40,25 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 		if (PtrMoveSnap)
 			std::fill_n(MoveSnap, std::size(MoveSnap), Tools->m_MoveSnap);
 
+		if (lst.size() == 1)
+		{
+			if (CWayObject* WayPtr = smart_cast<CWayObject*>(lst.front()))
+			{
+				ObjectMatrix = WayPtr->GetTransform();
+			}
+		}
+
 		const bool IsManipulated = ImGuizmo::Manipulate((float*)&Device.mView, (float*)&Device.mProject, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, (float*)&ObjectMatrix, (float*)&DeltaMatrix, PtrMoveSnap);
 
 		if (IsManipulated)
 		{
 			for (CCustomObject* ObjPtr : lst)
 			{
+				ObjPtr->Move(DeltaMatrix.c);
+
 				if (CWayObject* WayPtr = smart_cast<CWayObject*>(ObjPtr))
 				{
-					ObjPtr->Move(DeltaMatrix.c);
 					ObjPtr->UpdateTransform();
-				}
-				else
-				{
-					ObjPtr->Move(DeltaMatrix.c);
 				}
 			}
 		}
@@ -116,7 +121,7 @@ void IM_Manipulator::Render(float canvasX, float canvasY, float canvasWidth, flo
 				lst.front()->GetUTBox(test);
 				Flags |= ImGuizmo::BOUNDS;
 			}
-			if (LTools->CurrentClassID() == OBJCLASS_SHAPE)
+			else if (LTools->CurrentClassID() == OBJCLASS_SHAPE)
 			{
 				CEditShape* Shape = (CEditShape*)lst.front();
 				if (Shape->shapes[0].type == CShapeData::cfBox)
