@@ -3,6 +3,7 @@
 #include "UILogForm.h"
 #include "..\XrCore\os_clipboard.h"
 #include "..\XrEngine\XR_IOConsole.h"
+#include "..\xrEUI\xrUITheme.h"
 #define MSG_ERROR 	0x00C4C4FF
 #define MSG_INFO  	0x00E6FFE7
 #define MSG_CONF 	0x00FFE6E7
@@ -83,8 +84,8 @@ void UILogForm::Update()
 			xr_string CopyLog;
 			for (int i = 0; i < GetList()->size(); i++)
 			{
-
-				ImVec4 Color = { 1,1,1,1 };
+				CUIThemeManager& theme_manager = CUIThemeManager::Get();
+				ImVec4 Color = theme_manager.log_color_default;
 				const char* Str = GetList()->at(i).c_str();
 
 				if (Str == nullptr || xr_strlen(Str) == 0)
@@ -96,15 +97,15 @@ void UILogForm::Update()
 				}
 				if (strncmp(Str, "! ", 2) == 0)
 				{
-					Color = { 1,0,0,1 };
+					Color = theme_manager.log_color_error;
 				}
 				if (strncmp(Str, "~ ", 2) == 0)
 				{
-					Color = { 1,1,0,1 };
+					Color = theme_manager.log_color_warning;
 				}
 				if (strncmp(Str, "* ", 2) == 0)
 				{
-					Color = { 0.5,0.5,0.5,1 };
+					Color = theme_manager.log_color_debug;
 				}
 
 				ImGui::PushStyleColor(ImGuiCol_Text, Color);

@@ -69,6 +69,12 @@ void CUIThemeManager::Draw()
 		ImGui::ColorEdit4("Context Hovered", (float*)&colors[ImGuiCol_HeaderHovered]);
 		ImGui::ColorEdit4("Context PopupBg", (float*)&colors[ImGuiCol_PopupBg]);
 
+		ImGui::SeparatorText("Log");
+		ImGui::ColorEdit4("Error message", (float*)&log_color_error);
+		ImGui::ColorEdit4("Warning message", (float*)&log_color_warning);
+		ImGui::ColorEdit4("Debug message", (float*)&log_color_debug);
+		ImGui::ColorEdit4("Default message", (float*)&log_color_default);
+
 		ImGui::SeparatorText("Fonts");
 		FS_FileSet Files;
 		string_path Fonts = {};
@@ -209,6 +215,10 @@ void CUIThemeManager::InitDefault(bool Forced)
 	colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
 	colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
 	colors[ImGuiCol_PopupBg] = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
+	log_color_default = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	log_color_error = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	log_color_warning = ImVec4(1.00f, 1.00f, 0.00f, 1.00f);
+	log_color_debug = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 
 	IsLoaded = true;
 }
@@ -234,12 +244,36 @@ void CUIThemeManager::Show(bool value)
 	colors[color].w = a; \
 } \
 
+#define FastJSonReadImColorAlt(color) \
+{ \
+	if (!JSONData["Theme"].contains(#color))\
+		return; \
+	\
+	float r = JSONData["Theme"][#color]["r"];\
+	float g = JSONData["Theme"][#color]["g"];\
+	float b = JSONData["Theme"][#color]["b"];\
+	float a = JSONData["Theme"][#color]["a"];\
+	\
+	color.x = r; \
+	color.y = g; \
+	color.z = b; \
+	color.w = a; \
+} \
+
 #define FastJSonWriteImColor(color) \
 { \
 	JSONData["Theme"][#color]["r"] = colors[color].x;\
 	JSONData["Theme"][#color]["g"] = colors[color].y;\
 	JSONData["Theme"][#color]["b"] = colors[color].z;\
 	JSONData["Theme"][#color]["a"] = colors[color].w;\
+} \
+
+#define FastJSonWriteImColorAlt(color) \
+{ \
+	JSONData["Theme"][#color]["r"] = color.x;\
+	JSONData["Theme"][#color]["g"] = color.y;\
+	JSONData["Theme"][#color]["b"] = color.z;\
+	JSONData["Theme"][#color]["a"] = color.w;\
 } \
 
 void CUIThemeManager::Save()
@@ -273,6 +307,10 @@ void CUIThemeManager::Save()
 	FastJSonWriteImColor(ImGuiCol_Header);
 	FastJSonWriteImColor(ImGuiCol_HeaderHovered);
 	FastJSonWriteImColor(ImGuiCol_PopupBg);
+	FastJSonWriteImColorAlt(log_color_default);
+	FastJSonWriteImColorAlt(log_color_error);
+	FastJSonWriteImColorAlt(log_color_warning);
+	FastJSonWriteImColorAlt(log_color_debug);
 
 	JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 	JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -320,6 +358,10 @@ void CUIThemeManager::SaveTo()
 		FastJSonWriteImColor(ImGuiCol_Header);
 		FastJSonWriteImColor(ImGuiCol_HeaderHovered);
 		FastJSonWriteImColor(ImGuiCol_PopupBg);
+		FastJSonWriteImColorAlt(log_color_default);
+		FastJSonWriteImColorAlt(log_color_error);
+		FastJSonWriteImColorAlt(log_color_warning);
+		FastJSonWriteImColorAlt(log_color_debug);
 
 		JSONData["Theme"]["InactiveAlpha"] = TransparentDefault;
 		JSONData["Theme"]["ActiveAlpha"] = TransparentUnfocused;
@@ -371,6 +413,10 @@ void CUIThemeManager::LoadFrom()
 		FastJSonReadImColor(ImGuiCol_Header);
 		FastJSonReadImColor(ImGuiCol_HeaderHovered);
 		FastJSonReadImColor(ImGuiCol_PopupBg);
+		FastJSonReadImColorAlt(log_color_default);
+		FastJSonReadImColorAlt(log_color_error);
+		FastJSonReadImColorAlt(log_color_warning);
+		FastJSonReadImColorAlt(log_color_debug);
 
 
 		if (JSONData["Theme"].contains("InactiveAlpha"))
@@ -434,6 +480,10 @@ void CUIThemeManager::Load()
 	FastJSonReadImColor(ImGuiCol_Header);
 	FastJSonReadImColor(ImGuiCol_HeaderHovered);
 	FastJSonReadImColor(ImGuiCol_PopupBg);
+	FastJSonReadImColorAlt(log_color_default);
+	FastJSonReadImColorAlt(log_color_error);
+	FastJSonReadImColorAlt(log_color_warning);
+	FastJSonReadImColorAlt(log_color_debug);
 
 
 	if (JSONData["Theme"].contains("InactiveAlpha"))
