@@ -797,7 +797,12 @@ bool CLevelSpawnConstructor::Execute()
 		m_level_graph = 0;
 		return false;
 	}
-	generate_artefact_spawn_positions();
+
+	if (((CLevelPreferences*)(EPrefs))->PIEArtSpawnPos)
+	{
+		generate_artefact_spawn_positions();
+	}
+
 	correct_level_changers();
 	if (MainForm->GetTopBarForm()->VerifySpaceRestrictors())
 		if (!verify_space_restrictors())

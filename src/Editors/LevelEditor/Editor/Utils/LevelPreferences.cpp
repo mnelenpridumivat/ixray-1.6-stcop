@@ -25,6 +25,11 @@ void CLevelPreferences::Load()
 		Compiler_xrDO = ((std::string)JSONData["Compilers Path"]["xrDO"]).c_str();
 	}
 
+	if (JSONData.contains("PIE") && JSONData["PIE"].contains("ArtPos"))
+	{
+		PIEArtSpawnPos = JSONData["PIE"]["ArtPos"];
+	}
+
 	if (JSONData["windows"].contains("snap_list"))
 	{
 		OpenSnapList = JSONData["windows"]["snap_list"];
@@ -80,6 +85,8 @@ void CLevelPreferences::Save()
 	JSONData["windows"]["world_properties"] = OpenWorldProperties;
 	JSONData["windows"]["snap_list"] = OpenSnapList;
 	JSONData["windows"]["light_anim"] = OpenLightAnim;
+	
+	JSONData["PIE"]["ArtPos"] = PIEArtSpawnPos;
 
 	JSONData["Compilers Path"]["xrLC"] = Compiler_xrLC.c_str();
 	JSONData["Compilers Path"]["xrAI"] = Compiler_xrAI.c_str();
