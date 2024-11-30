@@ -1,7 +1,7 @@
 #ifndef	_XRLIGHT_IMPLICITCALCGLOBS_H_
 #define	_XRLIGHT_IMPLICITCALCGLOBS_H_
 #include "xrFaceDefs.h"
-#include "hash2d.h"
+#include "hash2D.h"
 class ImplicitDeflector;
 typedef hash2D <Face*,384,384>		IHASH;
 class ImplicitCalcGlobs

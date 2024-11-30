@@ -8,7 +8,7 @@
 
 #pragma once
 #include "script_engine.h"
-#include "../xrScripts/script_export_space.h"
+#include "script_export_space.h"
 
 IC bool compare_safe(const luabind::object& o1, const luabind::object& o2)
 {

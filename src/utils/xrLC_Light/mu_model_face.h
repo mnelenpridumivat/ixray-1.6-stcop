@@ -3,7 +3,7 @@
  
 
 #include "base_face.h"
-#include "meshstructure.h"
+#include "MeshStructure.h"
 #include "mu_model_face_defs.h"
 //#ifndef MESHSTRUCTURE_EXSPORTS_IMPORTS
 //#define MESHSTRUCTURE_EXSPORTS_IMPORTS

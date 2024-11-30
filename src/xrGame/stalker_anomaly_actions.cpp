@@ -6,7 +6,7 @@
 //	Description : Stalker anomaly action classes
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "stalker_anomaly_actions.h"
 #include "ai/stalker/ai_stalker.h"
@@ -26,7 +26,7 @@
 #include "stalker_movement_manager_smart_cover.h"
 #include "sound_player.h"
 #include "ai/stalker/ai_stalker_space.h"
-#include "radioactivezone.h"
+#include "RadioactiveZone.h"
 #include "alife_simulator.h"
 #include "alife_object_registry.h"
 #include "../xrServerEntities/xrServer_Objects_ALife_Monsters.h"

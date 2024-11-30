@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "key_binding_registrator.h"
 #include "../xrEngine/xr_level_controller.h"

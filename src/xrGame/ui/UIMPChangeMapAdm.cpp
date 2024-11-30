@@ -7,7 +7,7 @@
 #include "../../xrUI/Widgets/UI3tButton.h"
 #include "../../xrUI/Widgets/UIDialogWnd.h"
 #include "../Level.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 #include "../UIGameCustom.h"
 #include "../../xrEngine/string_table.h"
 

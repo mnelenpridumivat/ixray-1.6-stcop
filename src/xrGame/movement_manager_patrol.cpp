@@ -6,14 +6,14 @@
 //	Description : Movement manager for patrol paths
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "movement_manager.h"
 #include "patrol_path_manager.h"
 #include "level_path_manager.h"
 #include "detail_path_manager.h"
 #include "ai_object_location.h"
-#include "custommonster.h"
+#include "CustomMonster.h"
 #include "level_path_builder.h"
 #include "detail_path_builder.h"
 #include "mt_config.h"

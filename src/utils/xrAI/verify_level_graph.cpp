@@ -6,7 +6,7 @@
 //	Description : Verifying level graph
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "level_graph.h"
 
 CLevelGraph::CVertex	**stack_storage;

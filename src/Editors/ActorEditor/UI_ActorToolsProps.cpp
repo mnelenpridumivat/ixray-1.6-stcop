@@ -1,8 +1,8 @@
 //---------------------------------------------------------------------------
 #include "stdafx.h"
 #pragma hdrstop
-#include "..\..\Layers\xrRender\KinematicAnimatedDefs.h"
-#include "..\..\Layers\xrRender\SkeletonAnimated.h"
+#include "../../Layers/xrRender/KinematicAnimatedDefs.h"
+#include "../../Layers/xrRender/SkeletonAnimated.h"
 //------------------------------------------------------------------------------
 
 void  CActorTools::OnObjectItemsFocused(xr_vector<ListItem*>& items)

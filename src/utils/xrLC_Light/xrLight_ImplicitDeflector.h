@@ -2,7 +2,7 @@
 #define	_XRLIGHT_IPLICIDDEFLECTOR
 
 #include "lm_layer.h"
-#include "xrFacedefs.h"
+#include "xrFaceDefs.h"
 struct  b_BuildTexture;
 
 class ImplicitDeflector

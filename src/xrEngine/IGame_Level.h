@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "iinputreceiver.h"
+#include "IInputReceiver.h"
 #include "xr_object_list.h"
-#include "../xrcdb/xr_area.h"
-#include "../xrEngine/IGame_Patrol.h"
+#include "../xrCDB/xr_area.h"
+#include "IGame_Patrol.h"
 
 // refs
 class ENGINE_API CCameraManager;

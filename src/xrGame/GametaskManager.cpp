@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "GameTaskManager.h"
+#include "GametaskManager.h"
 #include "alife_registry_wrappers.h"
 #include "../../xrUI/xrUIXmlParser.h"
 #include "GameTask.h"
@@ -9,7 +9,7 @@
 #include "map_location.h"
 #include "Actor.h"
 #include "UIGameSP.h"
-#include "ui/UIPDAWnd.h"
+#include "ui/UIPdaWnd.h"
 #include "encyclopedia_article.h"
 #include "ui/UIMapWnd.h"
 

@@ -6,7 +6,7 @@
 //	Description : Level graph
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "level_graph.h"
 
 LPCSTR LEVEL_GRAPH_NAME = "level.ai";

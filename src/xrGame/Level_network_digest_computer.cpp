@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Level.h"
 #include "../xrGameSpy/gamespy/md5.h"
 

@@ -1,14 +1,14 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "actorcondition.h"
+#include "ActorCondition.h"
 #include "Actor.h"
-#include "actorEffector.h"
+#include "ActorEffector.h"
 #include "Inventory.h"
 #include "Level.h"
-#include "sleepeffector.h"
+#include "SleepEffector.h"
 #include "game_base_space.h"
 #include "autosave_manager.h"
-#include "xrserver.h"
+#include "xrServer.h"
 #include "ai_space.h"
 #include "script_game_object.h"
 #include "game_object_space.h"
@@ -406,7 +406,7 @@ void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
 	}//while
 }
 
-#include "characterphysicssupport.h"
+#include "CharacterPhysicsSupport.h"
 float CActorCondition::GetInjuriousMaterialDamage()
 {
 	u16 mat_injurios = m_object->character_physics_support()->movement()->injurious_material_idx();

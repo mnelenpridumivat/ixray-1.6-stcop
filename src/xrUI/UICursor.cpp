@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "uicursor.h"
+#include "UICursor.h"
 
 #include "Widgets/UIStatic.h"
 #include "Widgets/UIBtnHint.h"

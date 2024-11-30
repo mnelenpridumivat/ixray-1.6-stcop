@@ -6,7 +6,7 @@
 //	Description : Script world property script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_world_property.h"
 #include "operator_abstract.h"

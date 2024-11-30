@@ -2,8 +2,8 @@
 #pragma hdrstop
 
 #include "ImageManager.h"
-#include "editobject.h"
-#include "editmesh.h"
+#include "EditObject.h"
+#include "EditMesh.h"
 #include "ui_main.h"
 #include "../xrEngine/xrHemisphere.h"
 

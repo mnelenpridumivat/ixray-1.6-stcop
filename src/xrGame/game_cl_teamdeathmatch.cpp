@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_cl_teamdeathmatch.h"
 #include "xrMessages.h"
 #include "Level.h"
@@ -9,7 +9,7 @@
 #include "Actor.h"
 #include "ui/UIMainIngameWnd.h"
 #include "ui/UISkinSelector.h"
-#include "ui/UIPDAWnd.h"
+#include "ui/UIPdaWnd.h"
 #include "ui/UIMapDesc.h"
 #include "game_base_menu_events.h"
 #include "ui/TeamInfo.h"
@@ -395,7 +395,7 @@ char*	game_cl_TeamDeathmatch::getTeamSection(int Team)
 };
 
 #include "../xrEngine/string_table.h"
-#include "ui/teaminfo.h"
+#include "ui/TeamInfo.h"
 
 void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 {

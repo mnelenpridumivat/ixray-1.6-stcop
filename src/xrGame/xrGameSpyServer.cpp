@@ -1,10 +1,10 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "xrMessages.h"
 #include "xrGameSpyServer.h"
-#include "../xrEngine/igame_persistent.h"
+#include "../xrEngine/IGame_Persistent.h"
 
-#include "GameSpy/GameSpy_Base_Defs.h"
-#include "GameSpy/GameSpy_Available.h"
+#include "gamespy/GameSpy_Base_Defs.h"
+#include "gamespy/GameSpy_Available.h"
 
 //#define DEMO_BUILD
 

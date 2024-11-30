@@ -8,7 +8,7 @@
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
-#include "../xrRenderDX10/dx10ConstantBuffer.h"
+#include "dx10ConstantBuffer.h"
 
 IC bool	p_sort		(ref_constant C1, ref_constant C2)
 {

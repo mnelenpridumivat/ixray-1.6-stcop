@@ -1,6 +1,6 @@
 #pragma once
-#include "../../xrUI/Widgets/uiframewindow.h"
-#include "../../xrUI/Widgets/uilistbox.h"
+#include "UIFrameWindow.h"
+#include "UIListBox.h"
 
 class UI_API CUIPropertiesBox:
 	public CUIFrameWindow,

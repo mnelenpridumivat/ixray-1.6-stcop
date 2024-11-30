@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "../xrRender/DetailManager.h"
 
-#include "../../xrEngine/igame_persistent.h"
-#include "../../xrEngine/environment.h"
+#include "../../xrEngine/IGame_Persistent.h"
+#include "../../xrEngine/Environment.h"
 
-#include "../xrRenderDX10/dx10BufferUtils.h"
+#include "dx10BufferUtils.h"
 
 const int			quant	= 16384;
 const int			c_hdr	= 10;

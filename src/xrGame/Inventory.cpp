@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "Inventory.h"
 #include "Actor.h"
@@ -15,13 +15,13 @@
 #include "../xrEngine/xr_level_controller.h"
 #include "Level.h"
 #include "ai_space.h"
-#include "entitycondition.h"
+#include "EntityCondition.h"
 #include "game_base_space.h"
-#include "uigamecustom.h"
+#include "UIGameCustom.h"
 #include "clsid_game.h"
 #include "player_hud.h"
 #include "ai/stalker/ai_stalker.h"
-#include "weaponmagazined.h"
+#include "WeaponMagazined.h"
 #include "Car.h"
 
 using namespace InventoryUtilities;

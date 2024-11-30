@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "../../../xrengine/stats.h"
+#include "../../../xrEngine/Stats.h"
 // refs
 class CGameFont;
 

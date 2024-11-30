@@ -3,7 +3,7 @@
 #include "mu_model_face.h"
   
 
-#include "../../xrcore/xrPool.h"
+#include "../../xrCore/xrPool.h"
 
 
 poolSS<_vertex,8*1024>	&mu_vertices_pool();

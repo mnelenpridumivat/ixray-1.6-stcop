@@ -6,7 +6,7 @@
 //	Description : Level script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "Level.h"
 #include "Actor.h"
@@ -14,7 +14,7 @@
 #include "patrol_path_storage.h"
 #include "xrServer.h"
 #include "client_spawn_manager.h"
-#include "../xrEngine/igame_persistent.h"
+#include "../xrEngine/IGame_Persistent.h"
 #include "game_cl_base.h"
 #include "UIGameCustom.h"
 #include "../xrUI/Widgets/UIDialogWnd.h"
@@ -32,7 +32,7 @@
 #include "physics_world_scripted.h"
 #include "alife_simulator.h"
 #include "alife_time_manager.h"
-#include "UI/UIGameTutorial.h"
+#include "ui/UIGameTutorial.h"
 #include "../xrEngine/string_table.h"
 #include "ui/UIInventoryUtilities.h"
 #include "alife_object_registry.h"
@@ -628,7 +628,7 @@ void iterate_sounds2				(LPCSTR prefix, u32 max_count, luabind::object object, l
 	iterate_sounds				(prefix,max_count,temp);
 }
 
-#include "actoreffector.h"
+#include "ActorEffector.h"
 float add_cam_effector(LPCSTR fn, int id, bool cyclic, LPCSTR cb_func)
 {
 	CAnimatorCamEffectorScriptCB* e		= new CAnimatorCamEffectorScriptCB(cb_func);
@@ -695,7 +695,7 @@ void remove_complex_effector(int id)
 	RemoveEffector(Actor(),id);
 }
 
-#include "postprocessanimator.h"
+#include "PostprocessAnimator.h"
 void add_pp_effector(LPCSTR fn, int id, bool cyclic)
 {
 	CPostprocessAnimator* pp		= new CPostprocessAnimator(id, cyclic);

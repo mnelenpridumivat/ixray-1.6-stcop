@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 #include "../xrQSlim/src/MxStdModel.h"
 #include "../xrQSlim/src/MxQSlim.h"
-#include "../../xrcdb/xrcdb.h"
+#include "../../xrCDB/xrCDB.h"
 #include "../../common/face_smoth_flags.h"
 
 #define MAX_DECIMATE_ERROR 0.0005f

@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 
 #include "../xrLC_Light/xrLC_GlobalData.h"
 #include "../xrLC_Light/light_point.h"
-#include "../xrLC_Light/xrdeflector.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrDeflector.h"
+#include "../xrLC_Light/xrFace.h"
 
-#include "../../xrcdb/xrcdb.h"
+#include "../../xrCDB/xrCDB.h"
 #include "../../common/face_smoth_flags.h"
 #include "../xrForms/xrThread.h"
 

@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "../../xrUI/Widgets/uiwindow.h"
+#include "../../xrUI/Widgets/UIWindow.h"
 #include "../../xrEngine/AI/alife_space.h"
 #include "character_info_defs.h"
 class CUIStatic;

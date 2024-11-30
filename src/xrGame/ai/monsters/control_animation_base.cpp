@@ -2,7 +2,7 @@
 #include "control_animation_base.h"
 #include "control_direction_base.h"
 #include "control_movement_base.h"
-#include "BaseMonster/base_monster.h"
+#include "basemonster/base_monster.h"
 #include "../../PHMovementControl.h"
 #include "anim_triple.h"
 #include "../../../Include/xrRender/KinematicsAnimated.h"
@@ -11,8 +11,8 @@
 #include "monster_event_manager.h"
 #include "control_jump.h"
 #include "../../sound_player.h"
-#include "../../../xrEngine/gamemtllib.h"
-#include "../../actor.h"
+#include "../../../xrEngine/GameMtlLib.h"
+#include "../../Actor.h"
 
 // DEBUG purpose only
 const char *dbg_action_name_table[] = {

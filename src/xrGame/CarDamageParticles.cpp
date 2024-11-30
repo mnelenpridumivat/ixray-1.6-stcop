@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "cardamageparticles.h"
+#include "StdAfx.h"
+#include "CarDamageParticles.h"
 #ifdef DEBUG
 
 #include "PHDebug.h"

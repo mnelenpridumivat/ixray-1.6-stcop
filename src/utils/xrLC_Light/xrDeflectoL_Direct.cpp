@@ -2,10 +2,10 @@
 //#include "build.h"
 //#include "std_classes.h"
 #include "../xrForms/xrThread.h"
-#include "xrdeflector.h"
-#include "xrlc_globaldata.h"
+#include "xrDeflector.h"
+#include "xrLC_GlobalData.h"
 #include "light_point.h"
-#include "xrface.h"
+#include "xrFace.h"
 
 extern void Jitter_Select	(Fvector2* &Jitter, u32& Jcount);
 

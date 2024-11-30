@@ -6,11 +6,11 @@
 //	Description : Script entity class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_entity.h"
 #include "CustomMonster.h"
-#include "../xrEngine/feel_vision.h"
+#include "../xrEngine/Feel_Vision.h"
 #include "../xrEngine/motion.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "script_entity_action.h"

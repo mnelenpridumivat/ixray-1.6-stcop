@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "Helicopter.h"
+#include "helicopter.h"
 #include "Level.h"
 #include "patrol_path.h"
 #include "patrol_path_storage.h"

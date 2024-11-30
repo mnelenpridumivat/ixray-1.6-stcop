@@ -1,10 +1,10 @@
 // multiTrackDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "multiTrack.h"
 #include "multiTrackDlg.h"
-#include "waitingDlg.h"
+#include "WaitingDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

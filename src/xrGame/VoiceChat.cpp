@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "VoiceChat.h"
 #include "Level.h"
 #include "../xrSound/Recorder/SoundVoiceChat.h"

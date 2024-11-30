@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "WeaponKnife.h"
 #include "Entity.h"
@@ -7,8 +7,8 @@
 #include "../xrEngine/xr_level_controller.h"
 #include "game_cl_base.h"
 #include "../Include/xrRender/Kinematics.h"
-#include "../xrEngine/gamemtllib.h"
-#include "level_bullet_manager.h"
+#include "../xrEngine/GameMtlLib.h"
+#include "Level_Bullet_Manager.h"
 #include "../xrSound/ai_sounds.h"
 #include "game_cl_single.h"
 #include "../xrEngine/SkeletonMotions.h"

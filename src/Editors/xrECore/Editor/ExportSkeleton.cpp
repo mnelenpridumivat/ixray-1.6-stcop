@@ -19,8 +19,8 @@
 
 #if 1
 #include "ui_main.h"
-#include "ui_toolscustom.h"
-#include "..\Engine\XrGameMaterialLibraryEditors.h"
+#include "UI_ToolsCustom.h"
+#include "../Engine/XrGameMaterialLibraryEditors.h"
 #endif
 //#include "../../../Layers/xrRender/SkeletonAnimated.h"
 #include <d3dx9.h>

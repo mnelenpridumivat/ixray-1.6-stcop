@@ -1,19 +1,19 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "imotion_position.h"
 
-#include "../xrPhysics/physicsshell.h"
+#include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/MathUtils.h"
-#include "../xrPhysics/extendedgeom.h"
+#include "../xrPhysics/ExtendedGeom.h"
 
 #include "../Include/xrRender/Kinematics.h"
 ///////////////////////////////////////////////////////////////////////////////////////
-#include "physicsshellholder.h"
+#include "PhysicsShellHolder.h"
 
 #include "game_object_space.h"
 #include "animation_utils.h"
 #ifdef	DEBUG
-#include "phdebug.h"
+#include "PHDebug.h"
 #endif
 
 #ifdef	DEBUG

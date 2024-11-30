@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "../xrRender/du_cone.h"
-#include "..\xrRender\CHudInitializer.h"
+#include "../xrRender/CHudInitializer.h"
 
 void CRenderTarget::accum_spot(light* L) {
 	if (L == nullptr)

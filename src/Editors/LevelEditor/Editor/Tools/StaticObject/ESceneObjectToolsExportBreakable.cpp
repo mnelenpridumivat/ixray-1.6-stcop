@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "..\..\Utils\GeometryPartExtractor.h"
+#include "../../Utils/GeometryPartExtractor.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Objects.h"

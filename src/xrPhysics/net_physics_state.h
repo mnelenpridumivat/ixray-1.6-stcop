@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "..\xrServerEntities\PHNetState.h"
+#include "../xrServerEntities/PHNetState.h"
 
 #define MIN_LINEAR_VELOCITY_COMPONENT -32.f
 #define MAX_LINEAR_VELOCITY_COMPONENT 32.f

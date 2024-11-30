@@ -1,7 +1,7 @@
 // gp_statsDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "gp_stats.h"
 #include "gp_statsDlg.h"
 #include "../gpersist.h"

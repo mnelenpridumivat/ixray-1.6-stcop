@@ -4,8 +4,8 @@
 #include "shaders.h"
 #include "samplers.h"
 #include "iparamm2.h"
-#include "texmaps.h"
-#include "..\kernel\resources.h"
+#include "TexMaps.h"
+#include "../kernel/resources.h"
 
 #define XRAYMTL_CLASS_ID	Class_ID(0x35e04198, 0x2293156c)
 

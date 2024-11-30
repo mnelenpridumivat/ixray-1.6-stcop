@@ -14,7 +14,7 @@
 #include "UIProgressBar.h"
 #include "UIHelper.h"
 
-#include "../actor.h"
+#include "../Actor.h"
 #include "../ai_space.h"
 #include "../../xrServerEntities/script_engine.h"
 #include "../character_community.h"

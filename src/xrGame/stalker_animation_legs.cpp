@@ -6,7 +6,7 @@
 //	Description : Stalker animation manager : legs animations
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "stalker_animation_manager.h"
 #include "ai/stalker/ai_stalker.h"
 #include "sight_manager.h"
@@ -14,7 +14,7 @@
 #include "stalker_animation_data.h"
 
 #include "Weapon.h"
-#include "missile.h"
+#include "Missile.h"
 #include "Inventory.h"
 #include "stalker_animation_manager_impl.h"
 

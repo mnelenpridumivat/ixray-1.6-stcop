@@ -2,15 +2,15 @@
 // 
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "Weapon.h"
-#include "inventoryowner.h"
+#include "InventoryOwner.h"
 #include "Actor.h"
 #include "inventory_item_impl.h"
 
-#include "actoreffector.h"
-#include "effectorshot.h"
+#include "ActorEffector.h"
+#include "EffectorShot.h"
 #include "EffectorShotX.h"
 
 

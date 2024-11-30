@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "physicobject.h"
+#include "PhysicObject.h"
 #include "../xrPhysics/PhysicsShell.h"
 //#include "Physics.h"
 #include "xrServer_Objects_ALife.h"
@@ -13,10 +13,10 @@
 #include "game_object_space.h"
 //#include "../xrPhysics/PhysicsShellAnimator.h"
 #include "moving_bones_snd_player.h"
-#include "../xrPhysics/extendedgeom.h"
+#include "../xrPhysics/ExtendedGeom.h"
 #ifdef	DEBUG
-#include "phdebug.h"
-#include "../xrengine/objectdump.h"
+#include "PHDebug.h"
+#include "../xrEngine/ObjectDump.h"
 #endif
 BOOL dbg_draw_doors = false;
 CPhysicObject::CPhysicObject(void): 

@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 #include "xrPhase_MergeLM_Rect.h"
-#include "../xrlc_light/xrdeflector.h"
+#include "../xrLC_Light/xrDeflector.h"
 #include <mmintrin.h>
 
 static	BYTE*	surface;

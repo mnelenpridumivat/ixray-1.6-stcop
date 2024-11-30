@@ -4,9 +4,9 @@
 #include "xrLC_GlobalData.h"
 #include "xrMU_Model.h"
 
-#include "../../xrcdb/xrcdb.h"
-#include "../shader_xrlc.h"
-#include "xrface.h"
+#include "../../xrCDB/xrCDB.h"
+#include "../Shader_xrLC.h"
+#include "xrFace.h"
  
 
 void xrMU_Reference::Load( IReader& F, xr_vector<xrMU_Model*>& mu_models )

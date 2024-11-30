@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrFace.h"
 //#define VPUSH(a) ((a).x), ((a).y), ((a).z)
 
 IC float	SqrDistance2Segment(const Fvector& P, const Fvector& A, const Fvector& B)

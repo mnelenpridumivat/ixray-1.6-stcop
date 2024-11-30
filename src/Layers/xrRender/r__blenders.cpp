@@ -1,19 +1,19 @@
 #include "stdafx.h"
 
-#include "../xrRender/uber_deffer.h"
+#include "uber_deffer.h"
 
-#include "../xrRender/blender_BmmD.h"
+#include "Blender_BmmD.h"
 #include "blender_deffer_flat.h"
 #include "blender_deffer_model.h"
 #include "blender_deffer_aref.h"
-#include "../xrRender/blender_screen_set.h"
-#include "../xrRender/blender_editor_wire.h"
-#include "../xrRender/blender_editor_selection.h"
-#include "../xrRender/blender_tree.h"
-#include "../xrRender/blender_detail_still.h"
-#include "../xrRender/blender_particle.h"
-#include "../xrRender/Blender_Model_EbB.h"
-#include "../xrRender/blender_Lm(EbB).h"
+#include "Blender_Screen_SET.h"
+#include "Blender_Editor_Wire.h"
+#include "Blender_Editor_Selection.h"
+#include "Blender_tree.h"
+#include "Blender_detail_still.h"
+#include "Blender_Particle.h"
+#include "Blender_Model_EbB.h"
+#include "Blender_Lm(EbB).h"
 
 IBlender*	CRender::blender_create	(CLASS_ID cls)
 {	

@@ -5,7 +5,7 @@
 //	Description : detail namespace functions
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "smart_cover_detail.h"
 

@@ -6,7 +6,7 @@
 //	Description : Visual memory manager
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "visual_memory_manager.h"
 #include "ai/stalker/ai_stalker.h"
@@ -15,13 +15,13 @@
 #include "ai_object_location.h"
 #include "level_graph.h"
 #include "stalker_movement_manager_smart_cover.h"
-#include "../xrEngine/gamemtllib.h"
+#include "../xrEngine/GameMtlLib.h"
 #include "agent_manager.h"
 #include "agent_member_manager.h"
 #include "ai_space.h"
 #include "Actor.h"
-#include "../xrEngine/camerabase.h"
-#include "gamepersistent.h"
+#include "../xrEngine/CameraBase.h"
+#include "GamePersistent.h"
 #include "actor_memory.h"
 #include "client_spawn_manager.h"
 #include "client_spawn_manager.h"

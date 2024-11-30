@@ -11,7 +11,7 @@
 #include "Widgets/UIProgressShape.h"
 #include "Widgets/UITabControl.h"
 #include "Widgets/UIAnimatedStatic.h"
-#include "uixmlinit.h"
+#include "UIXmlInit.h"
 #include "Widgets/UIListBox.h"
 #include "Widgets/UIComboBox.h"
 #include "Widgets/UITrackBar.h"
@@ -19,7 +19,7 @@
 //#include "game_base_space.h"
 
 #include "UITextureMaster.h"
-#include "Widgets/UItabButtonMP.h"
+#include "Widgets/UITabButtonMP.h"
 #include "Widgets/UILines.h"
 //////////////////////////////////////////////////////////////////////////
 

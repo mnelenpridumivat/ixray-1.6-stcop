@@ -2,16 +2,16 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
-#include "build.h"
+#include "Build.h"
 
 #include "../xrLC_Light/xrMU_Model.h"
 
 
 
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrFace.h"
 #include "../xrLC_Light/mu_model_light.h"
 
 //#include "../xrLC_Light/lcnet_task_manager.h"

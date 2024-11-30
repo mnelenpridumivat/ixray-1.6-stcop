@@ -1,6 +1,6 @@
 #pragma once
 
-#include "r_light.h"
+#include "R_light.h"
 
 #pragma pack(push,4)
 class XRLC_LIGHT_API base_lighting

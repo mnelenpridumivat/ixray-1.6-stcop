@@ -7,7 +7,7 @@
  * below is included in the resulting source code, for example:
  * "Portions Copyright (C) Tom Forsyth, 2001"
  */
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 
 #include "object.h"

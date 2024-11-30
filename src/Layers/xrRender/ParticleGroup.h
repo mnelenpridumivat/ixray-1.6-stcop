@@ -3,7 +3,7 @@
 #define ParticleGroupH
 class ButtonValue;
 
-#include "../xrRender/dxParticleCustom.h"
+#include "dxParticleCustom.h"
 
 namespace PS
 {

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "game_state_accumulator.h"
 #include "Level.h"
 #include "actor_mp_client.h"

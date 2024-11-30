@@ -6,9 +6,9 @@
 
 #include	"AnimationKeyCalculate.h"
 #include	"SkeletonX.h"
-#include	"../../xrEngine/fmesh.h"
+#include "../../xrEngine/Fmesh.h"
 #ifdef DEBUG
-#include	"../../xrcore/dump_string.h"
+#include "../../xrCore/dump_string.h"
 #endif
 extern int	psSkeletonUpdate;
 using	namespace animation;

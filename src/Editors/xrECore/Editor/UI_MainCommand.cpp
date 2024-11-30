@@ -11,7 +11,7 @@
 #include "UIImageEditorForm.h"
 #include "UIMinimapEditorForm.h"
 #include "UISoundEditorForm.h"
-#include "d3dutils.h"
+#include "D3DUtils.h"
 #include "UIMoveToCamera.h"
 
 #include "Library.h"

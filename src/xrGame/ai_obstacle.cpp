@@ -6,7 +6,7 @@
 //	Description : ai obstacle class inline functions
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ai_obstacle.h"
 #include "ai_space.h"
 #include "level_graph.h"
@@ -98,7 +98,7 @@ IC	bool ai_obstacle::inside	(const u32 &vertex_id) const
 	);
 }
 
-#include "../xrengine/xr_collide_form.h"
+#include "../xrEngine/xr_collide_form.h"
 void ai_obstacle::compute_matrix_novis(Fmatrix &result, const Fvector &additional)
 {
 	if(!m_object->CFORM())

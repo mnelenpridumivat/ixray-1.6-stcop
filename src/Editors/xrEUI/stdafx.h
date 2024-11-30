@@ -9,7 +9,7 @@ using ImTextureID = IDirect3DBaseTexture9*;
 #define XREUI_API __declspec(dllimport)
 #endif
 
-#include "..\..\xrCore\xrCore.h"
+#include "../../xrCore/xrCore.h"
 
 #include "EditorWnd.h"
 #include "XrUIManager.h"

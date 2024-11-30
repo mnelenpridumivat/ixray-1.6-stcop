@@ -6,7 +6,7 @@
 //	Description : Script sound action class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_sound_action.h"
 

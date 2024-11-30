@@ -3,7 +3,7 @@
 
 
 #include "xrGameSpy_MainDefs.h"
-#include "GameSpy/sc/sc.h"
+#include "gamespy/sc/sc.h"
 
 extern "C"
 {

@@ -1,15 +1,15 @@
 #include "stdafx.h"
 
-#include "../../xrEngine/igame_persistent.h"
+#include "../../xrEngine/IGame_Persistent.h"
 #include "../xrRender/FBasicVisual.h"
-#include "../../xrEngine/customhud.h"
+#include "../../xrEngine/CustomHUD.h"
 #include "../../xrEngine/xr_object.h"
 
 #include "../xrRender/QueryHelper.h"
 
 #include "FSR2Wrapper.h"
 
-#include "../../xrEngine/gamefont.h"
+#include "../../xrEngine/GameFont.h"
 #include "../../xrEngine/x_ray.h"
 #include "../xrRender/SkeletonCustom.h"
 static	float	CalcSSADynamic				(const Fvector& C, float R)

@@ -5,7 +5,7 @@
 //	Author		: Dmitriy Iassenev
 //	Description : GUID generator
 ////////////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 
 #include "guid_generator.h"

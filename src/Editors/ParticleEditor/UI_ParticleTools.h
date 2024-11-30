@@ -3,9 +3,9 @@
 #define UI_ParticleToolsH
 
 //. ?#include "ParticleSystem.h"
-#include "..\..\Layers\xrRender\ParticleEffect.h"
-#include "..\..\Layers\xrRender\ParticleGroup.h"
-#include "..\..\xrEngine\pure.h"
+#include "../../Layers/xrRender/ParticleEffect.h"
+#include "../../Layers/xrRender/ParticleGroup.h"
+#include "../../xrEngine/pure.h"
 
 // refs
 class CEditableObject;

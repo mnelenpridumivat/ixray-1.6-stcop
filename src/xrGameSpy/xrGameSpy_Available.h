@@ -1,8 +1,8 @@
 #pragma once
 #include "xrGameSpy_MainDefs.h"
 
-#include "GameSpy\nonport.h"
-#include "GameSpy\common\gsAvailable.h"
+#include "gamespy/nonport.h"
+#include "gamespy/common/gsAvailable.h"
 
 extern "C"
 {

@@ -6,7 +6,7 @@
 //	Description : Level change object
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "level_changer.h"
 #include "Hit.h"
 #include "Actor.h"
@@ -18,7 +18,7 @@
 #include "game_level_cross_table.h"
 
 #include "UIGameSP.h"
-#include "../xrengine/xr_collide_form.h"
+#include "../xrEngine/xr_collide_form.h"
 
 xr_vector<CLevelChanger*>	g_lchangers;
 

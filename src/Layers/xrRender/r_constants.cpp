@@ -6,7 +6,7 @@
 #include "../../xrCore/xrPool.h"
 #include "r_constants.h"
 
-#include "../xrRender/dxRenderDeviceRender.h"
+#include "dxRenderDeviceRender.h"
 
 #ifndef USE_DX11
 #include "../xrRenderDX9/dx9ShaderUtils.h"

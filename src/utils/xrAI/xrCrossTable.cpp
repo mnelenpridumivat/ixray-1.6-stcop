@@ -6,7 +6,7 @@
 //	Description : Building cross table for AI nodes
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "defines.h"
 #include "xrCrossTable.h"
 

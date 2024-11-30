@@ -11,7 +11,7 @@ extern "C" void*	cxrealloc(void* ptr, size_t size);
 #include "../../../xrCore/xrCore.h"
 
 #ifdef DEBUG
-#include "../../../xrCore/ftimer.h"
+#include "../../../xrCore/FTimer.h"
 #endif //#ifdef DEBUG
 
 # define CXIMAGE_API

@@ -4,15 +4,15 @@
 #include "../../../ai_object_location.h"
 #include "../../../game_graph.h"
 #include "../../../ai_space.h"
-#include "../../../hit.h"
+#include "../../../Hit.h"
 #include "../../../PHDestroyable.h"
 #include "../../../CharacterPhysicsSupport.h"
 #include "../control_animation_base.h"
 #include "../xrPhysics/net_physics_state.h"
 
-#include "../../../../xrphysics/iPHWorld.h"
+#include "../../../../xrPhysics/IPHWorld.h"
 #include "../../../PHMovementControl.h"
-#include "../../../../xrphysics/PhysicsShell.h"
+#include "../../../../xrPhysics/PhysicsShell.h"
 #include "../../../sound_player.h"
 
 extern int g_cl_InterpolationType;

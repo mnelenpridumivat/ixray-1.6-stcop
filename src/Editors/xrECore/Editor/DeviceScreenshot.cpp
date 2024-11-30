@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "ui_toolscustom.h"
+#include "UI_ToolsCustom.h"
 #include "ui_main.h"
 #include "../Layers/xrRender/ResourceManager.h"
 #include "../Layers/xrRender/dxRenderDeviceRender.h"

@@ -6,7 +6,7 @@
 //	Description : Script game object class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_game_object.h"
 #include "ai_space.h"
@@ -32,7 +32,7 @@
 #include "movement_manager_space.h"
 #include "detail_path_manager_space.h"
 #include "level_debug.h"
-#include "ai/monsters/BaseMonster/base_monster.h"
+#include "ai/monsters/basemonster/base_monster.h"
 #include "trade_parameters.h"
 #include "../xrScripts/exports/script_ini_file.h"
 #include "sound_player.h"

@@ -5,7 +5,7 @@
 #include "UIStatsPlayerList.h"
 #include "../../xrUI/Widgets/UIStatic.h"
 #include "../../xrUI/Widgets/UIFrameWindow.h"
-#include "../level.h"
+#include "../Level.h"
 #include "game_base_space.h"
 
 

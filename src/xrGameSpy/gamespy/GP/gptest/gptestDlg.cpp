@@ -1,7 +1,7 @@
 // gptestDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "gptest.h"
 #include "gptestDlg.h"
 

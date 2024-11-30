@@ -2,7 +2,7 @@
 #define XRGAMESPY_GP
 
 #include "xrGameSpy_MainDefs.h"
-#include "GameSpy/GP/gp.h"
+#include "gamespy/GP/gp.h"
 
 extern "C"
 {

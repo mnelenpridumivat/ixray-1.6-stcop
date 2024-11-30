@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 #include "pch_script.h"
-#include "xrServer_Objects_ALife_Smartcovers.h"
+#include "xrServer_Objects_Alife_Smartcovers.h"
 #include "xrServer_script_macroses.h"
 
 using namespace luabind;

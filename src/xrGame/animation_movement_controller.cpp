@@ -5,7 +5,7 @@
 #include "game_object_space.h"
 #include "../xrPhysics/matrix_utils.h"
 #ifdef	 DEBUG
-#include "phdebug.h"
+#include "PHDebug.h"
 #endif
 
 void	DBG_DrawBones( const Fmatrix &xform,  IKinematics *K );

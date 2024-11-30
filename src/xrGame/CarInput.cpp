@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 #ifdef DEBUG
 
@@ -6,11 +6,11 @@
 #endif
 #include "alife_space.h"
 #include "Hit.h"
-#include "phdestroyable.h"
-#include "car.h"
+#include "PHDestroyable.h"
+#include "Car.h"
 #include "Actor.h"
 #include "cameralook.h"
-#include "camerafirsteye.h"
+#include "CameraFirstEye.h"
 #include "script_entity_action.h"
 #include "../xrEngine/xr_level_controller.h"
 #include "../Include/xrRender/Kinematics.h"

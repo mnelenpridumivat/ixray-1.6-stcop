@@ -1,6 +1,6 @@
-#include	"stdafx.h"
-#include	"../xrPhysics/physicsshell.h"
-#include	"phsimplecalls.h"
+#include "StdAfx.h"
+#include "../xrPhysics/PhysicsShell.h"
+#include "PHSimpleCalls.h"
 //#include	"phobject.h"
 //#include	"PHWorld.h"
 //extern		CPHWorld			*ph_world;

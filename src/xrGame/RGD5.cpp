@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "rgd5.h"
+#include "RGD5.h"
 
 CRGD5::CRGD5(void)
 {

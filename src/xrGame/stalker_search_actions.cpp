@@ -6,7 +6,7 @@
 //	Description : stalker search enemy action classes
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "stalker_search_actions.h"
 #include "ai/stalker/ai_stalker.h"

@@ -10,8 +10,8 @@
 #include "../xrEngine/motion.h"
 #include "../xrEngine/bone.h"
 #include "../xrEngine/fmesh.h"
-#include "library.h"
-#include "d3dutils.h"
+#include "Library.h"
+#include "D3DUtils.h"
 
 //------------------------------------------------------------------------------
 CToolCustom* Tools=0;

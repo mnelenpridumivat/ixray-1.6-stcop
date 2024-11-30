@@ -3,8 +3,8 @@
 #pragma hdrstop
 
 #include "SHGameMtlPairTools.h"
-#include "UI_ShaderTools.h"
-#include "../xrEProps/folderlib.h"
+#include "UI_shadertools.h"
+#include "../xrEProps/FolderLib.h"
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------

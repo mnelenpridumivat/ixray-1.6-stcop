@@ -4,8 +4,8 @@
 #pragma hdrstop
 #define dSINGLE
 #include "../../Include/xrRender/animation_blend.h"
-#include "..\..\XrPhysics\Physics.h"
-#include "..\XrECore\Editor\EditMesh.h"
+#include "../../xrPhysics/Physics.h"
+#include "../xrECore/Editor/EditMesh.h"
 #include "../../Layers/xrRender/KinematicAnimatedDefs.h"
 #include "../../Layers/xrRender/SkeletonAnimated.h"
 
@@ -54,7 +54,7 @@ CActorTools::~CActorTools()
 }
 
 #include "../../xrEngine/IGame_Persistent.h"
-#include "..\xrECore\editor\d3dutils.h"
+#include "../xrECore/Editor/D3DUtils.h"
 
 const u32 color_bone_sel_color = 0xFFFFFFFF;
 const u32 color_bone_norm_color = 0xFFFFFF00;

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "player_state_ammo_elapsed.h"
 #include "game_state_accumulator.h"
 #include "Weapon.h"

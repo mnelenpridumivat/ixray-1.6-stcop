@@ -14,7 +14,7 @@
 #undef ECORE_API
 #define ECORE_API				// fake, to enable sharing with editors
 #define XR_EPROPS_API
-#include "../../xrcore/clsid.h"
+#include "../../xrCore/clsid.h"
 #include "defines.h"
 #include "../xrForms/cl_log.h"
 

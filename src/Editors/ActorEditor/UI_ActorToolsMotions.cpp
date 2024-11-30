@@ -4,14 +4,14 @@
 #pragma hdrstop
 
 #include "UI_ActorTools.h"
-#include "../xrECore/Editor/UI_Main.h"
+#include "../xrECore/Editor/ui_main.h"
 #include "../xrECore/Editor/EditObject.h"
 #include "../../xrEngine/motion.h"
 #include "../../xrEngine/bone.h"
 #include "../../Layers/xrRender/SkeletonAnimated.h"
-#include "../../xrEngine/fmesh.h"
-#include "../xrEProps/folderlib.h"
-#include "../../xrphysics/physicsshell.h"
+#include "../../xrEngine/Fmesh.h"
+#include "../xrEProps/FolderLib.h"
+#include "../../xrPhysics/PhysicsShell.h"
 //---------------------------------------------------------------------------
 MotionID EngineModel::FindMotionID(LPCSTR name, u16 slot)
 {

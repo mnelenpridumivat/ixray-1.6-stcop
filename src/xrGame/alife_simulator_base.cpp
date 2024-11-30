@@ -6,7 +6,7 @@
 //	Description : ALife Simulator base class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "alife_simulator_base.h"
 #include "alife_simulator_header.h"
@@ -19,7 +19,7 @@
 #include "alife_smart_terrain_registry.h"
 #include "alife_group_registry.h"
 #include "alife_registry_container.h"
-#include "xrserver.h"
+#include "xrServer.h"
 #include "level_graph.h"
 #include "inventory_upgrade_manager.h"
 #include "Level.h"

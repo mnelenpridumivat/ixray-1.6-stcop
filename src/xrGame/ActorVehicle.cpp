@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 
 #include "Actor.h"
@@ -18,7 +18,7 @@
 
 #include "actor_anim_defs.h"
 #include "game_object_space.h"
-#include "characterphysicssupport.h"
+#include "CharacterPhysicsSupport.h"
 #include "Inventory.h"
 
 #include "pch_script.h"

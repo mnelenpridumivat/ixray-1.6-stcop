@@ -9,11 +9,11 @@
 #define ECORE_API
 
 #include "../xrCore/xrCore.h"
-#include "../xrCore/API/xrapi.h"
+#include "../xrCore/API/xrAPI.h"
 #include "../xrServerEntities/smart_cast.h"
 
 #include "../xrCDB/xrCDB.h"
-#include "../xrSound/sound.h"
+#include "../xrSound/Sound.h"
 
 #include "xrPhysics.h"
 

@@ -7,7 +7,7 @@
 #include "../../xrUI/UICursor.h"
 #include "../UIGameCustom.h"
 #include "../game_cl_deathmatch.h"
-#include "../level.h"
+#include "../Level.h"
 
 #include "object_broker.h"
 

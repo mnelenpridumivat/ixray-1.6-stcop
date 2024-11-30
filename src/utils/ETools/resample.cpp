@@ -1,6 +1,6 @@
 /* resample.c: see resample.h for interesting stuff */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include <math.h>
 #include <stdlib.h>

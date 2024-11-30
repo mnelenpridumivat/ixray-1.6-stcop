@@ -1,6 +1,6 @@
 #pragma once
 #include "Physics.h"
-#include "phupdateobject.h"
+#include "PHUpdateObject.h"
 #include "IPHWorld.h"
 #include "physics_scripted.h"
 #include "../xrEngine/pure.h"

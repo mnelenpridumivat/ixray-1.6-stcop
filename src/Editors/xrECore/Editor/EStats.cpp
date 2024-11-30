@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "EStats.h"
-#include "UI_Main.h"
+#include "ui_main.h"
 
 ECORE_API extern bool bIsLevelEditor = true;
 //////////////////////////////////////////////////////////////////////

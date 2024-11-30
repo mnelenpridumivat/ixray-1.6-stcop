@@ -1,6 +1,6 @@
 #pragma once
 #include "inventory_item_object.h"
-#include "hudsound.h"
+#include "HudSound.h"
 #include "CustomZone.h"
 #include "Artefact.h"
 #include "../xrSound/ai_sounds.h"

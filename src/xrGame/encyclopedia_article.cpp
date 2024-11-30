@@ -3,7 +3,7 @@
 // структура, хранящая и загружающая статьи в энциклопедию
 ///////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "encyclopedia_article.h"
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../../xrUI/UIXmlInit.h"

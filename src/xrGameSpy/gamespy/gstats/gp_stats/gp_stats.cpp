@@ -1,7 +1,7 @@
 // gp_stats.cpp : Defines the class behaviors for the application.
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "gp_stats.h"
 #include "gp_statsDlg.h"
 

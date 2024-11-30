@@ -1,8 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "../xrLC_Light/xrMU_Model.h"
 #include "OGF_Face.h"
-#include "build.h"
+#include "Build.h"
 
 #define	TRY(a) try { a; } catch (...) { clMsg("* E: %s", #a); }
 

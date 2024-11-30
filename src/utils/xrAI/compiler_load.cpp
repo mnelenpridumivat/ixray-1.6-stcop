@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "compiler.h"
 //.#include "communicate.h"
 #include "levelgamedef.h"

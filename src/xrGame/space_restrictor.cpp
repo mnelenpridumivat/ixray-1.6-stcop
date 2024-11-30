@@ -6,7 +6,7 @@
 //	Description : Space restrictor
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "space_restrictor.h"
 #include "xrServer_Objects_ALife.h"
@@ -15,7 +15,7 @@
 #include "restriction_space.h"
 #include "ai_space.h"
 #include "CustomZone.h"
-#include "../xrengine/xr_collide_form.h"
+#include "../xrEngine/xr_collide_form.h"
 #ifdef DEBUG
 #	include "debug_renderer.h"
 #endif

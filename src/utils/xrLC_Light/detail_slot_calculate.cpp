@@ -10,7 +10,7 @@
 #include "cl_intersect.h"
 #include "base_lighting.h"
 #include "global_calculation_data.h"
-#include "../shader_xrlc.h"
+#include "../Shader_xrLC.h"
 
 #undef LP_DEFAULT
 enum

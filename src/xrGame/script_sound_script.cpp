@@ -6,7 +6,7 @@
 //	Description : XRay Script sound class script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_sound.h"
 #include "script_game_object.h"

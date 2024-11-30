@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
-#include "weaponwalther.h"
+#include "WeaponWalther.h"
 
 CWeaponWalther::CWeaponWalther(void)
 {}

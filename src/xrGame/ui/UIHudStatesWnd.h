@@ -3,7 +3,7 @@
 #include "../../xrUI/Widgets/UIWindow.h"
 #include "../../xrEngine/AI/alife_space.h"
 #include "../../xrServerEntities/inventory_space.h"
-#include "..\actor_defs.h"
+#include "../actor_defs.h"
 
 class CUIStatic;
 class CUITextWnd;

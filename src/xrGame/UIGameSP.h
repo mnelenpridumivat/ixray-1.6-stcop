@@ -1,5 +1,5 @@
 #pragma once
-#include "uigamecustom.h"
+#include "UIGameCustom.h"
 #include "../../xrUI/Widgets/UIDialogWnd.h"
 #include "game_graph_space.h"
 

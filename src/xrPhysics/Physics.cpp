@@ -1,9 +1,9 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "PHDynamicData.h"
 #include "Physics.h"
 #include "tri-colliderknoopc/dTriList.h"
 #include "PHContactBodyEffector.h"
-#include "../xrEngine/gamemtllib.h"
+#include "../xrEngine/GameMtlLib.h"
 #include "PHCollideValidator.h"
 #ifdef DEBUG
 #include "debug_output.h"

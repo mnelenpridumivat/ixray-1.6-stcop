@@ -113,7 +113,7 @@ void ESoundThumbnail::Save(int age, LPCSTR path)
 }
 //------------------------------------------------------------------------------
 
-#include "..\Engine\ai_sounds.h"
+#include "../Engine/ai_sounds.h"
 
 bool ESoundThumbnail::OnMaxAIDistAfterEdit(PropValue* sender, float& edit_val)
 {

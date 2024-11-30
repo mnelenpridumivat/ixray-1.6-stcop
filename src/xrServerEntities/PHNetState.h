@@ -1,7 +1,7 @@
 #ifndef  PHNETSTATE_H
 #define  PHNETSTATE_H
 
-#include "..\xrEngine\VisMask.h"
+#include "../xrEngine/VisMask.h"
 
 class NET_Packet;
 

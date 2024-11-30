@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "build.h"
+#include "StdAfx.h"
+#include "Build.h"
 
-#include "../xrlc_light/xrdeflector.h"
+#include "../xrLC_Light/xrDeflector.h"
 #include "../xrForms/xrThread.h"
 #include "../xrLC_Light/xrLC_GlobalData.h"
 #include "../xrLC_Light/xrLightVertex.h"
 
-#include "../../xrcore/xrSyncronize.h"
+#include "../../xrCore/xrSyncronize.h"
 
 #include "../xrLC_Light/mu_model_light.h"
 xrCriticalSection	task_CS

@@ -14,7 +14,7 @@
 
 // server entities includes
 #include "xrServer_Objects_ALife_All.h"
-#include "xrServer_Objects_ALife_Smartcovers.h"
+#include "xrServer_Objects_Alife_Smartcovers.h"
 #include "clsid_game.h"
 
 // client entities includes

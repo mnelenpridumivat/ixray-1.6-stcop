@@ -4,9 +4,9 @@
 
 //#include "../xrPhysics/PHCharacter.h"
 //#include "../xrPhysics/MathUtils.h"
-#include "../xrPhysics/physicsexternalcommon.h"
-#include "../xrPhysics/mathutils.h"
-#include "../xrPhysics/movementboxdynamicactivate.h"
+#include "../xrPhysics/PhysicsExternalCommon.h"
+#include "../xrPhysics/MathUtils.h"
+#include "../xrPhysics/MovementBoxDynamicActivate.h"
 namespace ALife {
 	enum EHitType;
 };

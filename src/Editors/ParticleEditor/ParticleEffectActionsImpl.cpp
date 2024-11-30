@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "../XrECore/Editor/ParticleEffectActions.h"
-#include "../xrEProps/folderlib.h"
-#include "../../Editors/Public/PropertiesListHelper.h"
+#include "../xrECore/Editor/ParticleEffectActions.h"
+#include "../xrEProps/FolderLib.h"
+#include "../Public/PropertiesListHelper.h"
 #include "../../xrParticles/particle_actions_collection.h"
 #include "../../xrParticles/noise.h"
 

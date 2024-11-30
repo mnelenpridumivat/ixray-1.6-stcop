@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "..\..\Layers\xrRender\PSLibrary.h"
-#include "..\..\Layers\xrRender\ParticleEffect.h"
-#include "..\..\Layers\xrRender\ParticleGroup.h"
+#include "../../Layers/xrRender/PSLibrary.h"
+#include "../../Layers/xrRender/ParticleEffect.h"
+#include "../../Layers/xrRender/ParticleGroup.h"
 //------------------------------------------------------------------------------
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Weapon.h"
-#include "hudsound.h"
+#include "HudSound.h"
 #include "../xrSound/ai_sounds.h"
 
 class ENGINE_API CMotionDef;

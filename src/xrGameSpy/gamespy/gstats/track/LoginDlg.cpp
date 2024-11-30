@@ -1,11 +1,11 @@
 // LoginDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "track.h"
 #include "LoginDlg.h"
 
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -1,7 +1,7 @@
 #pragma once
 #include "../../xrCore/XmlParser/xrXMLParser.h"
-#include "../xrRender/blenders/blender.h"
-#include "../xrRender/blenders/blender_recorder.h"
+#include "../xrRender/blenders/Blender.h"
+#include "../xrRender/blenders/Blender_Recorder.h"
 
 class CXMLBlend
 {

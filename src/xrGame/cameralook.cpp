@@ -1,8 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #pragma hdrstop
 
-#include "CameraLook.h"
-#include "../xrEngine/Cameramanager.h"
+#include "cameralook.h"
+#include "../xrEngine/CameraManager.h"
 #include "../xrEngine/xr_level_controller.h"
 #include "Actor.h"
 #include "object_broker.h"
@@ -193,8 +193,8 @@ void CCameraLook2::UpdateDistance(Fvector& pivot, Fvector& correction)
 }
 
 #include "Actor.h"
-#include "inventory.h"
-#include "weapon.h"
+#include "Inventory.h"
+#include "Weapon.h"
 void CCameraLook2::Update(Fvector& point, Fvector& noise_dangle)
 {
 	Fmatrix mR, R;

@@ -6,7 +6,7 @@
 //	Description : Client spawn manager script export
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "client_spawn_manager.h"
 

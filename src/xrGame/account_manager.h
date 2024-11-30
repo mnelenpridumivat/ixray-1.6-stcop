@@ -2,7 +2,7 @@
 #define ACCOUNT_MANAGER
 
 #include "mixed_delegate.h"
-#include "GameSpy/GameSpy_FuncDefs.h"
+#include "gamespy/GameSpy_FuncDefs.h"
 #include "../xrScripts/script_export_space.h"
 #include "queued_async_method.h"
 

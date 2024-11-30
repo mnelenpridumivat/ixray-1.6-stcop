@@ -1,10 +1,10 @@
 #pragma once
-#include "xrfacedefs.h"
+#include "xrFaceDefs.h"
 #include "base_color.h"
 #include "lm_layer.h"
 #include "uv_tri.h"
-#include "../../xrcdb/xrCDB.h"
-#include "xrdeflectordefs.h"
+#include "../../xrCDB/xrCDB.h"
+#include "xrDeflectorDefs.h"
 
 class  base_lighting;
  

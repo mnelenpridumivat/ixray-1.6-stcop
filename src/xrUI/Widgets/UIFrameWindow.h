@@ -1,5 +1,5 @@
 #pragma once
-#include "uiwindow.h"
+#include "UIWindow.h"
 
 
 class UI_API CUIFrameWindow: public CUIWindow,

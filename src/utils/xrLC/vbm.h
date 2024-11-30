@@ -1,7 +1,7 @@
 #pragma once
 
-#include	"../../xrEngine/fmesh.h"
-#include	"../../xrcore/fs.h"
+#include "../../xrEngine/Fmesh.h"
+#include "../../xrCore/FS.h"
 
 static const	u32								c_VB_maxSize			= 4096*1024;	// bytes
 // Vertex containers

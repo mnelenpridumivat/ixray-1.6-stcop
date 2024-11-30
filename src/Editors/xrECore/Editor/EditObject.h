@@ -11,7 +11,7 @@
 #endif
 #	include "..\..\..\Include\xrRender\Kinematics.h"
 
-#include "physicsshellholdereditorbase.h"
+#include "PhysicsShellHolderEditorBase.h"
 #include "Engine/GameMtlLib.h"
 
 //----------------------------------------------------

@@ -2,7 +2,7 @@
 #define XRGAMESPY_SAKE
 
 #include "xrGameSpy_MainDefs.h"
-#include "GameSpy/sake/sake.h"
+#include "gamespy/sake/sake.h"
 
 extern "C"
 {

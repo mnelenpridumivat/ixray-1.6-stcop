@@ -6,7 +6,7 @@
 //	Description : Inventory item upgrades class impl
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "inventory_item.h"
 #include "inventory_item_impl.h"

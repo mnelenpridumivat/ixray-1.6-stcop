@@ -10,11 +10,11 @@
 #include "../xrNetServer/NET_AuthCheck.h"
 
 #include "xr_input.h"
-#include "xr_ioconsole.h"
+#include "XR_IOConsole.h"
 #include "x_ray.h"
 #include "GameFont.h"
 #include "LightAnimLibrary.h"
-#include "../xrCDB/ispatial.h"
+#include "../xrCDB/ISpatial.h"
 #include <luabind/luabind.hpp>
 #include <luabind/luabind_memory.h>
 #include "string_table.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../xrUI/Widgets/uiwindow.h"
+#include "../../xrUI/Widgets/UIWindow.h"
 
 
 class CInventoryItem;

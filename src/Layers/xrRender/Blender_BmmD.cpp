@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "blender_BmmD.h"
-#include "..\xrRender\uber_deffer.h"
+#include "Blender_BmmD.h"
+#include "uber_deffer.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

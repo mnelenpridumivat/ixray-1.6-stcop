@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "render.h"
+#include "Render.h"
 
 //ENGINE_API	IRender_interface*	Render		= nullptr;
 

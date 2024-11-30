@@ -1,13 +1,13 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "WeaponRG6.h"
-#include "entity.h"
-#include "explosiveRocket.h"
+#include "Entity.h"
+#include "ExplosiveRocket.h"
 #include "Level.h"
 #include "../xrPhysics/MathUtils.h"
 #include "Actor.h"
 #include "UIGameCustom.h"
-#include "inventory.h"
-#include "inventoryOwner.h"
+#include "Inventory.h"
+#include "InventoryOwner.h"
 
 #ifdef DEBUG
 #	include "phdebug.h"

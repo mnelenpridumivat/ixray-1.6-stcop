@@ -1,13 +1,13 @@
-#include "stdafx.h"
-#include "hudtarget.h"
-#include "../xrEngine/gamemtllib.h"
+#include "StdAfx.h"
+#include "HUDTarget.h"
+#include "../xrEngine/GameMtlLib.h"
 
 #include "../xrEngine/Environment.h"
 #include "../xrEngine/CustomHUD.h"
 #include "Entity.h"
 #include "Level.h"
 #include "game_cl_base.h"
-#include "../xrEngine/igame_persistent.h"
+#include "../xrEngine/IGame_Persistent.h"
 
 #include "../../xrUI/ui_base.h"
 #include "InventoryOwner.h"

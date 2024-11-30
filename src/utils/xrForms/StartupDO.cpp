@@ -1,6 +1,6 @@
 #include "../../xrCore/xrCore.h"
-#include "../xrlc_light/xrlc_light.h"
-#include "../xrlc_light/global_calculation_data.h"
+#include "../xrLC_Light/xrLC_Light.h"
+#include "../xrLC_Light/global_calculation_data.h"
 #include "cl_log.h"
 
 extern volatile BOOL bClose;

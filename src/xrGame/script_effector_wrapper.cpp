@@ -6,7 +6,7 @@
 //	Description : XRay Script effector wrapper class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "script_effector_wrapper.h"
 

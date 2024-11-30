@@ -28,7 +28,7 @@ Comments:
 */
 
 #include "stdafx.h"
-#include "nvMeshMender.h"
+#include "NVMeshMender.h"
 #include "assert.h"
 
 namespace

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../../xrGameSpy/GameSpy/Common/gsCommon.h"
-#include "../../xrGameSpy/GameSpy/Common/gsAvailable.h"
-#include "../../xrGameSpy/GameSpy/ghttp/ghttp.h"
+#include "../../xrGameSpy/gamespy/common/gsCommon.h"
+#include "../../xrGameSpy/gamespy/common/gsAvailable.h"
+#include "../../xrGameSpy/gamespy/ghttp/ghttp.h"
 
-#include "../../xrGameSpy/GameSpy/qr2/qr2.h"
-#include "../../xrGameSpy/GameSpy/gcdkey/gcdkeyc.h"
-#include "../../xrGameSpy/GameSpy/gcdkey/gcdkeys.h"
-#include "../../xrGameSpy/GameSpy/serverbrowsing/sb_serverbrowsing.h"
+#include "../../xrGameSpy/gamespy/qr2/qr2.h"
+#include "../../xrGameSpy/gamespy/gcdkey/gcdkeyc.h"
+#include "../../xrGameSpy/gamespy/gcdkey/gcdkeys.h"
+#include "../../xrGameSpy/gamespy/serverbrowsing/sb_serverbrowsing.h"
 
 //#include "../../xrGameSpy/GameSpy/pt/pt.h"
-#include "../../xrGameSpy/GameSpy/gp/gp.h"
-#include "../../xrGameSpy/GameSpy/sake/sake.h"
-#include "../../xrGameSpy/GameSpy/sc/sc.h"
+#include "../../xrGameSpy/gamespy/GP/gp.h"
+#include "../../xrGameSpy/gamespy/sake/sake.h"
+#include "../../xrGameSpy/gamespy/sc/sc.h"
 
 #undef max
 

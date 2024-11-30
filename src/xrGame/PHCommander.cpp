@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "PHCommander.h"
 
-#include "phsimplecalls.h"
+#include "PHSimpleCalls.h"
 #ifdef DEBUG
-#include "../xrphysics/IPHWorld.h"
+#include "../xrPhysics/IPHWorld.h"
 #endif
 
 CPHCall::CPHCall(CPHCondition* condition,CPHAction* action)	

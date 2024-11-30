@@ -1,7 +1,7 @@
 #ifndef __RECALCULATION_PARAMS_H__
 #define __RECALCULATION_PARAMS_H__
 
-#include	"detailformat.h"
+#include "DetailFormat.h"
  
 class CVirtualFileRW;
 class recalculation

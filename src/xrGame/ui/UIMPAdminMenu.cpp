@@ -10,7 +10,7 @@
 #include "../../xrUI/Widgets/UI3tButton.h"
 #include "UIMessageBox.h"
 #include "UIMessageBoxEx.h"
-#include "../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 
 CUIMpAdminMenu::CUIMpAdminMenu()
 {

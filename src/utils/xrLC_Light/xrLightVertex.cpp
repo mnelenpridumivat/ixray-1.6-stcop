@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "xrLightVertex.h"
 #include "../xrForms/xrThread.h"
-#include "xrface.h"
+#include "xrFace.h"
 #include "xrLC_GlobalData.h"
 #include "light_point.h"
 
-#include "../../xrcdb/xrCDB.h"
+#include "../../xrCDB/xrCDB.h"
 //-----------------------------------------------------------------------
 typedef	xr_multimap<float,vecVertex>	mapVert;
 typedef	mapVert::iterator				mapVertIt;

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "WeaponBinocularsVision.h"
 #include "WeaponBinoculars.h"
 #include "entity_alive.h"
@@ -11,8 +11,8 @@
 #include "game_base_space.h"
 #include "Level.h"
 #include "game_cl_base.h"
-#include "AI/Monsters/BaseMonster/base_monster.h"
-#include "../xrEngine/igame_persistent.h"
+#include "ai/monsters/basemonster/base_monster.h"
+#include "../xrEngine/IGame_Persistent.h"
 
 #define RECT_SIZE	11
 

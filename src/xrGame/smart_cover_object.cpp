@@ -6,10 +6,10 @@
 //	Description : smart cover object class
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "pch_script.h"
 #include "smart_cover_object.h"
-#include "../xrServerEntities/xrServer_Objects_ALife_Smartcovers.h"
+#include "../xrServerEntities/xrServer_Objects_Alife_Smartcovers.h"
 #include "Level.h"
 #include "debug_renderer.h"
 #include "ai_space.h"
@@ -18,7 +18,7 @@
 #include "smart_cover.h"
 #include "smart_cover_description.h"
 #include "smart_cover_loophole.h"
-#include "../xrengine/xr_collide_form.h"
+#include "../xrEngine/xr_collide_form.h"
 
 void smart_cover::object::Load			(LPCSTR section)
 {

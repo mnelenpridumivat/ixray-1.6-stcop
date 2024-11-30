@@ -1,14 +1,14 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "cl_collector.h"
-#include "build.h"
+#include "Build.h"
 #include "../xrLC_Light/xrMU_Model.h"
 #include "../xrLC_Light/xrMU_Model_Reference.h"
 
 #include "../xrLC_Light/xrLC_GlobalData.h"
-#include "../xrLC_Light/xrface.h"
+#include "../xrLC_Light/xrFace.h"
 
-#include "../../xrcore/fs.h"
-#include "../../xrcdb/xrcdb.h"
+#include "../../xrCore/FS.h"
+#include "../../xrCDB/xrCDB.h"
 
 int GetVertexIndex(Vertex *F)
 {

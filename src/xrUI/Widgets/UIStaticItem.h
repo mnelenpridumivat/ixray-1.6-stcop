@@ -1,5 +1,5 @@
 #pragma once
-#include "../../xrUI/ui_defs.h"
+#include "../ui_defs.h"
 
 
 class UI_API CUIStaticItem

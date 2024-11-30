@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ExtendedGeom.h"
-#include "phsimplecharacter.h"
+#include "PHSimpleCharacter.h"
 #include "PHActorCharacterInline.h"
 
 class CPhysicShellHolder;

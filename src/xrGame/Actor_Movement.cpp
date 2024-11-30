@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "Actor.h"
 #include "Inventory.h"
@@ -8,15 +8,15 @@
 
 #include "Level.h"
 #include "UIGameCustom.h"
-#include "actorcondition.h"
+#include "ActorCondition.h"
 #include "game_cl_base.h"
 #include "WeaponMagazined.h"
 #include "CharacterPhysicsSupport.h"
-#include "actoreffector.h"
+#include "ActorEffector.h"
 #include "player_hud.h"
 
 #ifdef DEBUG
-#include "phdebug.h"
+#include "PHDebug.h"
 #endif
 static const float	s_fLandingTime1		= 0.1f;// через сколько снять флаг Landing1 (т.е. включить следующую анимацию)
 static const float	s_fLandingTime2		= 0.3f;// через сколько снять флаг Landing2 (т.е. включить следующую анимацию)

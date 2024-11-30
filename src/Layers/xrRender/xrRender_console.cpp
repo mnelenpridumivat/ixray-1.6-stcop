@@ -198,7 +198,7 @@ float		ps_r__test_exp_to_shaders_4	= 1.0f;
 BOOL		ps_r2_particle_dt			= FALSE;
 
 #ifndef _EDITOR
-#include	"../../xrEngine/xr_ioconsole.h"
+#include "../../xrEngine/XR_IOConsole.h"
 #include	"../../xrEngine/xr_ioc_cmd.h"
 
 #ifdef USE_DX11

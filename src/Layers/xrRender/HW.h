@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "hwcaps.h"
+#include "HWCaps.h"
 
 #ifndef _EDITOR
 #	include <renderdoc/api/app/renderdoc_app.h>

@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#include "..\..\Layers\xrRender\ParticleGroup.h"
+#include "../../Layers/xrRender/ParticleGroup.h"
 #include "../Public/PropertiesListHelper.h"
-#include "ui_particletools.h"
+#include "UI_ParticleTools.h"
 
 BOOL PS::CPGDef::SEffect::Equal(const SEffect& src)
 {

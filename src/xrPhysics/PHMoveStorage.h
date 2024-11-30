@@ -1,6 +1,6 @@
 #ifndef PHMOVESTORAGE_H
 #define PHMOVESTORAGE_H
-#include "phgeometryowner.h"
+#include "PHGeometryOwner.h"
 
 //using POSITIONS_STORAGE = xr_vector<dReal*&>;
 //using POSITIONS_I = POSITIONS_STORAGE::iterator;

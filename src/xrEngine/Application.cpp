@@ -3,9 +3,9 @@
 #include "Application.h"
 #include "IGame_Level.h"
 #include "IGame_Persistent.h"
-#include "xr_ioconsole.h"
+#include "XR_IOConsole.h"
 #include "std_classes.h"
-#include "../xrCDB/ispatial.h"
+#include "../xrCDB/ISpatial.h"
 #include "ILoadingScreen.h"
 
 //---------------------------------------------------------------------

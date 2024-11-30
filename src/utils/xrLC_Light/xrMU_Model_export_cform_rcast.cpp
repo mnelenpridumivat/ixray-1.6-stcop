@@ -2,8 +2,8 @@
 #include "xrMU_Model.h"
 #include "xrMU_Model_Reference.h"
 
-#include "../../xrcdb/xrcdb.h"
-#include "../shader_xrlc.h"
+#include "../../xrCDB/xrCDB.h"
+#include "../Shader_xrLC.h"
 
 u32 convert_nax(base_Face* F);
 

@@ -4,10 +4,10 @@
 #pragma once
 #include "../xrDXT/xrDXT.h"
 #include "../../xrCore/FS.h"
-#include "../shader_xrlc.h"
+#include "../Shader_xrLC.h"
 
 #include "../xrLC_Light/b_build_texture.h"
-#include "../xrLC_Light/xrfacedefs.h"
+#include "../xrLC_Light/xrFaceDefs.h"
 
 class xrLC_GlobalData;
 class xrMU_Model;

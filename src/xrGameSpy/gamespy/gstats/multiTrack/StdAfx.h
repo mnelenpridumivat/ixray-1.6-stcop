@@ -20,7 +20,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include "../gstats.h"
-#include "../../gp/gp.h"
+#include "../../GP/gp.h"
 #include "../../ghttp/ghttp.h"
 #include "../../gt2/gt2.h"
 #include "../../gt2/gt2Encode.h"

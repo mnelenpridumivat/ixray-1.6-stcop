@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "pch_script.h"
 
-#include "uiiteminfo.h"
-#include "../../xrUI/Widgets/uistatic.h"
+#include "UIItemInfo.h"
+#include "../../xrUI/Widgets/UIStatic.h"
 #include "../../xrUI/UIXmlInit.h"
 
 #include "../../xrUI/Widgets/UIProgressBar.h"
@@ -12,7 +12,7 @@
 #include "ai_space.h"
 #include "alife_simulator.h"
 #include "../../xrEngine/string_table.h"
-#include "../Inventory_Item.h"
+#include "../inventory_item.h"
 #include "UIInventoryUtilities.h"
 #include "../PhysicsShellHolder.h"
 #include "UIWpnParams.h"

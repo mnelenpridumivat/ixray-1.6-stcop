@@ -6,7 +6,7 @@
 //	Description : Patrol path
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "patrol_path.h"
 #include "levelgamedef.h"
 

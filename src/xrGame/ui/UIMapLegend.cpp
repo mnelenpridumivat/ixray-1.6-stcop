@@ -21,7 +21,7 @@
 #include "../../xrUI/Widgets/UIHint.h"
 
 #include "UIInventoryUtilities.h"
-#include "../level.h"
+#include "../Level.h"
 
 UIMapLegend::~UIMapLegend()
 {

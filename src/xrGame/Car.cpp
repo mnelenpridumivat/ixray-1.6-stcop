@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "car.h"
+#include "StdAfx.h"
+#include "Car.h"
 
 #ifdef DEBUG
 #	include "../xrEngine/StatGraph.h"
@@ -10,7 +10,7 @@
 #include "PHDestroyable.h"
 
 #include "cameralook.h"
-#include "camerafirsteye.h"
+#include "CameraFirstEye.h"
 #include "Actor.h"
 #include "ActorEffector.h"
 #include "math.h"

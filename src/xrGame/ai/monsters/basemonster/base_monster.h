@@ -25,8 +25,8 @@
 #include "../monster_sound_defs.h"
 
 #include "../monster_aura.h"
-#include "../../../inventoryowner.h"
-#include "../../../../xrphysics/PHCharacter.h"
+#include "../../../InventoryOwner.h"
+#include "../../../../xrPhysics/PHCharacter.h"
 
 #include "../xrServerEntities/xrServer_Objects_ALife_Monsters.h"
 

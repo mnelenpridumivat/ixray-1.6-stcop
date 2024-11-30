@@ -1,8 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "trajectories.h"
 #include "Level.h"
 #include "../xrPhysics/IPHWorld.h"
-#include "../xrGame/ai_debug_variables.h"
+#include "ai_debug_variables.h"
 
 #include "../xrCore/_vector3d_ext.h"
 

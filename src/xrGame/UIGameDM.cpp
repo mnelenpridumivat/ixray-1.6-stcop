@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
 #include "UIGameDM.h"
 
@@ -13,7 +13,7 @@
 #include "InventoryOwner.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "../../xrUI/xrUIXmlParser.h"
-#include "game_cl_Deathmatch.h"
+#include "game_cl_deathmatch.h"
 #include "ui/UIMoneyIndicator.h"
 #include "ui/UIRankIndicator.h"
 #include "ui/UIVoteStatusWnd.h"

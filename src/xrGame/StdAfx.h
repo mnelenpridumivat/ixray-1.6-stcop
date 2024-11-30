@@ -20,10 +20,10 @@
 #include "../xrScripts/stdafx.h"
 #pragma warning(default:4995)
 
-#include "../xrEngine/gamefont.h"
+#include "../xrEngine/GameFont.h"
 #include "../xrEngine/xr_object.h"
-#include "../xrEngine/igame_level.h"
-#include "../xrPhysics/xrphysics.h"
+#include "../xrEngine/IGame_Level.h"
+#include "../xrPhysics/xrPhysics.h"
 #include "smart_cast.h"
 #else
 #include "../Editors/ActorEditor/stdafx.h"
