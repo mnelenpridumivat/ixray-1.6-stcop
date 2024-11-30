@@ -4,7 +4,8 @@
 //refs
 
 #if 1
-extern doug_lea_allocator	g_render_lua_allocator;
+//extern doug_lea_allocator	g_render_lua_allocator;
+extern doug_lea_area_allocator	g_render_lua_allocator_area;
 
 template <class T>
 class doug_lea_alloc {
@@ -27,9 +28,9 @@ public:
 	doug_lea_alloc(const doug_lea_alloc<T>&) {	}
 	template<class _Other>							doug_lea_alloc(const doug_lea_alloc<_Other>&) {	}
 	template<class _Other>	doug_lea_alloc<T>& operator=		(const doug_lea_alloc<_Other>&) { return (*this); }
-	pointer					allocate(size_type n, const void* p = 0) const { return (T*)g_render_lua_allocator.malloc_impl(sizeof(T) * (u32)n); }
-	void					deallocate(pointer p, size_type n) const { g_render_lua_allocator.free_impl((void*&)p); }
-	void					deallocate(void* p, size_type n) const { g_render_lua_allocator.free_impl(p); }
+	pointer					allocate(size_type n, const void* p = 0) const { return (T*)g_render_lua_allocator_area.malloc_impl(sizeof(T) * (u32)n); }
+	void					deallocate(pointer p, size_type n) const { g_render_lua_allocator_area.free_impl((void*&)p); }
+	void					deallocate(void* p, size_type n) const { g_render_lua_allocator_area.free_impl(p); }
 	char* __charalloc(size_type n) { return (char*)allocate(n); }
 	void					construct(pointer p, const T& _Val) { new(p)T(_Val); }
 
@@ -46,9 +47,9 @@ struct doug_lea_allocator_wrapper {
 		typedef doug_lea_alloc<T>	result;
 	};
 
-	static	void* alloc(const u32& n) { return g_render_lua_allocator.malloc_impl((u32)n); }
+	static	void* alloc(const u32& n) { return g_render_lua_allocator_area.malloc_impl((u32)n); }
 	template <typename T>
-	static	void	dealloc(T*& p) { g_render_lua_allocator.free_impl((void*&)p); }
+	static	void	dealloc(T*& p) { g_render_lua_allocator_area.free_impl((void*&)p); }
 };
 
 #	define render_alloc				doug_lea_alloc

@@ -1,6 +1,10 @@
 #include "stdafx.h"
 
-doug_lea_allocator g_render_lua_allocator("render:lua");
+static constexpr size_t	s_arena_size = 8 * 1024 * 1024;
+static char s_fake_array[s_arena_size];
+
+doug_lea_area_allocator	g_render_lua_allocator_area(s_fake_array,"render:sdk", s_arena_size);
+//doug_lea_allocator g_render_lua_allocator("render:lua");
 
 #define RENDER_OBJECT(P,B)\
 {\

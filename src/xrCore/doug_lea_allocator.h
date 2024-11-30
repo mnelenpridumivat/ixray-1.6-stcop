@@ -4,6 +4,7 @@
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 #pragma once
+#include "memory/doug_lea_area_allocator.h"
 
 class XRCORE_API doug_lea_allocator
 {
