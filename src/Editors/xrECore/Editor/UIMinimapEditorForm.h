@@ -87,4 +87,5 @@ private:
 	//
 	U32Vec      m_ImageData;
 	xr_string	m_BackgroundTexturePath;
+	bool		m_mp_mode = false;
 };
