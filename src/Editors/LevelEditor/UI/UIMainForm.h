@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 class UIMainForm :public IEditorWnd
 {
 public:

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class TUI_ControlPSAdd: public TUI_CustomControl
 {

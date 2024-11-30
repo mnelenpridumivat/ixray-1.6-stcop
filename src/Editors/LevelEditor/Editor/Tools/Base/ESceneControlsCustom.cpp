@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 TUI_CustomControl::TUI_CustomControl(int st, int act, ESceneToolBase* parent)
 {

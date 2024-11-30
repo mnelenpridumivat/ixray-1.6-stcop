@@ -130,7 +130,7 @@ public:
 		left
 	};
 
-	// Приборная панель
+	// РџСЂРёР±РѕСЂРЅР°СЏ РїР°РЅРµР»СЊ
 	Fvector4 m_speed_offsets;
 	Fvector4 m_fuel_offsets;
 	Fvector4 m_rpm_offsets;

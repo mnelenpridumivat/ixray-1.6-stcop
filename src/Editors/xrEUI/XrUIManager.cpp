@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "../../xrEngine/stdafx.h"
 #include "imgui_impl_dx9.h"
 #include "imgui_impl_sdl3.h"

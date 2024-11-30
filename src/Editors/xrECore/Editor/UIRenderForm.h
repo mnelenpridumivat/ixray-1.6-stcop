@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 using TOnRenderContextMenu = xr_delegate<void()>;
 using TOnRenderToolBar = xr_delegate<void(ImVec2, ImVec2)>;
 

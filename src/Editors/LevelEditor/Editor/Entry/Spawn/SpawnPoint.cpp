@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "../../../../../xrServerEntities/xrServer_Objects_ALife.h"
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"

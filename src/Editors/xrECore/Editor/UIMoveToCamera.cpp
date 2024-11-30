@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "UIMoveToCamera.h"
 #include "ui_main.h"
 

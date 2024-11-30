@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////
 // PhraseScript.h
-// классы для связи диалогов со скриптами
+// РєР»Р°СЃСЃС‹ РґР»в‚¬ СЃРІв‚¬Р·Рё РґРёР°Р»РѕРіРѕРІ СЃРѕ СЃРєСЂРёРїС‚Р°РјРё
 ///////////////////////////////////////////////////////////////
 
 
@@ -45,19 +45,19 @@ public:
 			void				SetScriptText	(LPCSTR str)		{m_sScriptTextFunc = str;};
 			LPCSTR				GetScriptText	(LPCSTR str_to_translate, const CGameObject* pSpeakerGO1, const CGameObject* pSpeakerGO2, LPCSTR dialog_id, LPCSTR phrase_id);
 protected:
-	//загрузка содержания последовательности тагов в контейнер строк 
+	//Р·Р°РіСЂСѓР·РєР° СЃРѕРґРµСЂР¶Р°РЅРёв‚¬ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё С‚Р°РіРѕРІ РІ РєРѕРЅС‚РµР№РЅРµСЂ СЃС‚СЂРѕРє 
 	template<class T> 
 		void					LoadSequence		(CUIXml* ui_xml, XML_NODE* phrase_node, LPCSTR tag, T&  str_vector);
 
-	//манипуляции с информацией во время вызовов Precondition и Action 
+	//РјР°РЅРёРїСѓР»в‚¬С†РёРё СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ РІРѕ РІСЂРµРјв‚¬ РІС‹Р·РѕРІРѕРІ Precondition Рё Action 
 	virtual bool				CheckInfo		(const CInventoryOwner* pOwner) const;
 	virtual void				TransferInfo	(const CInventoryOwner* pOwner) const;
 
-	//имя скриптовой функции, которая возвращает какой-то текст
+	//РёРјв‚¬ СЃРєСЂРёРїС‚РѕРІРѕР№ С„СѓРЅРєС†РёРё, РєРѕС‚РѕСЂР°в‚¬ РІРѕР·РІСЂР°С‰Р°РµС‚ РєР°РєРѕР№-С‚Рѕ С‚РµРєСЃС‚
 	shared_str					m_sScriptTextFunc;
 
-	//скриптовые действия, которые активируется после того как 
-	//говорится фраза
+	//СЃРєСЂРёРїС‚РѕРІС‹Рµ РґРµР№СЃС‚РІРёв‚¬, РєРѕС‚РѕСЂС‹Рµ Р°РєС‚РёРІРёСЂСѓРµС‚СЃв‚¬ РїРѕСЃР»Рµ С‚РѕРіРѕ РєР°Рє 
+	//РіРѕРІРѕСЂРёС‚СЃв‚¬ С„СЂР°Р·Р°
 	using ACTION_NAME_VECTOR = xr_vector<shared_str>;
 	using ACTION_NAME_VECTOR_IT = ACTION_NAME_VECTOR::iterator;
 
@@ -69,13 +69,13 @@ protected:
 	INFO_VECTOR					m_GiveInfo;
 	INFO_VECTOR					m_DisableInfo;
 
-	//список скриптовых предикатов, выполнение, которых необходимо
-	//для того чтоб фраза стала доступной
+	//СЃРїРёСЃРѕРє СЃРєСЂРёРїС‚РѕРІС‹С… РїСЂРµРґРёРєР°С‚РѕРІ, РІС‹РїРѕР»РЅРµРЅРёРµ, РєРѕС‚РѕСЂС‹С… РЅРµРѕР±С…РѕРґРёРјРѕ
+	//РґР»в‚¬ С‚РѕРіРѕ С‡С‚РѕР± С„СЂР°Р·Р° СЃС‚Р°Р»Р° РґРѕСЃС‚СѓРїРЅРѕР№
 	using PRECONDITION_VECTOR = xr_vector<shared_str>;
 	using PRECONDITION_VECTOR_IT = PRECONDITION_VECTOR::iterator;
 
 	PRECONDITION_VECTOR			m_Preconditions;
-	//проверка наличия/отсутствия информации
+	//РїСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡Рёв‚¬/РѕС‚СЃСѓС‚СЃС‚РІРёв‚¬ РёРЅС„РѕСЂРјР°С†РёРё
 	INFO_VECTOR					m_HasInfo;
 	INFO_VECTOR					m_DontHasInfo;
 };

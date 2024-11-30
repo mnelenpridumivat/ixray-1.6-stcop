@@ -36,7 +36,7 @@ class game_sv_mp :public game_sv_GameState
 	typedef game_sv_GameState inherited;
 
 protected:
-	//список трупов для удаления
+	//СЃРїРёСЃРѕРє С‚СЂСѓРїРѕРІ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
 	using CORPSE_LIST = xr_deque<u16>;
 	using CORPSE_LIST_it = CORPSE_LIST::iterator;
 
@@ -127,8 +127,8 @@ public:
 
 	virtual		void				net_Export_State		(NET_Packet& P, ClientID id_to);
 
-	virtual		void				OnRoundStart			();												// старт раунда
-	virtual		void				OnRoundEnd				();	//round_end_reason							// конец раунда
+	virtual		void				OnRoundStart			();												// СЃС‚Р°СЂС‚ СЂР°СѓРЅРґР°
+	virtual		void				OnRoundEnd				();	//round_end_reason							// РєРѕРЅРµС† СЂР°СѓРЅРґР°
 	virtual		bool				OnNextMap				();
 	virtual		void				OnPrevMap				();
 	

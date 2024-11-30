@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 #include "EStats.h"
 #include "UI_Main.h"

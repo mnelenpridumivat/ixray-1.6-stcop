@@ -1,4 +1,4 @@
-﻿#include "StdAfx.h"
+#include "StdAfx.h"
 #include "../../Layers/xrRender/ETextureParams.h"
 #include <RedImage.hpp>
 

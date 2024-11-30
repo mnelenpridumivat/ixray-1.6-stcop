@@ -1,4 +1,4 @@
-// ShaderEditor.cpp : Определяет точку входа для приложения.
+// ShaderEditor.cpp : РћРїСЂРµРґРµР»СЏРµС‚ С‚РѕС‡РєСѓ РІС…РѕРґР° РґР»СЏ РїСЂРёР»РѕР¶РµРЅРёСЏ.
 //
 #include "stdafx.h"
 #include "../../xrEngine/xr_input.h"

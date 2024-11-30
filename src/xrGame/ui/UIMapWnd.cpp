@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "UIMapWnd.h"
 #include "UIMap.h"
 #include "../../xrUI/UIXmlInit.h"

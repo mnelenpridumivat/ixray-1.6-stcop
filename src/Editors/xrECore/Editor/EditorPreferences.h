@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <json/json.hpp>
 using json = nlohmann::json;

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 // chunks
 #define WM_VERSION  				0x0004

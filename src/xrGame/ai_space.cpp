@@ -217,7 +217,7 @@ void CAI_Space::game_graph				(IGameGraph *game_graph)
 
 void CAI_Space::destroy_game_graph()
 {
-	// Pavel: фикс краша при перезаходе клиентом в мп
+	// Pavel: С„РёРєСЃ РєСЂР°С€Р° РїСЂРё РїРµСЂРµР·Р°С…РѕРґРµ РєР»РёРµРЅС‚РѕРј РІ РјРї
 	xr_delete(m_game_graph);
 }
 

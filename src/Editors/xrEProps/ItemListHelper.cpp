@@ -40,7 +40,7 @@ bool CListHelper::NameAfterEdit(ListItem* sender, LPCSTR value, shared_str& N)
             else name++;
             if ((item != sender) && (N == name))
             {
-                // елемент с таким именем уже существует
+                // РµР»РµРјРµРЅС‚ СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                 N =value; return false;
             }
         }

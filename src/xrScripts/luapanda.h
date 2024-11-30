@@ -1,4 +1,4 @@
-﻿#ifndef LIBPDEBUG_H
+#ifndef LIBPDEBUG_H
 #define LIBPDEBUG_H
 
 #define USE_SOURCE_CODE

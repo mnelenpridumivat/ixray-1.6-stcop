@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class TUI_ControlPortalSelect: public TUI_CustomControl
 {

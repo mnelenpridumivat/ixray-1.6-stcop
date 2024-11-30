@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "UIEditLibrary.h"
 #include "../../xrECore/Editor/Library.h"
 

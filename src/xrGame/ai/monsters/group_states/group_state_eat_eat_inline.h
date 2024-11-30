@@ -32,7 +32,7 @@ void CStateGroupEatingAbstract::execute()
 	this->object->set_action				(ACT_EAT);
 	this->object->set_state_sound			(MonsterSound::eMonsterSoundEat);
 
-	// ñúåñòü ÷àñòü
+	// ÑÑŠÐµÑÑ‚ÑŒ Ñ‡Ð°ÑÑ‚ÑŒ
 	if (time_last_eat + u32(1000/this->object->db().m_fEatFreq) < Device.dwTimeGlobal) {
 		this->object->ChangeSatiety(this->object->db().m_fEatSlice);
 		corpse->m_fFood -= this->object->db().m_fEatSliceWeight;

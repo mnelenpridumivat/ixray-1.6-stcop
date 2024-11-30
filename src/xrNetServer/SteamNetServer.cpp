@@ -123,7 +123,7 @@ bool SteamNetServer::CreateConnection(GameDescriptionData & game_descr, ServerCo
 
 void SteamNetServer::DestroyConnection()
 {
-	// Pavel: дисконнект не должен исполняться, во время обработки колбека
+	// Pavel: РґРёСЃРєРѕРЅРЅРµРєС‚ РЅРµ РґРѕР»Р¶РµРЅ РёСЃРїРѕР»РЅСЏС‚СЊСЃСЏ, РІРѕ РІСЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё РєРѕР»Р±РµРєР°
 	xrCriticalSectionGuard lock(&csConnection);
 
 	m_server_password.clear();

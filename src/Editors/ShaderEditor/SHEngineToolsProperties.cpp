@@ -191,7 +191,7 @@ void CSHEngineTools::RealUpdateProperties()
             }
             data.advance(sz);
         }
-// âìåñòî ApplyChanges(true);
+// ×’×œ×•×¡×¢×ž ApplyChanges(true);
         UpdateObjectFromStream();
       //  Ext.m_ItemProps->ResetModified();
 //---------------------------

@@ -143,7 +143,7 @@ void CStateGroupAttackRunAbstract::execute()
  		vertex = this->object->EnemyMan.get_enemy()->ai_location().level_vertex_id();
 	}
 	
-	// óñòàíîâêà ïàðàìåòðîâ ôóíêöèîíàëüíûõ áëîêîâ
+	// ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð² Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ñ‹Ñ… Ð±Ð»Ð¾ÐºÐ¾Ð²
 	this->object->set_action (ACT_RUN);
 
 	this->object->anim().accel_activate			(eAT_Aggressive);

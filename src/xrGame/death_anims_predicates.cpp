@@ -101,7 +101,7 @@ void type_motion_diagnostic( LPCSTR message, type_motion::edirection dr, const C
 }
 
 
- //1.	Èíåðöèîííîå äâèæåíèå âïåðåä îò ïîïàäàíèÿ â ãîëîâó 
+ //1.	Ð˜Ð½ÐµÑ€Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ðµ Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ Ð²Ð¿ÐµÑ€ÐµÐ´ Ð¾Ñ‚ Ð¿Ð¾Ð¿Ð°Ð´Ð°Ð½Ð¸Ñ Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ 
 class	type_motion0: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle )	const
@@ -145,12 +145,12 @@ class	type_motion0: public type_motion
 			return false;
 
 		m = motion( front );
-		type_motion_diagnostic( " type_motion0: 1. = Èíåðöèîííîå äâèæåíèå âïåðåä îò ïîïàäàíèÿ â ãîëîâó ", front, ea, H, m );
+		type_motion_diagnostic( " type_motion0: 1. = Ð˜Ð½ÐµÑ€Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ðµ Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ Ð²Ð¿ÐµÑ€ÐµÐ´ Ð¾Ñ‚ Ð¿Ð¾Ð¿Ð°Ð´Ð°Ð½Ð¸Ñ Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ ", front, ea, H, m );
 		return true;
 	}
 };
 
-//2.	Èçðåøåòèòü ïóëÿìè
+//2.	Ð˜Ð·Ñ€ÐµÑˆÐµÑ‚Ð¸Ñ‚ÑŒ Ð¿ÑƒÐ»ÑÐ¼Ð¸
 class	type_motion1: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const	
@@ -158,13 +158,13 @@ class	type_motion1: public type_motion
 		m = MotionID();
 //#ifdef DEBUG		
 //		if( death_anim_debug )
-//			Msg( " type_motion1: 2.	Èçðåøåòèòü ïóëÿìè  " );
+//			Msg( " type_motion1: 2.	Ð˜Ð·Ñ€ÐµÑˆÐµÑ‚Ð¸Ñ‚ÑŒ Ð¿ÑƒÐ»ÑÐ¼Ð¸  " );
 //#endif
 		return false;
 	}
 };
 
-//3.	Øîòãàí 
+//3.	Ð¨Ð¾Ñ‚Ð³Ð°Ð½ 
 class	type_motion2: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const	
@@ -186,12 +186,12 @@ class	type_motion2: public type_motion
 			return false;
 		edirection dr = dir( ea, H, angle );
 		m = motion( dr );
-		type_motion_diagnostic( " type_motion2: 3.	Øîòãàí ", dr, ea, H, m );
+		type_motion_diagnostic( " type_motion2: 3.	Ð¨Ð¾Ñ‚Ð³Ð°Ð½ ", dr, ea, H, m );
 		return true;
 	}
 };
 
-//4.	Õåäøîò (ïî âåðîÿòíîñòè), êðîìå 5 (4) 
+//4.	Ð¥ÐµÐ´ÑˆÐ¾Ñ‚ (Ð¿Ð¾ Ð²ÐµÑ€Ð¾ÑÑ‚Ð½Ð¾ÑÑ‚Ð¸), ÐºÑ€Ð¾Ð¼Ðµ 5 (4) 
 class	type_motion3: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const
@@ -206,7 +206,7 @@ class	type_motion3: public type_motion
 		{
 			edirection dr = dir( ea, H, angle );
 			m = motion( dr );
-			type_motion_diagnostic( " type_motion3: 4.	Õåäøîò (ïî âåðîÿòíîñòè), êðîìå 5 (4)", dr, ea, H, m );
+			type_motion_diagnostic( " type_motion3: 4.	Ð¥ÐµÐ´ÑˆÐ¾Ñ‚ (Ð¿Ð¾ Ð²ÐµÑ€Ð¾ÑÑ‚Ð½Ð¾ÑÑ‚Ð¸), ÐºÑ€Ð¾Ð¼Ðµ 5 (4)", dr, ea, H, m );
 			return true;
 		}
 		return false;
@@ -231,7 +231,7 @@ bool is_snipper( u16 weaponID )
 	return true;
 }
 
-//5.	Ñíàéïåðêà â ãîëîâó. 
+//5.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ. 
 class	type_motion4: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const	
@@ -249,14 +249,14 @@ class	type_motion4: public type_motion
 		{
 			edirection dr = dir( ea, H, angle );
 			m = motion( dr );
-			type_motion_diagnostic( " type_motion4: 5.	Ñíàéïåðêà â ãîëîâó", dr, ea, H, m );
+			type_motion_diagnostic( " type_motion4: 5.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ", dr, ea, H, m );
 			return true;
 		}
 		return false;
 	}
 };
 
-//6.	Ñíàéïåðêà â òåëî. 
+//6.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ñ‚ÐµÐ»Ð¾. 
 class	type_motion5: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const	
@@ -272,14 +272,14 @@ class	type_motion5: public type_motion
 		{
 			edirection dr = dir( ea, H, angle );
 			m = motion( dr );
-			type_motion_diagnostic( "type_motion5: 6.	Ñíàéïåðêà â òåëî", dr, ea, H, m );
+			type_motion_diagnostic( "type_motion5: 6.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ñ‚ÐµÐ»Ð¾", dr, ea, H, m );
 			return true;
 		}
 		return false;
 	}
 };
 
-//7.	Ãðàíòà 
+//7.	Ð“Ñ€Ð°Ð½Ñ‚Ð° 
 class	type_motion6: public type_motion
 {
 	bool predicate( CEntityAlive& ea, const SHit& H, MotionID &m, float &angle ) const	
@@ -292,7 +292,7 @@ class	type_motion6: public type_motion
 		{
 			edirection dr = dir( ea, H, angle );
 			m = motion( dr );
-			type_motion_diagnostic( "type_motion6: 7. Ãðàíòà", dr, ea, H, m );
+			type_motion_diagnostic( "type_motion6: 7. Ð“Ñ€Ð°Ð½Ñ‚Ð°", dr, ea, H, m );
 			return true;
 		}
 
@@ -307,7 +307,7 @@ class	type_motion6: public type_motion
 		{	
 			edirection dr = dir( ea, H, angle );
 			m = motion(  dr );
-			type_motion_diagnostic( "type_motion6: 7. Ãðàíòà - îñêîëîê", dr, ea, H, m );
+			type_motion_diagnostic( "type_motion6: 7. Ð“Ñ€Ð°Ð½Ñ‚Ð° - Ð¾ÑÐºÐ¾Ð»Ð¾Ðº", dr, ea, H, m );
 			return true;
 		}
 
@@ -324,14 +324,14 @@ void death_anims::setup		( IKinematicsAnimated* k, LPCSTR section, CInifile cons
 	VERIFY( ini );
 	VERIFY( anims.empty() );
 	anims.resize( types_number );
-	anims[0] =	(new type_motion0())->setup( k, ini, section, "kill_enertion"			);	//1.	Èíåðöèîííîå äâèæåíèå âïåðåä îò ïîïàäàíèÿ â ãîëîâó 
-	anims[1] =	(new type_motion1())->setup( k, ini, section, "kill_burst"				);	//2.	Èçðåøåòèòü ïóëÿìè
-	anims[2] =	(new type_motion2())->setup( k, ini, section, "kill_shortgun"			);	//3.	(Øîòãàí 
+	anims[0] =	(new type_motion0())->setup( k, ini, section, "kill_enertion"			);	//1.	Ð˜Ð½ÐµÑ€Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ðµ Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ðµ Ð²Ð¿ÐµÑ€ÐµÐ´ Ð¾Ñ‚ Ð¿Ð¾Ð¿Ð°Ð´Ð°Ð½Ð¸Ñ Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ 
+	anims[1] =	(new type_motion1())->setup( k, ini, section, "kill_burst"				);	//2.	Ð˜Ð·Ñ€ÐµÑˆÐµÑ‚Ð¸Ñ‚ÑŒ Ð¿ÑƒÐ»ÑÐ¼Ð¸
+	anims[2] =	(new type_motion2())->setup( k, ini, section, "kill_shortgun"			);	//3.	(Ð¨Ð¾Ñ‚Ð³Ð°Ð½ 
 								
-	anims[6] =	(new type_motion3())->setup( k, ini, section, "kill_headshot"			);	//4.	Õåäøîò (ïî âåðîÿòíîñòè), êðîìå 5 (4) 
-	anims[4] =	(new type_motion4())->setup( k, ini, section, "kill_sniper_headshot"	);	//5.	Ñíàéïåðêà â ãîëîâó. 
-	anims[5] =	(new type_motion5())->setup( k, ini, section, "kill_sniper_body"		);	//6.	Ñíàéïåðêà â òåëî. 
-	anims[3] =	(new type_motion6())->setup( k, ini, section, "kill_grenade"			);	//7.	Ãðàíòà 
+	anims[6] =	(new type_motion3())->setup( k, ini, section, "kill_headshot"			);	//4.	Ð¥ÐµÐ´ÑˆÐ¾Ñ‚ (Ð¿Ð¾ Ð²ÐµÑ€Ð¾ÑÑ‚Ð½Ð¾ÑÑ‚Ð¸), ÐºÑ€Ð¾Ð¼Ðµ 5 (4) 
+	anims[4] =	(new type_motion4())->setup( k, ini, section, "kill_sniper_headshot"	);	//5.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ð³Ð¾Ð»Ð¾Ð²Ñƒ. 
+	anims[5] =	(new type_motion5())->setup( k, ini, section, "kill_sniper_body"		);	//6.	Ð¡Ð½Ð°Ð¹Ð¿ÐµÑ€ÐºÐ° Ð² Ñ‚ÐµÐ»Ð¾. 
+	anims[3] =	(new type_motion6())->setup( k, ini, section, "kill_grenade"			);	//7.	Ð“Ñ€Ð°Ð½Ñ‚Ð° 
 
 	if (ini->line_exist(section, "random_death_animations"))
 		rnd_anims.setup(k, ini->r_string(section, "random_death_animations"));

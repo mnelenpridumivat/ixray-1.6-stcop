@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #define CHUNK_OBJECT_BODY   0x7777
 

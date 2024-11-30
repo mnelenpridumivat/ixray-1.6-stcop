@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 ESceneLightTool::ESceneLightTool():ESceneCustomOTool(OBJCLASS_LIGHT)
 {
