@@ -5,6 +5,9 @@
 #include "ui_main.h"
 #include "ui_toolscustom.h"
 
+#include "../xrEngine/IGame_Level.h"
+#include "../xrEngine/CameraManager.h"
+
 CUI_Camera::CUI_Camera()
 {
 	m_Style = csPlaneMove;
@@ -57,7 +60,7 @@ const Fvector& CUI_Camera::GetPosition() const
 {
     if (UI->IsPlayInEditor())
     {
-        return Device.vCameraPosition;
+        return g_pGameLevel->Cameras().Position();
     }
     return m_Position;
 }
@@ -66,7 +69,7 @@ const Fvector& CUI_Camera::GetRight() const
 {
 	if (UI->IsPlayInEditor())
 	{
-		return Device.vCameraRight;
+        return g_pGameLevel->Cameras().Right();
 	}
    return m_CamMat.i;
 }
@@ -75,7 +78,7 @@ const Fvector& CUI_Camera::GetNormal() const
 {
 	if (UI->IsPlayInEditor())
 	{
-		return Device.vCameraTop;
+        return g_pGameLevel->Cameras().Up();
 	}
     return m_CamMat.j;
 }
@@ -84,7 +87,7 @@ const Fvector& CUI_Camera::GetDirection() const
 {
 	if (UI->IsPlayInEditor())
 	{
-		return Device.vCameraDirection;
+        return g_pGameLevel->Cameras().Direction();
 	}
     return m_CamMat.k;
 }
