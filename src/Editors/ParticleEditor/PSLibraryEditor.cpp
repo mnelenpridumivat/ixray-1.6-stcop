@@ -36,36 +36,49 @@ bool CPSLibrary::Save()
 	return false;
 }
 //------------------------------------------------------------------------------
- bool CPSLibrary::Save2()
+bool CPSLibrary::Save2()
 {
-	FS.dir_delete("$game_particles$","",TRUE);
-	string_path				fn;
-	SPBItem* pb 		= UI->ProgressStart(m_PEDs.size()+m_PGDs.size(),"Saving particles...");
-	for (PS::PEDIt it=m_PEDs.begin(); it!=m_PEDs.end(); ++it)
+	string_path fn;
+	SPBItem* pb = UI->ProgressStart(m_PEDs.size() + m_PGDs.size(), "Saving particles...");
+
+	for (PS::PEDIt it = m_PEDs.begin(); it != m_PEDs.end(); ++it)
 	{
-	   pb->Inc				();
-		PS::CPEDef*	pe 		= (*it);
-		FS.update_path		(fn, "$game_particles$", pe->m_Name.c_str());
-		strcat				(fn,".pe");
-		CInifile 			ini(fn,FALSE,FALSE,FALSE);
-		pe->Save2			(ini);
-		ini.save_as			(fn);
+		pb->Inc();
+		PS::CPEDef* pe = (*it);
+
+		if (!pe->Validate(false))
+			continue;
+
+		FS.update_path(fn, "$game_particles$", pe->m_Name.c_str());
+		strcat(fn, ".pe");
+
+		FS.file_delete(fn);
+
+		CInifile ini(fn, FALSE, FALSE, FALSE);
+		pe->Save2(ini);
+		ini.save_as(fn);
 	}
 
-	for (PS::PGDIt g_it=m_PGDs.begin(); g_it!=m_PGDs.end(); ++g_it)
+	for (PS::PGDIt g_it = m_PGDs.begin(); g_it != m_PGDs.end(); ++g_it)
 	{
-	   pb->Inc				();
-		PS::CPGDef*	pg 		= (*g_it);
-		FS.update_path		(fn, "$game_particles$", pg->m_Name.c_str());
-		strcat				(fn,".pg");
-		CInifile 			ini(fn,FALSE,FALSE,FALSE);
-		pg->Save2			(ini);
-		ini.save_as			(fn);
+		pb->Inc();
+		PS::CPGDef* pg = (*g_it);
+
+		if (!pg->Validate(false))
+			continue;
+
+		FS.update_path(fn, "$game_particles$", pg->m_Name.c_str());
+		strcat(fn, ".pg");
+
+		FS.file_delete(fn);
+
+		CInifile ini(fn, FALSE, FALSE, FALSE);
+		pg->Save2(ini);
+		ini.save_as(fn);
 	}
-	UI->ProgressEnd		(pb);
+	UI->ProgressEnd(pb);
 	return true;
 }
-
 
 bool CPSLibrary::Save(const char* nm)
 {

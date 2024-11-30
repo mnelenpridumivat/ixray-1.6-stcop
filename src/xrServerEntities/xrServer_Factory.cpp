@@ -9,7 +9,20 @@
 #include "stdafx.h"
 #include "object_factory.h"
 
-CSE_Abstract *F_entity_Create	(LPCSTR section)
+CSE_Abstract* F_entity_Create(LPCSTR section)
 {
-	return			(object_factory().server_object(pSettings->r_clsid(section,"class"),section));
+	if (Device.IsEditorMode())
+	{
+		if (pSettings->section_exist(section))
+		{
+			return (object_factory().server_object(pSettings->r_clsid(section, "class"), section));
+		}
+		else
+		{
+			Msg("! Error: not found section %s", section);
+			return nullptr;
+		}
+	}
+
+	return (object_factory().server_object(pSettings->r_clsid(section, "class"), section));
 }

@@ -80,7 +80,7 @@ EParticleAction* pCreateEActionImpl(PAPI::PActionEnum type)
 	case PAPI::PATargetVelocityDID: pa = new EPATargetVelocity	();	break;
 	case PAPI::PAVortexID:    		pa = new EPAVortex			();	break;
 	case PAPI::PATurbulenceID: 		pa = new EPATurbulence		();	break;
-	default: NODEFAULT;
+	default: return nullptr;
 	}
 	pa->type						= type;
 	return pa;
@@ -94,10 +94,36 @@ void 	EParticleAction::Render		(const Fmatrix& parent)
 void 	EParticleAction::Load		(IReader& F)
 {
 	u32 vers		= F.r_u32();
-	R_ASSERT		(vers==PARTICLE_ACTION_VERSION);
+
+	if (vers == 0)
+	{
+	}
+	else R_ASSERT(vers==PARTICLE_ACTION_VERSION);
+
 	F.r_stringZ		(actionName);
 	flags.assign	(F.r_u32());
-	for (PFloatMapIt 	f_it=floats.begin(); 	f_it!=floats.end(); 	f_it++)	f_it->second.val	= F.r_float();
+
+
+	if (vers == 0 && smart_cast<EPATargetColor*>(this))
+	{
+		constexpr int Count = 2;
+		int Iter = 0;
+		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
+		{
+			if (Iter >= Count)
+				break;
+
+			f_it->second.val = F.r_float();
+
+			Iter++;
+		}
+	}
+	else
+	{
+		for (PFloatMapIt f_it = floats.begin(); f_it != floats.end(); f_it++)
+			f_it->second.val = F.r_float();
+	}
+
 	for (PVectorMapIt 	v_it=vectors.begin();	v_it!=vectors.end(); 	v_it++)	F.r_fvector3(v_it->second.val);
 	for (PDomainMapIt 	d_it=domains.begin(); 	d_it!=domains.end(); 	d_it++)	d_it->second.Load	(F);
 	for (PBoolMapIt 	b_it=bools.begin();  	b_it!=bools.end(); 		b_it++)	b_it->second.val	= F.r_u8();

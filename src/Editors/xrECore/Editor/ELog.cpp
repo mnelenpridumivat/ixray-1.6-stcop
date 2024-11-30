@@ -43,6 +43,7 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 	{
 	case mtCustom:
 		break;
+	case mtSkip:
 	case mtError:
 		Title = "Error";
 		Flags = Flags | SDL_MESSAGEBOX_ERROR;
@@ -68,6 +69,12 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 	{
 		{ 0, 0, "OK" },
 		{ 0, 1, "Skip All" },
+	};
+	const SDL_MessageBoxButtonData btnYesNoSkip[] =
+	{
+		{ 0, 0, "Yes" },
+		{ 0, 1, "No" },
+		{ 0, 2, "Skip All" },
 	};
 	const SDL_MessageBoxButtonData btnYes[] =
 	{
@@ -140,6 +147,17 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 		nullptr						/* .colorScheme */
 	};
 
+	const SDL_MessageBoxData messageboxYesNoSkip =
+	{
+		(u32)Flags, /* .flags */
+		nullptr,						/* .window */
+		Title,						/* .title */
+		text,						/* .message */
+		SDL_arraysize(btnYesNoSkip),		/* .numbuttons */
+		btnYesNoSkip,					/* .buttons */
+		nullptr						/* .colorScheme */
+	};
+
 	int buttonid = -1;
 
 	if (btn == mbYes)
@@ -156,7 +174,14 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 	}
 	else if (btn == (mbYes | mbNo))
 	{
-		SDL_ShowMessageBox(&messageboxYesNo, &buttonid);
+		if (mt == mtSkip)
+		{
+			SDL_ShowMessageBox(&messageboxYesNoSkip, &buttonid);
+		}
+		else
+		{
+			SDL_ShowMessageBox(&messageboxYesNo, &buttonid);
+		}
 	}
 	else if (btn == (mbYes | mbNo | mbCancel))
 	{
@@ -178,7 +203,7 @@ inline TMsgDlgButtons MessageDlg(const char*text, TMsgDlgType mt, int btn)
 			return mrNo;
 			break;
 		case 2:
-			return mrCancel;	// TODO: add code
+			return mt == mtSkip ? mrSkip : mrCancel;	// TODO: add code
 			break;
 		}
 	}
@@ -209,7 +234,7 @@ int CLog::DlgMsg (TMsgDlgType mt, int btn, LPCSTR _Format, ...)
 	vsprintf( buf, _Format, l );
 
 	int res=0;
-#if 1 
+
     ExecCommand(COMMAND_RENDER_FOCUS);
 
     res=MessageDlg(buf, mt, btn);
@@ -221,21 +246,6 @@ int CLog::DlgMsg (TMsgDlgType mt, int btn, LPCSTR _Format, ...)
         default: strcat(buf," - Something.");
         }
     }
-#endif
-#ifdef _LW_EXPORT
-	switch(mt){
-	case mtError:		g_msg->error(buf,0);	break;
-	case mtInformation: g_msg->info(buf,0);		break;
-	default:			g_msg->info(buf,0);		break;
-	}
-#endif
-#ifdef _MAX_PLUGIN
-	switch(mt){
-	case mtError:		MessageBox(0,buf,"Error",		MB_OK|MB_ICONERROR);		break;
-	case mtInformation: MessageBox(0,buf,"Information",	MB_OK|MB_ICONINFORMATION);	break;
-	default:			MessageBox(0,buf,"Information",	MB_OK|MB_ICONINFORMATION);	break;
-	}
-#endif
 
     Msg(mt, buf);
 
@@ -246,7 +256,6 @@ int CLog::DlgMsg (TMsgDlgType mt, int btn, LPCSTR _Format, ...)
 
 void CLog::Close()
 {
-	//SetLogCB(0);
 	UILogForm::Destroy();
 }
 
@@ -260,12 +269,11 @@ int CLog::DlgMsg (TMsgDlgType mt, LPCSTR _Format, ...)
 	vsprintf( buf, _Format, l );
 
     int res=0;
-#if 1
     ExecCommand(COMMAND_RENDER_FOCUS);
 
-    if (mtConfirmation==mt)	res=MessageDlg(buf, mt,  mbYes | mbNo | mbCancel);
+    if (mtConfirmation==mt)	res = MessageDlg(buf, mt,  mbYes | mbNo | mbCancel);
 	else if (mtSkip == mt)	res = MessageDlg(buf, mtConfirmation, mbOK | mbSkip);
-    else                   	res=MessageDlg(buf, mt,  mbOK);
+    else                   	res = MessageDlg(buf, mt,  mbOK);
 
     if (mtConfirmation==mt){
         switch (res){
@@ -275,21 +283,6 @@ int CLog::DlgMsg (TMsgDlgType mt, LPCSTR _Format, ...)
         default: strcat(buf," - Something.");
         }
     }
-#endif
-#ifdef _LW_EXPORT
-	switch(mt){
-	case mtError:		g_msg->error(buf,0);	break;
-	case mtInformation: g_msg->info(buf,0);		break;
-	default:			g_msg->info(buf,0);		break;
-	}
-#endif
-#ifdef _MAX_PLUGIN
-	switch(mt){
-	case mtError:		MessageBox(0,buf,"Error",		MB_OK|MB_ICONERROR);		break;
-	case mtInformation: MessageBox(0,buf,"Information",	MB_OK|MB_ICONINFORMATION);	break;
-	default:			MessageBox(0,buf,"Information",	MB_OK|MB_ICONINFORMATION);	break;
-	}
-#endif
 
     Msg(mt,buf);
 
@@ -311,8 +304,6 @@ void CLog::Msg(TMsgDlgType mt, LPCSTR _Format, ...)
 	{
 		case mtError: OutString = "! " + OutString; break;
 	}
-
-	//UILogForm::AddMessage(OutString);
 
 	::Msg(OutString.c_str());
 }

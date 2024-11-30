@@ -319,8 +319,20 @@ bool CParticleTool::Save(bool bAsXR)
     // validate
     if (!Validate(true))
     {
-    	ELog.DlgMsg	(mtError,"Invalid particle's found. Validate library and try again.");
-        return false;
+        if (!bAsXR)
+        {
+            int RetVal = ELog.DlgMsg(mtError, mbYes | mbNo, "Should I save only valid parts or cancel saving?");
+            if (RetVal == mrNo)
+            {
+                ELog.Msg(mtConfirmation, ">>> Cancel");
+                return false;
+            }
+        }
+        else
+        {
+            ELog.DlgMsg(mtError, "Invalid particle's found. Validate library and try again.");
+            return false;
+        }
     }
 	bool bRes			= false;
 	if(bAsXR)

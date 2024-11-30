@@ -264,9 +264,13 @@ BOOL CPEDef::Load(IReader& F)
 		{
             PAPI::PActionEnum type		= (PAPI::PActionEnum)F.r_u32();
             (*it)						= pCreateEAction(type);
-            (*it)->Load					(F);
+
+			if ((*it) != nullptr)
+			{
+				(*it)->Load(F);
+			}
         }
-		Compile							(m_EActionList);
+		Compile(m_EActionList);
     } 
 #endif
 
@@ -479,7 +483,7 @@ void PS::CPEDef::Compile(EPAVec& v)
     
 	for(; it!=it_e; ++it)
 	{
-		if ((*it)->flags.is(EParticleAction::flEnabled))
+		if ((*it) != nullptr && (*it)->flags.is(EParticleAction::flEnabled))
 		{
     	    (*it)->Compile(m_Actions);
             cnt++;
