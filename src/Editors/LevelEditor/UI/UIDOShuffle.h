@@ -30,7 +30,9 @@ private:
 	ref_texture m_TextureNull;
 	ImTextureID m_Texture;
 	ImTextureID m_RealTexture;
+	ref_texture m_MaskTexture;
 
+	U8Vec Pixels;
 	xr_vector<xr_string> m_list;
 	int m_list_selected;
 	bool bModif;

@@ -12,7 +12,7 @@ UIDOOneColor::~UIDOOneColor()
 
 void UIDOOneColor::Draw()
 {
-	ImGui::BeginChild("ColorIndex", ImVec2(0, ImGui::GetFrameHeight() * 4), false, ImGuiWindowFlags_NoScrollbar);
+	ImGui::BeginChild("ColorIndex", ImVec2(0, ImGui::GetFrameHeight() * 4 + 3), false, ImGuiWindowFlags_NoScrollbar);
 	ImGui::BeginGroup();
 	if (ImGui::ColorEdit3("##value", Color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
 	{
@@ -43,7 +43,21 @@ void UIDOOneColor::Draw()
 	ImGui::EndGroup(); ImGui::SameLine();
 	ImGui::SetNextItemWidth(-1);
 
-	bool IsChanged = ImGui::ListBox("##list", &list_index, [](void* data, int ind, const char** out)->bool {auto item = reinterpret_cast<xr_vector<xr_string>*>(data)->at(ind).c_str();; *out = item; return true; }, reinterpret_cast<void*>(&list), list.size(), 4);
+	bool IsChanged = ImGui::ListBox
+	(
+		"##list", 
+		&list_index,
+		[](void* data, int ind, const char** out)->bool
+		{
+			auto item = reinterpret_cast<xr_vector<xr_string>*>(data)->at(ind).c_str();
+			*out = item; 
+			return true;
+		}, 
+		reinterpret_cast<void*>(&list),
+		list.size(), 
+		4
+	);
+
 	if (IsChanged)
 	{
 		this->DOShuffle->OnItemFocused(list[list_index].c_str());
