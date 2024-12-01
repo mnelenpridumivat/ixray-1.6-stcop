@@ -14,6 +14,7 @@
 #include "../Include/xrRender/RenderDeviceRender.h"
 
 #include "xr_object.h"
+#include "GameplayParametersManager.h"
 
 xr_token*							vid_quality_token = nullptr;
 
@@ -818,5 +819,7 @@ void CCC_Register()
 	extern BOOL debug_destroy;
 	CMD4(CCC_Integer, "debug_destroy", &debug_destroy, FALSE, TRUE );
 #endif
+
+	CMD3(CCC_Mask64, "use_items_animations", GameplayParametersManager::GetInstance().GetFlagsPtr(), (u64)GameplayParametersManager::GameplayFlags::use_item_animations);
 };
  

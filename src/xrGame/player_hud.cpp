@@ -789,6 +789,29 @@ u32 player_hud::motion_length(const shared_str& anim_name, const shared_str& hud
 	return motion_length			(pm->m_animations[0].mid, md, speed);
 }
 
+u32 player_hud::motion_length_script(LPCSTR section, LPCSTR anm_name, float speed)
+{
+	if (!pSettings->section_exist(section))
+	{
+		Msg("!script motion section [%s] does not exist", section);
+		return 0;
+	}
+
+	player_hud_motion_container* pm = get_hand_motions(section);
+	if (!pm)
+		return 0;
+
+	player_hud_motion* phm = pm->find_motion(anm_name);
+	if (!phm)
+	{
+		Msg("!script motion [%s] not found in section [%s]", anm_name, section);
+		return 0;
+	}
+
+	const CMotionDef* temp;
+	return motion_length(phm->m_animations[0].mid, temp, speed);
+}
+
 u32 player_hud::motion_length(const MotionID& M, const CMotionDef*& md, float speed)
 {
 	md					= m_model->LL_GetMotionDef(M);
@@ -933,6 +956,151 @@ u32 player_hud::anim_play(u16 part, const MotionID& M, BOOL bMixIn, const CMotio
 	m_model->dcast_PKinematics()->CalculateBones_Invalidate	();
 
 	return				motion_length(M, md, speed);
+}
+
+u32 player_hud::script_anim_play(u8 hand, LPCSTR itm_name, LPCSTR anm_name, bool bMixIn, float speed, LPCSTR attach_visual)
+{
+	xr_string pos = "hands_position";
+	xr_string rot = "hands_orientation";
+
+	if (UI().is_widescreen())
+	{
+		pos.append("_16x9");
+		rot.append("_16x9");
+	}
+
+	Fvector def = { 0.f, 0.f, 0.f };
+	Fvector offs = READ_IF_EXISTS(pSettings, r_fvector3, section, pos.c_str(), def);
+	Fvector rrot = READ_IF_EXISTS(pSettings, r_fvector3, section, rot.c_str(), def);
+
+	if (pSettings->line_exist(section, "item_visual") && !attach_visual)
+		attach_visual = pSettings->r_string(section, "item_visual");
+
+	if (attach_visual)
+	{
+		::Render->hud_loading = true;
+		script_anim_item_model = ::Render->model_Create(attach_visual)->dcast_PKinematics();
+		::Render->hud_loading = false;
+
+		item_pos[0] = READ_IF_EXISTS(pSettings, r_fvector3, section, "item_position", def);
+		item_pos[1] = READ_IF_EXISTS(pSettings, r_fvector3, section, "item_orientation", def);
+		script_anim_item_attached = READ_IF_EXISTS(pSettings, r_bool, section, "item_attached", true);
+		script_anim_item_visible = READ_IF_EXISTS(pSettings, r_bool, section, "item_visible", true);
+
+		if (script_anim_item_model)
+		{
+			u16 root_id = script_anim_item_model->LL_GetBoneRoot();
+			script_anim_item_model->LL_SetBoneVisible(root_id, script_anim_item_visible, TRUE);
+		}
+
+		m_attach_idx = READ_IF_EXISTS(pSettings, r_u8, section, "attach_place_idx", 0);
+
+		if (!script_anim_item_attached)
+		{
+			Fmatrix attach_offs;
+			Fvector ypr = item_pos[1];
+			ypr.mul(PI / 180.f);
+			attach_offs.setHPB(ypr.x, ypr.y, ypr.z);
+			attach_offs.translate_over(item_pos[0]);
+			m_item_pos = attach_offs;
+		}
+	}
+
+	script_anim_offset[0] = offs;
+	script_anim_offset[1] = rrot;
+	script_anim_part = hand;
+
+	if (!pSettings->section_exist(section))
+	{
+		Msg("!script motion section [%s] does not exist", section);
+		m_bStopAtEndAnimIsRunning = true;
+		script_anim_end = Device.dwTimeGlobal;
+		return 0;
+	}
+
+	player_hud_motion_container* pm = get_hand_motions(section);
+	player_hud_motion* phm = pm->find_motion(anm_name);
+
+	if (!phm)
+	{
+		Msg("!script motion [%s] not found in section [%s]", anm_name, section);
+		m_bStopAtEndAnimIsRunning = true;
+		script_anim_end = Device.dwTimeGlobal;
+		return 0;
+	}
+
+	const motion_descr& M = phm->m_animations[Random.randI(phm->m_animations.size())];
+
+	if (script_anim_item_model && script_anim_item_model->dcast_PKinematicsAnimated())
+	{
+		shared_str item_anm_name;
+		if (phm->m_base_name != phm->m_additional_name)
+			item_anm_name = phm->m_additional_name;
+		else
+			item_anm_name = M.name;
+
+		MotionID M2 = script_anim_item_model->dcast_PKinematicsAnimated()->ID_Cycle_Safe(item_anm_name);
+		if (!M2.valid())
+			M2 = script_anim_item_model->dcast_PKinematicsAnimated()->ID_Cycle_Safe("idle");
+
+		R_ASSERT3(M2.valid(), "model %s has no motion [idle] ", pSettings->r_string(m_sect_name, "item_visual"));
+
+		u16 root_id = script_anim_item_model->LL_GetBoneRoot();
+		CBoneInstance& root_binst = script_anim_item_model->LL_GetBoneInstance(root_id);
+		root_binst.set_callback_overwrite(TRUE);
+		root_binst.mTransform.identity();
+
+		u16 pc = script_anim_item_model->dcast_PKinematicsAnimated()->partitions().count();
+		for (u16 pid = 0; pid < pc; ++pid)
+		{
+			CBlend* B = script_anim_item_model->dcast_PKinematicsAnimated()->PlayCycle(pid, M2, bMixIn);
+			R_ASSERT(B);
+			B->speed *= speed;
+		}
+
+		script_anim_item_model->CalculateBones_Invalidate();
+	}
+
+	if (hand == 0) // right hand
+	{
+		CBlend* B = m_model->PlayCycle(0, M.mid, bMixIn);
+		B->speed *= speed;
+		B = m_model->PlayCycle(2, M.mid, bMixIn);
+		B->speed *= speed;
+	}
+	else if (hand == 1) // left hand
+	{
+		CBlend* B = m_model_2->PlayCycle(0, M.mid, bMixIn);
+		B->speed *= speed;
+		B = m_model_2->PlayCycle(1, M.mid, bMixIn);
+		B->speed *= speed;
+	}
+	else if (hand == 2) // both hands
+	{
+		CBlend* B = m_model->PlayCycle(0, M.mid, bMixIn);
+		B->speed *= speed;
+		B = m_model_2->PlayCycle(0, M.mid, bMixIn);
+		B->speed *= speed;
+		B = m_model->PlayCycle(2, M.mid, bMixIn);
+		B->speed *= speed;
+		B = m_model_2->PlayCycle(1, M.mid, bMixIn);
+		B->speed *= speed;
+	}
+
+	const CMotionDef* md;
+	u32 length = motion_length(M.mid, md, speed);
+
+	if (length > 0)
+	{
+		m_bStopAtEndAnimIsRunning = true;
+		script_anim_end = Device.dwTimeGlobal + length;
+	}
+	else
+		m_bStopAtEndAnimIsRunning = false;
+
+	updateMovementLayerState();
+
+	return length;
 }
 
 void player_hud::update_additional	(Fmatrix& trans)
@@ -1465,6 +1633,24 @@ void player_hud::animator_fx_play(const shared_str& anim_name, u16 place_idx, u1
 			}break;
 		}
 	}
+}
+
+player_hud_motion_container* player_hud::get_hand_motions(LPCSTR section)
+{
+	xr_vector<hand_motions*>::iterator it = m_hand_motions.begin();
+	xr_vector<hand_motions*>::iterator it_e = m_hand_motions.end();
+	for (; it != it_e; it++)
+	{
+		if (!xr_strcmp((*it)->section, section))
+			return &(*it)->pm;
+	}
+
+	hand_motions* res = new hand_motions();
+	res->section = section;
+	res->pm.load(m_model, section);
+	m_hand_motions.push_back(res);
+
+	return &res->pm;
 }
 
 void player_hud::Thumb0Callback(CBoneInstance* B)

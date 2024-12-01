@@ -1,5 +1,4 @@
-#ifndef ELEVATOR_STAETE
-#define ELEVATOR_STAETE
+#pragma once
 
 #include "IElevatorState.h"
 class CPHCharacter;
@@ -64,4 +63,4 @@ public:
 
 };
 
-#endif
+extern XRPHYSICS_API bool g_actor_allow_ladder;

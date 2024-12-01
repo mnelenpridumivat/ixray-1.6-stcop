@@ -36,7 +36,10 @@ CPda::CPda(void)
 }
 
 CPda::~CPda() 
-{}
+{
+	pda_light.destroy();
+	pda_glow.destroy();
+}
 
 BOOL CPda::net_Spawn(CSE_Abstract* DC) 
 {
@@ -270,7 +273,7 @@ void CPda::OnH_A_Chield()
 {
 	VERIFY(IsOff());
 
-	//âêëþ÷èòü PDA òîëüêî åñëè îíî íàõîäèòñÿ ó ïåðâîãî âëàäåëüöà
+	//Switch on PDA only in case of a new product with auxiliary control
 	if(H_Parent()->ID() == m_idOriginalOwner){
 		TurnOn					();
 		if(m_sFullName.empty()){
@@ -286,8 +289,27 @@ void CPda::OnH_B_Independent(bool just_before_destroy)
 {
 	inherited::OnH_B_Independent(just_before_destroy);
 	
-	//âûêëþ÷èòü
 	TurnOff();
+
+	if (!ParentIsActor())
+		return;
+
+	m_sounds.PlaySound(hasEnoughBatteryPower() ? "sndHide" : "sndHideEmpty", Position(), H_Root(), !!GetHUDmode(), false);
+
+	SwitchState(eHidden);
+	SetPending(false);
+	m_bZoomed = false;
+	m_fZoomfactor = 0.f;
+
+	CUIPdaWnd* pda = &CurrentGameUI()->PdaMenu();
+	if (pda->IsShown()) pda->HideDialog();
+	g_player_hud->reset_thumb(true);
+	pda->ResetJoystick(true);
+
+	if (joystick != BI_NONE && HudItemData())
+		HudItemData()->m_model->LL_GetBoneInstance(joystick).reset_callback();
+
+	g_player_hud->detach_item(this);
 }
 
 

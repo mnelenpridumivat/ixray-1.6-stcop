@@ -67,7 +67,11 @@ protected:
 
 	UIHint*					m_hint_wnd;
 
+	u32 dwPDAFrame;
+
 	CUIProgressBar* m_battery_bar;
+
+	bool bButtonL, bButtonR;
 
 public:
 	CUITaskWnd*				pUITaskWnd;
@@ -93,6 +97,8 @@ public:
 	virtual void 			Show				(bool status);
 	virtual bool			OnMouseAction				(float x, float y, EUIMessages mouse_action) {CUIDialogWnd::OnMouseAction(x,y,mouse_action);return true;} //always true because StopAnyMove() == false
 	virtual bool			OnKeyboardAction			(int dik, EUIMessages keyboard_action);
+
+	void Enable(bool status) override;
 		
 			UIHint*			get_hint_wnd		() const { return m_hint_wnd; }
 			void			DrawHint			();

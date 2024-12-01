@@ -24,6 +24,7 @@ CCustomOutfit::CCustomOutfit()
 	m_boneProtection = new SBoneProtections();
 	m_artefact_count = 0;
 	m_BonesProtectionSect = nullptr;
+	m_bHasLSS = false;
 }
 
 CCustomOutfit::~CCustomOutfit() 
@@ -113,6 +114,8 @@ void CCustomOutfit::Load(LPCSTR section)
 
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
+
+	m_bHasLSS = READ_IF_EXISTS(pSettings, r_bool, section, "has_ls_system", false);
 }
 
 void CCustomOutfit::ReloadBonesProtection()

@@ -74,6 +74,7 @@
 #include "ui/UIDragDropReferenceList.h"
 #include "../../xrUI/UIFontDefines.h"
 #include "PickupManager.h"
+#include "../xrPhysics/ElevatorState.h"
 
 const u32		patch_frames	= 50;
 const float		respawn_delay	= 1.f;
@@ -86,6 +87,7 @@ extern float cammera_into_collision_shift ;
 string32		ACTOR_DEFS::g_quick_use_slots[4]={0, 0, 0, 0};
 //skeleton
 
+extern bool g_block_all_except_movement;
 
 
 static Fbox		bbStandBox;
@@ -96,6 +98,10 @@ static Fvector	vFootExt;
 Flags32			psActorFlags={AF_DISABLE_CONDITION_TEST|AF_AUTOPICKUP|AF_RUN_BACKWARD|AF_IMPORTANT_SAVE|AF_DISPLAY_VOICE_ICON};
 
 
+
+std::atomic<bool> isHidingInProgress(false);
+std::atomic<bool> CheckNVGAnimNeeded(false);
+std::atomic<bool> CleanMaskAnimNeeded(false);
 
 CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 {
@@ -200,6 +206,10 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 	// Alex ADD: for smooth crouch
 	CurrentHeight = -1.f;
 	bBlockSprint = false;
+
+	m_bQuickKickActivated = false;
+	m_bQuickKick = false;
+	m_bActionAnimInProcess = false;
 }
 
 
@@ -1447,6 +1457,44 @@ void CActor::shedule_Update	(u32 DT)
 	setSVU							(OnServer());
 //.	UpdateInventoryOwner			(DT);
 
+	if (IsFocused())
+	{
+		BOOL bHudView = HUDview();
+		if (bHudView)
+		{
+			CInventoryItem* pInvItem = inventory().ActiveItem();
+			if (pInvItem)
+			{
+				CHudItem* pHudItem = smart_cast<CHudItem*>(pInvItem);
+				if (pHudItem)
+				{
+					if (pHudItem->IsHidden())
+					{
+						g_player_hud->detach_item(pHudItem);
+					}
+					else
+					{
+						bool attach = !m_bQuickKickActivated;
+
+						if (attach)
+							g_player_hud->attach_item(pHudItem);
+					}
+				}
+			}
+			else
+			{
+				g_player_hud->detach_item_idx(0);
+				//Msg("---No active item in inventory(), item 0 detached.");
+			}
+		}
+		else
+		{
+			g_player_hud->detach_all_items();
+			//Msg("---No hud view found, all items detached.");
+		}
+
+	}
+
 	if(m_holder || !getEnabled() || !Ready())
 	{
 		m_sDefaultObjAction				= nullptr;
@@ -1650,9 +1698,214 @@ void CActor::shedule_Update	(u32 DT)
 	UpdateArtefactsOnBeltAndOutfit				();
 	m_pPhysics_support->in_shedule_Update		(DT);
 	Check_for_AutoPickUp						();
+
+
+	if (CheckNVGAnimNeeded.load())
+	{
+		StartNVGAnimation();
+		CheckNVGAnimNeeded.store(false);
+	}
+
+	if (CleanMaskAnimNeeded.load())
+	{
+		CleanMask();
+		CleanMaskAnimNeeded.store(false);
+	}
+
+	if (m_bActionAnimInProcess)
+	{
+		if (m_bNVGActivated)
+			UpdateNVGUseAnim();
+
+		if (m_bMaskAnimActivated)
+			UpdateMaskUseAnim();
+
+		if (m_bQuickKickActivated)
+			UpdateQuickKickAnim();
+	}
+
+	inventory().UpdateUseAnim(this);
+}
+
+void CActor::StartNVGAnimation()
+{
+	CWeapon* Wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+	CHelmet* pHelmet = smart_cast<CHelmet*>(inventory().ItemFromSlot(HELMET_SLOT));
+	CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(inventory().ItemFromSlot(OUTFIT_SLOT));
+
+	if (Wpn && Wpn->IsZoomed())
+		return;
+
+	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "switch_nightvision_section", nullptr);
+
+	if (!anim_sect)
+	{
+		SwitchNightVision(!m_bNightVisionOn);
+		return;
+	}
+
+	if (!(pHelmet && pHelmet->m_NightVisionSect.size()) && !(pOutfit && pOutfit->m_NightVisionSect.size()))
+		return;
+
+	if (Wpn && !(Wpn->GetState() == CWeapon::eIdle))
+		return;
+
+	m_bNVGActivated = true;
+
+	int anim_timer = READ_IF_EXISTS(pSettings, r_u32, anim_sect, "anim_timing", 0);
+
+	g_block_all_except_movement = true;
+	g_actor_allow_ladder = false;
+
+	LPCSTR use_cam_effector = READ_IF_EXISTS(pSettings, r_string, anim_sect, !Wpn ? "anim_camera_effector" : "anim_camera_effector_weapon", nullptr);
+	float effector_intensity = READ_IF_EXISTS(pSettings, r_float, anim_sect, "cam_effector_intensity", 1.0f);
+	float anim_speed = READ_IF_EXISTS(pSettings, r_float, anim_sect, "anim_speed", 1.0f);
+
+	if (pSettings->line_exist(anim_sect, "anm_use"))
+	{
+		g_player_hud->script_anim_play(!inventory().GetActiveSlot() ? 2 : 1, anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", true, anim_speed);
+
+		if (use_cam_effector)
+			g_player_hud->PlayBlendAnm(use_cam_effector, 0, anim_speed, effector_intensity, false);
+
+		m_iNVGAnimLength = Device.dwTimeGlobal + g_player_hud->motion_length_script(anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", anim_speed);
+	}
+
+	if (pSettings->line_exist(anim_sect, "snd_using"))
+	{
+		if (m_action_anim_sound._feedback())
+			m_action_anim_sound.stop();
+
+		shared_str snd_name = pSettings->r_string(anim_sect, "snd_using");
+		m_action_anim_sound.create(snd_name.c_str(), st_Effect, sg_SourceType);
+		m_action_anim_sound.play(nullptr, sm_2D);
+	}
+
+	m_iActionTiming = Device.dwTimeGlobal + anim_timer;
+
+	m_bNVGSwitched = false;
+	m_bActionAnimInProcess = true;
+}
+
+void CActor::CleanMask()
+{
+	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "clean_mask_section", nullptr);
+
+	if (!anim_sect)
+		return;
+
+	CWeapon* Wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+	CHelmet* pHelmet = smart_cast<CHelmet*>(inventory().ItemFromSlot(HELMET_SLOT));
+	CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(inventory().ItemFromSlot(OUTFIT_SLOT));
+
+	if (!(pHelmet && pHelmet->m_b_HasGlass) && !(pOutfit && pOutfit->m_b_HasGlass))
+		return;
+
+	if (Wpn && !(Wpn->GetState() == CWeapon::eIdle))
+		return;
+
+	m_bMaskAnimActivated = true;
+
+	int anim_timer = READ_IF_EXISTS(pSettings, r_u32, anim_sect, "anim_timing", 0);
+
+	g_block_all_except_movement = true;
+	g_actor_allow_ladder = false;
+
+	LPCSTR use_cam_effector = READ_IF_EXISTS(pSettings, r_string, anim_sect, !Wpn ? "anim_camera_effector" : "anim_camera_effector_weapon", nullptr);
+	float effector_intensity = READ_IF_EXISTS(pSettings, r_float, anim_sect, "cam_effector_intensity", 1.0f);
+	float anim_speed = READ_IF_EXISTS(pSettings, r_float, anim_sect, "anim_speed", 1.0f);
+
+	if (pSettings->line_exist(anim_sect, "anm_use"))
+	{
+		g_player_hud->script_anim_play(!inventory().GetActiveSlot() ? 2 : 1, anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", true, anim_speed);
+
+		if (use_cam_effector)
+			g_player_hud->PlayBlendAnm(use_cam_effector, 0, anim_speed, effector_intensity, false);
+
+		m_iMaskAnimLength = Device.dwTimeGlobal + g_player_hud->motion_length_script(anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", anim_speed);
+	}
+
+	if (pSettings->line_exist(anim_sect, "snd_using"))
+	{
+		if (m_action_anim_sound._feedback())
+			m_action_anim_sound.stop();
+
+		shared_str snd_name = pSettings->r_string(anim_sect, "snd_using");
+		m_action_anim_sound.create(snd_name.c_str(), st_Effect, sg_SourceType);
+		m_action_anim_sound.play(nullptr, sm_2D);
+	}
+
+	m_iActionTiming = Device.dwTimeGlobal + anim_timer;
+
+	m_bMaskClear = false;
+	m_bActionAnimInProcess = true;
+}
+
+void CActor::QuickKick()
+{
+	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "quick_kick_section", nullptr);
+
+	if (!anim_sect)
+		return;
+
+	CHudItem* active_item = smart_cast<CHudItem*>(inventory().ActiveItem());
+	CWeaponKnife* cur_knife = smart_cast<CWeaponKnife*>(inventory().ItemFromSlot(KNIFE_SLOT));
+
+	if (active_item && !(active_item->GetState() == CWeapon::eIdle))
+		return;
+
+	if (!cur_knife || active_item == cur_knife)
+		return;
+
+	m_bQuickKickActivated = true;
+
+	int anim_timer = READ_IF_EXISTS(pSettings, r_u32, anim_sect, "anim_timing", 0);
+
+	g_block_all_except_movement = true;
+	g_actor_allow_ladder = false;
+
+	LPCSTR use_cam_effector = READ_IF_EXISTS(pSettings, r_string, anim_sect, !active_item ? "anim_camera_effector" : "anim_camera_effector_weapon", nullptr);
+	float effector_intensity = READ_IF_EXISTS(pSettings, r_float, anim_sect, "cam_effector_intensity", 1.0f);
+	float anim_speed = READ_IF_EXISTS(pSettings, r_float, anim_sect, "anim_speed", 1.0f);
+
+	if (pSettings->line_exist(anim_sect, "anm_use"))
+	{
+		if (active_item)
+		{
+			g_player_hud->detach_item(active_item);
+			SetWeaponHideState(INV_STATE_BLOCK_ALL, true);
+		}
+
+		string128 attach_visual{};
+		xr_strconcat(attach_visual, cur_knife->cNameVisual().c_str(), "_hud");
+
+		g_player_hud->script_anim_play(2, anim_sect, !active_item ? "anm_use" : "anm_use_weapon", true, anim_speed, attach_visual);
+		CEffectorCam* effector = Cameras().GetCamEffector((ECamEffectorType)effUseItem);
+
+		if (!effector && use_cam_effector != nullptr)
+			AddEffector(this, effUseItem, use_cam_effector, effector_intensity);
+
+		m_iQuickKickAnimLength = Device.dwTimeGlobal + g_player_hud->motion_length_script(anim_sect, !active_item ? "anm_use" : "anm_use_weapon", anim_speed);
+	}
+
+	if (pSettings->line_exist(anim_sect, "snd_using"))
+	{
+		if (m_action_anim_sound._feedback())
+			m_action_anim_sound.stop();
+
+		shared_str snd_name = pSettings->r_string(anim_sect, "snd_using");
+		m_action_anim_sound.create(snd_name.c_str(), st_Effect, sg_SourceType);
+		m_action_anim_sound.play(nullptr, sm_2D);
+	}
+
+	m_iActionTiming = Device.dwTimeGlobal + anim_timer;
+
+	m_bQuickKick = false;
+	m_bActionAnimInProcess = true;
 }
 
 #include "debug_renderer.h"
+#include <WeaponKnife.h>
 void CActor::renderable_Render	()
 {
 	VERIFY(_valid(XFORM()));
@@ -2103,6 +2356,89 @@ float CActor::GetProtection_ArtefactsOnBelt(ALife::EHitType hit_type)
 	}
 
 	return sum;
+}
+
+void CActor::UpdateNVGUseAnim()
+{
+	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bNVGSwitched) && g_Alive())
+	{
+		m_iActionTiming = Device.dwTimeGlobal;
+		SwitchNightVision(!m_bNightVisionOn);
+		m_bNVGSwitched = true;
+	}
+
+	if (m_bNVGActivated)
+	{
+		if ((m_iNVGAnimLength <= Device.dwTimeGlobal) || !g_Alive())
+		{
+			m_iNVGAnimLength = Device.dwTimeGlobal;
+			m_iActionTiming = Device.dwTimeGlobal;
+			m_action_anim_sound.stop();
+			g_block_all_except_movement = false;
+			g_actor_allow_ladder = true;
+			m_bActionAnimInProcess = false;
+			m_bNVGActivated = false;
+		}
+	}
+}
+
+void CActor::UpdateMaskUseAnim()
+{
+	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bMaskClear) && g_Alive())
+	{
+		m_iActionTiming = Device.dwTimeGlobal;
+		m_bMaskClear = true;
+	}
+
+	if (m_bMaskAnimActivated)
+	{
+		if ((m_iMaskAnimLength <= Device.dwTimeGlobal) || !g_Alive())
+		{
+			m_iMaskAnimLength = Device.dwTimeGlobal;
+			m_iActionTiming = Device.dwTimeGlobal;
+			m_action_anim_sound.stop();
+			g_block_all_except_movement = false;
+			g_actor_allow_ladder = true;
+			m_bActionAnimInProcess = false;
+			m_bMaskAnimActivated = false;
+			m_bMaskClear = false;
+		}
+	}
+}
+
+void CActor::UpdateQuickKickAnim()
+{
+	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bQuickKick) && g_Alive())
+	{
+		m_iActionTiming = Device.dwTimeGlobal;
+		m_bQuickKick = true;
+
+		CWeaponKnife* cur_knife = smart_cast<CWeaponKnife*>(inventory().ItemFromSlot(KNIFE_SLOT));
+
+		if (cur_knife)
+			cur_knife->FastStrike(0);
+	}
+
+	if (m_bQuickKickActivated)
+	{
+		if ((m_iQuickKickAnimLength <= Device.dwTimeGlobal) || !g_Alive())
+		{
+			CEffectorCam* effector = Cameras().GetCamEffector((ECamEffectorType)effUseItem);
+
+			if (effector)
+				RemoveEffector(this, effUseItem);
+
+			SetWeaponHideState(INV_STATE_BLOCK_ALL, false);
+			m_iQuickKickAnimLength = Device.dwTimeGlobal;
+			m_iActionTiming = Device.dwTimeGlobal;
+			m_action_anim_sound.stop();
+			g_block_all_except_movement = false;
+			g_actor_allow_ladder = true;
+			m_bActionAnimInProcess = false;
+			m_bQuickKickActivated = false;
+			m_bQuickKick = false;
+		}
+	}
 }
 
 void	CActor::SetZoomRndSeed		(s32 Seed)

@@ -35,6 +35,7 @@
 	extern void restore_actor();
 #endif
 
+extern bool g_block_all_except_movement;
 bool g_bDisableAllInput = false;
 extern	float	g_fTimeFactor;
 
@@ -130,6 +131,13 @@ void CLevel::IR_OnKeyboardPress	(int key)
 				Device.Pause(!Device.Paused(), TRUE, TRUE, "li_pause_key");
 		}
 		return;
+	}
+
+	if (g_block_all_except_movement)
+	{
+		if (!(_curr < kCAM_1 || _curr == kWPN_FIRE || _curr == kPAUSE || _curr == kDROP || _curr == kSCREENSHOT || _curr == kQUIT || _curr == kCONSOLE)) {
+			return;
+		}
 	}
 
 	if(	g_bDisableAllInput )	return;

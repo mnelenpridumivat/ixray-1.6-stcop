@@ -948,6 +948,36 @@ void CUIActorMenu::UpdateConditionProgressBars()
 	}
 }
 
+void CUIActorMenu::RefreshConsumableCells()
+{
+	CUICellItem* ci = GetCurrentConsumable();
+	if (ci)
+	{
+		CEatableItem* eitm = smart_cast<CEatableItem*>(static_cast<CEatableItem*>(ci->m_pData));
+		if (eitm)
+		{
+			Fvector2 cp = GetUICursor().GetCursorPosition(); // XXX: This is unused
+			CUIDragDropListEx* invlist = GetListByType(iActorBag);
+
+			CUICellItem* parent = invlist->RemoveItem(ci, true);
+			const u32 c = parent->ChildsCount();
+			if (c > 0)
+			{
+				while (parent->ChildsCount())
+				{
+					CUICellItem* child = parent->PopChild(nullptr);
+					invlist->SetItem(child);
+				}
+
+				invlist->SetItem(parent);
+			}
+			else
+				invlist->SetItem(parent);
+		}
+		SetCurrentConsumable(nullptr);
+	}
+}
+
 void CUIActorMenu::HighlightSectionInSlot(pcstr section, EDDListType type, u16 slot_id /*= 0*/)
 {
 	CUIDragDropListEx* slot_list = GetListByType(type);

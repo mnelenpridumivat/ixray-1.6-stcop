@@ -45,8 +45,10 @@ public:
 	virtual void	UpdateCL				();
 
 			void	Switch					();
+			void	ProcessSwitch();
 			void	Switch					(bool light_on);
 			bool	torch_active			() const;
+			void	UpdateUseAnim();
 
 	virtual bool	can_be_attached			() const;
 
@@ -67,6 +69,7 @@ protected:
 
 	CNightVisionEffector*	m_night_vision;
 	HUD_SOUND_COLLECTION	m_sounds;
+	ref_sound		m_action_anim_sound;
 
 	enum EStats{
 		eTorchActive				= (1<<0),
@@ -86,6 +89,11 @@ public:
 
 	virtual void	afterDetach				();
 	virtual void	renderable_Render		();
+
+	int				m_iActionTiming;
+	int				m_iAnimLength;
+	bool			m_bActivated;
+	bool			m_bSwitched;
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

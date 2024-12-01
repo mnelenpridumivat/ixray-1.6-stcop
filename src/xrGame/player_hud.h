@@ -31,6 +31,12 @@ struct player_hud_motion_container
 	void		load				(IKinematicsAnimated* model, const shared_str& sect);
 };
 
+struct hand_motions
+{
+	LPCSTR section;
+	player_hud_motion_container pm;
+};
+
 struct hud_item_measures
 {
 	enum{e_fire_point=(1<<0), e_fire_point2=(1<<1), e_shell_point=(1<<2), e_16x9_mode_now=(1<<3)};
@@ -121,11 +127,13 @@ public:
 	void			load				(const shared_str& model_name);
 	void			load_default		(){load("actor_hud");};
 	void			update				(const Fmatrix& trans);
+	void			PlayBlendAnm(LPCSTR name, u8 part = 0, float speed = 1.f, float power = 1.f, bool bLooped = true, bool no_restart = false);
 	void			render_hud			();	
 	void			render_item_ui		();
 	bool			render_item_ui_query();
 
 	u32				anim_play			(u16 part, const MotionID& M, BOOL bMixIn, const CMotionDef*& md, float speed);
+	u32				script_anim_play(u8 hand, LPCSTR itm_name, LPCSTR anm_name, bool bMixIn = true, float speed = 1.f, LPCSTR attach_visual = nullptr);
 	bool			check_anim			(const shared_str& anim_name, u16 place_idx);
 
 	bool			animator_play			(const shared_str& anim_name, u16 place_idx = u16(-1), u16 part_id = u16(-1), BOOL bMixIn = FALSE, float speed = 1.0f, u8 anm_idx = u8(0), bool impact_on_item = false, bool similar_check = false, PlayCallback Callback = PlayCallback(0), LPVOID CallbackParam = LPVOID(0), BOOL UpdateCallbackType = 0);
@@ -146,6 +154,7 @@ public:
 	void			tune				(Ivector values);
 	u32				motion_length		(const MotionID& M, const CMotionDef*& md, float speed);
 	u32				motion_length		(const shared_str& anim_name, const shared_str& hud_name, const CMotionDef*& md);
+	u32				motion_length_script(LPCSTR section, LPCSTR anm_name, float speed);
 	void			OnMovementChanged	(ACTOR_DEFS::EMoveCommand cmd)	;
 	void			RestoreHandBlends(LPCSTR ignored_part);
 
@@ -182,6 +191,9 @@ private:
 	bool								m_binverted;
 	int									item_idx_priority;
 	void  LeftArmCallback(CBoneInstance* B);
+
+	xr_vector<hand_motions*>			m_hand_motions;
+	player_hud_motion_container* get_hand_motions(LPCSTR section);
 
 	static void _BCL Thumb0Callback(CBoneInstance* B);
 	static void _BCL Thumb01Callback(CBoneInstance* B);

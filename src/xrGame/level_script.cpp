@@ -49,6 +49,17 @@
 #include "ai_object_location.h"
 
 using namespace luabind;
+bool g_block_all_except_movement = false;
+
+void block_all_except_movement(bool b)
+{
+	g_block_all_except_movement = b;
+}
+
+bool only_movement_allowed()
+{
+	return g_block_all_except_movement;
+}
 
 void show_legs(bool val)
 {
@@ -830,6 +841,46 @@ void stop_tutorial()
 		g_tutorial->Stop();
 }
 
+u32 PlayHudMotion(u8 hand, LPCSTR itm_name, LPCSTR anm_name, bool bMixIn = true, float speed = 1.f, LPCSTR attach_visual = nullptr)
+{
+	return g_player_hud->script_anim_play(hand, itm_name, anm_name, bMixIn, speed, attach_visual);
+}
+
+void StopHudMotion()
+{
+	g_player_hud->StopScriptAnim();
+}
+
+float MotionLength(LPCSTR section, LPCSTR name, float speed)
+{
+	return g_player_hud->motion_length_script(section, name, speed);
+}
+
+bool AllowHudMotion()
+{
+	return g_player_hud->allow_script_anim();
+}
+
+void PlayBlendAnm(LPCSTR name, u8 part, float speed, float power, bool bLooped, bool no_restart)
+{
+	g_player_hud->PlayBlendAnm(name, part, speed, power, bLooped, no_restart);
+}
+
+void StopBlendAnm(LPCSTR name, bool bForce)
+{
+	g_player_hud->StopBlendAnm(name, bForce);
+}
+
+void StopAllBlendAnms(bool bForce)
+{
+	g_player_hud->StopAllBlendAnms(bForce);
+}
+
+float SetBlendAnmTime(LPCSTR name, float time)
+{
+	return g_player_hud->SetBlendAnmTime(name, time);
+}
+
 LPCSTR translate_string(LPCSTR str)
 {
 	return *g_pStringTable->translate(str);
@@ -1347,7 +1398,18 @@ void CLevel::script_register(lua_State* L)
 				def("start_tutorial", &start_tutorial),
 				def("stop_tutorial", &stop_tutorial),
 				def("has_active_tutorial", &has_active_tutotial),
-				def("translate_string", &translate_string)
+				def("translate_string", &translate_string),
+
+				def("only_allow_movekeys", block_all_except_movement),
+				def("only_movekeys_allowed", only_movement_allowed),
+				def("play_hud_motion", PlayHudMotion),
+				def("stop_hud_motion", StopHudMotion),
+				def("get_motion_length", MotionLength),
+				def("hud_motion_allowed", AllowHudMotion),
+				def("play_hud_anm", PlayBlendAnm),
+				def("stop_hud_anm", StopBlendAnm),
+				def("stop_all_hud_anms", StopAllBlendAnms),
+				def("set_hud_anm_time", SetBlendAnmTime)
 		];
 }
 

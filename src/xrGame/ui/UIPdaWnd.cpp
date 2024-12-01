@@ -27,12 +27,19 @@
 #include "UIRankingWnd.h"
 #include "UILogsWnd.h"
 #include "UIEncyclopediaWnd.h"
+#include <Actor.h>
+#include <Inventory.h>
+#include <UIScriptWnd.h>
+#include "player_hud.h"
+
+#include "../xrEngine/XR_IOConsole.h"
 
 #define PDA_XML		"pda.xml"
 
 u32 g_pda_info_state = 0;
 
 void RearrangeTabButtons(CUITabControl* pTab);
+CDialogHolder* CurrentDialogHolder();
 
 CUIPdaWnd::CUIPdaWnd()
 {
@@ -42,6 +49,10 @@ CUIPdaWnd::CUIPdaWnd()
 	pUIEncyclopediaWnd = nullptr;
 	pUILogsWnd       = nullptr;
 	m_hint_wnd       = nullptr;
+	m_battery_bar = nullptr;
+	m_power = 0.f;
+	last_cursor_pos.set(UI_BASE_WIDTH / 2.f, UI_BASE_HEIGHT / 2.f);
+	m_cursor_box.set(117.f, 39.f, UI_BASE_WIDTH - 121.f, UI_BASE_HEIGHT - 37.f);
 	Init();
 }
 
@@ -133,14 +144,17 @@ void CUIPdaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 		{
 			if ( pWnd == m_btn_close )
 			{
-				HideDialog();
+				if (Actor()->inventory().GetActiveSlot() == PDA_SLOT)
+					Actor()->inventory().Activate(NO_ACTIVE_SLOT);
+				//HideDialog();
 			}
 			break;
 		}
 	default:
 		{
-			R_ASSERT						(m_pActiveDialog);
-			m_pActiveDialog->SendMessage	(pWnd, msg, pData);
+		if (m_pActiveDialog) {
+			m_pActiveDialog->SendMessage(pWnd, msg, pData);
+		}
 		}
 	};
 }
@@ -151,26 +165,42 @@ void CUIPdaWnd::Show(bool status)
 	if(status)
 	{
 		InventoryUtilities::SendInfoToActor	("ui_pda");
-		
-		if ( !m_pActiveDialog )
+
+		if (!m_sActiveSection || strcmp(m_sActiveSection.c_str(), "") == 0)
 		{
-			SetActiveSubdialog				("eptTasks");
+			SetActiveSubdialog("eptTasks");
+			UITabControl->SetActiveTab("eptTasks");
 		}
-		m_pActiveDialog->Show				(true);
+		else
+			SetActiveSubdialog(m_sActiveSection);
+
+		CurrentGameUI()->HideActorMenu();
 	}else
 	{
-		InventoryUtilities::SendInfoToActor	("ui_pda_hide");
-		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiPdaTask, false);
-		m_pActiveDialog->Show				(false);
-		g_btnHint->Discard					();
-		g_statHint->Discard					();
+		InventoryUtilities::SendInfoToActor("ui_pda_hide");
+
+		//if (GameConstants::GetPDA_FlashingIconsQuestsEnabled())
+		//	CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiPdaTask, false);
+
+		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, false);
+		//CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiJournal, false);
+
+		if (m_pActiveDialog)
+		{
+			m_pActiveDialog->Show(false);
+			m_pActiveDialog = pUITaskWnd; //hack for script window
+		}
+		g_btnHint->Discard();
+		g_statHint->Discard();
 	}
 }
 
 void CUIPdaWnd::Update()
 {
 	inherited::Update();
-	m_pActiveDialog->Update();
+	if (m_pActiveDialog)
+		m_pActiveDialog->Update();
+
 	m_clock->TextItemControl().SetText(InventoryUtilities::GetGameTimeAsString(InventoryUtilities::etpTimeToMinutes).c_str());
 
 	m_battery_bar->SetProgressPos(m_power);
@@ -184,7 +214,8 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 
 	if ( m_pActiveDialog )
 	{
-		UIMainPdaFrame->DetachChild( m_pActiveDialog );
+		if (UIMainPdaFrame->IsChild(m_pActiveDialog))
+			UIMainPdaFrame->DetachChild(m_pActiveDialog);
 		m_pActiveDialog->Show( false );
 	}
 
@@ -192,19 +223,6 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 	{
 		m_pActiveDialog = pUITaskWnd;
 	}
-//-	else if ( section == "eptFractionWar" )
-//-	{
-//-		m_pActiveDialog = pUIFactionWarWnd;
-//-	}
-	/*
-	if (IsGameTypeSingle())
-	{
-	    if (section == "eptRanking")
-	{
-		    m_pActiveDialog = pUIRankingWnd;
-	    }
-	}
-	*/
 	else if (section == "eptRanking")
 	{
 		if (IsGameTypeSingle()) {
@@ -220,7 +238,31 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 		m_pActiveDialog = pUIEncyclopediaWnd;
 	}
 
-	R_ASSERT2                       (m_pActiveDialog, "active dialog is not initialized");
+	luabind::functor<CUIDialogWndEx*> functor;
+	if (ai().script_engine().functor("pda.set_active_subdialog", functor))
+	{
+		CUIDialogWndEx* scriptWnd = functor(section.c_str());
+		if (scriptWnd)
+		{
+			scriptWnd->SetHolder(CurrentDialogHolder());
+			m_pActiveDialog = scriptWnd;
+		}
+	}
+
+	if (m_pActiveDialog)
+	{
+		if (!UIMainPdaFrame->IsChild(m_pActiveDialog))
+			UIMainPdaFrame->AttachChild(m_pActiveDialog);
+		m_pActiveDialog->Show(true);
+		m_sActiveSection = section;
+		SetActiveCaption();
+	}
+	else
+	{
+		m_sActiveSection = "";
+	}
+
+	/*R_ASSERT2(m_pActiveDialog, "active dialog is not initialized");
 	UIMainPdaFrame->AttachChild		(m_pActiveDialog);
 	m_pActiveDialog->Show			(true);
 
@@ -229,7 +271,7 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 		UITabControl->SetActiveTab( section );
 	}
 	m_sActiveSection = section;
-	SetActiveCaption();
+	SetActiveCaption();*/
 }
 
 void CUIPdaWnd::SetActiveCaption()
@@ -279,6 +321,11 @@ void CUIPdaWnd::Show_MapLegendWnd( bool status )
 
 void CUIPdaWnd::Draw()
 {
+	if (Device.dwFrame == dwPDAFrame)
+		return;
+
+	dwPDAFrame = Device.dwFrame;
+
 	inherited::Draw();
 //.	DrawUpdatedSections();
 	DrawHint();
@@ -362,9 +409,114 @@ void RearrangeTabButtons(CUITabControl* pTab)
 	pTab->SetWndPos( pos );
 }
 
+void CUIPdaWnd::Enable(bool status)
+{
+	if (status)
+		ResetCursor();
+	else
+	{
+		g_player_hud->reset_thumb(false);
+		ResetJoystick(false);
+		bButtonL = false;
+		bButtonR = false;
+	}
+
+	inherited::Enable(status);
+}
+
 bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 {
-	if ( is_binded(kACTIVE_JOBS, dik) )
+	if (WINDOW_KEY_PRESSED == keyboard_action && IsShown())
+	{
+		if (!psActorFlags.test(AF_3D_PDA))
+		{
+			EGameActions action = get_binded_action(dik);
+
+			if (action == kQUIT || action == kINVENTORY || action == kACTIVE_JOBS)
+			{
+				HideDialog();
+				return true;
+			}
+		}
+		else
+		{
+			CPda* pda = Actor()->GetPDA();
+			if (pda)
+			{
+				EGameActions action = get_binded_action(dik);
+
+				if (action == kQUIT) // "Hack" to make Esc key open main menu instead of simply hiding the PDA UI
+				{
+					if (pda->GetState() == CPda::eHiding || pda->GetState() == CPda::eHidden)
+					{
+						HideDialog();
+						Console->Execute("main_menu");
+					}
+					else if (pda->m_bZoomed)
+					{
+						pda->m_bZoomed = false;
+						CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+					}
+					else
+						Actor()->inventory().Activate(NO_ACTIVE_SLOT);
+
+					return true;
+				}
+
+				if (action == kUSE || action == kACTIVE_JOBS || action == kINVENTORY || (action > kCAM_ZOOM_OUT && action < kWPN_NEXT)) // Since UI no longer passes non-movement inputs to the actor input receiver this is needed now.
+				{
+					CObject* obj = (GameID() == eGameIDSingle) ? Level().CurrentEntity() : Level().CurrentControlEntity();
+					{
+						IInputReceiver* IR = smart_cast<IInputReceiver*>(smart_cast<CGameObject*>(obj));
+						if (IR) IR->IR_OnKeyboardPress(action);
+					}
+					return true;
+				}
+
+				// Don't allow zoom in while draw/holster animation plays, freelook is enabled or a hand animation plays
+				if (pda->IsPending())
+					return false;
+
+				// Simple PDA input mode - only allow input if PDA is zoomed in. Both left and right mouse button will zoom in instead of only right mouse button
+				if (psActorFlags.test(AF_SIMPLE_PDA))
+				{
+					if (action == kWPN_ZOOM)
+					{
+						if (!pda->m_bZoomed)
+						{
+							Actor()->StopSprint();
+						}
+						else
+						{
+							Enable(false);
+							CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+						}
+
+						pda->m_bZoomed = !pda->m_bZoomed;
+						return true;
+					}
+				}
+				// "Normal" input mode, PDA input can be toggled without having to be zoomed in
+				else
+				{
+					if (action == kWPN_ZOOM)
+					{
+						if (!pda->m_bZoomed)
+						{
+							Actor()->StopSprint();
+						}
+						else
+							CurrentGameUI()->SetMainInputReceiver(nullptr, false);
+						pda->m_bZoomed = !pda->m_bZoomed;
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return inherited::OnKeyboardAction(dik, keyboard_action);
+
+	/*if (is_binded(kACTIVE_JOBS, dik))
 	{
 		if ( WINDOW_KEY_PRESSED == keyboard_action )
 			HideDialog();
@@ -372,7 +524,7 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 		return true;
 	}	
 
-	return inherited::OnKeyboardAction(dik,keyboard_action);
+	return inherited::OnKeyboardAction(dik,keyboard_action);*/
 }
 
 void CUIPdaWnd::PdaContentsChanged(pda_section::part type)

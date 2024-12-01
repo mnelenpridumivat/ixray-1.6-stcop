@@ -956,3 +956,8 @@ void CGamePersistent::SetDiscordStatus() const {
 		g_Discord.SetPhase(levelName);
 	}
 }
+
+bool CGamePersistent::GetActorAliveStatus()
+{
+	return	(Actor()->g_Alive());
+}

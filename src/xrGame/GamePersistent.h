@@ -97,6 +97,8 @@ public:
 	virtual void		OnSectorChanged			(int sector);
 	virtual void		OnAssetsChanged			();
 	void				SetDiscordStatus() const;
+
+	bool		GetActorAliveStatus();
 };
 
 IC CGamePersistent&		GamePersistent()		{ return *((CGamePersistent*) g_pGamePersistent);			}

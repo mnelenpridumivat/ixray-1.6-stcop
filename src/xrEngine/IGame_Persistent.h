@@ -84,6 +84,8 @@ public:
 	virtual void					OnSectorChanged		(int sector){};
 	virtual void					OnAssetsChanged		();
 
+	virtual bool					GetActorAliveStatus() { return 0; };
+
 	virtual void					RegisterModel		(IRenderVisual* V)
 #ifndef _EDITOR
      = 0;

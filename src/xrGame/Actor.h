@@ -209,6 +209,9 @@ public:
 	void				HitArtefactsCondition(SHit& hit);
 			float		HitArtefactsOnBelt		(float hit_power, ALife::EHitType hit_type);
 			float		GetProtection_ArtefactsOnBelt(ALife::EHitType hit_type);
+			void		UpdateNVGUseAnim();
+			void		UpdateMaskUseAnim();
+			void		UpdateQuickKickAnim();
 
 protected:
 	//звук тяжелого дыхания
@@ -412,6 +415,7 @@ public:
 	bool					CanSprint				();
 	bool					CanRun					();
 	virtual void			StopAnyMove				() override;
+	void					StopSprint() { mstate_wishful &= ~mcSprint; }
 
 	bool					AnyAction				()	{return (mstate_real & mcAnyAction) != 0;};
 	bool					AnyMove					()	{return (mstate_real & mcAnyMove) != 0;};
@@ -698,8 +702,14 @@ public:
 	virtual	bool				InventoryAllowSprint			();
 	virtual void				OnNextWeaponSlot				();
 	virtual void				OnPrevWeaponSlot				();
+
+	void				NVGAnimCheckDetector();
+	void				CleanMaskAnimCheckDetector();
+	void				StartNVGAnimation();
 			void				SwitchNightVision				();
 			void				SwitchTorch						();
+			void				CleanMask();
+			void				QuickKick();
 #ifndef MASTER_GOLD
 			void				NoClipFly						(int cmd);
 #endif //DEBUG
@@ -776,6 +786,20 @@ private:
 public:
 	bool OnLadder = false;
 	IC bool is_ladder() const { return OnLadder; };
+
+	bool					m_bActionAnimInProcess;
+
+protected:
+	bool					m_bNightVisionOn;
+	bool					m_bNightVisionAllow;
+	bool					m_bNVGActivated;
+	bool					m_bNVGSwitched;
+	bool					m_bMaskAnimActivated;
+	bool					m_bMaskClear;
+	bool					m_bQuickKickActivated;
+	bool					m_bQuickKick;
+	int						m_iNVGAnimLength;
+
 };
 
 extern bool		isActorAccelerated			(u32 mstate, bool ZoomMode);
