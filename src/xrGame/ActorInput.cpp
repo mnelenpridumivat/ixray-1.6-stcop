@@ -710,64 +710,6 @@ void CActor::set_input_external_handler(CActorInputHandler *handler)
 	m_input_external_handler	= handler;
 }
 
-void CActor::NVGAnimCheckDetector()
-{
-	if (isHidingInProgress.load())
-		return;
-
-	CCustomDetector* pDet = smart_cast<CCustomDetector*>(inventory().ItemFromSlot(DETECTOR_SLOT));
-	bool AnimEnabled = pSettings->line_exist("actions_animations", "switch_nightvision_section");
-
-	if (!pDet || pDet->IsHidden() || !AnimEnabled);
-	{
-		StartNVGAnimation();
-		return;
-	}
-
-	isHidingInProgress.store(true);
-
-	std::thread hidingThread([&, pDet]
-		{
-			while (pDet && !pDet->IsHidden())
-				pDet->HideDetector(true);
-
-			isHidingInProgress.store(false);
-			CheckNVGAnimNeeded.store(true);
-		});
-
-	hidingThread.detach();
-}
-
-void CActor::CleanMaskAnimCheckDetector()
-{
-	if (isHidingInProgress.load())
-		return;
-
-	CCustomDetector* pDet = smart_cast<CCustomDetector*>(inventory().ItemFromSlot(DETECTOR_SLOT));
-
-	if (!pSettings->line_exist("actions_animations", "clean_mask_section"))
-		return;
-
-	if (!pDet || pDet->IsHidden())
-	{
-		CleanMask();
-		return;
-	}
-
-	isHidingInProgress.store(true);
-
-	std::thread hidingThread([&, pDet]
-		{
-			while (pDet && !pDet->IsHidden())
-				pDet->HideDetector(true);
-
-			isHidingInProgress.store(false);
-			CleanMaskAnimNeeded.store(true);
-		});
-
-	hidingThread.detach();
-}
-
 void CActor::SwitchNightVision()
 {
 	if (!Actor()->m_bActionAnimInProcess)

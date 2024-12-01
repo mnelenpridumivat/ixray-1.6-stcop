@@ -58,6 +58,10 @@ public:
 	bool					bIsHelmetAvaliable;
 	bool					isDisableChangeSkin = true;
 
+	u32						m_NightVisionType;
+	float					m_fNightVisionLumFactor;
+
+	bool					m_b_HasGlass;
 	bool					m_bHasLSS;
 
 	virtual u32				ef_equipment_type		() const;
@@ -71,6 +75,8 @@ public:
 			void			ApplySkinModel			(CActor* pActor, bool bDress, bool bHUDOnly);
 			void			ReloadBonesProtection	();
 			void			AddBonesProtection		(LPCSTR bones_section);
+
+			IC int			GetOutfitNV_Type() const { return m_NightVisionType; }
 
 protected:
 	virtual bool			install_upgrade_impl( LPCSTR section, bool test );

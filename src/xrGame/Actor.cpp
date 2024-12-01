@@ -27,6 +27,7 @@
 #include "game_cl_base_weapon_usage_statistic.h"
 #include "Grenade.h"
 #include "Torch.h"
+#include "WeaponKnife.h"
 
 // breakpoints
 #include "../xrEngine/xr_input.h"
@@ -75,6 +76,7 @@
 #include "../../xrUI/UIFontDefines.h"
 #include "PickupManager.h"
 #include "../xrPhysics/ElevatorState.h"
+#include <CustomDetector.h>
 
 const u32		patch_frames	= 50;
 const float		respawn_delay	= 1.f;
@@ -1451,6 +1453,77 @@ void CActor::set_state_box(u32	mstate)
 		character_physics_support()->movement()->ActivateBox(0, true);
 }
 
+void CActor::SwitchNightVision(bool light_on, bool use_sounds, bool send_event)
+{
+	m_bNightVisionOn = light_on;
+
+	if (!m_night_vision)
+		m_night_vision = new CNightVisionEffector(cNameSect());
+
+	bool bIsActiveNow = m_night_vision->IsActive();
+
+	CHelmet* pHelmet = smart_cast<CHelmet*>(inventory().ItemFromSlot(HELMET_SLOT));
+	if (pHelmet && pHelmet->m_NightVisionSect.size())
+	{
+		if (m_bNightVisionAllow)
+		{
+			if (m_bNightVisionOn && !bIsActiveNow)
+			{
+				m_night_vision->Start(pHelmet->m_NightVisionSect, this, use_sounds);
+
+				//if (ps_r__ShaderNVG)
+				g_pGamePersistent->devices_shader_data.nightvision_lum_factor = pHelmet->m_fNightVisionLumFactor;
+			}
+		}
+		else
+		{
+			m_night_vision->OnDisabled(this, use_sounds);
+			m_bNightVisionOn = false;
+			g_pGamePersistent->devices_shader_data.nightvision_lum_factor = 0.0f;
+		}
+	}
+	else
+	{
+		CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(inventory().ItemFromSlot(OUTFIT_SLOT));
+		if (pOutfit && pOutfit->m_NightVisionSect.size())
+		{
+			if (m_bNightVisionAllow)
+			{
+				if (m_bNightVisionOn && !bIsActiveNow)
+				{
+					m_night_vision->Start(pOutfit->m_NightVisionSect, this, use_sounds);
+
+					//if (ps_r__ShaderNVG)
+					g_pGamePersistent->devices_shader_data.nightvision_lum_factor = pOutfit->m_fNightVisionLumFactor;
+				}
+			}
+			else
+			{
+				m_night_vision->OnDisabled(this, use_sounds);
+				m_bNightVisionOn = false;
+				g_pGamePersistent->devices_shader_data.nightvision_lum_factor = 0.0f;
+			}
+		}
+	}
+
+	if ((!m_bNightVisionOn && bIsActiveNow) || (!m_bNightVisionOn/* && ps_r__ShaderNVG == 1*/))
+	{
+		m_night_vision->Stop(100000.0f, use_sounds);
+	}
+
+	//Alun: Update flags and send message they were changed
+	if (send_event)
+	{
+		m_trader_flags.set(CSE_ALifeTraderAbstract::eTraderFlagNightVisionActive, m_bNightVisionOn);
+		CGameObject* object = smart_cast<CGameObject*>(this);
+		NET_Packet packet;
+		object->u_EventGen(packet, GE_TRADER_FLAGS, object->ID());
+		packet.w_u32(m_trader_flags.get());
+		object->u_EventSend(packet);
+		//Msg("GE_TRADER_FLAGS event sent %d", m_trader_flags.get());
+	}
+}
+
 void CActor::shedule_Update	(u32 DT)
 {
 	PROF_EVENT("CActor shedule_Update");
@@ -1736,7 +1809,7 @@ void CActor::StartNVGAnimation()
 	if (Wpn && Wpn->IsZoomed())
 		return;
 
-	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "switch_nightvision_section", nullptr);
+	LPCSTR anim_sect = READ_IF_EXISTS(pSettings, r_string, "actions_animations", "switch_nightvision_section", nullptr);
 
 	if (!anim_sect)
 	{
@@ -1787,9 +1860,67 @@ void CActor::StartNVGAnimation()
 	m_bActionAnimInProcess = true;
 }
 
+void CActor::NVGAnimCheckDetector()
+{
+	if (isHidingInProgress.load())
+		return;
+
+	CCustomDetector* pDet = smart_cast<CCustomDetector*>(inventory().ItemFromSlot(DETECTOR_SLOT));
+	bool AnimEnabled = pSettings->line_exist("actions_animations", "switch_nightvision_section");
+
+	if (!pDet || pDet->IsHidden() || !AnimEnabled);
+	{
+		StartNVGAnimation();
+		return;
+	}
+
+	isHidingInProgress.store(true);
+
+	std::thread hidingThread([&, pDet]
+		{
+			while (pDet && !pDet->IsHidden())
+				pDet->HideDetector(true);
+
+			isHidingInProgress.store(false);
+			CheckNVGAnimNeeded.store(true);
+		});
+
+	hidingThread.detach();
+}
+
+void CActor::CleanMaskAnimCheckDetector()
+{
+	if (isHidingInProgress.load())
+		return;
+
+	CCustomDetector* pDet = smart_cast<CCustomDetector*>(inventory().ItemFromSlot(DETECTOR_SLOT));
+
+	if (!pSettings->line_exist("actions_animations", "clean_mask_section"))
+		return;
+
+	if (!pDet || pDet->IsHidden())
+	{
+		CleanMask();
+		return;
+	}
+
+	isHidingInProgress.store(true);
+
+	std::thread hidingThread([&, pDet]
+		{
+			while (pDet && !pDet->IsHidden())
+				pDet->HideDetector(true);
+
+			isHidingInProgress.store(false);
+			CleanMaskAnimNeeded.store(true);
+		});
+
+	hidingThread.detach();
+}
+
 void CActor::CleanMask()
 {
-	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "clean_mask_section", nullptr);
+	LPCSTR anim_sect = READ_IF_EXISTS(pSettings, r_string, "actions_animations", "clean_mask_section", nullptr);
 
 	if (!anim_sect)
 		return;
@@ -1843,7 +1974,7 @@ void CActor::CleanMask()
 
 void CActor::QuickKick()
 {
-	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "quick_kick_section", nullptr);
+	LPCSTR anim_sect = READ_IF_EXISTS(pSettings, r_string, "actions_animations", "quick_kick_section", nullptr);
 
 	if (!anim_sect)
 		return;

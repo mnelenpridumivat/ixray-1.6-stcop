@@ -137,6 +137,18 @@ public:
 
 protected:
 	TISlotArr				m_slots;
+
+	bool					m_bTakeItemActivated;
+	bool					m_bItemTaken;
+	bool					m_bUsePickupAnim;
+	int						m_iTakeAnimLength;
+	int						m_iActionTiming;
+
+	CGameObject* GameObject;
+	CObject* Object;
+
+	ref_sound				m_action_anim_sound;
+
 public:
 	//возвращает все кроме PDA в слоте и болта
 	void				AddAvailableItems			(TIItemContainer& items_container, bool for_trade) const;

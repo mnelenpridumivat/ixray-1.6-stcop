@@ -157,6 +157,7 @@ public:
 	u32				motion_length_script(LPCSTR section, LPCSTR anm_name, float speed);
 	void			OnMovementChanged	(ACTOR_DEFS::EMoveCommand cmd)	;
 	void			RestoreHandBlends(LPCSTR ignored_part);
+	void			SetScriptItemVisible(bool visible);
 
 	void			ResetBlockedPartID(){m_blocked_part_idx=u16(-1); };
 	void			SetHandsVisible(bool val){m_bhands_visible=val;};
@@ -185,6 +186,8 @@ private:
 	xr_vector<u16>						m_ancors;
 	attachable_hud_item*				m_attached_items[2];
 	xr_vector<attachable_hud_item*>		m_pool;
+
+	IKinematics* script_anim_item_model;
 
 	u16									m_blocked_part_idx;
 	bool								m_bhands_visible;

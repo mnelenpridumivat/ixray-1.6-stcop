@@ -63,6 +63,8 @@ class CActorStatisticMgr;
 class CLocationManager;
 class CPickUpManager;
 
+class CNightVisionEffector;
+
 class CActor: 
 	public IGame_Actor, 
 	public CEntityAlive, 
@@ -799,6 +801,15 @@ protected:
 	bool					m_bQuickKickActivated;
 	bool					m_bQuickKick;
 	int						m_iNVGAnimLength;
+	int						m_iActionTiming;
+	int						m_iMaskAnimLength;
+	int						m_iQuickKickAnimLength;
+
+	ref_sound				m_action_anim_sound;
+
+	CNightVisionEffector* m_night_vision;
+
+	void					SwitchNightVision(bool light_on, bool use_sounds = true, bool send_event = true);
 
 };
 

@@ -23,6 +23,7 @@
 #include "ai/stalker/ai_stalker.h"
 #include "WeaponMagazined.h"
 #include "Car.h"
+#include "CustomDetector.h"
 
 //скушать предмет 
 #include "game_object_space.h"
@@ -33,6 +34,9 @@
 using namespace InventoryUtilities;
 
 extern bool g_block_all_except_movement;
+
+std::atomic<bool> isHidingInProgressInv(false);
+std::atomic<bool> TakeItemAnimNeeded(false);
 
 // what to block
 u16	INV_STATE_LADDER		= INV_STATE_BLOCK_ALL;
@@ -102,6 +106,12 @@ CInventory::CInventory()
 	
 	InitPriorityGroupsForQSwitch				();
 	m_next_item_iteration_time					= 0;
+
+	m_bTakeItemActivated = false;
+	m_bItemTaken = false;
+	m_iTakeAnimLength = 0;
+	m_iActionTiming = 0;
+	Object = nullptr;
 }
 
 
@@ -182,7 +192,7 @@ void CInventory::TakeItemAnimCheck(CGameObject* GameObj, CObject* Obj, bool use_
 
 void CInventory::TakeItemAnim(CGameObject* GameObj, CObject* Obj, bool use_pickup_anim)
 {
-	LPCSTR anim_sect = READ_IF_EXISTS(pAdvancedSettings, r_string, "actions_animations", "take_item_section", nullptr);
+	LPCSTR anim_sect = READ_IF_EXISTS(pSettings, r_string, "actions_animations", "take_item_section", nullptr);
 
 	if (!anim_sect || !use_pickup_anim)
 	{
@@ -231,7 +241,7 @@ void CInventory::TakeItemAnim(CGameObject* GameObj, CObject* Obj, bool use_picku
 
 	m_iActionTiming = Device.dwTimeGlobal + anim_timer;
 
-	m_bItemTaked = false;
+	m_bItemTaken = false;
 	Actor()->m_bActionAnimInProcess = true;
 }
 
@@ -1589,7 +1599,7 @@ void CInventory::UpdateUseAnim(CActor* actor)
 
 	bool IsActorAlive = g_pGamePersistent->GetActorAliveStatus();
 
-	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bItemTaked) && IsActorAlive)
+	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bItemTaken) && IsActorAlive)
 	{
 		m_iActionTiming = Device.dwTimeGlobal;
 
@@ -1600,7 +1610,7 @@ void CInventory::UpdateUseAnim(CActor* actor)
 		Object->H_SetParent(smart_cast<CObject*>(actor));
 		Take(GameObject, false, true);
 
-		m_bItemTaked = true;
+		m_bItemTaken = true;
 	}
 
 	if (m_bTakeItemActivated)

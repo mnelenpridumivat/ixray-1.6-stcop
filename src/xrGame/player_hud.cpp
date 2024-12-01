@@ -544,6 +544,8 @@ player_hud::player_hud(bool invert)
 	m_blocked_part_idx = u16(-1);
 	m_bhands_visible = false;
 	m_legs_model = nullptr;
+
+	script_anim_item_model = nullptr;
 }
 
 
@@ -712,6 +714,12 @@ void player_hud::render_hud()
 	if(b_r1) 
 	{
 		m_attached_items[1]->render();
+	}
+
+	if (script_anim_item_model)
+	{
+		::Render->set_Transform(&m_item_pos);
+		::Render->add_Visual(script_anim_item_model->dcast_RenderVisual(), true);
 	}
 
 	if(m_show_legs && Actor() && m_legs_model)
@@ -908,6 +916,9 @@ void player_hud::update(const Fmatrix& cam_trans)
 
 	if(m_attached_items[1])
 		m_attached_items[1]->update(true);
+
+	if (script_anim_item_attached && script_anim_item_model)
+		update_script_item();
 }
 
 u32 player_hud::anim_play(u16 part, const MotionID& M, BOOL bMixIn, const CMotionDef*& md, float speed)
@@ -1267,6 +1278,14 @@ void player_hud::RestoreHandBlends(LPCSTR ignored_part)
 				B->bone_or_part		= bop;
 			}
 		}
+	}
+}
+void player_hud::SetScriptItemVisible(bool visible)
+{
+	if (script_anim_item_model)
+	{
+		u16 root_id = script_anim_item_model->LL_GetBoneRoot();
+		script_anim_item_model->LL_SetBoneVisible(root_id, visible, TRUE);
 	}
 }
 void player_hud::detach_item_idx(u16 idx)
