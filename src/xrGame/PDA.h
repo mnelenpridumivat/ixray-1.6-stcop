@@ -135,4 +135,6 @@ public:
 	bool m_bPowerSaving;
 	float m_psy_factor;
 	float m_thumb_rot[2];
+
+	bool first_activation = true;
 };

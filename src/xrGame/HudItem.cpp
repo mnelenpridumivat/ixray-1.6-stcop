@@ -649,6 +649,12 @@ bool CHudItem::TryPlayAnimIdle()
 	return false;
 }
 
+bool CHudItem::NeedBlendAnm()
+{
+	u32 state = GetState();
+	return (state != eIdle && state != eHidden);
+}
+
 void CHudItem::PlayAnimIdleMoving()
 {
 	PlayHUDMotion("anm_idle_moving", TRUE, nullptr, GetState());
@@ -733,4 +739,10 @@ float CHudItem::GetHudFov()
 	}
 
 	return m_nearwall_last_hud_fov;
+}
+
+inline void CHUDState::SetState(u32 v) {
+	m_hud_item_state = v;
+	m_dw_curr_state_time = Device.dwTimeGlobal;
+	ResetSubStateTime();
 }

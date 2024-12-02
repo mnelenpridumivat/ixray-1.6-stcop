@@ -772,8 +772,10 @@ void CPda::OnMoveToRuck(const SInvItemPlace& prev)
 void CPda::UpdateCL()
 {
 	inherited::UpdateCL();
-	if (!ParentIsActor())
+	if (!ParentIsActor()) {
+		first_activation = false;
 		return;
+	}
 
 	UpdateLights();
 
@@ -790,6 +792,15 @@ void CPda::UpdateCL()
 	{
 		if (state != eHidden)
 			Actor()->inventory().Activate(NO_ACTIVE_SLOT);
+		return;
+	}
+
+	//HACK: using force closing on first activation after from moving to slot
+	if (state == eShowing && first_activation) {
+		first_activation = false;
+		CurrentGameUI()->PdaMenu().HideDialog();
+		Actor()->inventory().Action(kACTIVE_JOBS, CMD_START);
+		SetState(eHidden);
 		return;
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "firedeps.h"
 
+#include "../xrEngine/ObjectAnimator.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "../Include/xrRender/KinematicsAnimated.h"
 #include "actor_defs.h"
@@ -35,6 +36,140 @@ struct hand_motions
 {
 	LPCSTR section;
 	player_hud_motion_container pm;
+};
+
+enum eMovementLayers
+{
+	eAimWalk = 0,
+	eAimCrouch,
+	eCrouch,
+	eWalk,
+	eRun,
+	eSprint,
+	move_anms_end
+};
+
+struct movement_layer
+{
+	CObjectAnimator* anm;
+	float blend_amount[2];
+	bool active;
+	float m_power;
+	Fmatrix blend;
+	u8 m_part;
+
+	movement_layer()
+	{
+		blend.identity();
+		anm = new CObjectAnimator();
+		blend_amount[0] = 0.f;
+		blend_amount[1] = 0.f;
+		active = false;
+		m_power = 1.f;
+	}
+
+	void Load(LPCSTR name)
+	{
+		if (xr_strcmp(name, anm->Name()))
+			anm->Load(name);
+	}
+
+	void Play(bool bLoop = true)
+	{
+		if (!anm->Name())
+			return;
+
+		if (IsPlaying())
+		{
+			active = true;
+			return;
+		}
+
+		anm->Play(bLoop);
+		active = true;
+	}
+
+	bool IsPlaying()
+	{
+		return anm->IsPlaying();
+	}
+
+	void Stop(bool bForce)
+	{
+		if (bForce)
+		{
+			anm->Stop();
+			blend_amount[0] = 0.f;
+			blend_amount[1] = 0.f;
+			blend.identity();
+		}
+
+		active = false;
+	}
+
+	const Fmatrix& XFORM(u8 part)
+	{
+		blend.set(anm->XFORM());
+		blend.mul(blend_amount[part] * m_power);
+		blend.m[0][0] = 1.f;
+		blend.m[1][1] = 1.f;
+		blend.m[2][2] = 1.f;
+
+		return blend;
+	}
+};
+
+struct script_layer
+{
+	LPCSTR m_name;
+	CObjectAnimator* anm;
+	float blend_amount;
+	float m_power;
+	bool active;
+	Fmatrix blend;
+	u8 m_part;
+
+	script_layer(LPCSTR name, u8 part, float speed = 1.f, float power = 1.f, bool looped = true)
+	{
+		m_name = name;
+		m_part = part;
+		m_power = power;
+		blend.identity();
+		anm = new CObjectAnimator();
+		anm->Load(name);
+		anm->Play(looped);
+		anm->Speed() = speed;
+		blend_amount = 0.f;
+		active = true;
+	}
+
+	bool IsPlaying()
+	{
+		return anm->IsPlaying();
+	}
+
+	void Stop(bool bForce)
+	{
+		if (bForce)
+		{
+			anm->Stop();
+			blend_amount = 0.f;
+			blend.identity();
+		}
+
+		active = false;
+	}
+
+	const Fmatrix& XFORM()
+	{
+		blend.set(anm->XFORM());
+		blend.mul(blend_amount * m_power);
+		blend.m[0][0] = 1.f;
+		blend.m[1][1] = 1.f;
+		blend.m[2][2] = 1.f;
+
+		return blend;
+	}
 };
 
 struct hud_item_measures
@@ -127,7 +262,12 @@ public:
 	void			load				(const shared_str& model_name);
 	void			load_default		(){load("actor_hud");};
 	void			update				(const Fmatrix& trans);
+	void			StopScriptAnim();
+	void			updateMovementLayerState();
 	void			PlayBlendAnm(LPCSTR name, u8 part = 0, float speed = 1.f, float power = 1.f, bool bLooped = true, bool no_restart = false);
+	void			StopBlendAnm(LPCSTR name, bool bForce = false);
+	void			StopAllBlendAnms(bool bForce);
+	float			SetBlendAnmTime(LPCSTR name, float time);
 	void			render_hud			();	
 	void			render_item_ui		();
 	bool			render_item_ui_query();
@@ -149,6 +289,7 @@ public:
 	void			detach_item_idx		(u16 idx);
 	void			detach_item			(CHudItem* item);
 	void			detach_all_items	(){m_attached_items[0]=NULL; m_attached_items[1]=NULL;};
+	bool			allow_script_anim();
 
 	void			calc_transform		(u16 attach_slot_idx, const Fmatrix& offset, Fmatrix& result);
 	void			tune				(Ivector values);
@@ -187,7 +328,14 @@ private:
 	attachable_hud_item*				m_attached_items[2];
 	xr_vector<attachable_hud_item*>		m_pool;
 
+	u32									script_anim_end;
+	bool								m_bStopAtEndAnimIsRunning;
+	bool								script_anim_item_attached;
+	bool								script_anim_item_visible;
 	IKinematics* script_anim_item_model;
+	Fvector								item_pos[2];
+	Fmatrix								m_item_pos;
+	u8									m_attach_idx;
 
 	u16									m_blocked_part_idx;
 	bool								m_bhands_visible;
@@ -195,8 +343,13 @@ private:
 	int									item_idx_priority;
 	void  LeftArmCallback(CBoneInstance* B);
 
+	xr_vector<movement_layer*>			m_movement_layers;
+	xr_vector<script_layer*>			m_script_layers;
+
 	xr_vector<hand_motions*>			m_hand_motions;
 	player_hud_motion_container* get_hand_motions(LPCSTR section);
+
+	void update_script_item();
 
 	static void _BCL Thumb0Callback(CBoneInstance* B);
 	static void _BCL Thumb01Callback(CBoneInstance* B);

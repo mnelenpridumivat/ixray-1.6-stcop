@@ -37,7 +37,7 @@ public:
 	IC		u32				GetNextState		() const			{return		m_nextState;}
 	IC		u32				GetState			() const			{return		m_hud_item_state;}
 
-	IC		void			SetState			(u32 v)				{m_hud_item_state = v; m_dw_curr_state_time=Device.dwTimeGlobal;ResetSubStateTime();}
+	void			SetState			(u32 v);
 	IC		void			SetNextState		(u32 v)				{m_nextState = v;}
 	IC		u32				CurrStateTime		() const			{return Device.dwTimeGlobal-m_dw_curr_state_time;}
 	IC		void			ResetSubStateTime	()					{m_dw_curr_substate_time=Device.dwTimeGlobal;}
@@ -113,6 +113,7 @@ public:
 	virtual void				PlayAnimBore		();
 	bool						TryPlayAnimIdle		();
 	virtual bool				MovingAnimAllowedNow ()				{return true;}
+	virtual bool				NeedBlendAnm();
 
 	virtual void				PlayAnimIdleMoving	();
 	virtual void				PlayAnimIdleSprint	();

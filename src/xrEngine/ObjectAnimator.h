@@ -29,6 +29,9 @@ public:
 						CObjectAnimator	();
 	virtual				~CObjectAnimator();
 
+	inline const SAnimParams& anim_param() const { return m_MParam; }
+	inline bool GetIsLooped() const { return bLoop; }
+
 	void				Clear			();
 	void				Load			(LPCSTR name);
     IC LPCSTR			Name			(){return *m_Name;}
