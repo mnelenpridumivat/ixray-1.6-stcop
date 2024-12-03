@@ -141,8 +141,6 @@ void CInventoryItem::Load(LPCSTR section)
 	}
 	m_icon_name					= READ_IF_EXISTS(pSettings, r_string,section,"icon_name",		nullptr);
 
-	m_fLowestBatteryCharge = READ_IF_EXISTS(pSettings, r_float, section, "power_critical", .03f);
-
 	u32 inv_grid_x = pSettings->r_u32(m_object->cNameSect(), "inv_grid_x");
 	u32 inv_grid_y = pSettings->r_u32(m_object->cNameSect(), "inv_grid_y");
 	u32 inv_grid_width = READ_IF_EXISTS(pSettings, r_u32, m_object->cNameSect(), "inv_grid_width", 1);

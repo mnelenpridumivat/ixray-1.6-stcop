@@ -252,7 +252,7 @@ void attachable_hud_item::update_hud_additional(Fmatrix& trans)
 {
 	if(m_parent_hud_item)
 	{
-		m_parent_hud_item->UpdateHudAdditional(trans);
+		m_parent_hud_item->UpdateHudAdditonal(trans);
 	}
 }
 
@@ -607,29 +607,9 @@ void player_hud::load(const shared_str& player_hud_sect)
 		m_legs_model = PKinematics(::Render->model_Create(model_name));
 	}
 
-	{
-		u16 l_arm = m_model->dcast_PKinematics()->LL_BoneID("l_clavicle");
-		if (l_arm != BI_NONE) {
-			m_model->dcast_PKinematics()->LL_GetBoneInstance(l_arm).set_callback(bctCustom, [](CBoneInstance* B) {g_player_hud->LeftArmCallback(B); }, NULL);
-		}
-	}
-	{
-		u16 r_finger0 = m_model->dcast_PKinematics()->LL_BoneID("r_finger0");
-		if (r_finger0 != BI_NONE) {
-			m_model->dcast_PKinematics()->LL_GetBoneInstance(r_finger0).set_callback(bctCustom, Thumb0Callback, this);
-		}
-	}
-	{
-		u16 r_finger01 = m_model->dcast_PKinematics()->LL_BoneID("r_finger01");
-		if (r_finger01 != BI_NONE) {
-			m_model->dcast_PKinematics()->LL_GetBoneInstance(r_finger01).set_callback(bctCustom, Thumb01Callback, this);
-		}
-	}
-	{
-		u16 r_finger02 = m_model->dcast_PKinematics()->LL_BoneID("r_finger02");
-		if (r_finger02 != BI_NONE) {
-			m_model->dcast_PKinematics()->LL_GetBoneInstance(r_finger02).set_callback(bctCustom, Thumb02Callback, this);
-		}
+	u16 l_arm = m_model->dcast_PKinematics()->LL_BoneID("l_clavicle");
+	if(l_arm != BI_NONE) {
+		m_model->dcast_PKinematics()->LL_GetBoneInstance(l_arm).set_callback(bctCustom, [](CBoneInstance* B) {g_player_hud->LeftArmCallback(B); }, NULL);
 	}
 
 	auto& _sect = pSettings->r_section(player_hud_sect);
@@ -984,17 +964,6 @@ void player_hud::update_inertion(Fmatrix& trans)
 		origin.mad							(xform.i,	-pitch * inertion.PitchOffsetR);
 		origin.mad							(xform.j,	-pitch * inertion.PitchOffsetN);
 	}
-}
-
-bool player_hud::inertion_allowed()
-{
-	attachable_hud_item* hi = m_attached_items[0];
-	if (hi)
-	{
-		bool res = (hi->m_parent_hud_item->HudInertionEnabled() && hi->m_parent_hud_item->HudInertionAllowed());
-		return	res;
-	}
-	return true;
 }
 
 
@@ -1465,106 +1434,4 @@ void player_hud::animator_fx_play(const shared_str& anim_name, u16 place_idx, u1
 			}break;
 		}
 	}
-}
-
-void player_hud::Thumb0Callback(CBoneInstance* B)
-{
-	player_hud* P = static_cast<player_hud*>(B->callback_param());
-
-	Fvector& target = P->target_thumb0rot;
-	Fvector& current = P->thumb0rot;
-
-	if (!target.similar(current))
-	{
-		Fvector diff[2];
-		diff[0] = target;
-		diff[0].sub(current);
-		diff[0].mul(Device.fTimeDelta / .1f);
-		current.add(diff[0]);
-	}
-	else
-		current.set(target);
-
-	Fmatrix rotation;
-	rotation.identity();
-	rotation.rotateX(current.x);
-
-	Fmatrix rotation_y;
-	rotation_y.identity();
-	rotation_y.rotateY(current.y);
-	rotation.mulA_43(rotation_y);
-
-	rotation_y.identity();
-	rotation_y.rotateZ(current.z);
-	rotation.mulA_43(rotation_y);
-
-	B->mTransform.mulB_43(rotation);
-}
-
-void player_hud::Thumb01Callback(CBoneInstance* B)
-{
-	player_hud* P = static_cast<player_hud*>(B->callback_param());
-
-	Fvector& target = P->target_thumb01rot;
-	Fvector& current = P->thumb01rot;
-
-	if (!target.similar(current))
-	{
-		Fvector diff[2];
-		diff[0] = target;
-		diff[0].sub(current);
-		diff[0].mul(Device.fTimeDelta / .1f);
-		current.add(diff[0]);
-	}
-	else
-		current.set(target);
-
-	Fmatrix rotation;
-	rotation.identity();
-	rotation.rotateX(current.x);
-
-	Fmatrix rotation_y;
-	rotation_y.identity();
-	rotation_y.rotateY(current.y);
-	rotation.mulA_43(rotation_y);
-
-	rotation_y.identity();
-	rotation_y.rotateZ(current.z);
-	rotation.mulA_43(rotation_y);
-
-	B->mTransform.mulB_43(rotation);
-}
-
-void player_hud::Thumb02Callback(CBoneInstance* B)
-{
-	player_hud* P = static_cast<player_hud*>(B->callback_param());
-
-	Fvector& target = P->target_thumb02rot;
-	Fvector& current = P->thumb02rot;
-
-	if (!target.similar(current))
-	{
-		Fvector diff[2];
-		diff[0] = target;
-		diff[0].sub(current);
-		diff[0].mul(Device.fTimeDelta / .1f);
-		current.add(diff[0]);
-	}
-	else
-		current.set(target);
-
-	Fmatrix rotation;
-	rotation.identity();
-	rotation.rotateX(current.x);
-
-	Fmatrix rotation_y;
-	rotation_y.identity();
-	rotation_y.rotateY(current.y);
-	rotation.mulA_43(rotation_y);
-
-	rotation_y.identity();
-	rotation_y.rotateZ(current.z);
-	rotation.mulA_43(rotation_y);
-
-	B->mTransform.mulB_43(rotation);
 }

@@ -26,7 +26,6 @@
 #include "UITaskWnd.h"
 #include "UIRankingWnd.h"
 #include "UILogsWnd.h"
-#include "UIEncyclopediaWnd.h"
 
 #define PDA_XML		"pda.xml"
 
@@ -39,7 +38,6 @@ CUIPdaWnd::CUIPdaWnd()
 	pUITaskWnd       = nullptr;
 //-	pUIFactionWarWnd = nullptr;
 	pUIRankingWnd    = nullptr;
-	pUIEncyclopediaWnd = nullptr;
 	pUILogsWnd       = nullptr;
 	m_hint_wnd       = nullptr;
 	Init();
@@ -51,7 +49,6 @@ CUIPdaWnd::~CUIPdaWnd()
 //-	delete_data( pUIFactionWarWnd );
 	delete_data( pUIRankingWnd );
 	delete_data( pUILogsWnd );
-	delete_data(pUIEncyclopediaWnd);
 	delete_data( m_hint_wnd );
 	delete_data( UINoice );
 }
@@ -80,29 +77,23 @@ void CUIPdaWnd::Init()
 	m_hint_wnd				= UIHelper::CreateHint( uiXml, "hint_wnd" );
 
 
-	m_battery_bar = new CUIProgressBar();
-	m_battery_bar->SetAutoDelete(true);
-	AttachChild(m_battery_bar);
-	CUIXmlInit::InitProgressBar(uiXml, "battery_bar", 0, m_battery_bar);
-	m_battery_bar->Show(true);
-
-	pUITaskWnd					= new CUITaskWnd();
-	pUITaskWnd->hint_wnd		= m_hint_wnd;
-	pUITaskWnd->Init			();
+	if ( IsGameTypeSingle() )
+	{
+		pUITaskWnd					= new CUITaskWnd();
+		pUITaskWnd->hint_wnd		= m_hint_wnd;
+		pUITaskWnd->Init			();
 
 //-		pUIFactionWarWnd				= new CUIFactionWarWnd();
 //-		pUIFactionWarWnd->hint_wnd		= m_hint_wnd;
 //-		pUIFactionWarWnd->Init			();
 
-	pUIRankingWnd					= new CUIRankingWnd();
-	pUIRankingWnd->Init				();
+		pUIRankingWnd					= new CUIRankingWnd();
+		pUIRankingWnd->Init				();
 
-	pUILogsWnd						= new CUILogsWnd();
-	pUILogsWnd->Init				();
+		pUILogsWnd						= new CUILogsWnd();
+		pUILogsWnd->Init				();
 
-	pUIEncyclopediaWnd				= new CUIEncyclopediaWnd();
-	pUIEncyclopediaWnd->Init		();
-
+	}
 
 	UITabControl					= new CUITabControl();
 	UITabControl->SetAutoDelete		(true);
@@ -173,8 +164,6 @@ void CUIPdaWnd::Update()
 	m_pActiveDialog->Update();
 	m_clock->TextItemControl().SetText(InventoryUtilities::GetGameTimeAsString(InventoryUtilities::etpTimeToMinutes).c_str());
 
-	m_battery_bar->SetProgressPos(m_power);
-
 	Device.seqParallel.push_back(xr_make_delegate(pUILogsWnd, &CUILogsWnd::PerformWork));
 }
 
@@ -196,31 +185,16 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 //-	{
 //-		m_pActiveDialog = pUIFactionWarWnd;
 //-	}
-	/*
-	if (IsGameTypeSingle())
+	else if ( section == "eptRanking" )
 	{
-	    if (section == "eptRanking")
-	{
-		    m_pActiveDialog = pUIRankingWnd;
-	    }
-	}
-	*/
-	else if (section == "eptRanking")
-	{
-		if (IsGameTypeSingle()) {
-			m_pActiveDialog = pUIRankingWnd;
-		}
+		m_pActiveDialog = pUIRankingWnd;
 	}
 	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
 	}
-	else if (section == "eptEnc")
-	{
-		m_pActiveDialog = pUIEncyclopediaWnd;
-	}
 
-	R_ASSERT2                       (m_pActiveDialog, "active dialog is not initialized");
+	R_ASSERT						(m_pActiveDialog);
 	UIMainPdaFrame->AttachChild		(m_pActiveDialog);
 	m_pActiveDialog->Show			(true);
 
@@ -245,18 +219,9 @@ void CUIPdaWnd::SetActiveCaption()
 			string256 buf;
 			xr_strconcat(buf, m_caption_const.c_str(), cur );
 			SetCaption( buf );
-			UITabControl->Show(true);
-			m_clock->Show(true);
-			m_caption->Show(true);
-			m_battery_bar->Show(true);
 			return;
 		}
 	}
-
-	UITabControl->Show(false);
-	m_clock->Show(false);
-	m_caption->Show(false);
-	m_battery_bar->Show(false);
 }
 
 void CUIPdaWnd::Show_SecondTaskWnd( bool status )
@@ -329,7 +294,6 @@ void CUIPdaWnd::Reset()
 //-	if ( pUIFactionWarWnd )	pUITaskWnd->ResetAll();
 	if ( pUIRankingWnd )	pUIRankingWnd->ResetAll();
 	if ( pUILogsWnd )		pUILogsWnd->ResetAll();
-	if (pUIEncyclopediaWnd)		pUIEncyclopediaWnd->ResetAll();
 }
 
 void CUIPdaWnd::SetCaption( LPCSTR text )
@@ -373,26 +337,4 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	}	
 
 	return inherited::OnKeyboardAction(dik,keyboard_action);
-}
-
-void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
-{
-	if (type == pda_section::encyclopedia)
-	{
-		pUIEncyclopediaWnd->ReloadArticles();
-		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
-
-	}
-	/*else if (type == pda_section::quests && GameConstants::GetPDA_FlashingIconsQuestsEnabled())
-	{
-		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiPdaTask, true);
-	}*/
-}
-
-#include "../xrUI/UICursor.h"
-
-void CUIPdaWnd::ResetCursor()
-{
-	if (!last_cursor_pos.similar({ 0.f, 0.f }))
-		GetUICursor().SetUICursorPosition(last_cursor_pos);
 }

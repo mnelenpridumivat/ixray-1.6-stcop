@@ -20,8 +20,6 @@ ENGINE_API extern float psHUD_FOV_def;
 CHudItem::CHudItem()
 {
 	RenderHud					(TRUE);
-	EnableHudInertion(TRUE);
-	AllowHudInertion(TRUE);
 	m_bStopAtEndAnimIsRunning	= false;
 	m_current_motion_def		= nullptr;
 	m_started_rnd_anim_idx		= u8(-1);
@@ -216,7 +214,7 @@ void CHudItem::SendHiddenItem()
 	}
 }
 
-void CHudItem::UpdateHudAdditional(Fmatrix& trans)
+void CHudItem::UpdateHudAdditonal(Fmatrix& trans)
 {
 	const static bool isInertion = EngineExternal()[EEngineExternalGame::EnableWeaponInertion];
 	if (!isInertion)
@@ -692,25 +690,6 @@ attachable_hud_item* CHudItem::HudItemData()
 		return hi;
 
 	return nullptr;
-}
-
-BOOL CHudItem::ParentIsActor()
-{
-	CObject* O = object().H_Parent();
-	if (!O)
-		return false;
-
-	CEntityAlive* EA = smart_cast<CEntityAlive*>(O);
-	if (!EA)
-		return false;
-
-	return !!EA->cast_actor();
-}
-
-void CHudItem::ReplaceHudSection(LPCSTR hud_section)
-{
-	if (hud_section != hud_sect)
-		hud_sect = hud_section;
 }
 
 float CHudItem::GetHudFov()

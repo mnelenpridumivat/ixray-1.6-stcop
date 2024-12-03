@@ -311,8 +311,6 @@ public:
 	bool	install_upgrade				( LPCSTR section );
 	void	pre_install_upgrade			();
 
-	float	m_fLowestBatteryCharge;
-
 #ifdef DEBUG	
 	void	log_upgrades				();
 #endif // DEBUG

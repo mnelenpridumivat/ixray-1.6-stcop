@@ -33,6 +33,7 @@ class UI_API CDialogHolder :
 
 	void					StartMenu						(CUIDialogWnd* pDialog, bool bDoHideIndicators);
 	void					StopMenu						(CUIDialogWnd* pDialog);
+	void					SetMainInputReceiver			(CUIDialogWnd* ir, bool _find_remove);
 protected:
 	void					DoRenderDialogs					();
 	void					CleanInternals					();
@@ -57,6 +58,5 @@ public:
 	virtual bool 			IR_UIOnMouseMove				(int dx, int dy);
 	virtual bool 			IR_UIOnMouseWheel				(int direction);
 	virtual bool 			IR_UIOnKeyboardHold				(int dik);
-	void			SetMainInputReceiver(CUIDialogWnd* ir, bool _find_remove);
 
 };

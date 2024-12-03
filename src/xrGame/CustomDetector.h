@@ -44,7 +44,7 @@ public:
 	virtual void	OnStateSwitch		(u32 S);
 	virtual void	OnAnimationEnd		(u32 state);
 	virtual	void	UpdateXForm			();
-	virtual void	UpdateHudAdditional	(Fmatrix& trans);
+	virtual void	UpdateHudAdditonal	(Fmatrix& trans);
 	void			ToggleDetector		(bool bFastMode, bool switching = false);
 	void			HideDetector		(bool bFastMode);
 	void			ShowDetector		(bool bFastMode);
