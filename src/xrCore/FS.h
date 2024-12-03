@@ -5,8 +5,6 @@
 #ifndef fsH
 #define fsH
 
-#include "log.h"
-
 #define CFS_CompressMark	(1ul << 31ul)
 #define CFS_HeaderChunkID	(666)
 
@@ -216,94 +214,6 @@ public:
 	IC	void		rewind		()			{	impl().seek(0); }
 
 	u32 			find_chunk  (u32 ID, BOOL* bCompressed);
-
-	u32				find_chunk_thm(const u32 ID, const char* dbg_name, bool* is_valid = nullptr)
-	{
-		u32 dwSize{}, dwType{};
-		bool success{};
-		if (m_last_pos != 0)
-		{
-			impl().seek(m_last_pos);
-			dwType = r_u32();
-			dwSize = r_u32();
-			if ((dwType & (~CFS_CompressMark)) == ID)
-			{
-				success = true;
-			}
-		}
-		if (!success)
-		{
-			rewind();
-			while (!eof())
-			{
-				dwType = r_u32();
-				dwSize = r_u32();
-				if ((dwType & (~CFS_CompressMark)) == ID)
-				{
-					success = true;
-					break;
-				}
-				else
-				{
-					if ((ID & 0x7ffffff0) == 0x810) // is it a thm chunk ID?
-					{
-						const u32 pos = (u32)impl().tell();
-						const u32 size = (u32)impl().length();
-						u32 length = dwSize;
-						if (pos + length != size) // not the last chunk in the file?
-						{
-							bool ok = true;
-							if (pos + length > size - 8) {
-								ok = false; // size too large?
-							}
-							if (ok)
-							{
-								impl().seek(pos + length);
-								if ((r_u32() & 0x7ffffff0) != 0x810) {
-									ok = false; // size too small?
-								}
-							}
-							if (!ok) // size incorrect?
-							{
-								length = 0;
-								while (pos + length < size) // find correct size, up to eof
-								{
-									impl().seek(pos + length);
-									if (pos + length <= size - 8 && (r_u32() & 0x7ffffff0) == 0x810) {
-										break; // found start of next section
-									}
-									length++;
-								}
-								if (is_valid) {
-									*is_valid = false;
-								}
-								Msg("!![%s] THM [%s] chunk [%u] fixed, wrong size = [%u], correct size = [%u]", __FUNCTION__, dbg_name, ID, dwSize, length);
-							}
-						}
-						impl().seek(pos); // go back to beginning of chunk
-						dwSize = length; // use correct(ed) size
-					}
-					impl().advance(dwSize);
-				}
-			}
-			if (!success)
-			{
-				m_last_pos = 0;
-				return 0;
-			}
-		}
-		VERIFY((u32)impl().tell() + dwSize <= (u32)impl().length());
-		const u32 dwPos = (u32)impl().tell();
-		if (dwPos + dwSize < (u32)impl().length())
-		{
-			m_last_pos = dwPos + dwSize;
-		}
-		else
-		{
-			m_last_pos = 0;
-		}
-		return dwSize;
-	}
 	
 	IC	BOOL		r_chunk		(u32 ID, void *dest)	// чтение XR Chunk'ов (4b-ID,4b-size,??b-data)
 	{
@@ -367,16 +277,7 @@ public:
 	IC void			seek		(int ptr)		{	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
 	IC int			length		()	const		{	return Size;			};
 	IC void*		pointer		()	const		{	return &(data[Pos]);	};
-	IC void			advance		(int cnt)		{	
-		Pos+=cnt;
-#ifdef DEBUG
-		if (!((Pos <= Size) && (Pos >= 0))) {
-			Msg("! Error advance! Pos+cnt<=Size");
-		}
-#else 
-		VERIFY((Pos <= Size) && (Pos >= 0));
-#endif
-	};
+	IC void			advance(int cnt) { Pos += cnt; VERIFY((Pos <= Size) && (Pos >= 0)); };
 
 public:
 	void			r			(void *p,int cnt);

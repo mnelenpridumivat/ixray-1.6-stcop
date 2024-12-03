@@ -66,9 +66,9 @@ xr_token					tbmode_token							[ ]={
 	{ 0,					0											}
 };
 
-void STextureParams::Load(IReader& F, const char* dbg_name, bool* is_valid)
+void STextureParams::Load(IReader& F)
 {
-    bool FoundedChunk = !!F.find_chunk_thm(THM_CHUNK_TEXTUREPARAM, dbg_name, is_valid);
+    bool FoundedChunk = !!F.find_chunk(THM_CHUNK_TEXTUREPARAM);
     R_ASSERT2(FoundedChunk, "Not found chunk THM_CHUNK_TEXTUREPARAM");
 
     F.r					(&fmt,sizeof(ETFormat));
@@ -80,21 +80,21 @@ void STextureParams::Load(IReader& F, const char* dbg_name, bool* is_valid)
     width		= F.r_u32();
     height		= F.r_u32();
 
-    if (F.find_chunk_thm(THM_CHUNK_TEXTURE_TYPE, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_TEXTURE_TYPE)) {
         type	= (ETType)F.r_u32();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_DETAIL_EXT, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_DETAIL_EXT)) {
         F.r_stringZ(detail_name);
         detail_scale = F.r_float();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_MATERIAL, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_MATERIAL)) {
     	material		= (ETMaterial)F.r_u32		();
 	    material_weight = F.r_float	();
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_BUMP, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_BUMP)) {
 	    bump_virtual_height	= F.r_float				();
 	    bump_mode			= (ETBumpMode)F.r_u32	();
         if (bump_mode<STextureParams::tbmNone){
@@ -103,11 +103,11 @@ void STextureParams::Load(IReader& F, const char* dbg_name, bool* is_valid)
     	F.r_stringZ			(bump_name);
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_EXT_NORMALMAP, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_EXT_NORMALMAP)) {
         F.r_stringZ(ext_normal_map_name);
     }
 
-    if (F.find_chunk_thm(THM_CHUNK_FADE_DELAY, dbg_name, is_valid)) {
+    if (F.find_chunk(THM_CHUNK_FADE_DELAY)) {
         fade_delay = F.r_u8();
     }
 }
