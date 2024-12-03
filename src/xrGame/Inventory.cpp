@@ -416,12 +416,26 @@ bool CInventory::Slot(u16 slot_id, PIItem pIItem, bool bNotActivate, bool strict
 		m_slots[pIItem->CurrSlot()].m_pIItem = nullptr;
 	}
 
-	if (((m_iActiveSlot==slot_id) ||(m_iActiveSlot==NO_ACTIVE_SLOT) && m_iNextActiveSlot==NO_ACTIVE_SLOT) && (!bNotActivate))
 	{
+		/*bool MainCondition = [&]()->bool {
+			bool ActivateBySameSlot = m_iActiveSlot == slot_id;
+			bool ActivateBySlots = [&]()->bool {
+				bool IsNotActiveSlot = m_iActiveSlot == NO_ACTIVE_SLOT;
+				bool IsNextNotActiveSlot = m_iNextActiveSlot == NO_ACTIVE_SLOT;
+				return IsNotActiveSlot && IsNextNotActiveSlot;
+				}();
+			return ActivateBySameSlot || ActivateBySlots;
+			}();
+		bool InverseNotActivate = !bNotActivate;*/
+
+		if (((m_iActiveSlot == slot_id) || (m_iActiveSlot == NO_ACTIVE_SLOT) && m_iNextActiveSlot == NO_ACTIVE_SLOT) && (!bNotActivate))
+		//if(MainCondition && InverseNotActivate)
+		{
 #ifdef DEBUG
-		Msg("---To Slot: activating slot [%d], Frame[%d]", slot_id, Device.dwFrame);
+			Msg("---To Slot: activating slot [%d], Frame[%d]", slot_id, Device.dwFrame);
 #endif // #ifdef DEBUG
-		Activate				(slot_id);
+			Activate(slot_id);
+		}
 	}
 	SInvItemPlace p					= pIItem->m_ItemCurrPlace;
 	m_pOwner->OnItemSlot			(pIItem, pIItem->m_ItemCurrPlace);

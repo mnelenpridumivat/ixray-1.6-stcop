@@ -14,6 +14,11 @@ shared_str& __cdecl shared_str::printf(const char* format, ...)
 	return 		(shared_str&)*this;
 }
 
+inline char shared_str::operator[](size_t index) const {
+	VERIFY(index < p_->dwLength);
+	return p_->value[index];
+}
+
 struct str_container_impl
 {
 	static const u32 buffer_size = 1024 * 256;

@@ -92,6 +92,8 @@ public:
 	void _set(shared_str const& rhs) { str_value* v = rhs.p_; if (0 != v) v->dwReference++; _dec(); p_ = v; }
 
 	const str_value* _get()	const { return p_; }
+
+	inline char operator[](size_t index) const;
 public:
 	// construction
 	shared_str() { p_ = 0; }
