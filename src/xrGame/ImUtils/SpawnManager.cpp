@@ -748,7 +748,7 @@ void RenderSpawnManagerWindow() {
 				ImGui::EndTabItem();
 			}
 
-			if (ImGui::BeginTabItem("Multiplayer Stuff"))
+			if (ImGui::BeginTabItem("Mp Stuffs"))
 			{
 				size_t number_imgui{};
 				SectionStatistics(imgui_spawn_manager.MpStuffSections);

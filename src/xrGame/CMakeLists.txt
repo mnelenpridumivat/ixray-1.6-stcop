@@ -84,6 +84,8 @@ file(GLOB_RECURSE XGM_SOURCE_AI_POLT_ABILITIES_FILES "ai/monsters/abilities/polt
 
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
+file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
+
 # Source groups
 source_group("core" FILES ${XGM_SOURCE_ALL_FILES})
 source_group("ui" FILES ${XGM_SOURCE_UI_FILES})

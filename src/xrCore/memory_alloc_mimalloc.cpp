@@ -6,18 +6,18 @@
 
 void* CMemAllocMimalloc::alloc(size_t size)
 {
-	return mi_malloc(size);
+	return 0;// mi_malloc(size);
 }
 
 void* CMemAllocMimalloc::realloc(void* p, size_t size)
 {
-	void* result = ::mi_realloc(p, size);
+	void* result = 0;// ::mi_realloc(p, size);
 	return (result);
 }
 
 void CMemAllocMimalloc::free(void* p)
 {
-	::mi_free(p);
+	//::mi_free(p);
 }
 
 CMemAllocMimalloc* CMemAllocMimalloc::Create()

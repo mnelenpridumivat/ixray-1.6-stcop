@@ -538,7 +538,7 @@ bool CHudItem::HudAnimationExist(LPCSTR anim_name)
 	{
 		string256 anim_name_r;
 		bool is_16x9 = UI().is_widescreen();
-		u16 attach_place_idx = pSettings->r_u16(HudItemData()->m_sect_name, "attach_place_idx");
+		u16 attach_place_idx = READ_IF_EXISTS(pSettings, r_u16, HudItemData()->m_sect_name, "attach_place_idx", 0);
 		xr_sprintf(anim_name_r, "%s%s", anim_name, ((attach_place_idx == 1) && is_16x9) ? "_16x9" : "");
 		player_hud_motion* anm = HudItemData()->m_hand_motions.find_motion(anim_name_r);
 		if (anm)
@@ -559,7 +559,13 @@ bool CHudItem::HudAnimationExist(LPCSTR anim_name)
 
 u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 state)
 {
-	u32 anim_time					= PlayHUDMotion_noCB(M, bMixIn);
+	if (HudItemData() && !HudAnimationExist(M.c_str()))
+	{
+		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M);
+		return 0;
+	}
+
+	u32 anim_time = PlayHUDMotion_noCB(M.c_str(), bMixIn);
 	if (anim_time>0)
 	{
 		m_bStopAtEndAnimIsRunning	= true;

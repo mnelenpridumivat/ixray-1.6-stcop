@@ -88,6 +88,12 @@ void player_hud_motion_container::load(IKinematicsAnimated* model, const shared_
 					xr_sprintf				(buff,"%s%d",pm->m_base_name.c_str(),i);		
 
 				motion_ID				= model->ID_Cycle_Safe(buff);
+				if (!motion_ID.valid() && i == 0)
+				{
+					motion_ID = model->ID_Cycle_Safe("hand_idle_doun");
+					Msg("! motion not found[% s]", pm->m_base_name.c_str());
+				}
+
 				if(motion_ID.valid())
 				{
 					pm->m_animations.resize			(pm->m_animations.size()+1);
@@ -95,6 +101,7 @@ void player_hud_motion_container::load(IKinematicsAnimated* model, const shared_
 					pm->m_animations.back().name	= buff;
 				}
 			}
+
 			R_ASSERT2(pm->m_animations.size(), make_string<const char*>("motion not found [%s]", pm->m_base_name.c_str()));
 		}
 	}
@@ -441,7 +448,7 @@ void attachable_hud_item::load(const shared_str& sect_name)
 	const shared_str& visual_name = pSettings->r_string(sect_name, "item_visual");
 	m_model						 = smart_cast<IKinematics*>(::Render->model_Create(visual_name.c_str()));
 
-	m_attach_place_idx			= pSettings->r_u16(sect_name, "attach_place_idx");
+	m_attach_place_idx = READ_IF_EXISTS(pSettings, r_u16, sect_name, "attach_place_idx", 0);
 	m_measures.load				(sect_name, m_model);
 }
 
@@ -615,6 +622,8 @@ void player_hud::load(const shared_str& player_hud_sect)
 	auto& _sect = pSettings->r_section(player_hud_sect);
 	auto _b = _sect.Data.begin();
 	auto _e = _sect.Data.end();
+
+	m_ancors.clear();
 
 	for(; _b != _e; ++_b) 
 	{
