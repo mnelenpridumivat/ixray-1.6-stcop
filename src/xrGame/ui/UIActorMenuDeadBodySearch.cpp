@@ -109,7 +109,7 @@ void CUIActorMenu::InitDeadBodySearchMode()
 			NET_Packet					P;
 			CGameObject::u_EventGen		(P,GE_INFO_TRANSFER, m_pActorInvOwner->object_id());
 			P.w_u16						(0);
-			P.w_stringZ					(*it_);
+			P.w_stringZ					(it_->info_id);
 			P.w_u8						(1);
 			CGameObject::u_EventSend	(P);
 		}

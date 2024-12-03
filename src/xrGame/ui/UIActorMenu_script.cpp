@@ -179,12 +179,12 @@ void CUIActorMenu::script_register(lua_State *L)
 				.def(constructor<>())
 				.def("IsShown", &CUIPdaWnd::IsShown)
 				.def("ShowDialog", &CUIPdaWnd::ShowDialog)
-				.def("HideDialog", &CUIPdaWnd::HideDialog)
-				.def("SetActiveSubdialog", &CUIPdaWnd::SetActiveSubdialog_script)
+				.def("HideDialog", &CUIPdaWnd::HideDialog),
+				/*.def("SetActiveSubdialog", &CUIPdaWnd::SetActiveSubdialog_script)
 				.def("SetActiveDialog", &CUIPdaWnd::SetActiveDialog)
 				.def("GetActiveDialog", &CUIPdaWnd::GetActiveDialog)
 				.def("GetActiveSection", &CUIPdaWnd::GetActiveSection)
-				.def("GetTabControl", &CUIPdaWnd::GetTabControl),
+				.def("GetTabControl", &CUIPdaWnd::GetTabControl),*/
 
 				class_< CUIMainIngameWnd, CUIWindow>("CUIMainIngameWnd")
 				.def(constructor<>())

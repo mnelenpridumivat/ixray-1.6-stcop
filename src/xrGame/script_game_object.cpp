@@ -396,19 +396,24 @@ void CScriptGameObject::SetCondition	(float val)
 
 float CScriptGameObject::GetPsyFactor() const
 {
-	CPda* pda = smart_cast<CPda*>(&object());
+	ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,
+		"CSciptEntity : GetPsyFactor not implemented!");
+	return 0.0f;
+	/*CPda* pda = smart_cast<CPda*>(&object());
 	if (!pda)
 	{
 		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,
 			"CSciptEntity : cannot access class member GetPsyFactor!");
 		return 0.f;
 	}
-	return (pda->m_psy_factor);
+	return (pda->m_psy_factor);*/
 }
 
 void CScriptGameObject::SetPsyFactor(float val)
 {
-	CPda* pda = smart_cast<CPda*>(&object());
+	ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,
+		"CSciptEntity : GetPsyFactor not implemented!");
+	/*CPda* pda = smart_cast<CPda*>(&object());
 	if (!pda)
 	{
 		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,
@@ -417,7 +422,7 @@ void CScriptGameObject::SetPsyFactor(float val)
 	}
 	pda->m_psy_factor = val;
 
-	clamp(pda->m_psy_factor, 0.0f, 1.0f);
+	clamp(pda->m_psy_factor, 0.0f, 1.0f);*/
 }
 
 void CScriptGameObject::eat				(CScriptGameObject *item)
