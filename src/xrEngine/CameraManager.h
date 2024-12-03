@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CameraDefs.h"
-#include "../xrGame/CameraEffector.h"
 
 struct ENGINE_API SPPInfo {
 	struct SColor{
@@ -75,7 +74,7 @@ using EffectorCamIt = EffectorCamVec::iterator;
 using EffectorPPVec = xr_vector<CEffectorPP*>;
 using EffectorPPIt = EffectorPPVec::iterator;
 
-//#define			effCustomEffectorStartID	10000
+#define			effCustomEffectorStartID	10000
 
 struct SCamEffectorInfo;
 class ENGINE_API CCameraManager

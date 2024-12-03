@@ -18,13 +18,6 @@
 #include "ActorEffector.h"
 #include "CustomOutfit.h"
 #include "ActorHelmet.h"
-#include "Weapon.h"
-#include "../xrPhysics/ElevatorState.h"
-#include "player_hud.h"
-#include "../xrEngine/GameplayParametersManager.h"
-
-std::atomic<bool> isHidingInProgressTorch(false);
-std::atomic<bool> processSwitchNeeded(false);
 
 static const float		TORCH_INERTION_CLAMP		= PI_DIV_6;
 static const float		TORCH_INERTION_SPEED_MAX	= 7.5f;
@@ -36,8 +29,6 @@ static const float		OPTIMIZATION_DISTANCE		= 100.f;
 static bool stalker_use_dynamic_lights	= false;
 
 ENGINE_API int g_current_renderer;
-
-extern bool g_block_all_except_movement;
 
 CTorch::CTorch(void) 
 {
@@ -64,11 +55,6 @@ CTorch::CTorch(void)
 		TORCH_OFFSET.x = 0;
 		TORCH_OFFSET.z = 0;
 	}
-
-	m_iAnimLength = 0;
-	m_iActionTiming = 0;
-	m_bActivated = false;
-	m_bSwitched = false;
 }
 
 CTorch::~CTorch() 
@@ -197,62 +183,6 @@ void CTorch::Switch()
 	}
 }
 
-void CTorch::ProcessSwitch()
-{
-	if (OnClient())
-		return;
-
-	bool bActive = !m_switched_on;
-
-	if (!GameplayParametersManager::GetInstance().Test(GameplayParametersManager::GameplayFlags::use_item_animations)) {
-		Switch(bActive);
-		return;
-	}
-
-	LPCSTR anim_sect = READ_IF_EXISTS(pSettings, r_string, "actions_animations", "switch_torch_section", nullptr);
-
-	CWeapon* Wpn = smart_cast<CWeapon*>(Actor()->inventory().ActiveItem());
-
-	if (Wpn && !(Wpn->GetState() == CWeapon::eIdle))
-		return;
-
-	m_bActivated = true;
-
-	int anim_timer = READ_IF_EXISTS(pSettings, r_u32, anim_sect, "anim_timing", 0);
-
-	g_block_all_except_movement = true;
-	g_actor_allow_ladder = false;
-
-	LPCSTR use_cam_effector = READ_IF_EXISTS(pSettings, r_string, anim_sect, !Wpn ? "anim_camera_effector" : "anim_camera_effector_weapon", nullptr);
-	float effector_intensity = READ_IF_EXISTS(pSettings, r_float, anim_sect, "cam_effector_intensity", 1.0f);
-	float anim_speed = READ_IF_EXISTS(pSettings, r_float, anim_sect, "anim_speed", 1.0f);
-
-	if (pSettings->line_exist(anim_sect, "anm_use"))
-	{
-		g_player_hud->script_anim_play(!Actor()->inventory().GetActiveSlot() ? 2 : 1, anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", true, anim_speed);
-
-		if (use_cam_effector)
-			g_player_hud->PlayBlendAnm(use_cam_effector, 0, anim_speed, effector_intensity, false);
-
-		m_iAnimLength = Device.dwTimeGlobal + g_player_hud->motion_length_script(anim_sect, !Wpn ? "anm_use" : "anm_use_weapon", anim_speed);
-	}
-
-	if (pSettings->line_exist(anim_sect, "snd_using"))
-	{
-		if (m_action_anim_sound._feedback())
-			m_action_anim_sound.stop();
-
-		shared_str snd_name = pSettings->r_string(anim_sect, "snd_using");
-		m_action_anim_sound.create(snd_name.c_str(), st_Effect, sg_SourceType);
-		m_action_anim_sound.play(nullptr, sm_2D);
-	}
-
-	m_iActionTiming = Device.dwTimeGlobal + anim_timer;
-
-	m_bSwitched = false;
-	Actor()->m_bActionAnimInProcess = true;
-}
-
 void CTorch::Switch(bool light_on)
 {
 	m_switched_on			= light_on;
@@ -279,36 +209,6 @@ void CTorch::Switch(bool light_on)
 bool CTorch::torch_active					() const
 {
 	return (m_switched_on);
-}
-
-void CTorch::UpdateUseAnim()
-{
-	if (OnClient())
-		return;
-
-	bool IsActorAlive = g_pGamePersistent->GetActorAliveStatus();
-	bool bActive = !m_switched_on;
-
-	if ((m_iActionTiming <= Device.dwTimeGlobal && !m_bSwitched) && IsActorAlive)
-	{
-		m_iActionTiming = Device.dwTimeGlobal;
-		Switch(bActive);
-		m_bSwitched = true;
-	}
-
-	if (m_bActivated)
-	{
-		if ((m_iAnimLength <= Device.dwTimeGlobal) || !IsActorAlive)
-		{
-			m_iAnimLength = Device.dwTimeGlobal;
-			m_iActionTiming = Device.dwTimeGlobal;
-			m_action_anim_sound.stop();
-			g_block_all_except_movement = false;
-			g_actor_allow_ladder = true;
-			Actor()->m_bActionAnimInProcess = false;
-			m_bActivated = false;
-		}
-	}
 }
 
 BOOL CTorch::net_Spawn(CSE_Abstract* DC) 
@@ -398,16 +298,7 @@ void CTorch::UpdateCL()
 {
 	PROF_EVENT_DYNAMIC(cNameSect_str())
 	inherited::UpdateCL			();
-
-	if (processSwitchNeeded.load())
-	{
-		ProcessSwitch();
-		processSwitchNeeded.store(false);
-	}
-
-	if (Actor()->m_bActionAnimInProcess && m_bActivated)
-		UpdateUseAnim();
-
+	
 	if (!m_switched_on)			return;
 
 	CBoneInstance			&BI = PKinematics(Visual())->LL_GetBoneInstance(guid_bone);

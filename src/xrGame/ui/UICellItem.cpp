@@ -10,8 +10,6 @@
 #include "../../xrUI/Widgets/UIProgressBar.h"
 
 #include "CustomOutfit.h"
-#include <UIGameCustom.h>
-#include "UIActorMenu.h"
 
 CUICellItem* CUICellItem::m_mouse_selected_item = nullptr;
 
@@ -235,7 +233,6 @@ bool CUICellItem::OnMouseAction(float x, float y, EUIMessages mouse_action)
 	else if ( mouse_action == WINDOW_LBUTTON_DB_CLICK )
 	{
 		GetMessageTarget()->SendMessage( this, DRAG_DROP_ITEM_DB_CLICK, nullptr );
-		CurrentGameUI()->ActorMenu().SetCurrentConsumable(this);
 		return true;
 	}
 	else if ( mouse_action == WINDOW_RBUTTON_DOWN )

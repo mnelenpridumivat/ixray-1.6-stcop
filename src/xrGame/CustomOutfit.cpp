@@ -24,10 +24,6 @@ CCustomOutfit::CCustomOutfit()
 	m_boneProtection = new SBoneProtections();
 	m_artefact_count = 0;
 	m_BonesProtectionSect = nullptr;
-	m_bHasLSS = false;
-	m_NightVisionType = 0;
-	m_fNightVisionLumFactor = 0.0f;
-	m_b_HasGlass = false;
 }
 
 CCustomOutfit::~CCustomOutfit() 
@@ -117,13 +113,6 @@ void CCustomOutfit::Load(LPCSTR section)
 
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
-
-	m_bHasLSS = READ_IF_EXISTS(pSettings, r_bool, section, "has_ls_system", false);
-
-	m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
-	m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
-
-	m_b_HasGlass = READ_IF_EXISTS(pSettings, r_bool, section, "has_glass", false);
 }
 
 void CCustomOutfit::ReloadBonesProtection()
@@ -331,8 +320,6 @@ bool CCustomOutfit::install_upgrade_impl( LPCSTR section, bool test )
 	if ( result2 && !test )
 	{
 		m_NightVisionSect._set( str );
-		m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
-		m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
 	}
 	result |= result2;
 

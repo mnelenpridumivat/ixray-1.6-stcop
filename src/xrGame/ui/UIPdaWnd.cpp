@@ -36,128 +36,134 @@ void RearrangeTabButtons(CUITabControl* pTab);
 
 CUIPdaWnd::CUIPdaWnd()
 {
-	pUITaskWnd = nullptr;
-	//-	pUIFactionWarWnd = nullptr;
-	pUIRankingWnd = nullptr;
-	pUILogsWnd = nullptr;
+	pUITaskWnd       = nullptr;
+//-	pUIFactionWarWnd = nullptr;
+	pUIRankingWnd    = nullptr;
 	pUIEncyclopediaWnd = nullptr;
-	m_hint_wnd = nullptr;
+	pUILogsWnd       = nullptr;
+	m_hint_wnd       = nullptr;
 	Init();
 }
 
 CUIPdaWnd::~CUIPdaWnd()
 {
-	delete_data(pUITaskWnd);
-	//-	delete_data( pUIFactionWarWnd );
-	delete_data(pUIRankingWnd);
-	delete_data(pUILogsWnd);
+	delete_data( pUITaskWnd );
+//-	delete_data( pUIFactionWarWnd );
+	delete_data( pUIRankingWnd );
+	delete_data( pUILogsWnd );
 	delete_data(pUIEncyclopediaWnd);
-	delete_data(m_hint_wnd);
-	delete_data(UINoice);
+	delete_data( m_hint_wnd );
+	delete_data( UINoice );
 }
 
 void CUIPdaWnd::Init()
 {
 	CUIXml					uiXml;
-	uiXml.Load(CONFIG_PATH, UI_PATH, PDA_XML);
+	uiXml.Load				(CONFIG_PATH, UI_PATH, PDA_XML);
 
-	m_pActiveDialog = nullptr;
-	m_sActiveSection = "";
+	m_pActiveDialog			= nullptr;
+	m_sActiveSection		= "";
 
-	CUIXmlInit::InitWindow(uiXml, "main", 0, this);
+	CUIXmlInit::InitWindow	(uiXml, "main", 0, this);
 
-	UIMainPdaFrame = UIHelper::CreateStatic(uiXml, "background_static", this);
-	m_caption = UIHelper::CreateTextWnd(uiXml, "caption_static", this);
-	m_caption_const = (m_caption->GetText());
-	m_clock = UIHelper::CreateTextWnd(uiXml, "clock_wnd", this);
-	/*
-		m_anim_static			= new CUIAnimatedStatic();
-		AttachChild				(m_anim_static);
-		m_anim_static->SetAutoDelete(true);
-		CUIXmlInit::InitAnimatedStatic(uiXml, "anim_static", 0, m_anim_static);
-	*/
-	m_btn_close = UIHelper::Create3tButton(uiXml, "close_button", this);
-	m_hint_wnd = UIHelper::CreateHint(uiXml, "hint_wnd");
-
-	pUITaskWnd = new CUITaskWnd();
-	pUITaskWnd->hint_wnd = m_hint_wnd;
-	pUITaskWnd->Init();
-
-	//-		pUIFactionWarWnd				= new CUIFactionWarWnd();
-	//-		pUIFactionWarWnd->hint_wnd		= m_hint_wnd;
-	//-		pUIFactionWarWnd->Init			();
-
-	pUIRankingWnd = new CUIRankingWnd();
-	pUIRankingWnd->Init();
-
-	pUILogsWnd = new CUILogsWnd();
-	pUILogsWnd->Init();
-
-	pUIEncyclopediaWnd = new CUIEncyclopediaWnd();
-	pUIEncyclopediaWnd->Init();
+	UIMainPdaFrame			= UIHelper::CreateStatic	( uiXml, "background_static", this );
+	m_caption				= UIHelper::CreateTextWnd	( uiXml, "caption_static", this );
+	m_caption_const			= ( m_caption->GetText() );
+	m_clock					= UIHelper::CreateTextWnd	( uiXml, "clock_wnd", this );
+/*
+	m_anim_static			= new CUIAnimatedStatic();
+	AttachChild				(m_anim_static);
+	m_anim_static->SetAutoDelete(true);
+	CUIXmlInit::InitAnimatedStatic(uiXml, "anim_static", 0, m_anim_static);
+*/
+	m_btn_close				= UIHelper::Create3tButton( uiXml, "close_button", this );
+	m_hint_wnd				= UIHelper::CreateHint( uiXml, "hint_wnd" );
 
 
-	UITabControl = new CUITabControl();
-	UITabControl->SetAutoDelete(true);
-	AttachChild(UITabControl);
-	CUIXmlInit::InitTabControl(uiXml, "tab", 0, UITabControl);
-	UITabControl->SetMessageTarget(this);
+	m_battery_bar = new CUIProgressBar();
+	m_battery_bar->SetAutoDelete(true);
+	AttachChild(m_battery_bar);
+	CUIXmlInit::InitProgressBar(uiXml, "battery_bar", 0, m_battery_bar);
+	m_battery_bar->Show(true);
 
-	UINoice = new CUIStatic();
-	UINoice->SetAutoDelete(true);
-	CUIXmlInit::InitStatic(uiXml, "noice_static", 0, UINoice);
+	pUITaskWnd					= new CUITaskWnd();
+	pUITaskWnd->hint_wnd		= m_hint_wnd;
+	pUITaskWnd->Init			();
 
-	//	RearrangeTabButtons		(UITabControl);
+//-		pUIFactionWarWnd				= new CUIFactionWarWnd();
+//-		pUIFactionWarWnd->hint_wnd		= m_hint_wnd;
+//-		pUIFactionWarWnd->Init			();
+
+	pUIRankingWnd					= new CUIRankingWnd();
+	pUIRankingWnd->Init				();
+
+	pUILogsWnd						= new CUILogsWnd();
+	pUILogsWnd->Init				();
+
+	pUIEncyclopediaWnd				= new CUIEncyclopediaWnd();
+	pUIEncyclopediaWnd->Init		();
+
+
+	UITabControl					= new CUITabControl();
+	UITabControl->SetAutoDelete		(true);
+	AttachChild						(UITabControl);
+	CUIXmlInit::InitTabControl		(uiXml, "tab", 0, UITabControl);
+	UITabControl->SetMessageTarget	(this);
+
+	UINoice					= new CUIStatic();
+	UINoice->SetAutoDelete	( true );
+	CUIXmlInit::InitStatic	( uiXml, "noice_static", 0, UINoice );
+
+//	RearrangeTabButtons		(UITabControl);
 }
 
 void CUIPdaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 {
-	switch (msg)
+	switch ( msg )
 	{
 	case TAB_CHANGED:
-	{
-		if (pWnd == UITabControl)
 		{
-			SetActiveSubdialog(UITabControl->GetActiveId());
+			if ( pWnd == UITabControl )
+			{
+				SetActiveSubdialog			(UITabControl->GetActiveId());
+			}
+			break;
 		}
-		break;
-	}
 	case BUTTON_CLICKED:
-	{
-		if (pWnd == m_btn_close)
 		{
-			HideDialog();
+			if ( pWnd == m_btn_close )
+			{
+				HideDialog();
+			}
+			break;
 		}
-		break;
-	}
 	default:
-	{
-		R_ASSERT(m_pActiveDialog);
-		m_pActiveDialog->SendMessage(pWnd, msg, pData);
-	}
+		{
+			R_ASSERT						(m_pActiveDialog);
+			m_pActiveDialog->SendMessage	(pWnd, msg, pData);
+		}
 	};
 }
 
 void CUIPdaWnd::Show(bool status)
 {
-	inherited::Show(status);
-	if (status)
+	inherited::Show						(status);
+	if(status)
 	{
-		InventoryUtilities::SendInfoToActor("ui_pda");
-
-		if (!m_pActiveDialog)
+		InventoryUtilities::SendInfoToActor	("ui_pda");
+		
+		if ( !m_pActiveDialog )
 		{
-			SetActiveSubdialog("eptTasks");
+			SetActiveSubdialog				("eptTasks");
 		}
-		m_pActiveDialog->Show(true);
-	}
-	else
+		m_pActiveDialog->Show				(true);
+	}else
 	{
-		InventoryUtilities::SendInfoToActor("ui_pda_hide");
+		InventoryUtilities::SendInfoToActor	("ui_pda_hide");
 		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiPdaTask, false);
-		m_pActiveDialog->Show(false);
-		g_btnHint->Discard();
-		g_statHint->Discard();
+		m_pActiveDialog->Show				(false);
+		g_btnHint->Discard					();
+		g_statHint->Discard					();
 	}
 }
 
@@ -167,43 +173,45 @@ void CUIPdaWnd::Update()
 	m_pActiveDialog->Update();
 	m_clock->TextItemControl().SetText(InventoryUtilities::GetGameTimeAsString(InventoryUtilities::etpTimeToMinutes).c_str());
 
+	m_battery_bar->SetProgressPos(m_power);
+
 	Device.seqParallel.push_back(xr_make_delegate(pUILogsWnd, &CUILogsWnd::PerformWork));
 }
 
 void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 {
-	if (m_sActiveSection == section) return;
+	if ( m_sActiveSection == section ) return;
 
-	if (m_pActiveDialog)
+	if ( m_pActiveDialog )
 	{
-		UIMainPdaFrame->DetachChild(m_pActiveDialog);
-		m_pActiveDialog->Show(false);
+		UIMainPdaFrame->DetachChild( m_pActiveDialog );
+		m_pActiveDialog->Show( false );
 	}
 
-	if (section == "eptTasks")
+	if ( section == "eptTasks" )
 	{
 		m_pActiveDialog = pUITaskWnd;
 	}
-	//-	else if ( section == "eptFractionWar" )
-	//-	{
-	//-		m_pActiveDialog = pUIFactionWarWnd;
-	//-	}
-		/*
-		if (IsGameTypeSingle())
-		{
-			if (section == "eptRanking")
-		{
-				m_pActiveDialog = pUIRankingWnd;
-			}
-		}
-		*/
+//-	else if ( section == "eptFractionWar" )
+//-	{
+//-		m_pActiveDialog = pUIFactionWarWnd;
+//-	}
+	/*
+	if (IsGameTypeSingle())
+	{
+	    if (section == "eptRanking")
+	{
+		    m_pActiveDialog = pUIRankingWnd;
+	    }
+	}
+	*/
 	else if (section == "eptRanking")
 	{
 		if (IsGameTypeSingle()) {
 			m_pActiveDialog = pUIRankingWnd;
 		}
 	}
-	else if (section == "eptLogs")
+	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
 	}
@@ -212,13 +220,13 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 		m_pActiveDialog = pUIEncyclopediaWnd;
 	}
 
-	R_ASSERT2(m_pActiveDialog, "active dialog is not initialized");
-	UIMainPdaFrame->AttachChild(m_pActiveDialog);
-	m_pActiveDialog->Show(true);
+	R_ASSERT2                       (m_pActiveDialog, "active dialog is not initialized");
+	UIMainPdaFrame->AttachChild		(m_pActiveDialog);
+	m_pActiveDialog->Show			(true);
 
-	if (UITabControl->GetActiveId() != section)
+	if ( UITabControl->GetActiveId() != section )
 	{
-		UITabControl->SetActiveTab(section);
+		UITabControl->SetActiveTab( section );
 	}
 	m_sActiveSection = section;
 	SetActiveCaption();
@@ -226,63 +234,72 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 
 void CUIPdaWnd::SetActiveCaption()
 {
-	TABS_VECTOR* btn_vec = UITabControl->GetButtonsVector();
-	TABS_VECTOR::iterator it_b = btn_vec->begin();
-	TABS_VECTOR::iterator it_e = btn_vec->end();
-	for (; it_b != it_e; ++it_b)
+	TABS_VECTOR*	btn_vec		= UITabControl->GetButtonsVector();
+	TABS_VECTOR::iterator it_b	= btn_vec->begin();
+	TABS_VECTOR::iterator it_e	= btn_vec->end();
+	for ( ; it_b != it_e; ++it_b )
 	{
-		if ((*it_b)->m_btn_id == m_sActiveSection)
+		if ( (*it_b)->m_btn_id == m_sActiveSection )
 		{
 			LPCSTR cur = (*it_b)->TextItemControl()->GetText();
 			string256 buf;
-			xr_strconcat(buf, m_caption_const.c_str(), cur);
-			SetCaption(buf);
+			xr_strconcat(buf, m_caption_const.c_str(), cur );
+			SetCaption( buf );
+			UITabControl->Show(true);
+			m_clock->Show(true);
+			m_caption->Show(true);
+			m_battery_bar->Show(true);
 			return;
 		}
 	}
+
+	UITabControl->Show(false);
+	m_clock->Show(false);
+	m_caption->Show(false);
+	m_battery_bar->Show(false);
 }
 
-void CUIPdaWnd::Show_SecondTaskWnd(bool status)
+void CUIPdaWnd::Show_SecondTaskWnd( bool status )
 {
-	if (status)
+	if ( status )
 	{
-		SetActiveSubdialog("eptTasks");
+		SetActiveSubdialog( "eptTasks" );
 	}
-	pUITaskWnd->Show_TaskListWnd(status);
+	pUITaskWnd->Show_TaskListWnd( status );
 }
 
-void CUIPdaWnd::Show_MapLegendWnd(bool status)
+void CUIPdaWnd::Show_MapLegendWnd( bool status )
 {
-	if (status)
+	if ( status )
 	{
-		SetActiveSubdialog("eptTasks");
+		SetActiveSubdialog( "eptTasks" );
 	}
-	pUITaskWnd->ShowMapLegend(status);
+	pUITaskWnd->ShowMapLegend( status );
 }
 
 void CUIPdaWnd::Draw()
 {
 	inherited::Draw();
-	//.	DrawUpdatedSections();
+//.	DrawUpdatedSections();
 	DrawHint();
 	UINoice->Draw(); // over all
 }
 
 void CUIPdaWnd::DrawHint()
 {
-	if (m_pActiveDialog == pUITaskWnd)
+	if ( m_pActiveDialog == pUITaskWnd )
 	{
 		pUITaskWnd->DrawHint();
 	}
-	//-	else if ( m_pActiveDialog == pUIFactionWarWnd )
-	//-	{
-	//		m_hint_wnd->Draw();
-	//-	}
-	else if (m_pActiveDialog == pUIRankingWnd)
+//-	else if ( m_pActiveDialog == pUIFactionWarWnd )
+//-	{
+//		m_hint_wnd->Draw();
+//-	}
+	else if ( m_pActiveDialog == pUIRankingWnd )
 	{
 		pUIRankingWnd->DrawHint();
 	}
-	else if (m_pActiveDialog == pUILogsWnd)
+	else if ( m_pActiveDialog == pUILogsWnd )
 	{
 
 	}
@@ -293,7 +310,7 @@ void CUIPdaWnd::UpdatePda()
 {
 	pUILogsWnd->UpdateNews();
 
-	if (m_pActiveDialog == pUITaskWnd)
+	if ( m_pActiveDialog == pUITaskWnd )
 	{
 		pUITaskWnd->ReloadTaskInfo();
 	}
@@ -306,64 +323,76 @@ void CUIPdaWnd::UpdateRankingWnd()
 
 void CUIPdaWnd::Reset()
 {
-	inherited::ResetAll();
+	inherited::ResetAll		();
 
-	if (pUITaskWnd)		pUITaskWnd->ResetAll();
-	//-	if ( pUIFactionWarWnd )	pUITaskWnd->ResetAll();
-	if (pUIRankingWnd)	pUIRankingWnd->ResetAll();
-	if (pUILogsWnd)		pUILogsWnd->ResetAll();
+	if ( pUITaskWnd )		pUITaskWnd->ResetAll();
+//-	if ( pUIFactionWarWnd )	pUITaskWnd->ResetAll();
+	if ( pUIRankingWnd )	pUIRankingWnd->ResetAll();
+	if ( pUILogsWnd )		pUILogsWnd->ResetAll();
 	if (pUIEncyclopediaWnd)		pUIEncyclopediaWnd->ResetAll();
 }
 
-void CUIPdaWnd::SetCaption(LPCSTR text)
+void CUIPdaWnd::SetCaption( LPCSTR text )
 {
-	m_caption->SetText(text);
+	m_caption->SetText( text );
 }
 
 void RearrangeTabButtons(CUITabControl* pTab)
 {
-	TABS_VECTOR* btn_vec = pTab->GetButtonsVector();
-	TABS_VECTOR::iterator it = btn_vec->begin();
-	TABS_VECTOR::iterator it_e = btn_vec->end();
+	TABS_VECTOR *	btn_vec		= pTab->GetButtonsVector();
+	TABS_VECTOR::iterator it	= btn_vec->begin();
+	TABS_VECTOR::iterator it_e	= btn_vec->end();
 
 	Fvector2					pos;
-	pos.set((*it)->GetWndPos());
+	pos.set						((*it)->GetWndPos());
 	float						size_x;
 
-	for (; it != it_e; ++it)
+	for ( ; it != it_e; ++it )
 	{
-		(*it)->SetWndPos(pos);
+		(*it)->SetWndPos		(pos);
 		(*it)->AdjustWidthToText();
-		size_x = (*it)->GetWndSize().x + 30.0f;
-		(*it)->SetWidth(size_x);
-		pos.x += size_x - 6.0f;
+		size_x					= (*it)->GetWndSize().x + 30.0f;
+		(*it)->SetWidth			(size_x);
+		pos.x					+= size_x - 6.0f;
 	}
-
-	pTab->SetWidth(pos.x + 5.0f);
+	
+	pTab->SetWidth( pos.x + 5.0f );
 	pos.x = pTab->GetWndPos().x - pos.x;
 	pos.y = pTab->GetWndPos().y;
-	pTab->SetWndPos(pos);
+	pTab->SetWndPos( pos );
 }
 
 bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 {
-	if (is_binded(kACTIVE_JOBS, dik))
+	if ( is_binded(kACTIVE_JOBS, dik) )
 	{
-		if (WINDOW_KEY_PRESSED == keyboard_action)
+		if ( WINDOW_KEY_PRESSED == keyboard_action )
 			HideDialog();
 
 		return true;
-	}
+	}	
 
-	return inherited::OnKeyboardAction(dik, keyboard_action);
+	return inherited::OnKeyboardAction(dik,keyboard_action);
 }
 
 void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
 {
-	//if (type == pda_section::encyclopedia)
-	//{
+	if (type == pda_section::encyclopedia)
+	{
 		pUIEncyclopediaWnd->ReloadArticles();
 		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
 
-	//}
+	}
+	/*else if (type == pda_section::quests && GameConstants::GetPDA_FlashingIconsQuestsEnabled())
+	{
+		CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiPdaTask, true);
+	}*/
+}
+
+#include "../xrUI/UICursor.h"
+
+void CUIPdaWnd::ResetCursor()
+{
+	if (!last_cursor_pos.similar({ 0.f, 0.f }))
+		GetUICursor().SetUICursorPosition(last_cursor_pos);
 }

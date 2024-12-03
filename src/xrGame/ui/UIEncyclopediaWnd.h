@@ -17,7 +17,7 @@ class CUIFrameWindow;
 class CUIFrameLineWnd;
 class CUIAnimatedStatic;
 class CUIStatic;
-class CUIListBox;
+class CUIListBoxCOP;
 class CUIEncyclopediaCore;
 class CUIScrollView;
 class CUITreeViewItem;

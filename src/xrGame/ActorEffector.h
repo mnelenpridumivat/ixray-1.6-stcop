@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CameraEffector.h"
-#include "../xrEngine/CameraManager.h"
 
 class CObjectAnimator;
 class CEffectorController;

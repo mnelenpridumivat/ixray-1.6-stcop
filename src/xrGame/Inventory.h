@@ -5,7 +5,6 @@ class CInventory;
 class CInventoryItem;
 class CHudItem;
 class CInventoryOwner;
-class CActor;
 
 class CInventorySlot
 {									
@@ -78,7 +77,6 @@ public:
 	bool					Action				(u16 cmd, u32 flags);
 	void					ActiveWeapon		(u16 slot);
 	void					Update				();
-	void					UpdateUseAnim(CActor* actor);
 	// »щет на по€се аналогичный IItem
 	PIItem					Same				(const PIItem pIItem, bool bSearchRuck) const;
 	// »щет на по€се IItem дл€ указанного слота
@@ -126,10 +124,6 @@ public:
 	void					BlockSlot(u16 slot_id);
 	void					UnblockSlot(u16 slot_id);
 	bool					IsSlotBlocked(PIItem const iitem) const;
-
-	void					ChooseItmAnimOrNot(PIItem pIItem);
-	void					TakeItemAnimCheck(CGameObject* GameObj, CObject* Obj, bool use_pickup_anim);
-	void					TakeItemAnim(CGameObject* GameObj, CObject* Obj, bool use_pickup_anim);
 
 	TIItemContainer			m_all;
 	TIItemContainer			m_ruck, m_belt;

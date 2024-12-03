@@ -67,7 +67,7 @@ void CopyTexture(const char* texture)
 
             F->r_u32();
             tp.Clear();
-            tp.Load(*F, texture);
+            tp.Load(*F);
             FS.r_close(F);
 
             xr_string temp_name;

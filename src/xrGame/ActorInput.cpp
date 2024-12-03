@@ -445,8 +445,6 @@ void CActor::IR_GamepadKeyPress(int id)
 }
 
 #include "HudItem.h"
-#include <WeaponKnife.h>
-#include <ActorHelmet.h>
 bool CActor::use_Holder				(CHolderCustom* holder)
 {
 
@@ -712,9 +710,7 @@ void CActor::set_input_external_handler(CActorInputHandler *handler)
 
 void CActor::SwitchNightVision()
 {
-	if (!Actor()->m_bActionAnimInProcess)
-		NVGAnimCheckDetector();
-	/*CWeapon* wpn1 = nullptr;
+	CWeapon* wpn1 = nullptr;
 	CWeapon* wpn2 = nullptr;
 	if(inventory().ItemFromSlot(INV_SLOT_2))
 		wpn1 = smart_cast<CWeapon*>(inventory().ItemFromSlot(INV_SLOT_2));
@@ -739,16 +735,12 @@ void CActor::SwitchNightVision()
 			torch->SwitchNightVision();
 			return;
 		}
-	}*/
+	}
 }
 
 void CActor::SwitchTorch()
-{
-	CTorch* pTorch = smart_cast<CTorch*>(inventory().ItemFromSlot(TORCH_SLOT));
-
-	if (pTorch && !Actor()->m_bActionAnimInProcess)
-		pTorch->Switch();
-	/*xr_vector<CAttachableItem*> const& all = CAttachmentOwner::attached_objects();
+{ 
+	xr_vector<CAttachableItem*> const& all = CAttachmentOwner::attached_objects();
 	xr_vector<CAttachableItem*>::const_iterator it = all.begin();
 	xr_vector<CAttachableItem*>::const_iterator it_e = all.end();
 	for ( ; it != it_e; ++it )
@@ -759,7 +751,7 @@ void CActor::SwitchTorch()
 			torch->Switch();
 			return;
 		}
-	}*/
+	}
 }
 
 #ifndef MASTER_GOLD

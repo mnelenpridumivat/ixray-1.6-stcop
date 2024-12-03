@@ -63,8 +63,6 @@ class CActorStatisticMgr;
 class CLocationManager;
 class CPickUpManager;
 
-class CNightVisionEffector;
-
 class CActor: 
 	public IGame_Actor, 
 	public CEntityAlive, 
@@ -147,9 +145,6 @@ public:
 	virtual void	AddGameNews				 (GAME_NEWS_DATA& news_data);
 protected:
 	CActorStatisticMgr*				m_statistic_manager;
-
-	virtual void AddEncyclopediaArticle(const CInfoPortion* info_portion) const;
-
 public:
 	virtual void StartTalk			(CInventoryOwner* talk_partner);
 			void RunTalkDialog		(CInventoryOwner* talk_partner, bool disable_break);
@@ -214,9 +209,6 @@ public:
 	void				HitArtefactsCondition(SHit& hit);
 			float		HitArtefactsOnBelt		(float hit_power, ALife::EHitType hit_type);
 			float		GetProtection_ArtefactsOnBelt(ALife::EHitType hit_type);
-			void		UpdateNVGUseAnim();
-			void		UpdateMaskUseAnim();
-			void		UpdateQuickKickAnim();
 
 protected:
 	//звук тяжелого дыхания
@@ -420,13 +412,11 @@ public:
 	bool					CanSprint				();
 	bool					CanRun					();
 	virtual void			StopAnyMove				() override;
-	void					StopSprint() { mstate_wishful &= ~mcSprint; }
 
 	bool					AnyAction				()	{return (mstate_real & mcAnyAction) != 0;};
 	bool					AnyMove					()	{return (mstate_real & mcAnyMove) != 0;};
 
 	bool					is_jump					();
-	u32						MovingState() const { return mstate_real; }
 public:
 	u32						mstate_wishful;
 	u32						mstate_old;
@@ -708,14 +698,8 @@ public:
 	virtual	bool				InventoryAllowSprint			();
 	virtual void				OnNextWeaponSlot				();
 	virtual void				OnPrevWeaponSlot				();
-
-	void				NVGAnimCheckDetector();
-	void				CleanMaskAnimCheckDetector();
-	void				StartNVGAnimation();
 			void				SwitchNightVision				();
 			void				SwitchTorch						();
-			void				CleanMask();
-			void				QuickKick();
 #ifndef MASTER_GOLD
 			void				NoClipFly						(int cmd);
 #endif //DEBUG
@@ -792,29 +776,6 @@ private:
 public:
 	bool OnLadder = false;
 	IC bool is_ladder() const { return OnLadder; };
-
-	bool					m_bActionAnimInProcess;
-
-protected:
-	bool					m_bNightVisionOn;
-	bool					m_bNightVisionAllow;
-	bool					m_bNVGActivated;
-	bool					m_bNVGSwitched;
-	bool					m_bMaskAnimActivated;
-	bool					m_bMaskClear;
-	bool					m_bQuickKickActivated;
-	bool					m_bQuickKick;
-	int						m_iNVGAnimLength;
-	int						m_iActionTiming;
-	int						m_iMaskAnimLength;
-	int						m_iQuickKickAnimLength;
-
-	ref_sound				m_action_anim_sound;
-
-	CNightVisionEffector* m_night_vision;
-
-	void					SwitchNightVision(bool light_on, bool use_sounds = true, bool send_event = true);
-
 };
 
 extern bool		isActorAccelerated			(u32 mstate, bool ZoomMode);
