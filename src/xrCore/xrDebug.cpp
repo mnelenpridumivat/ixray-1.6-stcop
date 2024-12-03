@@ -18,7 +18,7 @@
 
 #pragma warning(pop)
 
-extern bool shared_str_initialized;
+//extern bool shared_str_initialized;
 
 #define DEBUG_INVOKE	__debugbreak();
 static BOOL bException = FALSE;
@@ -79,10 +79,10 @@ void xrDebug::gather_info		(const char *expression, const char *description, con
 
 		buffer			+= xr_sprintf(buffer,assertion_size - u32(buffer - buffer_base),"%s",endline);
 		if (!i) {
-			if (shared_str_initialized) {
-				Msg		("%s",assertion_info);
-				xrLogger::FlushLog();
-			}
+			//if (shared_str_initialized) {
+			Msg		("%s",assertion_info);
+			xrLogger::FlushLog();
+			//}
 			buffer		= assertion_info;
 			endline		= "\r\n";
 			prefix		= "";
@@ -90,15 +90,15 @@ void xrDebug::gather_info		(const char *expression, const char *description, con
 	}
 
 	if (!IsDebuggerPresent() && !strstr(GetCommandLineA(), "-no_call_stack_assert")) {
-		if (shared_str_initialized)
-			Msg			("stack trace:\n");
+		//if (shared_str_initialized)
+		Msg			("stack trace:\n");
 
 #ifdef USE_OWN_ERROR_MESSAGE_WINDOW
 		buffer			+= xr_sprintf(buffer,assertion_size - u32(buffer - buffer_base),"stack trace:%s%s",endline,endline);
 #endif // USE_OWN_ERROR_MESSAGE_WINDOW
 		
-		if (shared_str_initialized)
-			xrLogger::FlushLog	();
+		//if (shared_str_initialized)
+		xrLogger::FlushLog	();
 
 		os_clipboard::copy_to_clipboard	(assertion_info);
 	}
@@ -300,7 +300,7 @@ int out_of_memory_handler	(size_t size)
 		Memory.mem_compact	();
 
 		u32					process_heap	= mem_usage_impl(nullptr, nullptr);
-		int					eco_strings		= (int)g_pStringContainer->stat_economy			();
+		int					eco_strings		= (int)str_container::GetInstance().stat_economy			();
 		int					eco_smem		= (int)g_pSharedMemoryContainer->stat_economy	();
 		Msg					("* [x-ray]: process heap[%d K]", process_heap / 1024);
 		Msg					("* [x-ray]: economy: strings[%d K], smem[%d K]",eco_strings/1024,eco_smem);
@@ -491,16 +491,16 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 
 		if (*error_message)
 		{
-			if (shared_str_initialized)
-				Msg("\n%s", error_message);
+			//if (shared_str_initialized)
+			Msg("\n%s", error_message);
 
 			xr_strcat(error_message, sizeof(error_message), "\r\n");
 			os_clipboard::update_clipboard(buffer);
 		}
 	}
 
-	if (shared_str_initialized)
-		xrLogger::FlushLog();
+	//if (shared_str_initialized)
+	xrLogger::FlushLog();
 
 #ifdef USE_OWN_MINI_DUMP
 	save_mini_dump		(pExceptionInfo);

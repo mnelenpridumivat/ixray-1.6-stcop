@@ -49,7 +49,7 @@ CInventoryOwner::CInventoryOwner			()
 	m_deadbody_closed				= false;
 	m_play_show_hide_reload_sounds	= true;
 
-	m_trader_flags.zero();
+	//m_trader_flags.zero();
 }
 
 DLL_Pure *CInventoryOwner::_construct		()
@@ -150,7 +150,7 @@ BOOL CInventoryOwner::net_Spawn		(CSE_Abstract* DC)
 		m_deadbody_can_take = pTrader->m_deadbody_can_take;
 		m_deadbody_closed   = pTrader->m_deadbody_closed;
 
-		m_trader_flags.assign(pTrader->m_trader_flags.get());
+		//m_trader_flags.assign(pTrader->m_trader_flags.get());
 	}
 	else
 	{
