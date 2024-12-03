@@ -26,6 +26,7 @@
 #include "UITaskWnd.h"
 #include "UIRankingWnd.h"
 #include "UILogsWnd.h"
+#include "UIEncyclopediaWnd.h"
 
 #define PDA_XML		"pda.xml"
 
@@ -39,6 +40,7 @@ CUIPdaWnd::CUIPdaWnd()
 //-	pUIFactionWarWnd = nullptr;
 	pUIRankingWnd    = nullptr;
 	pUILogsWnd       = nullptr;
+	pUIEncyclopediaWnd = nullptr;
 	m_hint_wnd       = nullptr;
 	Init();
 }
@@ -49,6 +51,7 @@ CUIPdaWnd::~CUIPdaWnd()
 //-	delete_data( pUIFactionWarWnd );
 	delete_data( pUIRankingWnd );
 	delete_data( pUILogsWnd );
+	delete_data(pUIEncyclopediaWnd);
 	delete_data( m_hint_wnd );
 	delete_data( UINoice );
 }
@@ -92,6 +95,9 @@ void CUIPdaWnd::Init()
 
 		pUILogsWnd						= new CUILogsWnd();
 		pUILogsWnd->Init				();
+
+		pUIEncyclopediaWnd = new CUIEncyclopediaWnd();
+		pUIEncyclopediaWnd->Init();
 
 	}
 
@@ -192,6 +198,10 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
+	}
+	else if (section == "eptEnc")
+	{
+		m_pActiveDialog = pUIEncyclopediaWnd;
 	}
 
 	R_ASSERT						(m_pActiveDialog);
@@ -294,6 +304,7 @@ void CUIPdaWnd::Reset()
 //-	if ( pUIFactionWarWnd )	pUITaskWnd->ResetAll();
 	if ( pUIRankingWnd )	pUIRankingWnd->ResetAll();
 	if ( pUILogsWnd )		pUILogsWnd->ResetAll();
+	if (pUIEncyclopediaWnd)		pUIEncyclopediaWnd->ResetAll();
 }
 
 void CUIPdaWnd::SetCaption( LPCSTR text )
@@ -337,4 +348,14 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	}	
 
 	return inherited::OnKeyboardAction(dik,keyboard_action);
+}
+
+void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
+{
+	//if (type == pda_section::encyclopedia)
+	//{
+	pUIEncyclopediaWnd->ReloadArticles();
+	CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
+
+	//}
 }

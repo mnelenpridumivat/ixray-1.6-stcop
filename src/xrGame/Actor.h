@@ -145,6 +145,9 @@ public:
 	virtual void	AddGameNews				 (GAME_NEWS_DATA& news_data);
 protected:
 	CActorStatisticMgr*				m_statistic_manager;
+
+	virtual void AddEncyclopediaArticle(const CInfoPortion* info_portion) const;
+
 public:
 	virtual void StartTalk			(CInventoryOwner* talk_partner);
 			void RunTalkDialog		(CInventoryOwner* talk_partner, bool disable_break);

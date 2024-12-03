@@ -131,6 +131,8 @@ public:
 	enum EFlashingIcons
 	{
 		efiPdaTask	= 0,
+		efiEncyclopedia,
+		efiJournal,
 		efiMail
 	};
 	

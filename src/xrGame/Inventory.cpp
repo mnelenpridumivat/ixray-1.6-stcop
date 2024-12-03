@@ -814,7 +814,7 @@ void CInventory::Update()
 			
 			m_iActiveSlot			= GetNextActiveSlot();
 		}
-		if((GetNextActiveSlot()!=NO_ACTIVE_SLOT) && ActiveItem() && ActiveItem()->cast_hud_item()->IsHidden())
+		if((GetNextActiveSlot()!=NO_ACTIVE_SLOT) && ActiveItem() && (!ActiveItem()->cast_hud_item() || ActiveItem()->cast_hud_item()->IsHidden()))
 				ActiveItem()->ActivateItem();
 	}
 	UpdateDropTasks	();

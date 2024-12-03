@@ -76,10 +76,20 @@ void CPda::shedule_Update(u32 dt)
 void CPda::UpdateActiveContacts	()
 {
 	m_active_contacts.resize(0);
+	auto Owner = smart_cast<CEntityAlive*>(GetOwnerObject());
+	//VERIFY(Owner);
+	if (Owner && Owner->IsInEmi())
+	{
+		return;
+	}
 	xr_vector<CObject*>::iterator it= feel_touch.begin();
 	for(;it!=feel_touch.end();++it){
 		CEntityAlive* pEA = smart_cast<CEntityAlive*>(*it);
-		if(!!pEA->g_Alive() && !pEA->cast_base_monster() && !pEA->cast_car())
+		if (!!pEA->g_Alive()
+			&& !pEA->cast_base_monster()
+			&& !pEA->cast_car()
+			&& !pEA->IsInEmi()
+			&& !pEA->IsIgnoreOnPDA())
 		{
 			m_active_contacts.push_back(*it);
 		}

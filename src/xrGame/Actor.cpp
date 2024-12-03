@@ -99,6 +99,7 @@ Flags32			psActorFlags={AF_DISABLE_CONDITION_TEST|AF_AUTOPICKUP|AF_RUN_BACKWARD|
 
 CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 {
+	encyclopedia_registry = new CEncyclopediaRegistryWrapper();
 	game_news_registry		= new CGameNewsRegistryWrapper();
 	// Cameras
 	cameras[eacFirstEye] = new CCameraFirstEye(this, CCameraBase::flKeepPitch);
@@ -282,7 +283,7 @@ xr_vector<xr_string> CActor::GetKnowedPortions() const
 
 	for (auto Info : *KnownInfos)
 	{
-		SafeVector.push_back(Info.c_str());
+		SafeVector.push_back(Info.info_id.c_str());
 	}
 
 	return SafeVector;

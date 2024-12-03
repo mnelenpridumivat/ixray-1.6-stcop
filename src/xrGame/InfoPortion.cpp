@@ -55,7 +55,7 @@ void CInfoPortion::load_shared	(LPCSTR)
 
 	if(item_data==nullptr)
 	{
-		Msg("! attempt to use non-existent INFOPORTION [%s]", m_InfoId.c_str());
+		//Msg("! attempt to use non-existent INFOPORTION [%s]", m_InfoId.c_str());
 		return;
 	}
 

@@ -32,8 +32,8 @@ public:
 	// Устанавливаем смещение текста
 	void			SetTextShift(int delta)				{ iTextShift += delta; }
 
-	int GetValue() { return m_iValue; }
-	void SetValue(int value) { m_iValue = value; }
+	inline int GetValue() { return m_iValue; }
+	inline void SetValue(int value) { m_iValue = value; }
 
 	// Владелец
 	CUITreeViewItem * GetOwner() const					{ return pOwner; }
