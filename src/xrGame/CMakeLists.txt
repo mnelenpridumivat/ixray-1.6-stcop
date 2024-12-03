@@ -86,6 +86,8 @@ file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
+file(GLOB_RECURSE XGM_SOURCE_SAVE_FILES "Save/*.*")
+
 # Source groups
 source_group("core" FILES ${XGM_SOURCE_ALL_FILES})
 source_group("ui" FILES ${XGM_SOURCE_UI_FILES})
@@ -124,6 +126,7 @@ source_group("level" FILES ${XGM_SOURCE_LEVEL_FILES})
 source_group("ikan" FILES ${XGM_SOURCE_IKAN_FILES})
 source_group("inventory" FILES ${XGM_SOURCE_INV_FILES})
 source_group("Legacy" FILES ${XGM_SOURCE_LEGACY_FILES})
+source_group("Save" FILES ${XGM_SOURCE_SAVE_FILES})
 
 # Apply list
 list(APPEND XGM_SRC_FILES ${XGM_SOURCE_ALL_FILES})
