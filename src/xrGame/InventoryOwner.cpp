@@ -27,6 +27,7 @@
 #include "CustomOutfit.h"
 #include "Bolt.h"
 #include "actor_mp_server.h"
+#include "Save/SaveObject.h"
 
 CInventoryOwner::CInventoryOwner			()
 {
@@ -200,6 +201,36 @@ void	CInventoryOwner::load	(IReader &input_packet)
 	CharacterInfo().load(input_packet);
 	load_data		(m_game_name, input_packet);
 	load_data		(m_money,	input_packet);
+}
+
+void CInventoryOwner::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CInventoryOwner");
+	{
+		Object->GetCurrentChunk()->w_u8(inventory().GetActiveSlot());
+		CharacterInfo().Save(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_game_name);
+		Object->GetCurrentChunk()->w_u32(m_money);
+	}
+	Object->EndChunk();
+}
+
+void CInventoryOwner::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CInventoryOwner");
+	{
+		u8 active_slot;
+		Object->GetCurrentChunk()->r_u8(active_slot);
+		if (active_slot == NO_ACTIVE_SLOT) 
+		{
+			inventory().SetActiveSlot(NO_ACTIVE_SLOT);
+		}
+		m_tmp_active_slot_num = active_slot;
+		CharacterInfo().Load(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_game_name);
+		Object->GetCurrentChunk()->r_u32(m_money);
+	}
+	Object->EndChunk();
 }
 
 

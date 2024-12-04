@@ -27,6 +27,7 @@ class CTradeParameters;
 class CPurchaseList;
 class CWeapon;
 class CCustomOutfit;
+class CSaveObject;
 
 class CInventoryOwner : public CAttachmentOwner {							
 public:
@@ -49,6 +50,8 @@ public:
 	//serialization
 	virtual void	save						(NET_Packet &output_packet);
 	virtual void	load						(IReader &input_packet);
+	virtual void Save(CSaveObject* Object);
+	virtual void Load(CSaveObject* Object);
 
 	
 	//обновление
