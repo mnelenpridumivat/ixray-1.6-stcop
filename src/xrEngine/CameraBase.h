@@ -6,6 +6,7 @@
 #include "device.h"
 // refs
 class CObject;
+class CSaveObject;
 
 class ENGINE_API	CCameraBase
 {
@@ -64,6 +65,8 @@ public:
 
 	virtual void save(NET_Packet& output_packet) {};
 	virtual void load(IReader& input_packet) {};
+	virtual void Save(CSaveObject* Object) {};
+	virtual void Load(CSaveObject* Object) {};
 };
 
 

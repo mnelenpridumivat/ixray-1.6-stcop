@@ -5,6 +5,7 @@
 #include "../xrEngine/xr_level_controller.h"
 #include "../xrEngine/xr_object.h"
 #include "object_broker.h"
+#include "Save/SaveObject.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -32,6 +33,24 @@ void CCameraFirstEye::save(NET_Packet& packet)
 void CCameraFirstEye::load(IReader& packet)
 {
 	load_data(pitch, packet); 
+}
+
+void CCameraFirstEye::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CCameraFirstEye");
+	{
+		Object->GetCurrentChunk()->w_float(pitch);
+	}
+	Object->EndChunk();
+}
+
+void CCameraFirstEye::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CCameraFirstEye");
+	{
+		Object->GetCurrentChunk()->r_float(pitch);
+	}
+	Object->EndChunk();
 }
 
 void CCameraFirstEye::UpdateLookat()

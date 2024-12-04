@@ -24,6 +24,8 @@ public:
 	virtual float	GetDist		( )	{ return prev_d;	};	
 	void save(NET_Packet& output_packet) override;
 	void load(IReader& input_packet) override;
+	virtual void Save(CSaveObject* Object) override;
+	virtual void Load(CSaveObject* Object) override;
 
 protected:
 			void	UpdateDistance	( Fvector& point );

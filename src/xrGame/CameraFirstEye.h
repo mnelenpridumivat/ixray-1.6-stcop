@@ -25,6 +25,8 @@ public:
 
 			void save(NET_Packet& output_packet) override;
 			void load(IReader& input_packet) override;
+			virtual void Save(CSaveObject* Object) override;
+			virtual void Load(CSaveObject* Object) override;
 };
 
 #endif // __CAMERALOOK_H__

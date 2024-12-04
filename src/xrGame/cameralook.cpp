@@ -12,6 +12,8 @@
 #include "Missile.h"
 #include "Car.h"
 
+#include "Save/SaveObject.h"
+
 CCameraLook::CCameraLook(CObject* p, u32 flags ) 
 :CCameraBase(p, flags)
 {
@@ -38,6 +40,24 @@ void CCameraLook::save(NET_Packet& packet)
 void CCameraLook::load(IReader& packet) 
 {
 	load_data(pitch, packet);
+}
+
+void CCameraLook::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CCameraLook");
+	{
+		Object->GetCurrentChunk()->w_float(pitch);
+	}
+	Object->EndChunk();
+}
+
+void CCameraLook::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CCameraLook");
+	{
+		Object->GetCurrentChunk()->r_float(pitch);
+	}
+	Object->EndChunk();
 }
 
 void CCameraLook::Update(Fvector& point, Fvector& /**noise_dangle/**/)
