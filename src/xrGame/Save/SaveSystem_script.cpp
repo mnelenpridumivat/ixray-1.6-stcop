@@ -2,6 +2,7 @@
 #include "SaveSystem_script.h"
 #include "SaveChunk.h"
 #include "SaveVariables.h"
+#include "SaveObject.h"
 
 namespace CSaveChunk_script {
 	bool r_bool(CSaveChunk* Chunk) {
@@ -92,13 +93,23 @@ namespace CSaveChunk_script {
 
 }
 
+namespace CSaveObject_script {
+	void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
+		Object->BeginChunk(ChunkName);
+	}
+
+	void FindChunk(CSaveObject* Object, LPCSTR ChunkName) {
+		Object->FindChunk(ChunkName);
+	}
+}
+
 using namespace luabind;
 
 void SaveSystemScript::script_register(lua_State* L)
 {
 	module(L)
 		[
-			class_<CSaveChunk>("Serialisation")
+			class_<CSaveChunk>("SaveChunk")
 				.def("w_vec3", &CSaveChunk::w_vec3)
 				.def("w_float", &CSaveChunk::w_float)
 				.def("w_u64", &CSaveChunk::w_u64)
@@ -127,9 +138,14 @@ void SaveSystemScript::script_register(lua_State* L)
 
 				.def("ReadArray", &CSaveChunk_script::ReadArray)
 				.def("WriteArray", &CSaveChunk::WriteArray)
-				.def("EndArray", &CSaveChunk::EndArray)
+				.def("EndArray", &CSaveChunk::EndArray),
 
-				.def("BeginChunk", &CSaveChunk_script::BeginChunk)
-				.def("FindChunk", &CSaveChunk_script::FindChunk)
+				//.def("BeginChunk", &CSaveChunk_script::BeginChunk)
+				//.def("FindChunk", &CSaveChunk_script::FindChunk),
+			class_<CSaveObject>("SaveObject")
+				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+				.def("BeginChunk", &CSaveObject_script::BeginChunk)
+				.def("FindChunk", &CSaveObject_script::FindChunk)
+				.def("EndChunk", &CSaveObject::EndChunk)
 		];
 }
