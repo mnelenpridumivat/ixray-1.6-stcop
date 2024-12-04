@@ -17,6 +17,7 @@ class CCharacterPhysicsSupport;
 class CMaterialManager;
 class CVisualMemoryManager;
 class CBlend;
+class CSaveObject;
 class CEntityAlive : public CEntity {
 private:
 	typedef	CEntity			inherited;	
@@ -75,6 +76,8 @@ public:
 	//object serialization
 	virtual void			save					(NET_Packet &output_packet);
 	virtual void			load					(IReader &input_packet);
+	virtual void Save(CSaveObject* Object) override;
+	virtual void Load(CSaveObject* Object) override;
 
 
 	virtual BOOL			net_Spawn				(CSE_Abstract* DC);

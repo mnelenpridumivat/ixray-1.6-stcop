@@ -21,6 +21,7 @@
 #include "game_object_space.h"
 #include "material_manager.h"
 #include "game_base_space.h"
+#include "Save/SaveObject.h"
 
 #define SMALL_ENTITY_RADIUS		0.6f
 #define BLOOD_MARKS_SECT		"bloody_marks"
@@ -601,6 +602,26 @@ void CEntityAlive::load	(IReader &input_packet)
 {
 	inherited::load(input_packet);
 	conditions().load(input_packet);
+}
+
+void CEntityAlive::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CEntityAlive");
+	{
+		inherited::Save(Object);
+		conditions().Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CEntityAlive::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CEntityAlive");
+	{
+		inherited::Load(Object);
+		conditions().Load(Object);
+	}
+	Object->EndChunk();
 }
 
 BOOL	CEntityAlive::net_SaveRelevant		()
