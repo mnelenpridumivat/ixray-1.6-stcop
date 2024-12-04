@@ -60,6 +60,14 @@ void CScriptBinderObject::load				(IReader	*input_packet)
 {
 }
 
+void CScriptBinderObject::Save(CSaveObject* Object)
+{
+}
+
+void CScriptBinderObject::Load(CSaveObject* Object)
+{
+}
+
 bool CScriptBinderObject::net_SaveRelevant	()
 {
 	return		(false);

@@ -38,6 +38,7 @@ extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 #	include "debug_renderer.h"
 #	include "PHDebug.h"
 #endif
+#include <Save/SaveObject.h>
 
 ENGINE_API bool g_dedicated_server;
 
@@ -482,6 +483,16 @@ void CGameObject::save			(NET_Packet &output_packet)
 
 void CGameObject::load			(IReader &input_packet)
 {
+}
+
+void CGameObject::Save(CSaveObject* Object)
+{
+	CScriptBinder::Save(Object);
+}
+
+void CGameObject::Load(CSaveObject* Object)
+{
+	CScriptBinder::Load(Object);
 }
 
 void CGameObject::spawn_supplies()

@@ -16,6 +16,7 @@
 #include "script_game_object.h"
 #include "GameObject.h"
 #include "Level.h"
+#include "Save/SaveObject.h"
 
 // comment next string when commiting
 //#define DBG_DISABLE_SCRIPTS
@@ -179,6 +180,30 @@ void CScriptBinder::load			(IReader &input_packet)
 		}
 		catch(...) {
 			clear			();
+		}
+	}
+}
+
+void CScriptBinder::Save(CSaveObject* Object)
+{
+	if (m_object) {
+		try {
+			m_object->Save(Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}
+
+void CScriptBinder::Load(CSaveObject* Object)
+{
+	if (m_object) {
+		try {
+			m_object->Load(Object);
+		}
+		catch (...) {
+			clear();
 		}
 	}
 }

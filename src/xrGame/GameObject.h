@@ -41,6 +41,7 @@ class CAttachableItem;
 class animation_movement_controller;
 class CBlend;
 class ai_obstacle;
+class CSaveObject;
 
 class IKinematics;
 
@@ -113,6 +114,9 @@ public:
 	virtual BOOL			net_SaveRelevant	();
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
+	//object serialization new
+	virtual void Save(CSaveObject* Object);
+	virtual void Load(CSaveObject* Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local
 	virtual void			spatial_move		();
