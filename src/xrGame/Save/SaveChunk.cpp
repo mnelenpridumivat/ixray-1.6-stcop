@@ -17,7 +17,7 @@ void CSaveChunk::ReadArray(u64& Size)
 
 void CSaveChunk::WriteArray(u64 Size)
 {
-	_variables.emplace_back(xr_make_unique<CSaveVariableArray>(Size));
+	_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableArray(Size)));
 	auto ArrayPtr = (CSaveVariableArray*)_variables.back().get();
 	_currentArrayStack.push(ArrayPtr);
 
@@ -44,7 +44,7 @@ CSaveChunk* CSaveChunk::FindChunk(shared_str ChunkName)
 void CSaveChunk::w_bool(bool a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableBool>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableBool(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableBool(a));
@@ -54,7 +54,7 @@ void CSaveChunk::w_bool(bool a)
 void CSaveChunk::w_float(float a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableFloat>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableFloat(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableFloat(a));
@@ -64,7 +64,7 @@ void CSaveChunk::w_float(float a)
 void CSaveChunk::w_double(double a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableDouble>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableDouble(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableDouble(a));
@@ -74,7 +74,7 @@ void CSaveChunk::w_double(double a)
 void CSaveChunk::w_vec3(const Fvector& a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableVec3>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableVec3(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableVec3(a));
@@ -84,7 +84,7 @@ void CSaveChunk::w_vec3(const Fvector& a)
 void CSaveChunk::w_vec4(const Fvector4& a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableVec4>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableVec4(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableVec4(a));
@@ -94,7 +94,7 @@ void CSaveChunk::w_vec4(const Fvector4& a)
 void CSaveChunk::w_u64(u64 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableU64>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableU64(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableU64(a));
@@ -104,7 +104,7 @@ void CSaveChunk::w_u64(u64 a)
 void CSaveChunk::w_s64(s64 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableS64>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableS64(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableS64(a));
@@ -114,7 +114,7 @@ void CSaveChunk::w_s64(s64 a)
 void CSaveChunk::w_u32(u32 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableU32>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableU32(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableU32(a));
@@ -124,7 +124,7 @@ void CSaveChunk::w_u32(u32 a)
 void CSaveChunk::w_s32(s32 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableS32>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableS32(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableS32(a));
@@ -134,7 +134,7 @@ void CSaveChunk::w_s32(s32 a)
 void CSaveChunk::w_u16(u16 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableU16>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableU16(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableU16(a));
@@ -144,7 +144,7 @@ void CSaveChunk::w_u16(u16 a)
 void CSaveChunk::w_s16(s16 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableS16>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableS16(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableS16(a));
@@ -154,7 +154,7 @@ void CSaveChunk::w_s16(s16 a)
 void CSaveChunk::w_u8(u8 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableU8>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableU8(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableU8(a));
@@ -164,7 +164,7 @@ void CSaveChunk::w_u8(u8 a)
 void CSaveChunk::w_s8(s8 a)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableS8>(a));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableS8(a)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableS8(a));
@@ -234,7 +234,7 @@ void CSaveChunk::w_sdir(const Fvector& D)
 void CSaveChunk::w_stringZ(LPCSTR S)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableString>(S));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableString(S)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableString(S));
@@ -244,7 +244,7 @@ void CSaveChunk::w_stringZ(LPCSTR S)
 void CSaveChunk::w_stringZ(const shared_str& p)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableString>(p));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableString(p)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableString(p));
@@ -254,7 +254,7 @@ void CSaveChunk::w_stringZ(const shared_str& p)
 void CSaveChunk::w_stringZ(const xr_string& p)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableString>(p));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableString(p)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableString(p));
@@ -264,7 +264,7 @@ void CSaveChunk::w_stringZ(const xr_string& p)
 void CSaveChunk::w_matrix(Fmatrix& M)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableMatrix>(M));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableMatrix(M)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableMatrix(M));
@@ -274,7 +274,7 @@ void CSaveChunk::w_matrix(Fmatrix& M)
 void CSaveChunk::w_clientID(ClientID& C)
 {
 	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableClientID>(C));
+		_variables.emplace_back(xr_unique_ptr<CSaveVariableBase>(new CSaveVariableClientID(C)));
 	}
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableClientID(C));
