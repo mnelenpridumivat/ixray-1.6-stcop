@@ -51,6 +51,7 @@
 #	include "debug_renderer.h"
 #	include "../xrPhysics/phvalide.h"
 #endif
+#include "Save/SaveObject.h"
 
 int			g_cl_InterpolationType		= 0;
 u32			g_cl_InterpolationMaxPoints = 0;
@@ -1440,6 +1441,90 @@ void CActor::load(IReader &input_packet)
 	input_packet.r_stringZ(g_quick_use_slots[1], sizeof(g_quick_use_slots[1]));
 	input_packet.r_stringZ(g_quick_use_slots[2], sizeof(g_quick_use_slots[2]));
 	input_packet.r_stringZ(g_quick_use_slots[3], sizeof(g_quick_use_slots[3]));
+}
+
+void CActor::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CActor");
+	{
+		inherited::Save(Object);
+		CInventoryOwner::Save(Object);
+		Object->GetCurrentChunk()->w_bool(m_bOutBorder);
+
+		Object->BeginChunk("CActor::PDA");
+		{
+			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
+			Object->GetCurrentChunk()->w_bool(task_wnd->IsTreasuresEnabled());
+			Object->GetCurrentChunk()->w_bool(task_wnd->IsQuestNpcsEnabled());
+			Object->GetCurrentChunk()->w_bool(task_wnd->IsSecondaryTasksEnabled());
+			Object->GetCurrentChunk()->w_bool(task_wnd->IsPrimaryObjectsEnabled());
+		}
+		Object->EndChunk();
+
+		Object->BeginChunk("CActor::Camera");
+		{
+			cam_Active()->Save(Object);
+			Object->GetCurrentChunk()->w_u8(cam_active);
+		}
+		Object->EndChunk();
+
+		Object->BeginChunk("CActor::Quickslots");
+		{
+			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[0]);
+			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[1]);
+			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[2]);
+			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[3]);
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
+void CActor::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CActor");
+	{
+		inherited::Load(Object);
+		CInventoryOwner::Load(Object);
+		Object->GetCurrentChunk()->r_bool(m_bOutBorder);
+
+		Object->FindChunk("CActor::PDA");
+		{
+			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
+			bool Value;
+			Object->GetCurrentChunk()->r_bool(Value);
+			task_wnd->TreasuresEnabled(Value);
+			Object->GetCurrentChunk()->r_bool(Value);
+			task_wnd->QuestNpcsEnabled(Value);
+			Object->GetCurrentChunk()->r_bool(Value);
+			task_wnd->SecondaryTasksEnabled(Value);
+			Object->GetCurrentChunk()->r_bool(Value);
+			task_wnd->PrimaryObjectsEnabled(Value);
+		}
+		Object->EndChunk();
+
+		Object->BeginChunk("CActor::Camera");
+		{
+			cam_Active()->Load(Object);
+			u8 Value;
+			Object->GetCurrentChunk()->r_u8(Value);
+			cam_Set(EActorCameras(Value));
+		}
+		Object->EndChunk();
+
+		//need_quick_slot_reload = true;
+
+
+		Object->BeginChunk("CActor::Quickslots");
+		{
+			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[0]);
+			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[1]);
+			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[2]);
+			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[3]);
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
 }
 
 #ifdef DEBUG
