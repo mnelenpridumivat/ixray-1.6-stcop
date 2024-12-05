@@ -23,6 +23,8 @@ class NET_Packet;
 	class CSE_ALifeTraderAbstract;
 #endif
 
+class CSaveObject;
+
 
 //////////////////////////////////////////////////////////////////////////
 // SCharacterProfile: данные профиля персонажа
@@ -68,6 +70,8 @@ public:
 #ifdef XRGAME_EXPORTS
 	void 						load				(IReader&);
 	void 						save				(NET_Packet&);
+	virtual void Save(CSaveObject* Object);
+	virtual void Load(CSaveObject* Object);
 
 	//инициализация профиля подразумевает
 	//загрузку соответствующего CSpecificCharacter, по 

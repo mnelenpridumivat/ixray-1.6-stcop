@@ -14,6 +14,8 @@
 #	include "xrUIXmlParser.h"
 #endif // XRGAME_EXPORTS
 
+#include "Save/SaveObject.h"
+
 //////////////////////////////////////////////////////////////////////////
 SCharacterProfile::SCharacterProfile()
 {
@@ -182,6 +184,24 @@ void CCharacterInfo::load	(IReader& stream)
 void CCharacterInfo::save	(NET_Packet& stream)
 {
 	stream.w_stringZ	(m_StartDialog);
+}
+
+void CCharacterInfo::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CInventoryOwner");
+	{
+		Object->GetCurrentChunk()->w_stringZ(m_StartDialog);
+	}
+	Object->EndChunk();
+}
+
+void CCharacterInfo::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CInventoryOwner");
+	{
+		Object->GetCurrentChunk()->r_stringZ(m_StartDialog);
+	}
+	Object->EndChunk();
 }
 
 #endif

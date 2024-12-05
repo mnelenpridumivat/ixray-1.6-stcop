@@ -14,6 +14,7 @@ class CPHSkeleton;
 class CCharacterPhysicsSupport;
 class ICollisionDamageInfo;
 class CIKLimbsController;
+class CSaveObject;
 
 
 
@@ -94,6 +95,8 @@ public:
 	virtual BOOL			net_Spawn			(CSE_Abstract*	DC);
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
+	virtual void Save(CSaveObject* Object) override;
+	virtual void Load(CSaveObject* Object) override;
 			void			init				();
 
 	virtual void			OnChangeVisual		();

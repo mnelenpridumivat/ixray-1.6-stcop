@@ -21,6 +21,7 @@
 #include "physics_shell_animated.h"
 #include "PHCollisionDamageReceiver.h"
 #include "../xrEngine/IPhysicsShell.h"
+#include "Save/SaveObject.h"
 #ifdef	DEBUG
 #include "../xrEngine/ObjectDump.h"
 #endif
@@ -369,6 +370,31 @@ void		CPhysicsShellHolder::	load				(IReader &input_packet)
 	inherited::load(input_packet);
 	st_enable_state=input_packet.r_u8();
 
+}
+
+void CPhysicsShellHolder::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CPhysicsShellHolder");
+	{
+		inherited::Save(Object);
+		u8 enable_state = (u8)stNotDefitnite;
+		if (PPhysicsShell() && PPhysicsShell()->isActive())
+		{
+			enable_state = u8(PPhysicsShell()->isEnabled() ? stEnable : stDisable);
+		}
+		Object->GetCurrentChunk()->w_u8(enable_state);
+	}
+	Object->EndChunk();
+}
+
+void CPhysicsShellHolder::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CPhysicsShellHolder");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_u8(st_enable_state);
+	}
+	Object->EndChunk();
 }
 
 void CPhysicsShellHolder::PHSaveState(NET_Packet &P)
