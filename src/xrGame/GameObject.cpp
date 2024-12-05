@@ -485,12 +485,12 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
-void CGameObject::Save(CSaveObject* Object)
+void CGameObject::Save(CSaveObjectSave* Object)
 {
 	CScriptBinder::Save(Object);
 }
 
-void CGameObject::Load(CSaveObject* Object)
+void CGameObject::Load(CSaveObjectLoad* Object)
 {
 	CScriptBinder::Load(Object);
 }

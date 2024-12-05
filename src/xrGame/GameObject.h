@@ -11,6 +11,7 @@
 #include "script_binder.h"
 #include "Hit.h"
 #include "game_object_space.h"
+#include "Save/SaveObject.h"
 
 class CPhysicsShell;
 class CSE_Abstract;
@@ -41,8 +42,8 @@ class CAttachableItem;
 class animation_movement_controller;
 class CBlend;
 class ai_obstacle;
-class CSaveObject;
-
+class CSaveObjectSave;
+class CSaveObjectLoad;
 class IKinematics;
 
 template <typename _return_type>
@@ -115,8 +116,8 @@ public:
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
 	//object serialization new
-	virtual void Save(CSaveObject* Object);
-	virtual void Load(CSaveObject* Object);
+	virtual void Save(CSaveObjectSave* Object);
+	virtual void Load(CSaveObjectLoad* Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local
 	virtual void			spatial_move		();

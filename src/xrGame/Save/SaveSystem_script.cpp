@@ -142,10 +142,22 @@ void SaveSystemScript::script_register(lua_State* L)
 
 				//.def("BeginChunk", &CSaveChunk_script::BeginChunk)
 				//.def("FindChunk", &CSaveChunk_script::FindChunk),
-			class_<CSaveObject>("SaveObject")
+			/*class_<CSaveObject>("SaveObject")
+				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+				.def("BeginChunk", &CSaveObject_script::BeginChunk)
+				.def("FindChunk", &CSaveObject_script::FindChunk)
+				.def("EndChunk", &CSaveObject::EndChunk),*/
+			class_<CSaveObjectSave>("SaveObjectSave")
+				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+				.def("BeginChunk", &CSaveObject_script::BeginChunk)
+				.def("FindChunk", &CSaveObject_script::FindChunk)
+				.def("EndChunk", &CSaveObject::EndChunk),
+			class_<CSaveObjectLoad>("SaveObjectLoad")
 				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("FindChunk", &CSaveObject_script::FindChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
 		];
 }
+
+SCRIPT_EXPORT1(SaveSystemScript);

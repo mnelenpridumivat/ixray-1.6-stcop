@@ -13,7 +13,7 @@ class CSaveChunk: public ISaveable {
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_invalid; }
+	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
 	virtual bool IsArray() override { return false; }
 
 	void ReadArray(u64& Size);

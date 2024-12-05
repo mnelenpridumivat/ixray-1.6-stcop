@@ -111,22 +111,22 @@ void CScriptBinderObjectWrapper::load_static			(CScriptBinderObject *script_bind
 	script_binder_object->CScriptBinderObject::load		(input_packet);
 }
 
-void CScriptBinderObjectWrapper::Save(CSaveObject* Object)
+void CScriptBinderObjectWrapper::Save(CSaveObjectSave* Object)
 {
 	luabind::call_member<void>(this, "Save", Object);
 }
 
-void CScriptBinderObjectWrapper::Save_static(CScriptBinderObject* script_binder_object, CSaveObject* Object)
+void CScriptBinderObjectWrapper::Save_static(CScriptBinderObject* script_binder_object, CSaveObjectSave* Object)
 {
 	script_binder_object->CScriptBinderObject::Save(Object);
 }
 
-void CScriptBinderObjectWrapper::Load(CSaveObject* Object)
+void CScriptBinderObjectWrapper::Load(CSaveObjectLoad* Object)
 {
 	luabind::call_member<void>(this, "Load", Object);
 }
 
-void CScriptBinderObjectWrapper::Load_static(CScriptBinderObject* script_binder_object, CSaveObject* Object)
+void CScriptBinderObjectWrapper::Load_static(CScriptBinderObject* script_binder_object, CSaveObjectLoad* Object)
 {
 	script_binder_object->CScriptBinderObject::Load(Object);
 }

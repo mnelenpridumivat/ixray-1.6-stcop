@@ -30,6 +30,7 @@ enum class ESaveVariableType : u8 {
 	t_chunkEnd,
 	t_chunkSize,
 	t_array,
+	t_chunk,
 	t_invalid = u8(-1),
 };
 

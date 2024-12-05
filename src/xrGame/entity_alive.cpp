@@ -604,7 +604,7 @@ void CEntityAlive::load	(IReader &input_packet)
 	conditions().load(input_packet);
 }
 
-void CEntityAlive::Save(CSaveObject* Object)
+void CEntityAlive::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CEntityAlive");
 	{
@@ -614,7 +614,7 @@ void CEntityAlive::Save(CSaveObject* Object)
 	Object->EndChunk();
 }
 
-void CEntityAlive::Load(CSaveObject* Object)
+void CEntityAlive::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CEntityAlive");
 	{

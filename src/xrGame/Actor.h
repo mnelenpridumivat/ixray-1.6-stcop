@@ -18,6 +18,7 @@
 
 #include "step_manager.h"
 #include "../xrScripts/script_export_space.h"
+#include "Save/SaveObject.h"
 
 using namespace ACTOR_DEFS;
 
@@ -523,8 +524,8 @@ public:
 	//object serialization
 	virtual void						save				(NET_Packet &output_packet);
 	virtual void						load				(IReader &input_packet);
-	virtual void Save(CSaveObject* Object) override;
-	virtual void Load(CSaveObject* Object) override;
+	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 	virtual void						net_Save			(NET_Packet& P)																	;
 	virtual	BOOL						net_SaveRelevant	()																				;
 protected:

@@ -372,7 +372,7 @@ void		CPhysicsShellHolder::	load				(IReader &input_packet)
 
 }
 
-void CPhysicsShellHolder::Save(CSaveObject* Object)
+void CPhysicsShellHolder::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CPhysicsShellHolder");
 	{
@@ -387,7 +387,7 @@ void CPhysicsShellHolder::Save(CSaveObject* Object)
 	Object->EndChunk();
 }
 
-void CPhysicsShellHolder::Load(CSaveObject* Object)
+void CPhysicsShellHolder::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CPhysicsShellHolder");
 	{

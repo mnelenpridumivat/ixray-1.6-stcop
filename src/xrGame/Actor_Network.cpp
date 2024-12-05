@@ -1443,7 +1443,7 @@ void CActor::load(IReader &input_packet)
 	input_packet.r_stringZ(g_quick_use_slots[3], sizeof(g_quick_use_slots[3]));
 }
 
-void CActor::Save(CSaveObject* Object)
+void CActor::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CActor");
 	{
@@ -1480,7 +1480,7 @@ void CActor::Save(CSaveObject* Object)
 	Object->EndChunk();
 }
 
-void CActor::Load(CSaveObject* Object)
+void CActor::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CActor");
 	{

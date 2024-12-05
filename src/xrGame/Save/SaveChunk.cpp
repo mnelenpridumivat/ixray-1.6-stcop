@@ -30,15 +30,34 @@ void CSaveChunk::EndArray()
 
 CSaveChunk* CSaveChunk::BeginChunk(shared_str ChunkName)
 {
-	VERIFY(_subchunks.find(ChunkName) == _subchunks.end());
-	return _subchunks.emplace(ChunkName, xr_make_unique<CSaveChunk>(ChunkName)).first->second.get();
+	if (_currentArrayStack.empty()) {
+		VERIFY(_subchunks.find(ChunkName) == _subchunks.end());
+		return _subchunks.emplace(ChunkName, xr_make_unique<CSaveChunk>(ChunkName)).first->second.get();
+	}
+	else {
+		auto Array = _currentArrayStack.top();
+		auto Value = new CSaveChunk(ChunkName);
+		Array->AddVariable(Value);
+		return Value;
+	}
 }
 
 CSaveChunk* CSaveChunk::FindChunk(shared_str ChunkName)
 {
-	auto Chunk = _subchunks.find(ChunkName);
-	VERIFY(Chunk != _subchunks.end());
-	return Chunk->second.get();
+	if (_currentArrayStack.empty()) {
+		auto Chunk = _subchunks.find(ChunkName);
+		VERIFY(Chunk != _subchunks.end());
+		return Chunk->second.get();
+	}
+	else {
+		auto Array = _currentArrayStack.top();
+		auto CurrentElement = Array->GetCurrentElement(); 
+		Array->Next();
+		VERIFY(CurrentElement->GetVariableType() == ESaveVariableType::t_chunk);
+		auto CastedElement = (CSaveChunk*)CurrentElement;
+		VERIFY(CastedElement->_chunkName == ChunkName);
+		return CastedElement;
+	}
 }
 
 void CSaveChunk::w_bool(bool a)

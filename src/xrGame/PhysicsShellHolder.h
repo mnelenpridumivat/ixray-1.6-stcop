@@ -5,6 +5,7 @@
 #include "ParticlesPlayer.h"
 #include "../xrEngine/IObjectPhysicsCollision.h"
 #include "../xrPhysics/IPhysicsShellHolder.h"
+#include "Save/SaveObject.h"
 
 class CPHDestroyable;
 class CPHCollisionDamageReceiver;
@@ -14,7 +15,8 @@ class CPHSkeleton;
 class CCharacterPhysicsSupport;
 class ICollisionDamageInfo;
 class CIKLimbsController;
-class CSaveObject;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 
 
@@ -91,12 +93,14 @@ public:
 	virtual void			setup_physic_shell		();
 	virtual void			deactivate_physics_shell ();
 
+	virtual void Load(LPCSTR Section) override { inherited::Load(Section); }
+
 	virtual void			net_Destroy			();
 	virtual BOOL			net_Spawn			(CSE_Abstract*	DC);
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
-	virtual void Save(CSaveObject* Object) override;
-	virtual void Load(CSaveObject* Object) override;
+	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 			void			init				();
 
 	virtual void			OnChangeVisual		();

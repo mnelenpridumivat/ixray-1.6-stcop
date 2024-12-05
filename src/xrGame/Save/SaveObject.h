@@ -3,6 +3,7 @@
 #include "SaveChunk.h"
 
 class CSaveObject {
+protected:
 	xr_unique_ptr<CSaveChunk> _rootChunk;
 	xr_stack<CSaveChunk*> _chunkStack;
 
@@ -10,9 +11,19 @@ public:
 	CSaveObject();
 
 	CSaveChunk* GetCurrentChunk();
-	void BeginChunk(shared_str ChunkName);
-	void FindChunk(shared_str ChunkName);
+	virtual void BeginChunk(shared_str ChunkName) = 0;
+	virtual void FindChunk(shared_str ChunkName) = 0;
 	void EndChunk();
+};
 
-	DECLARE_SCRIPT_REGISTER_FUNCTION
+class CSaveObjectSave: public CSaveObject {
+public:
+	virtual void BeginChunk(shared_str ChunkName) override;
+	virtual void FindChunk(shared_str ChunkName) override;
+};
+
+class CSaveObjectLoad: public CSaveObject {
+public:
+	virtual void BeginChunk(shared_str ChunkName) override;
+	virtual void FindChunk(shared_str ChunkName) override;
 };
