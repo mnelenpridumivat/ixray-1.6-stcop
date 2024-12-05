@@ -42,6 +42,7 @@
 #include "../../../../xrScripts/script_engine.h"
 
 #include "../anti_aim_ability.h"
+#include "Save/SaveObject.h"
 
 // Lain: added 
 #include "../../../level_debug.h"
@@ -327,6 +328,24 @@ void CBaseMonster::update_enemy_accessible_and_at_home_info	()
 			m_last_tick_enemy_inaccessible	=	0;
 		}
 	}
+}
+
+void CBaseMonster::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CBaseMonster");
+	{
+		inherited::Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CBaseMonster::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CBaseMonster");
+	{
+		inherited::Load(Object);
+	}
+	Object->EndChunk();
 }
 
 void CBaseMonster::UpdateCL()

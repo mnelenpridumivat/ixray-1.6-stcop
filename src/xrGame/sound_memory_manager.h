@@ -22,6 +22,8 @@ enum ESoundTypes;
 
 class CCustomMonster;
 class CAI_Stalker;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 class CSoundMemoryManager {
 public:
@@ -105,6 +107,8 @@ public:
 public:
 			void				save					(NET_Packet &packet) const;
 			void				load					(IReader &packet);
+			virtual void Save(CSaveObjectSave* Object);
+			virtual void Load(CSaveObjectLoad* Object);
 			void				on_requested_spawn		(CObject *object);
 
 private:

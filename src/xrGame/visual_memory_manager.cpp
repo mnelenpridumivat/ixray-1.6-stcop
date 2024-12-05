@@ -27,6 +27,7 @@
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
 #include "ai/monsters/basemonster/base_monster.h"
+#include "Save/SaveObject.h"
 
 #ifndef MASTER_GOLD
 #	include "actor.h"
@@ -879,6 +880,202 @@ void CVisualMemoryManager::load	(IReader &packet)
 		}
 #endif // DEBUG
 	}
+}
+
+void CVisualMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CVisualMemoryManager");
+	{
+		if (m_client) {
+			Object->EndChunk();
+			return;
+		}
+
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		//	Msg("before saving object %s[%d]", m_object->cName().c_str(), packet.w_tell() );
+		u32 count = 0;
+		VISIBLES::const_iterator	I = objects().begin();
+		VISIBLES::const_iterator const	E = objects().end();
+		for (; I != E; ++I) {
+			if (is_object_valuable_to_save(m_object, *I)) {
+				++count;
+			}
+		}
+
+
+		Object->GetCurrentChunk()->WriteArray(count);
+		{
+			if (count) {
+				for (I = objects().begin(); I != E; ++I) {
+					if (!is_object_valuable_to_save(m_object, *I)) {
+						continue;
+					}
+					Object->BeginChunk("CVisualMemoryManager::object");
+					{
+
+						VERIFY((*I).m_object);
+						Object->GetCurrentChunk()->w_u16((*I).m_object->ID());
+						// object params
+						Object->GetCurrentChunk()->w_u32((*I).m_object_params.m_level_vertex_id);
+						Object->GetCurrentChunk()->w_vec3((*I).m_object_params.m_position);
+#ifdef USE_ORIENTATION
+						Object->BeginChunk("CVisualMemoryManager::object::object_params_orientation");
+						{
+							Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.yaw);
+							Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.pitch);
+							Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.roll);
+						}
+						Object->EndChunk();
+#endif // USE_ORIENTATION
+						// self params
+						Object->GetCurrentChunk()->w_u32((*I).m_self_params.m_level_vertex_id);
+						Object->GetCurrentChunk()->w_vec3((*I).m_self_params.m_position);
+#ifdef USE_ORIENTATION
+						Object->BeginChunk("CVisualMemoryManager::object::self_params_orientation");
+						{
+							Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.yaw);
+							Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.pitch);
+							Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.roll);
+						}
+						Object->EndChunk();
+#endif // USE_ORIENTATION
+#ifdef USE_LEVEL_TIME
+						Object->BeginChunk("CVisualMemoryManager::object::level_time");
+						{
+							Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
+							Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
+						}
+						Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+						Object->BeginChunk("CVisualMemoryManager::object::first_level_time");
+						{
+							Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
+						}
+						Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+						Object->GetCurrentChunk()->w_u64((*I).m_visible.flags);
+					}
+					Object->EndChunk();
+				}
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CVisualMemoryManager");
+	{
+		if (m_client) {
+			Object->EndChunk();
+			return;
+		}
+	
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+	
+		typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+		CALLBACK_TYPE					callback;
+		callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+	
+		u64								count;
+		Object->GetCurrentChunk()->ReadArray(count);
+		{
+			for (u64 i = 0; i < count; ++i) {
+				Object->FindChunk("CVisualMemoryManager::object");
+				{
+					CDelayedVisibleObject		delayed_object;
+					Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
+	
+					CVisibleObject& object = delayed_object.m_visible_object;
+					object.m_object = smart_cast<CGameObject*>(Level().Objects.net_Find(delayed_object.m_object_id));
+					// object params
+					Object->GetCurrentChunk()->r_u32(object.m_object_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->r_vec3(object.m_object_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->FindChunk("CVisualMemoryManager::object::object_params_orientation");
+					{
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif
+					// self params
+					Object->GetCurrentChunk()->r_u32(object.m_self_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->r_vec3(object.m_self_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->FindChunk("CVisualMemoryManager::object::self_params_orientation");
+					{
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif
+#ifdef USE_LEVEL_TIME
+					Object->FindChunk("CVisualMemoryManager::object::level_time");
+					{
+						VERIFY(Device.dwTimeGlobal >= object.m_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_level_time);
+						object.m_level_time = Device.dwTimeGlobal - object.m_level_time;
+						VERIFY(Device.dwTimeGlobal >= object.m_last_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_last_level_time);
+						object.m_last_level_time = Device.dwTimeGlobal - object.m_last_level_time;
+					}
+					Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+					Object->FindChunk("CVisualMemoryManager::object::first_level_time");
+					{
+						VERIFY(Device.dwTimeGlobal >= (*I).m_first_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_first_level_time);
+						object.m_first_level_time = Device.dwTimeGlobal - object.m_first_level_time;
+					}
+					Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+					{
+						u64 Value;
+						Object->GetCurrentChunk()->r_u64(Value);
+						object.m_visible.assign(Value);
+					}
+	
+					if (object.m_object) {
+						add_visible_object(object);
+						Object->EndChunk();
+						continue;
+					}
+	
+					m_delayed_objects.push_back(delayed_object);
+	
+					const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+					if (!spawn_callback || !spawn_callback->m_object_callback) {
+						if (!g_dedicated_server)
+							Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+#ifdef DEBUG
+						else {
+							if (spawn_callback && spawn_callback->m_object_callback) {
+								VERIFY(spawn_callback->m_object_callback == callback);
+							}
+						}
+					}
+				}
+				Object->EndChunk();
+#endif // DEBUG
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
 }
 
 void CVisualMemoryManager::clear_delayed_objects()

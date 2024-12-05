@@ -24,6 +24,7 @@
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
 #include "../xrEngine/IGame_Persistent.h"
+#include "Save/SaveObject.h"
 
 #ifndef MASTER_GOLD
 #	include "actor.h"
@@ -509,6 +510,178 @@ void CSoundMemoryManager::load	(IReader &packet)
 		}
 #endif // DEBUG
 	}
+}
+
+void CSoundMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CSoundMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		SOUNDS::const_iterator		I = objects().begin();
+		SOUNDS::const_iterator		E = objects().end();
+		Object->GetCurrentChunk()->WriteArray(objects().size());
+		for (; I != E; ++I) {
+			Object->BeginChunk("CSoundMemoryManager::object");
+			{
+				Object->GetCurrentChunk()->w_u16((*I).m_object ? (*I).m_object->ID() : ALife::_OBJECT_ID(-1));
+				// object params
+				Object->GetCurrentChunk()->w_u32((*I).m_object_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->w_vec3((*I).m_object_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->BeginChunk("CSoundMemoryManager::object::object_params_orientation");
+				{
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif // USE_ORIENTATION
+			// self params
+				Object->GetCurrentChunk()->w_u32((*I).m_self_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->w_vec3((*I).m_self_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->BeginChunk("CSoundMemoryManager::object::self_params_orientation");
+				{
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif // USE_ORIENTATION
+#ifdef USE_LEVEL_TIME
+				Object->BeginChunk("CSoundMemoryManager::object::level_time");
+				{
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
+				}
+				Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+				Object->BeginChunk("CSoundMemoryManager::object::first_level_time");
+				{
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
+				}
+				Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+				Object->GetCurrentChunk()->w_u32((*I).m_sound_type);
+				Object->GetCurrentChunk()->w_float((*I).m_power);
+			}
+			Object->EndChunk();
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CSoundMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSoundMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+		CALLBACK_TYPE					callback;
+		callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+
+		u64								count;
+		Object->GetCurrentChunk()->ReadArray(count);
+		for (u64 i = 0; i < count; ++i) {
+			Object->FindChunk("CSoundMemoryManager::object");
+			{
+				CDelayedSoundObject			delayed_object;
+				Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
+
+				CSoundObject& object = delayed_object.m_sound_object;
+				if (delayed_object.m_object_id != ALife::_OBJECT_ID(-1)) {
+					object.m_object = smart_cast<CGameObject*>(Level().Objects.net_Find(delayed_object.m_object_id));
+				}
+				else {
+					object.m_object = 0;
+				}
+
+				// object params
+				Object->GetCurrentChunk()->r_u32(object.m_object_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->r_vec3(object.m_object_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->FindChunk("CSoundMemoryManager::object::object_params_orientation");
+				{
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif
+				// self params
+				Object->GetCurrentChunk()->r_u32(object.m_self_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->r_vec3(object.m_self_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->FindChunk("CSoundMemoryManager::object::self_params_orientation");
+				{
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif
+#ifdef USE_LEVEL_TIME
+				Object->FindChunk("CSoundMemoryManager::object::level_time");
+				{
+					VERIFY(Device.dwTimeGlobal >= object.m_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_level_time);
+					object.m_level_time = Device.dwTimeGlobal - object.m_level_time;
+					VERIFY(Device.dwTimeGlobal >= object.m_last_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_last_level_time);
+					object.m_last_level_time = Device.dwTimeGlobal - object.m_last_level_time;
+				}
+				Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+				Object->FindChunk("CSoundMemoryManager::object::first_level_time");
+				{
+					VERIFY(Device.dwTimeGlobal >= (*I).m_first_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_first_level_time);
+					object.m_first_level_time = Device.dwTimeGlobal - object.m_first_level_time;
+				}
+				Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+				{
+					u32 Value;
+					Object->GetCurrentChunk()->r_u32(Value);
+					object.m_sound_type = (ESoundTypes)Value;
+				}
+				Object->GetCurrentChunk()->r_float(object.m_power);
+
+				if (object.m_object || (delayed_object.m_object_id == ALife::_OBJECT_ID(-1))) {
+					add(object, true);
+					continue;
+				}
+
+				m_delayed_objects.push_back(delayed_object);
+
+				const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+				if (!spawn_callback || !spawn_callback->m_object_callback) {
+					if (!g_dedicated_server) {
+						Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+					}
+#ifdef DEBUG
+					else if (spawn_callback && spawn_callback->m_object_callback) {
+						VERIFY(spawn_callback->m_object_callback == callback);
+					}
+#endif // DEBUG
+				}
+			}
+			Object->EndChunk();
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
 }
 
 void CSoundMemoryManager::clear_delayed_objects()

@@ -46,6 +46,7 @@
 #include "client_spawn_manager.h"
 #include "moving_object.h"
 #include "level_path_manager.h"
+#include "Save/SaveObject.h"
 
 // Lain: added
 #include "../xrEngine/IGame_Level.h"
@@ -1049,6 +1050,30 @@ void CCustomMonster::load (IReader &packet)
 	inherited::load			(packet);
 	if (g_Alive())
 		memory().load		(packet);
+}
+
+void CCustomMonster::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CCustomMonster");
+	{
+		inherited::Save(Object);
+		if (g_Alive()) {
+			memory().Save(Object);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CCustomMonster::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CCustomMonster");
+	{
+		inherited::Load(Object);
+		if (g_Alive()) {
+			memory().Load(Object);
+		}
+	}
+	Object->EndChunk();
 }
 
 

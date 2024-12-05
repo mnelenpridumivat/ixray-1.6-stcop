@@ -12,6 +12,7 @@
 #include "../Include/xrRender/Kinematics.h"
 #include "../xrCore/associative_vector.h"
 #include "trajectories.h"
+#include "Save/SaveObject.h"
 
 
 namespace MonsterSpace {
@@ -29,6 +30,8 @@ class CSoundPlayer;
 class CAI_Stalker;
 class CDangerObject;
 class moving_object;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 class CCustomMonster : 
 	public CEntityAlive, 
@@ -203,6 +206,8 @@ public:
 
 	virtual void				save					(NET_Packet &output_packet);
 	virtual void				load					(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 	virtual BOOL				net_SaveRelevant		()							{return inherited::net_SaveRelevant();}
 	
 	virtual	const MonsterSpace::SBoneRotation &head_orientation	() const;

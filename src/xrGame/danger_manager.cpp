@@ -15,6 +15,7 @@
 #include "enemy_manager.h"
 #include "Actor.h"
 #include "object_broker.h"
+#include "Save/SaveObject.h"
 
 struct CDangerPredicate {
 	const CObject	*m_object;
@@ -341,4 +342,33 @@ void CDangerManager::save			(NET_Packet &packet) const
 void CDangerManager::load			(IReader &packet)
 {
 	load_data				(m_ignored,packet);
+}
+
+void CDangerManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CDangerManager");
+	{
+		Object->GetCurrentChunk()->WriteArray(m_ignored.size());
+		for (auto& elem : m_ignored) {
+			Object->GetCurrentChunk()->r_u16(elem);
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CDangerManager::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CDangerManager");
+	{
+		u64 ArraySize;
+		Object->GetCurrentChunk()->ReadArray(ArraySize);
+		for (u64 i = 0; i < ArraySize; ++i) {
+			u16 elem;
+			Object->GetCurrentChunk()->r_u16(elem);
+			m_ignored.push_back(elem);
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
 }

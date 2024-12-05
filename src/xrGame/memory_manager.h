@@ -18,6 +18,8 @@ class CCustomMonster;
 class CAI_Stalker;
 class CEntityAlive;
 class CSound_UserDataVisitor;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 namespace MemorySpace {
 	struct CMemoryInfo;
@@ -82,6 +84,8 @@ public:
 public:
 			void				save						(NET_Packet &packet) const;
 			void				load						(IReader &packet);
+			virtual void Save(CSaveObjectSave* Object);
+			virtual void Load(CSaveObjectLoad* Object);
 			void 		on_requested_spawn			(CObject *object);
 };
 

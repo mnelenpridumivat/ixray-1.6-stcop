@@ -53,6 +53,8 @@ class CPHCharacter;
 // Lain: added
 class CMonsterSquad;
 class squad_grouping_behaviour;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 #ifdef DEBUG
 namespace debug { class text_tree; }
@@ -128,6 +130,8 @@ public:
 	//save/load server serialization
 	virtual void			save							(NET_Packet &output_packet) {inherited::save(output_packet);}
 	virtual void			load							(IReader &input_packet)		{inherited::load(input_packet);}
+	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 
 
 	virtual void			UpdateCL						();

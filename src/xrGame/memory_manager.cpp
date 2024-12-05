@@ -24,6 +24,7 @@
 #include "level_graph.h"
 #include "agent_enemy_manager.h"
 #include "script_game_object.h"
+#include "Save/SaveObject.h"
 
 CMemoryManager::CMemoryManager		(CEntityAlive *entity_alive, CSound_UserDataVisitor *visitor)
 {
@@ -354,6 +355,30 @@ void CMemoryManager::load							(IReader &packet)
 	sound().load				(packet);
 	hit().load					(packet);
 	danger().load				(packet);
+}
+
+void CMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CMemoryManager");
+	{
+		visual().Save(Object);
+		sound().Save(Object);
+		hit().Save(Object);
+		danger().Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CMemoryManager");
+	{
+		visual().Load(Object);
+		sound().Load(Object);
+		hit().Load(Object);
+		danger().Load(Object);
+	}
+	Object->EndChunk();
 }
 
 // we do this due to the limitation of client spawn manager
