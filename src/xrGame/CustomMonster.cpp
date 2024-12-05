@@ -1052,7 +1052,7 @@ void CCustomMonster::load (IReader &packet)
 		memory().load		(packet);
 }
 
-void CCustomMonster::Save(CSaveObjectSave* Object)
+void CCustomMonster::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CCustomMonster");
 	{

@@ -604,7 +604,7 @@ void CEntityAlive::load	(IReader &input_packet)
 	conditions().load(input_packet);
 }
 
-void CEntityAlive::Save(CSaveObjectSave* Object)
+void CEntityAlive::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CEntityAlive");
 	{

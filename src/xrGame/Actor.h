@@ -327,7 +327,7 @@ public:
 	
 public:
 	CActorCameraManager&	Cameras				() 	{VERIFY(m_pActorEffector); return *m_pActorEffector;}
-	IC CCameraBase*			cam_Active			()	{return cameras[cam_active];}
+	IC CCameraBase*			cam_Active			() const	{return cameras[cam_active];}
 	IC CCameraBase*			cam_FirstEye		()	{return cameras[eacFirstEye];}
 	IC EActorCameras active_cam() { return cam_active; }
 	virtual void cam_Set(EActorCameras style);
@@ -524,7 +524,7 @@ public:
 	//object serialization
 	virtual void						save				(NET_Packet &output_packet);
 	virtual void						load				(IReader &input_packet);
-	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Save(CSaveObjectSave* Object) const override;
 	virtual void Load(CSaveObjectLoad* Object) override;
 	virtual void						net_Save			(NET_Packet& P)																	;
 	virtual	BOOL						net_SaveRelevant	()																				;

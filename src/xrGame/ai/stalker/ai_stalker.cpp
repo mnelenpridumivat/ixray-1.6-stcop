@@ -1310,7 +1310,7 @@ void CAI_Stalker::load (IReader &packet)
 	brain().load			(packet);
 }
 
-void CAI_Stalker::Save(CSaveObjectSave* Object)
+void CAI_Stalker::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CAI_Stalker");
 	{

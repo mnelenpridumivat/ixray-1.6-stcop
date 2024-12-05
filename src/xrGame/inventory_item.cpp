@@ -716,10 +716,6 @@ void CInventoryItem::net_Export			(NET_Packet& P)
 		return;
 	}
 
-	/*if (num_items.mask&CSE_ALifeObjectPhysic::animated)
-	{
-		net_Export_Anim_Params(P);
-	}*/
 	net_Export_PH_Params(P,State,num_items);
 	
 	if (object().PPhysicsShell() && object().PPhysicsShell()->isEnabled())
@@ -729,90 +725,6 @@ void CInventoryItem::net_Export			(NET_Packet& P)
 	{
 		P.w_u8(0);  //freezed
 	}
-
-	/*if (object().H_Parent() || IsGameTypeSingle()) 
-	{
-		P.w_u8				(0);
-		return;
-	}
-	CPHSynchronize* pSyncObj				= nullptr;
-	SPHNetState								State;
-	pSyncObj = object().PHGetSyncItem		(0);
-
-	if (pSyncObj && !object().H_Parent()) 
-		pSyncObj->get_State					(State);
-	else 	
-		State.position.set					(object().Position());
-
-
-	mask_num_items			num_items;
-	num_items.mask			= 0;
-	u16						temp = object().PHGetSyncItemsNumber();
-	R_ASSERT				(temp < (u16(1) << 5));
-	num_items.num_items		= u8(temp);
-
-	if (State.enabled)									num_items.mask |= CSE_ALifeInventoryItem::inventory_item_state_enabled;
-	if (fis_zero(State.angular_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_angular_null;
-	if (fis_zero(State.linear_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_linear_null;
-
-	P.w_u8					(num_items.common);
-
-	P.w_vec3				(State.position);
-
-	float					magnitude = _sqrt(State.quaternion.magnitude());
-	if (fis_zero(magnitude)) {
-		magnitude			= 1;
-		State.quaternion.x	= 0.f;
-		State.quaternion.y	= 0.f;
-		State.quaternion.z	= 1.f;
-		State.quaternion.w	= 0.f;
-	}
-	else {
-		float				invert_magnitude = 1.f/magnitude;
-		
-		State.quaternion.x	*= invert_magnitude;
-		State.quaternion.y	*= invert_magnitude;
-		State.quaternion.z	*= invert_magnitude;
-		State.quaternion.w	*= invert_magnitude;
-
-		clamp				(State.quaternion.x, -1.f, 1.f);
-		clamp				(State.quaternion.y, -1.f, 1.f);
-		clamp				(State.quaternion.z, -1.f, 1.f);
-		clamp				(State.quaternion.w, -1.f, 1.f);
-	}
-
-	P.w_float_q8			(State.quaternion.x, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.y, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.z, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.w, -1.f, 1.f);
-
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) {
-		clamp				(State.angular_vel.x,0.f,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.y,0.f,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.z,0.f,10.f*PI_MUL_2);
-
-		P.w_float_q8		(State.angular_vel.x,0.f,10.f*PI_MUL_2);
-		P.w_float_q8		(State.angular_vel.y,0.f,10.f*PI_MUL_2);
-		P.w_float_q8		(State.angular_vel.z,0.f,10.f*PI_MUL_2);
-	}
-
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) {
-		clamp				(State.linear_vel.x,-32.f,32.f);
-		clamp				(State.linear_vel.y,-32.f,32.f);
-		clamp				(State.linear_vel.z,-32.f,32.f);
-
-		P.w_float_q8		(State.linear_vel.x,-32.f,32.f);
-		P.w_float_q8		(State.linear_vel.y,-32.f,32.f);
-		P.w_float_q8		(State.linear_vel.z,-32.f,32.f);
-	}
-
-	if (object().PPhysicsShell() && object().PPhysicsShell()->isEnabled())
-	{
-		P.w_u8(1);	//not freezed
-	} else
-	{
-		P.w_u8(0);  //freezed
-	}*/
 };
 
 void CInventoryItem::load(IReader &packet)
@@ -834,6 +746,64 @@ void CInventoryItem::load(IReader &packet)
 	
 	object().PHLoadState(packet);
 	object().PPhysicsShell()->Disable();
+}
+
+void CInventoryItem::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CInventoryItem");
+	{
+		Object->GetCurrentChunk()->w_u16(m_ItemCurrPlace.value);
+		Object->GetCurrentChunk()->w_float(m_fCondition);
+		//--	save_data				(m_upgrades, packet);
+
+		if (object().H_Parent()) {
+			Object->GetCurrentChunk()->w_u8(0);
+			Object->EndChunk();
+			return;
+		}
+
+		CArtefact* artefact = smart_cast<CArtefact*>(this);
+
+		if (artefact && artefact->IsInContainer())
+		{
+			Object->GetCurrentChunk()->w_u8(0);
+			Object->EndChunk();
+			return;
+		}
+
+		u8 _num_items = (u8)object().PHGetSyncItemsNumber();
+		Object->GetCurrentChunk()->w_u8(_num_items);
+		object().PHSaveState(Object);
+	}
+	Object->EndChunk();
+}
+
+void CInventoryItem::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CInventoryItem");
+	{
+		Object->GetCurrentChunk()->r_u16(m_ItemCurrPlace.value);
+		Object->GetCurrentChunk()->r_float(m_fCondition);
+
+		//--	load_data( m_upgrades, packet );
+		//--	install_loaded_upgrades();
+
+		u8						tmp;
+		Object->GetCurrentChunk()->r_u8(tmp);
+		if (!tmp) {
+			Object->EndChunk();
+			return;
+		}
+
+		if (!object().PPhysicsShell()) {
+			object().setup_physic_shell();
+			object().PPhysicsShell()->Disable();
+		}
+
+		object().PHLoadState(Object);
+		object().PPhysicsShell()->Disable();
+	}
+	Object->EndChunk();
 }
 
 ///////////////////////////////////////////////

@@ -130,7 +130,7 @@ public:
 	//save/load server serialization
 	virtual void			save							(NET_Packet &output_packet) {inherited::save(output_packet);}
 	virtual void			load							(IReader &input_packet)		{inherited::load(input_packet);}
-	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Save(CSaveObjectSave* Object) const override;
 	virtual void Load(CSaveObjectLoad* Object) override;
 
 

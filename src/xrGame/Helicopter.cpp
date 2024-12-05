@@ -267,7 +267,7 @@ void CHelicopter::net_Destroy()
 void	CHelicopter::SpawnInitPhysics	(CSE_Abstract	*D)	
 {
 	
-	PPhysicsShell()=P_build_Shell	(this,false);
+	SetPPhysicsShell(P_build_Shell	(this,false));
 	if(g_Alive())
 	{
 		PPhysicsShell()->EnabledCallbacks				(FALSE);

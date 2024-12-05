@@ -330,7 +330,7 @@ void CBaseMonster::update_enemy_accessible_and_at_home_info	()
 	}
 }
 
-void CBaseMonster::Save(CSaveObjectSave* Object)
+void CBaseMonster::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CBaseMonster");
 	{

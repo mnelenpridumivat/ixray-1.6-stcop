@@ -81,6 +81,26 @@ void CEatableItem::save(NET_Packet& packet)
 	packet.w_u8((u8)m_iPortionsMarker);
 }
 
+void CEatableItem::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CEatableItem");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_float(m_iPortionsMarker);
+	}
+	Object->EndChunk();
+}
+
+void CEatableItem::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CEatableItem");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_float(m_iPortionsMarker);
+	}
+	Object->EndChunk();
+}
+
 BOOL CEatableItem::net_Spawn(CSE_Abstract* DC)
 {
 	if (!inherited::net_Spawn(DC)) return FALSE;

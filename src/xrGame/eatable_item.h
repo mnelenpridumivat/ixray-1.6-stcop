@@ -34,6 +34,8 @@ public:
 	virtual void			Load(LPCSTR section);
 	virtual void			load(IReader& packet);
 	virtual void			save(NET_Packet& packet);
+	virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);
 	virtual bool			Useful() const;
 
 	virtual BOOL			net_Spawn(CSE_Abstract* DC);

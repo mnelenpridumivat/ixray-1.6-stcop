@@ -203,7 +203,7 @@ void	CInventoryOwner::load	(IReader &input_packet)
 	load_data		(m_money,	input_packet);
 }
 
-void CInventoryOwner::Save(CSaveObject* Object)
+void CInventoryOwner::Save(CSaveObject* Object) const
 {
 	Object->BeginChunk("CInventoryOwner");
 	{

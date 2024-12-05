@@ -303,13 +303,13 @@ f32 CPhysicsShellHolder::GetMass()
 	return m_pPhysicsShell ? m_pPhysicsShell->getMass() : 0;
 }
 
-u16	CPhysicsShellHolder::PHGetSyncItemsNumber()
+u16	CPhysicsShellHolder::PHGetSyncItemsNumber() const
 {
 	if(m_pPhysicsShell)	return m_pPhysicsShell->get_ElementsNumber();
 	else				return 0;
 }
 
-CPHSynchronize*	CPhysicsShellHolder::PHGetSyncItem	(u16 item)
+CPHSynchronize*	CPhysicsShellHolder::PHGetSyncItem	(u16 item) const
 {
 	if(m_pPhysicsShell) return m_pPhysicsShell->get_ElementSync(item);
 	else				return 0;
@@ -372,7 +372,7 @@ void		CPhysicsShellHolder::	load				(IReader &input_packet)
 
 }
 
-void CPhysicsShellHolder::Save(CSaveObjectSave* Object)
+void CPhysicsShellHolder::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPhysicsShellHolder");
 	{
@@ -490,6 +490,113 @@ void CPhysicsShellHolder::PHLoadState(IReader& P) {
 	}
 }
 
+void CPhysicsShellHolder::PHSaveState(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CPhysicsShellHolder");
+	{
+		IKinematics* K = smart_cast<IKinematics*>(Visual());
+		VisMask _vm;
+
+		if (K)
+		{
+			_vm = K->LL_GetBonesVisible();
+			Object->GetCurrentChunk()->w_u64(_vm._visimask.flags);
+			Object->GetCurrentChunk()->w_u16(K->LL_GetBoneRoot());
+		}
+		else
+		{
+			Object->GetCurrentChunk()->w_u64(u64(-1));
+			Object->GetCurrentChunk()->w_u16(0);
+		}
+		/////////////////////////////
+		Fvector min, max;
+
+		min.set(flt_max, flt_max, flt_max);
+		max.set(-flt_max, -flt_max, -flt_max);
+		/////////////////////////////////////
+
+		u16 bones_number = PHGetSyncItemsNumber();
+		for (u16 i = 0; i < bones_number; i++)
+		{
+			SPHNetState state;
+			PHGetSyncItem(i)->get_State(state);
+			Fvector& p = state.position;
+			if (p.x < min.x)min.x = p.x;
+			if (p.y < min.y)min.y = p.y;
+			if (p.z < min.z)min.z = p.z;
+
+			if (p.x > max.x)max.x = p.x;
+			if (p.y > max.y)max.y = p.y;
+			if (p.z > max.z)max.z = p.z;
+		}
+
+		min.sub(2.f * EPS_L);
+		max.add(2.f * EPS_L);
+
+		VERIFY(!min.similar(max));
+		Object->GetCurrentChunk()->w_vec3(min);
+		Object->GetCurrentChunk()->w_vec3(max);
+
+		Object->GetCurrentChunk()->w_u16(bones_number);
+
+		if (bones_number > 64) {
+			Msg("!![CPhysicsShellHolder::PHSaveState] bones_number is [%u]!", bones_number);
+			Object->GetCurrentChunk()->w_u64(K ? _vm._visimask_ex.flags : u64(-1));
+		}
+
+		for (u16 i = 0; i < bones_number; i++)
+		{
+			SPHNetState state;
+			PHGetSyncItem(i)->get_State(state);
+			state.net_Save(Object, min, max);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CPhysicsShellHolder::PHLoadState(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CEatableItem");
+	{
+		u64 _low = 0;
+		u64 _high = 0;
+
+		IKinematics* K = smart_cast<IKinematics*>(Visual());
+		if (K)
+		{
+			Object->GetCurrentChunk()->r_u64(_low);
+			u16 Value;
+			Object->GetCurrentChunk()->r_u16(Value);
+			K->LL_SetBoneRoot(Value);
+		}
+
+		Fvector min;
+		Object->GetCurrentChunk()->r_vec3(min);
+		Fvector max;
+		Object->GetCurrentChunk()->r_vec3(max);
+
+		VERIFY(!min.similar(max));
+
+		u16 bones_number;
+		Object->GetCurrentChunk()->r_u16(bones_number);
+		if (bones_number > 64) {
+			Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
+			Object->GetCurrentChunk()->r_u64(_high);
+		}
+
+		VisMask _vm(_low, _high);
+		K->LL_SetBonesVisible(_vm);
+
+		for (u16 i = 0; i < bones_number; i++)
+		{
+			SPHNetState state;
+			state.net_Load(Object, min, max);
+			PHGetSyncItem(i)->set_State(state);
+		}
+	}
+	Object->EndChunk();
+}
+
 bool CPhysicsShellHolder::register_schedule	() const
 {
 	return					(b_sheduled);
@@ -564,7 +671,7 @@ void CPhysicsShellHolder::ObjectSpatialMove()
 {
 	spatial_move();
 }
-CPhysicsShell*& CPhysicsShellHolder::ObjectPPhysicsShell()
+CPhysicsShell* CPhysicsShellHolder::ObjectPPhysicsShell()
 {
 	return PPhysicsShell();
 }

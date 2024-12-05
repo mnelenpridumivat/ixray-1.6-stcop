@@ -327,7 +327,7 @@ void CPhantom::load(IReader &input_packet)
 {
 	SwitchToState	(EState(input_packet.r_s32()));
 }
-void CPhantom::Save(CSaveObjectSave* Object)
+void CPhantom::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPhantom");
 	{

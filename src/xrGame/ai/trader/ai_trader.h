@@ -55,6 +55,8 @@ public:
 
 	virtual void		save			(NET_Packet &output_packet);
 	virtual void		load			(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object);
+	virtual void Load(CSaveObjectLoad* Object);
 	virtual BOOL		net_SaveRelevant()							{return inherited::net_SaveRelevant();}
 
 	virtual void		Die				(CObject* who);

@@ -32,7 +32,7 @@ void CStateMonsterHitObjectAbstract::execute()
 		Fvector			dir;
 		dir.add			(Fvector().sub(target->Position(), object->Position()), object->Direction());
 		dir.normalize	();
-		target->m_pPhysicsShell->applyImpulse(dir,IMPULSE * target->m_pPhysicsShell->getMass());
+		target->GetEntityAlife()->PPhysicsShell()->applyImpulse(dir, IMPULSE * target->GetEntityAlife()->PPhysicsShell()->getMass());
 	}
 }
 
@@ -50,7 +50,7 @@ bool CStateMonsterHitObjectAbstract::check_start_conditions()
 
 	for (xr_vector<CObject*>::iterator I = B; I != E; I++)	 {
 		CPhysicsShellHolder  *obj = smart_cast<CPhysicsShellHolder *>(*I);
-		if (!obj || !obj->m_pPhysicsShell) continue;
+		if (!obj || !obj->GetEntityAlife()->PPhysicsShell()) continue;
 
 		// определить дистанцию до врага
 		Fvector d;

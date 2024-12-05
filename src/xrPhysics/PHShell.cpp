@@ -356,7 +356,7 @@ const CPhysicsElement *CPHShell::get_ElementByStoreOrder(u16 num) const
 	R_ASSERT2(num<elements.size(),"argument is out of range");
 	return cast_PhysicsElement(elements[num]);
 }
-CPHSynchronize*	CPHShell::get_ElementSync			  ( u16 element )
+CPHSynchronize*	CPHShell::get_ElementSync			  ( u16 element ) const
 {
 	return smart_cast<CPHSynchronize*>(elements[element]);
 }

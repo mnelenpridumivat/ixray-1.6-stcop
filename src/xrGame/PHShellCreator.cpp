@@ -17,7 +17,7 @@ void CPHShellSimpleCreator::CreatePhysicsShell()
 
 	phys_shell_verify_object_model ( *owner );
 
-	owner->PPhysicsShell()			= P_create_Shell();
+	owner->SetPPhysicsShell(P_create_Shell());
 #ifdef DEBUG
 	owner->PPhysicsShell()->dbg_obj=owner;
 #endif

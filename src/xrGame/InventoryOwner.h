@@ -50,7 +50,7 @@ public:
 	//serialization
 	virtual void	save						(NET_Packet &output_packet);
 	virtual void	load						(IReader &input_packet);
-	virtual void Save(CSaveObject* Object);
+	virtual void Save(CSaveObject* Object) const;
 	virtual void Load(CSaveObject* Object);
 
 	

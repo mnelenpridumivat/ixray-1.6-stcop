@@ -44,10 +44,12 @@ public:
 
 	virtual bool		ActivationSpeedOverriden (Fvector& dest, bool clear_override) { return false; }
 
-	IC CPhysicsShell	*&PPhysicsShell				()		
+	CPhysicsShell* PPhysicsShell				()		const
 	{
 		return m_pPhysicsShell;
 	}
+
+	void SetPPhysicsShell(CPhysicsShell* pp) { m_pPhysicsShell = pp; }
 
 	IC CPhysicsShellHolder*	PhysicsShellHolder	()
 	{
@@ -78,12 +80,14 @@ public:
 	virtual void			PHSetMaterial		(u16 m);
 			void			PHSaveState			(NET_Packet &P);
 			void			PHLoadState			(IReader &P);
+			void			PHSaveState(CSaveObjectSave* Object) const;
+			void			PHLoadState(CSaveObjectLoad* Object);
 	virtual f32				GetMass				();
 	virtual	void			PHHit				(SHit &H);
 	virtual	void			Hit					(SHit* pHDS);
 ///////////////////////////////////////////////////////////////////////
-	virtual u16				PHGetSyncItemsNumber();
-	virtual CPHSynchronize*	PHGetSyncItem		(u16 item);
+	virtual u16				PHGetSyncItemsNumber() const;
+	virtual CPHSynchronize*	PHGetSyncItem		(u16 item) const;
 	virtual void			PHUnFreeze			();
 	virtual void			PHFreeze			();
 	virtual float			EffectiveGravity	();
@@ -99,7 +103,7 @@ public:
 	virtual BOOL			net_Spawn			(CSE_Abstract*	DC);
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
-	virtual void Save(CSaveObjectSave* Object) override;
+	virtual void Save(CSaveObjectSave* Object) const override;
 	virtual void Load(CSaveObjectLoad* Object) override;
 			void			init				();
 
@@ -131,7 +135,7 @@ private://IPhysicsShellHolder
 	virtual	void					_BCL					ObjectProcessingDeactivate			()						;
 	virtual	void					_BCL					ObjectProcessingActivate			()						;				
 	virtual	void					_BCL					ObjectSpatialMove					()						;
-	virtual	CPhysicsShell*&			_BCL					ObjectPPhysicsShell					()						;
+	virtual	CPhysicsShell*			_BCL					ObjectPPhysicsShell					()						;
 //	virtual	void						enable_notificate					()						;
 	virtual bool					_BCL					has_parent_object					()						;
 //	virtual	void						on_physics_disable					()						;

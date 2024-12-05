@@ -36,6 +36,8 @@ public:
 	virtual void	create_box_physic_shell			();
 	virtual void	create_box2sphere_physic_shell	();
 	virtual void	create_physic_shell				();
+	virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); }
+	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); }
 };
 
 #include "physic_item_inline.h"

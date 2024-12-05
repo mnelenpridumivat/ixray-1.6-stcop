@@ -52,7 +52,7 @@ BOOL CPhysicObject::net_Spawn(CSE_Abstract* DC)
 	setVisible(TRUE);
 	setEnabled(TRUE);
 
-	if (!PPhysicsShell()->isBreakable()&&!CScriptBinder::object()&&!CPHSkeleton::IsRemoving())
+	if (!PPhysicsShell()->isBreakable()&&!m_ScriptBinderComponent->object()&&!CPHSkeleton::IsRemoving())
 		SheduleUnregister();
 
 	//if (PPhysicsShell()->Animated())

@@ -111,10 +111,56 @@ void CCustomTimerBase::load(IReader& packet)
     load_data(m_bIsActive, packet);
 }
 
+void CCustomTimerBase::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CCustomTimerBase");
+    {
+        Object->GetCurrentChunk()->w_s32(m_iTimerStartValue);
+        Object->GetCurrentChunk()->w_s32(m_iTimerCurValue);
+        Object->GetCurrentChunk()->w_s32(m_iTimerMode);
+        Object->GetCurrentChunk()->w_u32(m_iStartTime);
+        Object->GetCurrentChunk()->w_bool(m_bIsActive);
+    }
+    Object->EndChunk();
+}
+
+void CCustomTimerBase::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CCustomTimerBase");
+    {
+        Object->GetCurrentChunk()->r_s32(m_iTimerStartValue);
+        Object->GetCurrentChunk()->r_s32(m_iTimerCurValue);
+        Object->GetCurrentChunk()->r_s32(m_iTimerMode);
+        Object->GetCurrentChunk()->r_u32(m_iStartTime);
+        Object->GetCurrentChunk()->r_bool(m_bIsActive);
+    }
+    Object->EndChunk();
+}
+
 void CCustomTimer::load(IReader& packet)
 {
     load_data(m_sTimerName, packet);
     CCustomTimerBase::load(packet);
+}
+
+void CCustomTimer::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CCustomTimer");
+    {
+        CCustomTimerBase::Save(Object);
+        Object->GetCurrentChunk()->w_stringZ(m_sTimerName);
+    }
+    Object->EndChunk();
+}
+
+void CCustomTimer::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CCustomTimer");
+    {
+        CCustomTimerBase::Load(Object);
+        Object->GetCurrentChunk()->r_stringZ(m_sTimerName);
+    }
+    Object->EndChunk();
 }
 
 void CBinder::load(IReader& input_packet)
@@ -124,6 +170,31 @@ void CBinder::load(IReader& input_packet)
     load_data(m_expired, input_packet);
     m_params.load(input_packet);
     m_bIsActive = true;
+}
+
+void CBinder::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CBinder");
+    {
+        CCustomTimerBase::Save(Object);
+        Object->GetCurrentChunk()->w_stringZ(m_sFuncName);
+        Object->GetCurrentChunk()->w_bool(m_expired);
+        m_params.Save(Object);
+    }
+    Object->EndChunk();
+}
+
+void CBinder::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CBinder");
+    {
+        CCustomTimerBase::Load(Object);
+        Object->GetCurrentChunk()->r_stringZ(m_sFuncName);
+        Object->GetCurrentChunk()->r_bool(m_expired);
+        m_params.Load(Object);
+        m_bIsActive = true;
+    }
+    Object->EndChunk();
 }
 
 void CCustomTimerBase::Update()
@@ -188,7 +259,7 @@ CTimerManager& CTimerManager::GetInstance()
     return manager;
 }
 
-void CTimerManager::CreateTimer(std::string name, int value, int mode)
+void CTimerManager::CreateTimer(shared_str name, int value, int mode)
 {
     for (auto& timer : Timers)
     {
@@ -208,7 +279,7 @@ void CTimerManager::CreateTimer(std::string name, int value, int mode)
     Timers.push_back(std::make_shared<CCustomTimer>(name, value, mode));
 }
 
-bool CTimerManager::DeleteTimer(std::string name)
+bool CTimerManager::DeleteTimer(shared_str name)
 {
     for (auto it = Timers.begin(); it != Timers.end(); ++it)
     {
@@ -226,7 +297,7 @@ bool CTimerManager::DeleteTimer(std::string name)
     return false;
 }
 
-bool CTimerManager::ResetTimer(std::string name)
+bool CTimerManager::ResetTimer(shared_str name)
 {
     for (auto& timer : Timers)
     {
@@ -239,13 +310,13 @@ bool CTimerManager::ResetTimer(std::string name)
     return false;
 }
 
-bool CTimerManager::StartTimer(std::string name, int start_time, int mode)
+bool CTimerManager::StartTimer(shared_str name, int start_time, int mode)
 {
     for (auto& timer : Timers)
     {
         if ((*timer).getName() == name)
         {
-            (*timer).SetOnTimerStopCallback([this, name = (*timer).getName()](std::string stopped_name)
+            (*timer).SetOnTimerStopCallback([this, name = (*timer).getName()](shared_str stopped_name)
             {
                 OnTimerStop(stopped_name);
             });
@@ -267,7 +338,7 @@ bool CTimerManager::StartTimer(std::string name, int start_time, int mode)
     return false;
 }
 
-bool CTimerManager::StopTimer(std::string name)
+bool CTimerManager::StopTimer(shared_str name)
 {
     for (auto& timer : Timers)
     {
@@ -300,13 +371,48 @@ void CTimerManager::load(IReader& packet)
 
     for (u32 i = 0; i < timer_count; ++i)
     {
-        auto timer = std::make_shared<CCustomTimer>();
+        auto timer = xr_make_shared<CCustomTimer>();
         timer->load(packet);
         Timers.push_back(timer);
     }
 }
 
-int CTimerManager::GetTimerValue(std::string name) const
+void CTimerManager::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CTimerManager");
+    {
+        Object->GetCurrentChunk()->WriteArray(Timers.size());
+        {
+            for (const auto& timer : Timers)
+            {
+                timer->Save(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
+}
+
+void CTimerManager::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CBinderManager");
+    {
+        Timers.clear();
+        u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i)
+            {
+                Timers.push_back(xr_make_unique<CCustomTimer>());
+                Timers.back()->Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
+}
+
+int CTimerManager::GetTimerValue(shared_str name) const
 {
     for (const auto& timer : Timers)
     {
@@ -333,9 +439,9 @@ CBinderManager& CBinderManager::GetInstance()
     return manager;
 }
 
-void CBinderManager::CreateBinder(std::string name, const CBinderParams& params, int value, int mode)
+void CBinderManager::CreateBinder(shared_str name, const CBinderParams& params, int value, int mode)
 {
-    Binders.push_back(std::make_unique<CBinder>(name, params, value, mode));
+    Binders.push_back(xr_make_unique<CBinder>(name, params, value, mode));
 }
 
 void CBinderManager::save(IWriter& packet)
@@ -358,9 +464,44 @@ void CBinderManager::load(IReader& packet)
 
     for (u32 i = 0; i < timer_count; ++i)
     {
-        Binders.push_back(std::make_unique<CBinder>());
+        Binders.push_back(xr_make_unique<CBinder>());
         Binders.back()->load(packet);
     }
+}
+
+void CBinderManager::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CBinderManager");
+    {
+        Object->GetCurrentChunk()->WriteArray(Binders.size());
+        {
+            for (const auto& timer : Binders)
+            {
+                timer->Save(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
+}
+
+void CBinderManager::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CBinderManager");
+    {
+        Binders.clear();
+        u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i)
+            {
+                Binders.push_back(xr_make_unique<CBinder>());
+                Binders.back()->Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
 }
 
 void CBinderManager::Update()
@@ -589,6 +730,60 @@ void CBinderParam::load(IReader& input_packet)
     }
 }
 
+void CBinderParam::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CBinderParam");
+    {
+        Object->GetCurrentChunk()->w_u8(type);
+        switch (type) {
+        case eBinderParamString: {
+            Object->GetCurrentChunk()->w_stringZ(std::get<xr_string>(value));
+            break;
+        }
+        case eBinderParamU64: {
+            Object->GetCurrentChunk()->w_u64(std::get<u64>(value));
+            break;
+        }
+        case eBinderParamS64: {
+            Object->GetCurrentChunk()->w_s64(std::get<s64>(value));
+            break;
+        }
+        }
+    }
+    Object->EndChunk();
+}
+
+void CBinderParam::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CBinderParam");
+    {
+        u8 type;
+        Object->GetCurrentChunk()->r_u8(type);
+        this->type = static_cast<EBinderParamType>(type);
+        switch (type) {
+        case eBinderParamString: {
+            xr_string new_value;
+            Object->GetCurrentChunk()->r_stringZ(new_value);
+            value = new_value;
+            break;
+        }
+        case eBinderParamU64: {
+            u64 new_value;
+            Object->GetCurrentChunk()->r_u64(new_value);
+            value = new_value;
+            break;
+        }
+        case eBinderParamS64: {
+            s64 new_value;
+            Object->GetCurrentChunk()->r_s64(new_value);
+            value = new_value;
+            break;
+        }
+        }
+    }
+    Object->EndChunk();
+}
+
 CBinderParams::CBinderParams()
 {
 }
@@ -658,4 +853,36 @@ void CBinderParams::load(IReader& input_packet)
     for (auto i = 0; i < size; ++i) {
         params[i].load(input_packet);
     }
+}
+
+void CBinderParams::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CBinderParams");
+    {
+        Object->GetCurrentChunk()->WriteArray(params.size());
+        {
+            for (const auto& elem : params) {
+                elem.Save(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
+}
+
+void CBinderParams::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CBinderParams");
+    {
+        u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        params.resize(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i) {
+                params[i].Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();
+    }
+    Object->EndChunk();
 }

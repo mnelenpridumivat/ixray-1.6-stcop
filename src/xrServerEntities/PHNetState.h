@@ -1,7 +1,9 @@
-#ifndef  PHNETSTATE_H
-#define  PHNETSTATE_H
+#pragma once
 
 #include "../xrEngine/VisMask.h"
+#ifdef XRGAME_EXPORTS
+#include "Save/SaveObject.h"
+#endif
 
 class NET_Packet;
 
@@ -31,11 +33,22 @@ struct SPHNetState
 	void								net_Save			(		NET_Packet&		P,const Fvector& min,const Fvector& max);					
 	void								net_Load			(		NET_Packet&		P,const Fvector& min,const Fvector& max);
 	void								net_Load			(		IReader&		P,const Fvector& min,const Fvector& max);
+#ifdef XRGAME_EXPORTS
+	void								net_Save(CSaveObjectSave* Object);
+	void								net_Load(CSaveObjectLoad* Object);
+	void								net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max);
+	void								net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max);
+#endif
+
 private:
 template<typename src>
 	void								read				(		src&			P);
 template<typename src>
 	void								read				(		src&		P,const Fvector& min,const Fvector& max);
+	template<typename src>
+	void								read(src* P);
+	template<typename src>
+	void								read(src* P, const Fvector& min, const Fvector& max);
 };
 
 using PHNETSTATE_VECTOR = xr_vector<SPHNetState>; 
@@ -57,4 +70,3 @@ public:
 	const Fvector&						get_min				()	const	{return m_min;}
 	const Fvector&						get_max				()	const	{return m_max;}
 };
-#endif

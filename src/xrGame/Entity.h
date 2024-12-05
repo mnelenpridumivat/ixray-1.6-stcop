@@ -66,7 +66,7 @@ public:
 	virtual BOOL			net_Spawn			(CSE_Abstract* DC);
 	virtual void			net_Destroy			();
 
-	virtual void Save(CSaveObjectSave* Object) override { inherited::Save(Object); };
+	virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); };
 	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); };
 	
 	virtual void			shedule_Update		(u32 dt);

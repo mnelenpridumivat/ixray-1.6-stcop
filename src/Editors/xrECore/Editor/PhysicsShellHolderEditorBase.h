@@ -29,7 +29,7 @@ private:
 	virtual	void						_BCL	ObjectProcessingDeactivate			()				 {;}
 	virtual	void						_BCL	ObjectProcessingActivate			()				 {}
 	virtual	void						_BCL	ObjectSpatialMove					()				 {}
-    virtual	CPhysicsShell*&				_BCL	ObjectPPhysicsShell					()				 { return m_physics_shell; }
+    virtual	CPhysicsShell*				_BCL	ObjectPPhysicsShell					()				 { return m_physics_shell; }
 	virtual	void						_BCL	enable_notificate					()				 {}
 	virtual bool						_BCL	has_parent_object					()				 { return false; }
 	virtual	void						_BCL	on_physics_disable					()				 {}

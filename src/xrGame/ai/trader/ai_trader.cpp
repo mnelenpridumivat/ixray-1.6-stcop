@@ -335,6 +335,26 @@ void CAI_Trader::load (IReader &input_packet)
 	CInventoryOwner::load(input_packet);
 }
 
+void CAI_Trader::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CAI_Trader");
+	{
+		inherited::Save(Object);
+		CInventoryOwner::Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CAI_Trader::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CAI_Trader");
+	{
+		inherited::Load(Object);
+		CInventoryOwner::Load(Object);
+	}
+	Object->EndChunk();
+}
+
 
 //проверяет список артефактов в заказах
 u32 CAI_Trader::ArtefactPrice (CArtefact* pArtefact)

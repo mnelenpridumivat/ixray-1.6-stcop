@@ -51,8 +51,7 @@ class CScriptCallbackEx;
 
 class CGameObject : 
 	public CObject, 
-	public CUsableScriptObject,
-	public CScriptBinder
+	public CUsableScriptObject
 {
 	typedef CObject inherited;
 	bool							m_spawned;
@@ -63,10 +62,13 @@ class CGameObject :
 protected:
 	//время удаления объекта
 	bool					m_bObjectRemoved;
+	xr_unique_ptr<CScriptBinder> m_ScriptBinderComponent;
 public:
 	CGameObject();
 	virtual ~CGameObject();
 public:
+	CScriptBinder* GetScriptBinderComponent() { return m_ScriptBinderComponent.get(); }
+
 	//functions used for avoiding most of the smart_cast
 	virtual CAttachmentOwner*			cast_attachment_owner		()						{return NULL;}
 	virtual CInventoryOwner*			cast_inventory_owner		()						{return NULL;}
@@ -116,7 +118,7 @@ public:
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
 	//object serialization new
-	virtual void Save(CSaveObjectSave* Object);
+	virtual void Save(CSaveObjectSave* Object) const;
 	virtual void Load(CSaveObjectLoad* Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local

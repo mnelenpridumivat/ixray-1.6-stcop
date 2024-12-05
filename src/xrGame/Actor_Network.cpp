@@ -889,9 +889,9 @@ void	CActor::OnChangeVisual()
 {
 	{
 		CPhysicsShell* tmp_shell=PPhysicsShell();
-		PPhysicsShell()=nullptr;
+		SetPPhysicsShell(nullptr);
 		inherited::OnChangeVisual();
-		PPhysicsShell()=tmp_shell;
+		SetPPhysicsShell(tmp_shell);
 		tmp_shell=nullptr;
 	}
 	
@@ -1443,7 +1443,7 @@ void CActor::load(IReader &input_packet)
 	input_packet.r_stringZ(g_quick_use_slots[3], sizeof(g_quick_use_slots[3]));
 }
 
-void CActor::Save(CSaveObjectSave* Object)
+void CActor::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CActor");
 	{

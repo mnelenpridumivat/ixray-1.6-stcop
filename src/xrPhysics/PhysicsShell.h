@@ -363,7 +363,7 @@ virtual				void						GetGlobalTransformDynamic					(Fmatrix* m) 																
 	virtual	const CPhysicsElement				*get_ElementByStoreOrder					(u16 num) const																				= 0;
 	virtual			CPhysicsElement				*get_PhysicsParrentElement					( u16 bone_id )																				= 0;
 	virtual			u16							get_ElementsNumber							()const																						= 0;
-	virtual			CPHSynchronize				*get_ElementSync							(u16 element)																				= 0;
+	virtual			CPHSynchronize				*get_ElementSync							(u16 element)	const																			= 0;
 	virtual			CPhysicsJoint				*get_Joint									(u16 bone_id)																				= 0;
 	virtual			CPhysicsJoint				*get_Joint									(const shared_str & bone_name)																= 0;
 	virtual			CPhysicsJoint				*get_Joint									(LPCSTR bone_name)																			= 0;

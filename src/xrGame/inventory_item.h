@@ -13,6 +13,7 @@
 #include "attachable_item.h"
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Items.h"
+#include "Save/SaveObject.h"
 
 enum EHandDependence{
 	hdNone	= 0,
@@ -122,6 +123,8 @@ public:
 
 	virtual void				save				(NET_Packet &output_packet);
 	virtual void				load				(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);
 	virtual BOOL				net_SaveRelevant	()								{return TRUE;}
 
 	virtual void				render_item_ui		()								{}; //when in slot & query return TRUE

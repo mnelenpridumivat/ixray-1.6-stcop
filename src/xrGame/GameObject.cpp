@@ -46,6 +46,8 @@ CGameObject::CGameObject		()
 {
 	m_ai_obstacle				= 0;
 
+	m_ScriptBinderComponent = xr_make_unique<CScriptBinder>();
+
 	init						();
 	//-----------------------------------------
 	m_bCrPr_Activated			= false;
@@ -144,7 +146,7 @@ void CGameObject::net_Destroy	()
 
 //.	Parent									= 0;
 
-	CScriptBinder::net_Destroy				();
+	m_ScriptBinderComponent->net_Destroy();
 
 	xr_delete								(m_lua_game_object);
 	m_spawned								= false;
@@ -333,10 +335,10 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 
 	reload(*cNameSect());
-	CScriptBinder::reload(*cNameSect());
+	m_ScriptBinderComponent->reload(*cNameSect());
 	
 	reinit();
-	CScriptBinder::reinit();
+	m_ScriptBinderComponent->reinit();
 
 #ifdef DEBUG
 	if(ph_dbg_draw_mask1.test(ph_m1_DbgTrackObject)&&_stricmp(PH_DBG_ObjectTrackName(),*cName())==0)
@@ -401,7 +403,7 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	{
 		Msg("CGameObject::net_Spawn obj %s Before CScriptBinder::net_Spawn %f,%f,%f",PH_DBG_ObjectTrackName(),Position().x,Position().y,Position().z);
 	}
-	BOOL ret =CScriptBinder::net_Spawn(DC);
+	BOOL ret = m_ScriptBinderComponent->net_Spawn(DC);
 #else
 	return						(CScriptBinder::net_Spawn(DC));
 #endif
@@ -430,7 +432,7 @@ void CGameObject::net_Save		(NET_Packet &net_packet)
 
 #endif
 
-	CScriptBinder::save			(net_packet);
+	m_ScriptBinderComponent->save			(net_packet);
 
 #ifdef DEBUG	
 
@@ -457,7 +459,7 @@ void CGameObject::net_Load		(IReader &ireader)
 
 #endif
 
-	CScriptBinder::load		(ireader);
+	m_ScriptBinderComponent->load		(ireader);
 
 
 #ifdef DEBUG	
@@ -485,14 +487,14 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
-void CGameObject::Save(CSaveObjectSave* Object)
+void CGameObject::Save(CSaveObjectSave* Object) const
 {
-	CScriptBinder::Save(Object);
+	m_ScriptBinderComponent->Save(Object);
 }
 
 void CGameObject::Load(CSaveObjectLoad* Object)
 {
-	CScriptBinder::Load(Object);
+	m_ScriptBinderComponent->Load(Object);
 }
 
 void CGameObject::spawn_supplies()
@@ -834,12 +836,12 @@ void CGameObject::shedule_Update	(u32 dt)
 	// Msg							("-SUB-:[%x][%s] CGameObject::shedule_Update",smart_cast<void*>(this),*cName());
 	inherited::shedule_Update	(dt);
 	
-	CScriptBinder::shedule_Update(dt);
+	m_ScriptBinderComponent->shedule_Update(dt);
 }
 
 BOOL CGameObject::net_SaveRelevant	()
 {
-	return	(CScriptBinder::net_SaveRelevant());
+	return	(m_ScriptBinderComponent->net_SaveRelevant());
 }
 
 //игровое имя объекта
@@ -896,7 +898,7 @@ u32	CGameObject::ef_detector_type		() const
 void CGameObject::net_Relcase(CObject* O)
 {
 	inherited::net_Relcase(O);
-	CScriptBinder::net_Relcase(O);
+	m_ScriptBinderComponent->net_Relcase(O);
 }
 
 CGameObject::CScriptCallbackExVoid &CGameObject::callback(GameObject::ECallbackType type) const

@@ -11,6 +11,14 @@ static void w_vec_q8(NET_Packet& P,const Fvector& vec,const Fvector& min,const F
 	P.w_float_q8(vec.y,min.y,max.y);
 	P.w_float_q8(vec.z,min.z,max.z);
 }
+#ifdef XRGAME_EXPORTS
+static void w_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
+{
+	P->w_float(vec.x); clamp(vec.x, min.x, max.x);
+	P->w_float(vec.y); clamp(vec.y, min.y, max.y);
+	P->w_float(vec.z); clamp(vec.z, min.z, max.z);
+}
+#endif
 template<typename src>
 static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 {
@@ -22,41 +30,38 @@ static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 	clamp(vec.y,min.y,max.y);
 	clamp(vec.z,min.z,max.z);
 }
+#ifdef XRGAME_EXPORTS
+static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
+{
+	P->r_float(vec.x);
+	P->r_float(vec.y);
+	P->r_float(vec.z);
+
+	clamp(vec.x, min.x, max.x);
+	clamp(vec.y, min.y, max.y);
+	clamp(vec.z, min.z, max.z);
+}
+#endif
 static void w_qt_q8(NET_Packet& P,const Fquaternion& q)
 {
-	//Fvector Q;
-	//Q.set(q.x,q.y,q.z);
-	//if(q.w<0.f)	Q.invert();
-	//P.w_float_q8(Q.x,-1.f,1.f);
-	//P.w_float_q8(Q.y,-1.f,1.f);
-	//P.w_float_q8(Q.z,-1.f,1.f);
-///////////////////////////////////////////////////
 	P.w_float_q8(q.x,-1.f,1.f);
 	P.w_float_q8(q.y,-1.f,1.f);
 	P.w_float_q8(q.z,-1.f,1.f);
 	P.w_float_q8(q.w,-1.f,1.f);
-	
-///////////////////////////////////////////
-	
-	
-	//P.w_float_q8(q.x,-1.f,1.f);
-	//P.w_float_q8(q.y,-1.f,1.f);
-	//P.w_float_q8(q.z,-1.f,1.f);
-	//P.w(sign())
 }
+#ifdef XRGAME_EXPORTS
+static void w_qt_q8(CSaveChunk* P, Fquaternion& q)
+{
+	P->w_float(q.x); clamp(q.x, -1.f, 1.f);
+	P->w_float(q.y); clamp(q.y, -1.f, 1.f);
+	P->w_float(q.z); clamp(q.z, -1.f, 1.f);
+	P->w_float(q.w); clamp(q.w, -1.f, 1.f);
+}
+#endif
 
 template<typename src>
 static void r_qt_q8(src& P,Fquaternion& q)
 {
-	//// x^2 + y^2 + z^2 + w^2 = 1
-	//P.r_float_q8(q.x,-1.f,1.f);
-	//P.r_float_q8(q.y,-1.f,1.f);
-	//P.r_float_q8(q.z,-1.f,1.f);
-	//float w2=1.f-q.x*q.x-q.y*q.y-q.z*q.z;
-	//w2=w2<0.f ? 0.f : w2;
-	//q.w=_sqrt(w2);
-/////////////////////////////////////////////////////
-	///////////////////////////////////////////////////
 	q.x=P.r_float_q8(-1.f,1.f);
 	q.y=P.r_float_q8(-1.f,1.f);
 	q.z=P.r_float_q8(-1.f,1.f);
@@ -67,6 +72,21 @@ static void r_qt_q8(src& P,Fquaternion& q)
 	clamp(q.z,-1.f,1.f);
 	clamp(q.w,-1.f,1.f);
 }
+
+#ifdef XRGAME_EXPORTS
+static void r_qt_q8(CSaveChunk* P, Fquaternion& q)
+{
+	P->r_float(q.x);
+	P->r_float(q.y);
+	P->r_float(q.z);
+	P->r_float(q.w);
+
+	clamp(q.x, -1.f, 1.f);
+	clamp(q.y, -1.f, 1.f);
+	clamp(q.z, -1.f, 1.f);
+	clamp(q.w, -1.f, 1.f);
+}
+#endif
 
 #ifdef XRGAME_EXPORTS
 /////////////////////////////////16////////////////////////////////////////////////////////////////
@@ -133,9 +153,10 @@ void	SPHNetState::net_Export(NET_Packet& P)
 	P.w_vec3(position);
 	P.w_vec4(*((Fvector4*)&quaternion));
 	//P.w_vec4(*((Fvector4*)&previous_quaternion));
-	P.w_u8	((u8)enabled);
+	P.w_u8((u8)enabled);
 
 }
+
 template<typename src>
 void	SPHNetState::read				(src&			P)
 {
@@ -148,6 +169,34 @@ void	SPHNetState::read				(src&			P)
 	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
 	enabled=!!P.r_u8	();
 }
+template<typename src>
+void	SPHNetState::read(src* P)
+{
+	P->r_vec3(linear_vel);
+	angular_vel.set(0.f, 0.f, 0.f);		//P.r_vec3(angular_vel);
+	force.set(0.f, 0.f, 0.f);				//P.r_vec3(force);
+	torque.set(0.f, 0.f, 0.f);			//P.r_vec3(torque);
+	P->r_vec3(position);
+	Fvector4* q = ((Fvector4*)&quaternion);
+	P->r_vec4(*q);
+	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
+	P->r_bool(enabled);
+}
+#ifdef XRGAME_EXPORTS
+template<>
+void	SPHNetState::read(CSaveChunk* P)
+{
+	P->r_vec3(linear_vel);
+	angular_vel.set(0.f, 0.f, 0.f);		//P.r_vec3(angular_vel);
+	force.set(0.f, 0.f, 0.f);				//P.r_vec3(force);
+	torque.set(0.f, 0.f, 0.f);			//P.r_vec3(torque);
+	P->r_vec3(position);
+	Fvector4* q = ((Fvector4*)&quaternion);
+	P->r_vec4(*q);
+	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
+	P->r_bool(enabled);
+}
+#endif
 
 void	SPHNetState::net_Import(NET_Packet&	P)
 {
@@ -197,6 +246,38 @@ void SPHNetState::read(src &P,const Fvector& min,const Fvector& max)
 	enabled = !!P.r_u8();
 
 }
+template<typename src>
+void SPHNetState::read(src* P, const Fvector& min, const Fvector& max)
+{
+	VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
+	linear_vel.set(0.f, 0.f, 0.f);
+	angular_vel.set(0.f, 0.f, 0.f);
+	force.set(0.f, 0.f, 0.f);
+	torque.set(0.f, 0.f, 0.f);
+	r_vec_q8(P, position, min, max);
+	previous_position.set(position);
+	r_qt_q8(P, quaternion);
+	previous_quaternion.set(quaternion);
+	enabled = !!P->r_u8();
+
+}
+#ifdef XRGAME_EXPORTS
+template<>
+void SPHNetState::read(CSaveChunk* P, const Fvector& min, const Fvector& max)
+{
+	VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
+	linear_vel.set(0.f, 0.f, 0.f);
+	angular_vel.set(0.f, 0.f, 0.f);
+	force.set(0.f, 0.f, 0.f);
+	torque.set(0.f, 0.f, 0.f);
+	r_vec_q8(P, position, min, max);
+	previous_position.set(position);
+	r_qt_q8(P, quaternion);
+	previous_quaternion.set(quaternion);
+	P->r_bool(enabled);
+
+}
+#endif
 
 void SPHNetState::net_Load(NET_Packet &P,const Fvector& min,const Fvector& max)
 {
@@ -209,6 +290,51 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 	VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
 	read(P, min, max);
 }
+
+#ifdef XRGAME_EXPORTS
+void SPHNetState::net_Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("SPHNetState");
+	{
+		Object->GetCurrentChunk()->w_vec3(linear_vel);
+		Object->GetCurrentChunk()->w_vec3(position);
+		Object->GetCurrentChunk()->w_vec4(*((Fvector4*)&quaternion));
+		Object->GetCurrentChunk()->w_bool(enabled);
+	}
+	Object->EndChunk();
+}
+
+void SPHNetState::net_Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("SPHNetState");
+	{
+		read(Object->GetCurrentChunk());
+		previous_position.set(position);
+	}
+	Object->EndChunk();
+}
+
+void SPHNetState::net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max)
+{
+	Object->BeginChunk("SPHNetState");
+	{
+		w_vec_q8(Object->GetCurrentChunk(), position, min, max);
+		w_qt_q8(Object->GetCurrentChunk(), quaternion);
+		Object->GetCurrentChunk()->w_bool(enabled);
+	}
+	Object->EndChunk();
+}
+
+void SPHNetState::net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max)
+{
+	Object->FindChunk("SPHNetState");
+	{
+		VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
+		read(Object->GetCurrentChunk(), min, max);
+	}
+	Object->EndChunk();
+}
+#endif
 
 SPHBonesData::SPHBonesData()
 {

@@ -66,11 +66,11 @@ bool CArtContainer::CanStoreArt(CArtefact* art)
 
 void CArtContainer::PutArtefactToContainer(const CArtefact& artefact)
 {
-    CArtefact* af = new CArtefact(artefact);
+    //CArtefact* af = new CArtefact(artefact);
 
-    af->m_bInContainer = true;
+    //af->m_bInContainer = true;
 
-    m_sArtefactsInside.push_back(af);
+    //m_sArtefactsInside.push_back(af);
 }
 
 void CArtContainer::TakeArtefactFromContainer(CArtefact* artefact)
