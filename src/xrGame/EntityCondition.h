@@ -5,6 +5,7 @@ class CWound;
 class NET_Packet;
 class CEntityAlive;
 class CLevel;
+class CSaveObject;
 
 #include "hit_immunity.h"
 #include "Hit.h"
@@ -107,6 +108,8 @@ public:
 
 	virtual void			save					(NET_Packet &output_packet);
 	virtual void			load					(IReader &input_packet);
+	virtual void Save(CSaveObject* Object);
+	virtual void Load(CSaveObject* Object);
 
 	IC float				GetPower				() const			{return m_fPower;}	
 	IC float				GetRadiation			() const			{return m_fRadiation;}

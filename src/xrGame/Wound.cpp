@@ -5,6 +5,7 @@
 #include "StdAfx.h"
 #include "Wound.h"
 #include "../xrEngine/bone.h"
+#include "Save/SaveObject.h"
 
 CWound::CWound(u16 bone_num)
 {
@@ -44,6 +45,32 @@ void  CWound::load	(IReader &input_packet)
 		m_Wounds[i] = input_packet.r_float_q8 (0.f, WOUND_MAX);
 		VERIFY(m_Wounds[i]>=0.0f && m_Wounds[i]<=WOUND_MAX);	
 	}
+}
+
+void CWound::Save(CSaveObject* Object)
+{
+	Object->BeginChunk("CWound");
+	{
+		Object->GetCurrentChunk()->w_u16(m_iBoneNum);
+		for (int i = 0; i < ALife::eHitTypeMax; i++) {
+			Object->GetCurrentChunk()->w_float(m_Wounds[i]);
+		}
+
+	}
+	Object->EndChunk();
+}
+
+void CWound::Load(CSaveObject* Object)
+{
+	Object->FindChunk("CWound");
+	{
+		Object->GetCurrentChunk()->r_u16(m_iBoneNum);
+		for (int i = 0; i < ALife::eHitTypeMax; i++) {
+			Object->GetCurrentChunk()->r_float(m_Wounds[i]);
+			VERIFY(m_Wounds[i] >= 0.0f && m_Wounds[i] <= WOUND_MAX);
+		}
+	}
+	Object->EndChunk();
 }
 
 
