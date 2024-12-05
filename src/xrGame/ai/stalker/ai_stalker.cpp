@@ -1310,6 +1310,28 @@ void CAI_Stalker::load (IReader &packet)
 	brain().load			(packet);
 }
 
+void CAI_Stalker::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CAI_Stalker");
+	{
+		inherited::Save(Object);
+		CInventoryOwner::Save(Object);
+		brain().Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CAI_Stalker::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CAI_Stalker");
+	{
+		inherited::Load(Object);
+		CInventoryOwner::Load(Object);
+		brain().Load(Object);
+	}
+	Object->EndChunk();
+}
+
 void CAI_Stalker::load_critical_wound_bones()
 {
 	fill_bones_body_parts			("head",		critical_wound_type_head);

@@ -50,6 +50,9 @@ public:
 	virtual	void		save					(NET_Packet &packet) {inherited_planner::save(packet); inherited_action::save(packet);}
 	virtual	void		load					(IReader &packet)	 {inherited_planner::load(packet); inherited_action::load(packet);}
 
+	virtual void Save(CSaveObjectSave* Object) { inherited_planner::Save(Object); inherited_action::Save(Object); };
+	virtual void Load(CSaveObjectLoad* Object) { inherited_planner::Load(Object); inherited_action::Load(Object); };
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 typedef CActionPlannerAction<CScriptGameObject> CScriptActionPlannerAction;

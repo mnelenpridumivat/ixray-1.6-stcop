@@ -417,5 +417,115 @@ IC	void CPlanner::load	(IReader &packet)
 	m_loaded						= true;
 }
 
+TEMPLATE_SPECIALIZATION
+IC	void CPlanner::Save(CSaveObjectSave* Object) 
+{
+	Object->BeginChunk("CPlanner");
+	{
+		Object->BeginChunk("CPlanner::m_evaluators");
+		{
+			auto I = this->m_evaluators.begin();
+			auto E = this->m_evaluators.end();
+			Object->GetCurrentChunk()->WriteArray(this->m_evaluators.size());
+			for (; I != E; ++I) 
+			{
+				(*I).second->Save(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+
+		Object->BeginChunk("CPlanner::m_operators");
+		{
+			auto I = this->m_operators.begin();
+			auto E = this->m_operators.end();
+			Object->GetCurrentChunk()->WriteArray(this->m_operators.size());
+			for (; I != E; ++I) 
+			{
+				(*I).m_operator->Save(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+
+		Object->BeginChunk("CPlanner::m_storage");
+		{
+			using CConditionStorage = CPropertyStorage::CConditionStorage;
+			typename CConditionStorage::const_iterator	I = m_storage.m_storage.begin();
+			typename CConditionStorage::const_iterator	E = m_storage.m_storage.end();
+			Object->GetCurrentChunk()->WriteArray(m_storage.m_storage.size());
+			for (; I != E; ++I) 
+			{
+				Object->BeginChunk("CPlanner::m_storage::elem");
+				{
+					Object->GetCurrentChunk()->w_u32((*I).m_condition);
+					Object->GetCurrentChunk()->w_bool((*I).m_value);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CPlanner::Load(CSaveObjectLoad* Object) 
+{
+	Object->FindChunk("CPlanner");
+	{
+		Object->FindChunk("CPlanner::m_evaluators");
+		{
+			auto I = this->m_evaluators.begin();
+			auto E = this->m_evaluators.end();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (; I != E; ++I) 
+			{
+				(*I).second->Load(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+
+		Object->FindChunk("CPlanner::m_operators");
+		{
+			auto I = this->m_operators.begin();
+			auto E = this->m_operators.end();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (; I != E; ++I) 
+			{
+				(*I).m_operator->Load(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+
+		Object->FindChunk("CPlanner::m_storage");
+		{
+			u64							count;
+			GraphEngineSpace::_solver_condition_type	condition;
+			GraphEngineSpace::_solver_value_type		value;
+			Object->GetCurrentChunk()->ReadArray(count);
+			for (u64 i = 0; i < count; ++i) 
+			{
+				Object->FindChunk("CPlanner::m_storage::elem");
+				{
+					Object->GetCurrentChunk()->r_u32(condition);
+					Object->GetCurrentChunk()->r_bool(value);
+					m_storage.set_property(condition, value);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		m_loaded = true;
+	}
+	Object->EndChunk();
+}
+
 #undef TEMPLATE_SPECIALIZATION
 #undef CPlanner

@@ -70,6 +70,7 @@ public:
 		{
 			return			(m_operator);
 		}
+
 	};
 	typedef xr_vector<SOperator>											OPERATOR_VECTOR;
 	typedef typename OPERATOR_VECTOR::const_iterator						const_iterator;

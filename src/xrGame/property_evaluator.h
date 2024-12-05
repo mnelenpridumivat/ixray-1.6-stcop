@@ -11,6 +11,7 @@
 #include "property_storage.h"
 #include "../xrScripts/script_export_space.h"
 #include "action_management_config.h"
+#include "Save/SaveObject.h"
 
 class CScriptGameObject;
 
@@ -38,6 +39,9 @@ public:
 
 	virtual	void				save				(NET_Packet &packet) {}
 	virtual	void				load				(IReader &packet) {}
+
+	virtual void Save(CSaveObjectSave* Object) {};
+	virtual void Load(CSaveObjectLoad* Object) {};
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

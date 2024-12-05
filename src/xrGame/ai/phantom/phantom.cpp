@@ -327,6 +327,24 @@ void CPhantom::load(IReader &input_packet)
 {
 	SwitchToState	(EState(input_packet.r_s32()));
 }
+void CPhantom::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CPhantom");
+	{
+		Object->GetCurrentChunk()->w_s32(s32(m_CurState));
+	}
+	Object->EndChunk();
+}
+void CPhantom::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CPhantom");
+	{
+		s32 Value;
+		Object->GetCurrentChunk()->r_s32(Value);
+		SwitchToState(EState(Value));
+	}
+	Object->EndChunk();
+}
 void CPhantom::net_Export	(NET_Packet& P)					// export to server
 {
 	// export 
