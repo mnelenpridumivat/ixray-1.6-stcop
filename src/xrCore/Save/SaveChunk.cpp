@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "SaveChunk.h"
 
 CSaveChunk::~CSaveChunk()
