@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../xrEngine/VisMask.h"
-#ifdef XRGAME_EXPORTS
 #include "Save/SaveObject.h"
-#endif
 
 class NET_Packet;
 
@@ -33,12 +31,10 @@ struct SPHNetState
 	void								net_Save			(		NET_Packet&		P,const Fvector& min,const Fvector& max);					
 	void								net_Load			(		NET_Packet&		P,const Fvector& min,const Fvector& max);
 	void								net_Load			(		IReader&		P,const Fvector& min,const Fvector& max);
-#ifdef XRGAME_EXPORTS
 	void								net_Save(CSaveObjectSave* Object);
 	void								net_Load(CSaveObjectLoad* Object);
 	void								net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max);
 	void								net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max);
-#endif
 
 private:
 template<typename src>

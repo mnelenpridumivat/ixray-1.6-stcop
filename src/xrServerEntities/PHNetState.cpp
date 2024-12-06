@@ -11,14 +11,12 @@ static void w_vec_q8(NET_Packet& P,const Fvector& vec,const Fvector& min,const F
 	P.w_float_q8(vec.y,min.y,max.y);
 	P.w_float_q8(vec.z,min.z,max.z);
 }
-#ifdef XRGAME_EXPORTS
 static void w_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
 {
 	P->w_float(vec.x); clamp(vec.x, min.x, max.x);
 	P->w_float(vec.y); clamp(vec.y, min.y, max.y);
 	P->w_float(vec.z); clamp(vec.z, min.z, max.z);
 }
-#endif
 template<typename src>
 static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 {
@@ -30,7 +28,6 @@ static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 	clamp(vec.y,min.y,max.y);
 	clamp(vec.z,min.z,max.z);
 }
-#ifdef XRGAME_EXPORTS
 static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
 {
 	P->r_float(vec.x);
@@ -41,7 +38,6 @@ static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvec
 	clamp(vec.y, min.y, max.y);
 	clamp(vec.z, min.z, max.z);
 }
-#endif
 static void w_qt_q8(NET_Packet& P,const Fquaternion& q)
 {
 	P.w_float_q8(q.x,-1.f,1.f);
@@ -49,7 +45,6 @@ static void w_qt_q8(NET_Packet& P,const Fquaternion& q)
 	P.w_float_q8(q.z,-1.f,1.f);
 	P.w_float_q8(q.w,-1.f,1.f);
 }
-#ifdef XRGAME_EXPORTS
 static void w_qt_q8(CSaveChunk* P, Fquaternion& q)
 {
 	P->w_float(q.x); clamp(q.x, -1.f, 1.f);
@@ -57,7 +52,6 @@ static void w_qt_q8(CSaveChunk* P, Fquaternion& q)
 	P->w_float(q.z); clamp(q.z, -1.f, 1.f);
 	P->w_float(q.w); clamp(q.w, -1.f, 1.f);
 }
-#endif
 
 template<typename src>
 static void r_qt_q8(src& P,Fquaternion& q)
@@ -73,7 +67,6 @@ static void r_qt_q8(src& P,Fquaternion& q)
 	clamp(q.w,-1.f,1.f);
 }
 
-#ifdef XRGAME_EXPORTS
 static void r_qt_q8(CSaveChunk* P, Fquaternion& q)
 {
 	P->r_float(q.x);
@@ -86,7 +79,6 @@ static void r_qt_q8(CSaveChunk* P, Fquaternion& q)
 	clamp(q.z, -1.f, 1.f);
 	clamp(q.w, -1.f, 1.f);
 }
-#endif
 
 #ifdef XRGAME_EXPORTS
 /////////////////////////////////16////////////////////////////////////////////////////////////////
@@ -182,7 +174,6 @@ void	SPHNetState::read(src* P)
 	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
 	P->r_bool(enabled);
 }
-#ifdef XRGAME_EXPORTS
 template<>
 void	SPHNetState::read(CSaveChunk* P)
 {
@@ -196,7 +187,6 @@ void	SPHNetState::read(CSaveChunk* P)
 	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
 	P->r_bool(enabled);
 }
-#endif
 
 void	SPHNetState::net_Import(NET_Packet&	P)
 {
@@ -261,7 +251,6 @@ void SPHNetState::read(src* P, const Fvector& min, const Fvector& max)
 	enabled = !!P->r_u8();
 
 }
-#ifdef XRGAME_EXPORTS
 template<>
 void SPHNetState::read(CSaveChunk* P, const Fvector& min, const Fvector& max)
 {
@@ -277,7 +266,6 @@ void SPHNetState::read(CSaveChunk* P, const Fvector& min, const Fvector& max)
 	P->r_bool(enabled);
 
 }
-#endif
 
 void SPHNetState::net_Load(NET_Packet &P,const Fvector& min,const Fvector& max)
 {
@@ -291,7 +279,6 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 	read(P, min, max);
 }
 
-#ifdef XRGAME_EXPORTS
 void SPHNetState::net_Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("SPHNetState");
@@ -334,7 +321,6 @@ void SPHNetState::net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fv
 	}
 	Object->EndChunk();
 }
-#endif
 
 SPHBonesData::SPHBonesData()
 {
