@@ -1,8 +1,9 @@
 #include "StdAfx.h"
+#include "pch_script.h"
 #include "SaveSystem_script.h"
-#include "SaveChunk.h"
-#include "SaveVariables.h"
-#include "SaveObject.h"
+#include "Save/SaveChunk.h"
+#include "Save/SaveVariables.h"
+#include "Save/SaveObject.h"
 
 namespace CSaveChunk_script {
 	bool r_bool(CSaveChunk* Chunk) {

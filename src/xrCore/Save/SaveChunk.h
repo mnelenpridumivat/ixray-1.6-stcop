@@ -2,16 +2,17 @@
 #include "../xrScripts/script_export_space.h"
 #include "SaveVariables.h"
 
-class CSaveChunk: public ISaveable {
+class XRCORE_API CSaveChunk: public ISaveable {
 
 	shared_str _chunkName;
-	xr_map<shared_str, xr_unique_ptr<CSaveChunk>> _subchunks;
-	xr_vector<xr_unique_ptr<CSaveVariableBase>> _variables;
+	xr_map<shared_str, CSaveChunk*> _subchunks;
+	xr_vector<CSaveVariableBase*> _variables;
 	u64 _currentReadIndex;
 	xr_stack<CSaveVariableArray*> _currentArrayStack;
 
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
+	~CSaveChunk();
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
 	virtual bool IsArray() override { return false; }

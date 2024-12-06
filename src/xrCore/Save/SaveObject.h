@@ -2,7 +2,7 @@
 #include "../xrScripts/script_export_space.h"
 #include "SaveChunk.h"
 
-class CSaveObject {
+class XRCORE_API CSaveObject {
 protected:
 	xr_unique_ptr<CSaveChunk> _rootChunk;
 	xr_stack<CSaveChunk*> _chunkStack;
@@ -16,13 +16,13 @@ public:
 	void EndChunk();
 };
 
-class CSaveObjectSave: public CSaveObject {
+class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:
 	virtual void BeginChunk(shared_str ChunkName) override;
 	virtual void FindChunk(shared_str ChunkName) override;
 };
 
-class CSaveObjectLoad: public CSaveObject {
+class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
 	virtual void BeginChunk(shared_str ChunkName) override;
 	virtual void FindChunk(shared_str ChunkName) override;

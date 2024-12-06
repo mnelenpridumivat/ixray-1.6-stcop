@@ -65,6 +65,8 @@ file(GLOB_RECURSE CORE_SOURCE_ALL_FILES CONFIGURE_DEPENDS
     "*.h"
 )
 
+file(GLOB_RECURSE CORE_SOURCE_SAVE_FILES "Save/*.*")
+
 file(GLOB CORE_SOURCE_RT_FILES "rt_c*.*")
 file(GLOB CORE_SOURCE_PPMD_FILES "ppmd_*.*")
 file(GLOB_RECURSE CORE_SOURCE_DISCORD_FILES "discord/*.*")
@@ -97,6 +99,7 @@ source_group("core/XML" FILES ${CORE_SOURCE_XML_FILES})
 source_group("core/StackTrace" FILES ${CORE_SOURCE_STACK_FILES})
 source_group("discord" FILES ${CORE_SOURCE_DISCORD_FILES})
 source_group("discord/api" FILES ${CORE_SOURCE_DISCORD_API_FILES})
+source_group("Save" FILES ${CORE_SOURCE_SAVE_FILES})
 
 # Apply list
 list(APPEND CORE_SRC_FILES ${CORE_SOURCE_ALL_FILES})

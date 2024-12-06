@@ -3,7 +3,7 @@
 #include "../xrCore/_types.h"
 #include "../xrCore/_vector4.h"
 
-enum class ESaveVariableType : u8 {
+enum class XRCORE_API ESaveVariableType : u8 {
 	t_bool,
 	t_float,
 	t_double,
@@ -34,13 +34,13 @@ enum class ESaveVariableType : u8 {
 	t_invalid = u8(-1),
 };
 
-class ISaveable{
+class XRCORE_API ISaveable{
 public:
 	virtual ESaveVariableType GetVariableType() = 0;
 	virtual bool IsArray() = 0;
 };
 
-class CSaveVariableBase: public ISaveable {
+class XRCORE_API CSaveVariableBase: public ISaveable {
 protected:
 	virtual void* GetValue() { return nullptr; }
 
@@ -49,27 +49,28 @@ public:
 	virtual bool IsArray() { return false; }
 };
 
-class CSaveVariableArray :
+class XRCORE_API CSaveVariableArray :
 	public CSaveVariableBase
 {
 	u64 _size;
 	u64 _currentReadPos;
-	xr_vector<xr_unique_ptr<ISaveable>> _array;
+	xr_vector<ISaveable*> _array;
 
 public:
-	CSaveVariableArray(u64 Size) : _size(Size){}
+	CSaveVariableArray(u64 Size) : _size(Size) {}
+	~CSaveVariableArray();
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_array; }
 	virtual bool IsArray() { return true; }
 
 	u64 GetSize() { return _size; }
-	ISaveable* GetCurrentElement() { VERIFY(_currentReadPos < _size); return _array[_currentReadPos].get(); }
+	ISaveable* GetCurrentElement() { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
 	void Next() { ++_currentReadPos; }
 
-	void AddVariable(ISaveable* data) { _array.push_back(xr_unique_ptr<ISaveable>(data)); }
+	void AddVariable(ISaveable* data) { _array.emplace_back(data); }
 };
 
-class CSaveVariableBool:
+class XRCORE_API CSaveVariableBool:
 	public CSaveVariableBase 
 {
 	friend struct SSaveVariableGetter;
@@ -84,7 +85,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_bool; }
 };
 
-class CSaveVariableFloat :
+class XRCORE_API CSaveVariableFloat :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -99,7 +100,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float; }
 };
 
-class CSaveVariableDouble :
+class XRCORE_API CSaveVariableDouble :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -114,7 +115,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_double; }
 };
 
-class CSaveVariableVec3 :
+class XRCORE_API CSaveVariableVec3 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -129,7 +130,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec3; }
 };
 
-class CSaveVariableVec4 :
+class XRCORE_API CSaveVariableVec4 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -144,7 +145,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec4; }
 };
 
-class CSaveVariableU64 :
+class XRCORE_API CSaveVariableU64 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -159,7 +160,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u64; }
 };
 
-class CSaveVariableS64 :
+class XRCORE_API CSaveVariableS64 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -174,7 +175,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s64; }
 };
 
-class CSaveVariableU32 :
+class XRCORE_API CSaveVariableU32 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -189,7 +190,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u32; }
 };
 
-class CSaveVariableS32 :
+class XRCORE_API CSaveVariableS32 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -204,7 +205,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s32; }
 };
 
-class CSaveVariableU16 :
+class XRCORE_API CSaveVariableU16 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -219,7 +220,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u16; }
 };
 
-class CSaveVariableS16 :
+class XRCORE_API CSaveVariableS16 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -234,7 +235,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s16; }
 };
 
-class CSaveVariableU8 :
+class XRCORE_API CSaveVariableU8 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -249,7 +250,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u8; }
 };
 
-class CSaveVariableS8 :
+class XRCORE_API CSaveVariableS8 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -367,7 +368,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_sdir; }
 };*/
 
-class CSaveVariableString :
+class XRCORE_API CSaveVariableString :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -384,7 +385,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_string; }
 };
 
-class CSaveVariableMatrix :
+class XRCORE_API CSaveVariableMatrix :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -399,7 +400,7 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_matrix; }
 };
 
-class CSaveVariableClientID :
+class XRCORE_API CSaveVariableClientID :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
