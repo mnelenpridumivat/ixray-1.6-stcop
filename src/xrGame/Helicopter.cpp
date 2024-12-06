@@ -500,6 +500,52 @@ void CHelicopter::load(IReader &input_packet)
 	load_data		(m_time_between_rocket_attack, input_packet);
 	load_data		(m_syncronize_rocket, input_packet);
 }
+
+void CHelicopter::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CHelicopter");
+	{
+		inherited::Save(Object);
+		m_movement.Save(Object);
+		m_body.Save(Object);
+		m_enemy.Save(Object);
+		Object->GetCurrentChunk()->w_vec3(XFORM().c);
+		Object->GetCurrentChunk()->w_float(m_barrel_dir_tolerance);
+		Object->GetCurrentChunk()->w_bool(m_use_rocket_on_attack);
+		Object->GetCurrentChunk()->w_bool(m_use_mgun_on_attack);
+		Object->GetCurrentChunk()->w_float(m_min_rocket_dist);
+		Object->GetCurrentChunk()->w_float(m_max_rocket_dist);
+		Object->GetCurrentChunk()->w_float(m_min_mgun_dist);
+		Object->GetCurrentChunk()->w_float(m_max_mgun_dist);
+		Object->GetCurrentChunk()->w_u32(m_time_between_rocket_attack);
+		Object->GetCurrentChunk()->w_bool(m_syncronize_rocket);
+	}
+	Object->EndChunk();
+}
+
+void CHelicopter::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CHelicopter");
+	{
+		inherited::Load(Object);
+		m_movement.Load(Object);
+		m_body.Load(Object);
+		m_enemy.Load(Object);
+		Object->GetCurrentChunk()->r_vec3(XFORM().c);
+		Object->GetCurrentChunk()->r_float(m_barrel_dir_tolerance);
+		UseFireTrail(m_enemy.bUseFireTrail);//force reloar disp params
+		Object->GetCurrentChunk()->r_bool(m_use_rocket_on_attack);
+		Object->GetCurrentChunk()->r_bool(m_use_mgun_on_attack);
+		Object->GetCurrentChunk()->r_float(m_min_rocket_dist);
+		Object->GetCurrentChunk()->r_float(m_max_rocket_dist);
+		Object->GetCurrentChunk()->r_float(m_min_mgun_dist);
+		Object->GetCurrentChunk()->r_float(m_max_mgun_dist);
+		Object->GetCurrentChunk()->r_u32(m_time_between_rocket_attack);
+		Object->GetCurrentChunk()->r_bool(m_syncronize_rocket);
+	}
+	Object->EndChunk();
+}
+
 void CHelicopter::net_Relcase(CObject* O )
 {
 	CExplosive::net_Relcase(O);

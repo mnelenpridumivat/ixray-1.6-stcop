@@ -1429,6 +1429,31 @@ void CWeaponMagazined::load(IReader &input_packet)
 	load_data		(m_iCurFireMode, input_packet);
 }
 
+void CWeaponMagazined::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CWeaponMagazined");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_s32(m_iQueueSize);
+		Object->GetCurrentChunk()->w_s32(m_iShotNum);
+		Object->GetCurrentChunk()->w_s32(m_iCurFireMode);
+	}
+	Object->EndChunk();
+}
+
+void CWeaponMagazined::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CWeaponMagazined");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_s32(m_iQueueSize); 
+		SetQueueSize(m_iQueueSize);
+		Object->GetCurrentChunk()->r_s32(m_iShotNum);
+		Object->GetCurrentChunk()->r_s32(m_iCurFireMode);
+	}
+	Object->EndChunk();
+}
+
 void CWeaponMagazined::net_Export	(NET_Packet& P)
 {
 	inherited::net_Export (P);

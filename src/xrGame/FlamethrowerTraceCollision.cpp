@@ -672,6 +672,14 @@ void FlamethrowerTrace::CManager::load(IReader& input_packet)
 {
 }
 
+void FlamethrowerTrace::CManager::Save(CSaveObjectSave* Object) const
+{
+}
+
+void FlamethrowerTrace::CManager::Load(CSaveObjectLoad* Object)
+{
+}
+
 void FlamethrowerTrace::CManager::UpdateOverlaps(float DeltaTime)
 {
 	Fvector Center{};

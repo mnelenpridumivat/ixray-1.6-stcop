@@ -743,6 +743,45 @@ void CWeapon::load(IReader &input_packet)
 	load_data		(m_bRememberActorNVisnStatus,	input_packet);
 }
 
+void CWeapon::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CWeapon");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_s32(iAmmoElapsed);
+		Object->GetCurrentChunk()->w_u8(m_cur_scope);
+		Object->GetCurrentChunk()->w_u8(m_flagsAddOnState);
+		Object->GetCurrentChunk()->w_u8(m_ammoType);
+		Object->GetCurrentChunk()->w_bool(m_zoom_params.m_bIsZoomModeNow);
+		Object->GetCurrentChunk()->w_bool(m_bRememberActorNVisnStatus);
+	}
+	Object->EndChunk();
+}
+
+void CWeapon::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CWeapon");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_s32(iAmmoElapsed);
+		Object->GetCurrentChunk()->r_u8(m_cur_scope);
+		Object->GetCurrentChunk()->r_u8(m_flagsAddOnState);
+		UpdateAddonsVisibility();
+		Object->GetCurrentChunk()->r_u8(m_ammoType);
+		Object->GetCurrentChunk()->r_bool(m_zoom_params.m_bIsZoomModeNow);
+
+		if (m_zoom_params.m_bIsZoomModeNow) {
+			OnZoomIn();
+		}
+		else {
+			OnZoomOut();
+		}
+
+		Object->GetCurrentChunk()->r_bool(m_bRememberActorNVisnStatus);
+	}
+	Object->EndChunk();
+}
+
 
 void CWeapon::OnEvent(NET_Packet& P, u16 type) 
 {

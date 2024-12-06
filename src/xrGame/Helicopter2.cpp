@@ -356,7 +356,6 @@ void SHeliEnemy::save(NET_Packet &output_packet)
 	output_packet.w_s16		((s16)type);
 	output_packet.w_vec3	(destEnemyPos);
 	output_packet.w_u16		(destEnemyID);
-
 	output_packet.w_float	(fire_trail_length_des);
 	output_packet.w_u8		(bUseFireTrail ? 1 : 0);
 }
@@ -369,6 +368,36 @@ void SHeliEnemy::load(IReader &input_packet)
 
 	fire_trail_length_des	= input_packet.r_float();
 	bUseFireTrail		= !!input_packet.r_u8();
+}
+
+void SHeliEnemy::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SHeliEnemy");
+	{
+		Object->GetCurrentChunk()->w_s16((s16)type);
+		Object->GetCurrentChunk()->w_vec3(destEnemyPos);
+		Object->GetCurrentChunk()->w_u16(destEnemyID);
+		Object->GetCurrentChunk()->w_float(fire_trail_length_des);
+		Object->GetCurrentChunk()->w_bool(bUseFireTrail);
+	}
+	Object->EndChunk();
+}
+
+void SHeliEnemy::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("SHeliEnemy");
+	{
+		{
+			s16 Value;
+			Object->GetCurrentChunk()->r_s16(Value);
+			type = (EHeliHuntState)type;
+		}
+		Object->GetCurrentChunk()->r_vec3(destEnemyPos);
+		Object->GetCurrentChunk()->r_u16(destEnemyID);
+		Object->GetCurrentChunk()->r_float(fire_trail_length_des);
+		Object->GetCurrentChunk()->r_bool(bUseFireTrail);
+	}
+	Object->EndChunk();
 }
 
 void CHelicopter::SetFireTrailLength(float val)
@@ -433,6 +462,36 @@ void SHeliBodyState::load(IReader &input_packet)
 	currBodyHPB.x			= input_packet.r_float();
 	currBodyHPB.y			= input_packet.r_float();
 	currBodyHPB.z			= input_packet.r_float();
+}
+
+void SHeliBodyState::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SHeliBodyState");
+	{
+		Object->GetCurrentChunk()->w_s16((s16)type);
+		Object->GetCurrentChunk()->w_bool(b_looking_at_point);
+		Object->GetCurrentChunk()->w_float(currBodyHPB.x);
+		Object->GetCurrentChunk()->w_float(currBodyHPB.y);
+		Object->GetCurrentChunk()->w_float(currBodyHPB.z);
+	}
+	Object->EndChunk();
+}
+
+void SHeliBodyState::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("SHeliBodyState");
+	{
+		{
+			s16 Value;
+			Object->GetCurrentChunk()->r_s16(Value);
+			type = (EHeliBodyState)Value;
+		}
+		Object->GetCurrentChunk()->r_bool(b_looking_at_point);
+		Object->GetCurrentChunk()->r_float(currBodyHPB.x);
+		Object->GetCurrentChunk()->r_float(currBodyHPB.y);
+		Object->GetCurrentChunk()->r_float(currBodyHPB.z);
+	}
+	Object->EndChunk();
 }
 
 

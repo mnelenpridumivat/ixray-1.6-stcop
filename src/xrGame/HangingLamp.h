@@ -28,7 +28,7 @@ private:
 	ref_light		light_ambient;
 	CLAItem*		lanim;
 	float			ambient_power;
-	BOOL			m_bState;
+	bool			m_bState;
 	
 	ref_glow		glow_render;
 	
@@ -60,6 +60,8 @@ public:
 	virtual	BOOL	net_SaveRelevant	();
 	virtual void	save				(NET_Packet &output_packet);
 	virtual void	load				(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 
 	virtual BOOL	renderable_ShadowGenerate	( ) { return TRUE;	}
 	virtual BOOL	renderable_ShadowReceive	( ) { return TRUE;	}

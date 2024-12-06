@@ -198,11 +198,33 @@ void	CHangingLamp::	save			(NET_Packet &output_packet)
 	output_packet.w_u8((u8)m_bState);
 
 }
+
 void	CHangingLamp::load				(IReader &input_packet)
 {
 	inherited::load(input_packet);
 	m_bState	= (u8)input_packet.r_u8();
 }
+
+void CHangingLamp::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CHangingLamp");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_bool(m_bState);
+	}
+	Object->EndChunk();
+}
+
+void CHangingLamp::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CHangingLamp");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_bool(m_bState);
+	}
+	Object->EndChunk();
+}
+
 void CHangingLamp::shedule_Update	(u32 dt)
 {
 	CPHSkeleton::Update(dt);

@@ -57,6 +57,8 @@ void	CFlamethrower::OnZoomIn() {}
 void	CFlamethrower::OnZoomOut() {}
 void	CFlamethrower::save(NET_Packet& output_packet) {}
 void	CFlamethrower::load(IReader& input_packet) {}
+void	CFlamethrower::Save(CSaveObjectSave* Object) const {}
+void	CFlamethrower::Load(CSaveObjectLoad* Object) {}
 void	CFlamethrower::SpawnFuelCanister(float Condition, LPCSTR ammoSect, u32 ParentID) {}
 bool	CFlamethrower::install_upgrade_impl(LPCSTR section, bool test) { return false; }
 void	CFlamethrower::PlayAnimShow() {}
@@ -1687,6 +1689,36 @@ void CFlamethrower::load(IReader& input_packet)
 	load_data(m_current_fuel_level, input_packet);
 	load_data(m_fuel_section_name, input_packet);
 	TraceManager->load(input_packet);
+}
+
+void CFlamethrower::Save(CSaveObjectSave* Object) const 
+{
+	Object->BeginChunk("CFlamethrower");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_bool(m_is_overheated);
+		Object->GetCurrentChunk()->w_float(m_overheating_state);
+		Object->GetCurrentChunk()->w_float(m_current_charge);
+		Object->GetCurrentChunk()->w_float(m_current_fuel_level);
+		Object->GetCurrentChunk()->w_stringZ(m_fuel_section_name);
+		TraceManager->Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CFlamethrower::Load(CSaveObjectLoad* Object) 
+{
+	Object->FindChunk("CFlamethrower");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_bool(m_is_overheated);
+		Object->GetCurrentChunk()->r_float(m_overheating_state);
+		Object->GetCurrentChunk()->r_float(m_current_charge);
+		Object->GetCurrentChunk()->r_float(m_current_fuel_level);
+		Object->GetCurrentChunk()->r_stringZ(m_fuel_section_name);
+		TraceManager->Load(Object);
+	}
+	Object->EndChunk();
 }
 
 void CFlamethrower::SpawnFuelCanister(float Condition, LPCSTR ammoSect, u32 ParentID)

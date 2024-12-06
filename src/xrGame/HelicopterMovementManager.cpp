@@ -303,6 +303,72 @@ void SHeliMovementState::load(IReader &input_packet)
 
 }
 
+void SHeliMovementState::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SHeliMovementState");
+	{
+		Object->GetCurrentChunk()->w_s16((s16)type);
+		Object->GetCurrentChunk()->w_u32(patrol_begin_idx);
+		Object->GetCurrentChunk()->w_stringZ(patrol_path_name);
+		Object->GetCurrentChunk()->w_float(maxLinearSpeed);
+		Object->GetCurrentChunk()->w_float(LinearAcc_fw);
+		Object->GetCurrentChunk()->w_float(LinearAcc_bk);
+		Object->GetCurrentChunk()->w_float(speedInDestPoint);
+		Object->GetCurrentChunk()->w_vec3(desiredPoint);
+		Object->GetCurrentChunk()->w_float(curLinearSpeed);
+		Object->GetCurrentChunk()->w_float(curLinearAcc);
+		Object->GetCurrentChunk()->w_vec3(currP);
+		Object->GetCurrentChunk()->w_float(currPathH);
+		Object->GetCurrentChunk()->w_float(currPathP);
+		Object->GetCurrentChunk()->w_vec3(round_center);
+		Object->GetCurrentChunk()->w_float(round_radius);
+		Object->GetCurrentChunk()->w_bool(round_reverse);
+		Object->GetCurrentChunk()->w_float(onPointRangeDist);
+		if (type == eMovPatrolPath) {
+			Object->GetCurrentChunk()->w_s32(currPatrolVertex->vertex_id());
+		}
+	}
+	Object->EndChunk();
+}
+
+void SHeliMovementState::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("SHeliMovementState");
+	{
+		{
+			s16 Value;
+			Object->GetCurrentChunk()->r_s16(Value);
+			type = (EHeilMovementState)Value;
+		}
+		Object->GetCurrentChunk()->r_s32(patrol_begin_idx);
+		Object->GetCurrentChunk()->r_stringZ(patrol_path_name);
+		Object->GetCurrentChunk()->r_float(maxLinearSpeed);
+		Object->GetCurrentChunk()->r_float(LinearAcc_fw);
+		Object->GetCurrentChunk()->r_float(LinearAcc_bk);
+		Object->GetCurrentChunk()->r_float(speedInDestPoint);
+		Object->GetCurrentChunk()->r_vec3(desiredPoint);
+		Object->GetCurrentChunk()->r_float(curLinearSpeed);
+		Object->GetCurrentChunk()->r_float(curLinearAcc);
+		Object->GetCurrentChunk()->r_vec3(currP);
+		Object->GetCurrentChunk()->r_float(currPathH);
+		Object->GetCurrentChunk()->r_float(currPathP);
+		Object->GetCurrentChunk()->r_vec3(round_center);
+		Object->GetCurrentChunk()->r_float(round_radius);
+		Object->GetCurrentChunk()->r_bool(round_reverse);
+		Object->GetCurrentChunk()->r_float(onPointRangeDist);
+		if (type == eMovPatrolPath) {
+			currPatrolPath = ai().patrol_paths().path(patrol_path_name);
+			s32 Value;
+			Object->GetCurrentChunk()->r_s32(Value);
+			currPatrolVertex = currPatrolPath->vertex(Value);
+		}
+		if (type == eMovRoundPath) {
+			goByRoundPath(round_center, round_radius, !round_reverse);
+		}
+	}
+	Object->EndChunk();
+}
+
 float SHeliMovementState::GetSafeAltitude()
 {
 	Fbox	boundingVolume = Level().ObjectSpace.GetBoundingVolume();

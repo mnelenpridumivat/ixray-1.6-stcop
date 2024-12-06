@@ -208,6 +208,26 @@ void CPda::load(IReader &input_packet)
 	load_data		(m_sFullName, input_packet);
 }
 
+void CPda::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CPda");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_sFullName);
+	}
+	Object->EndChunk();
+}
+
+void CPda::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CPda");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_sFullName);
+	}
+	Object->EndChunk();
+}
+
 CObject* CPda::GetOwnerObject()
 {
 	return				Level().Objects.net_Find(GetOriginalOwnerID());

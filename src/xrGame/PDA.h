@@ -59,6 +59,8 @@ public:
 
 	virtual void							save					(NET_Packet &output_packet);
 	virtual void							load					(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 
 //*	virtual LPCSTR							Name					();
 

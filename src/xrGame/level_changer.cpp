@@ -209,6 +209,28 @@ void CLevelChanger::load(IReader &input_packet)
 	m_b_enabled				= !!input_packet.r_u8();
 }
 
+void CLevelChanger::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CLevelChanger");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_invite_str);
+		Object->GetCurrentChunk()->w_bool(m_b_enabled);
+	}
+	Object->EndChunk();
+}
+
+void CLevelChanger::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CLevelChanger");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_invite_str);
+		Object->GetCurrentChunk()->r_bool(m_b_enabled);
+	}
+	Object->EndChunk();
+}
+
 BOOL CLevelChanger::net_SaveRelevant()
 {
 	if(!m_b_enabled || m_invite_str!=DEF_INVITATION )

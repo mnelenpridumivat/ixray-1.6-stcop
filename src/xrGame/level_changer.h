@@ -47,6 +47,8 @@ public:
 	virtual BOOL	net_SaveRelevant		();
 	virtual void	save					(NET_Packet &output_packet);
 	virtual void	load					(IReader &input_packet);
+	virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 
 #ifdef DEBUG_DRAW
 	virtual void		OnRender();

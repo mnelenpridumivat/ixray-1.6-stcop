@@ -171,6 +171,26 @@ void CWeaponBinoculars::load(IReader &input_packet)
 	load_data		(m_fRTZoomFactor,input_packet);
 }
 
+void CWeaponBinoculars::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CWeaponBinoculars");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_float(m_fRTZoomFactor);
+	}
+	Object->EndChunk();
+}
+
+void CWeaponBinoculars::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CWeaponBinoculars");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_float(m_fRTZoomFactor);
+	}
+	Object->EndChunk();
+}
+
 bool CWeaponBinoculars::GetBriefInfo( II_BriefInfo& info )
 {
 	info.clear();
