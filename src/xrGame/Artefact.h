@@ -146,6 +146,10 @@ public:
 		//processing_deactivate		();
 	}
 
+
+	virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); };
+	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); };
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 

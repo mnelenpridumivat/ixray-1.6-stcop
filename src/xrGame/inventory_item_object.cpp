@@ -128,6 +128,26 @@ void CInventoryItemObject::load				(IReader &packet)
 	CInventoryItem::load				(packet);
 }
 
+void CInventoryItemObject::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CInventoryItemObject");
+	{
+		CPhysicItem::Save(Object);
+		CInventoryItem::Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CInventoryItemObject::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CInventoryItemObject");
+	{
+		CPhysicItem::Load(Object);
+		CInventoryItem::Load(Object);
+	}
+	Object->EndChunk();
+}
+
 void CInventoryItemObject::renderable_Render()
 {
 	CPhysicItem::renderable_Render		();

@@ -53,6 +53,8 @@ public:
 	
 	virtual void			save				(NET_Packet &output_packet) {inherited::save(output_packet);}
 	virtual void			load				(IReader &input_packet)		{inherited::load(input_packet);}
+	virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); };
+	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); };
 	virtual BOOL			net_SaveRelevant	()							{return inherited::net_SaveRelevant();}
 
 	virtual void			OnH_A_Chield		()				{inherited::OnH_A_Chield();}

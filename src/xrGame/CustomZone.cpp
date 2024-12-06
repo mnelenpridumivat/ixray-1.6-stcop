@@ -1535,3 +1535,25 @@ void CCustomZone::load							(IReader &input_packet)
 	else
 		m_eZoneState = eZoneStateIdle;
 }
+
+void CCustomZone::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CCustomZone");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_u8((u8)m_eZoneState);
+	}
+	Object->EndChunk();
+}
+
+void CCustomZone::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CCustomZone");
+	{
+		inherited::Load(Object);
+		u8 Value;
+		Object->GetCurrentChunk()->r_u8(Value);
+		m_eZoneState = (EZoneState)Value;
+	}
+	Object->EndChunk();
+}

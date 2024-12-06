@@ -489,12 +489,20 @@ void CGameObject::load			(IReader &input_packet)
 
 void CGameObject::Save(CSaveObjectSave* Object) const
 {
-	m_ScriptBinderComponent->Save(Object);
+	Object->BeginChunk("CGameObject");
+	{
+		m_ScriptBinderComponent->Save(Object);
+	}
+	Object->EndChunk();
 }
 
 void CGameObject::Load(CSaveObjectLoad* Object)
 {
-	m_ScriptBinderComponent->Load(Object);
+	Object->FindChunk("CGameObject");
+	{
+		m_ScriptBinderComponent->Load(Object);
+	}
+	Object->EndChunk();
 }
 
 void CGameObject::spawn_supplies()

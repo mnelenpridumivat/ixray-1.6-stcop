@@ -24,6 +24,26 @@ void CArtCombiner::load(IReader& input_packet)
 	CArtContainer::load(input_packet);
 }
 
+void CArtCombiner::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CArtCombiner");
+	{
+		CArtefact::Save(Object);
+		CArtContainer::Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CArtCombiner::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CArtCombiner");
+	{
+		CArtefact::Load(Object);
+		CArtContainer::Load(Object);
+	}
+	Object->EndChunk();
+}
+
 u32 CArtCombiner::Cost() const
 {
 	auto res = CArtefact::Cost();

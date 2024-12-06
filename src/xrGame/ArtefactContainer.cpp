@@ -48,6 +48,26 @@ void CArtefactContainer::load(IReader& packet)
     CArtContainer::load(packet);
 }
 
+void CArtefactContainer::Save(CSaveObjectSave* Object) const
+{
+    Object->BeginChunk("CArtefactContainer");
+    {
+        inherited::Save(Object);
+        CArtContainer::Save(Object);
+    }
+    Object->EndChunk();
+}
+
+void CArtefactContainer::Load(CSaveObjectLoad* Object)
+{
+    Object->FindChunk("CInventoryItemObject");
+    {
+        inherited::Load(Object);
+        CArtContainer::Load(Object);
+    }
+    Object->EndChunk();
+}
+
 u32 CArtefactContainer::Cost() const
 {
     u32 res = CInventoryItem::Cost();

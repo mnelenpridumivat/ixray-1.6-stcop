@@ -1,4 +1,5 @@
 #pragma once
+#include "Save/SaveObject.h"
 
 class CArtefact;
 
@@ -18,6 +19,9 @@ public:
 
 	void			save(NET_Packet& output_packet);
 	void			load(IReader& input_packet);
+
+	virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);
 
 	u32				Cost() const;
 	float			Weight() const;
