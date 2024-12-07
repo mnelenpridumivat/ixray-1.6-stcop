@@ -47,7 +47,7 @@ void  CWound::load	(IReader &input_packet)
 	}
 }
 
-void CWound::Save(CSaveObject* Object)
+void CWound::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CWound");
 	{
@@ -60,7 +60,7 @@ void CWound::Save(CSaveObject* Object)
 	Object->EndChunk();
 }
 
-void CWound::Load(CSaveObject* Object)
+void CWound::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CWound");
 	{

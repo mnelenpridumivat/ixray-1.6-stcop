@@ -62,6 +62,14 @@ void CPureServerObject::save				(NET_Packet	&tNetPacket)
 {
 }
 
+void CPureServerObject::Load(CSaveObjectLoad* tNetPacket)
+{
+}
+
+void CPureServerObject::Save(CSaveObjectSave* tNetPacket)
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // CSE_Abstract
 ////////////////////////////////////////////////////////////////////////////
@@ -466,3 +474,4 @@ void CSE_Abstract::load_update				(NET_Packet &tNetPacket)
 	tNetPacket.r				(&m_next_spawn_time,sizeof(m_next_spawn_time));
 }
 /**/
+

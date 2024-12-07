@@ -80,7 +80,7 @@ public:
 	virtual	void				save				(NET_Packet &packet) {}
 	virtual	void				load				(IReader &packet) {}
 
-	virtual void Save(CSaveObjectSave* Object) {};
+	virtual void Save(CSaveObjectSave* Object) const {};
 	virtual void Load(CSaveObjectLoad* Object) {};
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION

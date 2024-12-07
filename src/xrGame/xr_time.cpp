@@ -65,7 +65,7 @@ void	xrTime::set				(int y, int mo, int d, int h, int mi, int s, int ms)
 	m_time+=generate_time(y,mo,d,h,mi,s,ms);
 }
 
-void xrTime::get(u32& y, u32& mo, u32& d, u32& h, u32& mi, u32& s, u32& ms)
+void xrTime::get(u32& y, u32& mo, u32& d, u32& h, u32& mi, u32& s, u32& ms) const
 {
 	split_time(m_time, y, mo, d, h, mi, s, ms);
 }
@@ -100,6 +100,46 @@ void xrTime::Load(NET_Packet& Packet)
 	Packet.r_u32(Tm.TimeTotal);
 
 	set(Tm.Years + 2000, Tm.Month, Tm.Days, Tm.Hours, Tm.Min, Tm.Sec, 0);
+}
+
+void xrTime::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("xrTime");
+	{
+		u32 y;
+		u32 mo;
+		u32 d;
+		u32 h;
+		u32 mi;
+		u32 s;
+		u32 ms;
+
+		get(y, mo, d, h, mi, s, ms);
+
+		TimePacked Tm = {};
+		Tm.Years = y - 2000;
+		Tm.Month = mo;
+		Tm.Days = d;
+
+		Tm.Hours = h;
+		Tm.Min = mi;
+		Tm.Sec = s;
+
+		Object->GetCurrentChunk()->w_u32(Tm.TimeTotal);
+	}
+	Object->EndChunk();
+}
+
+void xrTime::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("xrTime");
+	{
+		TimePacked Tm = {};
+		Object->GetCurrentChunk()->r_u32(Tm.TimeTotal);
+
+		set(Tm.Years + 2000, Tm.Month, Tm.Days, Tm.Hours, Tm.Min, Tm.Sec, 0);
+	}
+	Object->EndChunk();
 }
 
 float	xrTime::diffSec(const xrTime& other)

@@ -13,6 +13,7 @@
 #include "script_value_container.h"
 #include "alife_space.h"
 #include "../xrCore/client_id.h"
+#include "Save/SaveObject.h"
 
 class NET_Packet;
 class xrClientData;
@@ -45,6 +46,8 @@ SERVER_ENTITY_DECLARE_BEGIN(CPureServerObject,IPureServerObject)
 	virtual void					save(IWriter	&tMemoryStream);
 	virtual void					load(NET_Packet	&tNetPacket);
 	virtual void					save(NET_Packet	&tNetPacket);
+	virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);
 };
 
 SERVER_ENTITY_DECLARE_BEGIN3(CSE_Abstract,ISE_Abstract,CPureServerObject,CScriptValueContainer)

@@ -418,7 +418,7 @@ IC	void CPlanner::load	(IReader &packet)
 }
 
 TEMPLATE_SPECIALIZATION
-IC	void CPlanner::Save(CSaveObjectSave* Object) 
+IC	void CPlanner::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPlanner");
 	{

@@ -729,6 +729,44 @@ void CWeaponMagazinedWGrenade::load(IReader &input_packet)
 		m_magazine2.push_back(l_cartridge);
 }
 
+void CWeaponMagazinedWGrenade::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CWeaponMagazinedWGrenade");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_bool(m_bGrenadeMode);
+		Object->GetCurrentChunk()->w_u64(m_magazine2.size());
+	}
+	Object->EndChunk();
+}
+
+void CWeaponMagazinedWGrenade::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CWeaponMagazinedWGrenade");
+	{
+		inherited::Load(Object);
+		{
+			bool Value;
+			Object->GetCurrentChunk()->w_bool(Value);
+			if (Value != m_bGrenadeMode) {
+				PerformSwitchGL();
+			}
+		}
+		{
+			u64 Value;
+			Object->GetCurrentChunk()->w_u64(Value);
+
+			CCartridge					l_cartridge;
+			l_cartridge.Load(m_ammoTypes2[m_ammoType2].c_str(), m_ammoType2);
+
+			while (Value > m_magazine2.size()) {
+				m_magazine2.push_back(l_cartridge);
+			}
+		}
+	}
+	Object->EndChunk();
+}
+
 void CWeaponMagazinedWGrenade::net_Export	(NET_Packet& P)
 {
 	P.w_u8						(m_bGrenadeMode ? 1 : 0);
