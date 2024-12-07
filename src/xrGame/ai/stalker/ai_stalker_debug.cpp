@@ -22,7 +22,6 @@
 #include "../../danger_manager.h"
 #include "../../item_manager.h"
 #include "../../Actor.h"
-#include "../../stalker_planner.h"
 #include "../../script_game_object.h"
 #include "../../stalker_animation_manager.h"
 #include "../../Weapon.h"
