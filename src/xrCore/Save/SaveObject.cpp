@@ -3,8 +3,22 @@
 
 CSaveObject::CSaveObject()
 {
-	_rootChunk = xr_make_unique<CSaveChunk>("Root");
-	_chunkStack.push(_rootChunk.get());
+	_rootChunk = new CSaveChunk("Root");
+	_chunkStack.push(_rootChunk);
+}
+
+CSaveObject::CSaveObject(CSaveChunk* Root)
+{
+	_rootChunk = Root;
+	_isPartial = true;
+	_chunkStack.push(_rootChunk);
+}
+
+CSaveObject::~CSaveObject()
+{
+	if (!_isPartial) {
+		xr_delete(_rootChunk);
+	}
 }
 
 CSaveChunk* CSaveObject::GetCurrentChunk()
@@ -29,6 +43,19 @@ void CSaveObject::EndChunk()
 	_chunkStack.pop();
 }
 
+CSaveObjectSave::CSaveObjectSave()
+{
+	_rootChunk = new CSaveChunk("Root");
+	_chunkStack.push(_rootChunk);
+}
+
+CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
+{
+	_rootChunk = Root;
+	_isPartial = true;
+	_chunkStack.push(_rootChunk);
+}
+
 void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
@@ -38,6 +65,19 @@ void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 void CSaveObjectSave::FindChunk(shared_str ChunkName)
 {
 	VERIFY2(false, "Attempt to use FindChunk while saving!");
+}
+
+CSaveObjectLoad::CSaveObjectLoad()
+{
+	_rootChunk = new CSaveChunk("Root");
+	_chunkStack.push(_rootChunk);
+}
+
+CSaveObjectLoad::CSaveObjectLoad(CSaveChunk* Root)
+{
+	_rootChunk = Root;
+	_isPartial = true;
+	_chunkStack.push(_rootChunk);
 }
 
 void CSaveObjectLoad::BeginChunk(shared_str ChunkName)

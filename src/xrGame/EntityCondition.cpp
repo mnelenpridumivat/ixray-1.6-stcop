@@ -610,7 +610,7 @@ void CEntityCondition::load	(IReader &input_packet)
 	}
 }
 
-void CEntityCondition::Save(CSaveObject* Object)
+void CEntityCondition::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CEntityCondition");
 	{
@@ -636,7 +636,7 @@ void CEntityCondition::Save(CSaveObject* Object)
 	Object->EndChunk();
 }
 
-void CEntityCondition::Load(CSaveObject* Object)
+void CEntityCondition::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CEntityCondition");
 	{

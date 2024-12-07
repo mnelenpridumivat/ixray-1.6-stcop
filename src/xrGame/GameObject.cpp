@@ -349,9 +349,12 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	//load custom user data from server
 	if(!E->client_data.empty())
 	{	
+		auto* PartialObj = new CSaveObjectLoad(E->client_data_new);
+		net_Load(PartialObj);
+		xr_delete(PartialObj);
 //		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
-		IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
-		net_Load		(ireader);
+		/*IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
+		net_Load		(ireader);*/
 	}
 	else {
 //		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());
@@ -487,11 +490,31 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
+void CGameObject::net_Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CGameObject::net_Save");
+	{
+		Save(Object);
+		m_ScriptBinderComponent->Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CGameObject::net_Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CGameObject::net_Save");
+	{
+		Load(Object);
+		m_ScriptBinderComponent->Load(Object);
+	}
+	Object->EndChunk();
+}
+
 void CGameObject::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CGameObject");
 	{
-		m_ScriptBinderComponent->Save(Object);
+		//m_ScriptBinderComponent->Save(Object);
 	}
 	Object->EndChunk();
 }
@@ -500,7 +523,7 @@ void CGameObject::Load(CSaveObjectLoad* Object)
 {
 	Object->FindChunk("CGameObject");
 	{
-		m_ScriptBinderComponent->Load(Object);
+		//m_ScriptBinderComponent->Load(Object);
 	}
 	Object->EndChunk();
 }

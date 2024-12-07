@@ -118,6 +118,8 @@ public:
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
 	//object serialization new
+	virtual void			net_Save(CSaveObjectSave* Object);
+	virtual void			net_Load(CSaveObjectLoad* Object);
 	virtual void Save(CSaveObjectSave* Object) const;
 	virtual void Load(CSaveObjectLoad* Object);
 

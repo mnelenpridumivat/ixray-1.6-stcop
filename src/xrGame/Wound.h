@@ -6,6 +6,7 @@
 
 #include "alife_space.h"
 #include "hit_immunity.h"
+#include "Save/SaveObject.h"
 
 class NET_Packet;
 class CSaveObject;

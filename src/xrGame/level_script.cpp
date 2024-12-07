@@ -1329,8 +1329,8 @@ void CLevel::script_register(lua_State* L)
 				.def("add", &xrTime::add_script)
 				.def("sub", &xrTime::sub_script)
 
-				.def("save", &xrTime::Save)
-				.def("load", &xrTime::Load)
+				.def("save", (void(xrTime::*)(NET_Packet&))(&xrTime::Save))
+				.def("load", (void(xrTime::*)(NET_Packet&))(&xrTime::Load))
 
 				.def("setHMS", &xrTime::setHMS)
 				.def("setHMSms", &xrTime::setHMSms)

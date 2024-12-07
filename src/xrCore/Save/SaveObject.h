@@ -4,11 +4,14 @@
 
 class XRCORE_API CSaveObject {
 protected:
-	xr_unique_ptr<CSaveChunk> _rootChunk;
+	CSaveChunk* _rootChunk;
 	xr_stack<CSaveChunk*> _chunkStack;
+	bool _isPartial = false;
 
 public:
 	CSaveObject();
+	CSaveObject(CSaveChunk* Root);
+	~CSaveObject();
 
 	CSaveChunk* GetCurrentChunk();
 	virtual void BeginChunk(shared_str ChunkName) = 0;
@@ -18,12 +21,18 @@ public:
 
 class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:
+	CSaveObjectSave();
+	CSaveObjectSave(CSaveChunk* Root);
+
 	virtual void BeginChunk(shared_str ChunkName) override;
 	virtual void FindChunk(shared_str ChunkName) override;
 };
 
 class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
+	CSaveObjectLoad();
+	CSaveObjectLoad(CSaveChunk* Root);
+
 	virtual void BeginChunk(shared_str ChunkName) override;
 	virtual void FindChunk(shared_str ChunkName) override;
 };

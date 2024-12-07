@@ -747,14 +747,14 @@ void CWeaponMagazinedWGrenade::Load(CSaveObjectLoad* Object)
 		inherited::Load(Object);
 		{
 			bool Value;
-			Object->GetCurrentChunk()->w_bool(Value);
+			Object->GetCurrentChunk()->r_bool(Value);
 			if (Value != m_bGrenadeMode) {
 				PerformSwitchGL();
 			}
 		}
 		{
 			u64 Value;
-			Object->GetCurrentChunk()->w_u64(Value);
+			Object->GetCurrentChunk()->r_u64(Value);
 
 			CCartridge					l_cartridge;
 			l_cartridge.Load(m_ammoTypes2[m_ammoType2].c_str(), m_ammoType2);

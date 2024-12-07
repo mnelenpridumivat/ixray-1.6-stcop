@@ -108,8 +108,8 @@ public:
 
 	virtual void			save					(NET_Packet &output_packet);
 	virtual void			load					(IReader &input_packet);
-	virtual void Save(CSaveObject* Object);
-	virtual void Load(CSaveObject* Object);
+	virtual void Save(CSaveObjectSave* Object);
+	virtual void Load(CSaveObjectLoad* Object);
 
 	IC float				GetPower				() const			{return m_fPower;}	
 	IC float				GetRadiation			() const			{return m_fRadiation;}

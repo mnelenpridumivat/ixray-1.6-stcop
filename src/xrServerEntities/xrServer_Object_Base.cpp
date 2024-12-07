@@ -62,11 +62,11 @@ void CPureServerObject::save				(NET_Packet	&tNetPacket)
 {
 }
 
-void CPureServerObject::Load(CSaveObjectLoad* tNetPacket)
+void CPureServerObject::Load(CSaveObjectLoad* Object)
 {
 }
 
-void CPureServerObject::Save(CSaveObjectSave* tNetPacket)
+void CPureServerObject::Save(CSaveObjectSave* Object) const
 {
 }
 
