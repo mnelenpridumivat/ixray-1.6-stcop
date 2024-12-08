@@ -301,6 +301,42 @@ void CSE_ALifeGraphPoint::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 }
 
+void CSE_ALifeGraphPoint::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeGraphPoint");
+	{
+		Object->GetCurrentChunk()->r_stringZ(m_caConnectionPointName);
+		Object->GetCurrentChunk()->r_stringZ(m_caConnectionLevelName);
+		Object->GetCurrentChunk()->r_u8(m_tLocations[0]);
+		Object->GetCurrentChunk()->r_u8(m_tLocations[1]);
+		Object->GetCurrentChunk()->r_u8(m_tLocations[2]);
+		Object->GetCurrentChunk()->r_u8(m_tLocations[3]);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeGraphPoint::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->FindChunk("CSE_ALifeGraphPoint");
+	{
+		Object->GetCurrentChunk()->w_stringZ(m_caConnectionPointName);
+		Object->GetCurrentChunk()->w_stringZ(m_caConnectionLevelName);
+		Object->GetCurrentChunk()->w_u8(m_tLocations[0]);
+		Object->GetCurrentChunk()->w_u8(m_tLocations[1]);
+		Object->GetCurrentChunk()->w_u8(m_tLocations[2]);
+		Object->GetCurrentChunk()->w_u8(m_tLocations[3]);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeGraphPoint::UPDATE_Read(CSaveObjectLoad* Object)
+{
+}
+
+void CSE_ALifeGraphPoint::UPDATE_Write(CSaveObjectSave* Object) const
+{
+}
+
 #if !defined(XRGAME_EXPORTS)
 void CSE_ALifeGraphPoint::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -2108,6 +2144,42 @@ void CSE_ALifeStationaryMgun::STATE_Write		(NET_Packet	&tNetPacket)
 	inherited::STATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeStationaryMgun::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_ALifeStationaryMgun");
+	{}
+	Object->EndChunk();
+}
+
+void CSE_ALifeStationaryMgun::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeStationaryMgun");
+	{}
+	Object->EndChunk();
+}
+
+void CSE_ALifeStationaryMgun::UPDATE_Read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_ALifeStationaryMgun");
+	{
+		inherited::UPDATE_Read(Object);
+		Object->GetCurrentChunk()->r_bool(m_bWorking);
+		Object->GetCurrentChunk()->r_vec3(m_destEnemyDir);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeStationaryMgun::UPDATE_Write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeStationaryMgun");
+	{
+		inherited::UPDATE_Write(Object);
+		Object->GetCurrentChunk()->w_bool(m_bWorking);
+		Object->GetCurrentChunk()->w_vec3(m_destEnemyDir);
+	}
+	Object->EndChunk();
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeStationaryMgun::FillProps			(LPCSTR pref, PropItemVec& values)
 {
@@ -2147,6 +2219,36 @@ void CSE_ALifeTeamBaseZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeTeamBaseZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeTeamBaseZone::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeTeamBaseZone");
+	{
+		inherited::STATE_Read(Object);
+		Object->GetCurrentChunk()->r_u8(m_team);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeTeamBaseZone::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->FindChunk("CSE_ALifeTeamBaseZone");
+	{
+		inherited::STATE_Write(Object);
+		Object->GetCurrentChunk()->w_u8(m_team);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeTeamBaseZone::UPDATE_Read(CSaveObjectLoad* Object)
+{
+	inherited::UPDATE_Read(Object);
+}
+
+void CSE_ALifeTeamBaseZone::UPDATE_Write(CSaveObjectSave* Object) const
+{
+	inherited::UPDATE_Write(Object);
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2204,6 +2306,26 @@ void CSE_ALifeSmartZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeSmartZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeSmartZone::STATE_Read(CSaveObjectLoad* Object)
+{
+	inherited1::STATE_Read(Object);
+}
+
+void CSE_ALifeSmartZone::STATE_Write(CSaveObjectSave* Object) const
+{
+	inherited1::STATE_Write(Object);
+}
+
+void CSE_ALifeSmartZone::UPDATE_Read(CSaveObjectLoad* Object)
+{
+	inherited1::UPDATE_Read(Object);
+}
+
+void CSE_ALifeSmartZone::UPDATE_Write(CSaveObjectSave* Object) const
+{
+	inherited1::UPDATE_Write(Object);
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2271,6 +2393,40 @@ void CSE_ALifeInventoryBox::UPDATE_Read( NET_Packet &tNetPacket )
 void CSE_ALifeInventoryBox::UPDATE_Write( NET_Packet &tNetPacket )
 {
 	inherited::UPDATE_Write( tNetPacket );
+}
+
+void CSE_ALifeInventoryBox::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeInventoryBox");
+	{
+		inherited::STATE_Read(Object);
+		Object->GetCurrentChunk()->r_bool(m_can_take);
+		Object->GetCurrentChunk()->r_bool(m_closed);
+		Object->GetCurrentChunk()->r_stringZ(m_tip_text);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeInventoryBox::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->FindChunk("CSE_ALifeInventoryBox");
+	{
+		inherited::STATE_Write(Object);
+		Object->GetCurrentChunk()->w_bool(m_can_take);
+		Object->GetCurrentChunk()->w_bool(m_closed);
+		Object->GetCurrentChunk()->w_stringZ(m_tip_text);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeInventoryBox::UPDATE_Read(CSaveObjectLoad* Object)
+{
+	inherited::UPDATE_Read(Object);
+}
+
+void CSE_ALifeInventoryBox::UPDATE_Write(CSaveObjectSave* Object) const
+{
+	inherited::UPDATE_Write(Object);
 }
 
 #ifndef XRGAME_EXPORTS

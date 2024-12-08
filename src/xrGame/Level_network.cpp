@@ -279,6 +279,19 @@ void CLevel::ClientSave	()
 	}
 }
 
+/*void CLevel::ClientSave(CSaveObjectSave* Object)
+{
+	for (;;) {
+
+		start = Objects_net_Save(&P, start, max_objects_size_in_save);
+
+		if (P.B.count > 2)
+			Send(P, net_flags(FALSE));
+		else
+			break;
+	}
+}*/
+
 //extern	XRPHYSICS_API	float		phTimefactor;
 extern					BOOL		g_SV_Disable_Auth_Check;
 

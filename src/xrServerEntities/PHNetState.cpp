@@ -11,11 +11,11 @@ static void w_vec_q8(NET_Packet& P,const Fvector& vec,const Fvector& min,const F
 	P.w_float_q8(vec.y,min.y,max.y);
 	P.w_float_q8(vec.z,min.z,max.z);
 }
-static void w_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
+static void w_vec_q8(CSaveChunk* P, const Fvector& vec, const Fvector& min, const Fvector& max)
 {
-	P->w_float(vec.x); clamp(vec.x, min.x, max.x);
-	P->w_float(vec.y); clamp(vec.y, min.y, max.y);
-	P->w_float(vec.z); clamp(vec.z, min.z, max.z);
+	P->w_float(vec.x);
+	P->w_float(vec.y);
+	P->w_float(vec.z);
 }
 template<typename src>
 static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
@@ -45,12 +45,12 @@ static void w_qt_q8(NET_Packet& P,const Fquaternion& q)
 	P.w_float_q8(q.z,-1.f,1.f);
 	P.w_float_q8(q.w,-1.f,1.f);
 }
-static void w_qt_q8(CSaveChunk* P, Fquaternion& q)
+static void w_qt_q8(CSaveChunk* P, const Fquaternion& q)
 {
-	P->w_float(q.x); clamp(q.x, -1.f, 1.f);
-	P->w_float(q.y); clamp(q.y, -1.f, 1.f);
-	P->w_float(q.z); clamp(q.z, -1.f, 1.f);
-	P->w_float(q.w); clamp(q.w, -1.f, 1.f);
+	P->w_float(q.x);
+	P->w_float(q.y);
+	P->w_float(q.z);
+	P->w_float(q.w);
 }
 
 template<typename src>
@@ -279,7 +279,7 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 	read(P, min, max);
 }
 
-void SPHNetState::net_Save(CSaveObjectSave* Object)
+void SPHNetState::net_Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SPHNetState");
 	{
@@ -301,7 +301,7 @@ void SPHNetState::net_Load(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }
 
-void SPHNetState::net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max)
+void SPHNetState::net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max) const
 {
 	Object->BeginChunk("SPHNetState");
 	{
@@ -380,6 +380,32 @@ void SPHBonesData::net_Load(NET_Packet &P)
 		S.net_Load(P, get_min(), get_max());
 		bones.push_back(S);
 	}
+}
+
+void SPHBonesData::net_Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SPHBonesData");
+	{
+		Object->GetCurrentChunk()->w_u64(bones_mask._visimask.flags);
+		Object->GetCurrentChunk()->w_u16(root_bone);
+
+		Object->GetCurrentChunk()->w_vec3(get_min());
+		Object->GetCurrentChunk()->w_vec3(get_max());
+		Object->GetCurrentChunk()->w_u16((u16)bones.size());//bones number;
+
+		if (bones.size() > 64) {
+			Msg("!![SPHBonesData::net_Save] bones_size is [%u]!", bones.size());
+			Object->GetCurrentChunk()->w_u64(bones_mask._visimask_ex.flags);
+		}
+
+		Object->GetCurrentChunk()->WriteArray(bones.size());
+		{
+			for (const auto& bone : bones) {
+				bone.net_Save(Object, get_min(), get_max());
+			}
+		}
+	}
+	Object->EndChunk();
 }
 
 void SPHBonesData::set_min_max(const Fvector& _min, const Fvector& _max)

@@ -6,10 +6,10 @@
 //	Description : Server objects space
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef xrServer_SpaceH
-#define xrServer_SpaceH
+#pragma once
 
 #include "../xrScripts/script_export_space.h"
+#include "Save/SaveObject.h"
 
 #ifndef XRGAME_EXPORTS
 #	define SERVER_ENTITY_EDITOR_METHODS					virtual void FillProps(LPCSTR pref, PropItemVec& values);
@@ -25,10 +25,14 @@
 
 #define	SERVER_ENTITY_DECLARE_END \
 public:\
-	virtual void 			UPDATE_Read		(NET_Packet& P); \
-	virtual void 			UPDATE_Write	(NET_Packet& P); \
-	virtual void 			STATE_Read		(NET_Packet& P, u16 size); \
-	virtual void 			STATE_Write		(NET_Packet& P); \
+	virtual void 			UPDATE_Read		(NET_Packet& P) override; \
+	virtual void 			UPDATE_Write	(NET_Packet& P) override; \
+	virtual void 			STATE_Read		(NET_Packet& P, u16 size) override; \
+	virtual void 			STATE_Write		(NET_Packet& P) override; \
+	virtual void 			UPDATE_Read		(CSaveObjectLoad* Object) override; \
+	virtual void 			UPDATE_Write	(CSaveObjectSave* Object) const override; \
+	virtual void 			STATE_Read		(CSaveObjectLoad* Object) override; \
+	virtual void 			STATE_Write		(CSaveObjectSave* Object) const override; \
 	SERVER_ENTITY_EDITOR_METHODS \
 };
 
@@ -74,6 +78,4 @@ template <class T> void	F_entity_Destroy	(T *&P)
 {
 	xr_delete	(P);
 };
-#endif
-
 #endif

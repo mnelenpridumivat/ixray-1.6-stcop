@@ -9,6 +9,7 @@
 #pragma once
 
 #include "object_interfaces.h"
+#include "Save/SaveObject.h"
 
 class CSE_Abstract;
 
@@ -23,6 +24,8 @@ public:
 	virtual	void			load					(IReader &stream);
 			void			save_update				(IWriter &stream);
 			void			load_update				(IReader &stream);
+			void			save_update(CSaveObjectSave* stream);
+			void			load_update(CSaveObjectLoad* stream);
 	IC		CSE_Abstract	&object					() const;
 };
 

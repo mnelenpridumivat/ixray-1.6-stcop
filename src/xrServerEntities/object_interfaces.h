@@ -7,6 +7,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "Save/SaveObject.h"
+#include "FS.h"
 
 class NET_Packet;
 
@@ -38,6 +40,10 @@ public:
 	virtual void					STATE_Read	(NET_Packet &tNetPacket, u16 size)		= 0;
 	virtual void					UPDATE_Write(NET_Packet &tNetPacket)				= 0;
 	virtual void					UPDATE_Read	(NET_Packet &tNetPacket)				= 0;
+	virtual void					STATE_Write(CSaveObjectSave* Object) const = 0;
+	virtual void					STATE_Read(CSaveObjectLoad* Object) = 0;
+	virtual void					UPDATE_Write(CSaveObjectSave* Object) const = 0;
+	virtual void					UPDATE_Read(CSaveObjectLoad* Object) = 0;
 };
 
 class IPureSchedulableObject {

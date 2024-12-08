@@ -53,7 +53,7 @@ class XRCORE_API CSaveVariableArray :
 	public CSaveVariableBase
 {
 	u64 _size;
-	u64 _currentReadPos;
+	u64 _currentReadPos = 0;
 	xr_vector<ISaveable*> _array;
 
 public:

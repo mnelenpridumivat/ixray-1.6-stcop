@@ -30,6 +30,7 @@ class CDUInterface;
 #else
 	#include "../Include/xrRender/DrawUtils.h"
 #endif
+#include "Save/SaveObject.h"
 
 #pragma warning(push)
 #pragma warning(disable:4005)
@@ -56,6 +57,8 @@ public:
 
 	void							visual_read				(NET_Packet& P, u16 version);
 	void							visual_write			(NET_Packet& P);
+	void							visual_read(CSaveObjectLoad* Object);
+	void							visual_write(CSaveObjectSave* Object) const;
 
     virtual void					set_visual				(LPCSTR name, bool load=true);
 	LPCSTR							get_visual				() const {return *visual_name;};
@@ -111,6 +114,8 @@ public:
 public:
 	virtual void			Spawn_Write				(NET_Packet &tNetPacket, BOOL bLocal) = 0;
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket) = 0;
+	virtual void			Spawn_Write(CSaveObjectSave* Object, bool bLocal) const = 0;
+	virtual bool			Spawn_Read(CSaveObjectLoad* Object) = 0;
 #if !defined(XRGAME_EXPORTS)
 	virtual void			FillProp				(LPCSTR pref, PropItemVec &items) = 0;
 	virtual void 			on_render				(CDUInterface* du, ISE_AbstractLEOwner* owner, bool bSelected, const Fmatrix& parent,int priority, bool strictB2F) = 0;

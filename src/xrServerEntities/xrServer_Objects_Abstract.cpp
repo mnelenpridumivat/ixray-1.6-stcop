@@ -61,6 +61,30 @@ void CSE_Visual::visual_write  	(NET_Packet	&tNetPacket)
 	tNetPacket.w_u8				(flags.get());
 }
 
+void CSE_Visual::visual_read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_Visual::visual");
+	{
+		Object->GetCurrentChunk()->r_stringZ(visual_name);
+		{
+			u8 Value;
+			Object->GetCurrentChunk()->r_u8(Value);
+			flags.assign(Value);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CSE_Visual::visual_write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_Visual::visual");
+	{
+		Object->GetCurrentChunk()->w_stringZ(visual_name);
+		Object->GetCurrentChunk()->w_u8(flags.get());
+	}
+	Object->EndChunk();
+}
+
 void CSE_Visual::OnChangeVisual	(PropValue* sender)
 {
 	ISE_Abstract* abstract		= smart_cast<ISE_Abstract*>(this); VERIFY(abstract);

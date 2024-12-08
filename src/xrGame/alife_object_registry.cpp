@@ -59,6 +59,41 @@ void CALifeObjectRegistry::save				(IWriter &memory_stream, CSE_ALifeDynamicObje
 	}
 }
 
+void CALifeObjectRegistry::Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const
+{
+	Object->BeginChunk("CALifeObjectRegistry::single_object");
+	{
+		++object_count;
+
+		//NET_Packet					tNetPacket;
+		// Spawn
+		object->Spawn_Write(Object, TRUE);
+		//memory_stream.w_u16(u16(tNetPacket.B.count));
+		//memory_stream.w(tNetPacket.B.data, tNetPacket.B.count);
+
+		// Update
+		//tNetPacket.w_begin(M_UPDATE);
+		object->UPDATE_Write(Object);
+
+		//memory_stream.w_u16(u16(tNetPacket.B.count));
+		//memory_stream.w(tNetPacket.B.data, tNetPacket.B.count);
+	}
+	Object->EndChunk();
+
+	ALife::OBJECT_VECTOR::const_iterator	I = object->children.begin();
+	ALife::OBJECT_VECTOR::const_iterator	E = object->children.end();
+	for (; I != E; ++I) {
+		CSE_ALifeDynamicObject* child = this->object(*I, true);
+		if (!child)
+			continue;
+
+		if (!child->can_save())
+			continue;
+
+		Save(Object, child, object_count);
+	}
+}
+
 void CALifeObjectRegistry::save				(IWriter &memory_stream)
 {
 	Msg							("* Saving objects...");
@@ -145,4 +180,48 @@ void CALifeObjectRegistry::load(IReader& file_stream)
 	}
 
 	Msg("* %d objects are successfully loaded", count);
+}
+
+void CALifeObjectRegistry::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CALifeObjectRegistry");
+	{
+		Msg("* Saving objects...");
+
+		CSaveChunk* ObjectCountChunk;
+		Object->BeginChunk("CALifeObjectRegistry::object_count");
+		{
+			ObjectCountChunk = Object->GetCurrentChunk();
+		}
+		Object->EndChunk();
+
+		u32	object_count = 0;
+		Object->BeginChunk("CALifeObjectRegistry::objects");
+		{
+			Object->GetCurrentChunk()->WriteArray(m_objects.size());
+			{
+				for(const auto& elem : m_objects) {
+					if (!elem.second->can_save()) {
+						continue;
+					}
+
+					if (elem.second->redundant()) {
+						continue;
+					}
+
+					if (elem.second->ID_Parent != 0xffff) {
+						continue;
+					}
+
+					Save(Object, elem.second, object_count);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+
+		ObjectCountChunk->w_u32(object_count);
+		Msg("* %d objects are successfully saved", object_count);
+	}
+	Object->EndChunk();
 }

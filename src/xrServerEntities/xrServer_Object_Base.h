@@ -125,6 +125,8 @@ public:
 	//
 	virtual void			Spawn_Write				(NET_Packet &tNetPacket, BOOL bLocal);
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket);
+	virtual void			Spawn_Write(CSaveObjectSave* Object, bool bLocal) const override;
+	virtual bool			Spawn_Read(CSaveObjectLoad* Object) override;
 	virtual LPCSTR			name					() const override;
 	virtual LPCSTR			name_replace			() const override;
 	virtual void			set_name				(LPCSTR s) override

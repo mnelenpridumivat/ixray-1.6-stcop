@@ -58,6 +58,15 @@ void CALifeStorageManager::save	(LPCSTR save_name_no_check, bool update_name)
 	if (ai().script_engine().functor("save_manager.BeforeSaveEvent", funct))
 		funct((LPCSTR)save_name);
 
+	CSaveObjectSave* SaveObj = new CSaveObjectSave();
+	{
+		header().Save(SaveObj);
+		time_manager().Save(SaveObj);
+		spawns().Save(SaveObj);
+		objects().Save(SaveObj);
+		registry().Save(SaveObj);
+	}
+
 	u32							source_count;
 	u32							dest_count;
 	void						*dest_data;
@@ -194,7 +203,9 @@ bool CALifeStorageManager::load	(LPCSTR save_name_no_check)
 
 void CALifeStorageManager::save	(NET_Packet &net_packet)
 {
-	prepare_objects_for_save	();
+	Level().ClientSend();
+	//prepare_objects_for_save	();
+	//Level().ClientSave(SaveObj);
 
 	shared_str					game_name;
 	net_packet.r_stringZ		(game_name);

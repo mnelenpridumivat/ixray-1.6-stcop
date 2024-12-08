@@ -9,6 +9,7 @@
 #pragma once
 
 #include "xrServer_Objects_ALife.h"
+#include "Save/SaveObject.h"
 
 class CALifeObjectRegistry
 {
@@ -23,6 +24,7 @@ protected:
 	xr_vector<CSE_ALifeDynamicObject*> m_objects_as_vec;
 private:
 			void					save					(IWriter &memory_stream, CSE_ALifeDynamicObject *object, u32 &object_count);
+			void					Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const;
 
 public:
 	static	CSE_ALifeDynamicObject	*get_object				(IReader &file_stream);
@@ -32,6 +34,8 @@ public:
 	virtual							~CALifeObjectRegistry	();
 	virtual	void					save					(IWriter &memory_stream);
 			void					load					(IReader &file_stream);
+			virtual	void			Save(CSaveObjectSave* Object) const;
+			void					Load(CSaveObjectLoad* Object);
 	IC		void					add						(CSE_ALifeDynamicObject *object);
 	IC		void					remove					(const ALife::_OBJECT_ID &id, bool no_assert = false);
 	IC		CSE_ALifeDynamicObject	*object					(const ALife::_OBJECT_ID &id, bool no_assert = false) const;

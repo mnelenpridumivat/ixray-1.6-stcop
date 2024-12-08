@@ -14,6 +14,7 @@
 #include "graph_abstract.h"
 #include "server_entity_wrapper.h"
 #include "ai_debug.h"
+#include "Save/SaveObject.h"
 
 class CServerEntityWrapper;
 class IGameGraph;
@@ -43,8 +44,10 @@ private:
 	IGameGraph								*m_game_graph;
 
 protected:
-			void							save_updates				(IWriter &stream);
-			void							load_updates				(IReader &stream);
+			void							save_updates				(CSaveObjectSave* Object);
+			void							load_updates				(CSaveObjectLoad* Object);
+			void							save_updates(IWriter& stream);
+			void							load_updates(IReader& stream);
 			void							build_story_spawns			();
 			void							build_root_spawns			();
 			void							fill_new_spawns_single		(SPAWN_GRAPH::CVertex *vertex, xr_vector<ALife::_SPAWN_ID> &spawns, ALife::_TIME_ID game_time, xr_vector<ALife::_SPAWN_ID> &objects);
@@ -65,6 +68,7 @@ public:
 	virtual									~CALifeSpawnRegistry		();
 	virtual void							load						(IReader &file_stream, xrGUID *save_guid = 0);
 	virtual void							save						(IWriter &memory_stream);
+	virtual void							Save(CSaveObjectSave* Object);
 			void							load						(IReader &file_stream, LPCSTR game_name);
 			void							load						(LPCSTR spawn_name);
 			void							load_from_editor			();

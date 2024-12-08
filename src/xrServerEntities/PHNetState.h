@@ -31,9 +31,9 @@ struct SPHNetState
 	void								net_Save			(		NET_Packet&		P,const Fvector& min,const Fvector& max);					
 	void								net_Load			(		NET_Packet&		P,const Fvector& min,const Fvector& max);
 	void								net_Load			(		IReader&		P,const Fvector& min,const Fvector& max);
-	void								net_Save(CSaveObjectSave* Object);
+	void								net_Save(CSaveObjectSave* Object) const;
 	void								net_Load(CSaveObjectLoad* Object);
-	void								net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max);
+	void								net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max) const;
 	void								net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max);
 
 private:
@@ -62,6 +62,8 @@ public:
 	void								net_Save			(		NET_Packet&		P);					
 	void								net_Load			(		NET_Packet&		P);
 	void								net_Load			(		IReader&		P);
+	void								net_Save(CSaveObjectSave* Object) const;
+	void								net_Load(CSaveObjectLoad* Object);
 	void								set_min_max			(const Fvector& _min, const Fvector& _max);
 	const Fvector&						get_min				()	const	{return m_min;}
 	const Fvector&						get_max				()	const	{return m_max;}

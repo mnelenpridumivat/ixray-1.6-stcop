@@ -116,6 +116,22 @@ void CSE_Spectator::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
 }
 
+void CSE_Spectator::STATE_Read(CSaveObjectLoad* Object)
+{
+}
+
+void CSE_Spectator::STATE_Write(CSaveObjectSave* Object) const
+{
+}
+
+void CSE_Spectator::UPDATE_Read(CSaveObjectLoad* Object)
+{
+}
+
+void CSE_Spectator::UPDATE_Write(CSaveObjectSave* Object) const
+{
+}
+
 #if !defined(XRGAME_EXPORTS)
 void CSE_Spectator::FillProps				(LPCSTR pref, PropItemVec& items)
 {
@@ -138,20 +154,46 @@ CSE_Temporary::~CSE_Temporary				()
 void CSE_Temporary::STATE_Read				(NET_Packet	&tNetPacket, u16 size)
 {
 	tNetPacket.r_u32			(m_tNodeID);
-};
+}
 
 void CSE_Temporary::STATE_Write				(NET_Packet	&tNetPacket)
 {
 	tNetPacket.w_u32			(m_tNodeID);
-};
+}
 
 void CSE_Temporary::UPDATE_Read				(NET_Packet	&tNetPacket)
 {
-};
+}
 
 void CSE_Temporary::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
-};
+}
+
+void CSE_Temporary::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_Temporary");
+	{
+		Object->GetCurrentChunk()->r_u32(m_tNodeID);
+	}
+	Object->EndChunk();
+}
+
+void CSE_Temporary::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->FindChunk("CSE_Temporary");
+	{
+		Object->GetCurrentChunk()->w_u32(m_tNodeID);
+	}
+	Object->EndChunk();
+}
+
+void CSE_Temporary::UPDATE_Read(CSaveObjectLoad* Object)
+{
+}
+
+void CSE_Temporary::UPDATE_Write(CSaveObjectSave* Object) const
+{
+}
 
 #ifndef XRGAME_EXPORTS
 void CSE_Temporary::FillProps				(LPCSTR pref, PropItemVec& values)
@@ -285,6 +327,48 @@ void CSE_PHSkeleton::UPDATE_Read(NET_Packet &tNetPacket)
 
 }
 
+void CSE_PHSkeleton::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_PHSkeleton");
+	{
+		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
+		R_ASSERT(visual);
+		Object->GetCurrentChunk()->r_stringZ(visual->startup_animation);
+		Object->GetCurrentChunk()->r_u8(_flags.flags);
+		Object->GetCurrentChunk()->r_u16(source_id);
+		if (_flags.test(flSavedData)) {
+			data_load(Object);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CSE_PHSkeleton::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_PHSkeleton");
+	{
+		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
+		R_ASSERT(visual);
+		Object->GetCurrentChunk()->w_stringZ(visual->startup_animation);
+		Object->GetCurrentChunk()->w_u8(_flags.flags);
+		Object->GetCurrentChunk()->w_u16(source_id);
+		////////////////////////saving///////////////////////////////////////
+		if (_flags.test(flSavedData))
+		{
+			data_save(Object);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CSE_PHSkeleton::UPDATE_Read(CSaveObjectLoad* Object)
+{
+}
+
+void CSE_PHSkeleton::UPDATE_Write(CSaveObjectSave* Object) const
+{
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_PHSkeleton::FillProps				(LPCSTR pref, PropItemVec& values)
 {
@@ -326,6 +410,41 @@ void CSE_AbstractVisual::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_AbstractVisual::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 }
+
+void CSE_AbstractVisual::STATE_Read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_AbstractVisual");
+	{
+		visual_read(Object);
+		Object->GetCurrentChunk()->r_stringZ(startup_animation);
+	}
+	Object->EndChunk();
+}
+
+void CSE_AbstractVisual::STATE_Write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_AbstractVisual");
+	{
+		visual_write(Object);
+		Object->GetCurrentChunk()->w_stringZ(startup_animation);
+	}
+	Object->EndChunk();
+}
+
+void CSE_AbstractVisual::UPDATE_Read(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_AbstractVisual");
+	{}
+	Object->EndChunk();
+}
+
+void CSE_AbstractVisual::UPDATE_Write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_AbstractVisual");
+	{}
+	Object->EndChunk();
+}
+
 LPCSTR	CSE_AbstractVisual::getStartupAnimation		()
 {
 	return *startup_animation;
@@ -334,4 +453,23 @@ LPCSTR	CSE_AbstractVisual::getStartupAnimation		()
 CSE_Visual* CSE_AbstractVisual::visual					()
 {
 	return this;
+}
+
+void CSE_PHSkeleton::data_load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CSE_PHSkeleton::data");
+	{
+		saved_bones.net_Load(Object);
+		_flags.set(flSavedData, TRUE);
+	}
+	Object->EndChunk();
+}
+
+void CSE_PHSkeleton::data_save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_PHSkeleton::data");
+	{
+		saved_bones.net_Save(Object);
+	}
+	Object->EndChunk();
 }

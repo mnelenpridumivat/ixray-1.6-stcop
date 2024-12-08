@@ -188,7 +188,7 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_Temporary,CSE_Abstract)
 	virtual							~CSE_Temporary	();
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_PHSkeleton)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_PHSkeleton, IPureServerObject)
 								CSE_PHSkeleton(LPCSTR caSection);
 virtual							~CSE_PHSkeleton();
 
@@ -209,6 +209,8 @@ enum{
 protected:
 	virtual void					data_load				(NET_Packet &tNetPacket);
 	virtual void					data_save				(NET_Packet &tNetPacket);
+	virtual void					data_load(CSaveObjectLoad* Object);
+	virtual void					data_save(CSaveObjectSave* Object) const;
 public:
 SERVER_ENTITY_DECLARE_END
 

@@ -25,7 +25,27 @@ void CALifeSimulatorHeader::load				(IReader	&file_stream)
 	R_ASSERT2					(file_stream.find_chunk(ALIFE_CHUNK_DATA),"Can't find chunk ALIFE_CHUNK_DATA");
 	m_version					= file_stream.r_u32();
 	R_ASSERT2					(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
-};
+}
+
+void CALifeSimulatorHeader::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CALifeSimulatorHeader");
+	{
+		Object->GetCurrentChunk()->w_u32(ALIFE_VERSION);
+	}
+	Object->EndChunk();
+}
+
+void CALifeSimulatorHeader::Load(CSaveObjectLoad* Object)
+{
+	Object->FindChunk("CALifeSimulatorHeader");
+	{
+		Object->GetCurrentChunk()->w_u32(m_version);
+		R_ASSERT2(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
+	}
+	Object->EndChunk();
+}
+
 
 bool CALifeSimulatorHeader::valid				(IReader	&file_stream) const
 {

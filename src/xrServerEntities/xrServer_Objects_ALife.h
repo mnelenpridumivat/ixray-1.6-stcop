@@ -159,7 +159,7 @@ public:
 #endif
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeGroupAbstract)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeGroupAbstract, IPureServerObject)
 	ALife::OBJECT_VECTOR			m_tpMembers;
 	bool							m_bCreateSpawnPositions;
 	u16								m_wCount;
@@ -194,28 +194,52 @@ public:
 	{
 	};
 	
-	virtual void STATE_Read			(NET_Packet	&tNetPacket, u16 size)
+	virtual void STATE_Read			(NET_Packet	&tNetPacket, u16 size) override
 	{
 		inherited1::STATE_Read		(tNetPacket,size);
 		inherited2::STATE_Read		(tNetPacket,size);
 	};
 
-	virtual void STATE_Write		(NET_Packet	&tNetPacket)
+	virtual void STATE_Write		(NET_Packet	&tNetPacket) const override
 	{
 		inherited1::STATE_Write		(tNetPacket);
 		inherited2::STATE_Write		(tNetPacket);
 	};
 
-	virtual void UPDATE_Read		(NET_Packet	&tNetPacket)
+	virtual void UPDATE_Read		(NET_Packet	&tNetPacket) override
 	{
 		inherited1::UPDATE_Read		(tNetPacket);
 		inherited2::UPDATE_Read		(tNetPacket);
 	};
 
-	virtual void UPDATE_Write		(NET_Packet	&tNetPacket)
+	virtual void UPDATE_Write		(NET_Packet	&tNetPacket) const override
 	{
 		inherited1::UPDATE_Write	(tNetPacket);
 		inherited2::UPDATE_Write	(tNetPacket);
+	};
+
+	virtual void STATE_Read(CSaveObjectLoad* Object)
+	{
+		inherited1::STATE_Read(Object);
+		inherited2::STATE_Read(Object);
+	};
+
+	virtual void STATE_Write(CSaveObjectSave* Object)
+	{
+		inherited1::STATE_Write(Object);
+		inherited2::STATE_Write(Object);
+	};
+
+	virtual void UPDATE_Read(CSaveObjectLoad* Object)
+	{
+		inherited1::UPDATE_Read(Object);
+		inherited2::UPDATE_Read(Object);
+	};
+
+	virtual void UPDATE_Write(CSaveObjectSave* Object)
+	{
+		inherited1::UPDATE_Write(Object);
+		inherited2::UPDATE_Write(Object);
 	};
 
 	virtual CSE_Abstract *init		()

@@ -183,6 +183,7 @@ public:
 	CSE_Abstract*			Process_spawn			(NET_Packet& P, ClientID sender, BOOL bSpawnWithClientsMainEntityAsParent=FALSE, CSE_Abstract* tpExistedEntity=0);
 	void					Process_update			(NET_Packet& P, ClientID sender);
 	void					Process_save			(NET_Packet& P, ClientID sender);
+	void					Process_save			(CSaveObjectSave* Object, ClientID sender);
 	void					Process_event			(NET_Packet& P, ClientID sender);
 	void					Process_event_ownership	(NET_Packet& P, ClientID sender, u32 time, u16 ID, BOOL bForced = FALSE);
 	bool					Process_event_reject	(NET_Packet& P, const ClientID sender, const u32 time, const u16 id_parent, const u16 id_entity, bool send_message = true);
