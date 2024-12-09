@@ -126,7 +126,7 @@ void CCustomTimerBase::Save(CSaveObjectSave* Object) const
 
 void CCustomTimerBase::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CCustomTimerBase");
+    Object->BeginChunk("CCustomTimerBase");
     {
         Object->GetCurrentChunk()->r_s32(m_iTimerStartValue);
         Object->GetCurrentChunk()->r_s32(m_iTimerCurValue);
@@ -155,7 +155,7 @@ void CCustomTimer::Save(CSaveObjectSave* Object) const
 
 void CCustomTimer::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CCustomTimer");
+    Object->BeginChunk("CCustomTimer");
     {
         CCustomTimerBase::Load(Object);
         Object->GetCurrentChunk()->r_stringZ(m_sTimerName);
@@ -186,7 +186,7 @@ void CBinder::Save(CSaveObjectSave* Object) const
 
 void CBinder::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CBinder");
+    Object->BeginChunk("CBinder");
     {
         CCustomTimerBase::Load(Object);
         Object->GetCurrentChunk()->r_stringZ(m_sFuncName);
@@ -395,7 +395,7 @@ void CTimerManager::Save(CSaveObjectSave* Object) const
 
 void CTimerManager::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CBinderManager");
+    Object->BeginChunk("CBinderManager");
     {
         Timers.clear();
         u64 ArraySize;
@@ -487,7 +487,7 @@ void CBinderManager::Save(CSaveObjectSave* Object) const
 
 void CBinderManager::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CBinderManager");
+    Object->BeginChunk("CBinderManager");
     {
         Binders.clear();
         u64 ArraySize;
@@ -755,7 +755,7 @@ void CBinderParam::Save(CSaveObjectSave* Object) const
 
 void CBinderParam::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CBinderParam");
+    Object->BeginChunk("CBinderParam");
     {
         u8 type;
         Object->GetCurrentChunk()->r_u8(type);
@@ -872,7 +872,7 @@ void CBinderParams::Save(CSaveObjectSave* Object) const
 
 void CBinderParams::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CBinderParams");
+    Object->BeginChunk("CBinderParams");
     {
         u64 ArraySize;
         Object->GetCurrentChunk()->ReadArray(ArraySize);

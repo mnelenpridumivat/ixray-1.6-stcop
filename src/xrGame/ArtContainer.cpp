@@ -79,7 +79,7 @@ void CArtContainer::Save(CSaveObjectSave* Object) const
 
 void CArtContainer::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CArtContainer");
+    Object->BeginChunk("CArtContainer");
     {
         u64 ArraySize;
         Object->GetCurrentChunk()->ReadArray(ArraySize);

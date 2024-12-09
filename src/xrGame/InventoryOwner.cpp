@@ -217,7 +217,7 @@ void CInventoryOwner::Save(CSaveObject* Object) const
 
 void CInventoryOwner::Load(CSaveObject* Object)
 {
-	Object->FindChunk("CInventoryOwner");
+	Object->BeginChunk("CInventoryOwner");
 	{
 		u8 active_slot;
 		Object->GetCurrentChunk()->r_u8(active_slot);

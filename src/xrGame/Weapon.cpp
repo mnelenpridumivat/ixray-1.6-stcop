@@ -760,7 +760,7 @@ void CWeapon::Save(CSaveObjectSave* Object) const
 
 void CWeapon::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CWeapon");
+	Object->BeginChunk("CWeapon");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_s32(iAmmoElapsed);

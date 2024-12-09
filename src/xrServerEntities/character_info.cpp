@@ -196,7 +196,7 @@ void CCharacterInfo::Save(CSaveObject* Object)
 
 void CCharacterInfo::Load(CSaveObject* Object)
 {
-	Object->FindChunk("CInventoryOwner");
+	Object->BeginChunk("CInventoryOwner");
 	{
 		Object->GetCurrentChunk()->r_stringZ(m_StartDialog);
 	}

@@ -36,7 +36,7 @@ void CArtCombiner::Save(CSaveObjectSave* Object) const
 
 void CArtCombiner::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CArtCombiner");
+	Object->BeginChunk("CArtCombiner");
 	{
 		CArtefact::Load(Object);
 		CArtContainer::Load(Object);

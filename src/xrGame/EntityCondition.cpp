@@ -638,7 +638,7 @@ void CEntityCondition::Save(CSaveObjectSave* Object)
 
 void CEntityCondition::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CEntityCondition");
+	Object->BeginChunk("CEntityCondition");
 	{
 		m_bTimeValid = false;
 

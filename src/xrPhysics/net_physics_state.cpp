@@ -24,3 +24,25 @@ void net_physics_state::read(NET_Packet &packet)
 
 	physics_linear_velocity.set(0, 0, 0);
 }
+
+void net_physics_state::write(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("net_physics_state");
+	{
+		Object->GetCurrentChunk()->w_u32(dwTimeStamp);
+		Object->GetCurrentChunk()->w_vec3(physics_position);
+		Object->GetCurrentChunk()->w_bool(physics_state_enabled);
+	}
+	Object->EndChunk();
+}
+
+void net_physics_state::read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("net_physics_state");
+	{
+		Object->GetCurrentChunk()->r_u32(dwTimeStamp);
+		Object->GetCurrentChunk()->r_vec3(physics_position);
+		Object->GetCurrentChunk()->r_bool(physics_state_enabled);
+	}
+	Object->EndChunk();
+}

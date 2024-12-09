@@ -1443,7 +1443,7 @@ void CWeaponMagazined::Save(CSaveObjectSave* Object) const
 
 void CWeaponMagazined::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CWeaponMagazined");
+	Object->BeginChunk("CWeaponMagazined");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_s32(m_iQueueSize); 

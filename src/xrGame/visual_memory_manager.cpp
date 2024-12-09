@@ -971,7 +971,7 @@ void CVisualMemoryManager::Save(CSaveObjectSave* Object)
 
 void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CVisualMemoryManager");
+	Object->BeginChunk("CVisualMemoryManager");
 	{
 		if (m_client) {
 			Object->EndChunk();
@@ -991,7 +991,7 @@ void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->ReadArray(count);
 		{
 			for (u64 i = 0; i < count; ++i) {
-				Object->FindChunk("CVisualMemoryManager::object");
+				Object->BeginChunk("CVisualMemoryManager::object");
 				{
 					CDelayedVisibleObject		delayed_object;
 					Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
@@ -1023,7 +1023,7 @@ void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
 					Object->EndChunk();
 #endif
 #ifdef USE_LEVEL_TIME
-					Object->FindChunk("CVisualMemoryManager::object::level_time");
+					Object->BeginChunk("CVisualMemoryManager::object::level_time");
 					{
 						VERIFY(Device.dwTimeGlobal >= object.m_level_time);
 						Object->GetCurrentChunk()->r_u32(object.m_level_time);

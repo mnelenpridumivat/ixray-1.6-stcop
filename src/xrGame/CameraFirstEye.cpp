@@ -46,7 +46,7 @@ void CCameraFirstEye::Save(CSaveObject* Object)
 
 void CCameraFirstEye::Load(CSaveObject* Object)
 {
-	Object->FindChunk("CCameraFirstEye");
+	Object->BeginChunk("CCameraFirstEye");
 	{
 		Object->GetCurrentChunk()->r_float(pitch);
 	}

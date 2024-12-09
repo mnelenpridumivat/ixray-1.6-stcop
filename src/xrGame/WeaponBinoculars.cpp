@@ -183,7 +183,7 @@ void CWeaponBinoculars::Save(CSaveObjectSave* Object) const
 
 void CWeaponBinoculars::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CWeaponBinoculars");
+	Object->BeginChunk("CWeaponBinoculars");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_float(m_fRTZoomFactor);

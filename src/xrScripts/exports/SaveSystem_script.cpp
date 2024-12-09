@@ -100,7 +100,7 @@ namespace CSaveObject_script {
 	}
 
 	void FindChunk(CSaveObject* Object, LPCSTR ChunkName) {
-		Object->FindChunk(ChunkName);
+		Object->BeginChunk(ChunkName);
 	}
 }
 

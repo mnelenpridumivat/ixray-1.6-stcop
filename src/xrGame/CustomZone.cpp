@@ -1548,7 +1548,7 @@ void CCustomZone::Save(CSaveObjectSave* Object) const
 
 void CCustomZone::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CCustomZone");
+	Object->BeginChunk("CCustomZone");
 	{
 		inherited::Load(Object);
 		u8 Value;

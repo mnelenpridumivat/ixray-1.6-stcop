@@ -113,3 +113,35 @@ void CALifeHumanBrain::on_state_read		(NET_Packet &packet)
 		load_data						(m_cpMainWeaponPreferences,packet);
 	}
 }
+
+void CALifeHumanBrain::on_state_write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CALifeHumanBrain::State");
+	{
+		for (int i = 0; i < 5; ++i) {
+			Object->GetCurrentChunk()->w_u8(m_cpEquipmentPreferences[i]);
+		}
+		for (int i = 0; i < 4; ++i) {
+			Object->GetCurrentChunk()->w_u8(m_cpMainWeaponPreferences[i]);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CALifeHumanBrain::on_state_read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CALifeHumanBrain::State");
+	{
+		for (int i = 0; i < 5; ++i) {
+			s8 Value;
+			Object->GetCurrentChunk()->r_s8(Value);
+			m_cpEquipmentPreferences[i] = Value;
+		}
+		for (int i = 0; i < 4; ++i) {
+			s8 Value;
+			Object->GetCurrentChunk()->r_s8(Value);
+			m_cpMainWeaponPreferences[i] = Value;
+		}
+	}
+	Object->EndChunk();
+}

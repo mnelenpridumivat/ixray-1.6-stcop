@@ -293,7 +293,7 @@ void SPHNetState::net_Save(CSaveObjectSave* Object) const
 
 void SPHNetState::net_Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("SPHNetState");
+	Object->BeginChunk("SPHNetState");
 	{
 		read(Object->GetCurrentChunk());
 		previous_position.set(position);
@@ -314,7 +314,7 @@ void SPHNetState::net_Save(CSaveObjectSave* Object, const Fvector& min, const Fv
 
 void SPHNetState::net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max)
 {
-	Object->FindChunk("SPHNetState");
+	Object->BeginChunk("SPHNetState");
 	{
 		VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
 		read(Object->GetCurrentChunk(), min, max);
@@ -403,6 +403,41 @@ void SPHBonesData::net_Save(CSaveObjectSave* Object) const
 			for (const auto& bone : bones) {
 				bone.net_Save(Object, get_min(), get_max());
 			}
+		}
+	}
+	Object->EndChunk();
+}
+
+void SPHBonesData::net_Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SPHBonesData");
+	{
+		bones.clear();
+
+		// VisMask init 
+		u64 _low; // Left (0...64)
+		Object->GetCurrentChunk()->r_u64(_low);
+		u64 _high = u64(-1); // Right(64..128)
+
+		root_bone;
+		Object->GetCurrentChunk()->r_u16(root_bone);
+		Fvector _mn, _mx;
+		Object->GetCurrentChunk()->r_vec3(_mn);
+		Object->GetCurrentChunk()->r_vec3(_mx);
+		set_min_max(_mn, _mx);
+
+		u16 bones_number;
+		Object->GetCurrentChunk()->r_u16(bones_number);
+		if (bones_number > 64) {
+			Msg("!![SPHBonesData::net_Load] bones_number is [%u]!", bones_number);
+			Object->GetCurrentChunk()->r_u64(_high);
+		}
+		bones_mask.set(_low, _high);
+
+		for (int i = 0; i < bones_number; i++) {
+			SPHNetState	S;
+			S.net_Load(Object, get_min(), get_max());
+			bones.push_back(S);
 		}
 	}
 	Object->EndChunk();

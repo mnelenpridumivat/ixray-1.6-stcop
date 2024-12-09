@@ -53,7 +53,7 @@ void CCameraLook::Save(CSaveObject* Object)
 
 void CCameraLook::Load(CSaveObject* Object)
 {
-	Object->FindChunk("CCameraLook");
+	Object->BeginChunk("CCameraLook");
 	{
 		Object->GetCurrentChunk()->r_float(pitch);
 	}

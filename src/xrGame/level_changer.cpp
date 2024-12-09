@@ -222,7 +222,7 @@ void CLevelChanger::Save(CSaveObjectSave* Object) const
 
 void CLevelChanger::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CLevelChanger");
+	Object->BeginChunk("CLevelChanger");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_stringZ(m_invite_str);

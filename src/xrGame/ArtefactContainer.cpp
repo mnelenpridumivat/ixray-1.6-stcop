@@ -60,7 +60,7 @@ void CArtefactContainer::Save(CSaveObjectSave* Object) const
 
 void CArtefactContainer::Load(CSaveObjectLoad* Object)
 {
-    Object->FindChunk("CInventoryItemObject");
+    Object->BeginChunk("CInventoryItemObject");
     {
         inherited::Load(Object);
         CArtContainer::Load(Object);

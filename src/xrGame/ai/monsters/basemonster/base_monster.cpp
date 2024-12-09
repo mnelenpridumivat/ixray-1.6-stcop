@@ -341,7 +341,7 @@ void CBaseMonster::Save(CSaveObjectSave* Object) const
 
 void CBaseMonster::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CBaseMonster");
+	Object->BeginChunk("CBaseMonster");
 	{
 		inherited::Load(Object);
 	}

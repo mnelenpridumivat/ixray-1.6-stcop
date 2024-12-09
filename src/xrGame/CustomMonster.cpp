@@ -1066,7 +1066,7 @@ void CCustomMonster::Save(CSaveObjectSave* Object) const
 
 void CCustomMonster::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CCustomMonster");
+	Object->BeginChunk("CCustomMonster");
 	{
 		inherited::Load(Object);
 		if (g_Alive()) {

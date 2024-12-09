@@ -447,7 +447,7 @@ void CHitMemoryManager::Save(CSaveObjectSave* Object)
 
 void CHitMemoryManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CHitMemoryManager");
+	Object->BeginChunk("CHitMemoryManager");
 	{
 		if (!m_object->g_Alive()){
 			Object->EndChunk();
@@ -462,7 +462,7 @@ void CHitMemoryManager::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->ReadArray(count);
 		{
 			for (u64 i = 0; i < count; ++i) {
-				Object->FindChunk("CHitMemoryManager::object");
+				Object->BeginChunk("CHitMemoryManager::object");
 				{
 					CDelayedHitObject			delayed_object;
 					Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
@@ -494,7 +494,7 @@ void CHitMemoryManager::Load(CSaveObjectLoad* Object)
 					Object->EndChunk();
 #endif
 #ifdef USE_LEVEL_TIME
-					Object->FindChunk("CHitMemoryManager::object::level_time");
+					Object->BeginChunk("CHitMemoryManager::object::level_time");
 					{
 						VERIFY(Device.dwTimeGlobal >= object.m_level_time);
 						Object->GetCurrentChunk()->r_u32(object.m_level_time);

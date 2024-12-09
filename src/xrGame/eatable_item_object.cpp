@@ -150,7 +150,7 @@ void CEatableItemObject::Save(CSaveObjectSave* Object) const
 
 void CEatableItemObject::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CEatableItemObject");
+	Object->BeginChunk("CEatableItemObject");
 	{
 		CPhysicItem::Load(Object);
 		CEatableItem::Load(Object);

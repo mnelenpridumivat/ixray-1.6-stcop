@@ -73,7 +73,7 @@ void CALifeObjectRegistry::Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject*
 
 		// Update
 		//tNetPacket.w_begin(M_UPDATE);
-		object->UPDATE_Write(Object);
+		object->UPDATE_WriteSave(Object);
 
 		//memory_stream.w_u16(u16(tNetPacket.B.count));
 		//memory_stream.w(tNetPacket.B.data, tNetPacket.B.count);

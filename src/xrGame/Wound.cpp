@@ -62,7 +62,7 @@ void CWound::Save(CSaveObjectSave* Object)
 
 void CWound::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CWound");
+	Object->BeginChunk("CWound");
 	{
 		Object->GetCurrentChunk()->r_u16(m_iBoneNum);
 		for (int i = 0; i < ALife::eHitTypeMax; i++) {

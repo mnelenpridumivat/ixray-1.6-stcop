@@ -94,6 +94,7 @@ set_property(TARGET xrAbstractions PROPERTY ENABLE_EXPORTS ON)
 target_include_directories(xrAbstractions PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/AI")
 target_include_directories(xrAbstractions PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(xrAbstractions PUBLIC "${IXRAY_SDK_INC}")
+target_include_directories(xrAbstractions PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 
 # Move precompiled header
 target_validate_pch(xrAbstractions ${CMAKE_CURRENT_SOURCE_DIR})

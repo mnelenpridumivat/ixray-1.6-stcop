@@ -79,6 +79,8 @@ public:
 
 	void							motion_read				(NET_Packet& P);
 	void							motion_write			(NET_Packet& P);
+	void							motion_read(CSaveObjectLoad* Object);
+	void							motion_write(CSaveObjectSave* Object) const;
 
     void							set_motion				(LPCSTR name);
 	LPCSTR							get_motion				() const {return *motion_name;};

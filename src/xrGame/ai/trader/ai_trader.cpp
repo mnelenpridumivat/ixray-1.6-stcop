@@ -347,7 +347,7 @@ void CAI_Trader::Save(CSaveObjectSave* Object)
 
 void CAI_Trader::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CAI_Trader");
+	Object->BeginChunk("CAI_Trader");
 	{
 		inherited::Load(Object);
 		CInventoryOwner::Load(Object);

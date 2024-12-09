@@ -38,7 +38,7 @@ void CALifeSimulatorHeader::Save(CSaveObjectSave* Object)
 
 void CALifeSimulatorHeader::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CALifeSimulatorHeader");
+	Object->BeginChunk("CALifeSimulatorHeader");
 	{
 		Object->GetCurrentChunk()->w_u32(m_version);
 		R_ASSERT2(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");

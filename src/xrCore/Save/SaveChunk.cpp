@@ -290,7 +290,7 @@ void CSaveChunk::w_stringZ(const xr_string& p)
 	}
 }
 
-void CSaveChunk::w_matrix(Fmatrix& M)
+void CSaveChunk::w_matrix(const Fmatrix& M)
 {
 	if (_currentArrayStack.empty()) {
 		_variables.emplace_back(new CSaveVariableMatrix(M));

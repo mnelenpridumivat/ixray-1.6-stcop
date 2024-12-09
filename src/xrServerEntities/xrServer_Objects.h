@@ -170,6 +170,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_Shape,ISE_Shape,CShapeData)
 public:
 	void							cform_read		(NET_Packet& P);
 	void							cform_write		(NET_Packet& P);
+	void							cform_read(CSaveObjectLoad* Object);
+	void							cform_write(CSaveObjectSave* Object) const;
 									CSE_Shape		();
 	virtual							~CSE_Shape		();
 	virtual ISE_Shape*  	shape			() = 0;
@@ -188,7 +190,7 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_Temporary,CSE_Abstract)
 	virtual							~CSE_Temporary	();
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN(CSE_PHSkeleton, IPureServerObject)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_PHSkeleton, IPureStateUpdateObject)
 								CSE_PHSkeleton(LPCSTR caSection);
 virtual							~CSE_PHSkeleton();
 

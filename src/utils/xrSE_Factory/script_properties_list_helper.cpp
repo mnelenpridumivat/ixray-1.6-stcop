@@ -39,11 +39,28 @@ struct CWrapHelper {
 	}
 };
 
+struct CWrapHelper_BOOL_Legacy {
+	typedef BOOL result_type;
+	static BOOL* wrap_value(luabind::object object, LPCSTR name)
+	{
+		CScriptValueWrapperImpl_BOOL_Legacy* value = new CScriptValueWrapperImpl_BOOL_Legacy(object, name);
+		owner(object)->add(value);
+		return						(value->value());
+	}
+
+	static BOOL* wrap_value(luabind::object object, luabind::object table, LPCSTR name)
+	{
+		CScriptValueWrapperImpl_BOOL_Legacy* value = new CScriptValueWrapperImpl_BOOL_Legacy(table, name);
+		owner(object)->add(value);
+		return						(value->value());
+	}
+};
+
 template <>
 struct CWrapHelper<bool> {
-	typedef BOOL result_type;
+	typedef bool result_type;
 	template <bool a>
-	static BOOL	*wrap_value				(luabind::object object, LPCSTR name)
+	static bool	*wrap_value				(luabind::object object, LPCSTR name)
 	{
 		CScriptValueWrapper<bool>	*value = new CScriptValueWrapper<bool> (object,name);
 		owner(object)->add			(value);
@@ -51,7 +68,7 @@ struct CWrapHelper<bool> {
 	}
 
 	template <bool a>
-	static BOOL	*wrap_value				(luabind::object object, luabind::object table, LPCSTR name)
+	static bool	*wrap_value				(luabind::object object, luabind::object table, LPCSTR name)
 	{
 		CScriptValueWrapper<bool>	*value = new CScriptValueWrapper<bool> (table,name);
 		owner(object)->add			(value);
@@ -75,6 +92,11 @@ typename CWrapHelper<T>::result_type	*wrap_value		(luabind::object object, luabi
 		std::is_class<T>::value &&
 		!std::is_same<shared_str,T>::value
 	>(object,table,name));
+}
+
+typename CWrapHelper_BOOL_Legacy::result_type	*wrap_value_BOOL		(luabind::object object, luabind::object table, LPCSTR name)
+{
+	return						(CWrapHelper_BOOL_Legacy::wrap_value(object, table, name));
 }
 
 bool CScriptPropertiesListHelper::FvectorRDOnAfterEdit	(PropValue* sender,  Fvector& edit_val)
@@ -321,7 +343,12 @@ FloatValue* CScriptPropertiesListHelper::CreateFloat(PropItemVec* items, LPCSTR 
 
 BOOLValue* CScriptPropertiesListHelper::CreateBOOL(PropItemVec* items, LPCSTR key, luabind::object object, luabind::object table, LPCSTR name)
 {
-	return		(PHelper().CreateBOOL(*items,key,wrap_value<bool>(object,table,name)));
+	return		(PHelper().CreateBOOL(*items,key, wrap_value_BOOL(object,table,name)));
+}
+
+BoolValue* CScriptPropertiesListHelper::CreateBool(PropItemVec* items, LPCSTR key, luabind::object object, luabind::object table, LPCSTR name)
+{
+	return		(PHelper().CreateBool(*items, key, wrap_value<bool>(object, table, name)));
 }
 
 VectorValue* CScriptPropertiesListHelper::CreateVector(PropItemVec* items, LPCSTR key, luabind::object object, LPCSTR name, float mn, float mx, float inc, int decim)

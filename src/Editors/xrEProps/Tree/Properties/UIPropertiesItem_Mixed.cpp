@@ -110,6 +110,19 @@ void UIPropertiesItem::RemoveMixed()
 			}
 	}
 	break;
+	case PROP_BOOL:
+	{
+		BoolValue* V = dynamic_cast<BoolValue*>(PItem->GetFrontValue()); VERIFY(V);
+		bool val = V->GetValue();
+		PItem->BeforeEdit<BoolValue, bool>(val);
+
+		if (PItem->AfterEdit<BoolValue, bool>(val))
+			if (PItem->ApplyValue<BoolValue, bool>(val))
+			{
+				change = true;
+			}
+	}
+	break;
 	case PROP_FLAG:
 	{
 		if (!MixedFlag<u8>(PItem, change))

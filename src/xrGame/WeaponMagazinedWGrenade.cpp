@@ -742,7 +742,7 @@ void CWeaponMagazinedWGrenade::Save(CSaveObjectSave* Object) const
 
 void CWeaponMagazinedWGrenade::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CWeaponMagazinedWGrenade");
+	Object->BeginChunk("CWeaponMagazinedWGrenade");
 	{
 		inherited::Load(Object);
 		{

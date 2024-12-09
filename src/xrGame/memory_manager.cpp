@@ -371,7 +371,7 @@ void CMemoryManager::Save(CSaveObjectSave* Object)
 
 void CMemoryManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CMemoryManager");
+	Object->BeginChunk("CMemoryManager");
 	{
 		visual().Load(Object);
 		sound().Load(Object);

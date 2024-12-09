@@ -333,7 +333,7 @@ void SHeliMovementState::Save(CSaveObjectSave* Object) const
 
 void SHeliMovementState::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("SHeliMovementState");
+	Object->BeginChunk("SHeliMovementState");
 	{
 		{
 			s16 Value;

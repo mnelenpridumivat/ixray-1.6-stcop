@@ -67,7 +67,7 @@ void CALifeTimeManager::Save(CSaveObjectSave* Object)
 
 void CALifeTimeManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CALifeTimeManager");
+	Object->BeginChunk("CALifeTimeManager");
 	{
 		Object->GetCurrentChunk()->r_u64(m_game_time);
 		Object->GetCurrentChunk()->r_float(m_time_factor);

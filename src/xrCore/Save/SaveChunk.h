@@ -50,7 +50,7 @@ public:
 
 	void w_stringZ(const shared_str& p);
 	void w_stringZ(const xr_string& p);
-	void w_matrix(Fmatrix& M);
+	void w_matrix(const Fmatrix& M);
 	void w_clientID(ClientID& C);
 
 	// reading - utilities

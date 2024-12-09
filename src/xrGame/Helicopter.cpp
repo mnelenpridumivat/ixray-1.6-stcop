@@ -525,7 +525,7 @@ void CHelicopter::Save(CSaveObjectSave* Object) const
 
 void CHelicopter::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CHelicopter");
+	Object->BeginChunk("CHelicopter");
 	{
 		inherited::Load(Object);
 		m_movement.Load(Object);

@@ -188,6 +188,24 @@ void UIPropertiesItem::DrawProp()
 
 	}
 	break;
+	case PROP_BOOL:
+	{
+		BoolValue* V = dynamic_cast<BoolValue*>(PItem->GetFrontValue()); VERIFY(V);
+		bool new_val_as_bool = V->GetValue();
+		PItem->BeforeEdit<BoolValue, bool>(new_val_as_bool);
+		bool new_val = new_val_as_bool;
+		if (ImGui::Checkbox("##value", &new_val))
+		{
+			new_val_as_bool = new_val;
+			if (PItem->AfterEdit<BoolValue, bool>(new_val_as_bool))
+				if (PItem->ApplyValue<BoolValue, bool>(new_val_as_bool))
+				{
+					PropertiesFrom->Modified();
+				}
+		}
+
+	}
+	break;
 	case PROP_FLAG:
 	{
 		bool change = false;

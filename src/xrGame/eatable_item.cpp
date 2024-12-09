@@ -93,7 +93,7 @@ void CEatableItem::Save(CSaveObjectSave* Object) const
 
 void CEatableItem::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CEatableItem");
+	Object->BeginChunk("CEatableItem");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_float(m_iPortionsMarker);

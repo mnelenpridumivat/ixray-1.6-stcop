@@ -502,7 +502,7 @@ void CGameObject::net_Save(CSaveObjectSave* Object)
 
 void CGameObject::net_Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CGameObject::net_Save");
+	Object->BeginChunk("CGameObject::net_Save");
 	{
 		Load(Object);
 		m_ScriptBinderComponent->Load(Object);
@@ -521,7 +521,7 @@ void CGameObject::Save(CSaveObjectSave* Object) const
 
 void CGameObject::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CGameObject");
+	Object->BeginChunk("CGameObject");
 	{
 		//m_ScriptBinderComponent->Load(Object);
 	}

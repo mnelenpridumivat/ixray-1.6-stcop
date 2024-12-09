@@ -29,10 +29,10 @@ public:\
 	virtual void 			UPDATE_Write	(NET_Packet& P) override; \
 	virtual void 			STATE_Read		(NET_Packet& P, u16 size) override; \
 	virtual void 			STATE_Write		(NET_Packet& P) override; \
-	virtual void 			UPDATE_Read		(CSaveObjectLoad* Object) override; \
-	virtual void 			UPDATE_Write	(CSaveObjectSave* Object) const override; \
-	virtual void 			STATE_Read		(CSaveObjectLoad* Object) override; \
-	virtual void 			STATE_Write		(CSaveObjectSave* Object) const override; \
+	virtual void 			UPDATE_ReadSave		(CSaveObjectLoad* Object) override; \
+	virtual void 			UPDATE_WriteSave	(CSaveObjectSave* Object) const override; \
+	virtual void 			STATE_ReadSave		(CSaveObjectLoad* Object) override; \
+	virtual void 			STATE_WriteSave		(CSaveObjectSave* Object) const override; \
 	SERVER_ENTITY_EDITOR_METHODS \
 };
 

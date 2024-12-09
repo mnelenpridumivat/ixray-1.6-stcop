@@ -579,7 +579,7 @@ void CSoundMemoryManager::Save(CSaveObjectSave* Object)
 
 void CSoundMemoryManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSoundMemoryManager");
+	Object->BeginChunk("CSoundMemoryManager");
 	{
 		if (!m_object->g_Alive()) {
 			Object->EndChunk();
@@ -593,7 +593,7 @@ void CSoundMemoryManager::Load(CSaveObjectLoad* Object)
 		u64								count;
 		Object->GetCurrentChunk()->ReadArray(count);
 		for (u64 i = 0; i < count; ++i) {
-			Object->FindChunk("CSoundMemoryManager::object");
+			Object->BeginChunk("CSoundMemoryManager::object");
 			{
 				CDelayedSoundObject			delayed_object;
 				Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
@@ -631,7 +631,7 @@ void CSoundMemoryManager::Load(CSaveObjectLoad* Object)
 				Object->EndChunk();
 #endif
 #ifdef USE_LEVEL_TIME
-				Object->FindChunk("CSoundMemoryManager::object::level_time");
+				Object->BeginChunk("CSoundMemoryManager::object::level_time");
 				{
 					VERIFY(Device.dwTimeGlobal >= object.m_level_time);
 					Object->GetCurrentChunk()->r_u32(object.m_level_time);

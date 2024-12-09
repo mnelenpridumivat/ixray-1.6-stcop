@@ -2021,6 +2021,109 @@ void CSE_ALifeMonsterBase::UPDATE_Write(NET_Packet& tNetPacket)
 	inherited2::UPDATE_Write(tNetPacket);
 }
 
+void CSE_ALifeMonsterBase::STATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeMonsterBase::STATE");
+	{
+		inherited1::STATE_ReadSave(Object);
+		inherited2::STATE_ReadSave(Object);
+		Object->GetCurrentChunk()->r_u16(m_spec_object_id);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeMonsterBase::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeMonsterBase::STATE");
+	{
+		inherited1::STATE_WriteSave(Object);
+		inherited2::STATE_WriteSave(Object);
+		Object->GetCurrentChunk()->w_u16(m_spec_object_id);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeMonsterBase::UPDATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeMonsterBase::UPDATE");
+	{
+#ifdef XRGAME_EXPORTS
+		if (g_pGamePersistent->GameType() != eGameIDSingle)
+		{
+			Object->GetCurrentChunk()->r_float(o_torso.pitch);
+			Object->GetCurrentChunk()->r_float(o_torso.yaw);
+			Object->GetCurrentChunk()->r_bool(phSyncFlag);
+			if (phSyncFlag) {
+				physics_state->read(Object);
+			}
+			else {
+				Object->GetCurrentChunk()->r_vec3(o_Position);
+			}
+			// Sound Sync
+			{
+				u8 Value;
+				Object->GetCurrentChunk()->r_u8(Value);
+				m_snd_sync_flag = (eMonsterSound)Value;
+			}
+			if (m_snd_sync_flag != eMonsterSound::monster_sound_no) {
+				Object->GetCurrentChunk()->r_u8(m_snd_sync_sound);
+				if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
+					Object->GetCurrentChunk()->r_u32(m_snd_sync_sound_delay);
+				}
+			}
+			// Sound Sync
+			Object->GetCurrentChunk()->r_u16(u_motion_idx);
+			Object->GetCurrentChunk()->r_u16(u_motion_slot);
+			Object->GetCurrentChunk()->r_float(f_health);
+			set_health(f_health);
+			return;
+		}
+#endif
+
+		inherited1::UPDATE_ReadSave(Object);
+		inherited2::UPDATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeMonsterBase::UPDATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeMonsterBase::UPDATE");
+	{
+#ifdef XRGAME_EXPORTS
+		if (g_pGamePersistent->GameType() != eGameIDSingle)
+		{
+			Object->GetCurrentChunk()->w_float(o_torso.pitch);
+			Object->GetCurrentChunk()->w_float(o_torso.yaw);
+			Object->GetCurrentChunk()->w_bool(phSyncFlag);
+			if (phSyncFlag) {
+				physics_state->write(Object);
+			}
+			else {
+				Object->GetCurrentChunk()->w_vec3(o_Position);
+			}
+			// Sound Sync
+			Object->GetCurrentChunk()->w_u8((u8)m_snd_sync_flag);
+			if (m_snd_sync_flag != eMonsterSound::monster_sound_no) {
+				Object->GetCurrentChunk()->w_u8(m_snd_sync_sound);
+				if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
+					Object->GetCurrentChunk()->w_u32(m_snd_sync_sound_delay);
+				}
+			}
+			// Sound Sync
+			Object->GetCurrentChunk()->w_u16(u_motion_idx);
+			Object->GetCurrentChunk()->w_u16(u_motion_slot);
+			Object->GetCurrentChunk()->w_float(get_health());
+			return;
+		}
+#endif
+
+		inherited1::UPDATE_WriteSave(Object);
+		inherited2::UPDATE_WriteSave(Object);
+	}
+	Object->EndChunk();
+}
+
 BOOL CSE_ALifeMonsterBase::Net_Relevant() 
 {
 #ifdef XRGAME_EXPORTS
@@ -2074,6 +2177,42 @@ void CSE_ALifePsyDogPhantom::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifePsyDogPhantom::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifePsyDogPhantom::STATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifePsyDogPhantom::STATE");
+	{
+		inherited::STATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifePsyDogPhantom::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifePsyDogPhantom::STATE");
+	{
+		inherited::STATE_WriteSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifePsyDogPhantom::UPDATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifePsyDogPhantom::UPDATE");
+	{
+		inherited::UPDATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifePsyDogPhantom::UPDATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifePsyDogPhantom::UPDATE");
+	{
+		inherited::UPDATE_WriteSave(Object);
+	}
+	Object->EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2152,6 +2291,48 @@ void CSE_ALifeHumanAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 	}
 };
 
+void CSE_ALifeHumanAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeHumanAbstract::STATE");
+	{
+		inherited1::STATE_ReadSave(Object);
+		inherited2::STATE_ReadSave(Object);
+		brain().on_state_read(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanAbstract::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeHumanAbstract::STATE");
+	{
+		inherited1::STATE_WriteSave(Object);
+		inherited2::STATE_WriteSave(Object);
+		brain().on_state_write(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeHumanAbstract::UPDATE");
+	{
+		inherited1::UPDATE_ReadSave(Object);
+		inherited2::UPDATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanAbstract::UPDATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeHumanAbstract::UPDATE");
+	{
+		inherited1::UPDATE_WriteSave(Object);
+		inherited2::UPDATE_WriteSave(Object);
+	}
+	Object->EndChunk();
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeHumanAbstract::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -2209,6 +2390,48 @@ void CSE_ALifeHumanStalker::load			(NET_Packet &tNetPacket)
 {
 	inherited1::load			(tNetPacket);
 	inherited2::load			(tNetPacket);
+}
+
+void CSE_ALifeHumanStalker::STATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeHumanStalker::STATE");
+	{
+		inherited1::STATE_ReadSave(Object);
+		inherited2::STATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanStalker::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeHumanStalker::STATE");
+	{
+		inherited1::STATE_WriteSave(Object);
+		inherited2::STATE_WriteSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanStalker::UPDATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeHumanStalker::UPDATE");
+	{
+		inherited1::UPDATE_ReadSave(Object);
+		inherited2::UPDATE_ReadSave(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_start_dialog);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeHumanStalker::UPDATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeHumanStalker::UPDATE");
+	{
+		inherited1::UPDATE_WriteSave(Object);
+		inherited2::UPDATE_WriteSave(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_start_dialog);
+	}
+	Object->EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2307,6 +2530,58 @@ void CSE_ALifeOnlineOfflineGroup::UPDATE_Write				(NET_Packet &tNetPacket)
 void CSE_ALifeOnlineOfflineGroup::UPDATE_Read				(NET_Packet &tNetPacket)
 {
 	inherited1::UPDATE_Read		(tNetPacket);
+}
+
+void CSE_ALifeOnlineOfflineGroup::STATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::STATE");
+	{
+		u64 ArraySize;
+		Object->GetCurrentChunk()->ReadArray(ArraySize);
+		{
+			for (u64 i = 0; i < ArraySize; ++i) {
+				MEMBERS::value_type		pair;
+				Object->GetCurrentChunk()->r_u16(pair.first);
+				pair.second = 0;
+				m_members.insert(pair);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeOnlineOfflineGroup::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::STATE");
+	{
+		Object->GetCurrentChunk()->WriteArray(m_members.size());
+		{
+			for (const auto& elem : m_members) {
+				Object->GetCurrentChunk()->w_u16(elem.first);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeOnlineOfflineGroup::UPDATE_ReadSave(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::UPDATE");
+	{
+		inherited1::UPDATE_ReadSave(Object);
+	}
+	Object->EndChunk();
+}
+
+void CSE_ALifeOnlineOfflineGroup::UPDATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::UPDATE");
+	{
+		inherited1::UPDATE_WriteSave(Object);
+	}
+	Object->EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS

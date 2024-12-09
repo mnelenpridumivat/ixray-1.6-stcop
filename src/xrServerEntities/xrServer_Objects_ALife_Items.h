@@ -21,7 +21,7 @@
 
 class CSE_ALifeItemAmmo;
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeInventoryItem)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeInventoryItem, IPureStateUpdateObject)
 public:
 	enum {
 		inventory_item_state_enabled	= u8(1) << 0,

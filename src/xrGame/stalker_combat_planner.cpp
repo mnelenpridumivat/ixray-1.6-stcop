@@ -561,7 +561,7 @@ void CStalkerCombatPlanner::Save(CSaveObjectSave* Object) const
 
 void CStalkerCombatPlanner::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CStalkerCombatPlanner");
+	Object->BeginChunk("CStalkerCombatPlanner");
 	{
 		inherited::Load(Object);
 	}

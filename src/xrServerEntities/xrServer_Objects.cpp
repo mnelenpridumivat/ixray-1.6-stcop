@@ -77,6 +77,65 @@ void CSE_Shape::cform_write					(NET_Packet	&tNetPacket)
 	}
 }
 
+void CSE_Shape::cform_read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_Shape::cform_read");
+	{
+		u64 ArraySize;
+		Object->GetCurrentChunk()->ReadArray(ArraySize);
+		{
+			for (u64 i = 0; i < ArraySize; ++i) {
+				shape_def				S;
+				Object->GetCurrentChunk()->r_u8(S.type);
+				switch (S.type) {
+				case 0:
+				{
+					Object->GetCurrentChunk()->r_vec3(S.data.sphere.P);
+					Object->GetCurrentChunk()->r_float(S.data.sphere.R);
+					break;
+				}
+				case 1:
+					Object->GetCurrentChunk()->r_matrix(S.data.box);
+					break;
+				}
+				shapes.push_back(S);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CSE_Shape::cform_write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_Shape::cform_write");
+	{
+		Object->GetCurrentChunk()->WriteArray(shapes.size());
+		{
+			for (u32 i = 0; i < shapes.size(); ++i)
+			{
+				const shape_def& S = shapes[i];
+				Object->GetCurrentChunk()->w_u8(S.type);
+				switch (S.type)
+				{
+				case 0:
+				{
+					Object->GetCurrentChunk()->w_vec3(S.data.sphere.P);
+					Object->GetCurrentChunk()->w_float(S.data.sphere.R);
+					break;
+				}
+				case 1: {
+					Object->GetCurrentChunk()->w_matrix(S.data.box);
+					break;
+				}
+				}
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
 void CSE_Shape::assign_shapes	(CShapeData::shape_def* _shapes, u32 _cnt)
 {
 	shapes.resize	(_cnt);
@@ -116,20 +175,32 @@ void CSE_Spectator::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
 }
 
-void CSE_Spectator::STATE_Read(CSaveObjectLoad* Object)
+void CSE_Spectator::STATE_ReadSave(CSaveObjectLoad* Object)
 {
+	Object->BeginChunk("CSE_Spectator::STATE");
+	{}
+	Object->EndChunk();
 }
 
-void CSE_Spectator::STATE_Write(CSaveObjectSave* Object) const
+void CSE_Spectator::STATE_WriteSave(CSaveObjectSave* Object) const
 {
+	Object->BeginChunk("CSE_Spectator::STATE");
+	{}
+	Object->EndChunk();
 }
 
-void CSE_Spectator::UPDATE_Read(CSaveObjectLoad* Object)
+void CSE_Spectator::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
+	Object->BeginChunk("CSE_Spectator::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
-void CSE_Spectator::UPDATE_Write(CSaveObjectSave* Object) const
+void CSE_Spectator::UPDATE_WriteSave(CSaveObjectSave* Object) const
 {
+	Object->BeginChunk("CSE_Spectator::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
 #if !defined(XRGAME_EXPORTS)
@@ -169,30 +240,36 @@ void CSE_Temporary::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
 }
 
-void CSE_Temporary::STATE_Read(CSaveObjectLoad* Object)
+void CSE_Temporary::STATE_ReadSave(CSaveObjectLoad* Object)
 {
-	Object->BeginChunk("CSE_Temporary");
+	Object->BeginChunk("CSE_Temporary::STATE");
 	{
 		Object->GetCurrentChunk()->r_u32(m_tNodeID);
 	}
 	Object->EndChunk();
 }
 
-void CSE_Temporary::STATE_Write(CSaveObjectSave* Object) const
+void CSE_Temporary::STATE_WriteSave(CSaveObjectSave* Object) const
 {
-	Object->FindChunk("CSE_Temporary");
+	Object->BeginChunk("CSE_Temporary::STATE");
 	{
 		Object->GetCurrentChunk()->w_u32(m_tNodeID);
 	}
 	Object->EndChunk();
 }
 
-void CSE_Temporary::UPDATE_Read(CSaveObjectLoad* Object)
+void CSE_Temporary::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
+	Object->BeginChunk("CSE_Temporary::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
-void CSE_Temporary::UPDATE_Write(CSaveObjectSave* Object) const
+void CSE_Temporary::UPDATE_WriteSave(CSaveObjectSave* Object) const
 {
+	Object->BeginChunk("CSE_Temporary::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -327,9 +404,9 @@ void CSE_PHSkeleton::UPDATE_Read(NET_Packet &tNetPacket)
 
 }
 
-void CSE_PHSkeleton::STATE_Read(CSaveObjectLoad* Object)
+void CSE_PHSkeleton::STATE_ReadSave(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSE_PHSkeleton");
+	Object->BeginChunk("CSE_PHSkeleton::STATE");
 	{
 		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
 		R_ASSERT(visual);
@@ -343,9 +420,9 @@ void CSE_PHSkeleton::STATE_Read(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }
 
-void CSE_PHSkeleton::STATE_Write(CSaveObjectSave* Object) const
+void CSE_PHSkeleton::STATE_WriteSave(CSaveObjectSave* Object) const
 {
-	Object->BeginChunk("CSE_PHSkeleton");
+	Object->BeginChunk("CSE_PHSkeleton::STATE");
 	{
 		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
 		R_ASSERT(visual);
@@ -361,12 +438,18 @@ void CSE_PHSkeleton::STATE_Write(CSaveObjectSave* Object) const
 	Object->EndChunk();
 }
 
-void CSE_PHSkeleton::UPDATE_Read(CSaveObjectLoad* Object)
+void CSE_PHSkeleton::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
+	Object->BeginChunk("CSE_PHSkeleton::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
-void CSE_PHSkeleton::UPDATE_Write(CSaveObjectSave* Object) const
+void CSE_PHSkeleton::UPDATE_WriteSave(CSaveObjectSave* Object) const
 {
+	Object->BeginChunk("CSE_PHSkeleton::UPDATE");
+	{}
+	Object->EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -411,9 +494,9 @@ void CSE_AbstractVisual::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 }
 
-void CSE_AbstractVisual::STATE_Read(CSaveObjectLoad* Object)
+void CSE_AbstractVisual::STATE_ReadSave(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSE_AbstractVisual");
+	Object->BeginChunk("CSE_AbstractVisual::STATE");
 	{
 		visual_read(Object);
 		Object->GetCurrentChunk()->r_stringZ(startup_animation);
@@ -421,9 +504,9 @@ void CSE_AbstractVisual::STATE_Read(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }
 
-void CSE_AbstractVisual::STATE_Write(CSaveObjectSave* Object) const
+void CSE_AbstractVisual::STATE_WriteSave(CSaveObjectSave* Object) const
 {
-	Object->BeginChunk("CSE_AbstractVisual");
+	Object->BeginChunk("CSE_AbstractVisual::STATE");
 	{
 		visual_write(Object);
 		Object->GetCurrentChunk()->w_stringZ(startup_animation);
@@ -431,16 +514,16 @@ void CSE_AbstractVisual::STATE_Write(CSaveObjectSave* Object) const
 	Object->EndChunk();
 }
 
-void CSE_AbstractVisual::UPDATE_Read(CSaveObjectLoad* Object)
+void CSE_AbstractVisual::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSE_AbstractVisual");
+	Object->BeginChunk("CSE_AbstractVisual::UPDATE");
 	{}
 	Object->EndChunk();
 }
 
-void CSE_AbstractVisual::UPDATE_Write(CSaveObjectSave* Object) const
+void CSE_AbstractVisual::UPDATE_WriteSave(CSaveObjectSave* Object) const
 {
-	Object->BeginChunk("CSE_AbstractVisual");
+	Object->BeginChunk("CSE_AbstractVisual::UPDATE");
 	{}
 	Object->EndChunk();
 }
@@ -457,7 +540,7 @@ CSE_Visual* CSE_AbstractVisual::visual					()
 
 void CSE_PHSkeleton::data_load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSE_PHSkeleton::data");
+	Object->BeginChunk("CSE_PHSkeleton::data");
 	{
 		saved_bones.net_Load(Object);
 		_flags.set(flSavedData, TRUE);

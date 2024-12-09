@@ -23,7 +23,7 @@ class CALifeOnlineOfflineGroupBrain;
 #pragma warning(push)
 #pragma warning(disable:4005)
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeTraderAbstract, IPureStateUpdateObject)
 	enum eTraderFlags {
 		eTraderFlagInfiniteAmmo		= u32(1) << 0,
 		eTraderFlagNightVisionActive = static_cast<u32>(1) << 1,
@@ -507,7 +507,7 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeHumanStalker,CSE_ALifeHumanAbstract,CSE_PH
 
 									CSE_ALifeHumanStalker	(LPCSTR caSection);
 	virtual							~CSE_ALifeHumanStalker	();
-	virtual	void					load					(NET_Packet &tNetPacket);
+	virtual	void					load					(NET_Packet &tNetPacket) override;
 	virtual CSE_Abstract			*cast_abstract			() {return this;}
 SERVER_ENTITY_DECLARE_END
 

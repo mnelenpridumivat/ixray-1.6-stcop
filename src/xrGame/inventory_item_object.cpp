@@ -140,7 +140,7 @@ void CInventoryItemObject::Save(CSaveObjectSave* Object) const
 
 void CInventoryItemObject::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CInventoryItemObject");
+	Object->BeginChunk("CInventoryItemObject");
 	{
 		CPhysicItem::Load(Object);
 		CInventoryItem::Load(Object);

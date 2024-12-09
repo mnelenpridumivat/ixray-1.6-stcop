@@ -62,11 +62,6 @@ void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
 }
 
-void CSaveObjectSave::FindChunk(shared_str ChunkName)
-{
-	VERIFY2(false, "Attempt to use FindChunk while saving!");
-}
-
 CSaveObjectLoad::CSaveObjectLoad()
 {
 	_rootChunk = new CSaveChunk("Root");
@@ -81,11 +76,6 @@ CSaveObjectLoad::CSaveObjectLoad(CSaveChunk* Root)
 }
 
 void CSaveObjectLoad::BeginChunk(shared_str ChunkName)
-{
-	VERIFY2(false, "Attempt to use BeginChunk while loading!");
-}
-
-void CSaveObjectLoad::FindChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));

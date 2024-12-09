@@ -780,7 +780,7 @@ void CInventoryItem::Save(CSaveObjectSave* Object) const
 
 void CInventoryItem::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CInventoryItem");
+	Object->BeginChunk("CInventoryItem");
 	{
 		Object->GetCurrentChunk()->r_u16(m_ItemCurrPlace.value);
 		Object->GetCurrentChunk()->r_float(m_fCondition);

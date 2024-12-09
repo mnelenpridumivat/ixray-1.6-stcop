@@ -385,7 +385,7 @@ void SHeliEnemy::Save(CSaveObjectSave* Object) const
 
 void SHeliEnemy::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("SHeliEnemy");
+	Object->BeginChunk("SHeliEnemy");
 	{
 		{
 			s16 Value;
@@ -479,7 +479,7 @@ void SHeliBodyState::Save(CSaveObjectSave* Object) const
 
 void SHeliBodyState::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("SHeliBodyState");
+	Object->BeginChunk("SHeliBodyState");
 	{
 		{
 			s16 Value;

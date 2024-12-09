@@ -616,7 +616,7 @@ void CEntityAlive::Save(CSaveObjectSave* Object) const
 
 void CEntityAlive::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CEntityAlive");
+	Object->BeginChunk("CEntityAlive");
 	{
 		inherited::Load(Object);
 		conditions().Load(Object);

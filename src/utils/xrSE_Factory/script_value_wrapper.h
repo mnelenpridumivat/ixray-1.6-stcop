@@ -33,8 +33,7 @@ public:
 	IC				CScriptValueWrapper		(luabind::object object, LPCSTR name);
 };
 
-template <>
-class CScriptValueWrapperImpl<bool> : public CScriptValue {
+class CScriptValueWrapperImpl_BOOL_Legacy : public CScriptValue {
 private:
 	typedef CScriptValue inherited;
 
@@ -42,7 +41,7 @@ protected:
 	BOOL			m_value;
 
 public:
-	IC				CScriptValueWrapperImpl	(luabind::object object, LPCSTR name) : inherited(object,name)
+	IC				CScriptValueWrapperImpl_BOOL_Legacy(luabind::object object, LPCSTR name) : inherited(object,name)
 	{
 		m_value		= luabind::object_cast<bool>(object[name]);
 	}

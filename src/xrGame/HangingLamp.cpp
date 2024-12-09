@@ -217,7 +217,7 @@ void CHangingLamp::Save(CSaveObjectSave* Object) const
 
 void CHangingLamp::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CHangingLamp");
+	Object->BeginChunk("CHangingLamp");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_bool(m_bState);

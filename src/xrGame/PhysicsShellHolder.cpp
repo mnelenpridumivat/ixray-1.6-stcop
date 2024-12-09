@@ -389,7 +389,7 @@ void CPhysicsShellHolder::Save(CSaveObjectSave* Object) const
 
 void CPhysicsShellHolder::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CPhysicsShellHolder");
+	Object->BeginChunk("CPhysicsShellHolder");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_u8(st_enable_state);
@@ -556,7 +556,7 @@ void CPhysicsShellHolder::PHSaveState(CSaveObjectSave* Object) const
 
 void CPhysicsShellHolder::PHLoadState(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CEatableItem");
+	Object->BeginChunk("CEatableItem");
 	{
 		u64 _low = 0;
 		u64 _high = 0;

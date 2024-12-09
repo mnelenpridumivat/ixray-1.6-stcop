@@ -253,7 +253,7 @@ void CALifeSpawnRegistry::save_updates(CSaveObjectSave* Object)
 
 void CALifeSpawnRegistry::load_updates(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CALifeSpawnRegistry::m_spawns");
+	Object->BeginChunk("CALifeSpawnRegistry::m_spawns");
 	{
 		u64 ArraySize;
 		Object->GetCurrentChunk()->ReadArray(ArraySize);
@@ -262,7 +262,7 @@ void CALifeSpawnRegistry::load_updates(CSaveObjectLoad* Object)
 			SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
 			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
 			for (; I != E; ++I) {
-				Object->FindChunk("CALifeSpawnRegistry::m_spawns::vertex");
+				Object->BeginChunk("CALifeSpawnRegistry::m_spawns::vertex");
 				{
 					Object->GetCurrentChunk()->r_u32(vertex_id);
 					VERIFY(u32(ALife::_SPAWN_ID(-1)) > vertex_id);

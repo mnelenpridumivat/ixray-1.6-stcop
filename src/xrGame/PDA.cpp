@@ -220,7 +220,7 @@ void CPda::Save(CSaveObjectSave* Object) const
 
 void CPda::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CPda");
+	Object->BeginChunk("CPda");
 	{
 		inherited::Load(Object);
 		Object->GetCurrentChunk()->r_stringZ(m_sFullName);

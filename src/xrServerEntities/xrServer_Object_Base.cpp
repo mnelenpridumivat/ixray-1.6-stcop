@@ -518,7 +518,7 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		//}
 		Object->BeginChunk("CSE_Abstract::ClientObject");
 		{
-#ifdef XRSE_FACTORY_EXPORTS
+#ifndef XRGAME_EXPORTS
 			Object->GetCurrentChunk()->w_bool(false);
 #else
 			Object->GetCurrentChunk()->w_bool(true);
@@ -549,7 +549,7 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		// write specific data
 		//u32	position = tNetPacket.w_tell();
 		//tNetPacket.w_u16(0);
-		STATE_Write(Object);
+		STATE_WriteSave(Object);
 		//u16 size = u16(tNetPacket.w_tell() - position);
 		//#ifdef XRSE_FACTORY_EXPORTS
 		R_ASSERT3((m_tClassID == CLSID_SPECTATOR),

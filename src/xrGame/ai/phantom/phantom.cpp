@@ -337,7 +337,7 @@ void CPhantom::Save(CSaveObjectSave* Object) const
 }
 void CPhantom::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CPhantom");
+	Object->BeginChunk("CPhantom");
 	{
 		s32 Value;
 		Object->GetCurrentChunk()->r_s32(Value);

@@ -359,7 +359,7 @@ void CDangerManager::Save(CSaveObjectSave* Object)
 
 void CDangerManager::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CDangerManager");
+	Object->BeginChunk("CDangerManager");
 	{
 		u64 ArraySize;
 		Object->GetCurrentChunk()->ReadArray(ArraySize);

@@ -63,7 +63,7 @@ void CSE_Visual::visual_write  	(NET_Packet	&tNetPacket)
 
 void CSE_Visual::visual_read(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CSE_Visual::visual");
+	Object->BeginChunk("CSE_Visual::visual");
 	{
 		Object->GetCurrentChunk()->r_stringZ(visual_name);
 		{
@@ -134,6 +134,24 @@ void CSE_Motion::motion_read	(NET_Packet	&tNetPacket)
 void CSE_Motion::motion_write	(NET_Packet	&tNetPacket)
 {
 	tNetPacket.w_stringZ			(motion_name);
+}
+
+void CSE_Motion::motion_read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_Motion::motion");
+	{
+		Object->GetCurrentChunk()->r_stringZ(motion_name);
+	}
+	Object->EndChunk();
+}
+
+void CSE_Motion::motion_write(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_Motion::motion");
+	{
+		Object->GetCurrentChunk()->w_stringZ(motion_name);
+	}
+	Object->EndChunk();
 }
 
 void CSE_Motion::OnChangeMotion	(PropValue* sender)

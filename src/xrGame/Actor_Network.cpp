@@ -1482,13 +1482,13 @@ void CActor::Save(CSaveObjectSave* Object) const
 
 void CActor::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("CActor");
+	Object->BeginChunk("CActor");
 	{
 		inherited::Load(Object);
 		CInventoryOwner::Load(Object);
 		Object->GetCurrentChunk()->r_bool(m_bOutBorder);
 
-		Object->FindChunk("CActor::PDA");
+		Object->BeginChunk("CActor::PDA");
 		{
 			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
 			bool Value;

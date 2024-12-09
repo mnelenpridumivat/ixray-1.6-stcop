@@ -473,9 +473,9 @@ IC	void CPlanner::Save(CSaveObjectSave* Object) const
 TEMPLATE_SPECIALIZATION
 IC	void CPlanner::Load(CSaveObjectLoad* Object) 
 {
-	Object->FindChunk("CPlanner");
+	Object->BeginChunk("CPlanner");
 	{
-		Object->FindChunk("CPlanner::m_evaluators");
+		Object->BeginChunk("CPlanner::m_evaluators");
 		{
 			auto I = this->m_evaluators.begin();
 			auto E = this->m_evaluators.end();
@@ -489,7 +489,7 @@ IC	void CPlanner::Load(CSaveObjectLoad* Object)
 		}
 		Object->EndChunk();
 
-		Object->FindChunk("CPlanner::m_operators");
+		Object->BeginChunk("CPlanner::m_operators");
 		{
 			auto I = this->m_operators.begin();
 			auto E = this->m_operators.end();
@@ -503,7 +503,7 @@ IC	void CPlanner::Load(CSaveObjectLoad* Object)
 		}
 		Object->EndChunk();
 
-		Object->FindChunk("CPlanner::m_storage");
+		Object->BeginChunk("CPlanner::m_storage");
 		{
 			u64							count;
 			GraphEngineSpace::_solver_condition_type	condition;
@@ -511,7 +511,7 @@ IC	void CPlanner::Load(CSaveObjectLoad* Object)
 			Object->GetCurrentChunk()->ReadArray(count);
 			for (u64 i = 0; i < count; ++i) 
 			{
-				Object->FindChunk("CPlanner::m_storage::elem");
+				Object->BeginChunk("CPlanner::m_storage::elem");
 				{
 					Object->GetCurrentChunk()->r_u32(condition);
 					Object->GetCurrentChunk()->r_bool(value);

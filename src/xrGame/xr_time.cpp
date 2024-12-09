@@ -132,7 +132,7 @@ void xrTime::Save(CSaveObjectSave* Object) const
 
 void xrTime::Load(CSaveObjectLoad* Object)
 {
-	Object->FindChunk("xrTime");
+	Object->BeginChunk("xrTime");
 	{
 		TimePacked Tm = {};
 		Object->GetCurrentChunk()->r_u32(Tm.TimeTotal);
