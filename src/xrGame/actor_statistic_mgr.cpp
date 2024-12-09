@@ -32,6 +32,30 @@ void SStatDetailBData::load(IReader &stream)
 		load_data			(str_value,		stream);
 }
 
+void SStatDetailBData::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SStatDetailBData");
+	{
+		Object->GetCurrentChunk()->w_stringZ(key);
+		Object->GetCurrentChunk()->w_s32(int_count);
+		Object->GetCurrentChunk()->w_s32(int_points);
+		Object->GetCurrentChunk()->w_stringZ(str_value);
+	}
+	Object->EndChunk();
+}
+
+void SStatDetailBData::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SStatDetailBData");
+	{
+		Object->GetCurrentChunk()->r_stringZ(key);
+		Object->GetCurrentChunk()->r_s32(int_count);
+		Object->GetCurrentChunk()->r_s32(int_points);
+		Object->GetCurrentChunk()->r_stringZ(str_value);
+	}
+	Object->EndChunk();
+}
+
 
 ////////////////////////////////////////////////
 void SStatSectionData::save(IWriter &stream)	
@@ -45,8 +69,8 @@ void SStatSectionData::load(IReader &stream)
 	load_data			(data,				stream);
 	if(ai().get_alife()->header().version()==0x0002)
 	{
-	int tmp;
-	load_data			(tmp,				stream);
+		int tmp;
+		load_data			(tmp,				stream);
 		switch(tmp)
 		{
 		case 100:
@@ -73,9 +97,44 @@ void SStatSectionData::load(IReader &stream)
 		}
 		s32				tmp2;
 		load_data		(tmp2,				stream);// old total_points
-	}else
-		load_data			(key,				stream);
-};
+	}
+	else {
+		load_data(key, stream);
+	}
+}
+
+void SStatSectionData::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SStatSectionData");
+	{
+		Object->GetCurrentChunk()->WriteArray(data.size());
+		for (const auto& elem : data) {
+			elem.save(Object);
+		}
+		Object->GetCurrentChunk()->EndArray();
+		Object->GetCurrentChunk()->w_stringZ(key);
+	}
+	Object->EndChunk();
+}
+
+void SStatSectionData::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SStatSectionData");
+	{
+		data.clear();
+		u64 ArraySize;
+		Object->GetCurrentChunk()->ReadArray(ArraySize);
+		for (u64 i = 0; i < ArraySize; ++i) {
+			SStatDetailBData&& Value = SStatDetailBData();
+			Value.load(Object);
+			data.emplace_back(Value);
+		}
+		Object->GetCurrentChunk()->EndArray();
+		Object->GetCurrentChunk()->r_stringZ(key);
+	}
+	Object->EndChunk();
+}
+
 
 SStatDetailBData&	SStatSectionData::GetData	(const shared_str& key_)
 {

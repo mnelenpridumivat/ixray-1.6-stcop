@@ -256,6 +256,62 @@ void CGameTask::load_task(IReader &stream)
 	CreateMapLocation		(true);
 }
 
+void CGameTask::save_task(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CGameTask");
+	{
+		Object->GetCurrentChunk()->w_u8(m_task_state);
+		Object->GetCurrentChunk()->w_u8(m_task_type);
+		Object->GetCurrentChunk()->w_u64(m_ReceiveTime);
+		Object->GetCurrentChunk()->w_u64(m_FinishTime);
+		Object->GetCurrentChunk()->w_u64(m_TimeToComplete);
+		Object->GetCurrentChunk()->w_u64(m_timer_finish);
+		Object->GetCurrentChunk()->w_stringZ(m_Title);
+		Object->GetCurrentChunk()->w_stringZ(m_Description);
+		Object->GetCurrentChunk()->w_stringZ(m_Description);
+		m_pScriptHelper.save(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_icon_texture_name);
+		Object->GetCurrentChunk()->w_stringZ(m_map_hint);
+		Object->GetCurrentChunk()->w_stringZ(m_map_location);
+		Object->GetCurrentChunk()->w_u16(m_map_object_id);
+		Object->GetCurrentChunk()->w_u32(m_priority);
+	}
+	Object->EndChunk();
+}
+
+void CGameTask::load_task(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CGameTask");
+	{
+		{
+			u8 Value;
+			Object->GetCurrentChunk()->r_u8(Value);
+			m_task_state = (ETaskState)Value;
+		}
+		{
+			u8 Value;
+			Object->GetCurrentChunk()->r_u8(Value);
+			m_task_type = (ETaskType)Value;
+		}
+		Object->GetCurrentChunk()->r_u64(m_ReceiveTime);
+		Object->GetCurrentChunk()->r_u64(m_FinishTime);
+		Object->GetCurrentChunk()->r_u64(m_TimeToComplete);
+		Object->GetCurrentChunk()->r_u64(m_timer_finish);
+		Object->GetCurrentChunk()->r_stringZ(m_Title);
+		Object->GetCurrentChunk()->r_stringZ(m_Description);
+		Object->GetCurrentChunk()->r_stringZ(m_Description);
+		m_pScriptHelper.load(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_icon_texture_name);
+		Object->GetCurrentChunk()->r_stringZ(m_map_hint);
+		Object->GetCurrentChunk()->r_stringZ(m_map_location);
+		Object->GetCurrentChunk()->r_u16(m_map_object_id);
+		Object->GetCurrentChunk()->r_u32(m_priority);
+		CommitScriptHelperContents();
+		CreateMapLocation(true);
+	}
+	Object->EndChunk();
+}
+
 void CGameTask::CommitScriptHelperContents()
 {
 	m_pScriptHelper.init_functors	(m_pScriptHelper.m_s_complete_lua_functions,	m_complete_lua_functions);
@@ -323,6 +379,126 @@ void SScriptTaskHelper::load(IReader &stream)
 		load_data(m_s_lua_functions_on_fail,		stream);
 }
 
+void SScriptTaskHelper::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SScriptTaskHelper");
+	{
+		Object->BeginChunk("SScriptTaskHelper::complete_cond");
+		{
+			Object->GetCurrentChunk()->WriteArray(m_s_complete_lua_functions.size());
+			{
+				for (const auto& elem : m_s_complete_lua_functions) {
+					Object->GetCurrentChunk()->w_stringZ(elem);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::fail_cond");
+		{
+			Object->GetCurrentChunk()->WriteArray(m_s_fail_lua_functions.size());
+			{
+				for (const auto& elem : m_s_fail_lua_functions) {
+					Object->GetCurrentChunk()->w_stringZ(elem);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::on_complete");
+		{
+			Object->GetCurrentChunk()->WriteArray(m_s_lua_functions_on_complete.size());
+			{
+				for (const auto& elem : m_s_lua_functions_on_complete) {
+					Object->GetCurrentChunk()->w_stringZ(elem);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::on_fail");
+		{
+			Object->GetCurrentChunk()->WriteArray(m_s_lua_functions_on_fail.size());
+			{
+				for (const auto& elem : m_s_lua_functions_on_fail) {
+					Object->GetCurrentChunk()->w_stringZ(elem);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
+void SScriptTaskHelper::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SScriptTaskHelper");
+	{
+		Object->BeginChunk("SScriptTaskHelper::complete_cond");
+		{
+			m_s_complete_lua_functions.clear();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			{
+				for (u64 i = 0; i < ArraySize; ++i) {
+					shared_str Value;
+					Object->GetCurrentChunk()->r_stringZ(Value);
+					m_s_complete_lua_functions.emplace_back(Value);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::fail_cond");
+		{
+			m_s_fail_lua_functions.clear();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			{
+				for (u64 i = 0; i < ArraySize; ++i) {
+					shared_str Value;
+					Object->GetCurrentChunk()->r_stringZ(Value);
+					m_s_fail_lua_functions.emplace_back(Value);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::on_complete");
+		{
+			m_s_lua_functions_on_complete.clear();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			{
+				for (u64 i = 0; i < ArraySize; ++i) {
+					shared_str Value;
+					Object->GetCurrentChunk()->r_stringZ(Value);
+					m_s_lua_functions_on_complete.emplace_back(Value);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("SScriptTaskHelper::on_fail");
+		{
+			m_s_lua_functions_on_fail.clear();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			{
+				for (u64 i = 0; i < ArraySize; ++i) {
+					shared_str Value;
+					Object->GetCurrentChunk()->r_stringZ(Value);
+					m_s_lua_functions_on_fail.emplace_back(Value);
+				}
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
 void SScriptTaskHelper::save(IWriter &stream)
 {
 		save_data(m_s_complete_lua_functions,		stream);
@@ -344,6 +520,28 @@ void SGameTaskKey::load(IReader &stream)
 	game_task->m_ID				= task_id;
 	game_task->load_task		(stream);
 
+}
+
+void SGameTaskKey::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SGameTaskKey");
+	{
+		Object->GetCurrentChunk()->w_stringZ(task_id);
+		game_task->save_task(Object);
+	}
+	Object->EndChunk();
+}
+
+void SGameTaskKey::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SGameTaskKey");
+	{
+		game_task = new CGameTask();
+		Object->GetCurrentChunk()->r_stringZ(task_id);
+		game_task->m_ID = task_id;
+		game_task->load_task(Object);
+	}
+	Object->EndChunk();
 }
 
 void SGameTaskKey::destroy()

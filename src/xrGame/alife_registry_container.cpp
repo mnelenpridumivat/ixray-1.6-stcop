@@ -105,7 +105,7 @@ void CALifeRegistryContainer::save(IWriter &memory_stream)
 	memory_stream.close_chunk	();
 }
 
-void CALifeRegistryContainer::load(CSaveObjectLoad* Object)
+void CALifeRegistryContainer::Load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CALifeRegistryContainer");
 	{
@@ -121,7 +121,7 @@ void CALifeRegistryContainer::load(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }
 
-void CALifeRegistryContainer::save(CSaveObjectSave* Object) const
+void CALifeRegistryContainer::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CALifeRegistryContainer");
 	{

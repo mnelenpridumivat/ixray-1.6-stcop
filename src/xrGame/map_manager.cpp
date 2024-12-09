@@ -70,7 +70,7 @@ void SLocationKey::load(IReader &stream)
 	location->load	(stream);
 }
 
-void SLocationKey::save(CSaveObjectSave* Object)
+void SLocationKey::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SLocationKey");
 	{
@@ -90,7 +90,7 @@ void SLocationKey::load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_u16(object_id);
 		Object->GetCurrentChunk()->r_stringZ(spot_type);
 		bool bUserDefined;
-		Object->GetCurrentChunk()->w_bool(bUserDefined);
+		Object->GetCurrentChunk()->r_bool(bUserDefined);
 		if (bUserDefined)
 		{
 			Level().Server->PerformIDgen(object_id);

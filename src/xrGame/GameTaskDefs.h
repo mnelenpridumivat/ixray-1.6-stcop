@@ -31,6 +31,8 @@ struct SGameTaskKey : public IPureSerializeObject<IReader,IWriter>,public IPureD
 
 	virtual void 	save								(IWriter &stream);
 	virtual void 	load								(IReader &stream);
+	virtual void 	save(CSaveObjectSave* Object) const;
+	virtual void 	load(CSaveObjectLoad* Object);
 	virtual void 	destroy								();
 };
 

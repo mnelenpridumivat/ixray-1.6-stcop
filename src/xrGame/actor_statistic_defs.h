@@ -13,6 +13,8 @@ struct SStatDetailBData: public IPureSerializeObject<IReader,IWriter>
 
 	virtual void save								(IWriter &stream);
 	virtual void load								(IReader &stream);
+	virtual void save(CSaveObjectSave* Object) const;
+	virtual void load(CSaveObjectLoad* Object);
 };
 
 
@@ -27,6 +29,8 @@ struct SStatSectionData: public IPureSerializeObject<IReader,IWriter>
 	s32						GetTotalPoints	() const;
 	virtual void			save			(IWriter &stream);
 	virtual void			load			(IReader &stream);
+	virtual void			save(CSaveObjectSave* Object) const;
+	virtual void			load(CSaveObjectLoad* Object);
 };
 
 typedef xr_vector<SStatSectionData> vStatSectionData;
