@@ -64,9 +64,45 @@ void SLocationKey::load(IReader &stream)
 		location = new CMapLocation(*spot_type, object_id);
 	}
 
-	location  = new CMapLocation(*spot_type, object_id);
+	//TODO: Make commit to IX-Ray to fix this
+	//location  = new CMapLocation(*spot_type, object_id);
 
 	location->load	(stream);
+}
+
+void SLocationKey::save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("SLocationKey");
+	{
+		Object->GetCurrentChunk()->w_u16(object_id);
+		Object->GetCurrentChunk()->w_stringZ(spot_type);
+		Object->GetCurrentChunk()->w_bool(location->IsUserDefined());
+		Object->GetCurrentChunk()->w_u8(0);
+		location->save(Object);
+	}
+	Object->EndChunk();
+}
+
+void SLocationKey::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SLocationKey");
+	{
+		Object->GetCurrentChunk()->r_u16(object_id);
+		Object->GetCurrentChunk()->r_stringZ(spot_type);
+		bool bUserDefined;
+		Object->GetCurrentChunk()->w_bool(bUserDefined);
+		if (bUserDefined)
+		{
+			Level().Server->PerformIDgen(object_id);
+			location = new CMapLocation(*spot_type, object_id, true);
+		}
+		else
+		{
+			location = new CMapLocation(*spot_type, object_id);
+		}
+		location->load(Object);
+	}
+	Object->EndChunk();
 }
 
 void SLocationKey::destroy()

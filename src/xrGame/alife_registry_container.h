@@ -11,6 +11,7 @@
 #include "alife_registry_container_space.h"
 #include "alife_registry_container_composition.h"
 #include "alife_abstract_registry.h"
+#include "Save/SaveObject.h"
 
 template <typename _type, typename _base>
 struct CLinearRegistryType : public _base, public _type {};
@@ -26,6 +27,8 @@ public:
 	IC		const T &operator()	(const T*) const;
 	virtual	void	load		(IReader &file_stream);
 	virtual void	save		(IWriter &memory_stream);
+	virtual	void	load(CSaveObjectLoad* Object);
+	virtual void	save(CSaveObjectSave* Object) const;
 };
 
 #include "alife_registry_container_inline.h"

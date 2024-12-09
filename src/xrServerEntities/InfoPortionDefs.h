@@ -2,6 +2,7 @@
 
 #include "alife_space.h"
 #include "object_interfaces.h"
+#include "Save/SaveObject.h"
 
 //using INFO_DATA = shared_str;
 
@@ -12,6 +13,8 @@ struct INFO_DATA : public IPureSerializeObject<IReader, IWriter>
 
 	void		load(IReader& stream) override;
 	void		save(IWriter&) override;
+	void		load(CSaveObjectLoad* Object);
+	void		save(CSaveObjectSave* Object) const;
 
 	shared_str			info_id;
 	//время получения нужно порции информации

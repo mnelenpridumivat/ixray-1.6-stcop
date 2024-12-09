@@ -34,6 +34,8 @@ struct RELATION_DATA : public IPureSerializeObject<IReader,IWriter>
 
 	virtual void load (IReader&);
 	virtual void save (IWriter&);
+	virtual void load(CSaveObjectLoad* Object);
+	virtual void save(CSaveObjectSave* Object) const;
 
 	//личные отношения
 	PERSONAL_RELATION_MAP personal; 

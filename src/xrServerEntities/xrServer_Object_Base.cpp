@@ -479,6 +479,66 @@ void CSE_Abstract::load_update				(NET_Packet &tNetPacket)
 }
 /**/
 
+bool CSE_Abstract::Spawn_Read(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSE_Abstract");
+	{
+		// generic
+		Object->GetCurrentChunk()->r_stringZ(s_name);
+		Object->GetCurrentChunk()->r_stringZ(s_name_replace);
+		u8							temp_gt;
+		Object->GetCurrentChunk()->r_u8(temp_gt);
+		Object->GetCurrentChunk()->r_u8(s_RP);
+		Object->GetCurrentChunk()->r_vec3(o_Position);
+		Object->GetCurrentChunk()->r_vec3(o_Angle);
+		Object->GetCurrentChunk()->r_u16(RespawnTime);
+		Object->GetCurrentChunk()->r_u16(ID);
+		Object->GetCurrentChunk()->r_u16(ID_Parent);
+		Object->GetCurrentChunk()->r_u16(ID_Phantom);
+		Object->GetCurrentChunk()->r_u16(s_flags.flags);
+		Object->GetCurrentChunk()->r_u16(m_wVersion);
+		{
+			u16 gt;
+			Object->GetCurrentChunk()->r_u16(gt);
+			m_gameType.m_GameType.assign(gt);
+		}
+		Object->GetCurrentChunk()->r_u16(m_script_version);
+
+		Object->BeginChunk("CSE_Abstract::ClientObject");
+		{
+			bool HasClientObject;
+			Object->GetCurrentChunk()->r_bool(HasClientObject);
+			if (HasClientObject) {
+#ifndef XRGAME_EXPORTS
+#else
+				// TODO: Implement spawn of client object here
+				/*auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+				if (Obj) {
+					Obj->Load(Object);
+				}*/
+#endif
+			}
+		}
+		Object->EndChunk();
+
+		Object->GetCurrentChunk()->w_u16(m_tSpawnID);
+
+#ifdef XRSE_FACTORY_EXPORTS
+		{
+			// HACK: because all save functions of new system tend to be const and assign function cannot be const
+			auto MutableThis = (CSE_Abstract*)this;
+			MutableThis->assign();
+		}
+#endif
+
+		STATE_ReadSave(Object);
+		R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
+			"object isn't successfully saved, get your backup :(", name_replace());
+	}
+	Object->EndChunk();
+	return true;
+}
+
 void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 {
 	Object->BeginChunk("CSE_Abstract");
@@ -494,28 +554,16 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		Object->GetCurrentChunk()->w_u16(ID);
 		Object->GetCurrentChunk()->w_u16(ID_Parent);
 		Object->GetCurrentChunk()->w_u16(ID_Phantom);
-
 		if (bLocal) {
 			Object->GetCurrentChunk()->w_u16(u16(s_flags.flags | M_SPAWN_OBJECT_LOCAL));
 		}
 		else {
 			Object->GetCurrentChunk()->w_u16(u16(s_flags.flags & ~(M_SPAWN_OBJECT_LOCAL | M_SPAWN_OBJECT_ASPLAYER)));
 		}
-
 		Object->GetCurrentChunk()->w_u16(SPAWN_VERSION);
-
 		Object->GetCurrentChunk()->w_u16(m_gameType.m_GameType.get());
-
 		Object->GetCurrentChunk()->w_u16(script_server_object_version());
 
-
-		//client object custom data serialization SAVE
-		//u16 client_data_size = (u16)client_data.size(); //не может быть больше 256 байт
-		//tNetPacket.w_u16(client_data_size);
-		//	Msg							("SERVER:saving:save:%d bytes:%d:%s",client_data_size,ID,s_name_replace ? s_name_replace : "");
-		//if (client_data_size > 0) {
-		//	tNetPacket.w(&*client_data.begin(), client_data_size);
-		//}
 		Object->BeginChunk("CSE_Abstract::ClientObject");
 		{
 #ifndef XRGAME_EXPORTS
@@ -531,12 +579,6 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		Object->EndChunk();
 
 		Object->GetCurrentChunk()->w_u16(m_tSpawnID);
-		//	tNetPacket.w_float			(m_spawn_probability);
-		//	tNetPacket.w_u32			(m_spawn_flags.get());
-		//	tNetPacket.w_stringZ		(m_spawn_control);
-		//	tNetPacket.w_u32			(m_max_spawn_count);
-		//	tNetPacket.w_u64			(m_min_spawn_interval);
-		//	tNetPacket.w_u64			(m_max_spawn_interval);
 
 #ifdef XRSE_FACTORY_EXPORTS
 		{
@@ -546,16 +588,9 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		}
 #endif
 
-		// write specific data
-		//u32	position = tNetPacket.w_tell();
-		//tNetPacket.w_u16(0);
 		STATE_WriteSave(Object);
-		//u16 size = u16(tNetPacket.w_tell() - position);
-		//#ifdef XRSE_FACTORY_EXPORTS
 		R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
 			"object isn't successfully saved, get your backup :(", name_replace());
-		//#endif
-		//tNetPacket.w_seek(position, &size, sizeof(u16));
 	}
 	Object->EndChunk();
 }

@@ -29,6 +29,34 @@ void ARTICLE_DATA::save (IWriter& stream)
 	save_data(article_type, stream);
 }
 
+void ARTICLE_DATA::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("ARTICLE_DATA");
+	{
+		Object->GetCurrentChunk()->r_u64(receive_time);
+		Object->GetCurrentChunk()->r_stringZ(article_id);
+		Object->GetCurrentChunk()->r_bool(readed);
+		{
+			u8 type;
+			Object->GetCurrentChunk()->r_u8(type);
+			article_type = (EArticleType)type;
+		}
+	}
+	Object->EndChunk();
+}
+
+void ARTICLE_DATA::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("ARTICLE_DATA");
+	{
+		Object->GetCurrentChunk()->w_u64(receive_time);
+		Object->GetCurrentChunk()->w_stringZ(article_id);
+		Object->GetCurrentChunk()->w_bool(readed);
+		Object->GetCurrentChunk()->w_u8((u8)article_type);
+	}
+	Object->EndChunk();
+}
+
 CEncyclopediaArticle::CEncyclopediaArticle()
 {
 }

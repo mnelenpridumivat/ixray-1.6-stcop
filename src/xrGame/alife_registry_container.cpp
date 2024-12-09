@@ -104,3 +104,28 @@ void CALifeRegistryContainer::save(IWriter &memory_stream)
 	>::process					(this,memory_stream);
 	memory_stream.close_chunk	();
 }
+
+void CALifeRegistryContainer::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CALifeRegistryContainer");
+	{
+		CInfoPortionRegistry::load(Object);
+		CRelationRegistry::load(Object);
+		CEncyclopediaRegistry::load(Object);
+		CGameNewsRegistry::load(Object);
+		CSpecificCharacterRegistry::load(Object);
+		CMapLocationRegistry::load(Object);
+		CGameTaskRegistry::load(Object);
+		CActorStatisticRegistry::load(Object);
+	}
+	Object->EndChunk();
+}
+
+void CALifeRegistryContainer::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CALifeRegistryContainer");
+	{
+
+	}
+	Object->EndChunk();
+}

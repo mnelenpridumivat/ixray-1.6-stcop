@@ -47,6 +47,93 @@ void RELATION_DATA::save (IWriter& stream)
 	save_data(communities, stream);
 }
 
+void RELATION_DATA::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("RELATION_DATA");
+	{
+		Object->BeginChunk("RELATION_DATA::personal");
+		{
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (u64 i = 0; i < ArraySize; ++i) {
+				Object->BeginChunk("RELATION_DATA::personal::elem");
+				{
+					std::pair<PERSONAL_RELATION_MAP::key_type, PERSONAL_RELATION_MAP::mapped_type>&& temp = std::pair<PERSONAL_RELATION_MAP::key_type, PERSONAL_RELATION_MAP::mapped_type>();
+					Object->GetCurrentChunk()->r_u16(temp.first);
+					s32 Goodwill;
+					Object->GetCurrentChunk()->r_s32(Goodwill);
+					temp.second.SetGoodwill(Goodwill);
+					personal.emplace(temp);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("RELATION_DATA::communities");
+		{
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (u64 i = 0; i < ArraySize; ++i) {
+				Object->BeginChunk("RELATION_DATA::communities::elem");
+				{
+					std::pair<COMMUNITY_RELATION_MAP::key_type, COMMUNITY_RELATION_MAP::mapped_type>&& temp = std::pair<COMMUNITY_RELATION_MAP::key_type, COMMUNITY_RELATION_MAP::mapped_type>();
+					s32 CommunityIndex;
+					Object->GetCurrentChunk()->r_s32(CommunityIndex);
+					temp.first = CommunityIndex;
+					s32 Goodwill;
+					Object->GetCurrentChunk()->r_s32(Goodwill);
+					temp.second.SetGoodwill(Goodwill);
+					communities.emplace(temp);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
+void RELATION_DATA::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("RELATION_DATA");
+	{
+		Object->BeginChunk("RELATION_DATA::personal");
+		{
+			Object->GetCurrentChunk()->WriteArray(personal.size());
+			for (const auto& elem : personal) {
+				Object->BeginChunk("RELATION_DATA::personal::elem");
+				{
+					Object->GetCurrentChunk()->w_u16(elem.first);
+					s32 Goodwill = elem.second.Goodwill();
+					Object->GetCurrentChunk()->w_s32(Goodwill);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+		Object->BeginChunk("RELATION_DATA::communities");
+		{
+			Object->GetCurrentChunk()->WriteArray(communities.size());
+			for (const auto& elem : communities) {
+				Object->BeginChunk("RELATION_DATA::communities::elem");
+				{
+					s32 CommunityIndex = elem.first;
+					Object->GetCurrentChunk()->w_s32(CommunityIndex);
+					s32 Goodwill = elem.second.Goodwill();
+					Object->GetCurrentChunk()->w_s32(Goodwill);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();
+		}
+		Object->EndChunk();
+	}
+	Object->EndChunk();
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 RELATION_REGISTRY::RELATION_MAP_SPOTS::RELATION_MAP_SPOTS()

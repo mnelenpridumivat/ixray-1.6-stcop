@@ -17,6 +17,8 @@ struct GAME_NEWS_DATA : public IPureSerializeObject<IReader,IWriter>
 
 	virtual void		load				(IReader&);
 	virtual void		save				(IWriter&);
+	virtual void		load(CSaveObjectLoad* Object);
+	virtual void		save(CSaveObjectSave* Object) const;
 
 
 	shared_str			news_caption;

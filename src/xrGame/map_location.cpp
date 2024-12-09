@@ -665,6 +665,47 @@ void CMapLocation::load(IReader &stream)
 	}
 }
 
+void CMapLocation::save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CMapLocation");
+	{
+		Object->GetCurrentChunk()->w_stringZ(m_hint);
+		Object->GetCurrentChunk()->w_u32(m_flags.flags);
+		Object->GetCurrentChunk()->w_stringZ(m_owner_task_id);
+		if (IsUserDefined())
+		{
+			Object->GetCurrentChunk()->w_stringZ(m_cached.m_LevelName);
+			Object->GetCurrentChunk()->w_float(m_cached.m_Position.x);
+			Object->GetCurrentChunk()->w_float(m_cached.m_Position.y);
+			Object->GetCurrentChunk()->w_u16(m_cached.m_graphID);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CMapLocation::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CMapLocation");
+	{
+		xr_string		str;
+		Object->GetCurrentChunk()->r_stringZ(str);
+		SetHint(str.c_str());
+		Object->GetCurrentChunk()->r_u32(m_flags.flags);
+		Object->GetCurrentChunk()->r_stringZ(str);
+		m_owner_task_id = str.c_str();
+		if (IsUserDefined())
+		{
+			Object->GetCurrentChunk()->r_stringZ(m_cached.m_LevelName);
+			Object->GetCurrentChunk()->r_float(m_cached.m_Position.x);
+			Object->GetCurrentChunk()->r_float(m_cached.m_Position.y);
+			Object->GetCurrentChunk()->r_u16(m_cached.m_graphID);
+			m_position_on_map = m_cached.m_Position;
+			m_position_global.set(m_position_on_map.x, 0.f, m_position_on_map.y);
+		}
+	}
+	Object->EndChunk();
+}
+
 void CMapLocation::SetHint(const shared_str& hint)		
 {
 	if ( hint == "disable_hint" )

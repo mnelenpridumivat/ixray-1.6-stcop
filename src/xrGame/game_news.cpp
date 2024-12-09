@@ -34,6 +34,36 @@ void GAME_NEWS_DATA::save (IWriter& stream)
 //	save_data(tex_rect,		stream);
 }
 
+void GAME_NEWS_DATA::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("GAME_NEWS_DATA");
+	{
+		{
+			u8 type;
+			Object->GetCurrentChunk()->r_u8(type);
+			m_type = (eNewsType)type;
+		}
+		Object->GetCurrentChunk()->r_stringZ(news_caption);
+		Object->GetCurrentChunk()->r_stringZ(news_text);
+		Object->GetCurrentChunk()->r_u64(receive_time);
+		Object->GetCurrentChunk()->r_stringZ(texture_name);
+	}
+	Object->EndChunk();
+}
+
+void GAME_NEWS_DATA::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("GAME_NEWS_DATA");
+	{
+		Object->GetCurrentChunk()->w_u8(m_type);
+		Object->GetCurrentChunk()->w_stringZ(news_caption);
+		Object->GetCurrentChunk()->w_stringZ(news_text);
+		Object->GetCurrentChunk()->w_u64(receive_time);
+		Object->GetCurrentChunk()->w_stringZ(texture_name);
+	}
+	Object->EndChunk();
+}
+
 void GAME_NEWS_DATA::load (IReader& stream)
 {
 	load_data(m_type,		stream);

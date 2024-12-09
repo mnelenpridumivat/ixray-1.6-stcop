@@ -49,4 +49,22 @@ struct CGameTaskRegistry : public CALifeAbstractRegistry<u16, vGameTasks>
 		CALifeAbstractRegistry<u16, vGameTasks>::load(stream);
 		load_data		(g_active_task_id,		stream);
 	};
+	virtual void save(CSaveObjectSave* Object) const
+	{
+		Object->BeginChunk("CGameTaskRegistry");
+		{
+			CALifeAbstractRegistry<u16, vGameTasks>::save(Object);
+			Object->GetCurrentChunk()->w_stringZ(g_active_task_id);
+		}
+		Object->EndChunk();
+	};
+	virtual void load(CSaveObjectLoad* Object)
+	{
+		Object->BeginChunk("CGameTaskRegistry");
+		{
+			CALifeAbstractRegistry<u16, vGameTasks>::load(Object);
+			Object->GetCurrentChunk()->r_stringZ(g_active_task_id);
+		}
+		Object->EndChunk();
+	};
 };
