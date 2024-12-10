@@ -45,15 +45,15 @@ void CSaveObject::EndChunk()
 
 CSaveObjectSave::CSaveObjectSave()
 {
-	_rootChunk = new CSaveChunk("Root");
-	_chunkStack.push(_rootChunk);
+	//_rootChunk = new CSaveChunk("Root");
+	//_chunkStack.push(_rootChunk);
 }
 
 CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
 {
-	_rootChunk = Root;
-	_isPartial = true;
-	_chunkStack.push(_rootChunk);
+	//_rootChunk = Root;
+	//_isPartial = true;
+	//_chunkStack.push(_rootChunk);
 }
 
 void CSaveObjectSave::BeginChunk(shared_str ChunkName)

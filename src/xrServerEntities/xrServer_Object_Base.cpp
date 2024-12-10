@@ -532,8 +532,8 @@ bool CSE_Abstract::Spawn_Read(CSaveObjectLoad* Object)
 #endif
 
 		STATE_ReadSave(Object);
-		R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
-			"object isn't successfully saved, get your backup :(", name_replace());
+		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
+		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}
 	Object->EndChunk();
 	return true;
@@ -589,8 +589,8 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 #endif
 
 		STATE_WriteSave(Object);
-		R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
-			"object isn't successfully saved, get your backup :(", name_replace());
+		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
+		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}
 	Object->EndChunk();
 }

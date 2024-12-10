@@ -10,11 +10,23 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_vec3,
 	t_vec4,
 	t_u64,
+	t_u64_op32,
+	t_u64_op16,
+	t_u64_op8,
 	t_s64,
+	t_s64_op32,
+	t_s64_op16,
+	t_s64_op8,
 	t_u32,
+	t_u32_op16,
+	t_u32_op8,
 	t_s32,
+	t_s32_op16,
+	t_s32_op8,
 	t_u16,
+	t_u16_op8,
 	t_s16,
+	t_s16_op8,
 	t_u8,
 	t_s8,
 	/*t_float_q16,
@@ -372,13 +384,13 @@ class XRCORE_API CSaveVariableString :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
-	xr_string _value;
+	shared_str _value;
 
 protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
-	CSaveVariableString(const xr_string& Value) : _value(Value) {}
+	CSaveVariableString(const xr_string& Value) : _value(Value.c_str()) {}
 	CSaveVariableString(const shared_str& Value) : _value(Value.c_str()) {}
 	CSaveVariableString(LPCSTR Value) : _value(Value) {}
 
