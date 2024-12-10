@@ -2,6 +2,8 @@
 #include "../xrScripts/script_export_space.h"
 #include "SaveVariables.h"
 
+class CMemoryBuffer;
+
 class XRCORE_API CSaveChunk: public ISaveable {
 
 	shared_str _chunkName;
@@ -13,6 +15,8 @@ class XRCORE_API CSaveChunk: public ISaveable {
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
 	~CSaveChunk();
+
+	void Write(CMemoryBuffer& Buffer);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
 	virtual bool IsArray() override { return false; }

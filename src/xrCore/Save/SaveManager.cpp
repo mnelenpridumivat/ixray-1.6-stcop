@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "SaveManager.h"
+#include "MemoryBuffer.h"
 
-SaveManager::SaveManager() 
+CSaveManager::CSaveManager() 
 {
 	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, false);
 	SetFlag(ESaveManagerFlagsGeneral::EUseIntOptimization, false);
@@ -9,28 +10,28 @@ SaveManager::SaveManager()
 	SetFlag(ESaveManagerFlagsGeneral::EHasExtraControlFlags, false);
 }
 
-void SaveManager::SetFlag(ESaveManagerFlagsGeneral Flag, bool Value)
+void CSaveManager::SetFlag(ESaveManagerFlagsGeneral Flag, bool Value)
 {
 	ControlFlagsDefault.set((u8)Flag, Value);
 }
 
-bool SaveManager::TestFlag(ESaveManagerFlagsGeneral Flag)
+bool CSaveManager::TestFlag(ESaveManagerFlagsGeneral Flag)
 {
 	return ControlFlagsDefault.test((u8)Flag);
 }
 
-SaveManager& SaveManager::GetInstance()
+CSaveManager& CSaveManager::GetInstance()
 {
-	static SaveManager instance;
+	static CSaveManager instance;
 	return instance;
 }
 
-bool SaveManager::IsSaving()
+bool CSaveManager::IsSaving()
 {
 	return false;
 }
 
-CSaveObjectSave* SaveManager::BeginSave()
+CSaveObjectSave* CSaveManager::BeginSave()
 {
 	if (SaveData) {
 		xr_delete(SaveData);
@@ -39,7 +40,7 @@ CSaveObjectSave* SaveManager::BeginSave()
 	return SaveData;
 }
 
-void SaveManager::WriteSavedData(const string_path& to_file)
+void CSaveManager::WriteSavedData(const string_path& to_file)
 {
 	SaveWriter = FS.w_open(to_file);
 	WriteHeader();
@@ -53,20 +54,21 @@ void SaveManager::WriteSavedData(const string_path& to_file)
 	}
 }
 
-void SaveManager::WriteHeader()
+void CSaveManager::WriteHeader()
 {
 	SaveWriter->w_u8(ControlFlagsDefault.flags);
 }
 
-void SaveManager::WriteStrings()
+void CSaveManager::WriteStrings()
 {
 }
 
-void SaveManager::WriteBools()
+void CSaveManager::WriteBools()
 {
 }
 
-void SaveManager::WriteData()
+void CSaveManager::WriteData()
 {
-
+	CMemoryBuffer buffer;
+	SaveData->Write(buffer);
 }

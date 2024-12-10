@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "SaveChunk.h"
+#include "MemoryBuffer.h"
+#include "SaveManager.h"
 
 CSaveChunk::~CSaveChunk()
 {
@@ -9,6 +11,24 @@ CSaveChunk::~CSaveChunk()
 	for (size_t i = 0; i < _variables.size(); ++i) {
 		xr_delete(_variables[i]);
 	}
+}
+
+void CSaveChunk::Write(CMemoryBuffer& Buffer)
+{
+	Buffer.Write((u8)ESaveVariableType::t_chunkStart);
+	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization)) {
+		Buffer.Write(_chunkName);
+	}
+	else {
+		Buffer.Write(_chunkName);
+	}
+	for (const auto& elem : _subchunks) {
+		elem.second->Write(Buffer);
+	}
+	for (const auto& elem : _variables) {
+		elem->Write(Buffer);
+	}
+	Buffer.Write((u8)ESaveVariableType::t_chunkEnd);
 }
 
 void CSaveChunk::ReadArray(u64& Size)

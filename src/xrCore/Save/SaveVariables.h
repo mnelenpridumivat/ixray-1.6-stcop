@@ -40,7 +40,6 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_clientID,
 	t_chunkStart,
 	t_chunkEnd,
-	t_chunkSize,
 	t_array,
 	t_chunk,
 	t_invalid = u8(-1),
@@ -50,6 +49,7 @@ class XRCORE_API ISaveable{
 public:
 	virtual ESaveVariableType GetVariableType() = 0;
 	virtual bool IsArray() = 0;
+	virtual void Write(CMemoryBuffer& Buffer) = 0;
 };
 
 class XRCORE_API CSaveVariableBase: public ISaveable {

@@ -1,9 +1,9 @@
 #pragma once
 #include "SaveObject.h"
 
-class XRCORE_API SaveManager
+class XRCORE_API CSaveManager
 {
-	SaveManager();
+	CSaveManager();
 
 	CSaveObjectSave* SaveData = nullptr;
 	IWriter* SaveWriter = nullptr;
@@ -27,12 +27,12 @@ public:
 	void SetFlag(ESaveManagerFlagsGeneral Flag, bool Value);
 	bool TestFlag(ESaveManagerFlagsGeneral Flag);
 
-	SaveManager(const SaveManager& other) = delete;
-	SaveManager(SaveManager&& other) = delete;
-	SaveManager& operator=(const SaveManager& other) = delete;
-	SaveManager& operator=(SaveManager&& other) = delete;
+	CSaveManager(const CSaveManager& other) = delete;
+	CSaveManager(CSaveManager&& other) = delete;
+	CSaveManager& operator=(const CSaveManager& other) = delete;
+	CSaveManager& operator=(CSaveManager&& other) = delete;
 
-	static SaveManager& GetInstance();
+	static CSaveManager& GetInstance();
 
 	bool IsSaving();
 	CSaveObjectSave* BeginSave();
