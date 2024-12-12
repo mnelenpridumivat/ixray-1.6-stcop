@@ -16,6 +16,7 @@ public:
 	CSaveChunk* GetCurrentChunk();
 	virtual void BeginChunk(shared_str ChunkName) = 0;
 	void EndChunk();
+
 };
 
 class XRCORE_API CSaveObjectSave: public CSaveObject {
@@ -24,6 +25,8 @@ public:
 	CSaveObjectSave(CSaveChunk* Root);
 
 	virtual void BeginChunk(shared_str ChunkName) override;
+
+	void Write(CMemoryBuffer* buffer);
 };
 
 class XRCORE_API CSaveObjectLoad: public CSaveObject {

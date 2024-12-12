@@ -3,6 +3,8 @@
 #include "../xrCore/_types.h"
 #include "../xrCore/_vector4.h"
 
+class CMemoryBuffer;
+
 enum class XRCORE_API ESaveVariableType : u8 {
 	t_bool,
 	t_float,
@@ -74,6 +76,7 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_array; }
 	virtual bool IsArray() { return true; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 
 	u64 GetSize() { return _size; }
 	ISaveable* GetCurrentElement() { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
@@ -95,6 +98,7 @@ public:
 	CSaveVariableBool(bool Value): _value(Value){}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_bool; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableFloat :
@@ -110,6 +114,7 @@ public:
 	CSaveVariableFloat(float Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableDouble :
@@ -125,6 +130,7 @@ public:
 	CSaveVariableDouble(double Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_double; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableVec3 :
@@ -140,6 +146,7 @@ public:
 	CSaveVariableVec3(const Fvector& Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec3; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableVec4 :
@@ -155,6 +162,7 @@ public:
 	CSaveVariableVec4(const Fvector4& Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec4; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableU64 :
@@ -170,6 +178,7 @@ public:
 	CSaveVariableU64(u64 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u64; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableS64 :
@@ -185,6 +194,7 @@ public:
 	CSaveVariableS64(s64 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s64; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableU32 :
@@ -200,6 +210,7 @@ public:
 	CSaveVariableU32(u32 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u32; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableS32 :
@@ -215,6 +226,7 @@ public:
 	CSaveVariableS32(s32 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s32; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableU16 :
@@ -230,6 +242,7 @@ public:
 	CSaveVariableU16(u16 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u16; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableS16 :
@@ -245,6 +258,7 @@ public:
 	CSaveVariableS16(s16 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s16; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableU8 :
@@ -260,6 +274,7 @@ public:
 	CSaveVariableU8(u8 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u8; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableS8 :
@@ -275,6 +290,7 @@ public:
 	CSaveVariableS8(s8 Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s8; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 /*class CSaveVariableFloatQ16 :
@@ -395,6 +411,7 @@ public:
 	CSaveVariableString(LPCSTR Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_string; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableMatrix :
@@ -410,6 +427,7 @@ public:
 	CSaveVariableMatrix(const Fmatrix& Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_matrix; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 class XRCORE_API CSaveVariableClientID :
@@ -425,6 +443,7 @@ public:
 	CSaveVariableClientID(ClientID Value) : _value(Value) {}
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_clientID; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
 struct SSaveVariableGetter {

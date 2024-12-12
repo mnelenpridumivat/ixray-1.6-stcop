@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "SaveObject.h"
+#include "SaveManager.h"
 
 CSaveObject::CSaveObject()
 {
@@ -60,6 +61,11 @@ void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
+}
+
+void CSaveObjectSave::Write(CMemoryBuffer* buffer)
+{
+	_rootChunk->Write(*buffer);
 }
 
 CSaveObjectLoad::CSaveObjectLoad()

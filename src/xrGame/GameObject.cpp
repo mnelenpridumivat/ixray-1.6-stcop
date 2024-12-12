@@ -46,7 +46,7 @@ CGameObject::CGameObject		()
 {
 	m_ai_obstacle				= 0;
 
-	m_ScriptBinderComponent = xr_make_unique<CScriptBinder>();
+	m_ScriptBinderComponent = xr_make_unique<CScriptBinder>(this);
 
 	init						();
 	//-----------------------------------------

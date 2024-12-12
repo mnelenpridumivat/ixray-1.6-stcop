@@ -13,9 +13,9 @@ bool CMemoryChunk::Write(const void* data, size_t size)
 	if (!CanWrite(size)) {
 		return false;
 	}
-	memcpy(this->data, data, size);
+	memcpy(this->data + count, data, size);
 	count += size;
-	return false;
+	return true;
 }
 
 CMemoryBuffer::CMemoryBuffer()

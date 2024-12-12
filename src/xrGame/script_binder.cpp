@@ -21,8 +21,9 @@
 // comment next string when commiting
 //#define DBG_DISABLE_SCRIPTS
 
-CScriptBinder::CScriptBinder		()
+CScriptBinder::CScriptBinder		(CGameObject* Owner)
 {
+	m_Owner = Owner;
 	init					();
 }
 
@@ -77,7 +78,7 @@ void CScriptBinder::reload			(LPCSTR section)
 		return;
 	}
 	
-	CGameObject				*game_object = smart_cast<CGameObject*>(this);
+	CGameObject				*game_object = m_Owner;
 
 	try {
 		lua_function		(game_object ? game_object->lua_game_object() : 0);

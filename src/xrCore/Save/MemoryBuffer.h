@@ -27,7 +27,7 @@ public:
 class CMemoryChunk
 {
 public:
-	static constexpr size_t ChunkSize = 16 * 1024;
+	static constexpr size_t ChunkSize = 2 * 1024;
 
 private:
 	BYTE	data[ChunkSize];
@@ -49,6 +49,12 @@ public:
 	template<typename T>
 	bool Write(T* data) {
 		return Write(data, sizeof(T));
+	}
+
+	template<>
+	bool Write(IWriter* data) {
+		data->w((BYTE*)&this->data, count);
+		return false;
 	}
 
 };
@@ -83,6 +89,14 @@ public:
 	bool Write(shared_str data) {
 		Write(data.size());
 		Write(data.c_str(), data.size());
+		return true;
+	}
+
+	template<>
+	bool Write(IWriter* data) {
+		for (const auto& elem : Chunks) {
+			elem->Write(data);
+		}
 		return true;
 	}
 };

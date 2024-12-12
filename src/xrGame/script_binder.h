@@ -13,13 +13,15 @@ class CSE_Abstract;
 class CScriptBinderObject;
 class NET_Packet;
 class CSaveObject;
+class CGameObject;
 
 class CScriptBinder {
 protected:
 	CScriptBinderObject			*m_object;
+	CGameObject* m_Owner;
 
 public:
-								CScriptBinder	();
+								CScriptBinder	(CGameObject* Owner);
 	virtual						~CScriptBinder	();
 			void				init			();
 			void				clear			();

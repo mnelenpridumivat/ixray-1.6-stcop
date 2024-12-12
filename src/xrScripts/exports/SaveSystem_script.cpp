@@ -98,10 +98,6 @@ namespace CSaveObject_script {
 	void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
 		Object->BeginChunk(ChunkName);
 	}
-
-	void FindChunk(CSaveObject* Object, LPCSTR ChunkName) {
-		Object->BeginChunk(ChunkName);
-	}
 }
 
 using namespace luabind;
@@ -151,12 +147,10 @@ void SaveSystemScript::script_register(lua_State* L)
 			class_<CSaveObjectSave>("SaveObjectSave")
 				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
-				.def("FindChunk", &CSaveObject_script::FindChunk)
 				.def("EndChunk", &CSaveObject::EndChunk),
 			class_<CSaveObjectLoad>("SaveObjectLoad")
 				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
-				.def("FindChunk", &CSaveObject_script::FindChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
 		];
 }

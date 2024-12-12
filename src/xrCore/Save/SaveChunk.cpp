@@ -16,12 +16,7 @@ CSaveChunk::~CSaveChunk()
 void CSaveChunk::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write((u8)ESaveVariableType::t_chunkStart);
-	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization)) {
-		Buffer.Write(_chunkName);
-	}
-	else {
-		Buffer.Write(_chunkName);
-	}
+	CSaveManager::GetInstance().ConditionalWriteString(_chunkName, Buffer);
 	for (const auto& elem : _subchunks) {
 		elem.second->Write(Buffer);
 	}
