@@ -183,7 +183,7 @@ void xrDebug::show_dialog(const std::string& message, bool& ignore_always)
 		SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT,		/* .flags */
 		nullptr,					/* .window */
 		"Fatal Error",				/* .title */
-		message.c_str(),			/* .message */
+		Platform::ANSI_TO_UTF8(message.c_str()).c_str(),			/* .message */
 		std::size(buttons),			/* .numbuttons */
 		buttons,					/* .buttons */
 		nullptr						/* .colorScheme */
