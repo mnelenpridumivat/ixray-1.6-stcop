@@ -17,6 +17,7 @@ public:
 	void fill(SPHNetState &state, u32 time);
 	void write(NET_Packet &packet);
 	void read(NET_Packet &packet);
-	void write(CSaveObjectSave* Object);
-	void read(CSaveObjectLoad* Object);
+	//void write(CSaveObjectSave* Object);
+	//void read(CSaveObjectLoad* Object);
+	void serialize(CSaveObject& Object);
 };

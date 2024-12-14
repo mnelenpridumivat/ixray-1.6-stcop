@@ -1,10 +1,11 @@
-#ifndef __V3D__
-#define __V3D__
+#pragma once
 
 // Inline call
 #ifndef IC
 #define IC __forceinline
 #endif
+
+class XRCORE_API CSaveObject;
 
 template <class T>
 struct _vector3 {
@@ -621,4 +622,11 @@ aa2_largest:	// aa2 is largest
 IC BOOL	exact_normalize	(Fvector3& a)	{	return exact_normalize(&a.x);	}
 #pragma warning(pop)
 
-#endif
+template<typename T> CSaveObject& operator<<(CSaveObject& Object, _vector3<T>& Value) {
+	return Object << Value.x << Value.y << Value.z;
+}
+
+/*template<> CSaveObject& operator<<(CSaveObject& Object, Fvector& Value);
+template<> CSaveObject& operator<<(CSaveObject& Object, Dvector& Value);
+template<> CSaveObject& operator<<(CSaveObject& Object, Ivector& Value);*/
+

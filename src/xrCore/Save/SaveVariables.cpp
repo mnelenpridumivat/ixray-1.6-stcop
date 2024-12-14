@@ -37,7 +37,7 @@ void CSaveVariableDouble::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableVec3::Write(CMemoryBuffer& Buffer)
+/*void CSaveVariableVec3::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write(ESaveVariableType::t_vec3);
 	Buffer.Write(_value.x);
@@ -52,7 +52,7 @@ void CSaveVariableVec4::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value.y);
 	Buffer.Write(_value.z);
 	Buffer.Write(_value.w);
-}
+}*/
 
 void CSaveVariableU64::Write(CMemoryBuffer& Buffer)
 {
@@ -180,7 +180,7 @@ void CSaveVariableString::Write(CMemoryBuffer& Buffer)
 	CSaveManager::GetInstance().ConditionalWriteString(_value, Buffer);
 }
 
-void CSaveVariableMatrix::Write(CMemoryBuffer& Buffer)
+/*void CSaveVariableMatrix::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write(ESaveVariableType::t_matrix);
 	Buffer.Write(_value._11); Buffer.Write(_value._12); Buffer.Write(_value._13); Buffer.Write(_value._14);
@@ -193,4 +193,4 @@ void CSaveVariableClientID::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write(ESaveVariableType::t_clientID);
 	Buffer.Write(_value.value());
-}
+}*/

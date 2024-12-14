@@ -98,6 +98,14 @@ namespace CSaveObject_script {
 	void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
 		Object->BeginChunk(ChunkName);
 	}
+
+	bool IsSaveTrue(CSaveObject* Object) {
+		return true;
+	}
+
+	bool IsSaveFalse(CSaveObject* Object) {
+		return false;
+	}
 }
 
 using namespace luabind;
@@ -106,7 +114,7 @@ void SaveSystemScript::script_register(lua_State* L)
 {
 	module(L)
 		[
-			class_<CSaveChunk>("SaveChunk")
+			/*class_<CSaveChunk>("SaveChunk")
 				.def("w_vec3", &CSaveChunk::w_vec3)
 				.def("w_float", &CSaveChunk::w_float)
 				.def("w_u64", &CSaveChunk::w_u64)
@@ -135,7 +143,7 @@ void SaveSystemScript::script_register(lua_State* L)
 
 				.def("ReadArray", &CSaveChunk_script::ReadArray)
 				.def("WriteArray", &CSaveChunk::WriteArray)
-				.def("EndArray", &CSaveChunk::EndArray),
+				.def("EndArray", &CSaveChunk::EndArray),*/
 
 				//.def("BeginChunk", &CSaveChunk_script::BeginChunk)
 				//.def("FindChunk", &CSaveChunk_script::FindChunk),
@@ -145,13 +153,39 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("FindChunk", &CSaveObject_script::FindChunk)
 				.def("EndChunk", &CSaveObject::EndChunk),*/
 			class_<CSaveObjectSave>("SaveObjectSave")
-				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
-				.def("BeginChunk", &CSaveObject_script::BeginChunk)
-				.def("EndChunk", &CSaveObject::EndChunk),
+				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+				.def("BeginChunk", &CSaveObject::BeginChunk)
+				.def("EndChunk", &CSaveObject::EndChunk)
+				/*.def("s_vec3", &CSaveObjectSave::s_vec3)
+				.def("s_float", &CSaveObjectSave::s_float)
+				.def("s_u64", &CSaveObjectSave::s_u64)
+				.def("s_s64", &CSaveObjectSave::s_s64)
+				.def("s_u32", &CSaveObjectSave::s_u32)
+				.def("s_s32", &CSaveObjectSave::s_s32)
+				.def("s_u16", &CSaveObjectSave::s_u16)
+				.def("s_s16", &CSaveObjectSave::s_s16)
+				.def("s_u8", &CSaveObjectSave::s_u8)
+				.def("s_s8", &CSaveObjectSave::s_s8)
+				.def("s_bool", &CSaveObjectSave::s_bool)
+				.def("s_string", &CSaveObjectSave::s_string)*/
+				.def("IsSave", &CSaveObjectSave::IsSave),
 			class_<CSaveObjectLoad>("SaveObjectLoad")
-				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
+				/*.def("s_vec3", &CSaveObjectLoad::s_vec3)
+				.def("s_float", &CSaveObjectLoad::s_float)
+				.def("s_u64", &CSaveObjectLoad::s_u64)
+				.def("s_s64", &CSaveObjectLoad::s_s64)
+				.def("s_u32", &CSaveObjectLoad::s_u32)
+				.def("s_s32", &CSaveObjectLoad::s_s32)
+				.def("s_u16", &CSaveObjectLoad::s_u16)
+				.def("s_s16", &CSaveObjectLoad::s_s16)
+				.def("s_u8", &CSaveObjectLoad::s_u8)
+				.def("s_s8", &CSaveObjectLoad::s_s8)
+				.def("s_bool", &CSaveObjectLoad::s_bool)
+				.def("s_string", &CSaveObjectLoad::s_string)*/
+				.def("IsSave", &CSaveObjectLoad::IsSave)
 		];
 }
 

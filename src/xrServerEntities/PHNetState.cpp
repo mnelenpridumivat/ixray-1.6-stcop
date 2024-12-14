@@ -2,6 +2,13 @@
 #pragma hdrstop
 
 #include "PHNetState.h"
+#include "fastdelegate.h"
+#include "Save/SaveObject.h"
+
+CSaveObject& operator<<(CSaveObject& Object, SPHNetState& Value) {
+	Value.net_Serialize(Object);
+	return Object;
+}
 
 //////////////////////////////////////8/////////////////////////////////////////////////////
 
@@ -11,12 +18,12 @@ static void w_vec_q8(NET_Packet& P,const Fvector& vec,const Fvector& min,const F
 	P.w_float_q8(vec.y,min.y,max.y);
 	P.w_float_q8(vec.z,min.z,max.z);
 }
-static void w_vec_q8(CSaveChunk* P, const Fvector& vec, const Fvector& min, const Fvector& max)
+/*static void w_vec_q8(CSaveObject& P, const Fvector& vec, const Fvector& min, const Fvector& max)
 {
 	P->w_float(vec.x);
 	P->w_float(vec.y);
 	P->w_float(vec.z);
-}
+}*/
 template<typename src>
 static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 {
@@ -28,7 +35,7 @@ static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 	clamp(vec.y,min.y,max.y);
 	clamp(vec.z,min.z,max.z);
 }
-static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
+/*static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvector& max)
 {
 	P->r_float(vec.x);
 	P->r_float(vec.y);
@@ -37,7 +44,22 @@ static void r_vec_q8(CSaveChunk* P, Fvector& vec, const Fvector& min, const Fvec
 	clamp(vec.x, min.x, max.x);
 	clamp(vec.y, min.y, max.y);
 	clamp(vec.z, min.z, max.z);
+}*/
+static void s_vec_q8(CSaveObject& P, Fvector& vec, const Fvector& min, const Fvector& max)
+{
+	if (P.IsSave()) {
+		clamp(vec.x, min.x, max.x);
+		clamp(vec.y, min.y, max.y);
+		clamp(vec.z, min.z, max.z);
+	}
+	P << vec;
+	if (!P.IsSave()) {
+		clamp(vec.x, min.x, max.x);
+		clamp(vec.y, min.y, max.y);
+		clamp(vec.z, min.z, max.z);
+	}
 }
+
 static void w_qt_q8(NET_Packet& P,const Fquaternion& q)
 {
 	P.w_float_q8(q.x,-1.f,1.f);
@@ -78,6 +100,24 @@ static void r_qt_q8(CSaveChunk* P, Fquaternion& q)
 	clamp(q.y, -1.f, 1.f);
 	clamp(q.z, -1.f, 1.f);
 	clamp(q.w, -1.f, 1.f);
+}
+static void s_qt_q8(CSaveObject& P, Fquaternion& q)
+{
+	if (P.IsSave()) 
+	{
+		clamp(q.x, -1.f, 1.f);
+		clamp(q.y, -1.f, 1.f);
+		clamp(q.z, -1.f, 1.f);
+		clamp(q.w, -1.f, 1.f);
+	}
+	P << q;
+	if (!P.IsSave())
+	{
+		clamp(q.x, -1.f, 1.f);
+		clamp(q.y, -1.f, 1.f);
+		clamp(q.z, -1.f, 1.f);
+		clamp(q.w, -1.f, 1.f);
+	}
 }
 
 #ifdef XRGAME_EXPORTS
@@ -175,17 +215,17 @@ void	SPHNetState::read(src* P)
 	P->r_bool(enabled);
 }
 template<>
-void	SPHNetState::read(CSaveChunk* P)
+void	SPHNetState::read(CSaveObject& P)
 {
-	P->r_vec3(linear_vel);
+	P << linear_vel;
 	angular_vel.set(0.f, 0.f, 0.f);		//P.r_vec3(angular_vel);
 	force.set(0.f, 0.f, 0.f);				//P.r_vec3(force);
 	torque.set(0.f, 0.f, 0.f);			//P.r_vec3(torque);
-	P->r_vec3(position);
-	Fvector4* q = ((Fvector4*)&quaternion);
-	P->r_vec4(*q);
+	P << position << quaternion;
+	//Fvector4* q = ((Fvector4*)&quaternion);
+	//P->r_vec4(*q);
 	previous_quaternion.set(quaternion);//P.r_vec4(*((Fvector4*)&previous_quaternion));
-	P->r_bool(enabled);
+	P << enabled;
 }
 
 void	SPHNetState::net_Import(NET_Packet&	P)
@@ -251,7 +291,7 @@ void SPHNetState::read(src* P, const Fvector& min, const Fvector& max)
 	enabled = !!P->r_u8();
 
 }
-template<>
+/*template<>
 void SPHNetState::read(CSaveChunk* P, const Fvector& min, const Fvector& max)
 {
 	VERIFY(!(fsimilar(min.x, max.x) && fsimilar(min.y, max.y) && fsimilar(min.z, max.z)));
@@ -265,7 +305,7 @@ void SPHNetState::read(CSaveChunk* P, const Fvector& min, const Fvector& max)
 	previous_quaternion.set(quaternion);
 	P->r_bool(enabled);
 
-}
+}*/
 
 void SPHNetState::net_Load(NET_Packet &P,const Fvector& min,const Fvector& max)
 {
@@ -279,7 +319,33 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 	read(P, min, max);
 }
 
-void SPHNetState::net_Save(CSaveObjectSave* Object) const
+void SPHNetState::net_Serialize(CSaveObject& Object)
+{
+	Object.BeginChunk("SPHNetState");
+	{
+		Object << linear_vel << position << quaternion << enabled;
+	}
+	Object.EndChunk();
+}
+
+void SPHNetState::net_Serialize(CSaveObject& Object, const Fvector& min, const Fvector& max)
+{
+	Object.BeginChunk("SPHNetState");
+	{
+		s_vec_q8(Object, position, min, max);
+		s_qt_q8(Object, quaternion);
+		Object << enabled;
+	}
+	Object.EndChunk();
+}
+
+/*CSaveObject& SPHNetState::operator<<(CSaveObject& Object)
+{
+	net_Serialize(Object);
+	return Object;
+}*/
+
+/*void SPHNetState::net_Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SPHNetState");
 	{
@@ -320,7 +386,7 @@ void SPHNetState::net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fv
 		read(Object->GetCurrentChunk(), min, max);
 	}
 	Object->EndChunk();
-}
+}*/
 
 SPHBonesData::SPHBonesData()
 {
@@ -336,17 +402,20 @@ SPHBonesData::SPHBonesData()
 
 void SPHBonesData::net_Save(NET_Packet &P)
 {
-	P.w_u64(bones_mask._visimask.flags);
+	for (u64 i = 0; i < VisMask::ArrSize; ++i) {
+		P.w_u64(bones_mask.GetRawChunkData(i));
+	}
+	//P.w_u64(bones_mask._visimask.flags);
 	P.w_u16(root_bone);
 
 	P.w_vec3(get_min());
 	P.w_vec3(get_max());
 	P.w_u16((u16)bones.size());//bones number;
 
-	if(bones.size() > 64) {
-		Msg("!![SPHBonesData::net_Save] bones_size is [%u]!", bones.size());
-		P.w_u64(bones_mask._visimask_ex.flags);
-	}
+	//if(bones.size() > 64) {
+	//	Msg("!![SPHBonesData::net_Save] bones_size is [%u]!", bones.size());
+	//	P.w_u64(bones_mask._visimask_ex.flags);
+	//}
 
 	PHNETSTATE_I i = bones.begin(), e = bones.end();
 	for(; e != i; i++) {
@@ -359,8 +428,12 @@ void SPHBonesData::net_Load(NET_Packet &P)
 	bones.clear();
 
 	// VisMask init 
-	u64 _low = P.r_u64(); // Left (0...64)
-	u64 _high = u64(-1); // Right(64..128)
+	//u64 _low = P.r_u64(); // Left (0...64)
+	//u64 _high = u64(-1); // Right(64..128)
+	for (u64 i = 0; i < VisMask::ArrSize; ++i) {
+		P.w_u64(bones_mask.GetRawChunkData(i));
+		bones_mask.set(P.r_u64(), true, i);
+	}
 
 	root_bone = P.r_u16();
 	Fvector _mn, _mx;
@@ -369,11 +442,11 @@ void SPHBonesData::net_Load(NET_Packet &P)
 	set_min_max(_mn, _mx);
 
 	u16 bones_number = P.r_u16();
-	if(bones_number > 64) {
-		Msg("!![SPHBonesData::net_Load] bones_number is [%u]!", bones_number);
-		_high = P.r_u64();
-	}
-	bones_mask.set(_low, _high);
+	//if(bones_number > 64) {
+	//	Msg("!![SPHBonesData::net_Load] bones_number is [%u]!", bones_number);
+	//	_high = P.r_u64();
+	//}
+	//bones_mask.set(_low, _high);
 
 	for(int i = 0; i < bones_number; i++) {
 		SPHNetState	S;
@@ -382,10 +455,14 @@ void SPHBonesData::net_Load(NET_Packet &P)
 	}
 }
 
-void SPHBonesData::net_Save(CSaveObjectSave* Object) const
+/*void SPHBonesData::net_Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SPHBonesData");
 	{
+		for (u64 i = 0; i < VisMask::ArrSize; ++i) {
+			P.w_u64(bones_mask.GetRawChunkData(i));
+		}
+
 		Object->GetCurrentChunk()->w_u64(bones_mask._visimask.flags);
 		Object->GetCurrentChunk()->w_u16(root_bone);
 
@@ -416,12 +493,16 @@ void SPHBonesData::net_Load(CSaveObjectLoad* Object)
 
 		// VisMask init 
 		u64 _low; // Left (0...64)
-		Object->GetCurrentChunk()->r_u64(_low);
 		u64 _high = u64(-1); // Right(64..128)
-
-		root_bone;
-		Object->GetCurrentChunk()->r_u16(root_bone);
 		Fvector _mn, _mx;
+
+		for (u64 i = 0; i < VisMask::ArrSize; ++i) {
+			P.w_u64(bones_mask.GetRawChunkData(i));
+			bones_mask.set(P.r_u64(), true, i);
+		}
+
+		Object->GetCurrentChunk()->r_u64(_low);
+		Object->GetCurrentChunk()->r_u16(root_bone);
 		Object->GetCurrentChunk()->r_vec3(_mn);
 		Object->GetCurrentChunk()->r_vec3(_mx);
 		set_min_max(_mn, _mx);
@@ -441,6 +522,56 @@ void SPHBonesData::net_Load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void SPHBonesData::net_Serialize(CSaveObject& Object)
+{
+	//auto PerElemAction = [&](SPHNetState& Elem) {Elem.net_Serialize(Object, get_min(), get_max()); };
+	Object.BeginChunk("SPHBonesData");
+	{
+		bones.clear();
+		Object << bones_mask << root_bone;
+		if (Object.IsSave()) {
+			Fvector _mn = get_min(), _mx = get_max();
+			Object << _mn << _mx;/*<void, SPHBonesData, SPHBonesData, CSaveObject&, SPHNetState&>*/ 
+			Object.Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
+
+			/*Object->GetCurrentChunk()->WriteArray(bones.size());
+			{
+				for (const auto& bone : bones) {
+					bone.net_Serialize(Object, get_min(), get_max());
+				}
+			}*/
+		}
+		else {
+			Fvector _mn, _mx;
+			u16 bones_number;
+			Object << _mn << _mx << bones_number;
+			set_min_max(_mn, _mx);
+			Object.Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
+
+			/*for (int i = 0; i < bones_number; i++) {
+				SPHNetState	S;
+				S.net_Serialize(Object, get_min(), get_max());
+				bones.push_back(S);
+			}*/
+		}
+
+		//u16 bones_number;
+		//Object->GetCurrentChunk()->r_u16(bones_number);
+		//if (bones_number > 64) {
+		//	Msg("!![SPHBonesData::net_Load] bones_number is [%u]!", bones_number);
+		//	Object->GetCurrentChunk()->r_u64(_high);
+		//}
+		//bones_mask.set(_low, _high);
+
+		/*for (int i = 0; i < bones_number; i++) {
+			SPHNetState	S;
+			S.net_Load(Object, get_min(), get_max());
+			bones.push_back(S);
+		}*/
+	}
+	Object.EndChunk();
 }
 
 void SPHBonesData::set_min_max(const Fvector& _min, const Fvector& _max)

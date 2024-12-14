@@ -229,7 +229,8 @@ public:
 
     BOOL					_BCL	LL_GetBoneVisible	(u16 bone_id)		{ 
 		VERIFY2(bone_id < LL_BoneCount(), make_string<const char*>("visual_name: %s, bone: %s, bone_id: %d", dbg_name.c_str(), LL_BoneName_dbg(bone_id), bone_id));
-		return visimask.is(bone_id);	}
+		return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id));	
+	}
 	void							LL_SetBoneVisible	(u16 bone_id, BOOL val, BOOL bRecursive);
 	VisMask					_BCL	LL_GetBonesVisible	()					{	return visimask;	}
 	void							LL_SetBonesVisible	(VisMask mask);

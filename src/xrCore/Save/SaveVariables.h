@@ -9,8 +9,8 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_bool,
 	t_float,
 	t_double,
-	t_vec3,
-	t_vec4,
+	//t_vec3,
+	//t_vec4,
 	t_u64,
 	t_u64_op32,
 	t_u64_op16,
@@ -38,8 +38,8 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_dir,
 	t_sdir,*/
 	t_string,
-	t_matrix,
-	t_clientID,
+	//t_matrix,
+	//t_clientID,
 	t_chunkStart,
 	t_chunkEnd,
 	t_array,
@@ -133,7 +133,7 @@ public:
 	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
-class XRCORE_API CSaveVariableVec3 :
+/*class XRCORE_API CSaveVariableVec3 :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -163,7 +163,7 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec4; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
-};
+};*/
 
 class XRCORE_API CSaveVariableU64 :
 	public CSaveVariableBase
@@ -414,7 +414,7 @@ public:
 	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
-class XRCORE_API CSaveVariableMatrix :
+/*class XRCORE_API CSaveVariableMatrix :
 	public CSaveVariableBase
 {
 	friend struct SSaveVariableGetter;
@@ -444,7 +444,7 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_clientID; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
-};
+};*/
 
 struct SSaveVariableGetter {
 	template<typename TType, typename TVarClass>

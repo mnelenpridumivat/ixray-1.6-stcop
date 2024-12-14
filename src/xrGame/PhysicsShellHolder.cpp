@@ -372,7 +372,7 @@ void		CPhysicsShellHolder::	load				(IReader &input_packet)
 
 }
 
-void CPhysicsShellHolder::Save(CSaveObjectSave* Object) const
+/*void CPhysicsShellHolder::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPhysicsShellHolder");
 	{
@@ -395,6 +395,26 @@ void CPhysicsShellHolder::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_u8(st_enable_state);
 	}
 	Object->EndChunk();
+}*/
+
+void CPhysicsShellHolder::Serialize(CSaveObject& Object)
+{
+	Object.BeginChunk("CPhysicsShellHolder");
+	{
+		inherited::Serialize(Object);
+		if (Object.IsSave()) {
+			u8 enable_state = (u8)stNotDefitnite;
+			if (PPhysicsShell() && PPhysicsShell()->isActive())
+			{
+				enable_state = u8(PPhysicsShell()->isEnabled() ? stEnable : stDisable);
+			}
+			Object << enable_state;
+		}
+		else {
+			Object << st_enable_state;
+		}
+	}
+	Object.EndChunk();
 }
 
 void CPhysicsShellHolder::PHSaveState(NET_Packet &P)

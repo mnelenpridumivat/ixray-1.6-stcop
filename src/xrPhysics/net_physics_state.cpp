@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "net_physics_state.h"
+#include "Save/SaveObject.h"
 
 void net_physics_state::fill(SPHNetState &state, u32 time)
 {
@@ -25,7 +26,16 @@ void net_physics_state::read(NET_Packet &packet)
 	physics_linear_velocity.set(0, 0, 0);
 }
 
-void net_physics_state::write(CSaveObjectSave* Object)
+void net_physics_state::serialize(CSaveObject& Object)
+{
+	Object.BeginChunk("net_physics_state");
+	{
+		Object << dwTimeStamp << physics_position << physics_state_enabled;
+	}
+	Object.EndChunk();
+}
+
+/*void net_physics_state::write(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("net_physics_state");
 	{
@@ -45,4 +55,4 @@ void net_physics_state::read(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_bool(physics_state_enabled);
 	}
 	Object->EndChunk();
-}
+}*/

@@ -230,7 +230,7 @@ void	CKinematics::Load(const char* N, IReader *data, u32 dwFlags)
 		L_parents.push_back			(buf);
 
 		data->r						(&pBone->obb,sizeof(Fobb));
-		visimask.set(ID, TRUE);
+		visimask.set(VisMask::GetBitMask(ID), TRUE, VisMask::GetChunkNumber(ID));
 	}
 	std::sort	(bone_map_N->begin(),bone_map_N->end(),pred_sort_N);
 	std::sort	(bone_map_P->begin(),bone_map_P->end(),pred_sort_P);
@@ -431,7 +431,9 @@ void CKinematics::Depart		()
     	if (count > 64)
         	Msg("ahtung !!! %d", count);
 #endif // #ifdef DEBUG
-		for(u32 b = 0; b < count; b++) visimask.set(b, true);
+		for (u32 b = 0; b < count; b++) {
+			visimask.set(VisMask::GetBitMask(b), TRUE, VisMask::GetChunkNumber(b));
+		}
 	}
 	// visibility
 	children.insert				(children.end(),children_invisible.begin(),children_invisible.end());
@@ -459,9 +461,9 @@ void CKinematics::Release		()
 void CKinematics::LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive)
 {
 	VERIFY2(bone_id < LL_BoneCount(), make_string<const char*>("visual_name: %s, bone: %s, bone_id: %d", dbg_name.c_str(), LL_BoneName_dbg(bone_id), bone_id));
-	visimask.set(bone_id, val);
+	visimask.set(VisMask::GetBitMask(bone_id), true, VisMask::GetChunkNumber(bone_id));
 
-	if(!visimask.is(bone_id)) {
+	if(!visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id))) {
         bone_instances[bone_id].mTransform.scale(0.f,0.f,0.f);
 	}
 	else {
@@ -480,8 +482,8 @@ void CKinematics::LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive)
 void CKinematics::LL_SetBonesVisible(VisMask mask) {
 	visimask.zero();
 	for(u32 b = 0; b < bones->size(); b++) {
-		if(mask.is(b)) {
-			visimask.set(b, true);
+		if(mask.is(VisMask::GetBitMask(b), VisMask::GetChunkNumber(b))) {
+			visimask.set(VisMask::GetBitMask(b), true, VisMask::GetChunkNumber(b));
 		}
 		else {
 	    	Fmatrix& A		= bone_instances[b].mTransform;

@@ -115,7 +115,7 @@ void CSaveChunk::w_double(double a)
 	}
 }
 
-void CSaveChunk::w_vec3(const Fvector& a)
+/*void CSaveChunk::w_vec3(const Fvector& a)
 {
 	if (_currentArrayStack.empty()) {
 		_variables.emplace_back(new CSaveVariableVec3(a));
@@ -133,7 +133,7 @@ void CSaveChunk::w_vec4(const Fvector4& a)
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableVec4(a));
 	}
-}
+}*/
 
 void CSaveChunk::w_u64(u64 a)
 {
@@ -215,67 +215,7 @@ void CSaveChunk::w_s8(s8 a)
 	}
 }
 
-/*void CSaveChunk::w_float_q16(float a, float min, float max)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableFloatQ16>(a, min, max));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableFloatQ16(a, min, max));
-	}
-}
-
-void CSaveChunk::w_float_q8(float a, float min, float max)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableFloatQ8>(a, min, max));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableFloatQ8(a, min, max));
-	}
-}
-
-void CSaveChunk::w_angle16(float a)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableAngle16>(a));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableAngle16(a));
-	}
-}
-
-void CSaveChunk::w_angle8(float a)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableAngle8>(a));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableAngle8(a));
-	}
-}
-
-void CSaveChunk::w_dir(const Fvector& D)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableDir>(D));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableDir(D));
-	}
-}
-
-void CSaveChunk::w_sdir(const Fvector& D)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(xr_make_unique<CSaveVariableSdir>(D));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableSdir(D));
-	}
-}*/
-
-void CSaveChunk::w_stringZ(LPCSTR S)
+void CSaveChunk::w_string(LPCSTR S)
 {
 	if (_currentArrayStack.empty()) {
 		_variables.emplace_back(new CSaveVariableString(S));
@@ -285,7 +225,7 @@ void CSaveChunk::w_stringZ(LPCSTR S)
 	}
 }
 
-void CSaveChunk::w_stringZ(const shared_str& p)
+/*void CSaveChunk::w_stringZ(const shared_str& p)
 {
 	if (_currentArrayStack.empty()) {
 		_variables.emplace_back(new CSaveVariableString(p));
@@ -323,7 +263,7 @@ void CSaveChunk::w_clientID(ClientID& C)
 	else {
 		_currentArrayStack.top()->AddVariable(new CSaveVariableClientID(C));
 	}
-}
+}*/
 
 void CSaveChunk::r_bool(bool& A)
 {
@@ -339,7 +279,7 @@ void CSaveChunk::r_bool(bool& A)
 	}
 }
 
-void CSaveChunk::r_vec3(Fvector& A)
+/*void CSaveChunk::r_vec3(Fvector& A)
 {
 	if (_currentArrayStack.empty()) {
 		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_vec3);
@@ -365,7 +305,7 @@ void CSaveChunk::r_vec4(Fvector4& A)
 		A = SSaveVariableGetter::GetValue<Fvector4, CSaveVariableVec4>((CSaveVariableVec4*)CurrentArray->GetCurrentElement());
 		CurrentArray->Next();
 	}
-}
+}*/
 
 void CSaveChunk::r_float(float& A)
 {
@@ -507,91 +447,7 @@ void CSaveChunk::r_s8(s8& A)
 	}
 }
 
-/*void CSaveChunk::r_float_q16(float& A, float min, float max)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_float_q16);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableFloatQ16>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_float_q16);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableFloatQ16>((CSaveVariableFloatQ16*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_float_q8(float& A, float min, float max)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_angle16(float& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_angle8(float& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<float, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_dir(Fvector& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableBool>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_sdir(Fvector& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableBool>(_variables[_currentReadIndex++].get());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}*/
-
-void CSaveChunk::r_stringZ(LPSTR S)
+void CSaveChunk::r_string(LPSTR S)
 {
 	if (_currentArrayStack.empty()) {
 		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
@@ -607,7 +463,7 @@ void CSaveChunk::r_stringZ(LPSTR S)
 	}
 }
 
-void CSaveChunk::r_stringZ(xr_string& dest)
+/*void CSaveChunk::r_stringZ(xr_string& dest)
 {
 	if (_currentArrayStack.empty()) {
 		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
@@ -679,4 +535,4 @@ void CSaveChunk::r_clientID(ClientID& C)
 		C = SSaveVariableGetter::GetValue<ClientID, CSaveVariableClientID>((CSaveVariableClientID*)CurrentArray->GetCurrentElement());
 		CurrentArray->Next();
 	}
-}
+}*/

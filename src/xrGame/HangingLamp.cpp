@@ -330,7 +330,7 @@ void CHangingLamp::TurnOff	()
 		IKinematics *K = smart_cast<IKinematics*>(Visual());
 		VERIFY( K );
 		K->LL_SetBoneVisible(light_bone, FALSE, TRUE);
-		VERIFY2( K->LL_GetBonesVisible()._visimask.flags != 0, make_string<const char*>("can not Turn Off lamp: %s, visual %s - because all bones become invisible", cNameVisual().c_str(), cName().c_str() ));
+		VERIFY2( K->LL_GetBonesVisible().is_any(u64(-1)), make_string<const char*>("can not Turn Off lamp: %s, visual %s - because all bones become invisible", cNameVisual().c_str(), cName().c_str()));
 	}
 	processing_deactivate();
 	m_bState				= 0;

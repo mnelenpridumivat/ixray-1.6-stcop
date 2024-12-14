@@ -15,6 +15,9 @@
 #include <mmsystem.h>
 #endif
 
+#include "Save/SaveObject.h"
+#include "_vector3d.h"
+
 // Initialized on startup
 XRCORE_API	Fmatrix			Fidentity;
 XRCORE_API	Dmatrix			Didentity;
@@ -394,3 +397,23 @@ void spline3( float t, Fvector *p, Fvector *ret )
 	ret->y = p[0].y*b0+p[1].y*b1+p[2].y*b2+p[3].y*b3;
 	ret->z = p[0].z*b0+p[1].z*b1+p[2].z*b2+p[3].z*b3;
 }
+
+/*template<> CSaveObject& operator<<(CSaveObject& Object, Fvector& Value) {
+	return Object << Value.x << Value.y << Value.z;
+}
+
+template<> CSaveObject& operator<<(CSaveObject& Object, Dvector& Value) {
+	return Object << Value.x << Value.y << Value.z;
+}
+
+template<> CSaveObject& operator<<(CSaveObject& Object, Ivector& Value) {
+	return Object << Value.x << Value.y << Value.z;
+}
+
+template<> CSaveObject& operator<<(CSaveObject& Object, Fquaternion& Value) {
+	return Object << Value.x << Value.y << Value.z << Value.w;
+}
+
+template<> CSaveObject& operator<<(CSaveObject& Object, Dquaternion& Value) {
+	return Object << Value.x << Value.y << Value.z << Value.w;
+}*/

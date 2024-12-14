@@ -185,12 +185,18 @@ void CPHSkeleton::SaveNetState(NET_Packet& P)
 	if(K)
 	{
 		_vm = K->LL_GetBonesVisible();
-		P.w_u64(_vm._visimask.flags);
+		for (size_t i = 0; i < VisMask::ArrSize; ++i) {
+			P.w_u64(_vm.GetRawChunkData(i));
+		}
+		//P.w_u64(_vm._visimask.flags);
 		P.w_u16(K->LL_GetBoneRoot());
 	}
 	else
 	{
-		P.w_u64(u64(-1));
+		for (size_t i = 0; i < VisMask::ArrSize; ++i) {
+			P.w_u64(-1);
+		}
+		//P.w_u64(u64(-1));
 		P.w_u16(0);
 	}
 	/////////////////////////////
@@ -222,10 +228,10 @@ void CPHSkeleton::SaveNetState(NET_Packet& P)
 	P.w_vec3(max);
 
 	P.w_u16(bones_number);
-	if(bones_number > 64) {
-		Msg("!![CPhysicsShellHolder::PHSaveState] bones_number is [%u]!", bones_number);
-		P.w_u64(K ? _vm._visimask_ex.flags : u64(-1));
-	}
+	//if(bones_number > 64) {
+	//	Msg("!![CPhysicsShellHolder::PHSaveState] bones_number is [%u]!", bones_number);
+		//P.w_u64(K ? _vm._visimask_ex.flags : u64(-1));
+	//}
 
 	for(u16 i=0;i<bones_number;i++)
 	{
@@ -241,21 +247,27 @@ void CPHSkeleton::LoadNetState(NET_Packet& P)
 	IKinematics* K=smart_cast<IKinematics*>(obj->Visual());
 	P.r_u8 (m_flags.flags);
 
-	u64 _low = 0;
-	u64 _high = 0;
+	//u64 _low = 0;
+	//u64 _high = 0;
+
+	VisMask _vm;
+	_vm.zero();
 
 	if(K)
 	{
-		_low = P.r_u64();
+		//_low = P.r_u64();
+		for (size_t i = 0; i < VisMask::ArrSize; ++i) {
+			_vm.set(P.r_u64(), true, i);
+		}
 		K->LL_SetBoneRoot(P.r_u16());
 	}
 
 	u16 bones_number = P.r_u16();
-	if(bones_number > 64) {
-		Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
-		_high = P.r_u64();
-	}
-	VisMask _vm(_low, _high);
+	//if(bones_number > 64) {
+	//	Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
+	//	_high = P.r_u64();
+	//}
+	//VisMask _vm(_low, _high);
 	K->LL_SetBonesVisible(_vm);
 
 	for(u16 i=0;i<bones_number;i++)
@@ -372,13 +384,13 @@ void CPHSkeleton::UnsplitSingle(CPHSkeleton* SO)
 	pKinematics->CalculateBones				(TRUE);
 
 	mask0 = pKinematics->LL_GetBonesVisible();//first part mask
-	VERIFY2(mask0._visimask.flags,"mask0 -Zero");
+	VERIFY2(mask0.count(), "mask0 -Zero");
 	mask0.invert();
 	mask1.band(mask0);//second part mask
 
 
 	newKinematics->LL_SetBoneRoot		(split_bone);
-	VERIFY2(mask1._visimask.flags,"mask1 -Zero");
+	VERIFY2(mask1.count(), "mask1 -Zero");
 	newKinematics->LL_SetBonesVisible	(mask1);
 
 	newKinematics->CalculateBones_Invalidate	();
@@ -433,7 +445,7 @@ void CPHSkeleton::RecursiveBonesCheck(u16 id)
 	//////////////////////////////////////////
 	VisMask mask = K->LL_GetBonesVisible();
 	///////////////////////////////////////////
-	if(mask.is(id) && !(BD.shape.flags.is(SBoneShape::sfRemoveAfterBreak)))
+	if(mask.is(VisMask::GetBitMask(id), VisMask::GetChunkNumber(id)) && !(BD.shape.flags.is(SBoneShape::sfRemoveAfterBreak)))
 	{
 		removable = false;
 		return;
