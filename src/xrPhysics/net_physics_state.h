@@ -19,5 +19,5 @@ public:
 	void read(NET_Packet &packet);
 	//void write(CSaveObjectSave* Object);
 	//void read(CSaveObjectLoad* Object);
-	void serialize(CSaveObject& Object);
+	void serialize(ISaveObject& Object);
 };

@@ -26,7 +26,7 @@ void net_physics_state::read(NET_Packet &packet)
 	physics_linear_velocity.set(0, 0, 0);
 }
 
-void net_physics_state::serialize(CSaveObject& Object)
+void net_physics_state::serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("net_physics_state");
 	{

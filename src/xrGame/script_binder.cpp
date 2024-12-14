@@ -185,7 +185,7 @@ void CScriptBinder::load			(IReader &input_packet)
 	}
 }
 
-void CScriptBinder::Save(CSaveObjectSave* Object)
+/*void CScriptBinder::Save(ISaveObject* Object)
 {
 	if (m_object) {
 		try {
@@ -197,11 +197,23 @@ void CScriptBinder::Save(CSaveObjectSave* Object)
 	}
 }
 
-void CScriptBinder::Load(CSaveObjectLoad* Object)
+void CScriptBinder::Load(ISaveObject* Object)
 {
 	if (m_object) {
 		try {
 			m_object->Load(Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}*/
+
+void CScriptBinder::Serialize(ISaveObject* Object)
+{
+	if (m_object) {
+		try {
+			m_object->Serialize(Object);
 		}
 		catch (...) {
 			clear();

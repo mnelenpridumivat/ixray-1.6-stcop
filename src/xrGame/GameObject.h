@@ -11,7 +11,7 @@
 #include "script_binder.h"
 #include "Hit.h"
 #include "game_object_space.h"
-#include "Save/SaveObject.h"
+#include "Save/SaveInterface.h"
 
 class CPhysicsShell;
 class CSE_Abstract;
@@ -118,10 +118,12 @@ public:
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
 	//object serialization new
-	virtual void			net_Save(CSaveObjectSave* Object);
-	virtual void			net_Load(CSaveObjectLoad* Object);
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void			net_Save(ISaveObject* Object);
+	//virtual void			net_Load(ISaveObject* Object);
+	virtual void			net_Serialize(ISaveObject* Object);
+	//virtual void Save(ISaveObject* Object) const;
+	//virtual void Load(ISaveObject* Object);
+	virtual void Serialize(ISaveObject* Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local
 	virtual void			spatial_move		();

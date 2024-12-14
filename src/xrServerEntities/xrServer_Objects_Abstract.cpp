@@ -61,7 +61,7 @@ void CSE_Visual::visual_write  	(NET_Packet	&tNetPacket)
 	tNetPacket.w_u8				(flags.get());
 }
 
-void CSE_Visual::visual_read(CSaveObjectLoad* Object)
+/*void CSE_Visual::visual_read(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_Visual::visual");
 	{
@@ -83,6 +83,15 @@ void CSE_Visual::visual_write(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8(flags.get());
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_Visual::visual_serialize(CSaveObject& Object)
+{
+	Object.BeginChunk("CSE_Visual::visual");
+	{
+		Object << visual_name << flags.flags;
+	}
+	Object.EndChunk();
 }
 
 void CSE_Visual::OnChangeVisual	(PropValue* sender)
@@ -136,7 +145,7 @@ void CSE_Motion::motion_write	(NET_Packet	&tNetPacket)
 	tNetPacket.w_stringZ			(motion_name);
 }
 
-void CSE_Motion::motion_read(CSaveObjectLoad* Object)
+/*void CSE_Motion::motion_read(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_Motion::motion");
 	{
@@ -152,6 +161,15 @@ void CSE_Motion::motion_write(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_stringZ(motion_name);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_Motion::motion_serialize(CSaveObject& Object)
+{
+	Object.BeginChunk("CSE_Motion::motion");
+	{
+		Object << motion_name;
+	}
+	Object.EndChunk();
 }
 
 void CSE_Motion::OnChangeMotion	(PropValue* sender)

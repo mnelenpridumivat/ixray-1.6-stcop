@@ -5,7 +5,7 @@
 #define IC __forceinline
 #endif
 
-class XRCORE_API CSaveObject;
+#include "Save/SaveInterface.h"
 
 template <class T>
 struct _vector3 {
@@ -622,7 +622,7 @@ aa2_largest:	// aa2 is largest
 IC BOOL	exact_normalize	(Fvector3& a)	{	return exact_normalize(&a.x);	}
 #pragma warning(pop)
 
-template<typename T> CSaveObject& operator<<(CSaveObject& Object, _vector3<T>& Value) {
+template<typename T> ISaveObject& operator<<(ISaveObject& Object, _vector3<T>& Value) {
 	return Object << Value.x << Value.y << Value.z;
 }
 

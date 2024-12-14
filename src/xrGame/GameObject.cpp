@@ -31,6 +31,7 @@
 #include "magic_box3.h"
 #include "animation_movement_controller.h"
 #include "../xrEngine/xr_collide_form.h"
+#include "Save/SaveObject.h"
 
 extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 
@@ -490,7 +491,7 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
-void CGameObject::net_Save(CSaveObjectSave* Object)
+/*void CGameObject::net_Save(ISaveObject* Object)
 {
 	Object->BeginChunk("CGameObject::net_Save");
 	{
@@ -500,7 +501,7 @@ void CGameObject::net_Save(CSaveObjectSave* Object)
 	Object->EndChunk();
 }
 
-void CGameObject::net_Load(CSaveObjectLoad* Object)
+void CGameObject::net_Load(ISaveObject* Object)
 {
 	Object->BeginChunk("CGameObject::net_Save");
 	{
@@ -508,9 +509,19 @@ void CGameObject::net_Load(CSaveObjectLoad* Object)
 		m_ScriptBinderComponent->Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CGameObject::net_Serialize(ISaveObject* Object)
+{
+	Object->BeginChunk("CGameObject::net_Serialize");
+	{
+		Serialize(Object);
+		m_ScriptBinderComponent->Serialize(Object);
+	}
+	Object->EndChunk();
 }
 
-void CGameObject::Save(CSaveObjectSave* Object) const
+/*void CGameObject::Save(ISaveObject* Object) const
 {
 	Object->BeginChunk("CGameObject");
 	{
@@ -519,11 +530,20 @@ void CGameObject::Save(CSaveObjectSave* Object) const
 	Object->EndChunk();
 }
 
-void CGameObject::Load(CSaveObjectLoad* Object)
+void CGameObject::Load(ISaveObject* Object)
 {
 	Object->BeginChunk("CGameObject");
 	{
 		//m_ScriptBinderComponent->Load(Object);
+	}
+	Object->EndChunk();
+}*/
+
+void CGameObject::Serialize(ISaveObject* Object)
+{
+	Object->BeginChunk("CGameObject");
+	{
+
 	}
 	Object->EndChunk();
 }

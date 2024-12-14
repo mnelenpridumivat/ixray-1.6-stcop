@@ -280,3 +280,13 @@ str_container* str_container_handle::get_container()
 	}
 	return pStringContainer;
 }*/
+
+ISaveObject& operator<<(ISaveObject& Object, shared_str& Value) {
+	if (Object.IsSave()) {
+		return Object << (char*)Value.c_str();
+	}
+	LPSTR Str = nullptr;
+	Object << Str;
+	Value = Str;
+	return Object;
+}

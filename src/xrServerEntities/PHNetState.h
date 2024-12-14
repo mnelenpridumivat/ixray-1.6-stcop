@@ -33,10 +33,10 @@ struct SPHNetState
 	void								net_Load			(		IReader&		P,const Fvector& min,const Fvector& max);
 	//void								net_Save(CSaveObjectSave* Object) const;
 	//void								net_Load(CSaveObjectLoad* Object);
-	void								net_Serialize(CSaveObject& Object);
+	void								net_Serialize(ISaveObject& Object);
 	//void								net_Save(CSaveObjectSave* Object, const Fvector& min, const Fvector& max) const;
 	//void								net_Load(CSaveObjectLoad* Object, const Fvector& min, const Fvector& max);
-	void								net_Serialize(CSaveObject& Object, const Fvector& min, const Fvector& max);
+	void								net_Serialize(ISaveObject& Object, const Fvector& min, const Fvector& max);
 
 private:
 
@@ -50,7 +50,7 @@ template<typename src>
 	void								read(src* P, const Fvector& min, const Fvector& max);
 };
 
-CSaveObject& operator<<(CSaveObject& Object, SPHNetState& Value);
+CSaveObject& operator<<(ISaveObject& Object, SPHNetState& Value);
 
 using PHNETSTATE_VECTOR = xr_vector<SPHNetState>; 
 using PHNETSTATE_I = PHNETSTATE_VECTOR::iterator;
@@ -69,10 +69,10 @@ public:
 	void								net_Load			(		IReader&		P);
 	//void								net_Save(CSaveObjectSave* Object) const;
 	//void								net_Load(CSaveObjectLoad* Object);
-	void								net_Serialize(CSaveObject& Object);
+	void								net_Serialize(ISaveObject& Object);
 	void								set_min_max			(const Fvector& _min, const Fvector& _max);
 	const Fvector&						get_min				()	const	{return m_min;}
 	const Fvector&						get_max				()	const	{return m_max;}
 private:
-	void PerElemAction(CSaveObject& Object, SPHNetState& Elem) { Elem.net_Serialize(Object, get_min(), get_max()); };
+	void PerElemAction(ISaveObject& Object, SPHNetState& Elem) { Elem.net_Serialize(Object, get_min(), get_max()); };
 };

@@ -5,7 +5,7 @@
 #include "fastdelegate.h"
 #include "Save/SaveObject.h"
 
-CSaveObject& operator<<(CSaveObject& Object, SPHNetState& Value) {
+CSaveObject& operator<<(ISaveObject& Object, SPHNetState& Value) {
 	Value.net_Serialize(Object);
 	return Object;
 }
@@ -45,7 +45,7 @@ static void r_vec_q8(src& P,Fvector& vec,const Fvector& min,const Fvector& max)
 	clamp(vec.y, min.y, max.y);
 	clamp(vec.z, min.z, max.z);
 }*/
-static void s_vec_q8(CSaveObject& P, Fvector& vec, const Fvector& min, const Fvector& max)
+static void s_vec_q8(ISaveObject& P, Fvector& vec, const Fvector& min, const Fvector& max)
 {
 	if (P.IsSave()) {
 		clamp(vec.x, min.x, max.x);
@@ -101,7 +101,7 @@ static void r_qt_q8(CSaveChunk* P, Fquaternion& q)
 	clamp(q.z, -1.f, 1.f);
 	clamp(q.w, -1.f, 1.f);
 }
-static void s_qt_q8(CSaveObject& P, Fquaternion& q)
+static void s_qt_q8(ISaveObject& P, Fquaternion& q)
 {
 	if (P.IsSave()) 
 	{
@@ -215,7 +215,7 @@ void	SPHNetState::read(src* P)
 	P->r_bool(enabled);
 }
 template<>
-void	SPHNetState::read(CSaveObject& P)
+void	SPHNetState::read(ISaveObject& P)
 {
 	P << linear_vel;
 	angular_vel.set(0.f, 0.f, 0.f);		//P.r_vec3(angular_vel);
@@ -319,7 +319,7 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 	read(P, min, max);
 }
 
-void SPHNetState::net_Serialize(CSaveObject& Object)
+void SPHNetState::net_Serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("SPHNetState");
 	{
@@ -328,7 +328,7 @@ void SPHNetState::net_Serialize(CSaveObject& Object)
 	Object.EndChunk();
 }
 
-void SPHNetState::net_Serialize(CSaveObject& Object, const Fvector& min, const Fvector& max)
+void SPHNetState::net_Serialize(ISaveObject& Object, const Fvector& min, const Fvector& max)
 {
 	Object.BeginChunk("SPHNetState");
 	{
@@ -524,7 +524,7 @@ void SPHBonesData::net_Load(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }*/
 
-void SPHBonesData::net_Serialize(CSaveObject& Object)
+void SPHBonesData::net_Serialize(ISaveObject& Object)
 {
 	//auto PerElemAction = [&](SPHNetState& Elem) {Elem.net_Serialize(Object, get_min(), get_max()); };
 	Object.BeginChunk("SPHBonesData");

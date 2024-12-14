@@ -594,3 +594,94 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 	}
 	Object->EndChunk();
 }
+
+bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal) 
+{
+	Object.BeginChunk("CSE_Abstract");
+	{
+		if (!s_name_replace) {
+			static auto TempStr = "";
+			s_name_replace = (char*)TempStr;
+		}
+		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
+		// generic
+		//Object->GetCurrentChunk()->w_stringZ(s_name);
+		//Object->GetCurrentChunk()->w_stringZ(s_name_replace ? s_name_replace : "");
+		//Object->GetCurrentChunk()->w_u8(0);
+		//Object->GetCurrentChunk()->w_u8(s_RP);
+		//Object->GetCurrentChunk()->w_vec3(o_Position);
+		//Object->GetCurrentChunk()->w_vec3(o_Angle);
+		//Object->GetCurrentChunk()->w_u16(RespawnTime);
+		//Object->GetCurrentChunk()->w_u16(ID);
+		//Object->GetCurrentChunk()->w_u16(ID_Parent);
+		//Object->GetCurrentChunk()->w_u16(ID_Phantom);
+		{
+			u16 FlagsTemp;
+			u16 SpawnVersion;
+			if (Object.IsSave()) {
+				if (bLocal) {
+					FlagsTemp = u16(s_flags.flags | M_SPAWN_OBJECT_LOCAL);
+				}
+				else {
+					FlagsTemp = u16(s_flags.flags & ~(M_SPAWN_OBJECT_LOCAL | M_SPAWN_OBJECT_ASPLAYER));
+				}
+				SpawnVersion = SPAWN_VERSION;
+			}
+			Object << FlagsTemp;
+			if (!Object.IsSave()) {
+				s_flags.assign(FlagsTemp);
+				m_wVersion = SpawnVersion;
+			}
+		}
+		Object << m_gameType.m_GameType;
+		{
+			u16 SpawnVer;
+			if (Object.IsSave()) {
+				SpawnVer = script_server_object_version();
+			}
+			Object << SpawnVer;
+			if(!Object.IsSave()) {
+				m_script_version = SpawnVer;
+			}
+		}
+		//Object->GetCurrentChunk()->w_u16(SPAWN_VERSION);
+		//Object->GetCurrentChunk()->w_u16(m_gameType.m_GameType.get());
+		//Object->GetCurrentChunk()->w_u16(script_server_object_version());
+
+		Object->BeginChunk("CSE_Abstract::ClientObject");
+		{
+			bool HasClientData;
+#ifndef XRGAME_EXPORTS
+			HasClientData = false;
+			//Object->GetCurrentChunk()->w_bool(false);
+#else
+			HasClientData = true;
+#endif
+			Object << HasClientData;
+#ifdef XRGAME_EXPORTS
+			HasClientData = true;
+			//Object->GetCurrentChunk()->w_bool(true);
+			auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+			if (Obj) {
+				Obj->Save(Object);
+			}
+#endif
+		}
+		Object->EndChunk();
+
+		Object->GetCurrentChunk()->w_u16(m_tSpawnID);
+
+#ifdef XRSE_FACTORY_EXPORTS
+		{
+			// HACK: because all save functions of new system tend to be const and assign function cannot be const
+			auto MutableThis = (CSE_Abstract*)this;
+			MutableThis->assign();
+		}
+#endif
+
+		STATE_WriteSave(Object);
+		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
+		//	"object isn't successfully saved, get your backup :(", name_replace());
+	}
+	Object.EndChunk();
+}

@@ -1,4 +1,5 @@
 #pragma once
+#include "Save/SaveInterface.h"
 #pragma pack(push,4)
 //////////////////////////////////////////////////////////////////////////
 using str_c = const char*;
@@ -157,5 +158,7 @@ namespace std
 		}
 	};
 }
+
+ISaveObject& operator<<(ISaveObject& Object, shared_str& Value);
 
 #pragma pack(pop)

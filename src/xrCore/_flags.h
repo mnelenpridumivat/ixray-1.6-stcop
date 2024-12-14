@@ -1,4 +1,5 @@
 #pragma once
+#include "Save/SaveInterface.h"
 
 template <class T>
 struct _flags {
@@ -48,6 +49,10 @@ typedef _flags<u64>	Flags64;	typedef _flags<u64>	flags64;
 
 template <class T>
 bool operator == (_flags<T> const& A, _flags<T>  const& B) { return A.flags == B.flags; }
+
+template<typename T> ISaveObject& operator<<(ISaveObject& Object, _flags<T>& Value) {
+	return Object << Value.flags;
+}
 
 template<size_t T>
 struct _flags_big {
@@ -276,3 +281,22 @@ typedef _flags_big<128>	 Flags128;	typedef _flags_big<128>	 flags128;
 typedef _flags_big<256>	 Flags256;	typedef _flags_big<256>	 flags256;
 typedef _flags_big<512>	 Flags512;	typedef _flags_big<512>	 flags512;
 typedef _flags_big<1024> Flags1024;	typedef _flags_big<1024> flags1024;
+
+template<size_t T> ISaveObject& operator<<(ISaveObject& Object, _flags_big<T>& Value) {
+	if (!Object.IsSave()) {
+		Value.zero();
+	}
+	for (u64 i = 0; i < _flags_big<T>::ArrSize; ++i) {
+		if (Object.IsSave()) {
+			auto ChunkNumber = Value.GetRawChunkData(i);
+			Object << ChunkNumber;
+		}
+		else {
+			Flags64 temp;
+			Object << temp;
+			Value.zero();
+			Value.bor(temp.flags, i);
+		}
+	}
+	return Object;
+}

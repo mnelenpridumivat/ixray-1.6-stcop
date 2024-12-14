@@ -1,4 +1,5 @@
 #pragma once
+#include "Save/SaveInterface.h"
 
 /***************************************************************************
 	The quatern module contains basic support for a quaternion object.
@@ -448,7 +449,7 @@ BOOL	_valid			(const _quaternion<T>& s)	{ return _valid(s.x) && _valid(s.y) && _
 #undef AA_QZERO_TOLERANCE
 #undef QEPSILON
 
-template<typename T> CSaveObject& operator<<(CSaveObject& Object, _quaternion<T>& Value) {
+template<typename T> ISaveObject& operator<<(ISaveObject& Object, _quaternion<T>& Value) {
 	return Object << Value.x << Value.y << Value.z << Value.w;
 }
 

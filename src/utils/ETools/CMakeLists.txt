@@ -19,6 +19,7 @@ list(APPEND ETL_SRC_FILES ${ETL_SOURCE_ALL_FILES})
 # ETools project
 add_library(ETools SHARED ${ETL_SRC_FILES})
 target_include_directories(ETools PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(ETools PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 target_precompile_headers(ETools PRIVATE "stdafx.h")
 
 # Project defines

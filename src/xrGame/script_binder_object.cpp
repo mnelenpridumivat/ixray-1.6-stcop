@@ -60,11 +60,15 @@ void CScriptBinderObject::load				(IReader	*input_packet)
 {
 }
 
-void CScriptBinderObject::Save(CSaveObjectSave* Object)
-{
-}
+//void CScriptBinderObject::Save(ISaveObject* Object)
+//{
+//}
 
-void CScriptBinderObject::Load(CSaveObjectLoad* Object)
+//void CScriptBinderObject::Load(ISaveObject* Object)
+//{
+//}
+
+void CScriptBinderObject::Serialize(ISaveObject* Object)
 {
 }
 
