@@ -114,7 +114,7 @@ void CALifeHumanBrain::on_state_read		(NET_Packet &packet)
 	}
 }
 
-void CALifeHumanBrain::on_state_write(CSaveObjectSave* Object) const
+/*void CALifeHumanBrain::on_state_write(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CALifeHumanBrain::State");
 	{
@@ -144,4 +144,23 @@ void CALifeHumanBrain::on_state_read(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CALifeHumanBrain::on_state_serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CALifeHumanBrain::State");
+	{
+		Object << m_cpEquipmentPreferences << m_cpMainWeaponPreferences;
+		/*for (int i = 0; i < 5; ++i) {
+			s8 Value;
+			Object->GetCurrentChunk()->r_s8(Value);
+			m_cpEquipmentPreferences[i] = Value;
+		}
+		for (int i = 0; i < 4; ++i) {
+			s8 Value;
+			Object->GetCurrentChunk()->r_s8(Value);
+			m_cpMainWeaponPreferences[i] = Value;
+		}*/
+	}
+	Object.EndChunk();
 }

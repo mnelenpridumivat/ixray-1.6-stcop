@@ -328,7 +328,7 @@ SERVER_ENTITY_DECLARE_BEGIN3(CSE_ALifeCreatureActor,CSE_ALifeCreatureAbstract,CS
 
 	// статический массив - 6 float(вектора пределов квантизации) + m_u16NumItems*(7 u8) (позиция и поворот кости)
 	u8								m_BoneDataSize;
-	char							m_DeadBodyData[1024];
+	u8								m_DeadBodyData[1024];
 	///////////////////////////////////////////
 									CSE_ALifeCreatureActor	(LPCSTR caSection);
 	virtual							~CSE_ALifeCreatureActor	();
@@ -531,6 +531,7 @@ public:
 
 private:
 	MEMBERS							m_members;
+	void STATE_SerializePerElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, MEMBER*>& Value);
 
 #ifdef XRGAME_EXPORTS
 

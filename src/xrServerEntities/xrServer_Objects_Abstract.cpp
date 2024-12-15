@@ -85,7 +85,7 @@ void CSE_Visual::visual_write(CSaveObjectSave* Object) const
 	Object->EndChunk();
 }*/
 
-void CSE_Visual::visual_serialize(CSaveObject& Object)
+void CSE_Visual::visual_serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("CSE_Visual::visual");
 	{
@@ -163,7 +163,7 @@ void CSE_Motion::motion_write(CSaveObjectSave* Object) const
 	Object->EndChunk();
 }*/
 
-void CSE_Motion::motion_serialize(CSaveObject& Object)
+void CSE_Motion::motion_serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("CSE_Motion::motion");
 	{

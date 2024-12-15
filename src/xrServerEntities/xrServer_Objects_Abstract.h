@@ -59,7 +59,7 @@ public:
 	void							visual_write			(NET_Packet& P);
 	//void							visual_read(CSaveObjectLoad* Object);
 	//void							visual_write(CSaveObjectSave* Object) const;
-	void							visual_serialize(CSaveObject& Object);
+	void							visual_serialize(ISaveObject& Object);
 
     virtual void					set_visual				(LPCSTR name, bool load=true);
 	LPCSTR							get_visual				() const {return *visual_name;};
@@ -82,7 +82,7 @@ public:
 	void							motion_write			(NET_Packet& P);
 	//void							motion_read(CSaveObjectLoad* Object);
 	//void							motion_write(CSaveObjectSave* Object) const;
-	void							motion_serialize(CSaveObject& Object);
+	void							motion_serialize(ISaveObject& Object);
 
     void							set_motion				(LPCSTR name);
 	LPCSTR							get_motion				() const {return *motion_name;};

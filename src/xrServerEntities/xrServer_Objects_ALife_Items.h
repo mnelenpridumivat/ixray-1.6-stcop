@@ -107,9 +107,10 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemTorch,CSE_ALifeItem)
 		eNightVisionActive			= (1<<1),
 		eAttached					= (1<<2)
 	};
-	bool							m_active;
-	bool							m_nightvision_active;
-	bool							m_attached;
+	//bool							m_active;
+	//bool							m_nightvision_active;
+	//bool							m_attached;
+	Flags8 m_Stats;
 									CSE_ALifeItemTorch	(LPCSTR caSection);
     virtual							~CSE_ALifeItemTorch	();
 	virtual BOOL					Net_Relevant			();

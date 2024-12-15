@@ -5,6 +5,7 @@
 #include "fastdelegate.h"
 #include "type_traits"
 #include "shared_string.h"
+#include "associative_vector.h"
 
 class XRCORE_API CSaveObject:
 	public ISaveObject
@@ -22,9 +23,133 @@ public:
 	~CSaveObject();
 	void EndChunk() override;
 
-	template<typename T>
-	ISaveObject& operator<<(xr_vector<T>& Value) {
-		Serialize(Value);
+	template<typename T, size_t Size>
+	ISaveObject& Serialize(svector<T, Size>& Value) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Size);
+			for (u64 i = 0; i < Size; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					(*this) << *(Value[i]);
+				}
+				else {
+					(*this) << Value[i];
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					//CreateElem(Value);
+					T Elem = new std::remove_pointer<T>::type();
+					(*this) << *(Value[i]);
+					Value[i] = Elem;
+				}
+				else {
+					(*this) << Value[i];
+				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
+	}
+
+
+	template<typename Key, typename Mapped>
+	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				if constexpr (std::is_pointer<Key>::value) {
+					(*this) << *(elem.first);
+				}
+				else {
+					(*this) << elem.first;
+				}
+				if constexpr (std::is_pointer<Mapped>::value) {
+					(*this) << *(elem.second);
+				}
+				else {
+					(*this) << elem.second;
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				std::pair<Key, Mapped> Elem;
+				if constexpr (std::is_pointer<Key>::value) {
+					Elem.first = new std::remove_pointer<Key>::type();
+					(*this) << *(Elem.first);
+				}
+				else {
+					Elem.first = Key();
+					(*this) << Elem.first;
+				}
+				if constexpr (std::is_pointer<Mapped>::value) {
+					Elem.second = new std::remove_pointer<Mapped>::type();
+					(*this) << *(Elem.second);
+				}
+				else {
+					Elem.second = Mapped();
+					(*this) << Elem.second;
+				}
+				Value.emplace_back(Elem);
+			}
+		}
+		GetCurrentChunk()->EndArray();
+	}
+
+	template<typename Key, typename Mapped>
+	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value, fastdelegate::FastDelegate<void(ISaveObject&, typename std::pair<Key, Mapped>&)> PerElem) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				PerElem(*this, elem);
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				std::pair<Key, Mapped> Elem;
+				PerElem(*this, Elem);
+				Value.emplace_back(Elem);
+			}
+		}
+		GetCurrentChunk()->EndArray();
+	}
+
+	template<typename T, size_t Size>
+	ISaveObject& Serialize(T (&Value)[Size]) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Size);
+			for (u64 i = 0; i < Size; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					(*this) << *(Value[i]);
+				}
+				else {
+					(*this) << Value[i];
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					//CreateElem(Value);
+					T Elem = new std::remove_pointer<T>::type();
+					(*this) << *(Value[i]);
+					Value[i] = Elem;
+				}
+				else {
+					(*this) << Value[i];
+				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
 	}
 
 	template<typename T>
@@ -98,6 +223,32 @@ public:
 	}
 
 };
+
+/*template<typename T>
+ISaveObject& operator<<(ISaveObject& Object, T* Value) {
+	VERIFY(Value);
+	Object << *Value;
+}*/
+
+template<typename T>
+ISaveObject& operator<<(ISaveObject& Object, xr_vector<T>& Value) {
+	((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename T, size_t Size>
+ISaveObject& operator<<(ISaveObject& Object, T (&Value)[Size]) {
+	((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename Key, typename Mapped>
+ISaveObject& operator<<(ISaveObject& Object, associative_vector<Key, Mapped>& Value) {
+	((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename T, size_t Size>
+ISaveObject& operator<<(ISaveObject& Object, svector<T, Size>& Value) {
+	((CSaveObject*)&Object)->Serialize(Value);
+}
 
 class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:

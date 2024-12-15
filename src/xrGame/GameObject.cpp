@@ -511,14 +511,14 @@ void CGameObject::net_Load(ISaveObject* Object)
 	Object->EndChunk();
 }*/
 
-void CGameObject::net_Serialize(ISaveObject* Object)
+void CGameObject::net_Serialize(ISaveObject& Object)
 {
-	Object->BeginChunk("CGameObject::net_Serialize");
+	Object.BeginChunk("CGameObject::net_Serialize");
 	{
 		Serialize(Object);
 		m_ScriptBinderComponent->Serialize(Object);
 	}
-	Object->EndChunk();
+	Object.EndChunk();
 }
 
 /*void CGameObject::Save(ISaveObject* Object) const
@@ -539,13 +539,13 @@ void CGameObject::Load(ISaveObject* Object)
 	Object->EndChunk();
 }*/
 
-void CGameObject::Serialize(ISaveObject* Object)
+void CGameObject::Serialize(ISaveObject& Object)
 {
-	Object->BeginChunk("CGameObject");
+	Object.BeginChunk("CGameObject");
 	{
 
 	}
-	Object->EndChunk();
+	Object.EndChunk();
 }
 
 void CGameObject::spawn_supplies()

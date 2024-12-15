@@ -1,5 +1,3 @@
-#ifndef FixedVectorH
-#define FixedVectorH
 #pragma once
 
 template <class T, const int dim>
@@ -70,5 +68,3 @@ public:
 		return TRUE;
 	}
 };
-
-#endif

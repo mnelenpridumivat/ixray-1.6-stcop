@@ -49,6 +49,7 @@ target_link_libraries(LevelEditor PUBLIC xrAbstractions)
 target_link_libraries(LevelEditor PUBLIC "Shell32.lib")
 add_dependencies(LevelEditor xrGame)
 add_dependencies(LevelEditor xrSE_Factory)
+target_include_directories(LevelEditor PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 
 # Move precompiled header
 target_validate_pch(LevelEditor ${CMAKE_CURRENT_SOURCE_DIR})

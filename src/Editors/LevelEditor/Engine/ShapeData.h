@@ -1,4 +1,7 @@
-#ifndef ShapeDataH
+#pragma once
+#include "../xrServerEntities/ShapeData.h"
+
+/*#ifndef ShapeDataH
 #define ShapeDataH
 
 
@@ -24,4 +27,4 @@ struct CShapeData
 	ShapeVec						shapes;
 };
 
-#endif
+#endif*/

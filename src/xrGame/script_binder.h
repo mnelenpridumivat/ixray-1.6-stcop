@@ -35,7 +35,7 @@ public:
 	virtual void				load			(IReader &input_packet);
 	//virtual void Save(ISaveObject* Object);
 	//virtual void Load(ISaveObject* Object);
-	virtual void Serialize(ISaveObject* Object);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL				net_SaveRelevant();
 	virtual void				net_Relcase		(CObject *object);
 			void				set_object		(CScriptBinderObject *object);
