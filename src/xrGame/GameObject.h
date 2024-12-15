@@ -120,10 +120,10 @@ public:
 	//object serialization new
 	//virtual void			net_Save(ISaveObject* Object);
 	//virtual void			net_Load(ISaveObject* Object);
-	virtual void			net_Serialize(ISaveObject* Object);
+	virtual void			net_Serialize(ISaveObject& Object);
 	//virtual void Save(ISaveObject* Object) const;
 	//virtual void Load(ISaveObject* Object);
-	virtual void Serialize(ISaveObject* Object);
+	virtual void Serialize(ISaveObject& Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local
 	virtual void			spatial_move		();

@@ -441,6 +441,7 @@ public:
 	};
 	/////////// network ///////////////
 	u8								m_u8NumItems;
+	Flags8							m_State;
 	bool							prev_freezed;
 	bool							freezed;
 	SPHNetState						State;
@@ -527,8 +528,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 	{
 		void read	(NET_Packet& P);
 		void write   (NET_Packet& P);
-		void read(CSaveObjectLoad* Object);
-		void write(CSaveObjectSave* Object) const;
+		//void read(CSaveObjectLoad* Object);
+		//void write(CSaveObjectSave* Object) const;
 		u8 open_state;
 		float health;
 	};
@@ -536,8 +537,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 	{
 		void read	(NET_Packet& P);
 		void write   (NET_Packet& P);
-		void read(CSaveObjectLoad* Object);
-		void write(CSaveObjectSave* Object) const;
+		//void read(CSaveObjectLoad* Object);
+		//void write(CSaveObjectSave* Object) const;
 		float health;
 	};
 	xr_vector<SDoorState>			door_states;
@@ -558,9 +559,13 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 protected:
 	virtual void					data_load				(NET_Packet &tNetPacket);
 	virtual void					data_save				(NET_Packet &tNetPacket);
-	virtual void					data_load(CSaveObjectLoad* Object) override;
-	virtual void					data_save(CSaveObjectSave* Object) const override;
+	//virtual void					data_load(CSaveObjectLoad* Object) override;
+	//virtual void					data_save(CSaveObjectSave* Object) const override;
+	virtual void					data_serialize(ISaveObject& Object) override;
 SERVER_ENTITY_DECLARE_END
+
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SDoorState& Value);
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SWheelState& Value);
 
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeObjectBreakable,CSE_ALifeDynamicObjectVisual)
     float							m_health;

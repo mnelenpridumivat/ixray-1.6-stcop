@@ -529,7 +529,7 @@ void CSE_ALifeTraderAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 {
 };
 
-void CSE_ALifeTraderAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTraderAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTraderAbstract::STATE");
 	{
@@ -580,9 +580,53 @@ void CSE_ALifeTraderAbstract::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_bool(m_deadbody_closed);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTraderAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTraderAbstract::STATE");
+	{
+		Object << m_dwMoney;
+		//Object->GetCurrentChunk()->w_u32(m_dwMoney);
+#ifndef XRGAME_EXPORTS
+		if (!Object.IsSave()) {
+#endif
+			Object << m_SpecificCharacter;
+			//Object->GetCurrentChunk()->w_stringZ(m_SpecificCharacter);
+#ifndef XRGAME_EXPORTS
+		}
+		else {
+			shared_str s;
+			Object << s;
+			//Object->GetCurrentChunk()->w_stringZ(s);
+		}
+#endif
+		Object << m_trader_flags << m_sCharacterProfile;
+		//Object->GetCurrentChunk()->w_u32(m_trader_flags.get());
+		//Object->GetCurrentChunk()->w_stringZ(m_sCharacterProfile);
+#ifndef XRGAME_EXPORTS
+		if (!Object.IsSave()) {
+#endif
+			Object << m_community_index << m_rank << m_reputation;
+#ifndef XRGAME_EXPORTS
+		}
+		else {
+			u32 CommunitiIndex = NO_COMMUNITY_INDEX, Rank = NO_RANK, Reputation = NO_REPUTATION;
+			Object << CommunitiIndex << Rank << Reputation;
+			//Object->GetCurrentChunk()->w_s32(NO_COMMUNITY_INDEX);
+			//Object->GetCurrentChunk()->w_s32(NO_RANK);
+			//Object->GetCurrentChunk()->w_s32(NO_REPUTATION);
+		}
+#endif
+		Object << m_character_name << m_deadbody_can_take << m_deadbody_closed;
+		//Object->GetCurrentChunk()->w_stringZ(m_character_name);
+		//Object->GetCurrentChunk()->w_bool(m_deadbody_can_take);
+		//Object->GetCurrentChunk()->w_bool(m_deadbody_closed);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeTraderAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTraderAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTraderAbstract::UPDATE");
 	{}
@@ -594,6 +638,13 @@ void CSE_ALifeTraderAbstract::UPDATE_WriteSave(CSaveObjectSave* Object) const
 	Object->BeginChunk("CSE_ALifeTraderAbstract::UPDATE");
 	{}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTraderAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTraderAbstract::UPDATE");
+	{}
+	Object.EndChunk();
 }
 
 
@@ -686,7 +737,7 @@ void CSE_ALifeTrader::UPDATE_Read			(NET_Packet &tNetPacket)
 	inherited2::UPDATE_Read		(tNetPacket);
 };
 
-void CSE_ALifeTrader::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTrader::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTrader::STATE");
 	{
@@ -704,9 +755,19 @@ void CSE_ALifeTrader::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTrader::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTrader::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeTrader::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTrader::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTrader::UPDATE");
 	{
@@ -724,6 +785,16 @@ void CSE_ALifeTrader::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTrader::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTrader::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 bool CSE_ALifeTrader::interactive			() const
@@ -809,13 +880,13 @@ void CSE_ALifeCustomZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeCustomZone::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCustomZone::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCustomZone::STATE");
 	{
 		inherited::STATE_ReadSave(Object);
 		float tmp;
-		Object->GetCurrentChunk()->r_float(tmp /*m_maxPower*/);
+		Object->GetCurrentChunk()->r_float(tmp m_maxPower);
 		Object->GetCurrentChunk()->r_u32(m_owner_id);
 		Object->GetCurrentChunk()->r_u32(m_enabled_time);
 		Object->GetCurrentChunk()->r_u32(m_disabled_time);
@@ -829,16 +900,28 @@ void CSE_ALifeCustomZone::STATE_WriteSave(CSaveObjectSave* Object) const
 	Object->BeginChunk("CSE_ALifeCustomZone::STATE");
 	{
 		inherited::STATE_WriteSave(Object);
-		Object->GetCurrentChunk()->w_float(0.0/*m_maxPower*/);
+		Object->GetCurrentChunk()->w_float(0.0m_maxPower);
 		Object->GetCurrentChunk()->w_u32(m_owner_id);
 		Object->GetCurrentChunk()->w_u32(m_enabled_time);
 		Object->GetCurrentChunk()->w_u32(m_disabled_time);
 		Object->GetCurrentChunk()->w_u32(m_start_time_shift);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCustomZone::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCustomZone::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		//float tmp;
+		//Object->GetCurrentChunk()->r_float(tmp /*m_maxPower*/);
+		Object << m_owner_id << m_enabled_time << m_disabled_time << m_start_time_shift;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeCustomZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCustomZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCustomZone::UPDATE");
 	{
@@ -854,6 +937,15 @@ void CSE_ALifeCustomZone::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCustomZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCustomZone::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -975,7 +1067,7 @@ void CSE_ALifeAnomalousZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write	(tNetPacket);
 }
 
-void CSE_ALifeAnomalousZone::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeAnomalousZone::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeAnomalousZone::STATE");
 	{
@@ -997,9 +1089,19 @@ void CSE_ALifeAnomalousZone::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u32(m_artefact_position_offset);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeAnomalousZone::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeAnomalousZone::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_offline_interactive_radius << m_artefact_spawn_count << m_artefact_position_offset;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeAnomalousZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeAnomalousZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeAnomalousZone::UPDATE");
 	{
@@ -1015,6 +1117,15 @@ void CSE_ALifeAnomalousZone::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeAnomalousZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeAnomalousZone::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1068,7 +1179,7 @@ void CSE_ALifeTorridZone::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited1::UPDATE_Write	(tNetPacket);
 }
 
-void CSE_ALifeTorridZone::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTorridZone::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTorridZone::STATE");
 	{
@@ -1087,9 +1198,20 @@ void CSE_ALifeTorridZone::STATE_WriteSave(CSaveObjectSave* Object) const
 		CSE_Motion::motion_write(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTorridZone::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTorridZone::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		CSE_Motion::motion_serialize(Object);
+		set_editor_flag(flMotionChange);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeTorridZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeTorridZone::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeTorridZone::UPDATE");
 	{
@@ -1105,6 +1227,15 @@ void CSE_ALifeTorridZone::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited1::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeTorridZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeTorridZone::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1162,7 +1293,7 @@ void CSE_ALifeZoneVisual::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited1::UPDATE_Write	(tNetPacket);
 }
 
-void CSE_ALifeZoneVisual::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeZoneVisual::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeZoneVisual::STATE");
 	{
@@ -1184,9 +1315,22 @@ void CSE_ALifeZoneVisual::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_stringZ(attack_animation);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeZoneVisual::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeZoneVisual::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		visual_serialize(Object);
+		Object << startup_animation << attack_animation;
+		//Object->GetCurrentChunk()->r_stringZ(startup_animation);
+		//Object->GetCurrentChunk()->r_stringZ(attack_animation);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeZoneVisual::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeZoneVisual::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeZoneVisual::UPDATE");
 	{
@@ -1202,6 +1346,15 @@ void CSE_ALifeZoneVisual::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited1::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeZoneVisual::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeZoneVisual::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1359,7 +1512,7 @@ void CSE_ALifeCreatureAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 	tNetPacket.r_u8				(s_group);
 };
 
-void CSE_ALifeCreatureAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureAbstract::STATE");
 	{
@@ -1423,9 +1576,46 @@ void CSE_ALifeCreatureAbstract::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u64(m_game_death_time);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureAbstract::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << s_team << s_squad << s_group << fHealth << m_dynamic_out_restrictions << m_dynamic_in_restrictions << m_killer_id;
+		/*Object->GetCurrentChunk()->r_u8(s_team);
+		Object->GetCurrentChunk()->r_u8(s_squad);
+		Object->GetCurrentChunk()->r_u8(s_group);
+		Object->GetCurrentChunk()->r_float(fHealth);
+		Object->GetCurrentChunk()->WriteArray(m_dynamic_out_restrictions.size());
+		{
+			for (auto elem : m_dynamic_out_restrictions) {
+				Object->GetCurrentChunk()->w_u16(elem);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+		Object->GetCurrentChunk()->WriteArray(m_dynamic_in_restrictions.size());
+		{
+			for (auto elem : m_dynamic_in_restrictions) {
+				Object->GetCurrentChunk()->w_u16(elem);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+		Object->GetCurrentChunk()->r_u16(m_killer_id);*/
+		if (Object.IsSave()) {
+			o_model = o_torso.yaw;
+			o_torso.pitch = o_Angle.x;
+			o_torso.yaw = o_Angle.y;
+		}
+		R_ASSERT(!(get_health() > 0.0f && get_killer_id() != u16(-1)));
+		Object << m_game_death_time;
+		//Object->GetCurrentChunk()->r_u64(m_game_death_time);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeCreatureAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureAbstract::UPDATE");
 	{
@@ -1463,6 +1653,27 @@ void CSE_ALifeCreatureAbstract::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8(s_group);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureAbstract::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << fHealth << timestamp << flags << o_Position << o_model << o_torso << s_team << s_squad << s_group;
+		/*Object->GetCurrentChunk()->r_float(fHealth);
+		Object->GetCurrentChunk()->r_u32(timestamp);
+		Object->GetCurrentChunk()->r_u8(flags);
+		Object->GetCurrentChunk()->r_vec3(o_Position);
+		Object->GetCurrentChunk()->r_float(o_model);
+		Object->GetCurrentChunk()->r_float(o_torso.yaw);
+		Object->GetCurrentChunk()->r_float(o_torso.pitch);
+		Object->GetCurrentChunk()->r_float(o_torso.roll);
+		Object->GetCurrentChunk()->r_u8(s_team);
+		Object->GetCurrentChunk()->r_u8(s_squad);
+		Object->GetCurrentChunk()->r_u8(s_group);*/
+	}
+	Object.EndChunk();
 }
 
 u8 CSE_ALifeCreatureAbstract::g_team		()
@@ -1692,7 +1903,7 @@ void CSE_ALifeMonsterAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 
 };
 
-void CSE_ALifeMonsterAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterAbstract::STATE");
 	{
@@ -1716,9 +1927,23 @@ void CSE_ALifeMonsterAbstract::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_bool(m_task_reached);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterAbstract::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		Object << m_out_space_restrictors << m_in_space_restrictors << m_smart_terrain_id << m_task_reached;
+		/*Object->GetCurrentChunk()->w_stringZ(m_out_space_restrictors);
+		Object->GetCurrentChunk()->w_stringZ(m_in_space_restrictors);
+		Object->GetCurrentChunk()->w_u16(m_smart_terrain_id);
+		Object->GetCurrentChunk()->w_bool(m_task_reached);*/
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeMonsterAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterAbstract::UPDATE");
 	{
@@ -1742,6 +1967,20 @@ void CSE_ALifeMonsterAbstract::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_float(m_fDistanceToPoint);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterAbstract::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		Object << m_tNextGraphID << m_tPrevGraphID << m_fDistanceFromPoint << m_fDistanceToPoint;
+		//Object->GetCurrentChunk()->r_u16(m_tNextGraphID);
+		//Object->GetCurrentChunk()->r_u16(m_tPrevGraphID);
+		//Object->GetCurrentChunk()->r_float(m_fDistanceFromPoint);
+		//Object->GetCurrentChunk()->r_float(m_fDistanceToPoint);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1959,7 +2198,7 @@ void CSE_ALifeCreatureActor::UPDATE_Write	(NET_Packet	&tNetPacket)
 	};
 }
 
-void CSE_ALifeCreatureActor::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureActor::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureActor::STATE");
 	{
@@ -1981,9 +2220,21 @@ void CSE_ALifeCreatureActor::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u16(m_holderID);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureActor::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureActor::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		inherited3::STATE_Serialize(Object);
+		Object << m_holderID;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeCreatureActor::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureActor::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureActor::UPDATE");
 	{
@@ -2087,6 +2338,66 @@ void CSE_ALifeCreatureActor::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->EndChunk();
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureActor::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureActor::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		inherited3::UPDATE_Serialize(Object);
+		Object << mstate << accel << velocity << fRadiation << weapon;
+		//Object->GetCurrentChunk()->r_u16(mstate);
+		//Object->GetCurrentChunk()->r_vec3(accel);
+		//Object->GetCurrentChunk()->r_vec3(velocity);
+		//Object->GetCurrentChunk()->r_float(fRadiation);
+		//Object->GetCurrentChunk()->r_u8(weapon);
+		////////////////////////////////////////////////////
+		//Object->GetCurrentChunk()->r_u16(m_u16NumItems);
+		Object.BeginChunk("CSE_ALifeCreatureActor::UPDATE::m_u16NumItems");
+		if (m_u16NumItems) {
+			Object.BeginChunk("CSE_ALifeCreatureActor::UPDATE::m_u16NumItems::eq1");
+			if (m_u16NumItems == 1)
+			{
+				Object << m_AliveState.enabled << m_AliveState.angular_vel << m_AliveState.linear_vel << m_AliveState.force 
+					<< m_AliveState.torque << m_AliveState.position << m_AliveState.quaternion;
+				/*Object->GetCurrentChunk()->r_bool(m_AliveState.enabled);
+				Object->GetCurrentChunk()->r_vec3(m_AliveState.angular_vel);
+				Object->GetCurrentChunk()->r_vec3(m_AliveState.linear_vel);
+				Object->GetCurrentChunk()->r_vec3(m_AliveState.force);
+				Object->GetCurrentChunk()->r_vec3(m_AliveState.torque);
+				Object->GetCurrentChunk()->r_vec3(m_AliveState.position);
+				Object->GetCurrentChunk()->r_float(m_AliveState.quaternion.x);
+				Object->GetCurrentChunk()->r_float(m_AliveState.quaternion.y);
+				Object->GetCurrentChunk()->r_float(m_AliveState.quaternion.z);
+				Object->GetCurrentChunk()->r_float(m_AliveState.quaternion.w);*/
+			};
+			Object.EndChunk();
+			////////////// Export dead body ////////////////////
+			Object.BeginChunk("CSE_ALifeCreatureActor::UPDATE::m_u16NumItems::dead_body");
+			if (m_u16NumItems > 1) {
+				Object << m_BoneDataSize;
+				VERIFY(m_BoneDataSize <= 1024);
+				Object << m_DeadBodyData;
+				/*Object->GetCurrentChunk()->r_u8(m_BoneDataSize);
+				u64 BodyDataSize;
+				Object->GetCurrentChunk()->ReadArray(BodyDataSize);
+				{
+					VERIFY(BodyDataSize == 24 + m_BoneDataSize * m_u16NumItems && BodyDataSize <= 1024);
+					for (u64 i = 0; i < BodyDataSize; ++i) {
+						s8 Value;
+						Object->GetCurrentChunk()->r_s8(Value);
+						m_DeadBodyData[i] = Value;
+					}
+				}
+				Object->GetCurrentChunk()->EndArray();*/
+			}
+			Object.EndChunk();
+		}
+		Object.EndChunk();
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2144,7 +2455,7 @@ void CSE_ALifeCreatureCrow::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeCreatureCrow::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureCrow::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureCrow::STATE");
 	{
@@ -2160,9 +2471,18 @@ void CSE_ALifeCreatureCrow::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureCrow::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureCrow::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeCreatureCrow::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreatureCrow::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreatureCrow::UPDATE");
 	{
@@ -2178,6 +2498,15 @@ void CSE_ALifeCreatureCrow::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreatureCrow::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreatureCrow::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2228,7 +2557,7 @@ void CSE_ALifeCreaturePhantom::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeCreaturePhantom::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreaturePhantom::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreaturePhantom::STATE");
 	{
@@ -2244,9 +2573,18 @@ void CSE_ALifeCreaturePhantom::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreaturePhantom::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreaturePhantom::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeCreaturePhantom::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeCreaturePhantom::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeCreaturePhantom::UPDATE");
 	{
@@ -2262,6 +2600,15 @@ void CSE_ALifeCreaturePhantom::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeCreaturePhantom::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeCreaturePhantom::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2384,7 +2731,7 @@ void CSE_ALifeMonsterRat::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited2::UPDATE_Write	(tNetPacket);
 }
 
-void CSE_ALifeMonsterRat::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterRat::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterRat::STATE");
 	{
@@ -2446,9 +2793,46 @@ void CSE_ALifeMonsterRat::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_float(fAttackSuccessProbability);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterRat::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterRat::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << fEyeFov << fEyeRange << fMinSpeed << fMaxSpeed << fAttackSpeed << fMaxPursuitRadius
+			<< fMaxHomeRadius << fMoraleSuccessAttackQuant << fMoraleDeathQuant << fMoraleFearQuant
+			<< fMoraleRestoreQuant << u16MoraleRestoreTimeInterval << fMoraleMinValue << fMoraleMaxValue
+			<< fMoraleNormalValue << fHitPower << u16HitInterval << fAttackDistance << fAttackAngle 
+			<< fAttackSuccessProbability;
+		//Object->GetCurrentChunk()->r_float(fEyeFov);
+		//Object->GetCurrentChunk()->r_float(fEyeRange);
+		//Object->GetCurrentChunk()->r_float(fMinSpeed);
+		//Object->GetCurrentChunk()->r_float(fMaxSpeed);
+		//Object->GetCurrentChunk()->r_float(fAttackSpeed);
+		//Object->GetCurrentChunk()->r_float(fMaxPursuitRadius);
+		//Object->GetCurrentChunk()->r_float(fMaxHomeRadius);
+		// morale
+		//Object->GetCurrentChunk()->r_float(fMoraleSuccessAttackQuant);
+		//Object->GetCurrentChunk()->r_float(fMoraleDeathQuant);
+		//Object->GetCurrentChunk()->r_float(fMoraleFearQuant);
+		//Object->GetCurrentChunk()->r_float(fMoraleRestoreQuant);
+		//Object->GetCurrentChunk()->r_u16(u16MoraleRestoreTimeInterval);
+		//Object->GetCurrentChunk()->r_float(fMoraleMinValue);
+		//Object->GetCurrentChunk()->r_float(fMoraleMaxValue);
+		//Object->GetCurrentChunk()->r_float(fMoraleNormalValue);
+		// attack
+		//Object->GetCurrentChunk()->r_float(fHitPower);
+		//Object->GetCurrentChunk()->r_u16(u16HitInterval);
+		//Object->GetCurrentChunk()->r_float(fAttackDistance);
+		//Object->GetCurrentChunk()->r_float(fAttackAngle);
+		//Object->GetCurrentChunk()->r_float(fAttackSuccessProbability);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeMonsterRat::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterRat::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterRat::UPDATE");
 	{
@@ -2466,6 +2850,16 @@ void CSE_ALifeMonsterRat::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterRat::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterRat::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 CSE_Abstract *CSE_ALifeMonsterRat::init			()
@@ -2599,7 +2993,7 @@ void CSE_ALifeMonsterZombie::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeMonsterZombie::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterZombie::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterZombie::STATE");
 	{
@@ -2641,9 +3035,33 @@ void CSE_ALifeMonsterZombie::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_float(fAttackAngle);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterZombie::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterZombie::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << fEyeFov << fEyeRange << fMinSpeed << fMaxSpeed << fAttackSpeed << fMaxPursuitRadius
+			<< fMaxHomeRadius << fHitPower << u16HitInterval << fAttackDistance << fAttackAngle;
+		// personal characteristics
+		//Object->GetCurrentChunk()->r_float(fEyeFov);
+		//Object->GetCurrentChunk()->r_float(fEyeRange);
+		//Object->GetCurrentChunk()->r_float(fMinSpeed);
+		//Object->GetCurrentChunk()->r_float(fMaxSpeed);
+		//Object->GetCurrentChunk()->r_float(fAttackSpeed);
+		//Object->GetCurrentChunk()->r_float(fMaxPursuitRadius);
+		//Object->GetCurrentChunk()->r_float(fMaxHomeRadius);
+		// attack
+		//Object->GetCurrentChunk()->r_float(fHitPower);
+		//Object->GetCurrentChunk()->r_u16(u16HitInterval);
+		//Object->GetCurrentChunk()->r_float(fAttackDistance);
+		//Object->GetCurrentChunk()->r_float(fAttackAngle);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeMonsterZombie::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterZombie::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterZombie::UPDATE");
 	{
@@ -2659,6 +3077,15 @@ void CSE_ALifeMonsterZombie::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterZombie::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterZombie::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2804,7 +3231,7 @@ void CSE_ALifeMonsterBase::UPDATE_Write(NET_Packet& tNetPacket)
 	inherited2::UPDATE_Write(tNetPacket);
 }
 
-void CSE_ALifeMonsterBase::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterBase::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterBase::STATE");
 	{
@@ -2824,9 +3251,20 @@ void CSE_ALifeMonsterBase::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u16(m_spec_object_id);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterBase::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterBase::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << m_spec_object_id;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeMonsterBase::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeMonsterBase::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeMonsterBase::UPDATE");
 	{
@@ -2905,6 +3343,44 @@ void CSE_ALifeMonsterBase::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeMonsterBase::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeMonsterBase::UPDATE");
+	{
+#ifdef XRGAME_EXPORTS
+		if (g_pGamePersistent->GameType() != eGameIDSingle)
+		{
+			Object << o_torso.pitch << o_torso.yaw << phSyncFlag;
+			if (phSyncFlag) {
+				physics_state->serialize(Object);
+			}
+			else {
+				Object << o_Position;
+			}
+			// Sound Sync
+			{
+				u8* Value = (u8*)&m_snd_sync_flag;
+				Object << *Value;
+			}
+			if (m_snd_sync_flag != eMonsterSound::monster_sound_no) {
+				Object << m_snd_sync_sound;
+				if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
+					Object << m_snd_sync_sound_delay;
+				}
+			}
+			// Sound Sync
+			Object << u_motion_idx << u_motion_slot << f_health;
+			set_health(f_health);
+			return;
+		}
+#endif
+
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 BOOL CSE_ALifeMonsterBase::Net_Relevant() 
@@ -2962,20 +3438,29 @@ void CSE_ALifePsyDogPhantom::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifePsyDogPhantom::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifePsyDogPhantom::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
+}
+
+/*void CSE_ALifePsyDogPhantom::STATE_WriteSave(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CSE_ALifePsyDogPhantom::STATE");
+	{
+		inherited::STATE_WriteSave(Object);
+	}
+	Object->EndChunk();
+}
+
 void CSE_ALifePsyDogPhantom::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifePsyDogPhantom::STATE");
 	{
 		inherited::STATE_ReadSave(Object);
-	}
-	Object->EndChunk();
-}
-
-void CSE_ALifePsyDogPhantom::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_ALifePsyDogPhantom::STATE");
-	{
-		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
 }
@@ -2996,6 +3481,15 @@ void CSE_ALifePsyDogPhantom::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifePsyDogPhantom::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifePsyDogPhantom::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -3074,7 +3568,7 @@ void CSE_ALifeHumanAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 	}
 };
 
-void CSE_ALifeHumanAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeHumanAbstract::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeHumanAbstract::STATE");
 	{
@@ -3094,9 +3588,20 @@ void CSE_ALifeHumanAbstract::STATE_WriteSave(CSaveObjectSave* Object) const
 		brain().on_state_write(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeHumanAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeHumanAbstract::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		brain().on_state_serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeHumanAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeHumanAbstract::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeHumanAbstract::UPDATE");
 	{
@@ -3114,6 +3619,16 @@ void CSE_ALifeHumanAbstract::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeHumanAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeHumanAbstract::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -3175,7 +3690,7 @@ void CSE_ALifeHumanStalker::load			(NET_Packet &tNetPacket)
 	inherited2::load			(tNetPacket);
 }
 
-void CSE_ALifeHumanStalker::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeHumanStalker::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeHumanStalker::STATE");
 	{
@@ -3193,9 +3708,19 @@ void CSE_ALifeHumanStalker::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeHumanStalker::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeHumanStalker::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeHumanStalker::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeHumanStalker::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeHumanStalker::UPDATE");
 	{
@@ -3215,6 +3740,17 @@ void CSE_ALifeHumanStalker::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_stringZ(m_start_dialog);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeHumanStalker::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeHumanStalker::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		Object << m_start_dialog;
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -3315,7 +3851,7 @@ void CSE_ALifeOnlineOfflineGroup::UPDATE_Read				(NET_Packet &tNetPacket)
 	inherited1::UPDATE_Read		(tNetPacket);
 }
 
-void CSE_ALifeOnlineOfflineGroup::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeOnlineOfflineGroup::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::STATE");
 	{
@@ -3347,9 +3883,36 @@ void CSE_ALifeOnlineOfflineGroup::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->EndArray();
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeOnlineOfflineGroup::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeOnlineOfflineGroup::STATE");
+	{
+		((CSaveObject&)Object).Serialize(m_members, fastdelegate::MakeDelegate(this, &CSE_ALifeOnlineOfflineGroup::STATE_SerializePerElem));
+		/*u64 ArraySize;
+		Object->GetCurrentChunk()->ReadArray(ArraySize);
+		{
+			for (u64 i = 0; i < ArraySize; ++i) {
+				MEMBERS::value_type		pair;
+				Object->GetCurrentChunk()->r_u16(pair.first);
+				pair.second = 0;
+				m_members.insert(pair);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();*/
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeOnlineOfflineGroup::UPDATE_ReadSave(CSaveObjectLoad* Object)
+void CSE_ALifeOnlineOfflineGroup::STATE_SerializePerElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, MEMBER*>& Value) {
+	Object << Value.first;
+	if (!Object.IsSave()) {
+		Value.second = nullptr;
+	}
+}
+
+/*void CSE_ALifeOnlineOfflineGroup::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeOnlineOfflineGroup::UPDATE");
 	{
@@ -3365,6 +3928,15 @@ void CSE_ALifeOnlineOfflineGroup::UPDATE_WriteSave(CSaveObjectSave* Object) cons
 		inherited1::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeOnlineOfflineGroup::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeOnlineOfflineGroup::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS

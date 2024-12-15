@@ -68,7 +68,7 @@ void CScriptBinderObject::load				(IReader	*input_packet)
 //{
 //}
 
-void CScriptBinderObject::Serialize(ISaveObject* Object)
+void CScriptBinderObject::Serialize(ISaveObject& Object)
 {
 }
 

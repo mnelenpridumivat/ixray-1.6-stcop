@@ -479,7 +479,7 @@ void CSE_Abstract::load_update				(NET_Packet &tNetPacket)
 }
 /**/
 
-bool CSE_Abstract::Spawn_Read(CSaveObjectLoad* Object)
+/*bool CSE_Abstract::Spawn_Read(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_Abstract");
 	{
@@ -512,10 +512,10 @@ bool CSE_Abstract::Spawn_Read(CSaveObjectLoad* Object)
 #ifndef XRGAME_EXPORTS
 #else
 				// TODO: Implement spawn of client object here
-				/*auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-				if (Obj) {
-					Obj->Load(Object);
-				}*/
+				//auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+				//if (Obj) {
+				//	Obj->Load(Object);
+				//}
 #endif
 			}
 		}
@@ -593,7 +593,7 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}
 	Object->EndChunk();
-}
+}*/
 
 bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal) 
 {
@@ -648,7 +648,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 		//Object->GetCurrentChunk()->w_u16(m_gameType.m_GameType.get());
 		//Object->GetCurrentChunk()->w_u16(script_server_object_version());
 
-		Object->BeginChunk("CSE_Abstract::ClientObject");
+		Object.BeginChunk("CSE_Abstract::ClientObject");
 		{
 			bool HasClientData;
 #ifndef XRGAME_EXPORTS
@@ -659,27 +659,32 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 #endif
 			Object << HasClientData;
 #ifdef XRGAME_EXPORTS
-			HasClientData = true;
-			//Object->GetCurrentChunk()->w_bool(true);
-			auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-			if (Obj) {
-				Obj->Save(Object);
+			if (HasClientData) {
+				if (Object.IsSave()) {
+					auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+					if (Obj) {
+						Obj->Serialize(Object);
+					}
+				}
+				else {
+					// TODO: Implement spawn of client object here
+					/*auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+					if (Obj) {
+						Obj->Load(Object);
+					}*/
+				}
 			}
 #endif
 		}
-		Object->EndChunk();
+		Object.EndChunk();
 
-		Object->GetCurrentChunk()->w_u16(m_tSpawnID);
+		Object << m_tSpawnID;
 
 #ifdef XRSE_FACTORY_EXPORTS
-		{
-			// HACK: because all save functions of new system tend to be const and assign function cannot be const
-			auto MutableThis = (CSE_Abstract*)this;
-			MutableThis->assign();
-		}
+		assign();
 #endif
 
-		STATE_WriteSave(Object);
+		STATE_Serialize(Object);
 		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
 		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}

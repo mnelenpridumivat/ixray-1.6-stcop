@@ -8,8 +8,6 @@
 
 #pragma once
 
-//#include "shapedata.h"
-
 class CSE_ALifeSpaceRestrictor;
 class ILevelGraph;
 class CGraphEngineEditor;

@@ -46,8 +46,9 @@ SERVER_ENTITY_DECLARE_BEGIN(CPureServerObject,IPureServerObject)
 	virtual void					save(IWriter	&tMemoryStream);
 	virtual void					load(NET_Packet	&tNetPacket);
 	virtual void					save(NET_Packet	&tNetPacket);
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(CSaveObject& Object);
 };
 
 SERVER_ENTITY_DECLARE_BEGIN3(CSE_Abstract,ISE_Abstract,CPureServerObject,CScriptValueContainer)

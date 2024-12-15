@@ -1,5 +1,5 @@
-#ifndef ShapeDataH
-#define ShapeDataH
+#pragma once
+#include "Save/SaveInterface.h"
 
 struct CShapeData
 {
@@ -24,4 +24,17 @@ struct CShapeData
 	ShapeVec						shapes;
 };
 
-#endif
+ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value) {
+	Object << Value.type;
+	switch (Value.type) {
+	case CShapeData::cfSphere: {
+		Object << Value.data.sphere;
+		break;
+	}
+	case CShapeData::cfBox: {
+		Object << Value.data.box;
+		break;
+	}
+	}
+	return Object;
+}

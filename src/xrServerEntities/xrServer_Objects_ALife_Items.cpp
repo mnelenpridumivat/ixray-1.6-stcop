@@ -11,6 +11,8 @@
 #include "xrServer_Objects_ALife_Items.h"
 #include "clsid_game.h"
 #include "object_broker.h"
+#include "Save/SaveObject.h"
+#include "shared_string.h"
 
 #ifndef XRGAME_EXPORTS
 #	include "bone.h"
@@ -276,7 +278,7 @@ void CSE_ALifeInventoryItem::UPDATE_Read	(NET_Packet &tNetPacket)
 	}
 };
 
-void CSE_ALifeInventoryItem::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeInventoryItem::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeInventoryItem::STATE");
 	{
@@ -316,9 +318,31 @@ void CSE_ALifeInventoryItem::STATE_WriteSave(CSaveObjectSave* Object) const
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeInventoryItem::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeInventoryItem::STATE");
+	{
+		Object << m_fCondition << m_upgrades;
+		/*Object->GetCurrentChunk()->r_float(m_fCondition);
+		{
+			m_upgrades.clear();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (u64 i = 0; i < ArraySize; ++i) {
+				shared_str Value;
+				Object->GetCurrentChunk()->r_stringZ(Value);
+				m_upgrades.push_back(Value);
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();*/
+		State.position = base()->o_Position;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeInventoryItem::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeInventoryItem::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeInventoryItem::UPDATE");
 	{
@@ -439,6 +463,98 @@ void CSE_ALifeInventoryItem::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_bool(true);	// not freezed - doesn't mean anything...
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeInventoryItem::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeInventoryItem::UPDATE");
+	{
+		if (!Object.IsSave()) {
+			Object << m_u8NumItems;
+		}
+		//Object->GetCurrentChunk()->r_u8(m_u8NumItems);
+		if (!m_u8NumItems) {
+			Object.EndChunk();
+			return;
+		}
+		if (Object.IsSave()) {
+			Object << m_u8NumItems;
+		}
+
+		//mask_num_items					num_items;
+		//num_items.common = m_u8NumItems;
+		//m_u8NumItems = num_items.num_items;
+
+		//R_ASSERT2(
+		//	m_u8NumItems < (u8(1) << 5),
+		//	make_string<const char*>("%d", m_u8NumItems)
+		//);
+
+		bool EnabledAngularVel = State.angular_vel.square_magnitude();
+		bool EnabledLinearVel = State.linear_vel.square_magnitude();
+		Object << State.enabled << EnabledAngularVel << EnabledLinearVel << State.force << State.torque << State.position;
+
+		//Object->GetCurrentChunk()->r_vec3(State.force);
+		//Object->GetCurrentChunk()->r_vec3(State.torque);
+		//Object->GetCurrentChunk()->r_vec3(State.position);
+		base()->o_Position.set(State.position); //this is very important because many functions use this o_Position..
+		Object << State.quaternion;
+		//Object->GetCurrentChunk()->r_float(State.quaternion.x);
+		//Object->GetCurrentChunk()->r_float(State.quaternion.y);
+		//Object->GetCurrentChunk()->r_float(State.quaternion.z);
+		//Object->GetCurrentChunk()->r_float(State.quaternion.w);
+		//State.enabled = check1(num_items.mask, inventory_item_state_enabled);
+
+		Object.BeginChunk("CSE_ALifeInventoryItem::UPDATE::item_angular");
+		if (EnabledAngularVel) {
+			Object << State.angular_vel;
+			//Object->GetCurrentChunk()->r_float(State.angular_vel.x);
+			//Object->GetCurrentChunk()->r_float(State.angular_vel.y);
+			//Object->GetCurrentChunk()->r_float(State.angular_vel.z);
+		}
+		else {
+			State.angular_vel.set(0.f, 0.f, 0.f);
+		}
+		Object.EndChunk();
+		Object.BeginChunk("CSE_ALifeInventoryItem::UPDATE::item_linear");
+		if (EnabledLinearVel) {
+			Object << State.linear_vel;
+			//Object->GetCurrentChunk()->r_float(State.linear_vel.x);
+			//Object->GetCurrentChunk()->r_float(State.linear_vel.y);
+			//Object->GetCurrentChunk()->r_float(State.linear_vel.z);
+		}
+		else {
+			State.linear_vel.set(0.f, 0.f, 0.f);
+		}
+		Object.EndChunk();
+		{
+			bool Value;
+			if (Object.IsSave()) {
+				Value = true;
+				Object << Value;
+			}
+			else {
+				prev_freezed = freezed;
+				bool Value;
+				Object << Value;
+				if (Value)
+				{
+					freezed = false;
+				}
+				else {
+					if (!freezed) {
+#ifdef XRGAME_EXPORTS
+						m_freeze_time = Device.dwTimeGlobal;
+#else
+						m_freeze_time = 0;
+#endif
+					}
+					freezed = true;
+				}
+			}
+		}
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -542,7 +658,7 @@ void CSE_ALifeItem::UPDATE_Read				(NET_Packet &tNetPacket)
 	m_physics_disabled			= false;
 };
 
-void CSE_ALifeItem::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItem::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItem::STATE");
 	{
@@ -560,9 +676,19 @@ void CSE_ALifeItem::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited2::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItem::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItem::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItem::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItem::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItem::UPDATE");
 	{
@@ -590,6 +716,22 @@ void CSE_ALifeItem::UPDATE_WriteSave(CSaveObjectSave* Object) const
 #endif // XRGAME_EXPORTS
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItem::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItem::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		if (!Object.IsSave()) {
+			m_physics_disabled = false;
+		}
+		else {
+			m_last_update_time = Device.dwTimeGlobal;
+		}
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -638,9 +780,10 @@ void CSE_ALifeItem::OnEvent					(NET_Packet &tNetPacket, u16 type, u32 time, Cli
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemTorch::CSE_ALifeItemTorch		(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-	m_active					= false;
-	m_nightvision_active		= false;
-	m_attached					= false;
+	m_Stats.zero();
+	//m_active					= false;
+	//m_nightvision_active		= false;
+	//m_attached					= false;
 }
 
 CSE_ALifeItemTorch::~CSE_ALifeItemTorch		()
@@ -649,7 +792,7 @@ CSE_ALifeItemTorch::~CSE_ALifeItemTorch		()
 
 BOOL	CSE_ALifeItemTorch::Net_Relevant			()
 {
-	if (m_attached) return true;
+	if (m_flags.test(eAttached)) return true;
 	return inherited::Net_Relevant();
 }
 
@@ -669,24 +812,25 @@ void CSE_ALifeItemTorch::UPDATE_Read		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
 	
-	BYTE F = tNetPacket.r_u8();
+	tNetPacket.r_u8(m_Stats.flags);
+	/*BYTE F = tNetPacket.r_u8();
 	m_active					= !!(F & eTorchActive);
 	m_nightvision_active		= !!(F & eNightVisionActive);
-	m_attached					= !!(F & eAttached);
+	m_attached					= !!(F & eAttached);*/
 }
 
 void CSE_ALifeItemTorch::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
 
-	BYTE F = 0;
+	/*BYTE F = 0;
 	F |= (m_active ? eTorchActive : 0);
 	F |= (m_nightvision_active ? eNightVisionActive : 0);
-	F |= (m_attached ? eAttached : 0);
-	tNetPacket.w_u8(F);
+	F |= (m_attached ? eAttached : 0);*/
+	tNetPacket.w_u8(m_Stats.flags);
 }
 
-void CSE_ALifeItemTorch::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemTorch::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemTorch::STATE");
 	{
@@ -702,9 +846,18 @@ void CSE_ALifeItemTorch::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemTorch::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemTorch::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemTorch::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemTorch::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemTorch::UPDATE");
 	{
@@ -732,6 +885,23 @@ void CSE_ALifeItemTorch::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8(F);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemTorch::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemTorch::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+
+		Object << m_Stats;
+
+		/*BYTE F;
+		Object->GetCurrentChunk()->r_u8(F);
+		m_active = !!(F & eTorchActive);
+		m_nightvision_active = !!(F & eNightVisionActive);
+		m_attached = !!(F & eAttached);*/
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -868,7 +1038,7 @@ void CSE_ALifeItemWeapon::STATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_u8				(cur_scope);
 }
 
-void CSE_ALifeItemWeapon::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeapon::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeapon::STATE");
 	{
@@ -906,9 +1076,38 @@ void CSE_ALifeItemWeapon::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8(cur_scope);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeapon::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeapon::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << a_current << a_elapsed << wpn_state << m_addon_flags << ammo_type << misfire << rt_zoom_factor << cur_scope;
+		/*Object->GetCurrentChunk()->r_u16(a_current);
+		Object->GetCurrentChunk()->r_u16(a_elapsed);
+		Object->GetCurrentChunk()->r_u8(wpn_state);
+		Object->GetCurrentChunk()->r_u8(m_addon_flags.flags);
+		Object->GetCurrentChunk()->r_u8(ammo_type);
+		Object->GetCurrentChunk()->r_u8(misfire);
+		Object->GetCurrentChunk()->r_float(rt_zoom_factor);
+		Object->GetCurrentChunk()->r_u8(cur_scope);*/
+		{
+			u8 Value;
+			if (Object.IsSave()) {
+				Value = a_elapsed_grenades.pack_to_byte();
+				Object << Value;
+			}
+			else {
+				Object << Value;
+				a_elapsed_grenades.unpack_from_byte(Value);
+			}
+		}
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemWeapon::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeapon::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeapon::UPDATE");
 	{
@@ -944,6 +1143,26 @@ void CSE_ALifeItemWeapon::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8(cur_scope);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeapon::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeapon::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << m_fCondition << wpn_flags << a_elapsed << m_addon_flags << ammo_type << wpn_state << m_bZoom << misfire << rt_zoom_factor << cur_scope;
+		/*Object->GetCurrentChunk()->r_float(m_fCondition);
+		Object->GetCurrentChunk()->r_u8(wpn_flags);
+		Object->GetCurrentChunk()->r_u16(a_elapsed);
+		Object->GetCurrentChunk()->r_u8(m_addon_flags.flags);
+		Object->GetCurrentChunk()->r_u8(ammo_type);
+		Object->GetCurrentChunk()->r_u8(wpn_state);
+		Object->GetCurrentChunk()->r_u8(m_bZoom);
+		Object->GetCurrentChunk()->r_u8(misfire);
+		Object->GetCurrentChunk()->r_float(rt_zoom_factor);
+		Object->GetCurrentChunk()->r_u8(cur_scope);*/
+	}
+	Object.EndChunk();
 }
 
 void CSE_ALifeItemWeapon::OnEvent			(NET_Packet	&tNetPacket, u16 type, u32 time, ClientID sender )
@@ -1061,7 +1280,7 @@ void CSE_ALifeItemWeaponShotGun::STATE_Write		(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
-void CSE_ALifeItemWeaponShotGun::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponShotGun::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponShotGun::STATE");
 	{
@@ -1095,9 +1314,31 @@ void CSE_ALifeItemWeaponShotGun::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->EndArray();
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponShotGun::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponShotGun::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+
+		Object << m_AmmoIDs;
+
+		/*m_AmmoIDs.clear();
+		u64 AmmoCount;
+		Object->GetCurrentChunk()->ReadArray(AmmoCount);
+		for (u64 i = 0; i < AmmoCount; i++)
+		{
+			u8 Value;
+			Object->GetCurrentChunk()->r_u8(Value);
+			m_AmmoIDs.push_back(Value);
+		}
+		Object->GetCurrentChunk()->EndArray();*/
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemWeaponShotGun::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponShotGun::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponShotGun::UPDATE");
 	{
@@ -1113,6 +1354,15 @@ void CSE_ALifeItemWeaponShotGun::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponShotGun::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponShotGun::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1149,7 +1399,7 @@ void CSE_ALifeItemWeaponAutoShotGun::STATE_Write	(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
-void CSE_ALifeItemWeaponAutoShotGun::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponAutoShotGun::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponAutoShotGun::STATE");
 	{
@@ -1167,9 +1417,19 @@ void CSE_ALifeItemWeaponAutoShotGun::STATE_WriteSave(CSaveObjectSave* Object) co
 		Object->GetCurrentChunk()->w_u8(m_u8CurFireMode);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponAutoShotGun::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponAutoShotGun::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_u8CurFireMode;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemWeaponAutoShotGun::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponAutoShotGun::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponAutoShotGun::UPDATE");
 	{
@@ -1185,6 +1445,15 @@ void CSE_ALifeItemWeaponAutoShotGun::UPDATE_WriteSave(CSaveObjectSave* Object) c
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponAutoShotGun::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponAutoShotGun::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1226,7 +1495,7 @@ void CSE_ALifeItemWeaponMagazined::STATE_Write		(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
-void CSE_ALifeItemWeaponMagazined::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponMagazined::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponMagazined::STATE");
 	{
@@ -1244,9 +1513,19 @@ void CSE_ALifeItemWeaponMagazined::STATE_WriteSave(CSaveObjectSave* Object) cons
 		Object->GetCurrentChunk()->w_u8(m_u8CurFireMode);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponMagazined::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponMagazined::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_u8CurFireMode;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemWeaponMagazined::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponMagazined::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponMagazined::UPDATE");
 	{
@@ -1262,6 +1541,15 @@ void CSE_ALifeItemWeaponMagazined::UPDATE_WriteSave(CSaveObjectSave* Object) con
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponMagazined::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponMagazined::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1299,7 +1587,7 @@ void CSE_ALifeItemFlamethrower::STATE_Write(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
-void CSE_ALifeItemFlamethrower::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemFlamethrower::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemFlamethrower::STATE");
 	{
@@ -1315,9 +1603,18 @@ void CSE_ALifeItemFlamethrower::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemFlamethrower::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemFlamethrower::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemFlamethrower::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemFlamethrower::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemFlamethrower::UPDATE");
 	{
@@ -1333,6 +1630,15 @@ void CSE_ALifeItemFlamethrower::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemFlamethrower::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemFlamethrower::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1375,7 +1681,7 @@ void CSE_ALifeItemWeaponMagazinedWGL::STATE_Write		(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
-void CSE_ALifeItemWeaponMagazinedWGL::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponMagazinedWGL::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponMagazinedWGL::STATE");
 	{
@@ -1393,9 +1699,19 @@ void CSE_ALifeItemWeaponMagazinedWGL::STATE_WriteSave(CSaveObjectSave* Object) c
 		Object->GetCurrentChunk()->w_bool(m_bGrenadeMode);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponMagazinedWGL::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponMagazinedWGL::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_bGrenadeMode;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemWeaponMagazinedWGL::UPDATE");
 	{
@@ -1411,6 +1727,15 @@ void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_WriteSave(CSaveObjectSave* Object) 
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemWeaponMagazinedWGL::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1460,7 +1785,7 @@ void CSE_ALifeItemAmmo::UPDATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_u16			(a_elapsed);
 }
 
-void CSE_ALifeItemAmmo::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemAmmo::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemAmmo::STATE");
 	{
@@ -1476,9 +1801,18 @@ void CSE_ALifeItemAmmo::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemAmmo::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemAmmo::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemAmmo::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemAmmo::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemAmmo::UPDATE");
 	{
@@ -1494,6 +1828,15 @@ void CSE_ALifeItemAmmo::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemAmmo::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemAmmo::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1546,7 +1889,7 @@ void CSE_ALifeItemFuel::UPDATE_Write(NET_Packet& tNetPacket)
 	inherited::UPDATE_Write(tNetPacket);
 }
 
-void CSE_ALifeItemFuel::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemFuel::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemFuel::STATE");
 	{
@@ -1562,9 +1905,18 @@ void CSE_ALifeItemFuel::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemFuel::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemFuel::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemFuel::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemFuel::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemFuel::UPDATE");
 	{
@@ -1580,6 +1932,15 @@ void CSE_ALifeItemFuel::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemFuel::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemFuel::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1636,7 +1997,7 @@ void CSE_ALifeItemDetector::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemDetector::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemDetector::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemDetector::STATE");
 	{
@@ -1652,9 +2013,18 @@ void CSE_ALifeItemDetector::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemDetector::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemDetector::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemDetector::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemDetector::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemDetector::UPDATE");
 	{
@@ -1670,6 +2040,15 @@ void CSE_ALifeItemDetector::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemDetector::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemDetector::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1711,7 +2090,7 @@ void CSE_ALifeItemArtefact::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemArtefact::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemArtefact::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemArtefact::STATE");
 	{
@@ -1727,9 +2106,18 @@ void CSE_ALifeItemArtefact::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemArtefact::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemArtefact::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemArtefact::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemArtefact::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemArtefact::UPDATE");
 	{
@@ -1745,6 +2133,15 @@ void CSE_ALifeItemArtefact::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemArtefact::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemArtefact::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1827,7 +2224,7 @@ void CSE_ALifeItemPDA::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemPDA::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemPDA::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemPDA::STATE");
 	{
@@ -1856,9 +2253,29 @@ void CSE_ALifeItemPDA::STATE_WriteSave(CSaveObjectSave* Object) const
 #endif
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemPDA::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemPDA::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_original_owner;
+#ifdef XRGAME_EXPORTS
+		Object << m_specific_character << m_info_portion;
+#else
+		shared_str tmp_1 = nullptr;
+		shared_str tmp_2 = nullptr;
+		Object << tmp_1 << tmp_2;
+#endif
+		/*Object->GetCurrentChunk()->r_u16(m_original_owner);
+		Object->GetCurrentChunk()->r_stringZ(m_specific_character);
+		Object->GetCurrentChunk()->r_stringZ(m_info_portion);*/
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemPDA::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemPDA::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemPDA::UPDATE");
 	{
@@ -1874,6 +2291,15 @@ void CSE_ALifeItemPDA::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemPDA::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemPDA::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1923,7 +2349,7 @@ void CSE_ALifeItemDocument::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemDocument::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemDocument::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemDocument::STATE");
 	{
@@ -1941,9 +2367,19 @@ void CSE_ALifeItemDocument::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_stringZ(m_wDoc);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemDocument::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemDocument::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_wDoc;
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemDocument::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemDocument::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemDocument::UPDATE");
 	{
@@ -1959,6 +2395,15 @@ void CSE_ALifeItemDocument::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemDocument::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemDocument::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2008,7 +2453,7 @@ void CSE_ALifeItemGrenade::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemGrenade::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemGrenade::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemGrenade::STATE");
 	{
@@ -2024,9 +2469,18 @@ void CSE_ALifeItemGrenade::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemGrenade::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemGrenade::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemGrenade::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemGrenade::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemGrenade::UPDATE");
 	{
@@ -2042,6 +2496,15 @@ void CSE_ALifeItemGrenade::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemGrenade::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemGrenade::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2082,7 +2545,7 @@ void CSE_ALifeItemExplosive::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
-void CSE_ALifeItemExplosive::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemExplosive::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemExplosive::STATE");
 	{
@@ -2098,9 +2561,18 @@ void CSE_ALifeItemExplosive::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemExplosive::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemExplosive::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemExplosive::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemExplosive::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemExplosive::UPDATE");
 	{
@@ -2116,6 +2588,15 @@ void CSE_ALifeItemExplosive::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemExplosive::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemExplosive::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2165,7 +2646,7 @@ void CSE_ALifeItemBolt::UPDATE_Read			(NET_Packet &tNetPacket)
 	inherited::UPDATE_Read		(tNetPacket);
 };
 
-void CSE_ALifeItemBolt::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemBolt::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemBolt::STATE");
 	{
@@ -2181,9 +2662,18 @@ void CSE_ALifeItemBolt::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemBolt::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemBolt::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemBolt::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemBolt::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemBolt::UPDATE");
 	{
@@ -2199,6 +2689,15 @@ void CSE_ALifeItemBolt::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemBolt::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemBolt::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 bool CSE_ALifeItemBolt::can_save			() const
@@ -2257,7 +2756,7 @@ void CSE_ALifeItemsNotSave::UPDATE_Read(NET_Packet& tNetPacket)
 	inherited::UPDATE_Read(tNetPacket);
 };
 
-void CSE_ALifeItemsNotSave::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemsNotSave::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemsNotSave::STATE");
 	{
@@ -2273,9 +2772,18 @@ void CSE_ALifeItemsNotSave::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemsNotSave::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemsNotSave::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemsNotSave::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemsNotSave::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemsNotSave::UPDATE");
 	{
@@ -2291,6 +2799,15 @@ void CSE_ALifeItemsNotSave::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemsNotSave::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemsNotSave::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 bool CSE_ALifeItemsNotSave::can_save() const
@@ -2348,16 +2865,25 @@ void CSE_ALifeItemCustomOutfit::UPDATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_float_q8			(m_fCondition,0.0f,1.0f);
 }
 
-void CSE_ALifeItemCustomOutfit::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemCustomOutfit::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemCustomOutfit::STATE");
 	{
 		inherited::STATE_ReadSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemCustomOutfit::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemCustomOutfit::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemCustomOutfit::STATE_WriteSave(CSaveObjectSave* Object) const
+/*void CSE_ALifeItemCustomOutfit::STATE_WriteSave(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CSE_ALifeItemCustomOutfit::STATE");
 	{
@@ -2384,6 +2910,16 @@ void CSE_ALifeItemCustomOutfit::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_float(m_fCondition);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemCustomOutfit::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemCustomOutfit::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << m_fCondition;
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2431,7 +2967,7 @@ void CSE_ALifeItemHelmet::UPDATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_float_q8			(m_fCondition,0.0f,1.0f);
 }
 
-void CSE_ALifeItemHelmet::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemHelmet::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemHelmet::STATE");
 	{
@@ -2447,9 +2983,18 @@ void CSE_ALifeItemHelmet::STATE_WriteSave(CSaveObjectSave* Object) const
 		inherited::STATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemHelmet::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemHelmet::STATE");
+	{
+		inherited::STATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
-void CSE_ALifeItemHelmet::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_ALifeItemHelmet::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_ALifeItemHelmet::UPDATE");
 	{
@@ -2467,6 +3012,16 @@ void CSE_ALifeItemHelmet::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_float(m_fCondition);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_ALifeItemHelmet::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_ALifeItemHelmet::UPDATE");
+	{
+		inherited::UPDATE_Serialize(Object);
+		//Object->GetCurrentChunk()->r_float(m_fCondition);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS

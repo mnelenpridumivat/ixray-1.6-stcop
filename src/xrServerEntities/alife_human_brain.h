@@ -41,8 +41,9 @@ public:
 public:
 			void						on_state_write		(NET_Packet &packet);
 			void						on_state_read		(NET_Packet &packet);
-			void						on_state_write(CSaveObjectSave* Object) const;
-			void						on_state_read(CSaveObjectLoad* Object);
+			//void						on_state_write(CSaveObjectSave* Object) const;
+			//void						on_state_read(CSaveObjectLoad* Object);
+			void						on_state_serialize(ISaveObject& Object);
 
 public:
 	IC		object_type					&object				() const;

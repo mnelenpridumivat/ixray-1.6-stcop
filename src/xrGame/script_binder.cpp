@@ -209,7 +209,7 @@ void CScriptBinder::Load(ISaveObject* Object)
 	}
 }*/
 
-void CScriptBinder::Serialize(ISaveObject* Object)
+void CScriptBinder::Serialize(ISaveObject& Object)
 {
 	if (m_object) {
 		try {
