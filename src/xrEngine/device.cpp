@@ -281,12 +281,6 @@ void CRenderDevice::on_idle		()
 	}
 	else 
 	{
-		if (g_pGamePersistent != nullptr)
-		{
-			PROF_EVENT("Update Particles");
-			g_pGamePersistent->UpdateParticles();
-		}
-
 		for (auto it = m_time_callbacks.begin(); it != m_time_callbacks.end();)
 		{
 		    if (Device.dwTimeGlobal >= it->first)
