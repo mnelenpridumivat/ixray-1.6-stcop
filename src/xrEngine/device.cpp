@@ -256,7 +256,11 @@ void CRenderDevice::on_idle		()
 
 	PROF_THREAD("MainThread");
 	PROF_FRAME("Main Thread");
-
+	{
+		PROF_EVENT("Update Particles");
+		if (g_pGamePersistent)
+			g_pGamePersistent->UpdateParticles();
+	}
 	SetEvent(Event3rdFirstStep);
 
 	Device.BeginRender();
