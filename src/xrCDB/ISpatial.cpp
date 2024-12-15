@@ -255,7 +255,6 @@ void			ISpatial_DB::_insert	(ISpatial_NODE* N, Fvector& n_C, float n_R)
 
 void			ISpatial_DB::insert		(ISpatial* S)
 {
-	xrSRWLockGuard guard(&db_lock, false);
 #if 0
 	stat_insert.Begin	();
 
@@ -314,7 +313,6 @@ void			ISpatial_DB::_remove	(ISpatial_NODE* N, ISpatial_NODE* N_sub)
 
 void			ISpatial_DB::remove		(ISpatial* S)
 {
-	xrSRWLockGuard guard(&db_lock, false);
 #ifdef DEBUG
 	stat_remove.Begin	();
 #endif
@@ -333,7 +331,6 @@ void			ISpatial_DB::update		(u32 nodes/* =8 */)
 {
 #ifdef DEBUG
 	if (0==m_root)	return;
-	xrSRWLockGuard guard(&db_lock, false);
 	VERIFY			(verify());
 #endif
 }
