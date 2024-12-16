@@ -12,11 +12,11 @@ namespace CSaveChunk_script {
 		return Value;
 	}
 
-	Fvector r_vec3(CSaveChunk* Chunk) {
+	/*Fvector r_vec3(CSaveChunk* Chunk) {
 		Fvector Value;
 		Chunk->r_vec3(Value);
 		return Value;
-	}
+	}*/
 
 	float r_float(CSaveChunk* Chunk) {
 		float Value;
@@ -72,11 +72,11 @@ namespace CSaveChunk_script {
 		return Value;
 	}
 
-	LPCSTR r_string(CSaveChunk* Chunk) {
+	/*LPCSTR r_string(CSaveChunk* Chunk) {
 		shared_str Value;
 		Chunk->r_stringZ(Value);
 		return Value.c_str();
-	}
+	}*/
 
 	u64 ReadArray(CSaveChunk* Chunk) {
 		u64 Size;

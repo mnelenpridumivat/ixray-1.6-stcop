@@ -80,8 +80,9 @@ public:
 	virtual void			PHSetMaterial		(u16 m);
 			void			PHSaveState			(NET_Packet &P);
 			void			PHLoadState			(IReader &P);
-			void			PHSaveState(CSaveObjectSave* Object) const;
-			void			PHLoadState(CSaveObjectLoad* Object);
+			//void			PHSaveState(CSaveObjectSave* Object) const;
+			//void			PHLoadState(CSaveObjectLoad* Object);
+			void			PHSerializeState(ISaveObject& Object);
 	virtual f32				GetMass				();
 	virtual	void			PHHit				(SHit &H);
 	virtual	void			Hit					(SHit* pHDS);
@@ -105,7 +106,7 @@ public:
 	virtual void			load				(IReader &input_packet);
 	//virtual void Save(CSaveObjectSave* Object) const override;
 	//virtual void Load(CSaveObjectLoad* Object) override;
-	virtual void Serialize(CSaveObject& Object) override;
+	virtual void Serialize(ISaveObject& Object) override;
 			void			init				();
 
 	virtual void			OnChangeVisual		();

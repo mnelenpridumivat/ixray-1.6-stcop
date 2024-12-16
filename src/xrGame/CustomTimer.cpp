@@ -111,7 +111,7 @@ void CCustomTimerBase::load(IReader& packet)
     load_data(m_bIsActive, packet);
 }
 
-void CCustomTimerBase::Save(CSaveObjectSave* Object) const
+/*void CCustomTimerBase::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CCustomTimerBase");
     {
@@ -135,6 +135,20 @@ void CCustomTimerBase::Load(CSaveObjectLoad* Object)
         Object->GetCurrentChunk()->r_bool(m_bIsActive);
     }
     Object->EndChunk();
+}*/
+
+void CCustomTimerBase::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CCustomTimerBase");
+    {
+        Object << m_iTimerStartValue << m_iTimerCurValue << m_iTimerMode << m_iStartTime << m_bIsActive;
+        /*bject->GetCurrentChunk()->r_s32(m_iTimerStartValue);
+        Object->GetCurrentChunk()->r_s32(m_iTimerCurValue);
+        Object->GetCurrentChunk()->r_s32(m_iTimerMode);
+        Object->GetCurrentChunk()->r_u32(m_iStartTime);
+        Object->GetCurrentChunk()->r_bool(m_bIsActive);*/
+    }
+    Object.EndChunk();
 }
 
 void CCustomTimer::load(IReader& packet)
@@ -143,7 +157,7 @@ void CCustomTimer::load(IReader& packet)
     CCustomTimerBase::load(packet);
 }
 
-void CCustomTimer::Save(CSaveObjectSave* Object) const
+/*void CCustomTimer::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CCustomTimer");
     {
@@ -161,6 +175,16 @@ void CCustomTimer::Load(CSaveObjectLoad* Object)
         Object->GetCurrentChunk()->r_stringZ(m_sTimerName);
     }
     Object->EndChunk();
+}*/
+
+void CCustomTimer::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CCustomTimer");
+    {
+        CCustomTimerBase::Serialize(Object);
+        Object << m_sTimerName;
+    }
+    Object.EndChunk();
 }
 
 void CBinder::load(IReader& input_packet)
@@ -172,7 +196,7 @@ void CBinder::load(IReader& input_packet)
     m_bIsActive = true;
 }
 
-void CBinder::Save(CSaveObjectSave* Object) const
+/*void CBinder::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CBinder");
     {
@@ -195,6 +219,20 @@ void CBinder::Load(CSaveObjectLoad* Object)
         m_bIsActive = true;
     }
     Object->EndChunk();
+}*/
+
+void CBinder::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CBinder");
+    {
+        CCustomTimerBase::Serialize(Object);
+        Object << m_sFuncName << m_expired;
+        m_params.Serialize(Object);
+        if (!Object.IsSave()) {
+            m_bIsActive = true;
+        }
+    }
+    Object.EndChunk();
 }
 
 void CCustomTimerBase::Update()
@@ -377,7 +415,7 @@ void CTimerManager::load(IReader& packet)
     }
 }
 
-void CTimerManager::Save(CSaveObjectSave* Object) const
+/*void CTimerManager::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CTimerManager");
     {
@@ -410,6 +448,26 @@ void CTimerManager::Load(CSaveObjectLoad* Object)
         Object->GetCurrentChunk()->EndArray();
     }
     Object->EndChunk();
+}*/
+
+void CTimerManager::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CBinderManager");
+    {
+        Object << Timers;
+        /*Timers.clear();
+        u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i)
+            {
+                Timers.push_back(xr_make_unique<CCustomTimer>());
+                Timers.back()->Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();*/
+    }
+    Object.EndChunk();
 }
 
 int CTimerManager::GetTimerValue(shared_str name) const
@@ -469,7 +527,7 @@ void CBinderManager::load(IReader& packet)
     }
 }
 
-void CBinderManager::Save(CSaveObjectSave* Object) const
+/*void CBinderManager::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CBinderManager");
     {
@@ -502,6 +560,26 @@ void CBinderManager::Load(CSaveObjectLoad* Object)
         Object->GetCurrentChunk()->EndArray();
     }
     Object->EndChunk();
+}*/
+
+void CBinderManager::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CBinderManager");
+    {
+        Object << Binders;
+        /*Binders.clear();
+        u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i)
+            {
+                Binders.push_back(xr_make_unique<CBinder>());
+                Binders.back()->Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();*/
+    }
+    Object.EndChunk();
 }
 
 void CBinderManager::Update()
@@ -730,7 +808,7 @@ void CBinderParam::load(IReader& input_packet)
     }
 }
 
-void CBinderParam::Save(CSaveObjectSave* Object) const
+/*void CBinderParam::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CBinderParam");
     {
@@ -782,6 +860,38 @@ void CBinderParam::Load(CSaveObjectLoad* Object)
         }
     }
     Object->EndChunk();
+}*/
+
+void CBinderParam::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CBinderParam");
+    {
+        u8* ValueType = (u8*)&type;
+        Object << *ValueType;
+        /*Object->GetCurrentChunk()->r_u8(type);
+        this->type = static_cast<EBinderParamType>(type);*/
+        switch (type) {
+        case eBinderParamString: {
+            xr_string new_value = std::get<xr_string>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        case eBinderParamU64: {
+            u64 new_value = std::get<u64>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        case eBinderParamS64: {
+            s64 new_value = std::get<s64>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        }
+    }
+    Object.EndChunk();
 }
 
 CBinderParams::CBinderParams()
@@ -855,7 +965,7 @@ void CBinderParams::load(IReader& input_packet)
     }
 }
 
-void CBinderParams::Save(CSaveObjectSave* Object) const
+/*void CBinderParams::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CBinderParams");
     {
@@ -885,4 +995,46 @@ void CBinderParams::Load(CSaveObjectLoad* Object)
         Object->GetCurrentChunk()->EndArray();
     }
     Object->EndChunk();
+}*/
+
+void CBinderParams::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CBinderParams");
+    {
+        Object << params;
+        /*u64 ArraySize;
+        Object->GetCurrentChunk()->ReadArray(ArraySize);
+        params.resize(ArraySize);
+        {
+            for (u64 i = 0; i < ArraySize; ++i) {
+                params[i].Load(Object);
+            }
+        }
+        Object->GetCurrentChunk()->EndArray();*/
+    }
+    Object.EndChunk();
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CCustomTimer& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinder& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParam& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParams& Value)
+{
+    Value.Serialize(Object);
+    return Object;
 }

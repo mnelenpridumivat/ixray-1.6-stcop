@@ -220,3 +220,7 @@ ISaveObject& CSaveObjectLoad::operator<<(LPSTR S)
 	GetCurrentChunk()->r_string(S);
 	return *this;
 }
+
+ISaveObject& operator<<(ISaveObject& Object, char& Value) {
+	return Object << (s8&)Value;
+}

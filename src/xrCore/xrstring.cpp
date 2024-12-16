@@ -267,3 +267,15 @@ xr_string xr_string::Join(xrStringVector::iterator beginIter, xrStringVector::it
 
 	return Result;
 }
+
+ISaveObject& operator<<(ISaveObject& Object, xr_string& Value) {
+	if (Object.IsSave()) {
+		Object << (char*)Value.c_str();
+	}
+	else {
+		LPSTR Str = nullptr;
+		Object << Str;
+		Value = Str;
+	}
+	return Object;
+}

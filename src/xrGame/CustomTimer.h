@@ -41,8 +41,9 @@ public:
 
     virtual void save               (IWriter& output_packet);
     virtual void load               (IReader& input_packet);
-    virtual void Save(CSaveObjectSave* Object) const;
-    virtual void Load(CSaveObjectLoad* Object);
+    /*virtual void Save(CSaveObjectSave* Object) const;
+    virtual void Load(CSaveObjectLoad* Object);*/
+    virtual void Serialize(ISaveObject& Object);
 };
 
 class CCustomTimer: public CCustomTimerBase
@@ -65,8 +66,9 @@ public:
 
     virtual void save(IWriter& output_packet) override;
     virtual void load(IReader& input_packet) override;
-    virtual void Save(CSaveObjectSave* Object) const override;
-    virtual void Load(CSaveObjectLoad* Object) override;
+    /*virtual void Save(CSaveObjectSave* Object) const override;
+    virtual void Load(CSaveObjectLoad* Object) override;*/
+    virtual void Serialize(ISaveObject& Object) override;
 
     void setName(shared_str name) { m_sTimerName = name; }
     shared_str getName() const { return m_sTimerName; }
@@ -76,6 +78,8 @@ public:
         OnTimerStop = callback;
     }
 };
+
+ISaveObject& operator<<(ISaveObject& Object, CCustomTimer& Value);
 
 enum EBinderParamType {
     eBinderParamString = 0,
@@ -118,9 +122,12 @@ public:
 
     void save(IWriter& output_packet) const;
     void load(IReader& input_packet);
-    virtual void Save(CSaveObjectSave* Object) const;
-    virtual void Load(CSaveObjectLoad* Object);
+    /*virtual void Save(CSaveObjectSave* Object) const;
+    virtual void Load(CSaveObjectLoad* Object);*/
+    virtual void Serialize(ISaveObject& Object);
 };
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParam& Value);
 
 class CBinderParams {
     xr_vector<CBinderParam> params = {};
@@ -140,9 +147,12 @@ public:
 
     void save(IWriter& output_packet) const;
     void load(IReader& input_packet);
-    virtual void Save(CSaveObjectSave* Object) const;
-    virtual void Load(CSaveObjectLoad* Object);
+    /*virtual void Save(CSaveObjectSave* Object) const;
+    virtual void Load(CSaveObjectLoad* Object);*/
+    virtual void Serialize(ISaveObject& Object);
 };
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParams& Value);
 
 class CBinder : public CCustomTimerBase
 {
@@ -163,16 +173,19 @@ public:
 
     virtual void save(IWriter& output_packet) override;
     virtual void load(IReader& input_packet) override;
-    virtual void Save(CSaveObjectSave* Object) const override;
-    virtual void Load(CSaveObjectLoad* Object) override;
+    /*virtual void Save(CSaveObjectSave* Object) const override;
+    virtual void Load(CSaveObjectLoad* Object) override;*/
+    virtual void Serialize(ISaveObject& Object) override;
 
     bool getExpired() const { return m_expired; }
 
 };
 
+ISaveObject& operator<<(ISaveObject& Object, CBinderParams& Value);
+
 class CTimerManager
 {
-    xr_vector<std::shared_ptr<CCustomTimer>> Timers;
+    xr_vector<xr_shared_ptr<CCustomTimer>> Timers;
     std::function<void(shared_str)> OnTimerStop = [](shared_str) {};
 
     CTimerManager(){}
@@ -197,6 +210,7 @@ public:
     void load           (IReader& input_packet);
     virtual void Save(CSaveObjectSave* Object) const;
     virtual void Load(CSaveObjectLoad* Object);
+    virtual void Serialize(ISaveObject& Object);
 
     void Update         ();
 
@@ -226,6 +240,7 @@ public:
     void load(IReader& input_packet);
     virtual void Save(CSaveObjectSave* Object) const;
     virtual void Load(CSaveObjectLoad* Object);
+    virtual void Serialize(ISaveObject& Object);
 
     void Update();
 };

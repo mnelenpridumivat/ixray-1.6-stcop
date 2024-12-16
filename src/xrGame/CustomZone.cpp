@@ -1536,7 +1536,7 @@ void CCustomZone::load							(IReader &input_packet)
 		m_eZoneState = eZoneStateIdle;
 }
 
-void CCustomZone::Save(CSaveObjectSave* Object) const
+/*void CCustomZone::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CCustomZone");
 	{
@@ -1556,4 +1556,15 @@ void CCustomZone::Load(CSaveObjectLoad* Object)
 		m_eZoneState = (EZoneState)Value;
 	}
 	Object->EndChunk();
+}*/
+
+void CCustomZone::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CCustomZone");
+	{
+		inherited::Serialize(Object);
+		u8* Value = (u8*)&m_eZoneState;
+		Object << *Value;
+	}
+	Object.EndChunk();
 }

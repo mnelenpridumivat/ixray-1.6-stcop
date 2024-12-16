@@ -610,7 +610,7 @@ void CEntityCondition::load	(IReader &input_packet)
 	}
 }
 
-void CEntityCondition::Save(CSaveObjectSave* Object)
+/*void CEntityCondition::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CEntityCondition");
 	{
@@ -668,6 +668,45 @@ void CEntityCondition::Load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CEntityCondition::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CEntityCondition");
+	{
+		if (!Object.IsSave()) {
+			m_bTimeValid = false;
+		}
+
+		bool is_alive = GetHealth() > 0.f;
+		Object << is_alive;
+		if (is_alive)
+		{
+			Object << m_fPower << m_fRadiation << m_fEntityMorale << m_fPsyHealth;
+			/*Object->GetCurrentChunk()->r_float(m_fPower);
+			Object->GetCurrentChunk()->r_float(m_fRadiation);
+			Object->GetCurrentChunk()->r_float(m_fEntityMorale);
+			Object->GetCurrentChunk()->r_float(m_fPsyHealth);*/
+			if (!Object.IsSave()) {
+				ClearWounds();
+			}
+			Object << m_WoundVector;
+			/* {
+				u64 ArraySize;
+				Object->GetCurrentChunk()->ReadArray(ArraySize);
+				m_WoundVector.resize(ArraySize);
+				if (!m_WoundVector.empty()) {
+					for (u32 i = 0; i < m_WoundVector.size(); i++)
+					{
+						CWound* pWound = new CWound(BI_NONE);
+						pWound->Load(Object);
+						m_WoundVector[i] = pWound;
+					}
+				}
+			}*/
+		}
+	}
+	Object.EndChunk();
 }
 
 void CEntityCondition::SConditionChangeV::load(LPCSTR sect, LPCSTR prefix)

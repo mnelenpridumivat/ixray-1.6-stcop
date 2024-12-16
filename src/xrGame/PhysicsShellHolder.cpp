@@ -397,7 +397,7 @@ void CPhysicsShellHolder::Load(CSaveObjectLoad* Object)
 	Object->EndChunk();
 }*/
 
-void CPhysicsShellHolder::Serialize(CSaveObject& Object)
+void CPhysicsShellHolder::Serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("CPhysicsShellHolder");
 	{
@@ -425,7 +425,9 @@ void CPhysicsShellHolder::PHSaveState(NET_Packet &P)
 	if(K)
 	{
 		_vm = K->LL_GetBonesVisible();
-		P.w_u64(_vm._visimask.flags);
+		for (size_t i = 0; i < VisMask::ArrSize; ++i) {
+			P.w_u64(_vm.GetRawChunkData(i));
+		}
 		P.w_u16(K->LL_GetBoneRoot());
 	}
 	else
@@ -464,10 +466,10 @@ void CPhysicsShellHolder::PHSaveState(NET_Packet &P)
 
 	P.w_u16(bones_number);
 
-	if(bones_number > 64) {
-		Msg("!![CPhysicsShellHolder::PHSaveState] bones_number is [%u]!", bones_number);
-		P.w_u64(K ? _vm._visimask_ex.flags : u64(-1));
-	}
+	//if(bones_number > 64) {
+	//	Msg("!![CPhysicsShellHolder::PHSaveState] bones_number is [%u]!", bones_number);
+	//	P.w_u64(K ? _vm._visimask_ex.flags : u64(-1));
+	//}
 
 	for(u16 i=0;i<bones_number;i++)
 	{
@@ -478,13 +480,18 @@ void CPhysicsShellHolder::PHSaveState(NET_Packet &P)
 }
 
 void CPhysicsShellHolder::PHLoadState(IReader& P) {
-	u64 _low = 0;
-	u64 _high = 0;
+	//u64 _low = 0;
+	//u64 _high = 0;
+	//VisMask _vm(_low, _high);
+	VisMask _vm;
 	
 	IKinematics* K=smart_cast<IKinematics*>(Visual());
 	if(K)
 	{
-		_low = P.r_u64();
+		//_low = P.r_u64();
+		for (size_t i = 0; i < VisMask::ArrSize; ++i) {
+			_vm.assign(P.r_u64(), i);
+		}
 		K->LL_SetBoneRoot(P.r_u16());
 	}
 
@@ -494,12 +501,11 @@ void CPhysicsShellHolder::PHLoadState(IReader& P) {
 	VERIFY(!min.similar(max));
 
 	u16 bones_number = P.r_u16();
-	if(bones_number > 64) {
-		Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
-		_high = P.r_u64();
-	}
+	//if(bones_number > 64) {
+	//	Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
+	//	_high = P.r_u64();
+	//}
 
-	VisMask _vm(_low, _high);
 	K->LL_SetBonesVisible(_vm);
 
 	for(u16 i=0;i<bones_number;i++)
@@ -510,7 +516,7 @@ void CPhysicsShellHolder::PHLoadState(IReader& P) {
 	}
 }
 
-void CPhysicsShellHolder::PHSaveState(CSaveObjectSave* Object) const
+/*void CPhysicsShellHolder::PHSaveState(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPhysicsShellHolder");
 	{
@@ -610,11 +616,80 @@ void CPhysicsShellHolder::PHLoadState(CSaveObjectLoad* Object)
 		for (u16 i = 0; i < bones_number; i++)
 		{
 			SPHNetState state;
+			PHGetSyncItem(i)->get_State(state);
 			state.net_Load(Object, min, max);
 			PHGetSyncItem(i)->set_State(state);
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
+{
+	Object.BeginChunk("CEatableItem");
+	{
+		//u64 _low = 0;
+		//u64 _high = 0;
+		VisMask _vm;
+
+		IKinematics* K = smart_cast<IKinematics*>(Visual());
+		if (K)
+		{
+			_vm = K->LL_GetBonesVisible();
+			Object << _vm;
+			u16 Value = K->LL_GetBoneRoot();
+			Object << Value;
+			K->LL_SetBoneRoot(Value);
+		}
+
+		Fvector min;
+		Fvector max;
+		if (Object.IsSave()) {
+			min.set(flt_max, flt_max, flt_max);
+			max.set(-flt_max, -flt_max, -flt_max);
+			/////////////////////////////////////
+
+			u16 bones_number = PHGetSyncItemsNumber();
+			for (u16 i = 0; i < bones_number; i++)
+			{
+				SPHNetState state;
+				PHGetSyncItem(i)->get_State(state);
+				Fvector& p = state.position;
+				if (p.x < min.x)min.x = p.x;
+				if (p.y < min.y)min.y = p.y;
+				if (p.z < min.z)min.z = p.z;
+
+				if (p.x > max.x)max.x = p.x;
+				if (p.y > max.y)max.y = p.y;
+				if (p.z > max.z)max.z = p.z;
+			}
+
+			min.sub(2.f * EPS_L);
+			max.add(2.f * EPS_L);
+
+			VERIFY(!min.similar(max));
+		}
+		u16 bones_number;
+		Object << min << max << bones_number;
+		VERIFY(!min.similar(max));
+
+		//Object->GetCurrentChunk()->r_u16(bones_number);
+		//if (bones_number > 64) {
+		//	Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
+		//	Object->GetCurrentChunk()->r_u64(_high);
+		//}
+
+		K->LL_SetBonesVisible(_vm);
+
+		for (u16 i = 0; i < bones_number; i++)
+		{
+			SPHNetState state;
+			PHGetSyncItem(i)->get_State(state);
+			state.net_Serialize(Object, min, max);
+			PHGetSyncItem(i)->set_State(state);
+		}
+	}
+	Object.EndChunk();
 }
 
 bool CPhysicsShellHolder::register_schedule	() const

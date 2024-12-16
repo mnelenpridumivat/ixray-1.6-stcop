@@ -20,6 +20,54 @@ void SHeliMovementState::net_Destroy()
 	}
 }
 
+void SHeliMovementState::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("SHeliMovementState");
+	{
+		s16* Value = (s16*)&type;
+		Object << *Value << patrol_begin_idx << patrol_path_name << maxLinearSpeed << LinearAcc_fw << LinearAcc_bk << speedInDestPoint
+			<< desiredPoint << curLinearSpeed << curLinearAcc << currP << currPathH << currPathP << round_center << round_radius
+			<< round_reverse << onPointRangeDist;
+		/* {
+			s16 Value;
+			Object->GetCurrentChunk()->r_s16(Value);
+			type = (EHeilMovementState)Value;
+		}
+		Object->GetCurrentChunk()->r_s32(patrol_begin_idx);
+		Object->GetCurrentChunk()->r_stringZ(patrol_path_name);
+		Object->GetCurrentChunk()->r_float(maxLinearSpeed);
+		Object->GetCurrentChunk()->r_float(LinearAcc_fw);
+		Object->GetCurrentChunk()->r_float(LinearAcc_bk);
+		Object->GetCurrentChunk()->r_float(speedInDestPoint);
+		Object->GetCurrentChunk()->r_vec3(desiredPoint);
+		Object->GetCurrentChunk()->r_float(curLinearSpeed);
+		Object->GetCurrentChunk()->r_float(curLinearAcc);
+		Object->GetCurrentChunk()->r_vec3(currP);
+		Object->GetCurrentChunk()->r_float(currPathH);
+		Object->GetCurrentChunk()->r_float(currPathP);
+		Object->GetCurrentChunk()->r_vec3(round_center);
+		Object->GetCurrentChunk()->r_float(round_radius);
+		Object->GetCurrentChunk()->r_bool(round_reverse);
+		Object->GetCurrentChunk()->r_float(onPointRangeDist);*/
+		if (type == eMovPatrolPath) {
+			s32 Value;
+			if (Object.IsSave()) {
+				Value = currPatrolVertex->vertex_id();
+				Object << Value;
+			}
+			else {
+				currPatrolPath = ai().patrol_paths().path(patrol_path_name);
+				Object << Value;
+				currPatrolVertex = currPatrolPath->vertex(Value);
+			}
+		}
+		if (type == eMovRoundPath) {
+			goByRoundPath(round_center, round_radius, !round_reverse);
+		}
+	}
+	Object.EndChunk();
+}
+
 void SHeliMovementState::Load(LPCSTR section)
 {
 	float angularSpeedPitch		= pSettings->r_float(section,"path_angular_sp_pitch");
@@ -303,7 +351,7 @@ void SHeliMovementState::load(IReader &input_packet)
 
 }
 
-void SHeliMovementState::Save(CSaveObjectSave* Object) const
+/*void SHeliMovementState::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SHeliMovementState");
 	{
@@ -367,7 +415,7 @@ void SHeliMovementState::Load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
-}
+}*/
 
 float SHeliMovementState::GetSafeAltitude()
 {

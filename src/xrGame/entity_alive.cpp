@@ -604,7 +604,7 @@ void CEntityAlive::load	(IReader &input_packet)
 	conditions().load(input_packet);
 }
 
-void CEntityAlive::Save(CSaveObjectSave* Object) const
+/*void CEntityAlive::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CEntityAlive");
 	{
@@ -622,6 +622,16 @@ void CEntityAlive::Load(CSaveObjectLoad* Object)
 		conditions().Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CEntityAlive::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CEntityAlive");
+	{
+		inherited::Serialize(Object);
+		conditions().Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 BOOL	CEntityAlive::net_SaveRelevant		()

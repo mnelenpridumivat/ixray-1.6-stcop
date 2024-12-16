@@ -1,9 +1,9 @@
 #pragma once
 #include "StdAfx.h"
-//#include "ShapeData.h"
+#include "ShapeData.h"
 #include "Save/SaveObject.h"
 
-/*ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value) {
+ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value) {
 	Object << Value.type;
 	switch (Value.type) {
 	case CShapeData::cfSphere: {
@@ -16,4 +16,4 @@
 	}
 	}
 	return Object;
-}*/
+}

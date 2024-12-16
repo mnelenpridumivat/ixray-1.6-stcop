@@ -3142,6 +3142,7 @@ ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SDoorState& Value) {
 		//Object->GetCurrentChunk()->r_float(health);
 	}
 	Object.EndChunk();
+	return Object;
 }
 
 ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SWheelState& Value) {
@@ -3151,6 +3152,7 @@ ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SWheelState& Value) {
 		//Object->GetCurrentChunk()->w_float(health);
 	}
 	Object.EndChunk();
+	return Object;
 }
 
 void CSE_ALifeCar::SDoorState::read(NET_Packet& P)

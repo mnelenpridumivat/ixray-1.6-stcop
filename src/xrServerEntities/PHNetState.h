@@ -50,7 +50,7 @@ template<typename src>
 	void								read(src* P, const Fvector& min, const Fvector& max);
 };
 
-CSaveObject& operator<<(ISaveObject& Object, SPHNetState& Value);
+ISaveObject& operator<<(ISaveObject& Object, SPHNetState& Value);
 
 using PHNETSTATE_VECTOR = xr_vector<SPHNetState>; 
 using PHNETSTATE_I = PHNETSTATE_VECTOR::iterator;

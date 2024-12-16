@@ -256,7 +256,7 @@ void CGameTask::load_task(IReader &stream)
 	CreateMapLocation		(true);
 }
 
-void CGameTask::save_task(CSaveObjectSave* Object) const
+/*void CGameTask::save_task(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CGameTask");
 	{
@@ -310,6 +310,28 @@ void CGameTask::load_task(CSaveObjectLoad* Object)
 		CreateMapLocation(true);
 	}
 	Object->EndChunk();
+}*/
+
+void CGameTask::serialize_task(ISaveObject& Object)
+{
+	Object.BeginChunk("CGameTask");
+	{
+		{
+			u8* Value = (u8*)&m_task_state;
+			Object << *Value;
+		}
+		{
+			u8* Value = (u8*)&m_task_type;
+			Object << *Value;
+		}
+		Object << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish << m_Title << m_Description << m_Description
+			<< m_icon_texture_name << m_map_hint << m_map_location << m_map_object_id << m_priority << m_pScriptHelper;
+		if (!Object.IsSave()) {
+			CommitScriptHelperContents();
+			CreateMapLocation(true);
+		}
+	}
+	Object.EndChunk();
 }
 
 void CGameTask::CommitScriptHelperContents()
@@ -379,7 +401,7 @@ void SScriptTaskHelper::load(IReader &stream)
 		load_data(m_s_lua_functions_on_fail,		stream);
 }
 
-void SScriptTaskHelper::save(CSaveObjectSave* Object) const
+/*void SScriptTaskHelper::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SScriptTaskHelper");
 	{
@@ -497,7 +519,7 @@ void SScriptTaskHelper::load(CSaveObjectLoad* Object)
 		Object->EndChunk();
 	}
 	Object->EndChunk();
-}
+}*/
 
 void SScriptTaskHelper::save(IWriter &stream)
 {
@@ -522,7 +544,7 @@ void SGameTaskKey::load(IReader &stream)
 
 }
 
-void SGameTaskKey::save(CSaveObjectSave* Object) const
+/*void SGameTaskKey::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SGameTaskKey");
 	{
@@ -542,9 +564,49 @@ void SGameTaskKey::load(CSaveObjectLoad* Object)
 		game_task->load_task(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void SGameTaskKey::serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("SGameTaskKey");
+	{
+		game_task = new CGameTask();
+		Object << task_id;
+		game_task->m_ID = task_id;
+		game_task->serialize_task(Object);
+	}
+	Object.EndChunk();
 }
 
 void SGameTaskKey::destroy()
 {
 	delete_data(game_task);
+}
+
+ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value)
+{
+	Object.BeginChunk("SScriptTaskHelper");
+	{
+		Object.BeginChunk("SScriptTaskHelper::complete_cond");
+		{
+			Object << Value.m_s_complete_lua_functions;
+		}
+		Object.EndChunk();
+		Object.BeginChunk("SScriptTaskHelper::fail_cond");
+		{
+			Object << Value.m_s_fail_lua_functions;
+		}
+		Object.EndChunk();
+		Object.BeginChunk("SScriptTaskHelper::on_complete");
+		{
+			Object << Value.m_s_lua_functions_on_complete;
+		}
+		Object.EndChunk();
+		Object.BeginChunk("SScriptTaskHelper::on_fail");
+		{
+			Object << Value.m_s_lua_functions_on_fail;
+		}
+		Object.EndChunk();
+	}
+	Object.EndChunk();
 }

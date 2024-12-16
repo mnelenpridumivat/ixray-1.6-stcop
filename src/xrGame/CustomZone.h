@@ -58,8 +58,9 @@ public:
 	virtual		void	save							(NET_Packet &output_packet);
 	virtual		void	load							(IReader &input_packet);
 
-	virtual void Save(CSaveObjectSave* Object) const override;
-	virtual void Load(CSaveObjectLoad* Object) override;
+	/*virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;*/
+	virtual void Serialize(ISaveObject& Object) override;
 	
 	virtual		void	UpdateCL						();
 	virtual		void	UpdateWorkload					(u32 dt);

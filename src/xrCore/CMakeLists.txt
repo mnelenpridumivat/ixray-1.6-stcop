@@ -17,6 +17,8 @@ file(GLOB CORE_SOURCE_MATH_FILES
     "vector.h"
     "_*.cpp"
     "_*.h"
+    "ShapeData.cpp"
+    "ShapeData.h"
 )
 
 file(GLOB CORE_SOURCE_LZ_FILES

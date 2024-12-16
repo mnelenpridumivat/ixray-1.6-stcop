@@ -55,6 +55,15 @@ namespace MemorySpace {
 #ifdef USE_ORIENTATION
 		SRotation					m_orientation;
 #endif
+
+		virtual void Serialize(ISaveObject& Object) {
+			Object << m_level_vertex_id << m_position;
+#ifdef USE_ORIENTATION
+			Object.BeginChunk("SObjectParams::Orientation");
+			Object << m_orientation;
+			Object.EndChunk();
+#endif
+		}
 	};
 	
 	template <typename T>
@@ -117,6 +126,44 @@ namespace MemorySpace {
 		{
 			m_enabled				= true;
 		}
+
+		virtual void Serialize(ISaveObject& Object) {
+#ifdef USE_GAME_TIME
+			Object.BeginChunk("SMemoryObject::game_time");
+			Object << m_game_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_LEVEL_TIME
+			Object.BeginChunk("SMemoryObject::level_time");
+			Object << m_level_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_LAST_GAME_TIME
+			Object.BeginChunk("SMemoryObject::last_game_time");
+			Object << m_last_game_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_LAST_LEVEL_TIME
+			Object.BeginChunk("SMemoryObject::last_level_time");
+			Object << m_last_level_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_FIRST_GAME_TIME
+			Object.BeginChunk("SMemoryObject::first_game_time");
+			Object << m_first_game_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_FIRST_LEVEL_TIME
+			Object.BeginChunk("SMemoryObject::first_level_time");
+			Object << m_first_level_time;
+			Object.EndChunk();
+#endif
+#ifdef USE_UPDATE_COUNT
+			Object.BeginChunk("SMemoryObject::update_count");
+			Object << m_update_count;
+			Object.EndChunk();
+#endif
+		}
 	};
 
 	template <typename T>
@@ -129,6 +176,12 @@ namespace MemorySpace {
 		IC			CMemoryObject	();
 		IC	bool	operator==		(u16 id) const;
 		IC	void	fill			(const T *game_object, const T *self, const squad_mask_type &mask);
+
+		virtual void Serialize(ISaveObject& Object) override {
+			SMemoryObject::Serialize(Object);
+			m_object_params.Serialize(Object);
+			m_self_params.Serialize(Object);
+		}
 	};
 
 	struct CVisibleObject : CMemoryObject<CGameObject> {
@@ -162,6 +215,26 @@ namespace MemorySpace {
 		Fvector						m_direction;
 		u16							m_bone_index;
 		float						m_amount;
+
+		/*virtual void Serialize(ISaveObject& Object) override {
+			Object.BeginChunk("CHitObject");
+			CMemoryObject<CEntityAlive>::Serialize(Object);
+			if (Object.IsSave()) {
+				VERIFY(m_object);
+				u16 Value = m_object->ID();
+				Object << Value;
+			}
+			else {
+
+				CDelayedHitObject			delayed_object;
+				Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
+
+				CHitObject& object = delayed_object.m_hit_object;
+				object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+			}
+			Object << m_direction << m_bone_index << m_amount;
+			Object.EndChunk();
+		}*/
 	};
 	
 	struct CSoundObject : public CMemoryObject<CGameObject> {

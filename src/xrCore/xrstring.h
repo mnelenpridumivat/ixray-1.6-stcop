@@ -138,14 +138,4 @@ IC String make_string(const char* format, Args... args)
 template<typename Key, typename Value>
 using xr_string_map = std::unordered_map<Key, Value, std::hash<Key>, std::equal_to<>>;
 
-ISaveObject& operator<<(ISaveObject& Object, xr_string& Value) {
-	if (Object.IsSave()) {
-		Object << (char*)Value.c_str();
-	}
-	else {
-		LPSTR Str = nullptr;
-		Object << Str;
-		Value = Str;
-	}
-	return Object;
-}
+XRCORE_API ISaveObject& operator<<(ISaveObject& Object, xr_string& Value);

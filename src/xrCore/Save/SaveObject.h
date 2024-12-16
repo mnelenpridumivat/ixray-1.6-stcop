@@ -52,6 +52,7 @@ public:
 			}
 		}
 		GetCurrentChunk()->EndArray();
+		return *this;
 	}
 
 
@@ -95,10 +96,11 @@ public:
 					Elem.second = Mapped();
 					(*this) << Elem.second;
 				}
-				Value.emplace_back(Elem);
+				Value.insert(Elem);
 			}
 		}
 		GetCurrentChunk()->EndArray();
+		return *this;
 	}
 
 	template<typename Key, typename Mapped>
@@ -115,10 +117,11 @@ public:
 			for (u64 i = 0; i < ArrSize; ++i) {
 				std::pair<Key, Mapped> Elem;
 				PerElem(*this, Elem);
-				Value.emplace_back(Elem);
+				Value.insert(Elem);
 			}
 		}
 		GetCurrentChunk()->EndArray();
+		return *this;
 	}
 
 	template<typename T, size_t Size>
@@ -150,6 +153,7 @@ public:
 			}
 		}
 		GetCurrentChunk()->EndArray();
+		return *this;
 	}
 
 	template<typename T>
@@ -181,6 +185,48 @@ public:
 					(*this) << Elem;
 					Value.emplace_back(Elem);
 				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
+	template<typename T>
+	ISaveObject& Serialize(xr_vector<xr_shared_ptr<T>>& Value)
+	{
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				(*this) << *elem;
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				Value.push_back(xr_make_shared<T>());
+				(*this) << *Value.back();
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
+	template<typename T>
+	ISaveObject& Serialize(xr_vector<xr_unique_ptr<T>>& Value)
+	{
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				(*this) << *elem;
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				Value.push_back(xr_make_unique<T>());
+				(*this) << *Value.back();
 			}
 		}
 		GetCurrentChunk()->EndArray();
@@ -232,23 +278,25 @@ ISaveObject& operator<<(ISaveObject& Object, T* Value) {
 
 template<typename T>
 ISaveObject& operator<<(ISaveObject& Object, xr_vector<T>& Value) {
-	((CSaveObject*)&Object)->Serialize(Value);
+	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
 template<typename T, size_t Size>
 ISaveObject& operator<<(ISaveObject& Object, T (&Value)[Size]) {
-	((CSaveObject*)&Object)->Serialize(Value);
+	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
 template<typename Key, typename Mapped>
 ISaveObject& operator<<(ISaveObject& Object, associative_vector<Key, Mapped>& Value) {
-	((CSaveObject*)&Object)->Serialize(Value);
+	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
 template<typename T, size_t Size>
 ISaveObject& operator<<(ISaveObject& Object, svector<T, Size>& Value) {
-	((CSaveObject*)&Object)->Serialize(Value);
+	return ((CSaveObject*)&Object)->Serialize(Value);
 }
+
+XRCORE_API ISaveObject& operator<<(ISaveObject& Object, char& Value);
 
 class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:

@@ -376,7 +376,7 @@ void CHitMemoryManager::load	(IReader &packet)
 	}
 }
 
-void CHitMemoryManager::Save(CSaveObjectSave* Object)
+/*void CHitMemoryManager::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CHitMemoryManager");
 	{
@@ -546,6 +546,129 @@ void CHitMemoryManager::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->EndArray();
 	}
 	Object->EndChunk();
+}*/
+
+void CHitMemoryManager::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CHitMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object.EndChunk();
+			return;
+		}
+
+		if (!Object.IsSave()) {
+			typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+			CALLBACK_TYPE					callback;
+			callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+		}
+
+		((CSaveObject&)Object).Serialize(*m_hits, fastdelegate::MakeDelegate(this, &CHitMemoryManager::SerializeSingle));
+
+		/*HITS::const_iterator		I = objects().begin();
+		HITS::const_iterator		E = objects().end();
+		Object->GetCurrentChunk()->WriteArray(objects().size());
+		{
+			for (; I != E; ++I) {
+				Object->BeginChunk("CHitMemoryManager::object");
+				{
+					VERIFY((*I).m_object);
+					Object->GetCurrentChunk()->w_u16((*I).m_object->ID());
+					// object params
+					Object->GetCurrentChunk()->w_u32((*I).m_object_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->w_vec3((*I).m_object_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->BeginChunk("CHitMemoryManager::object::object_params_orientation");
+					{
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif // USE_ORIENTATION
+					// self params
+					Object->GetCurrentChunk()->w_u32((*I).m_self_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->w_vec3((*I).m_self_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->BeginChunk("CHitMemoryManager::object::self_params_orientation");
+					{
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif // USE_ORIENTATION
+#ifdef USE_LEVEL_TIME
+					Object->BeginChunk("CHitMemoryManager::object::level_time");
+					{
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
+					}
+					Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+					Object->BeginChunk("CHitMemoryManager::object::first_level_time");
+					{
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
+					}
+					Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+					Object->GetCurrentChunk()->w_vec3((*I).m_direction);
+					Object->GetCurrentChunk()->w_u16((*I).m_bone_index);
+					Object->GetCurrentChunk()->w_float((*I).m_amount);
+				}
+				Object->EndChunk();
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();*/
+	}
+	Object.EndChunk();
+}
+
+void CHitMemoryManager::SerializeSingle(ISaveObject& Object, CHitObject& Value)
+{
+	Object.BeginChunk("CHitObject");
+	Value.Serialize(Object);
+	if (Object.IsSave()) {
+		VERIFY(m_object);
+		u16 Value = m_object->ID();
+		Object << Value;
+	}
+	else {
+
+		CDelayedHitObject			delayed_object;
+		Object << delayed_object.m_object_id;
+
+		CHitObject& object = delayed_object.m_hit_object;
+		object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+
+		//////////////////////////////////////////////////////////
+
+		if (object.m_object) {
+			add(object);
+		}
+		else {
+			m_delayed_objects.push_back(delayed_object);
+			const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+			if (!spawn_callback || !spawn_callback->m_object_callback) {
+				typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+				CALLBACK_TYPE					callback;
+				callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+				if (!g_dedicated_server) {
+					Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+				}
+#ifdef DEBUG
+				else {
+					if (spawn_callback && spawn_callback->m_object_callback) {
+						VERIFY(spawn_callback->m_object_callback == callback);
+					}
+				}
+#endif // DEBUG
+			}
+		}
+	}
+	Object << Value.m_direction << Value.m_bone_index << Value.m_amount;
+	Object.EndChunk();
 }
 
 void CHitMemoryManager::clear_delayed_objects()

@@ -31,8 +31,9 @@ struct SGameTaskKey : public IPureSerializeObject<IReader,IWriter>,public IPureD
 
 	virtual void 	save								(IWriter &stream);
 	virtual void 	load								(IReader &stream);
-	virtual void 	save(CSaveObjectSave* Object) const;
-	virtual void 	load(CSaveObjectLoad* Object);
+	/*virtual void 	save(CSaveObjectSave* Object) const;
+	virtual void 	load(CSaveObjectLoad* Object);*/
+	virtual void 	serialize(ISaveObject& Object);
 	virtual void 	destroy								();
 };
 
@@ -51,7 +52,7 @@ struct CGameTaskRegistry : public CALifeAbstractRegistry<u16, vGameTasks>
 		CALifeAbstractRegistry<u16, vGameTasks>::load(stream);
 		load_data		(g_active_task_id,		stream);
 	};
-	virtual void save(CSaveObjectSave* Object) const
+	/*virtual void save(CSaveObjectSave* Object) const
 	{
 		Object->BeginChunk("CGameTaskRegistry");
 		{
@@ -68,5 +69,14 @@ struct CGameTaskRegistry : public CALifeAbstractRegistry<u16, vGameTasks>
 			Object->GetCurrentChunk()->r_stringZ(g_active_task_id);
 		}
 		Object->EndChunk();
+	};*/
+	virtual void serialize(ISaveObject& Object)
+	{
+		Object.BeginChunk("CGameTaskRegistry");
+		{
+			CALifeAbstractRegistry<u16, vGameTasks>::serialize(Object);
+			Object << g_active_task_id;
+		}
+		Object.EndChunk();
 	};
 };

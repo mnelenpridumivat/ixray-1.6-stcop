@@ -65,11 +65,15 @@ void CPureServerObject::save				(NET_Packet	&tNetPacket)
 {
 }
 
-void CPureServerObject::Load(CSaveObjectLoad* Object)
+/*void CPureServerObject::Load(CSaveObjectLoad* Object)
 {
 }
 
 void CPureServerObject::Save(CSaveObjectSave* Object) const
+{
+}*/
+
+void CPureServerObject::Serialize(ISaveObject& Object)
 {
 }
 
@@ -689,4 +693,5 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}
 	Object.EndChunk();
+	return true;
 }

@@ -203,7 +203,7 @@ void	CInventoryOwner::load	(IReader &input_packet)
 	load_data		(m_money,	input_packet);
 }
 
-void CInventoryOwner::Save(CSaveObject* Object) const
+/*void CInventoryOwner::Save(CSaveObject* Object) const
 {
 	Object->BeginChunk("CInventoryOwner");
 	{
@@ -231,6 +231,23 @@ void CInventoryOwner::Load(CSaveObject* Object)
 		Object->GetCurrentChunk()->r_u32(m_money);
 	}
 	Object->EndChunk();
+}*/
+
+void CInventoryOwner::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CInventoryOwner");
+	{
+		u8 active_slot = inventory().GetActiveSlot();
+		Object << active_slot;
+		if (active_slot == NO_ACTIVE_SLOT)
+		{
+			inventory().SetActiveSlot(NO_ACTIVE_SLOT);
+		}
+		m_tmp_active_slot_num = active_slot;
+		CharacterInfo().Serialize(Object);
+		Object << m_game_name << m_money;
+	}
+	Object.EndChunk();
 }
 
 

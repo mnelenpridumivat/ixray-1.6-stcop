@@ -123,3 +123,17 @@ void CWound::Incarnation	(float percent, float min_wound_size)
 			m_Wounds[i] = 0;
 	}
 }
+
+ISaveObject& operator<<(ISaveObject& Object, CWound& Value)
+{
+	Object.BeginChunk("CWound");
+	{
+		Object << Value.m_iBoneNum << Value.m_Wounds;
+		/*for (int i = 0; i < ALife::eHitTypeMax; i++) {
+			Object->GetCurrentChunk()->r_float(m_Wounds[i]);
+			VERIFY(m_Wounds[i] >= 0.0f && m_Wounds[i] <= WOUND_MAX);
+		}*/
+	}
+	Object.EndChunk();
+	return Object;
+}

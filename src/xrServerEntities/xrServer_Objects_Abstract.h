@@ -120,7 +120,7 @@ public:
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket) = 0;
 	/*virtual void			Spawn_Write(CSaveObjectSave* Object, bool bLocal) const = 0;
 	virtual bool			Spawn_Read(CSaveObjectLoad* Object) = 0;*/
-	virtual bool			Spawn_Serialize(ISaveObject* Object, bool bLocal = true) = 0;
+	virtual bool			Spawn_Serialize(ISaveObject& Object, bool bLocal = true) = 0;
 #if !defined(XRGAME_EXPORTS)
 	virtual void			FillProp				(LPCSTR pref, PropItemVec &items) = 0;
 	virtual void 			on_render				(CDUInterface* du, ISE_AbstractLEOwner* owner, bool bSelected, const Fmatrix& parent,int priority, bool strictB2F) = 0;

@@ -41,9 +41,7 @@ struct	SRotation
 	SRotation(float y, float p, float r) { yaw=y;pitch=p;roll=r; }
 };
 
-ISaveObject& operator<<(ISaveObject& Object, SRotation& Value) {
-	return Object << Value.yaw << Value.pitch << Value.roll;
-}
+ISaveObject& operator<<(ISaveObject& Object, SRotation& Value);
 
 enum EPOType {
 	epotBox,

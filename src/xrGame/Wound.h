@@ -13,6 +13,8 @@ class CSaveObject;
 
 class CWound
 {
+	friend ISaveObject& operator<<(ISaveObject& Object, CWound& Value);
+
 public:
 	CWound				(u16 bone_num);
 	virtual ~CWound		(void);
@@ -60,3 +62,5 @@ protected:
 
 	bool						m_bToBeDestroy;
 };
+
+ISaveObject& operator<<(ISaveObject& Object, CWound& Value);

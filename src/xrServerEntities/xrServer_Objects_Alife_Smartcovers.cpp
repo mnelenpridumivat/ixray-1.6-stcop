@@ -171,7 +171,7 @@ void CSE_SmartCover::UPDATE_Write(NET_Packet &tNetPacket)
 	inherited1::UPDATE_Write	(tNetPacket);
 }
 
-void CSE_SmartCover::STATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_SmartCover::STATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_SmartCover::STATE");
 	{
@@ -201,9 +201,26 @@ void CSE_SmartCover::STATE_WriteSave(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_bool(m_can_fire);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_SmartCover::STATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_SmartCover::STATE");
+	{
+		inherited1::STATE_Serialize(Object);
+		cform_serialize(Object);
+		Object << m_description << m_hold_position_time << m_enter_min_enemy_distance << m_exit_min_enemy_distance << m_is_combat_cover << m_can_fire;
+		/*Object->GetCurrentChunk()->r_stringZ(m_description);
+		Object->GetCurrentChunk()->r_float(m_hold_position_time);
+		Object->GetCurrentChunk()->r_float(m_enter_min_enemy_distance);
+		Object->GetCurrentChunk()->r_float(m_exit_min_enemy_distance);
+		Object->GetCurrentChunk()->r_bool(m_is_combat_cover);
+		Object->GetCurrentChunk()->r_bool(m_can_fire);*/
+	}
+	Object.EndChunk();
 }
 
-void CSE_SmartCover::UPDATE_ReadSave(CSaveObjectLoad* Object)
+/*void CSE_SmartCover::UPDATE_ReadSave(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CSE_SmartCover::UPDATE");
 	{
@@ -219,6 +236,15 @@ void CSE_SmartCover::UPDATE_WriteSave(CSaveObjectSave* Object) const
 		inherited1::UPDATE_WriteSave(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CSE_SmartCover::UPDATE_Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CSE_SmartCover::UPDATE");
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS

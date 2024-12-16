@@ -1,7 +1,7 @@
 #pragma once
-#include "Save/SaveInterface.h"
+#include "../xrCore/ShapeData.h"
 
-struct CShapeData
+/*struct CShapeData
 {
 	enum{
     	cfSphere=0,
@@ -24,7 +24,7 @@ struct CShapeData
 	ShapeVec						shapes;
 };
 
-ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value) {
+ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value);*/ /* {
 	Object << Value.type;
 	switch (Value.type) {
 	case CShapeData::cfSphere: {
@@ -37,4 +37,4 @@ ISaveObject& operator<<(ISaveObject& Object, CShapeData::shape_def& Value) {
 	}
 	}
 	return Object;
-}
+}*/

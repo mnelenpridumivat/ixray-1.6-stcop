@@ -65,8 +65,9 @@ public:
 
 	virtual void save(NET_Packet& output_packet) {};
 	virtual void load(IReader& input_packet) {};
-	virtual void Save(CSaveObject* Object) {};
-	virtual void Load(CSaveObject* Object) {};
+	/*virtual void Save(CSaveObject* Object) {};
+	virtual void Load(CSaveObject* Object) {};*/
+	virtual void Serialize(ISaveObject& Object) {};
 };
 
 

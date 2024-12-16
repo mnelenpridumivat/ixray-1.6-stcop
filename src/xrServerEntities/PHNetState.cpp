@@ -5,7 +5,7 @@
 #include "fastdelegate.h"
 #include "Save/SaveObject.h"
 
-CSaveObject& operator<<(ISaveObject& Object, SPHNetState& Value) {
+ISaveObject& operator<<(ISaveObject& Object, SPHNetState& Value) {
 	Value.net_Serialize(Object);
 	return Object;
 }
@@ -534,7 +534,7 @@ void SPHBonesData::net_Serialize(ISaveObject& Object)
 		if (Object.IsSave()) {
 			Fvector _mn = get_min(), _mx = get_max();
 			Object << _mn << _mx;/*<void, SPHBonesData, SPHBonesData, CSaveObject&, SPHNetState&>*/ 
-			Object.Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
+			((CSaveObject&)Object).Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
 
 			/*Object->GetCurrentChunk()->WriteArray(bones.size());
 			{
@@ -548,7 +548,7 @@ void SPHBonesData::net_Serialize(ISaveObject& Object)
 			u16 bones_number;
 			Object << _mn << _mx << bones_number;
 			set_min_max(_mn, _mx);
-			Object.Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
+			((CSaveObject&)Object).Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
 
 			/*for (int i = 0; i < bones_number; i++) {
 				SPHNetState	S;

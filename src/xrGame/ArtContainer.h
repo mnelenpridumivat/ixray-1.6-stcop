@@ -20,8 +20,9 @@ public:
 	void			save(NET_Packet& output_packet);
 	void			load(IReader& input_packet);
 
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	/*virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 
 	u32				Cost() const;
 	float			Weight() const;

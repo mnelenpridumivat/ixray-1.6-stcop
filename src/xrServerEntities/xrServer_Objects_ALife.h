@@ -218,7 +218,7 @@ public:
 		inherited2::UPDATE_Write	(tNetPacket);
 	};
 
-	virtual void STATE_ReadSave(CSaveObjectLoad* Object) override
+	/*virtual void STATE_ReadSave(CSaveObjectLoad* Object) override
 	{
 		inherited1::STATE_ReadSave(Object);
 		inherited2::STATE_ReadSave(Object);
@@ -228,9 +228,15 @@ public:
 	{
 		inherited1::STATE_WriteSave(Object);
 		inherited2::STATE_WriteSave(Object);
+	};*/
+
+	virtual void STATE_Serialize(ISaveObject& Object) override
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
 	};
 
-	virtual void UPDATE_ReadSave(CSaveObjectLoad* Object) override
+	/*virtual void UPDATE_ReadSave(CSaveObjectLoad* Object) override
 	{
 		inherited1::UPDATE_ReadSave(Object);
 		inherited2::UPDATE_ReadSave(Object);
@@ -240,6 +246,12 @@ public:
 	{
 		inherited1::UPDATE_WriteSave(Object);
 		inherited2::UPDATE_WriteSave(Object);
+	};*/
+
+	virtual void UPDATE_Serialize(ISaveObject& Object) override
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
 	};
 
 	virtual CSE_Abstract *init		()

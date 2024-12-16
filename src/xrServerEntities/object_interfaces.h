@@ -42,10 +42,10 @@ public:
 	virtual void					UPDATE_Read(NET_Packet& tNetPacket) = 0;
 	//virtual void					STATE_WriteSave(CSaveObjectSave* Object) const = 0;
 	//virtual void					STATE_ReadSave(CSaveObjectLoad* Object) = 0;
-	virtual void					STATE_Serialize(CSaveObject& Object) = 0;
+	virtual void					STATE_Serialize(ISaveObject& Object) = 0;
 	//virtual void					UPDATE_WriteSave(CSaveObjectSave* Object) const = 0;
 	//virtual void					UPDATE_ReadSave(CSaveObjectLoad* Object) = 0;
-	virtual void					UPDATE_Serialize(CSaveObject& Object) = 0;
+	virtual void					UPDATE_Serialize(ISaveObject& Object) = 0;
 };
 
 class IPureServerObject : public IPureSerializeObject<IReader,IWriter>, public IPureStateUpdateObject {};
