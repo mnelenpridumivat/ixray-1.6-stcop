@@ -92,7 +92,7 @@ int xrDecompressor::ExtractFile(const char* filename)
 
 const char* xrDecompressor::CreatePath(const char* path)
 {
-	if (!m_PathCache.contains(path))
+	if (m_PathCache.find(path)==m_PathCache.end())
 	{
 		char relPath[MAX_PATH + 1];
 		xr_strcpy(relPath, path);
@@ -160,16 +160,14 @@ void xrDecompressor::Decompress()
 
 	Msg("%d file(s) to decompress in %d archive(s)\n", (int)files->size(), (int)FS.m_archives.size());
 
-	xr_parallel_for
-	(
-		files->begin(), files->end(), [this](const char* File)
+	xr_parallel_for(files->begin(), files->end(), 
+	[this](const char* File)
+	{
+		if (int err = ExtractFile(File))
 		{
-			if (int err = ExtractFile(File))
-			{
-				Msg("[ERROR] Failed to extract %s: %d", File, err);
-			}
+			Msg("[ERROR] Failed to extract %s: %d", File, err);
 		}
-	);
+	});
 
 	Msg("End Decompress: %d", timer.GetElapsed_ms());
 
