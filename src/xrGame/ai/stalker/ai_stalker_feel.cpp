@@ -14,13 +14,11 @@
 #include "../../sight_manager.h"
 #include "../../stalker_movement_manager_smart_cover.h"
 #include "../../stalker_animation_manager.h"
-#include "../../CustomZone.h"
 
 #ifdef DEBUG
 #	include "../../ai_debug.h"
 	extern Flags32 psAI_Flags;
 #endif // DEBUG
-
 
 BOOL CAI_Stalker::feel_vision_isRelevant(CObject* O)
 {
@@ -41,10 +39,9 @@ void CAI_Stalker::renderable_Render	()
 		CInventoryOwner::renderable_Render	();
 
 #ifdef DEBUG
-	if (g_Alive())
-	{
+	if (g_Alive()) {
 		if (psAI_Flags.test(aiAnimationStats))
-			animation().add_animation_stats();
+			animation().add_animation_stats	();
 	}
 #endif // DEBUG
 }
@@ -81,7 +78,7 @@ BOOL CAI_Stalker::feel_touch_on_contact	(CObject *O)
 {
 	VERIFY							(O != this);
 
-	if ((O->spatial.type | STYPE_VISIBLEFORAI) != O->spatial.type && !smart_cast<CCustomZone*>(O) )
+	if ((O->spatial.type | STYPE_VISIBLEFORAI) != O->spatial.type)
 		return	(FALSE);
 
 	return		(inherited::feel_touch_on_contact(O));
