@@ -1382,7 +1382,7 @@ void FRbmkObjectHandlerPlanner::SetGoap(MonsterSpace::EObjectAction ObjectAction
 		ActionName.printf("Firing1");
 		break;
 	case MonsterSpace::eObjectActionFireNoReload:
-		ActionName.printf("FiringNoReload1");
+		ActionName.printf("FiringNoReload");
 		break;
 	case MonsterSpace::eObjectActionFire2:
 		ActionName.printf("Firing2");
