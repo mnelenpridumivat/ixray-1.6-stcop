@@ -29,6 +29,7 @@ add_compile_options("$<$<CONFIG:RELEASE>:/GT>" "$<$<CONFIG:RELWITHDEBINFO>:/GT>"
 add_compile_options("$<$<CONFIG:RELEASE>:/GL>" "$<$<CONFIG:RELWITHDEBINFO>:/GL>")
 add_compile_options("$<$<CONFIG:RELWITHDEBINFO>:/Ob2>")
 add_compile_options("$<$<CONFIG:RELWITHDEBINFO>:/Ot>")
+add_link_options("$<$<CONFIG:RELEASE>:/LTCG:incremental>" "$<$<CONFIG:RELWITHDEBINFO>:/LTCG:incremental>")
 
 ## Exceptions...
 add_compile_options("$<$<CONFIG:DEBUG>:/EHsc>")
