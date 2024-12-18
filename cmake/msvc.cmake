@@ -24,7 +24,7 @@ add_link_options("$<$<CONFIG:DEBUG>:/SAFESEH:NO>")
 add_compile_options("$<$<CONFIG:RELEASE>:/wd4530>" "$<$<CONFIG:DEBUG>:/wd4275>" "$<$<CONFIG:DEBUG>:/wd4251>" "$<$<CONFIG:RELWITHDEBINFO>:/wd4530>")
 
 ## Exceptions...
-add_compile_options("/EHsc")
+add_compile_options("$<$<CONFIG:DEBUG>:/EHsc>")
 
 ## Edit and Continue mode
 if (IXRAY_ASAN)
