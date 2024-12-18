@@ -1,8 +1,20 @@
 #include "stdafx.h"
 #include "script_export_space.h"
 
-SCRIPTS_API xr_hash_map<script_exporter_key_base, script_exporter_data*>& get_script_export_container()
+SCRIPTS_API script_export_hashmap& get_script_export_container()
 {
-	static xr_hash_map<script_exporter_key_base, script_exporter_data*> script_exporter_container;
+	static script_export_hashmap script_exporter_container;
+	return script_exporter_container;
+}
+
+SCRIPTS_API script_export_hashmap& get_script_export_container_xrSE_Factory()
+{
+	static script_export_hashmap script_exporter_container;
+	return script_exporter_container;
+}
+
+SCRIPTS_API script_export_hashmap& get_script_export_container_xrGame()
+{
+	static script_export_hashmap script_exporter_container;
 	return script_exporter_container;
 }

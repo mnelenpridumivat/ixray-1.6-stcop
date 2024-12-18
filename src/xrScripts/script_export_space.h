@@ -88,7 +88,23 @@ struct script_exporter_data {
 	script_exporter_base* exporter = nullptr;
 };
 
-SCRIPTS_API xr_hash_map<script_exporter_key_base, script_exporter_data*>& get_script_export_container();
+using script_export_hashmap = xr_hash_map<script_exporter_key_base, script_exporter_data*>;
+
+SCRIPTS_API script_export_hashmap& get_script_export_container();
+SCRIPTS_API script_export_hashmap& get_script_export_container_xrSE_Factory();
+SCRIPTS_API script_export_hashmap& get_script_export_container_xrGame();
+
+#ifdef XRSE_FACTORY_EXPORTS
+#define SCRIPT_EXPORT_CONTAINER get_script_export_container_xrSE_Factory()
+#endif
+
+/*#ifdef XRGAME_EXPORTS
+#define SCRIPT_EXPORT_CONTAINER get_script_export_container_xrGame()
+#endif*/
+
+#ifndef SCRIPT_EXPORT_CONTAINER
+#define SCRIPT_EXPORT_CONTAINER get_script_export_container()
+#endif
 
 #define SCRIPT_EXPORT1(x) script_exporter1<x> x##_exporter = script_exporter1<x>::GetInstance(#x);
 #define SCRIPT_EXPORT2(x, x1) script_exporter2<x, x1> x##_exporter = script_exporter2<x, x1>::GetInstance(#x, #x1);
@@ -106,7 +122,10 @@ class script_exporter1 : public script_exporter_base {
 		data->inited = false;
 		data->exporter = this;
 		data->dependencies = {};
-		get_script_export_container().insert({ script_exporter_key<T>::GetKey(vT), data });
+		auto& Container = SCRIPT_EXPORT_CONTAINER;
+		auto ElemPos = Container.find(script_exporter_key<T>::GetKey(vT));
+		VERIFY(ElemPos == Container.end());
+		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
 public:
@@ -129,7 +148,7 @@ class script_exporter2 : public script_exporter_base {
 		data->exporter = this;
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
-		get_script_export_container().insert({ script_exporter_key<T>::GetKey(vT), data });
+		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
 public:
@@ -153,7 +172,7 @@ class script_exporter3 : public script_exporter_base {
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
-		get_script_export_container().insert({ script_exporter_key<T>::GetKey(vT), data });
+		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
 public:
@@ -178,7 +197,7 @@ class script_exporter4 : public script_exporter_base {
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
 		data->dependencies.push_back(script_exporter_key<A3>::GetKey(vA3));
-		get_script_export_container().insert({ script_exporter_key<T>::GetKey(vT), data });
+		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
 public:
@@ -204,7 +223,7 @@ class script_exporter5 : public script_exporter_base {
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
 		data->dependencies.push_back(script_exporter_key<A3>::GetKey(vA3));
 		data->dependencies.push_back(script_exporter_key<A4>::GetKey(vA4));
-		get_script_export_container().insert({ script_exporter_key<T>::GetKey(vT), data });
+		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
 public:

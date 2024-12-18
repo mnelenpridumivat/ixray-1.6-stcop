@@ -19,10 +19,10 @@ class CObjectFactory:
 	public IGame_ObjectFactory
 {
 public:
-#ifndef NO_XR_GAME
+//#ifndef NO_XR_GAME
 	using CLIENT_BASE_CLASS = ObjectFactory::CLIENT_BASE_CLASS ;
 	using CLIENT_SCRIPT_BASE_CLASS = ObjectFactory::CLIENT_SCRIPT_BASE_CLASS;
-#endif
+//#endif
 
 	using SERVER_BASE_CLASS = ObjectFactory::SERVER_BASE_CLASS ;
 	using SERVER_SCRIPT_BASE_CLASS = ObjectFactory::SERVER_SCRIPT_BASE_CLASS;

@@ -18,6 +18,7 @@
 #pragma warning(disable:4995)
 #include "../xrUI/stdafx.h"
 #include "../xrScripts/stdafx.h"
+#include "xrGame_Script_container.h"
 #pragma warning(default:4995)
 
 #include "../xrEngine/GameFont.h"

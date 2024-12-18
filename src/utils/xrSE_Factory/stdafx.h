@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../../xrCore/xrCore.h"
+#include "xrServer_ScriptContainer.h"
 #include "../../xrScripts/stdafx.h"
 
 #define STRINGIZE(a)			#a

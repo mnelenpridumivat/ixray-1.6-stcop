@@ -28,18 +28,25 @@
 #	include "ui/UIActorMenu.h"
 #endif
 
-void register_script_class_rec(script_exporter_key_base class_key, lua_State* L) {
-	auto& container = get_script_export_container();
+void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
+	//auto& container = get_script_export_container();
 	auto data = container.find(class_key);
 	VERIFY(data != container.end());
 	if (data->second->inited) {
 		return;
 	}
 	for (auto& elem : data->second->dependencies) {
-		register_script_class_rec(elem, L);
+		register_script_class_rec(container, elem, L);
 	}
 	data->second->exporter->script_register(L);
 	data->second->inited = true;
+#ifdef XRSE_FACTORY_EXPORTS
+	auto nonse_container = get_script_export_container();
+	auto nonse_data = nonse_container.find(class_key);
+	if (nonse_data != nonse_container.end() && nonse_data != data) {
+		nonse_data->second->inited = true;
+	}
+#endif
 }
 
 void export_classes	(lua_State *L)
@@ -48,8 +55,17 @@ void export_classes	(lua_State *L)
 	for (auto& elem : container) {
 		elem.second->inited = false;
 	}
+#ifdef XRSE_FACTORY_EXPORTS
+	auto se_container = get_script_export_container_xrSE_Factory();
+	for (auto& elem : se_container) {
+		elem.second->inited = false;
+	}
+	for (auto& elem : se_container) {
+		register_script_class_rec(se_container, elem.first, L);
+	}
+#endif
 	for (auto& elem : container) {
-		register_script_class_rec(elem.first, L);
+		register_script_class_rec(container, elem.first, L);
 	}
 
 	//CScriptEngine::script_register(L);
