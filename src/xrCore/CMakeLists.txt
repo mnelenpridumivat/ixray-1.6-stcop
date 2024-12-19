@@ -183,6 +183,7 @@ if(WIN32)
     target_link_libraries(xrCore PRIVATE "dbghelp.lib")
     target_link_libraries(xrCore PRIVATE "winmm.lib")
     target_link_libraries(xrCore PRIVATE "faultrep.lib")
+    target_link_libraries(xrCore PRIVATE "yaml-cpp.lib")
 
     target_link_libraries(xrCore PUBLIC ${CORE_SDL3}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/SDL3.lib)
     target_link_libraries(xrCore PUBLIC ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/tbb12.lib)
@@ -206,6 +207,7 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/tbb12.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/dep/discord_gamesdk/lib/${NUGET_PACKAGE_PLATFORM_EX}/discord_game_sdk.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LZO}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/lzo2.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${IXRAY_SDK_BIN}/yaml-cpp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
   #      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MIMALLOC}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/mimalloc.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
   #      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MIMALLOC}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/mimalloc-redirect${MIMALLOC_POSTFIX}.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
     )
