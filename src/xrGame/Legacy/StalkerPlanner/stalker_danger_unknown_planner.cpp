@@ -16,6 +16,8 @@
 #include "agent_member_manager.h"
 #include "stalker_danger_unknown_actions.h"
 
+#include "Legacy/StalkerPlanner/stalker_decision_space.h"
+
 using namespace StalkerDecisionSpace;
 
 CStalkerDangerUnknownPlanner::CStalkerDangerUnknownPlanner	(CAI_Stalker *object, LPCSTR action_name) :

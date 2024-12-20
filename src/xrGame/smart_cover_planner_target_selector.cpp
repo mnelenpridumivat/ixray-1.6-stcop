@@ -17,6 +17,8 @@
 #include "ai/stalker/ai_stalker.h"
 #include "smart_cover_default_behaviour_planner.hpp"
 
+#include "property_evaluator_member.h"
+
 using namespace StalkerDecisionSpace;
 using smart_cover::target_selector;
 using smart_cover::animation_planner;

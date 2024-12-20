@@ -47,6 +47,7 @@
 #include "../../script_game_object.h"
 #include "../../Inventory.h"
 
+#include "Legacy/StalkerPlanner/stalker_planner.h"
 #include "../../trajectories.h"
 
 #if USE_OLD_OBJECT_PLANNER

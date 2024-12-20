@@ -11,6 +11,7 @@
 #include "smart_cover_detail.h"
 #include "action_base.h"
 #include "smart_cover_planner_target_selector.h"
+#include "Legacy/StalkerPlanner/stalker_decision_space.h"
 
 namespace smart_cover {
 
