@@ -85,7 +85,7 @@ public:
 struct script_exporter_data {
 	bool inited = false;
 	xr_vector<script_exporter_key_base> dependencies;
-	script_exporter_base* exporter = nullptr;
+	u64 exporter = 0;
 };
 
 using script_export_hashmap = xr_hash_map<script_exporter_key_base, script_exporter_data*>;
@@ -106,6 +106,8 @@ SCRIPTS_API script_export_hashmap& get_script_export_container_xrGame();
 #define SCRIPT_EXPORT_CONTAINER get_script_export_container()
 #endif
 
+// There is a strange critical bug with pointer coping on xrSE_Factory registrator, so I disable this system
+#ifdef ENABLE_AUTOMATIC_SCRIPT_REGISTRATION
 #define SCRIPT_EXPORT1(x) script_exporter1<x> x##_exporter = script_exporter1<x>::GetInstance(#x);
 #define SCRIPT_EXPORT2(x, x1) script_exporter2<x, x1> x##_exporter = script_exporter2<x, x1>::GetInstance(#x, #x1);
 #define SCRIPT_EXPORT3(x, x1, x2) script_exporter3<x, x1, x2> x##_exporter = script_exporter3<x, x1, x2>::GetInstance(#x, #x1, #x2);
@@ -113,6 +115,15 @@ SCRIPTS_API script_export_hashmap& get_script_export_container_xrGame();
 #define SCRIPT_EXPORT5(x, x1, x2, x3, x4) script_exporter5<x, x1, x2, x3, x4> x##_exporter = script_exporter5<x, x1, x2, x3, x4>::GetInstance(#x, #x1, #x2, #x3, #x4);
 #define SCRIPT_EXPORT_NAME1(x, name) script_exporter1<x> name##_exporter = script_exporter1<x>::GetInstance(#x);
 #define SCRIPT_EXPORT_NAME2(x, name, x1) script_exporter2<x, x1> name##_exporter = script_exporter2<x, x1>::GetInstance(#x, #x1);
+#else
+#define SCRIPT_EXPORT1(x)
+#define SCRIPT_EXPORT2(x, x1)
+#define SCRIPT_EXPORT3(x, x1, x2)
+#define SCRIPT_EXPORT4(x, x1, x2, x3)
+#define SCRIPT_EXPORT5(x, x1, x2, x3, x4)
+#define SCRIPT_EXPORT_NAME1(x, name)
+#define SCRIPT_EXPORT_NAME2(x, name, x1)
+#endif
 
 template<has_script_register T>
 class script_exporter1 : public script_exporter_base {
@@ -120,11 +131,11 @@ class script_exporter1 : public script_exporter_base {
 	script_exporter1(shared_str vT) {
 		script_exporter_data* data = new script_exporter_data();
 		data->inited = false;
-		data->exporter = this;
+		data->exporter = (u64)(void*)this;
 		data->dependencies = {};
-		auto& Container = SCRIPT_EXPORT_CONTAINER;
-		auto ElemPos = Container.find(script_exporter_key<T>::GetKey(vT));
-		VERIFY(ElemPos == Container.end());
+		//auto& Container = SCRIPT_EXPORT_CONTAINER;
+		//auto ElemPos = Container.find(script_exporter_key<T>::GetKey(vT));
+		//VERIFY(ElemPos == Container.end());
 		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
 	}
 
@@ -145,7 +156,15 @@ class script_exporter2 : public script_exporter_base {
 	script_exporter2(shared_str vT, shared_str vA1) {
 		script_exporter_data* data = new script_exporter_data();
 		data->inited = false;
-		data->exporter = this;
+		//u64* ptr = (u64*)&(data->exporter);
+		//auto SelfPtr = this;
+		//*ptr = *(u64*)&SelfPtr;
+		/*using self_ptr = script_exporter2*;
+		self_ptr Ptr = this;
+		auto DestPtr = &data->exporter;
+		memcpy(DestPtr, &Ptr, sizeof(this));*/
+		data->exporter = (u64)(void*)this;
+		VERIFY(data->exporter == (u64)(void*)this);
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		SCRIPT_EXPORT_CONTAINER.insert({ script_exporter_key<T>::GetKey(vT), data });
@@ -168,7 +187,7 @@ class script_exporter3 : public script_exporter_base {
 	script_exporter3(shared_str vT, shared_str vA1, shared_str vA2) {
 		script_exporter_data* data = new script_exporter_data();
 		data->inited = false;
-		data->exporter = this;
+		data->exporter = (u64)(void*)this;
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
@@ -192,7 +211,7 @@ class script_exporter4 : public script_exporter_base {
 	script_exporter4(shared_str vT, shared_str vA1, shared_str vA2, shared_str vA3) {
 		script_exporter_data* data = new script_exporter_data();
 		data->inited = false;
-		data->exporter = this;
+		data->exporter = (u64)(void*)this;
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
@@ -217,7 +236,7 @@ class script_exporter5 : public script_exporter_base {
 	script_exporter5(shared_str vT, shared_str vA1, shared_str vA2, shared_str vA3, shared_str vA4) {
 		script_exporter_data* data = new script_exporter_data();
 		data->inited = false;
-		data->exporter = this;
+		data->exporter = (u64)(void*)this;
 		data->dependencies = {};
 		data->dependencies.push_back(script_exporter_key<A1>::GetKey(vA1));
 		data->dependencies.push_back(script_exporter_key<A2>::GetKey(vA2));
