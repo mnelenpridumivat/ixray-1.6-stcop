@@ -58,6 +58,8 @@
 #include "../../../xrUI/ui_base.h"
 #include "../../doors_actor.h"
 
+#include "Legacy/StalkerPlanner/stalker_planner.h"
+
 CActor *g_debug_actor = 0;
 
 void try_change_current_entity()

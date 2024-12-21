@@ -33,7 +33,9 @@ add_link_options("$<$<CONFIG:RELEASE>:/LTCG:incremental>" "$<$<CONFIG:RELWITHDEB
 add_link_options("$<$<CONFIG:RELEASE>:/INCREMENTAL:NO>" "$<$<CONFIG:RELWITHDEBINFO>:/INCREMENTAL:NO>")
 
 ## Exceptions...
-add_compile_options("$<$<CONFIG:DEBUG>:/EHsc>")
+if (IXRAY_LDEBUG)
+    add_compile_options("$<$<CONFIG:DEBUG>:/EHsc>")
+endif()
 
 ## Edit and Continue mode
 if (IXRAY_ASAN)
