@@ -102,6 +102,7 @@ void COMotion::SaveMotion(const char* buf){
 
 bool COMotion::LoadMotion(const char* buf)
 {
+    FS.TryLoad(buf);
 	destructor<IReader>	F(FS.r_open(buf));
 	R_ASSERT(F().find_chunk(EOBJ_OMOTION));
 	return Load		(F());
