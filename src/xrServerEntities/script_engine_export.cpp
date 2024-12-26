@@ -27,6 +27,7 @@
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
+#	include "EmiZone.h"
 #include "xrServer_Objects_ALife.h"
 #endif
 
@@ -306,6 +307,7 @@ void export_classes	(lua_State *L)
 	CUIActorMenu::script_register(L);
 
 	CAnomalPseudoGigant::script_register(L);
+	CEmiZone::script_register(L);
 
 #endif
 }

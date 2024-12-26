@@ -75,6 +75,9 @@
 #include "../../xrUI/UIFontDefines.h"
 #include "PickupManager.h"
 
+#include "CustomTimer.h"
+#include <CutsceneManager.h>
+
 const u32		patch_frames	= 50;
 const float		respawn_delay	= 1.f;
 const float		respawn_auto	= 7.f;
@@ -1006,6 +1009,9 @@ void CActor::UpdateCL	()
 
 	UpdateInventoryOwner			(Device.dwTimeDelta);
 
+	CTimerManager::GetInstance().Update();
+	CBinderManager::GetInstance().Update();
+
 	if(m_feel_touch_characters>0)
 	{
 		for(xr_vector<CObject*>::iterator it = feel_touch.begin(); it != feel_touch.end(); it++)
@@ -1718,6 +1724,7 @@ void CActor::OnHUDDraw	(CCustomHUD* Z)
 	if(auto pGameObject = smart_cast<CGameObject*>(Holder())) {
 		pGameObject->OnHUDDraw(Z);
 	}
+	CCutsceneManager::GetInstance().Update();
 #if 0//ndef NDEBUG
 	if (Level().CurrentControlEntity() == this && g_ShowAnimationInfo)
 	{

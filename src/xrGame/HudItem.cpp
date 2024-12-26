@@ -726,7 +726,7 @@ float CHudItem::GetHudFov()
 	return m_nearwall_last_hud_fov;
 }
 
-inline void CHUDState::SetState(u32 v) {
+void CHUDState::SetState(u32 v) {
 	m_hud_item_state = v;
 	m_dw_curr_state_time = Device.dwTimeGlobal;
 	ResetSubStateTime();

@@ -1833,6 +1833,13 @@ void CScriptGameObject::SetActorRunBackCoef(float run_back_coef)
 	pActor->m_fRunBackFactor = run_back_coef;
 }
 
+void CScriptGameObject::SetCharacterName(LPCSTR name)
+{
+	CInventoryOwner* pOurOwner = smart_cast<CInventoryOwner*>(&object()); VERIFY(pOurOwner);
+
+	pOurOwner->SetName(name);
+}
+
 void CScriptGameObject::SetCharacterIcon(LPCSTR iconName)
 {
 	CInventoryOwner* pInventoryOwner = smart_cast<CInventoryOwner*>(&object());
@@ -1843,4 +1850,28 @@ void CScriptGameObject::SetCharacterIcon(LPCSTR iconName)
 		return;
 	}
 	return pInventoryOwner->SetIcon(iconName);
+}
+
+void CScriptGameObject::SetCharacterDefaultVisual(LPCSTR name)
+{
+	if (!name)
+	{
+		Msg("! SetCharacterDefaultVisual(...): empty visual name!");
+		return;
+	}
+
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		Msg("! SetCharacterDefaultVisual(...): method applicable only for actor!");
+		return;
+	}
+
+	pActor->SetDefaultVisualOutfit(name);
+
+	// Update right now!
+	if (!pActor->GetOutfit())
+	{
+		pActor->ChangeVisual(pActor->GetDefaultVisualOutfit());
+	}
 }

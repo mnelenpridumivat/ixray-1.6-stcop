@@ -334,6 +334,21 @@ void change_game_time(u32 days, u32 hours, u32 mins)
 	}
 }
 
+void set_game_date_time(LPCSTR date, LPCSTR time)
+{
+	game_sv_Single* tpGame = smart_cast<game_sv_Single*>(Level().Server->game);
+	if (tpGame && ai().get_alife())
+	{
+		u32	years, months, days, hours, minutes, seconds;
+		sscanf(time, "%d:%d:%d", &hours, &minutes, &seconds);
+		sscanf(date, "%d.%d.%d", &days, &months, &years);
+		auto newTime = generate_time(years, months, days, hours, minutes, seconds);
+		float fValue = static_cast<float>(days * 86400 + hours * 3600 + minutes * 60);
+		g_pGamePersistent->Environment().ChangeGameTime(fValue);
+		tpGame->alife().time_manager().set_date_time(newTime);
+	}
+}
+
 float high_cover_in_direction(u32 level_vertex_id, const Fvector& direction)
 {
 	if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
@@ -885,6 +900,7 @@ void spawn_section(LPCSTR sSection, Fvector3 vPosition, u32 LevelVertexID, u16 P
 
 #include "HUDManager.h"
 #include <CustomTimer.h>
+#include <CutsceneManager.h>
 //ability to get the target game_object at crosshair
 CScriptGameObject* g_get_target_obj()
 {
@@ -1148,6 +1164,8 @@ void CLevel::script_register(lua_State* L)
 				def("get_time_minutes", get_time_minutes),
 				def("change_game_time", change_game_time),
 
+				def("set_game_date_time", set_game_date_time), // runtime set new date with time
+
 				def("high_cover_in_direction", high_cover_in_direction),
 				def("low_cover_in_direction", low_cover_in_direction),
 				def("vertex_in_direction", vertex_in_direction),
@@ -1261,7 +1279,8 @@ void CLevel::script_register(lua_State* L)
 
 	module(L, "animslot")
 		[
-			def("play", &CHUDAnimItem::PlayHudAnim)
+			def("play", &CHUDAnimItem::PlayHudAnim),
+			def("play_cutscene", &CCutsceneManager::PlayCutscene)
 		];
 
 	module(L, "player_hud")

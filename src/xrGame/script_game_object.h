@@ -838,7 +838,10 @@ public:
 			void        SetActorRunCoef(float run_coef);
 			float       GetActorRunBackCoef() const;
 			void        SetActorRunBackCoef(float run_back_coef);
+
+			void		SetCharacterName(LPCSTR name);
 			void		SetCharacterIcon(LPCSTR iconName);
+			void		SetCharacterDefaultVisual(LPCSTR name);
 
 			void IterateFeelTouch(const luabind::functor<bool>& functor);
 			bool IsActorLadder() const;

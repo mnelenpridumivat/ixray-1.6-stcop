@@ -65,6 +65,7 @@
 #	include "debug_text_tree.h"
 #include "level_changer.h"
 #endif
+#include <CutsceneManager.h>
 
 ENGINE_API bool g_dedicated_server;
 
