@@ -1724,7 +1724,6 @@ void CActor::OnHUDDraw	(CCustomHUD* Z)
 	if(auto pGameObject = smart_cast<CGameObject*>(Holder())) {
 		pGameObject->OnHUDDraw(Z);
 	}
-	CCutsceneManager::GetInstance().Update();
 #if 0//ndef NDEBUG
 	if (Level().CurrentControlEntity() == this && g_ShowAnimationInfo)
 	{

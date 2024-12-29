@@ -1083,6 +1083,7 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 		// free temp storage
 		for (int itm_idx=0; itm_idx<b_lst.size(); ++itm_idx)
 		{
+
 			bm_item& BM 	= items[itm_idx];
 			// check T
 			R_ASSERT		(dwLen);
