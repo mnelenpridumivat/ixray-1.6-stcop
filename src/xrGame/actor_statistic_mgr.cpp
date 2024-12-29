@@ -32,7 +32,7 @@ void SStatDetailBData::load(IReader &stream)
 		load_data			(str_value,		stream);
 }
 
-void SStatDetailBData::save(CSaveObjectSave* Object) const
+/*void SStatDetailBData::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SStatDetailBData");
 	{
@@ -54,7 +54,7 @@ void SStatDetailBData::load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_stringZ(str_value);
 	}
 	Object->EndChunk();
-}
+}*/
 
 
 ////////////////////////////////////////////////
@@ -103,7 +103,7 @@ void SStatSectionData::load(IReader &stream)
 	}
 }
 
-void SStatSectionData::save(CSaveObjectSave* Object) const
+/*void SStatSectionData::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SStatSectionData");
 	{
@@ -133,7 +133,7 @@ void SStatSectionData::load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_stringZ(key);
 	}
 	Object->EndChunk();
-}
+}*/
 
 
 SStatDetailBData&	SStatSectionData::GetData	(const shared_str& key_)

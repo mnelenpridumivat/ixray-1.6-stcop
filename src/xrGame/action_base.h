@@ -83,6 +83,8 @@ public:
 	virtual void Save(CSaveObjectSave* Object) const {};
 	virtual void Load(CSaveObjectLoad* Object) {};
 
+	virtual void Serialize(ISaveObject& Object) {}
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 typedef CActionBase<CScriptGameObject> CScriptActionBase;

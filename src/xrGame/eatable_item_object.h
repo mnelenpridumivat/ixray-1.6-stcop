@@ -47,8 +47,9 @@ public:
 	virtual void	net_Export				(NET_Packet& P);					// export to server
 	virtual void	save					(NET_Packet &output_packet);
 	virtual void	load					(IReader &input_packet);
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL	net_SaveRelevant		()								{return TRUE;}
 	virtual void	renderable_Render		();
 	virtual void	reload					(LPCSTR section);

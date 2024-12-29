@@ -70,7 +70,7 @@ void SLocationKey::load(IReader &stream)
 	location->load	(stream);
 }
 
-void SLocationKey::save(CSaveObjectSave* Object) const
+/*void SLocationKey::save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("SLocationKey");
 	{
@@ -103,6 +103,33 @@ void SLocationKey::load(CSaveObjectLoad* Object)
 		location->load(Object);
 	}
 	Object->EndChunk();
+}*/
+ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data) {
+
+	Object.BeginChunk("SLocationKey");
+	{
+		Object << Data.object_id << Data.spot_type;
+		if (Object.IsSave()) {
+			bool Value = Data.location->IsUserDefined();
+			Object << Value;
+		}
+		else {
+			bool Value;
+			Object << Value;
+			if (Value)
+			{
+				Level().Server->PerformIDgen(Data.object_id);
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id, true);
+			}
+			else
+			{
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id);
+			}
+		}
+		Data.location->serialize(Object);
+	}
+	Object.EndChunk();
+	return Object;
 }
 
 void SLocationKey::destroy()

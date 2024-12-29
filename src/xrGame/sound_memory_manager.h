@@ -110,7 +110,7 @@ public:
 			/*virtual void Save(CSaveObjectSave* Object);
 			virtual void Load(CSaveObjectLoad* Object);*/
 			virtual void Serialize(ISaveObject& Object);
-			virtual void SerializeSingle(ISaveObject& Object, CHitObject& Value);
+			virtual void SerializeSingle(ISaveObject& Object, CSoundObject& Value);
 			void				on_requested_spawn		(CObject *object);
 
 private:

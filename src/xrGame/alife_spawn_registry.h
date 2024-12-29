@@ -44,8 +44,9 @@ private:
 	IGameGraph								*m_game_graph;
 
 protected:
-			void							save_updates				(CSaveObjectSave* Object);
-			void							load_updates				(CSaveObjectLoad* Object);
+			//void							save_updates				(CSaveObjectSave* Object);
+			//void							load_updates				(CSaveObjectLoad* Object);
+			void							serialize_updates(ISaveObject& Object);
 			void							save_updates(IWriter& stream);
 			void							load_updates(IReader& stream);
 			void							build_story_spawns			();
@@ -68,8 +69,9 @@ public:
 	virtual									~CALifeSpawnRegistry		();
 	virtual void							load						(IReader &file_stream, xrGUID *save_guid = 0);
 	virtual void							save						(IWriter &memory_stream);
-	virtual void							Save(CSaveObjectSave* Object);
+	//virtual void							Save(CSaveObjectSave* Object);
 			void							load						(IReader &file_stream, LPCSTR game_name);
+	virtual void							Serialize(ISaveObject& Object);
 			void							load						(LPCSTR spawn_name);
 			void							load_from_editor			();
 			void							fill_new_spawns				(xr_vector<ALife::_SPAWN_ID> &spawns, ALife::_TIME_ID game_time, xr_vector<ALife::_SPAWN_ID> &objects);

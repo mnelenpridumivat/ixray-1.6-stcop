@@ -47,7 +47,7 @@ void  CWound::load	(IReader &input_packet)
 	}
 }
 
-void CWound::Save(CSaveObjectSave* Object)
+/*void CWound::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CWound");
 	{
@@ -71,6 +71,20 @@ void CWound::Load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CWound::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CWound");
+	{
+		Object << m_iBoneNum << m_Wounds;
+		if (!Object.IsSave()) {
+			for (int i = 0; i < ALife::eHitTypeMax; i++) {
+				VERIFY(m_Wounds[i] >= 0.0f && m_Wounds[i] <= WOUND_MAX);
+			}
+		}
+	}
+	Object.EndChunk();
 }
 
 

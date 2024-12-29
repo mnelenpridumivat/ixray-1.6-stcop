@@ -351,7 +351,7 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	if(!E->client_data.empty())
 	{	
 		auto* PartialObj = new CSaveObjectLoad(E->client_data_new);
-		net_Load(PartialObj);
+		net_Serialize(*PartialObj);
 		xr_delete(PartialObj);
 //		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
 		/*IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());

@@ -158,6 +158,29 @@ public:
 	virtual	void						clear					();
 };
 
+/*template <
+	typename _operator_condition,
+	typename _condition_state,
+	typename _operator,
+	typename _condition_evaluator,
+	typename _operator_id_type,
+	bool	 _reverse_search = false,
+	typename _operator_ptr = _operator*,
+	typename _condition_evaluator_ptr = _condition_evaluator*
+>
+ISaveObject& operator<<(ISaveObject& Object, typename CProblemSolver<
+	_operator_condition,
+	_condition_state,
+	_operator,
+	_condition_evaluator,
+	_operator_id_type,
+	_reverse_search,
+	_operator_ptr,
+	_condition_evaluator_ptr
+>::SOperator& Data) {
+
+}*/
+
 #ifndef AI_COMPILER
 #	include "ai_space.h"
 #endif

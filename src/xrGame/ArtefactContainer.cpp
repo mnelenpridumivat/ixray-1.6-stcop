@@ -48,7 +48,7 @@ void CArtefactContainer::load(IReader& packet)
     CArtContainer::load(packet);
 }
 
-void CArtefactContainer::Save(CSaveObjectSave* Object) const
+/*void CArtefactContainer::Save(CSaveObjectSave* Object) const
 {
     Object->BeginChunk("CArtefactContainer");
     {
@@ -66,6 +66,16 @@ void CArtefactContainer::Load(CSaveObjectLoad* Object)
         CArtContainer::Load(Object);
     }
     Object->EndChunk();
+}*/
+
+void CArtefactContainer::Serialize(ISaveObject& Object)
+{
+    Object.BeginChunk("CArtefactContainer");
+    {
+        inherited::Serialize(Object);
+        CArtContainer::Serialize(Object);
+    }
+    Object.EndChunk();
 }
 
 u32 CArtefactContainer::Cost() const

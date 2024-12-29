@@ -27,7 +27,7 @@ void CALifeSimulatorHeader::load				(IReader	&file_stream)
 	R_ASSERT2					(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
 }
 
-void CALifeSimulatorHeader::Save(CSaveObjectSave* Object)
+/*void CALifeSimulatorHeader::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CALifeSimulatorHeader");
 	{
@@ -44,6 +44,16 @@ void CALifeSimulatorHeader::Load(CSaveObjectLoad* Object)
 		R_ASSERT2(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
 	}
 	Object->EndChunk();
+}*/
+
+void CALifeSimulatorHeader::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CALifeSimulatorHeader");
+	{
+		Object << m_version;
+		R_ASSERT2(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
+	}
+	Object.EndChunk();
 }
 
 

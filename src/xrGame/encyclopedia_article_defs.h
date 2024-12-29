@@ -24,8 +24,8 @@ struct ARTICLE_DATA : public IPureSerializeObject<IReader,IWriter>
 	
 	virtual void load (IReader& stream);
 	virtual void save (IWriter&);
-	virtual void load(CSaveObjectLoad* Object);
-	virtual void save(CSaveObjectSave* Object) const;
+	//virtual void load(CSaveObjectLoad* Object);
+	//virtual void save(CSaveObjectSave* Object) const;
 
 	ALife::_TIME_ID			receive_time;
 	shared_str				article_id;
@@ -33,6 +33,8 @@ struct ARTICLE_DATA : public IPureSerializeObject<IReader,IWriter>
 
 	EArticleType			article_type;
 };
+
+ISaveObject& operator<<(ISaveObject& Object, ARTICLE_DATA& Data);
 
 using ARTICLE_ID_VECTOR = xr_vector<shared_str>;
 using ARTICLE_ID_IT = ARTICLE_ID_VECTOR::iterator;

@@ -81,7 +81,7 @@ void CEatableItem::save(NET_Packet& packet)
 	packet.w_u8((u8)m_iPortionsMarker);
 }
 
-void CEatableItem::Save(CSaveObjectSave* Object) const
+/*void CEatableItem::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CEatableItem");
 	{
@@ -99,6 +99,16 @@ void CEatableItem::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_float(m_iPortionsMarker);
 	}
 	Object->EndChunk();
+}*/
+
+void CEatableItem::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CEatableItem");
+	{
+		inherited::Serialize(Object);
+		Object << m_iPortionsMarker;
+	}
+	Object.EndChunk();
 }
 
 BOOL CEatableItem::net_Spawn(CSE_Abstract* DC)

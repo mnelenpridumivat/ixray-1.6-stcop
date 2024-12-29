@@ -65,11 +65,11 @@ void CALifeStorageManager::save	(LPCSTR save_name_no_check, bool update_name)
 
 	CSaveObjectSave* SaveObj = CSaveManager::GetInstance().BeginSave();
 	{
-		header().Save(SaveObj);
-		time_manager().Save(SaveObj);
-		spawns().Save(SaveObj);
-		objects().Save(SaveObj);
-		registry().Save(SaveObj);
+		header().Serialize(*SaveObj);
+		time_manager().Serialize(*SaveObj);
+		spawns().Serialize(*SaveObj);
+		objects().Serialize(*SaveObj);
+		registry().Serialize(*SaveObj);
 	}
 	CSaveManager::GetInstance().WriteSavedData(temp);
 

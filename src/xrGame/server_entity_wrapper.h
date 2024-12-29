@@ -24,8 +24,9 @@ public:
 	virtual	void			load					(IReader &stream);
 			void			save_update				(IWriter &stream);
 			void			load_update				(IReader &stream);
-			void			save_update(CSaveObjectSave* stream);
-			void			load_update(CSaveObjectLoad* stream);
+			//void			save_update(CSaveObjectSave* stream);
+			//void			load_update(CSaveObjectLoad* stream);
+			void			serialize_update(ISaveObject& stream);
 	IC		CSE_Abstract	&object					() const;
 };
 

@@ -66,6 +66,10 @@ protected:
 	bool						m_initialized;
 	_action_id_type				m_current_action_id;
 
+	void SerializeEval(ISaveObject& Object, CProblemSolver::EVALUATORS::value_type& elem);
+	void SerializeOper(ISaveObject& Object, CProblemSolver::SOperator& elem);
+	void SerializeStor(ISaveObject& Object, CSolverConditionValue& elem);
+
 #ifdef LOG_ACTION
 public:
 	bool						m_use_log;
@@ -112,8 +116,9 @@ public:
 	virtual	void				save					(NET_Packet &packet);
 	virtual	void				load					(IReader &packet);
 
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

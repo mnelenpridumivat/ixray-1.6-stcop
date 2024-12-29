@@ -105,7 +105,7 @@ void CALifeRegistryContainer::save(IWriter &memory_stream)
 	memory_stream.close_chunk	();
 }
 
-void CALifeRegistryContainer::Load(CSaveObjectLoad* Object)
+/*void CALifeRegistryContainer::Load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("CALifeRegistryContainer");
 	{
@@ -128,4 +128,20 @@ void CALifeRegistryContainer::Save(CSaveObjectSave* Object) const
 
 	}
 	Object->EndChunk();
+}*/
+
+void CALifeRegistryContainer::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CALifeRegistryContainer");
+	{
+		CInfoPortionRegistry::serialize(Object);
+		CRelationRegistry::serialize(Object);
+		CEncyclopediaRegistry::serialize(Object);
+		CGameNewsRegistry::serialize(Object);
+		CSpecificCharacterRegistry::serialize(Object);
+		CMapLocationRegistry::serialize(Object);
+		CGameTaskRegistry::serialize(Object);
+		CActorStatisticRegistry::serialize(Object);
+	}
+	Object.EndChunk();
 }

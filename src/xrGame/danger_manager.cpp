@@ -344,7 +344,7 @@ void CDangerManager::load			(IReader &packet)
 	load_data				(m_ignored,packet);
 }
 
-void CDangerManager::Save(CSaveObjectSave* Object)
+/*void CDangerManager::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CDangerManager");
 	{
@@ -371,4 +371,13 @@ void CDangerManager::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->EndArray();
 	}
 	Object->EndChunk();
+}*/
+
+void CDangerManager::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CDangerManager");
+	{
+		Object << m_ignored;
+	}
+	Object.EndChunk();
 }

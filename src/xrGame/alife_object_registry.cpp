@@ -59,7 +59,7 @@ void CALifeObjectRegistry::save				(IWriter &memory_stream, CSE_ALifeDynamicObje
 	}
 }
 
-void CALifeObjectRegistry::Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const
+/*void CALifeObjectRegistry::Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const
 {
 	Object->BeginChunk("CALifeObjectRegistry::single_object");
 	{
@@ -91,6 +91,36 @@ void CALifeObjectRegistry::Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject*
 			continue;
 
 		Save(Object, child, object_count);
+	}
+}*/
+
+void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject* object, u32& object_count)
+{
+	VERIFY(!Object.IsSave());
+	if (!Object.IsSave()) {
+		return;
+	}
+	Object << (LPSTR)object->name();
+	Object.BeginChunk("CALifeObjectRegistry::single_object");
+	{
+		++object_count;
+
+		object->Spawn_Serialize(Object, TRUE);
+		object->UPDATE_Serialize(Object);
+	}
+	Object.EndChunk();
+
+	ALife::OBJECT_VECTOR::const_iterator	I = object->children.begin();
+	ALife::OBJECT_VECTOR::const_iterator	E = object->children.end();
+	for (; I != E; ++I) {
+		CSE_ALifeDynamicObject* child = this->object(*I, true);
+		if (!child)
+			continue;
+
+		if (!child->can_save())
+			continue;
+
+		Serialize(Object, child, object_count);
 	}
 }
 
@@ -162,6 +192,26 @@ CSE_ALifeDynamicObject *CALifeObjectRegistry::get_object		(IReader &file_stream)
 	return					(tpALifeDynamicObject);
 }
 
+CSE_ALifeDynamicObject* CALifeObjectRegistry::get_object(ISaveObject& Object)
+{
+	string64				s_name;
+	Object << s_name;
+#ifdef DEBUG
+	if (psAI_Flags.test(aiALife)) {
+		Msg("Loading object %s", s_name);
+	}
+#endif
+	// create entity
+	CSE_Abstract* tpSE_Abstract = F_entity_Create(s_name);
+	R_ASSERT2(tpSE_Abstract, "Can't create entity.");
+	CSE_ALifeDynamicObject* tpALifeDynamicObject = smart_cast<CSE_ALifeDynamicObject*>(tpSE_Abstract);
+	R_ASSERT2(tpALifeDynamicObject, "Non-ALife object in the saved game!");
+	tpALifeDynamicObject->Spawn_Serialize(Object, true);
+	tpALifeDynamicObject->UPDATE_Serialize(Object);
+
+	return					(tpALifeDynamicObject);
+}
+
 void CALifeObjectRegistry::load(IReader& file_stream)
 {
 	Msg("* Loading objects...");
@@ -182,7 +232,7 @@ void CALifeObjectRegistry::load(IReader& file_stream)
 	Msg("* %d objects are successfully loaded", count);
 }
 
-void CALifeObjectRegistry::Save(CSaveObjectSave* Object) const
+/*void CALifeObjectRegistry::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CALifeObjectRegistry");
 	{
@@ -224,4 +274,67 @@ void CALifeObjectRegistry::Save(CSaveObjectSave* Object) const
 		Msg("* %d objects are successfully saved", object_count);
 	}
 	Object->EndChunk();
+}*/
+
+void CALifeObjectRegistry::SerializeElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, CSE_ALifeDynamicObject*>& elem)
+{
+	if (!elem.second->can_save()) {
+		return;
+	}
+
+	if (elem.second->redundant()) {
+		return;
+	}
+
+	if (elem.second->ID_Parent != 0xffff) {
+		return;
+	}
+
+	Serialize(Object, elem.second, m_serializable_object_count);
+}
+
+void CALifeObjectRegistry::Serialize(ISaveObject& Object)
+{
+	if (Object.IsSave()) {
+		Object.BeginChunk("CALifeObjectRegistry");
+		{
+			Msg("* Saving objects...");
+
+			m_serializable_object_count = 0;
+			Object.BeginChunk("CALifeObjectRegistry::objects");
+			{
+				((CSaveObject&)Object).Serialize(m_objects, fastdelegate::MakeDelegate(this, &CALifeObjectRegistry::SerializeElem));
+			}
+			Object.EndChunk();
+
+			Object.BeginChunk("CALifeObjectRegistry::object_count");
+			{
+				Object << m_serializable_object_count;
+			}
+			Object.EndChunk();
+			Msg("* %d objects are successfully saved", m_serializable_object_count);
+		}
+		Object.EndChunk();
+	}
+	else {
+		Msg("* Loading objects...");
+		m_serializable_object_count = 0;
+		m_objects.clear();
+		Object.BeginChunk("CALifeObjectRegistry::object_count");
+		{
+			Object << m_serializable_object_count;
+		}
+		Object.EndChunk();
+		CSE_ALifeDynamicObject** objects = (CSE_ALifeDynamicObject**)_alloca(m_serializable_object_count * sizeof(CSE_ALifeDynamicObject*));
+
+		CSE_ALifeDynamicObject** I = objects;
+		CSE_ALifeDynamicObject** E = objects + m_serializable_object_count;
+		for (; I != E; ++I) {
+			*I = get_object(Object);
+			add(*I);
+		}
+
+		Msg("* %d objects are successfully loaded", m_serializable_object_count);
+
+	}
 }

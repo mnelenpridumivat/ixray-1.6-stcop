@@ -330,7 +330,7 @@ void CBaseMonster::update_enemy_accessible_and_at_home_info	()
 	}
 }
 
-void CBaseMonster::Save(CSaveObjectSave* Object) const
+/*void CBaseMonster::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CBaseMonster");
 	{
@@ -346,6 +346,15 @@ void CBaseMonster::Load(CSaveObjectLoad* Object)
 		inherited::Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CBaseMonster::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CBaseMonster");
+	{
+		inherited::Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 void CBaseMonster::UpdateCL()

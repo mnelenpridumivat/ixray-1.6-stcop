@@ -42,7 +42,7 @@ void CCameraLook::load(IReader& packet)
 	load_data(pitch, packet);
 }
 
-void CCameraLook::Save(CSaveObject* Object)
+/*void CCameraLook::Save(CSaveObject* Object)
 {
 	Object->BeginChunk("CCameraLook");
 	{
@@ -58,6 +58,15 @@ void CCameraLook::Load(CSaveObject* Object)
 		Object->GetCurrentChunk()->r_float(pitch);
 	}
 	Object->EndChunk();
+}*/
+
+void CCameraLook::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CCameraLook");
+	{
+		Object << pitch;
+	}
+	Object.EndChunk();
 }
 
 void CCameraLook::Update(Fvector& point, Fvector& /**noise_dangle/**/)

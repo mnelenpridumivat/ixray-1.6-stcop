@@ -54,8 +54,9 @@ public:
 
 	void	Save			(NET_Packet& Packet);
 	void	Load			(NET_Packet& Packet);
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 
 	LPCSTR	dateToString	(int mode);
 	LPCSTR	timeToString	(int mode);

@@ -34,7 +34,7 @@ void GAME_NEWS_DATA::save (IWriter& stream)
 //	save_data(tex_rect,		stream);
 }
 
-void GAME_NEWS_DATA::load(CSaveObjectLoad* Object)
+/*void GAME_NEWS_DATA::load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("GAME_NEWS_DATA");
 	{
@@ -62,6 +62,17 @@ void GAME_NEWS_DATA::save(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_stringZ(texture_name);
 	}
 	Object->EndChunk();
+}*/
+
+ISaveObject& operator<<(ISaveObject& Object, GAME_NEWS_DATA& Data) 
+{
+	Object.BeginChunk("GAME_NEWS_DATA");
+	{
+		u8* Value = (u8*)&Data.m_type;
+		Object << *Value << Data.news_caption << Data.news_text << Data.receive_time << Data.texture_name;
+	}
+	Object.EndChunk();
+	return Object;
 }
 
 void GAME_NEWS_DATA::load (IReader& stream)

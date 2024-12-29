@@ -208,7 +208,7 @@ void CPda::load(IReader &input_packet)
 	load_data		(m_sFullName, input_packet);
 }
 
-void CPda::Save(CSaveObjectSave* Object) const
+/*void CPda::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPda");
 	{
@@ -226,6 +226,16 @@ void CPda::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_stringZ(m_sFullName);
 	}
 	Object->EndChunk();
+}*/
+
+void CPda::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CPda");
+	{
+		inherited::Serialize(Object);
+		Object << m_sFullName;
+	}
+	Object.EndChunk();
 }
 
 CObject* CPda::GetOwnerObject()

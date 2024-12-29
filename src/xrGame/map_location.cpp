@@ -665,7 +665,7 @@ void CMapLocation::load(IReader &stream)
 	}
 }
 
-void CMapLocation::save(CSaveObjectSave* Object)
+/*void CMapLocation::save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CMapLocation");
 	{
@@ -704,6 +704,31 @@ void CMapLocation::load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CMapLocation::serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CMapLocation");
+	{
+		if (Object.IsSave()) {
+			Object << m_hint;
+		}
+		else {
+			xr_string		str;
+			Object << str;
+			SetHint(str.c_str());
+		}
+		Object << m_flags.flags << m_owner_task_id;
+		if (IsUserDefined())
+		{
+			Object << m_cached.m_LevelName << m_cached.m_Position << m_cached.m_graphID;
+			if (!Object.IsSave()) {
+				m_position_on_map = m_cached.m_Position;
+				m_position_global.set(m_position_on_map.x, 0.f, m_position_on_map.y);
+			}
+		}
+	}
+	Object.EndChunk();
 }
 
 void CMapLocation::SetHint(const shared_str& hint)		

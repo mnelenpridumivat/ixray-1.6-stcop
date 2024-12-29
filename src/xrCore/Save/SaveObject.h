@@ -23,6 +23,72 @@ public:
 	~CSaveObject();
 	void EndChunk() override;
 
+	template<typename Key, typename Mapped>
+	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				if constexpr (std::is_pointer<Key>::value) {
+					(*this) << *(elem.first);
+				}
+				else {
+					Key Value = elem.first;
+					(*this) << Value;
+				}
+				if constexpr (std::is_pointer<Mapped>::value) {
+					(*this) << *(elem.second);
+				}
+				else {
+					(*this) << elem.second;
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				std::pair<Key, Mapped> Elem;
+				if constexpr (std::is_pointer<Key>::value) {
+					(*this) << *(Elem.first);
+				}
+				else {
+					(*this) << Elem.first;
+				}
+				if constexpr (std::is_pointer<Mapped>::value) {
+					(*this) << *(Elem.second);
+				}
+				else {
+					(*this) << Elem.second;
+				}
+				Value.insert(Elem);
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
+	template<typename Key, typename Mapped>
+	ISaveObject& Serialize(xr_map<Key, Mapped>& Value, fastdelegate::FastDelegate<void(ISaveObject&, typename std::pair<Key, Mapped>&)> PerElem) {
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray(Value.size());
+			for (auto& elem : Value) {
+				std::pair<Key, Mapped> Elem = elem;
+				PerElem(*this, Elem);
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				std::pair<Key, Mapped> Elem;
+				PerElem(*this, Elem);
+				Value.insert(Elem);
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
 	template<typename T, size_t Size>
 	ISaveObject& Serialize(svector<T, Size>& Value) {
 		if (IsSave()) {
@@ -54,7 +120,6 @@ public:
 		GetCurrentChunk()->EndArray();
 		return *this;
 	}
-
 
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
@@ -288,6 +353,11 @@ ISaveObject& operator<<(ISaveObject& Object, T (&Value)[Size]) {
 
 template<typename Key, typename Mapped>
 ISaveObject& operator<<(ISaveObject& Object, associative_vector<Key, Mapped>& Value) {
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename Key, typename Mapped>
+ISaveObject& operator<<(ISaveObject& Object, xr_map<Key, Mapped>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 

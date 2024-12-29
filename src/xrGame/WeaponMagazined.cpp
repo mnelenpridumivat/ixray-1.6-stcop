@@ -1429,7 +1429,7 @@ void CWeaponMagazined::load(IReader &input_packet)
 	load_data		(m_iCurFireMode, input_packet);
 }
 
-void CWeaponMagazined::Save(CSaveObjectSave* Object) const
+/*void CWeaponMagazined::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CWeaponMagazined");
 	{
@@ -1452,6 +1452,17 @@ void CWeaponMagazined::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_s32(m_iCurFireMode);
 	}
 	Object->EndChunk();
+}*/
+
+void CWeaponMagazined::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CWeaponMagazined");
+	{
+		inherited::Serialize(Object);
+		Object << m_iQueueSize << m_iShotNum << m_iCurFireMode;
+		SetQueueSize(m_iQueueSize);
+	}
+	Object.EndChunk();
 }
 
 void CWeaponMagazined::net_Export	(NET_Packet& P)

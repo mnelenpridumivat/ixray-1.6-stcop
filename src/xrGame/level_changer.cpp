@@ -209,7 +209,7 @@ void CLevelChanger::load(IReader &input_packet)
 	m_b_enabled				= !!input_packet.r_u8();
 }
 
-void CLevelChanger::Save(CSaveObjectSave* Object) const
+/*void CLevelChanger::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CLevelChanger");
 	{
@@ -229,6 +229,16 @@ void CLevelChanger::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_bool(m_b_enabled);
 	}
 	Object->EndChunk();
+}*/
+
+void CLevelChanger::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CLevelChanger");
+	{
+		inherited::Serialize(Object);
+		Object << m_invite_str << m_b_enabled;
+	}
+	Object.EndChunk();
 }
 
 BOOL CLevelChanger::net_SaveRelevant()

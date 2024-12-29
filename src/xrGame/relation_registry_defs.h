@@ -6,11 +6,14 @@
 #pragma once
 
 #include "object_interfaces.h"
+#include <character_info_defs.h>
 
 
 //структура, описывающая отношение одного персонажа к другому или к группировке
 struct SRelation
 {
+	friend ISaveObject& operator<<(ISaveObject& Object, SRelation& Data);
+
 	SRelation();
 	~SRelation();
 	CHARACTER_GOODWILL		Goodwill		() const							{return m_iGoodwill;};
@@ -19,6 +22,8 @@ private:
 	//благосклонность
 	CHARACTER_GOODWILL m_iGoodwill;
 };
+
+ISaveObject& operator<<(ISaveObject& Object, SRelation& Data);
 
 using PERSONAL_RELATION_MAP = xr_map<u16, SRelation>;
 using PERSONAL_RELATION_MAP_IT = PERSONAL_RELATION_MAP::iterator;
@@ -34,11 +39,14 @@ struct RELATION_DATA : public IPureSerializeObject<IReader,IWriter>
 
 	virtual void load (IReader&);
 	virtual void save (IWriter&);
-	virtual void load(CSaveObjectLoad* Object);
-	virtual void save(CSaveObjectSave* Object) const;
+	//virtual void load(CSaveObjectLoad* Object);
+	//virtual void save(CSaveObjectSave* Object) const;
+	virtual void serialize(ISaveObject& Object);
 
 	//личные отношения
 	PERSONAL_RELATION_MAP personal; 
 	//отношения с группировками
 	COMMUNITY_RELATION_MAP communities;
 };
+
+ISaveObject& operator<<(ISaveObject& Object, RELATION_DATA& Data);

@@ -672,13 +672,13 @@ void FlamethrowerTrace::CManager::load(IReader& input_packet)
 {
 }
 
-void FlamethrowerTrace::CManager::Save(CSaveObjectSave* Object) const
-{
-}
+//void FlamethrowerTrace::CManager::Save(CSaveObjectSave* Object) const
+//{
+//}
 
-void FlamethrowerTrace::CManager::Load(CSaveObjectLoad* Object)
-{
-}
+//void FlamethrowerTrace::CManager::Load(CSaveObjectLoad* Object)
+//{
+//}
 
 void FlamethrowerTrace::CManager::UpdateOverlaps(float DeltaTime)
 {
@@ -903,4 +903,10 @@ FlamethrowerTrace::CJoin* FlamethrowerTrace::CManager::GetJoin(CPoint* Prev, CPo
 	}
 	FirstJoin->SetBorders(Prev, Next);
 	return FirstJoin;
+}
+
+ISaveObject& FlamethrowerTrace::operator<<(ISaveObject& Object, CManager& Data)
+{
+	// TODO: insert return statement here
+	return Object;
 }

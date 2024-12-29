@@ -37,6 +37,8 @@ struct SGameTaskKey : public IPureSerializeObject<IReader,IWriter>,public IPureD
 	virtual void 	destroy								();
 };
 
+ISaveObject& operator<<(ISaveObject& Object, SGameTaskKey& Data);
+
 using vGameTasks = xr_vector<SGameTaskKey>;
 using vGameTasks_it = vGameTasks::iterator;
 

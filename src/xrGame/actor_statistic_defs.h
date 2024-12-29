@@ -13,10 +13,11 @@ struct SStatDetailBData: public IPureSerializeObject<IReader,IWriter>
 
 	virtual void save								(IWriter &stream);
 	virtual void load								(IReader &stream);
-	virtual void save(CSaveObjectSave* Object) const;
-	virtual void load(CSaveObjectLoad* Object);
+	//virtual void save(CSaveObjectSave* Object) const;
+	//virtual void load(CSaveObjectLoad* Object);
 };
 
+ISaveObject& operator<<(ISaveObject& Object, SStatDetailBData& Data);
 
 typedef xr_vector<SStatDetailBData>	vStatDetailData;
 
@@ -29,9 +30,11 @@ struct SStatSectionData: public IPureSerializeObject<IReader,IWriter>
 	s32						GetTotalPoints	() const;
 	virtual void			save			(IWriter &stream);
 	virtual void			load			(IReader &stream);
-	virtual void			save(CSaveObjectSave* Object) const;
-	virtual void			load(CSaveObjectLoad* Object);
+	//virtual void			save(CSaveObjectSave* Object) const;
+	//virtual void			load(CSaveObjectLoad* Object);
 };
+
+ISaveObject& operator<<(ISaveObject& Object, SStatSectionData& Data);
 
 typedef xr_vector<SStatSectionData> vStatSectionData;
 typedef CALifeAbstractRegistry<u16, vStatSectionData> CActorStatisticRegistry;

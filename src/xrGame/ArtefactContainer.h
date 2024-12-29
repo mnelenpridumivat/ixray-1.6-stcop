@@ -18,8 +18,9 @@ public:
 	void			save						(NET_Packet& output_packet) override;
 	void			load						(IReader& input_packet) override;
 
-	virtual void Save(CSaveObjectSave* Object) const override;
-	virtual void Load(CSaveObjectLoad* Object) override;
+	//virtual void Save(CSaveObjectSave* Object) const override;
+	//virtual void Load(CSaveObjectLoad* Object) override;
+	virtual void Serialize(ISaveObject& Object) override;
 
 	u32				Cost						() const override;
 	float			Weight						() const override;

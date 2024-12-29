@@ -256,11 +256,12 @@ BOOL CTorch::net_Spawn(CSE_Abstract* DC)
 		glow_render->set_radius(pUserData->r_float("torch_definition", "glow_radius"));
 
 		//включить/выключить фонарик
-		Switch(torch->m_active);
-		VERIFY(!torch->m_active || (torch->ID_Parent != 0xffff));
+		bool IsActive = torch->m_Stats.test(CSE_ALifeItemTorch::EStats::eTorchActive);
+		Switch(IsActive);
+		VERIFY(!IsActive || (torch->ID_Parent != 0xffff));
 
 		if (torch->ID_Parent == 0)
-			SwitchNightVision(torch->m_nightvision_active, false);
+			SwitchNightVision(torch->m_Stats.test(CSE_ALifeItemTorch::EStats::eNightVisionActive), false);
 		//else
 		//	SwitchNightVision	(false, false);
 

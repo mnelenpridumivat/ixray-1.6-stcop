@@ -205,7 +205,7 @@ void	CHangingLamp::load				(IReader &input_packet)
 	m_bState	= (u8)input_packet.r_u8();
 }
 
-void CHangingLamp::Save(CSaveObjectSave* Object) const
+/*void CHangingLamp::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CHangingLamp");
 	{
@@ -223,6 +223,16 @@ void CHangingLamp::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_bool(m_bState);
 	}
 	Object->EndChunk();
+}*/
+
+void CHangingLamp::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CHangingLamp");
+	{
+		inherited::Serialize(Object);
+		Object << m_bState;
+	}
+	Object.EndChunk();
 }
 
 void CHangingLamp::shedule_Update	(u32 dt)

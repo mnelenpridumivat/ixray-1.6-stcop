@@ -20,10 +20,12 @@ struct SLocationKey : public IPureSerializeObject<IReader,IWriter>,public IPureD
 	
 	virtual void save								(IWriter &stream);
 	virtual void load								(IReader &stream);
-	virtual void save(CSaveObjectSave* Object) const;
-	virtual void load(CSaveObjectLoad* Object);
+	//virtual void save(CSaveObjectSave* Object) const;
+	//virtual void load(CSaveObjectLoad* Object);
 	virtual void destroy							();
 };
+
+ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data);
 
 using Locations = xr_vector<SLocationKey>;
 using Locations_it = Locations::iterator;

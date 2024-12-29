@@ -147,8 +147,9 @@ public:
 	}
 
 
-	virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); };
-	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); };
+	//virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); };
+	//virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); };
+	virtual void Serialize(ISaveObject& Object) override { inherited::Serialize(Object); };
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

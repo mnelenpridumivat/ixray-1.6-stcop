@@ -29,7 +29,7 @@ void ARTICLE_DATA::save (IWriter& stream)
 	save_data(article_type, stream);
 }
 
-void ARTICLE_DATA::load(CSaveObjectLoad* Object)
+/*void ARTICLE_DATA::load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("ARTICLE_DATA");
 	{
@@ -55,7 +55,7 @@ void ARTICLE_DATA::save(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u8((u8)article_type);
 	}
 	Object->EndChunk();
-}
+}*/
 
 CEncyclopediaArticle::CEncyclopediaArticle()
 {

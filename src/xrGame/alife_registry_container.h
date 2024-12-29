@@ -27,8 +27,9 @@ public:
 	IC		const T &operator()	(const T*) const;
 	virtual	void	load		(IReader &file_stream);
 	virtual void	save		(IWriter &memory_stream);
-	virtual	void	Load(CSaveObjectLoad* Object);
-	virtual void	Save(CSaveObjectSave* Object) const;
+	//virtual	void	Load(CSaveObjectLoad* Object);
+	//virtual void	Save(CSaveObjectSave* Object) const;
+	virtual	void	Serialize(ISaveObject& Object);
 };
 
 #include "alife_registry_container_inline.h"

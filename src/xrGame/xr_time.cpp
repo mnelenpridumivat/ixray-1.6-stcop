@@ -102,7 +102,7 @@ void xrTime::Load(NET_Packet& Packet)
 	set(Tm.Years + 2000, Tm.Month, Tm.Days, Tm.Hours, Tm.Min, Tm.Sec, 0);
 }
 
-void xrTime::Save(CSaveObjectSave* Object) const
+/*void xrTime::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("xrTime");
 	{
@@ -140,6 +140,42 @@ void xrTime::Load(CSaveObjectLoad* Object)
 		set(Tm.Years + 2000, Tm.Month, Tm.Days, Tm.Hours, Tm.Min, Tm.Sec, 0);
 	}
 	Object->EndChunk();
+}*/
+
+void xrTime::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("xrTime");
+	{
+		if (!Object.IsSave()) {
+			TimePacked Tm = {};
+			Object << Tm.TimeTotal;
+
+			set(Tm.Years + 2000, Tm.Month, Tm.Days, Tm.Hours, Tm.Min, Tm.Sec, 0);
+		}
+		else {
+			u32 y;
+			u32 mo;
+			u32 d;
+			u32 h;
+			u32 mi;
+			u32 s;
+			u32 ms;
+
+			get(y, mo, d, h, mi, s, ms);
+
+			TimePacked Tm = {};
+			Tm.Years = y - 2000;
+			Tm.Month = mo;
+			Tm.Days = d;
+
+			Tm.Hours = h;
+			Tm.Min = mi;
+			Tm.Sec = s;
+
+			Object << Tm.TimeTotal;
+		}
+	}
+	Object.EndChunk();
 }
 
 float	xrTime::diffSec(const xrTime& other)

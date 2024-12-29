@@ -11,10 +11,69 @@
 #include "map_location.h"
 #include "GameTaskDefs.h"
 #include "actor_statistic_defs.h"
+#include "fastdelegate.h"
 
 namespace SaveSystemDefined {
 
+	template<typename K, typename V>
+	void Serialize2(ISaveObject& Object, std::pair<K, V>& Value);
+
 	template<>
+	void Serialize2<u16, KNOWN_INFO_VECTOR>(ISaveObject& Object, std::pair<u16, KNOWN_INFO_VECTOR>& Value)
+	{
+		Object << Value.first;
+		((CSaveObject&)Object).Serialize(Value.second);
+	}
+
+	template<>
+	void Serialize2<u16, RELATION_DATA>(ISaveObject& Object, std::pair<u16, RELATION_DATA>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<u16, ARTICLE_VECTOR>(ISaveObject& Object, std::pair<u16, ARTICLE_VECTOR>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<u16, GAME_NEWS_VECTOR>(ISaveObject& Object, std::pair<u16, GAME_NEWS_VECTOR>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<shared_str, int>(ISaveObject& Object, std::pair<shared_str, int>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<u16, Locations>(ISaveObject& Object, std::pair<u16, Locations>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<u16, vGameTasks>(ISaveObject& Object, std::pair<u16, vGameTasks>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize2<u16, vStatSectionData>(ISaveObject& Object, std::pair<u16, vStatSectionData>& Value)
+	{
+		Object << Value.first << Value.second;
+	}
+
+	template<>
+	void Serialize<u16, KNOWN_INFO_VECTOR>(ISaveObject& Object, xr_map<u16, KNOWN_INFO_VECTOR>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, KNOWN_INFO_VECTOR>));
+	}
+
+	/*template<>
 	void Save<u16, KNOWN_INFO_VECTOR>(CSaveObjectSave* Obj, u16 Key, const KNOWN_INFO_VECTOR& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -24,9 +83,9 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
-	template<>
+	/*template<>
 	void Load<u16, KNOWN_INFO_VECTOR>(CSaveObjectLoad* Obj, u16& Key, KNOWN_INFO_VECTOR& Value) {
 		Obj->GetCurrentChunk()->r_u16(Key);
 		Value.clear();
@@ -40,9 +99,15 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, RELATION_DATA>(ISaveObject& Object, xr_map<u16, RELATION_DATA>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, RELATION_DATA>));
+	}
+
+	/*template<>
 	void Save<u16, RELATION_DATA>(CSaveObjectSave* Obj, u16 Key, const RELATION_DATA& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Value.save(Obj);
@@ -52,9 +117,15 @@ namespace SaveSystemDefined {
 	void Load<u16, RELATION_DATA>(CSaveObjectLoad* Obj, u16& Key, RELATION_DATA& Value) {
 		Obj->GetCurrentChunk()->r_u16(Key);
 		Value.load(Obj);
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, ARTICLE_VECTOR>(ISaveObject& Object, xr_map<u16, ARTICLE_VECTOR>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, ARTICLE_VECTOR>));
+	}
+
+	/*template<>
 	void Save<u16, ARTICLE_VECTOR>(CSaveObjectSave* Obj, u16 Key, const ARTICLE_VECTOR& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -80,9 +151,15 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, GAME_NEWS_VECTOR>(ISaveObject& Object, xr_map<u16, GAME_NEWS_VECTOR>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, GAME_NEWS_VECTOR>));
+	}
+
+	/*template<>
 	void Save<u16, GAME_NEWS_VECTOR>(CSaveObjectSave* Obj, u16 Key, const GAME_NEWS_VECTOR& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -108,9 +185,15 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 	template<>
+	void Serialize<shared_str, int>(ISaveObject& Object, xr_map<shared_str, int>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<shared_str, int>));
+	}
+
+	/*template<>
 	void Save<shared_str, int>(CSaveObjectSave* Obj, shared_str Key, const int& Value) {
 		Obj->GetCurrentChunk()->w_stringZ(Key);
 		Obj->GetCurrentChunk()->w_s32(Value);
@@ -120,9 +203,15 @@ namespace SaveSystemDefined {
 	void Load<shared_str, int>(CSaveObjectLoad* Obj, shared_str& Key, int& Value) {
 		Obj->GetCurrentChunk()->r_stringZ(Key);
 		Obj->GetCurrentChunk()->r_s32(Value);
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, Locations>(ISaveObject& Object, xr_map<u16, Locations>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, Locations>));
+	}
+
+	/*template<>
 	void Save<u16, Locations>(CSaveObjectSave* Obj, u16 Key, const Locations& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -148,9 +237,15 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, vGameTasks>(ISaveObject& Object, xr_map<u16, vGameTasks>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, vGameTasks>));
+	}
+
+	/*template<>
 	void Save<u16, vGameTasks>(CSaveObjectSave* Obj, u16 Key, const vGameTasks& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -176,9 +271,15 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 	template<>
+	void Serialize<u16, vStatSectionData>(ISaveObject& Object, xr_map<u16, vStatSectionData>& Value)
+	{
+		((CSaveObject&)Object).Serialize(Value, fastdelegate::MakeDelegate(&SaveSystemDefined::Serialize2<u16, vStatSectionData>));
+	}
+
+	/*template<>
 	void Save<u16, vStatSectionData>(CSaveObjectSave* Obj, u16 Key, const vStatSectionData& Value) {
 		Obj->GetCurrentChunk()->w_u16(Key);
 		Obj->GetCurrentChunk()->WriteArray(Value.size());
@@ -204,6 +305,6 @@ namespace SaveSystemDefined {
 			}
 		}
 		Obj->GetCurrentChunk()->EndArray();
-	}
+	}*/
 
 };

@@ -335,7 +335,7 @@ void CAI_Trader::load (IReader &input_packet)
 	CInventoryOwner::load(input_packet);
 }
 
-void CAI_Trader::Save(CSaveObjectSave* Object)
+/*void CAI_Trader::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CAI_Trader");
 	{
@@ -353,6 +353,16 @@ void CAI_Trader::Load(CSaveObjectLoad* Object)
 		CInventoryOwner::Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CAI_Trader::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CAI_Trader");
+	{
+		inherited::Serialize(Object);
+		CInventoryOwner::Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 

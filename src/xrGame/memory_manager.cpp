@@ -357,7 +357,7 @@ void CMemoryManager::load							(IReader &packet)
 	danger().load				(packet);
 }
 
-void CMemoryManager::Save(CSaveObjectSave* Object)
+/*void CMemoryManager::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CMemoryManager");
 	{
@@ -379,6 +379,18 @@ void CMemoryManager::Load(CSaveObjectLoad* Object)
 		danger().Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CMemoryManager::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CMemoryManager");
+	{
+		visual().Serialize(Object);
+		sound().Serialize(Object);
+		hit().Serialize(Object);
+		danger().Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 // we do this due to the limitation of client spawn manager

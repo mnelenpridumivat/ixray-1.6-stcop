@@ -26,7 +26,7 @@ void INFO_DATA::save (IWriter& stream)
 	save_data(receive_time, stream);
 }
 
-void INFO_DATA::load(CSaveObjectLoad* Object)
+/*void INFO_DATA::load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("INFO_DATA");
 	{
@@ -44,7 +44,16 @@ void INFO_DATA::save(CSaveObjectSave* Object) const
 		Object->GetCurrentChunk()->w_u64(receive_time);
 	}
 	Object->EndChunk();
-}
+}*/
+
+/*void INFO_DATA::serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("INFO_DATA");
+	{
+		Object << info_id << receive_time;
+	}
+	Object.EndChunk();
+}*/
 
 
 SInfoPortionData::SInfoPortionData ()

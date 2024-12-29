@@ -95,17 +95,106 @@ namespace CSaveChunk_script {
 }
 
 namespace CSaveObject_script {
-	void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
-		Object->BeginChunk(ChunkName);
+	//void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
+	//	Object->BeginChunk(ChunkName);
+	//}
+
+	void r_bool(ISaveObject* Chunk, bool& Value) {
+		*Chunk << Value;
 	}
 
-	bool IsSaveTrue(CSaveObject* Object) {
-		return true;
+	void r_vec3(ISaveObject* Chunk, Fvector& Value) {
+		*Chunk << Value;
 	}
 
-	bool IsSaveFalse(CSaveObject* Object) {
-		return false;
+	void r_float(ISaveObject* Chunk, float& Value) {
+		*Chunk << Value;
 	}
+
+	void r_u64(ISaveObject* Chunk, u64& Value) {
+		*Chunk << Value;
+	}
+
+	void r_s64(ISaveObject* Chunk, s64& Value) {
+		*Chunk << Value;
+	}
+
+	void r_u32(ISaveObject* Chunk, u32& Value) {
+		*Chunk << Value;
+	}
+
+	void r_s32(ISaveObject* Chunk, s32& Value) {
+		*Chunk << Value;
+	}
+
+	void r_u16(ISaveObject* Chunk, u16& Value) {
+		*Chunk << Value;
+	}
+
+	void r_s16(ISaveObject* Chunk, s16& Value) {
+		*Chunk << Value;
+	}
+
+	void r_u8(ISaveObject* Chunk, u8& Value) {
+		*Chunk << Value;
+	}
+
+	void r_s8(ISaveObject* Chunk, s8& Value) {
+		*Chunk << Value;
+	}
+
+	void r_string(ISaveObject* Chunk, LPSTR& Value) {
+		*Chunk << Value;
+	}
+
+	void w_bool(ISaveObject* Chunk, bool Value) {
+		*Chunk << Value;
+	}
+
+	void w_vec3(ISaveObject* Chunk, Fvector Value) {
+		*Chunk << Value;
+	}
+
+	void w_float(ISaveObject* Chunk, float Value) {
+		*Chunk << Value;
+	}
+
+	void w_u64(ISaveObject* Chunk, u64 Value) {
+		*Chunk << Value;
+	}
+
+	void w_s64(ISaveObject* Chunk, s64 Value) {
+		*Chunk << Value;
+	}
+
+	void w_u32(ISaveObject* Chunk, u32 Value) {
+		*Chunk << Value;
+	}
+
+	void w_s32(ISaveObject* Chunk, s32 Value) {
+		*Chunk << Value;
+	}
+
+	void w_u16(ISaveObject* Chunk, u16 Value) {
+		*Chunk << Value;
+	}
+
+	void w_s16(ISaveObject* Chunk, s16 Value) {
+		*Chunk << Value;
+	}
+
+	void w_u8(ISaveObject* Chunk, u8 Value) {
+		*Chunk << Value;
+	}
+
+	void w_s8(ISaveObject* Chunk, s8 Value) {
+		*Chunk << Value;
+	}
+
+	void w_string(ISaveObject* Chunk, LPCSTR Value) {
+		*Chunk << (LPSTR)Value;
+	}
+
 }
 
 using namespace luabind;
@@ -152,39 +241,40 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("FindChunk", &CSaveObject_script::FindChunk)
 				.def("EndChunk", &CSaveObject::EndChunk),*/
-			class_<CSaveObjectSave>("SaveObjectSave")
+			class_<ISaveObject>("SaveObject"),
+			class_<CSaveObjectSave, ISaveObject>("SaveObjectSave")
 				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObject::BeginChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
-				/*.def("s_vec3", &CSaveObjectSave::s_vec3)
-				.def("s_float", &CSaveObjectSave::s_float)
-				.def("s_u64", &CSaveObjectSave::s_u64)
-				.def("s_s64", &CSaveObjectSave::s_s64)
-				.def("s_u32", &CSaveObjectSave::s_u32)
-				.def("s_s32", &CSaveObjectSave::s_s32)
-				.def("s_u16", &CSaveObjectSave::s_u16)
-				.def("s_s16", &CSaveObjectSave::s_s16)
-				.def("s_u8", &CSaveObjectSave::s_u8)
-				.def("s_s8", &CSaveObjectSave::s_s8)
-				.def("s_bool", &CSaveObjectSave::s_bool)
-				.def("s_string", &CSaveObjectSave::s_string)*/
+				.def("s_vec3", &CSaveObject_script::w_vec3)
+				.def("s_float", &CSaveObject_script::w_float)
+				.def("s_u64", &CSaveObject_script::w_u64)
+				.def("s_s64", &CSaveObject_script::w_s64)
+				.def("s_u32", &CSaveObject_script::w_u32)
+				.def("s_s32", &CSaveObject_script::w_s32)
+				.def("s_u16", &CSaveObject_script::w_u16)
+				.def("s_s16", &CSaveObject_script::w_s16)
+				.def("s_u8", &CSaveObject_script::w_u8)
+				.def("s_s8", &CSaveObject_script::w_s8)
+				.def("s_bool", &CSaveObject_script::w_bool)
+				.def("s_string", &CSaveObject_script::w_string)
 				.def("IsSave", &CSaveObjectSave::IsSave),
-			class_<CSaveObjectLoad>("SaveObjectLoad")
+			class_<CSaveObjectLoad, ISaveObject>("SaveObjectLoad")
 				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
-				.def("BeginChunk", &CSaveObject_script::BeginChunk)
+				.def("BeginChunk", &CSaveObjectLoad::BeginChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
-				/*.def("s_vec3", &CSaveObjectLoad::s_vec3)
-				.def("s_float", &CSaveObjectLoad::s_float)
-				.def("s_u64", &CSaveObjectLoad::s_u64)
-				.def("s_s64", &CSaveObjectLoad::s_s64)
-				.def("s_u32", &CSaveObjectLoad::s_u32)
-				.def("s_s32", &CSaveObjectLoad::s_s32)
-				.def("s_u16", &CSaveObjectLoad::s_u16)
-				.def("s_s16", &CSaveObjectLoad::s_s16)
-				.def("s_u8", &CSaveObjectLoad::s_u8)
-				.def("s_s8", &CSaveObjectLoad::s_s8)
-				.def("s_bool", &CSaveObjectLoad::s_bool)
-				.def("s_string", &CSaveObjectLoad::s_string)*/
+				.def("s_vec3", &CSaveObject_script::r_vec3, pure_out_value<2>())
+				.def("s_float", &CSaveObject_script::r_float, pure_out_value<2>())
+				.def("s_u64", &CSaveObject_script::r_u64, pure_out_value<2>())
+				.def("s_s64", &CSaveObject_script::r_s64, pure_out_value<2>())
+				.def("s_u32", &CSaveObject_script::r_u32, pure_out_value<2>())
+				.def("s_s32", &CSaveObject_script::r_s32, pure_out_value<2>())
+				.def("s_u16", &CSaveObject_script::r_u16, pure_out_value<2>())
+				.def("s_s16", &CSaveObject_script::r_s16, pure_out_value<2>())
+				.def("s_u8", &CSaveObject_script::r_u8, pure_out_value<2>())
+				.def("s_s8", &CSaveObject_script::r_s8, pure_out_value<2>())
+				.def("s_bool", &CSaveObject_script::r_bool, pure_out_value<2>())
+				.def("s_string", &CSaveObject_script::r_string, pure_out_value<2>())
 				.def("IsSave", &CSaveObjectLoad::IsSave)
 		];
 }

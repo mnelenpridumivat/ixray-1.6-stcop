@@ -13,13 +13,16 @@ struct INFO_DATA : public IPureSerializeObject<IReader, IWriter>
 
 	void		load(IReader& stream) override;
 	void		save(IWriter&) override;
-	void		load(CSaveObjectLoad* Object);
-	void		save(CSaveObjectSave* Object) const;
+	//void		load(CSaveObjectLoad* Object);
+	//void		save(CSaveObjectSave* Object) const;
+	//void		serialize(ISaveObject& Object);
 
 	shared_str			info_id;
 	//время получения нужно порции информации
 	ALife::_TIME_ID		receive_time;
 };
+
+ISaveObject& operator<<(ISaveObject& Object, INFO_DATA& Data);
 
 using KNOWN_INFO_VECTOR = xr_vector<INFO_DATA>;
 using KNOWN_INFO_VECTOR_IT = KNOWN_INFO_VECTOR::iterator;

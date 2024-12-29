@@ -35,7 +35,7 @@ void CCameraFirstEye::load(IReader& packet)
 	load_data(pitch, packet); 
 }
 
-void CCameraFirstEye::Save(CSaveObject* Object)
+/*void CCameraFirstEye::Save(CSaveObject* Object)
 {
 	Object->BeginChunk("CCameraFirstEye");
 	{
@@ -51,6 +51,15 @@ void CCameraFirstEye::Load(CSaveObject* Object)
 		Object->GetCurrentChunk()->r_float(pitch);
 	}
 	Object->EndChunk();
+}*/
+
+void CCameraFirstEye::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CCameraFirstEye");
+	{
+		Object << pitch;
+	}
+	Object.EndChunk();
 }
 
 void CCameraFirstEye::UpdateLookat()

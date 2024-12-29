@@ -1052,7 +1052,7 @@ void CCustomMonster::load (IReader &packet)
 		memory().load		(packet);
 }
 
-void CCustomMonster::Save(CSaveObjectSave* Object) const
+/*void CCustomMonster::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CCustomMonster");
 	{
@@ -1074,6 +1074,18 @@ void CCustomMonster::Load(CSaveObjectLoad* Object)
 		}
 	}
 	Object->EndChunk();
+}*/
+
+void CCustomMonster::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CCustomMonster");
+	{
+		inherited::Serialize(Object);
+		if (g_Alive()) {
+			memory().Serialize(Object);
+		}
+	}
+	Object.EndChunk();
 }
 
 

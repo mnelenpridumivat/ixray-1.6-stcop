@@ -24,18 +24,24 @@ protected:
 	xr_vector<CSE_ALifeDynamicObject*> m_objects_as_vec;
 private:
 			void					save					(IWriter &memory_stream, CSE_ALifeDynamicObject *object, u32 &object_count);
-			void					Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const;
+			//void					Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const;
+			void					Serialize(ISaveObject& Object, CSE_ALifeDynamicObject* object, u32& object_count);
+
+			void					SerializeElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, CSE_ALifeDynamicObject*>& elem);
+			u32 m_serializable_object_count = 0;
 
 public:
 	static	CSE_ALifeDynamicObject	*get_object				(IReader &file_stream);
+	static	CSE_ALifeDynamicObject* get_object(ISaveObject& Object);
 
 public:
 									CALifeObjectRegistry	(LPCSTR section);
 	virtual							~CALifeObjectRegistry	();
 	virtual	void					save					(IWriter &memory_stream);
 			void					load					(IReader &file_stream);
-			virtual	void			Save(CSaveObjectSave* Object) const;
-			void					Load(CSaveObjectLoad* Object);
+			//virtual	void			Save(CSaveObjectSave* Object) const;
+			//void					Load(CSaveObjectLoad* Object);
+			virtual void			Serialize(ISaveObject& Object);
 	IC		void					add						(CSE_ALifeDynamicObject *object);
 	IC		void					remove					(const ALife::_OBJECT_ID &id, bool no_assert = false);
 	IC		CSE_ALifeDynamicObject	*object					(const ALife::_OBJECT_ID &id, bool no_assert = false) const;

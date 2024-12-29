@@ -213,7 +213,7 @@ void CScriptBinder::Serialize(ISaveObject& Object)
 {
 	if (m_object) {
 		try {
-			m_object->Serialize(Object);
+			m_object->Serialize(&Object);
 		}
 		catch (...) {
 			clear();

@@ -748,7 +748,7 @@ void CInventoryItem::load(IReader &packet)
 	object().PPhysicsShell()->Disable();
 }
 
-void CInventoryItem::Save(CSaveObjectSave* Object) const
+/*void CInventoryItem::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CInventoryItem");
 	{
@@ -804,6 +804,50 @@ void CInventoryItem::Load(CSaveObjectLoad* Object)
 		object().PPhysicsShell()->Disable();
 	}
 	Object->EndChunk();
+}*/
+
+void CInventoryItem::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CInventoryItem");
+	{
+		Object << m_ItemCurrPlace.value << m_fCondition;
+
+		//--	load_data( m_upgrades, packet );
+		//--	install_loaded_upgrades();
+
+		if (Object.IsSave()) {
+			CArtefact* artefact = smart_cast<CArtefact*>(this);
+
+			if (artefact && artefact->IsInContainer())
+			{
+				u8 Value = 0;
+				Object << Value;
+				Object.EndChunk();
+				return;
+			}
+		}
+		u8 num_items;
+		if (Object.IsSave()) {
+			num_items = (u8)object().PHGetSyncItemsNumber();
+		}
+		Object << num_items;
+
+		if (!num_items) {
+			Object.EndChunk();
+			return;
+		}
+
+		if (!Object.IsSave()&&!object().PPhysicsShell()) {
+			object().setup_physic_shell();
+			object().PPhysicsShell()->Disable();
+		}
+
+		object().PHSerializeState(Object);
+		if (!Object.IsSave()) {
+			object().PPhysicsShell()->Disable();
+		}
+	}
+	Object.EndChunk();
 }
 
 ///////////////////////////////////////////////

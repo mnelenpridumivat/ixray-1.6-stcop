@@ -609,4 +609,5 @@ ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value)
 		Object.EndChunk();
 	}
 	Object.EndChunk();
+	return Object;
 }

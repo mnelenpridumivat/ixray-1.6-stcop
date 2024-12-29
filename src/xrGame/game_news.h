@@ -17,8 +17,8 @@ struct GAME_NEWS_DATA : public IPureSerializeObject<IReader,IWriter>
 
 	virtual void		load				(IReader&);
 	virtual void		save				(IWriter&);
-	virtual void		load(CSaveObjectLoad* Object);
-	virtual void		save(CSaveObjectSave* Object) const;
+	//virtual void		load(CSaveObjectLoad* Object);
+	//virtual void		save(CSaveObjectSave* Object) const;
 
 
 	shared_str			news_caption;
@@ -30,6 +30,8 @@ struct GAME_NEWS_DATA : public IPureSerializeObject<IReader,IWriter>
 	shared_str			texture_name;
 private:
 };
+
+ISaveObject& operator<<(ISaveObject& Object, GAME_NEWS_DATA& Data);
 
 using GAME_NEWS_VECTOR = xr_vector<GAME_NEWS_DATA>;
 using GAME_NEWS_IT = GAME_NEWS_VECTOR::iterator;

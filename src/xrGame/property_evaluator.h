@@ -40,8 +40,10 @@ public:
 	virtual	void				save				(NET_Packet &packet) {}
 	virtual	void				load				(IReader &packet) {}
 
-	virtual void Save(CSaveObjectSave* Object) {};
-	virtual void Load(CSaveObjectLoad* Object) {};
+	//virtual void Save(CSaveObjectSave* Object) {};
+	//virtual void Load(CSaveObjectLoad* Object) {};
+
+	virtual void Serialize(ISaveObject& Object) {};
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

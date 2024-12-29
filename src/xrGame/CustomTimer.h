@@ -208,8 +208,8 @@ public:
 
     void save           (IWriter& output_packet);
     void load           (IReader& input_packet);
-    virtual void Save(CSaveObjectSave* Object) const;
-    virtual void Load(CSaveObjectLoad* Object);
+    //virtual void Save(CSaveObjectSave* Object) const;
+    //virtual void Load(CSaveObjectLoad* Object);
     virtual void Serialize(ISaveObject& Object);
 
     void Update         ();
@@ -238,8 +238,8 @@ public:
 
     void save(IWriter& output_packet);
     void load(IReader& input_packet);
-    virtual void Save(CSaveObjectSave* Object) const;
-    virtual void Load(CSaveObjectLoad* Object);
+    //virtual void Save(CSaveObjectSave* Object) const;
+    //virtual void Load(CSaveObjectLoad* Object);
     virtual void Serialize(ISaveObject& Object);
 
     void Update();

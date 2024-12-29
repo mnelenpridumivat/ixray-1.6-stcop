@@ -36,8 +36,9 @@ public:
 	virtual void		on_renderable_Render();
 	virtual void		OnMoveToRuck		(const SInvItemPlace& prev);
 
-	virtual void Save(CSaveObjectSave* Object) const override { CInventoryItemObject::Save(Object); }
-	virtual void Load(CSaveObjectLoad* Object) override { CInventoryItemObject::Load(Object); }
+	//virtual void Save(CSaveObjectSave* Object) const override { CInventoryItemObject::Save(Object); }
+	//virtual void Load(CSaveObjectLoad* Object) override { CInventoryItemObject::Load(Object); }
+	virtual void Serialize(ISaveObject& Object) override { CInventoryItemObject::Serialize(Object); }
 
 	virtual bool			use_parent_ai_locations	() const
 	{

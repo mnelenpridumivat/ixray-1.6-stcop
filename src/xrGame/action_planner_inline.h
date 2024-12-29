@@ -417,7 +417,7 @@ IC	void CPlanner::load	(IReader &packet)
 	m_loaded						= true;
 }
 
-TEMPLATE_SPECIALIZATION
+/*TEMPLATE_SPECIALIZATION
 IC	void CPlanner::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CPlanner");
@@ -525,6 +525,100 @@ IC	void CPlanner::Load(CSaveObjectLoad* Object)
 		m_loaded = true;
 	}
 	Object->EndChunk();
+}*/
+
+TEMPLATE_SPECIALIZATION
+void CPlanner::SerializeEval(ISaveObject& Object, CProblemSolver::EVALUATORS::value_type& elem) {
+	elem.second->Serialize(Object);
+}
+
+TEMPLATE_SPECIALIZATION
+void CPlanner::SerializeOper(ISaveObject& Object, CProblemSolver::SOperator& elem) {
+	elem.m_operator->Serialize(Object);
+}
+
+TEMPLATE_SPECIALIZATION
+void CPlanner::SerializeStor(ISaveObject& Object, CSolverConditionValue& elem) {
+	Object << elem.m_condition << elem.m_value;
+}
+
+TEMPLATE_SPECIALIZATION
+IC	void CPlanner::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CPlanner");
+	{
+		Object.BeginChunk("CPlanner::m_evaluators");
+		{
+			auto I = this->m_evaluators.begin();
+			auto E = this->m_evaluators.end();
+			for (; I != E; ++I)
+			{
+				(*I).second->Serialize(Object);
+			}
+			//((CSaveObject&)Object).Serialize(this->m_evaluators, fastdelegate::MakeDelegate(this, &CPlanner::SerializeEval));
+			/*Object << this->m_evaluators;
+			auto I = this->m_evaluators.begin();
+			auto E = this->m_evaluators.end();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (; I != E; ++I)
+			{
+				(*I).second->Load(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();*/
+		}
+		Object.EndChunk();
+
+		Object.BeginChunk("CPlanner::m_operators");
+		{
+			auto I = this->m_operators.begin();
+			auto E = this->m_operators.end();
+			for (; I != E; ++I) 
+			{
+				(*I).m_operator->Serialize(Object);
+			}
+			//((CSaveObject&)Object).Serialize(this->m_operators, fastdelegate::MakeDelegate(this, &CPlanner::SerializeOper));
+			/*auto I = this->m_operators.begin();
+			auto E = this->m_operators.end();
+			u64 ArraySize;
+			Object->GetCurrentChunk()->ReadArray(ArraySize);
+			for (; I != E; ++I)
+			{
+				(*I).m_operator->Load(Object);
+			}
+			Object->GetCurrentChunk()->EndArray();*/
+		}
+		Object.EndChunk();
+
+		Object.BeginChunk("CPlanner::m_storage");
+		{
+			auto I = this->m_storage.m_storage.begin();
+			auto E = this->m_storage.m_storage.end();
+			for (; I != E; ++I)
+			{
+				Object << I->m_condition << I->m_value;
+			}
+			//((CSaveObject&)Object).Serialize(this->m_storage.m_storage, fastdelegate::MakeDelegate(this, &CPlanner::SerializeStor));
+			/*u64							count;
+			GraphEngineSpace::_solver_condition_type	condition;
+			GraphEngineSpace::_solver_value_type		value;
+			Object->GetCurrentChunk()->ReadArray(count);
+			for (u64 i = 0; i < count; ++i)
+			{
+				Object->BeginChunk("CPlanner::m_storage::elem");
+				{
+					Object->GetCurrentChunk()->r_u32(condition);
+					Object->GetCurrentChunk()->r_bool(value);
+					m_storage.set_property(condition, value);
+				}
+				Object->EndChunk();
+			}
+			Object->GetCurrentChunk()->EndArray();*/
+		}
+		Object.EndChunk();
+		m_loaded = true;
+	}
+	Object.EndChunk();
 }
 
 #undef TEMPLATE_SPECIALIZATION

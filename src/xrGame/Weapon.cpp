@@ -743,7 +743,7 @@ void CWeapon::load(IReader &input_packet)
 	load_data		(m_bRememberActorNVisnStatus,	input_packet);
 }
 
-void CWeapon::Save(CSaveObjectSave* Object) const
+/*void CWeapon::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CWeapon");
 	{
@@ -780,6 +780,27 @@ void CWeapon::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->r_bool(m_bRememberActorNVisnStatus);
 	}
 	Object->EndChunk();
+}*/
+
+void CWeapon::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CWeapon");
+	{
+		inherited::Serialize(Object);
+		Object << iAmmoElapsed << m_cur_scope << m_flagsAddOnState << m_ammoType << m_zoom_params.m_bIsZoomModeNow << m_bRememberActorNVisnStatus;
+
+		if (!Object.IsSave()) {
+			UpdateAddonsVisibility();
+			if (m_zoom_params.m_bIsZoomModeNow) {
+				OnZoomIn();
+			}
+			else {
+				OnZoomOut();
+			}
+		}
+
+	}
+	Object.EndChunk();
 }
 
 

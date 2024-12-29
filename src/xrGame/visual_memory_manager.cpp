@@ -882,7 +882,7 @@ void CVisualMemoryManager::load	(IReader &packet)
 	}
 }
 
-void CVisualMemoryManager::Save(CSaveObjectSave* Object)
+/*void CVisualMemoryManager::Save(CSaveObjectSave* Object)
 {
 	Object->BeginChunk("CVisualMemoryManager");
 	{
@@ -982,6 +982,8 @@ void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
 			Object->EndChunk();
 			return;
 		}
+
+		((CSaveObject&)Object).Serialize(*m_hits, fastdelegate::MakeDelegate(this, &CVisualMemoryManager::SerializeSingle));
 	
 		typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
 		CALLBACK_TYPE					callback;
@@ -1076,6 +1078,25 @@ void CVisualMemoryManager::Load(CSaveObjectLoad* Object)
 		Object->GetCurrentChunk()->EndArray();
 	}
 	Object->EndChunk();
+}*/
+
+void CVisualMemoryManager::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CVisualMemoryManager");
+	{
+		if (m_client) {
+			Object.EndChunk();
+			return;
+		}
+
+		if (!m_object->g_Alive()) {
+			Object.EndChunk();
+			return;
+		}
+
+		((CSaveObject&)Object).Serialize(*m_objects, fastdelegate::MakeDelegate(this, &CVisualMemoryManager::SerializeSingle));
+	}
+	Object.EndChunk();
 }
 
 void CVisualMemoryManager::clear_delayed_objects()
@@ -1093,6 +1114,52 @@ void CVisualMemoryManager::clear_delayed_objects()
 		manager.remove						((*I).m_object_id,m_object->ID());
 
 	m_delayed_objects.clear					();
+}
+
+void CVisualMemoryManager::SerializeSingle(ISaveObject& Object, CVisibleObject& Value)
+{
+	Object.BeginChunk("CHitObject");
+	Value.Serialize(Object);
+	if (Object.IsSave()) {
+		VERIFY(m_object);
+		u16 Value = m_object->ID();
+		Object << Value;
+	}
+	else {
+
+		CDelayedVisibleObject			delayed_object;
+		Object << delayed_object.m_object_id;
+
+		CVisibleObject& object = delayed_object.m_visible_object;
+		object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+
+		//////////////////////////////////////////////////////////
+
+		if (object.m_object) {
+			add_visible_object(object);
+		}
+		else {
+			m_delayed_objects.push_back(delayed_object);
+			const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+			if (!spawn_callback || !spawn_callback->m_object_callback) {
+				typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+				CALLBACK_TYPE					callback;
+				callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+				if (!g_dedicated_server) {
+					Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+				}
+#ifdef DEBUG
+				else {
+					if (spawn_callback && spawn_callback->m_object_callback) {
+						VERIFY(spawn_callback->m_object_callback == callback);
+					}
+				}
+#endif // DEBUG
+			}
+		}
+		Object << Value.m_visible.flags;
+	}
+	Object.EndChunk();
 }
 
 void CVisualMemoryManager::on_requested_spawn	(CObject *object)

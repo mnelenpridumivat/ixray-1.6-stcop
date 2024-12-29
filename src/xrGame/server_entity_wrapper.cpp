@@ -109,10 +109,14 @@ void CServerEntityWrapper::load_update		(IReader &stream)
 //	m_object->load_update	(net_packet);
 }
 
-void CServerEntityWrapper::save_update(CSaveObjectSave* stream)
+/*void CServerEntityWrapper::save_update(CSaveObjectSave* stream)
 {
 }
 
 void CServerEntityWrapper::load_update(CSaveObjectLoad* stream)
+{
+}*/
+
+void CServerEntityWrapper::serialize_update(ISaveObject& stream)
 {
 }

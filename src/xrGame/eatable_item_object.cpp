@@ -138,7 +138,7 @@ void CEatableItemObject::load				(IReader &packet)
 	CEatableItem::load				(packet);
 }
 
-void CEatableItemObject::Save(CSaveObjectSave* Object) const
+/*void CEatableItemObject::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CEatableItemObject");
 	{
@@ -156,6 +156,16 @@ void CEatableItemObject::Load(CSaveObjectLoad* Object)
 		CEatableItem::Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CEatableItemObject::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CEatableItemObject");
+	{
+		CPhysicItem::Serialize(Object);
+		CEatableItem::Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 void CEatableItemObject::renderable_Render()

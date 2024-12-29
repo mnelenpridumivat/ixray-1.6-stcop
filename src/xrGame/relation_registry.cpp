@@ -47,7 +47,14 @@ void RELATION_DATA::save (IWriter& stream)
 	save_data(communities, stream);
 }
 
-void RELATION_DATA::load(CSaveObjectLoad* Object)
+void RELATION_DATA::serialize(ISaveObject& Object)
+{
+	((CSaveObject&)Object).Serialize(personal);
+	((CSaveObject&)Object).Serialize(communities);
+	//Object << personal << communities;
+}
+
+/*void RELATION_DATA::load(CSaveObjectLoad* Object)
 {
 	Object->BeginChunk("RELATION_DATA");
 	{
@@ -132,7 +139,7 @@ void RELATION_DATA::save(CSaveObjectSave* Object) const
 		Object->EndChunk();
 	}
 	Object->EndChunk();
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 

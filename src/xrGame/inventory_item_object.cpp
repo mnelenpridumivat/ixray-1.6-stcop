@@ -128,7 +128,7 @@ void CInventoryItemObject::load				(IReader &packet)
 	CInventoryItem::load				(packet);
 }
 
-void CInventoryItemObject::Save(CSaveObjectSave* Object) const
+/*void CInventoryItemObject::Save(CSaveObjectSave* Object) const
 {
 	Object->BeginChunk("CInventoryItemObject");
 	{
@@ -146,6 +146,16 @@ void CInventoryItemObject::Load(CSaveObjectLoad* Object)
 		CInventoryItem::Load(Object);
 	}
 	Object->EndChunk();
+}*/
+
+void CInventoryItemObject::Serialize(ISaveObject& Object)
+{
+	Object.BeginChunk("CInventoryItemObject");
+	{
+		CPhysicItem::Serialize(Object);
+		CInventoryItem::Serialize(Object);
+	}
+	Object.EndChunk();
 }
 
 void CInventoryItemObject::renderable_Render()

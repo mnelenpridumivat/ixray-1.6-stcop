@@ -123,8 +123,9 @@ public:
 
 	virtual void				save				(NET_Packet &output_packet);
 	virtual void				load				(IReader &input_packet);
-	virtual void Save(CSaveObjectSave* Object) const;
-	virtual void Load(CSaveObjectLoad* Object);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL				net_SaveRelevant	()								{return TRUE;}
 
 	virtual void				render_item_ui		()								{}; //when in slot & query return TRUE
