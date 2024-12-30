@@ -50,6 +50,11 @@ void CNodeMacro::Draw()
 	DrawEnd();
 }
 
+MacroType CNodeMacro::GetType() const
+{
+	return Type;
+}
+
 void CNodeMacro::SetType(MacroType NewType)
 {
 	Type = NewType;

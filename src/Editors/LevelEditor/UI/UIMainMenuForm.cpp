@@ -530,6 +530,7 @@ void UIMainMenuForm::Draw()
 				View = new CUIMacroView;
 				UI->Push(View);
 			}
+			else View->Exec();
 
 			View->Show(true);
 		}
