@@ -116,6 +116,13 @@ void CUIMacroView::Draw()
 	if (ImGui::Begin("Macro Node Viewer", &IsOpen))
 	{
 		auto& io = ImGui::GetIO();
+		
+		if (ImGui::Button("Run"))
+		{
+			Exec();
+		}
+		ImGui::SameLine();
+
 		ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
 		ImGui::Separator();
@@ -175,28 +182,33 @@ void CUIMacroView::Show(bool State)
 void CUIMacroView::Exec()
 {
 	CNodeMacro* Node = (CNodeMacro*)Nodes.front();
+	ExecMacro(Node);
+}
 
-	while (Node != nullptr)
+void CUIMacroView::ExecMacro(CNodeMacro* Node)
+{
+	MacroType Type = Node->GetType();
+
+	if (Type == MacroType::eVoid)
 	{
-		MacroType Type = Node->GetType();
-
-		if (Type == MacroType::eVoid)
+		ExecCommand(Node->MacroCommandID);
+	}
+	else if (Type == MacroType::eOneArg)
+	{
+		bool IsInt = std::find(CommandsOneArgsInt.begin(), CommandsOneArgsInt.end(), Node->MacroCommandID) != CommandsOneArgsInt.end();
+		if (IsInt)
 		{
-			ExecCommand(Node->MacroCommandID);
+			u32 Value = Node->FirstValue.empty() ? 0 : atoi(Node->FirstValue.data());
+			ExecCommand(Node->MacroCommandID, Value);
 		}
-		else if (Type == MacroType::eOneArg)
+		else
 		{
-			bool IsInt = std::find(CommandsOneArgsInt.begin(), CommandsOneArgsInt.end(), Node->MacroCommandID) != CommandsOneArgsInt.end();
-			if (IsInt)
-			{
-				u32 Value = Node->FirstValue.empty() ? 0 : atoi(Node->FirstValue.data());
-				ExecCommand(Node->MacroCommandID, Value);
-			}
-			else
-			{
-				ExecCommand(Node->MacroCommandID, Node->FirstValue);
-			}
+			ExecCommand(Node->MacroCommandID, Node->FirstValue);
 		}
+	}
 
+	for (INodeUnknown* Macro : Node->OutNodes)
+	{
+		ExecMacro((CNodeMacro*)Macro);
 	}
 }
