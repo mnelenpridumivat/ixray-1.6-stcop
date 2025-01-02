@@ -6,6 +6,13 @@ class CCutsceneManager {
 	IKinematicsAnimated* HudModelKinematicsAnimated = nullptr;
 	IKinematics* HudModelKinematics = nullptr;
 	IRenderVisual* HudModel = nullptr;
+	Fvector Deviation;
+
+#ifndef MASTER_GOLD
+	bool Adjust = false;
+	shared_str AdjustCutsceneSection;
+	Fvector AdjustDeviation;
+#endif
 
 	CCutsceneManager(){}
 public:
@@ -18,4 +25,13 @@ public:
 	static void PlayCutscene(LPCSTR section);
 
 	void Update();
+
+#ifndef MASTER_GOLD
+	inline void SetAdjust(bool Adjust) { this->Adjust = Adjust; }
+	inline bool GetAdjust() { return Adjust; }
+	inline void SetAdjustSection(shared_str str) { AdjustCutsceneSection = str; }
+	void SaveAdjust();
+	void ResetAdjust();
+	Fvector GetAdjustDelta();
+#endif
 };

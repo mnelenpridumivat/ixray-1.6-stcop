@@ -222,6 +222,7 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 			if (ImGui::BeginMenu("Edit")) {
 				ImGui::MenuItem("Console variables", nullptr, &States[static_cast<u8>(EditorUI::CmdVars)]);
 				ImGui::MenuItem("Hud Adjust", nullptr, &States[static_cast<u8>(EditorUI::HudAdjust)]);
+				ImGui::MenuItem("Cutscene Adjust", nullptr, &States[static_cast<u8>(EditorUI::CutsceneAdjust)]);
 				ImGui::EndMenu();
 			}
 
