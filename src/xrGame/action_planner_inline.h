@@ -551,10 +551,12 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_evaluators.begin();
 			auto E = this->m_evaluators.end();
+			Object.BeginArray(this->m_evaluators.size());
 			for (; I != E; ++I)
 			{
 				(*I).second->Serialize(Object);
 			}
+			Object.EndArray();
 			//((CSaveObject&)Object).Serialize(this->m_evaluators, fastdelegate::MakeDelegate(this, &CPlanner::SerializeEval));
 			/*Object << this->m_evaluators;
 			auto I = this->m_evaluators.begin();
@@ -573,10 +575,12 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_operators.begin();
 			auto E = this->m_operators.end();
+			Object.BeginArray(this->m_operators.size());
 			for (; I != E; ++I) 
 			{
 				(*I).m_operator->Serialize(Object);
 			}
+			Object.EndArray();
 			//((CSaveObject&)Object).Serialize(this->m_operators, fastdelegate::MakeDelegate(this, &CPlanner::SerializeOper));
 			/*auto I = this->m_operators.begin();
 			auto E = this->m_operators.end();
@@ -594,10 +598,12 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_storage.m_storage.begin();
 			auto E = this->m_storage.m_storage.end();
+			Object.BeginArray(this->m_storage.m_storage.size());
 			for (; I != E; ++I)
 			{
 				Object << I->m_condition << I->m_value;
 			}
+			Object.EndArray();
 			//((CSaveObject&)Object).Serialize(this->m_storage.m_storage, fastdelegate::MakeDelegate(this, &CPlanner::SerializeStor));
 			/*u64							count;
 			GraphEngineSpace::_solver_condition_type	condition;

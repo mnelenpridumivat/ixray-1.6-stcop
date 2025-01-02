@@ -10,7 +10,9 @@ class XRCORE_API CSaveChunk: public ISaveable {
 	xr_map<shared_str, CSaveChunk*> _subchunks;
 	xr_vector<CSaveVariableBase*> _variables;
 	u64 _currentReadIndex;
-	xr_stack<CSaveVariableArray*> _currentArrayStack;
+	xr_stack<ISaveVariableArray*> _currentArrayStack;
+
+	void ParseRec(IReader* stream, ESaveVariableType type_key);
 
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
@@ -19,7 +21,6 @@ public:
 	void Write(CMemoryBuffer& Buffer);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
-	virtual bool IsArray() override { return false; }
 
 	void ReadArray(u64& Size);
 	void WriteArray(u64 Size);
@@ -32,8 +33,6 @@ public:
 	void w_bool(bool a);
 	void w_float(float a);
 	void w_double(double a);
-	//void w_vec3(const Fvector& a);
-	//void w_vec4(const Fvector4& a);
 	void w_u64(u64 a);
 	void w_s64(s64 a);
 	void w_u32(u32 a);
@@ -44,17 +43,8 @@ public:
 	void w_s8(s8 a);
 	void w_string(LPCSTR S);
 
-	//void w_string(LPCSTR S) { w_stringZ(S); }
-
-	//void w_stringZ(const shared_str& p);
-	//void w_stringZ(const xr_string& p);
-	//void w_matrix(const Fmatrix& M);
-	//void w_clientID(ClientID& C);
-
 	// reading - utilities
 	void r_bool(bool& A);
-	//void r_vec3(Fvector& A);
-	//void r_vec4(Fvector4& A);
 	void r_float(float& A);
 	void r_double(double& A);
 	void r_u64(u64& A);
@@ -66,18 +56,8 @@ public:
 	void r_u8(u8& A);
 	void r_s8(s8& A);
 	void r_string(LPSTR S);
-	//void r_stringZ(xr_string& dest);
-	//void r_stringZ(shared_str& dest);
-	//void r_stringZ_s(LPSTR string, u32 size);
 
-	//template <u32 size>
-	//inline void	r_stringZ_s(char(&string)[size])
-	//{
-	//	r_stringZ_s(string, size);
-	//}
-
-	//void r_matrix(Fmatrix& M);
-	//void r_clientID(ClientID& C);
+	void Parse(IReader* stream);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

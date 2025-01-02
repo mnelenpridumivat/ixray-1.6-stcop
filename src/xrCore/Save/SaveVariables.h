@@ -43,6 +43,8 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_chunkStart,
 	t_chunkEnd,
 	t_array,
+	t_arrayUnspec,
+	t_arrayUnspecEnd,
 	t_chunk,
 	t_invalid = u8(-1),
 };
@@ -50,39 +52,70 @@ enum class XRCORE_API ESaveVariableType : u8 {
 class XRCORE_API ISaveable{
 public:
 	virtual ESaveVariableType GetVariableType() = 0;
-	virtual bool IsArray() = 0;
+	//virtual bool IsArray() = 0;
 	virtual void Write(CMemoryBuffer& Buffer) = 0;
 };
 
-class XRCORE_API CSaveVariableBase: public ISaveable {
+class XRCORE_API CSaveVariableBase: 
+	public ISaveable 
+{
 protected:
 	virtual void* GetValue() { return nullptr; }
 
 public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_invalid; }
-	virtual bool IsArray() { return false; }
+	//virtual bool IsArray() override { return false; }
+};
+
+class XRCORE_API ISaveVariableArray
+{
+protected:
+	u64 _currentReadPos = 0;
+	xr_vector<ISaveable*> _array;
+public:
+	virtual ISaveable* GetCurrentElement() = 0;
+	virtual void Next() = 0;
+	virtual void AddVariable(ISaveable* data) = 0;
+	virtual u64 GetSize() { return -1; }
+};
+
+// Similar to CSaveVariableArray, but without io limit safety. More dangerous, use if CSaveVariableArray usage impossible
+class XRCORE_API CSaveVariableArrayUnspec :
+	public CSaveVariableBase,
+	public ISaveVariableArray
+{
+
+public:
+	CSaveVariableArrayUnspec() {}
+	~CSaveVariableArrayUnspec();
+
+	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_arrayUnspec; }
+	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual ISaveable* GetCurrentElement() override { VERIFY(_currentReadPos < _array.size()); return _array[_currentReadPos]; }
+	virtual void Next() override { ++_currentReadPos; }
+
+	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
 };
 
 class XRCORE_API CSaveVariableArray :
-	public CSaveVariableBase
+	public CSaveVariableBase,
+	public ISaveVariableArray
 {
 	u64 _size;
-	u64 _currentReadPos = 0;
-	xr_vector<ISaveable*> _array;
 
 public:
 	CSaveVariableArray(u64 Size) : _size(Size) {}
 	~CSaveVariableArray();
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_array; }
-	virtual bool IsArray() { return true; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
 
-	u64 GetSize() { return _size; }
-	ISaveable* GetCurrentElement() { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
-	void Next() { ++_currentReadPos; }
+	virtual u64 GetSize() override { return _size; }
+	virtual ISaveable* GetCurrentElement() override { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
+	virtual void Next() override { ++_currentReadPos; }
 
-	void AddVariable(ISaveable* data) { _array.emplace_back(data); }
+	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
 };
 
 class XRCORE_API CSaveVariableBool:
@@ -132,38 +165,6 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_double; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
 };
-
-/*class XRCORE_API CSaveVariableVec3 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fvector _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableVec3(const Fvector& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec3; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};
-
-class XRCORE_API CSaveVariableVec4 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fvector4 _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableVec4(const Fvector4& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_vec4; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};*/
 
 class XRCORE_API CSaveVariableU64 :
 	public CSaveVariableBase
@@ -292,109 +293,6 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s8; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
 };
-
-/*class CSaveVariableFloatQ16 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	u16 _value;
-
-protected:
-	virtual void* GetValue() override { 
-		static float UnwrappedValue; // Hack: safe return pointer of local variable 
-		A = (float(_value) * (max - min)) / 65535.f + min;		// floating-point-error possible
-		VERIFY((A >= min - EPS_S) && (A <= max + EPS_S));
-		return &UnwrappedValue;
-	}
-
-public:
-	CSaveVariableFloatQ16(float Value, float Min, float Max) : _value(Value) {
-		VERIFY(Value >= Min && Value <= Max);
-		float q = (Value - Min) / (Max - Min);
-		_value = u16(iFloor(q * 65535.f + 0.5f));
-	}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float_q16; }
-};
-
-class CSaveVariableFloatQ8 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	u8 _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableFloatQ8(float Value, float Min, float Max) : _value(Value) {
-		VERIFY(Value >= Min && Value <= Max);
-		float q = (Value - Min) / (Max - Min);
-		_value = u8(iFloor(q * 255.f + 0.5f));
-	}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float_q8; }
-};
-
-class CSaveVariableAngle16 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	float _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableAngle16(float Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_angle16; }
-};
-
-class CSaveVariableAngle8 :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	float _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableAngle8(float Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_angle8; }
-};
-
-class CSaveVariableDir :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fvector _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableDir(const Fvector& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_dir; }
-};
-
-class CSaveVariableSdir :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fvector _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableSdir(const Fvector& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_sdir; }
-};*/
 
 class XRCORE_API CSaveVariableString :
 	public CSaveVariableBase

@@ -87,8 +87,10 @@ public:
 
 	template<>
 	bool Write(shared_str data) {
-		Write(data.size());
-		Write(data.c_str(), data.size());
+		string256 buffer;
+		memcpy(buffer, data.c_str(), data.size());
+		buffer[data.size()] = 0;
+		Write(buffer, data.size()+1);
 		return true;
 	}
 

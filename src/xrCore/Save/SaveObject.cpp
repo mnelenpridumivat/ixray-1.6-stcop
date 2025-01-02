@@ -34,6 +34,11 @@ void CSaveObject::EndChunk()
 	_chunkStack.pop();
 }
 
+void CSaveObject::EndArray()
+{
+	GetCurrentChunk()->EndArray();
+}
+
 CSaveObjectSave::CSaveObjectSave()
 {
 	//_rootChunk = new CSaveChunk("Root");
@@ -51,6 +56,11 @@ void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
+}
+
+void CSaveObjectSave::BeginArray(size_t Size)
+{
+	GetCurrentChunk()->WriteArray(Size);
 }
 
 ISaveObject& CSaveObjectSave::operator<<(float& Value)
@@ -149,6 +159,11 @@ void CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));
 }
 
+void CSaveObjectLoad::BeginArray(size_t Size)
+{
+	GetCurrentChunk()->ReadArray(Size);
+}
+
 ISaveObject& CSaveObjectLoad::operator<<(float& Value)
 {
 	GetCurrentChunk()->r_float(Value);
@@ -219,6 +234,19 @@ ISaveObject& CSaveObjectLoad::operator<<(LPSTR S)
 {
 	GetCurrentChunk()->r_string(S);
 	return *this;
+}
+
+void CSaveObjectLoad::Parse(IReader* stream)
+{
+	{
+		ESaveVariableType type;
+		stream->r(&type, sizeof(ESaveVariableType));
+		VERIFY(type == ESaveVariableType::t_chunkStart);
+	}
+	shared_str chunkName;
+	CSaveManager::GetInstance().ConditionalReadString(stream, chunkName);
+	VERIFY(chunkName == "Root");
+	GetCurrentChunk()->Parse(stream);
 }
 
 ISaveObject& operator<<(ISaveObject& Object, char& Value) {

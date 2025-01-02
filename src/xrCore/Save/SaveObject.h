@@ -22,6 +22,7 @@ public:
 	CSaveObject(CSaveChunk* Root);
 	~CSaveObject();
 	void EndChunk() override;
+	void EndArray() override;
 
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
@@ -374,6 +375,7 @@ public:
 	CSaveObjectSave(CSaveChunk* Root);
 
 	virtual void BeginChunk(shared_str ChunkName) override;
+	virtual void BeginArray(size_t Size) override;
 
 	virtual bool IsSave() override { return true; }
 
@@ -399,6 +401,7 @@ public:
 	CSaveObjectLoad(CSaveChunk* Root);
 
 	virtual void BeginChunk(shared_str ChunkName) override;
+	virtual void BeginArray(size_t Size) override;
 
 	virtual bool IsSave() override { return false; }
 
@@ -414,5 +417,7 @@ public:
 	virtual ISaveObject& operator<<(s8& Value) override;
 	virtual ISaveObject& operator<<(bool& Value) override;
 	virtual ISaveObject& operator<<(LPSTR S) override;
+
+	void Parse(IReader* stream);
 
 };

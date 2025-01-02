@@ -96,7 +96,7 @@ void CALifeObjectRegistry::save				(IWriter &memory_stream, CSE_ALifeDynamicObje
 
 void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject* object, u32& object_count)
 {
-	VERIFY(!Object.IsSave());
+	VERIFY(Object.IsSave());
 	if (!Object.IsSave()) {
 		return;
 	}

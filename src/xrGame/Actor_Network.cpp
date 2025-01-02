@@ -1566,7 +1566,7 @@ void CActor::Serialize(ISaveObject& Object)
 		Object.BeginChunk("CActor::Camera");
 		{
 			cam_Active()->Serialize(Object);
-			u8* Value = (u8*)cam_active;
+			u8* Value = (u8*)&cam_active;
 			Object << *Value;
 			if (!Object.IsSave()) {
 				cam_Set(EActorCameras(*Value));

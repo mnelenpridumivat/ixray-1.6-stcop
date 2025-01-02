@@ -29,21 +29,28 @@ void CSaveChunk::Write(CMemoryBuffer& Buffer)
 void CSaveChunk::ReadArray(u64& Size)
 {
 	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->IsArray());
-		_currentArrayStack.push((CSaveVariableArray*)_variables[_currentReadIndex]);
+		auto Array = smart_cast<ISaveVariableArray*>(_variables[_currentReadIndex]);
+		VERIFY(Array);
+		_currentArrayStack.push(Array);
 	}
 	else {
 		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->IsArray());
-		_currentArrayStack.push((CSaveVariableArray*)CurrentArray);
+		auto CurrentElement = smart_cast<ISaveVariableArray*>(CurrentArray->GetCurrentElement());
+		VERIFY(CurrentElement);
+		_currentArrayStack.push(CurrentElement);
 	}
 	Size = _currentArrayStack.top()->GetSize();
 }
 
 void CSaveChunk::WriteArray(u64 Size)
 {
-	_variables.emplace_back(new CSaveVariableArray(Size));
-	auto ArrayPtr = (CSaveVariableArray*)_variables.back();
+	if (Size == u64(-1)) {
+		_variables.emplace_back(new CSaveVariableArrayUnspec());
+	}
+	else {
+		_variables.emplace_back(new CSaveVariableArray(Size));
+	}
+	auto ArrayPtr = (ISaveVariableArray*)_variables.back();
 	_currentArrayStack.push(ArrayPtr);
 
 }
@@ -460,6 +467,330 @@ void CSaveChunk::r_string(LPSTR S)
 		auto TempStr = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
 		xr_strcpy(S, TempStr.size(), TempStr.c_str());
 		CurrentArray->Next();
+	}
+}
+
+void CSaveChunk::Parse(IReader* stream)
+{
+	{
+		ESaveVariableType type;
+		stream->r(&type, sizeof(ESaveVariableType));
+		while(type == ESaveVariableType::t_chunkStart) {
+			shared_str subchunk_name;
+			CSaveManager::GetInstance().ConditionalReadString(stream, subchunk_name);
+			CSaveChunk* NewChunk = new CSaveChunk(subchunk_name);
+			NewChunk->Parse(stream);
+			stream->r(&type, sizeof(ESaveVariableType));
+			_subchunks[subchunk_name] = NewChunk;
+		}
+		ParseRec(stream, type);
+	}
+}
+
+void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
+{
+	ESaveVariableType type = type_key;
+	while (type != ESaveVariableType::t_chunkEnd) {
+		switch (type)
+		{
+		case ESaveVariableType::t_chunkStart: {
+			if (_currentArrayStack.empty()) {
+				Msg("_currentArrayStack.empty()");
+			}
+			//VERIFY(!_currentArrayStack.empty());
+			shared_str subchunk_name;
+			CSaveManager::GetInstance().ConditionalReadString(stream, subchunk_name);
+			CSaveChunk* NewChunk = new CSaveChunk(subchunk_name);
+			NewChunk->Parse(stream);
+			VERIFY(!_currentArrayStack.empty());
+			_currentArrayStack.top()->AddVariable(NewChunk);
+			break;
+		}
+		case ESaveVariableType::t_bool: {
+			bool Value;
+			CSaveManager::GetInstance().ConditionalReadBool(stream, Value);
+			auto Var = new CSaveVariableBool(Value);
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_float: {
+			auto Var = new CSaveVariableFloat(stream->r_float());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_double: {
+			double Value;
+			stream->r(&Value, sizeof(double));
+			auto Var = new CSaveVariableFloat(stream->r_float());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u64: {
+			auto Var = new CSaveVariableU64(stream->r_u64());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u64_op32: {
+			auto Var = new CSaveVariableU64(stream->r_u32());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u64_op16: {
+			auto Var = new CSaveVariableU64(stream->r_u16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u64_op8: {
+			auto Var = new CSaveVariableU64(stream->r_u8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s64: {
+			auto Var = new CSaveVariableS64(stream->r_s64());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s64_op32: {
+			auto Var = new CSaveVariableS64(stream->r_s32());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s64_op16: {
+			auto Var = new CSaveVariableS64(stream->r_s16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s64_op8: {
+			auto Var = new CSaveVariableS64(stream->r_s8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u32: {
+			auto Var = new CSaveVariableU32(stream->r_u32());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u32_op16: {
+			auto Var = new CSaveVariableU32(stream->r_u16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u32_op8: {
+			auto Var = new CSaveVariableU32(stream->r_u8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s32: {
+			auto Var = new CSaveVariableS32(stream->r_s32());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s32_op16: {
+			auto Var = new CSaveVariableS32(stream->r_s16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s32_op8: {
+			auto Var = new CSaveVariableS32(stream->r_s8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u16: {
+			auto Var = new CSaveVariableU16(stream->r_u16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u16_op8: {
+			auto Var = new CSaveVariableU16(stream->r_u8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s16: {
+			auto Var = new CSaveVariableS16(stream->r_s16());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s16_op8: {
+			auto Var = new CSaveVariableS16(stream->r_s8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_u8: {
+			auto Var = new CSaveVariableU8(stream->r_u8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_s8: {
+			auto Var = new CSaveVariableS8(stream->r_s8());
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_string: {
+			shared_str Value;
+			CSaveManager::GetInstance().ConditionalReadString(stream, Value);
+			auto Var = new CSaveVariableString(Value);
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			break;
+		}
+		case ESaveVariableType::t_array: {
+			size_t Size;
+			stream->r(&Size, sizeof(size_t));
+			auto Var = new CSaveVariableArray(Size);
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			_currentArrayStack.push(Var);
+			for (u64 i = 0; i < Size; ++i) {
+				stream->r(&type, sizeof(ESaveVariableType));
+				ParseRec(stream, type);
+			}
+			_currentArrayStack.pop();
+			break;
+		}
+		case ESaveVariableType::t_arrayUnspec: {
+			auto Var = new CSaveVariableArrayUnspec();
+			if (_currentArrayStack.empty()) {
+				_variables.emplace_back(Var);
+			}
+			else {
+				_currentArrayStack.top()->AddVariable(Var);
+			}
+			_currentArrayStack.push(Var);
+			stream->r(&type, sizeof(ESaveVariableType));
+			while (type != ESaveVariableType::t_arrayUnspecEnd) {
+				stream->r(&type, sizeof(ESaveVariableType));
+				ParseRec(stream, type);
+			}
+			_currentArrayStack.pop();
+		}
+		default: {
+			FATAL("Invalid save chunk type!");
+		}
+		}
+		stream->r(&type, sizeof(ESaveVariableType));
 	}
 }
 

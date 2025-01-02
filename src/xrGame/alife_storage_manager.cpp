@@ -22,6 +22,8 @@
 #include "../xrEngine/IGame_Persistent.h"
 #include "autosave_manager.h"
 #include "Save/SaveManager.h"
+#include <Actor.h>
+#include "alife_simulator.h"
 
 XRCORE_API string_path g_bug_report_file;
 
@@ -65,6 +67,12 @@ void CALifeStorageManager::save	(LPCSTR save_name_no_check, bool update_name)
 
 	CSaveObjectSave* SaveObj = CSaveManager::GetInstance().BeginSave();
 	{
+		CSaveManager::SGameInfoFast info;
+		info.m_actor_health = g_actor ? g_actor->GetfHealth() : 1.0f;
+		info.m_game_time = ai().alife().time_manager().game_time();
+		auto map_name = Level().name();
+		info.m_level_name = map_name.size() ? map_name : "Start";
+		CSaveManager::GetInstance().WriteGameInfo(info);
 		header().Serialize(*SaveObj);
 		time_manager().Serialize(*SaveObj);
 		spawns().Serialize(*SaveObj);
@@ -145,6 +153,46 @@ void CALifeStorageManager::load	(void *buffer, const u32 &buffer_size, LPCSTR fi
 	Level().autosave_manager().on_game_loaded	();
 }
 
+void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
+{
+	//IReader						source(buffer, buffer_size);
+
+	CSaveObjectLoad* SaveObj = CSaveManager::GetInstance().BeginLoad(stream);
+	{
+		CSaveManager::GetInstance().SkipGameInfo(stream);
+		header().Serialize(*SaveObj);
+		time_manager().Serialize(*SaveObj);
+		spawns().Serialize(*SaveObj);
+		graph().on_load();
+		objects().Serialize(*SaveObj);
+	}
+
+	VERIFY(can_register_objects());
+	can_register_objects(false);
+	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	B = objects().objects().begin();
+	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	E = objects().objects().end();
+	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	I;
+	for (I = B; I != E; ++I) {
+		ALife::_OBJECT_ID		id = (*I).second->ID;
+		(*I).second->ID = server().PerformIDgen(id);
+		VERIFY(id == (*I).second->ID);
+		register_object((*I).second, false);
+	}
+
+	registry().Serialize(*SaveObj);
+	xr_delete(SaveObj);
+
+	can_register_objects(true);
+
+	for (I = B; I != E; ++I)
+		(*I).second->on_register();
+
+	if (!g_pGameLevel)
+		return;
+
+	Level().autosave_manager().on_game_loaded();
+}
+
 bool CALifeStorageManager::load	(LPCSTR save_name_no_check)
 {
 	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path;
@@ -191,12 +239,15 @@ bool CALifeStorageManager::load	(LPCSTR save_name_no_check)
 	unload						();
 	reload						(m_section);
 
-	u32							source_count = stream->r_u32();
+	load(stream, file_name);
+	FS.r_close(stream);
+
+	/*u32							source_count = stream->r_u32();
 	void						*source_data = xr_malloc(source_count);
 	rtc_decompress				(source_data,source_count,stream->pointer(),stream->length() - 3*sizeof(u32));
 	FS.r_close					(stream);
 	load						(source_data, source_count, file_name);
-	xr_free						(source_data);
+	xr_free						(source_data);*/
 
 	groups().on_after_game_load	();
 

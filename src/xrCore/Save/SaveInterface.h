@@ -7,6 +7,8 @@ class XRCORE_API ISaveObject {
 public:
 	virtual void BeginChunk(shared_str ChunkName) = 0;
 	virtual void EndChunk() = 0;
+	virtual void BeginArray(size_t Size) = 0;
+	virtual void EndArray() = 0;
 
 	virtual bool IsSave() = 0;
 

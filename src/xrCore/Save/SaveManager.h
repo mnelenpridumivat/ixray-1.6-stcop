@@ -61,17 +61,34 @@ public:
 
 	}; 
 
+	struct SGameInfoFast {
+		u64			m_game_time;
+		shared_str	m_level_name;
+		float		m_actor_health;
+	};
+
+	bool GetGameInfoFast(IReader* stream, SGameInfoFast& data);
+	void SkipGameInfo(IReader* stream);
+	void WriteGameInfo(const SGameInfoFast& data);
+
 private:
 	SMemoryBuffers Buffers;
 	Flags8 ControlFlagsDefault;
 	Flags8 ControlFlagsRead;
+	SGameInfoFast GameInfo;
 
 	void WriteHeader();
 	void WriteStrings();
 	void WriteBools();
 	void WriteData();
+	void ReadHeader(IReader* stream);
+	void ReadStrings(IReader* stream);
+	void ReadBools(IReader* stream);
+	//void ReadData(IReader* stream);
 
 	void CompileData();
+
+	shared_str ReadStringInternal(IReader* stream);
 
 public:
 
@@ -94,9 +111,12 @@ public:
 
 	bool IsSaving();
 	CSaveObjectSave* BeginSave();
+	CSaveObjectLoad* BeginLoad(IReader* stream);
 	void WriteSavedData(const string_path& to_file);
 
 	void ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer);
-	void ConditionalWriteBool(bool& Value, CMemoryBuffer& buffer);
+	void ConditionalWriteBool(bool Value, CMemoryBuffer& buffer);
+	void ConditionalReadString(IReader* stream, shared_str& Value);
+	void ConditionalReadBool(IReader* stream, bool& Value);
 
 };

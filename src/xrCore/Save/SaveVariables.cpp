@@ -37,23 +37,6 @@ void CSaveVariableDouble::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-/*void CSaveVariableVec3::Write(CMemoryBuffer& Buffer)
-{
-	Buffer.Write(ESaveVariableType::t_vec3);
-	Buffer.Write(_value.x);
-	Buffer.Write(_value.y);
-	Buffer.Write(_value.z);
-}
-
-void CSaveVariableVec4::Write(CMemoryBuffer& Buffer)
-{
-	Buffer.Write(ESaveVariableType::t_vec3);
-	Buffer.Write(_value.x);
-	Buffer.Write(_value.y);
-	Buffer.Write(_value.z);
-	Buffer.Write(_value.w);
-}*/
-
 void CSaveVariableU64::Write(CMemoryBuffer& Buffer)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
@@ -180,17 +163,18 @@ void CSaveVariableString::Write(CMemoryBuffer& Buffer)
 	CSaveManager::GetInstance().ConditionalWriteString(_value, Buffer);
 }
 
-/*void CSaveVariableMatrix::Write(CMemoryBuffer& Buffer)
+CSaveVariableArrayUnspec::~CSaveVariableArrayUnspec()
 {
-	Buffer.Write(ESaveVariableType::t_matrix);
-	Buffer.Write(_value._11); Buffer.Write(_value._12); Buffer.Write(_value._13); Buffer.Write(_value._14);
-	Buffer.Write(_value._21); Buffer.Write(_value._22); Buffer.Write(_value._23); Buffer.Write(_value._24);
-	Buffer.Write(_value._31); Buffer.Write(_value._32); Buffer.Write(_value._33); Buffer.Write(_value._34);
-	Buffer.Write(_value._41); Buffer.Write(_value._42); Buffer.Write(_value._43); Buffer.Write(_value._44);
+	for (size_t i = 0; i < _array.size(); ++i) {
+		xr_delete(_array[i]);
+	}
 }
 
-void CSaveVariableClientID::Write(CMemoryBuffer& Buffer)
+void CSaveVariableArrayUnspec::Write(CMemoryBuffer& Buffer)
 {
-	Buffer.Write(ESaveVariableType::t_clientID);
-	Buffer.Write(_value.value());
-}*/
+	Buffer.Write(ESaveVariableType::t_arrayUnspec);
+	for (const auto& elem : _array) {
+		elem->Write(Buffer);
+	}
+	Buffer.Write(ESaveVariableType::t_arrayUnspecEnd);
+}
