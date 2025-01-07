@@ -159,7 +159,7 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 
 	CSaveObjectLoad* SaveObj = CSaveManager::GetInstance().BeginLoad(stream);
 	{
-		CSaveManager::GetInstance().SkipGameInfo(stream);
+		//CSaveManager::GetInstance().SkipGameInfo(stream);
 		header().Serialize(*SaveObj);
 		time_manager().Serialize(*SaveObj);
 		spawns().Serialize(*SaveObj);

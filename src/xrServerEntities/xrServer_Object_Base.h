@@ -63,7 +63,7 @@ public:
 	};
 
 private:
-	LPSTR							s_name_replace;
+	LPSTR							s_name_replace = nullptr;
 
 public:
 	BOOL							net_Ready;
@@ -135,7 +135,7 @@ public:
 	{
 		s_name		= s;
 	};
-	virtual void			set_name_replace		(LPCSTR s) override {xr_free(s_name_replace); s_name_replace = xr_strdup(s);};
+	virtual void			set_name_replace		(LPCSTR s) override { xr_free(s_name_replace); s_name_replace = xr_strdup(s); };
 	virtual Fvector&		position				();
 	virtual Fvector&		angle					();
 	virtual Flags16&		flags					();

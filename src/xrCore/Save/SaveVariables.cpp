@@ -3,21 +3,21 @@
 #include "MemoryBuffer.h"
 #include "SaveManager.h"
 
-CSaveVariableArray::~CSaveVariableArray()
+/*CSaveVariableArray::~CSaveVariableArray()
 {
 	for (size_t i = 0; i < _array.size(); ++i) {
 		xr_delete(_array[i]);
 	}
-}
+}*/
 
-void CSaveVariableArray::Write(CMemoryBuffer& Buffer)
+/*void CSaveVariableArray::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write(ESaveVariableType::t_array);
 	Buffer.Write(_size);
 	for (const auto& elem : _array) {
 		elem->Write(Buffer);
 	}
-}
+}*/
 
 void CSaveVariableBool::Write(CMemoryBuffer& Buffer)
 {

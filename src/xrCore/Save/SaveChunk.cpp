@@ -29,7 +29,7 @@ void CSaveChunk::Write(CMemoryBuffer& Buffer)
 void CSaveChunk::ReadArray(u64& Size)
 {
 	if (_currentArrayStack.empty()) {
-		auto Array = smart_cast<ISaveVariableArray*>(_variables[_currentReadIndex]);
+		auto Array = smart_cast<ISaveVariableArray*>(_variables[_currentReadIndex++]);
 		VERIFY(Array);
 		_currentArrayStack.push(Array);
 	}
@@ -42,14 +42,9 @@ void CSaveChunk::ReadArray(u64& Size)
 	Size = _currentArrayStack.top()->GetSize();
 }
 
-void CSaveChunk::WriteArray(u64 Size)
+void CSaveChunk::WriteArray()
 {
-	if (Size == u64(-1)) {
-		_variables.emplace_back(new CSaveVariableArrayUnspec());
-	}
-	else {
-		_variables.emplace_back(new CSaveVariableArray(Size));
-	}
+	_variables.emplace_back(new CSaveVariableArrayUnspec());
 	auto ArrayPtr = (ISaveVariableArray*)_variables.back();
 	_currentArrayStack.push(ArrayPtr);
 
@@ -121,26 +116,6 @@ void CSaveChunk::w_double(double a)
 		_currentArrayStack.top()->AddVariable(new CSaveVariableDouble(a));
 	}
 }
-
-/*void CSaveChunk::w_vec3(const Fvector& a)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableVec3(a));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableVec3(a));
-	}
-}
-
-void CSaveChunk::w_vec4(const Fvector4& a)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableVec4(a));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableVec4(a));
-	}
-}*/
 
 void CSaveChunk::w_u64(u64 a)
 {
@@ -222,55 +197,15 @@ void CSaveChunk::w_s8(s8 a)
 	}
 }
 
-void CSaveChunk::w_string(LPCSTR S)
+void CSaveChunk::w_string(shared_str S)
 {
 	if (_currentArrayStack.empty()) {
 		_variables.emplace_back(new CSaveVariableString(S));
 	}
 	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableString(S));
+		((ISaveVariableArray*)_currentArrayStack.top())->AddVariable(new CSaveVariableString(S));
 	}
 }
-
-/*void CSaveChunk::w_stringZ(const shared_str& p)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableString(p));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableString(p));
-	}
-}
-
-void CSaveChunk::w_stringZ(const xr_string& p)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableString(p));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableString(p));
-	}
-}
-
-void CSaveChunk::w_matrix(const Fmatrix& M)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableMatrix(M));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableMatrix(M));
-	}
-}
-
-void CSaveChunk::w_clientID(ClientID& C)
-{
-	if (_currentArrayStack.empty()) {
-		_variables.emplace_back(new CSaveVariableClientID(C));
-	}
-	else {
-		_currentArrayStack.top()->AddVariable(new CSaveVariableClientID(C));
-	}
-}*/
 
 void CSaveChunk::r_bool(bool& A)
 {
@@ -285,34 +220,6 @@ void CSaveChunk::r_bool(bool& A)
 		CurrentArray->Next();
 	}
 }
-
-/*void CSaveChunk::r_vec3(Fvector& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_vec3);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableVec3>(_variables[_currentReadIndex++]);
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_vec3);
-		A = SSaveVariableGetter::GetValue<Fvector, CSaveVariableVec3>((CSaveVariableVec3*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_vec4(Fvector4& A)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_vec4);
-		A = SSaveVariableGetter::GetValue<Fvector4, CSaveVariableVec4>(_variables[_currentReadIndex++]);
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_vec4);
-		A = SSaveVariableGetter::GetValue<Fvector4, CSaveVariableVec4>((CSaveVariableVec4*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}*/
 
 void CSaveChunk::r_float(float& A)
 {
@@ -454,18 +361,16 @@ void CSaveChunk::r_s8(s8& A)
 	}
 }
 
-void CSaveChunk::r_string(LPSTR S)
+void CSaveChunk::r_string(shared_str& S)
 {
 	if (_currentArrayStack.empty()) {
 		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
-		auto TempStr = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>(_variables[_currentReadIndex++]);
-		xr_strcpy(S, TempStr.size(), TempStr.c_str());
+		S = SSaveVariableGetter::GetValue<shared_str, CSaveVariableString>(_variables[_currentReadIndex++]).c_str();
 	}
 	else {
 		auto CurrentArray = _currentArrayStack.top();
 		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_string);
-		auto TempStr = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		xr_strcpy(S, TempStr.size(), TempStr.c_str());
+		S = SSaveVariableGetter::GetValue<shared_str, CSaveVariableString>((CSaveVariableBool*)CurrentArray->GetCurrentElement()).c_str();
 		CurrentArray->Next();
 	}
 }
@@ -480,8 +385,8 @@ void CSaveChunk::Parse(IReader* stream)
 			CSaveManager::GetInstance().ConditionalReadString(stream, subchunk_name);
 			CSaveChunk* NewChunk = new CSaveChunk(subchunk_name);
 			NewChunk->Parse(stream);
-			stream->r(&type, sizeof(ESaveVariableType));
 			_subchunks[subchunk_name] = NewChunk;
+			stream->r(&type, sizeof(ESaveVariableType));
 		}
 		ParseRec(stream, type);
 	}
@@ -752,7 +657,7 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			}
 			break;
 		}
-		case ESaveVariableType::t_array: {
+		/*case ESaveVariableType::t_array: {
 			size_t Size;
 			stream->r(&Size, sizeof(size_t));
 			auto Var = new CSaveVariableArray(Size);
@@ -769,7 +674,7 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			}
 			_currentArrayStack.pop();
 			break;
-		}
+		}*/
 		case ESaveVariableType::t_arrayUnspec: {
 			auto Var = new CSaveVariableArrayUnspec();
 			if (_currentArrayStack.empty()) {
@@ -781,89 +686,23 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			_currentArrayStack.push(Var);
 			stream->r(&type, sizeof(ESaveVariableType));
 			while (type != ESaveVariableType::t_arrayUnspecEnd) {
-				stream->r(&type, sizeof(ESaveVariableType));
 				ParseRec(stream, type);
+				stream->r(&type, sizeof(ESaveVariableType));
 			}
 			_currentArrayStack.pop();
+			break;
 		}
 		default: {
 			FATAL("Invalid save chunk type!");
 		}
 		}
-		stream->r(&type, sizeof(ESaveVariableType));
+		{
+			auto Pos = stream->tell();
+			stream->r(&type, sizeof(ESaveVariableType));
+			if (type == ESaveVariableType::t_arrayUnspecEnd) {
+				stream->seek(Pos);
+				return;
+			}
+		}
 	}
 }
-
-/*void CSaveChunk::r_stringZ(xr_string& dest)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
-		dest = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>(_variables[_currentReadIndex++]);
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_string);
-		dest = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_stringZ(shared_str& dest)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
-		dest = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>(_variables[_currentReadIndex++]).c_str();
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_string);
-		dest = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement()).c_str();
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_stringZ_s(LPSTR string, u32 size)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_string);
-		auto TempStr = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>(_variables[_currentReadIndex++]);
-		VERIFY(TempStr.size() <= size);
-		xr_strcpy(string, TempStr.size(), TempStr.c_str());
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_string);
-		auto TempStr = SSaveVariableGetter::GetValue<xr_string, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
-		VERIFY(TempStr.size() <= size);
-		xr_strcpy(string, TempStr.size(), TempStr.c_str());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_matrix(Fmatrix& M)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_matrix);
-		M = SSaveVariableGetter::GetValue<Fmatrix, CSaveVariableMatrix>(_variables[_currentReadIndex++]);
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_matrix);
-		M = SSaveVariableGetter::GetValue<Fmatrix, CSaveVariableMatrix>((CSaveVariableMatrix*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}
-
-void CSaveChunk::r_clientID(ClientID& C)
-{
-	if (_currentArrayStack.empty()) {
-		VERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_clientID);
-		C = SSaveVariableGetter::GetValue<ClientID, CSaveVariableClientID>(_variables[_currentReadIndex++]);
-	}
-	else {
-		auto CurrentArray = _currentArrayStack.top();
-		VERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_clientID);
-		C = SSaveVariableGetter::GetValue<ClientID, CSaveVariableClientID>((CSaveVariableClientID*)CurrentArray->GetCurrentElement());
-		CurrentArray->Next();
-	}
-}*/

@@ -281,12 +281,13 @@ str_container* str_container_handle::get_container()
 	return pStringContainer;
 }*/
 
-ISaveObject& operator<<(ISaveObject& Object, shared_str& Value) {
+/*ISaveObject& operator<<(ISaveObject& Object, shared_str& Value) {
 	if (Object.IsSave()) {
 		return Object << (char*)Value.c_str();
 	}
-	LPSTR Str = nullptr;
-	Object << Str;
+	string512 Str;
+	Object << (char*)Str;
 	Value = Str;
+
 	return Object;
-}
+}*/

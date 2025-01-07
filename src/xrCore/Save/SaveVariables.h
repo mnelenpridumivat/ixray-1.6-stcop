@@ -50,40 +50,52 @@ enum class XRCORE_API ESaveVariableType : u8 {
 };
 
 class XRCORE_API ISaveable{
+protected:
+	virtual void* GetValue() = 0;
 public:
 	virtual ESaveVariableType GetVariableType() = 0;
 	//virtual bool IsArray() = 0;
 	virtual void Write(CMemoryBuffer& Buffer) = 0;
+
+	virtual ISaveable* GetCurrentElement() = 0;
+	virtual void Next() = 0;
+	virtual void AddVariable(ISaveable* data) = 0;
+	virtual u64 GetSize() = 0;
 };
 
-class XRCORE_API CSaveVariableBase: 
-	public ISaveable 
+class XRCORE_API CSaveVariableBase:
+	public ISaveable
 {
-protected:
-	virtual void* GetValue() { return nullptr; }
 
 public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_invalid; }
 	//virtual bool IsArray() override { return false; }
+
+	virtual ISaveable* GetCurrentElement() override { return nullptr; };
+	virtual void Next() override {};
+	virtual void AddVariable(ISaveable* data) override {};
+	virtual u64 GetSize() override { return 0; };
 };
 
-class XRCORE_API ISaveVariableArray
+class XRCORE_API ISaveVariableArray:
+	public ISaveable
 {
-protected:
-	u64 _currentReadPos = 0;
-	xr_vector<ISaveable*> _array;
 public:
-	virtual ISaveable* GetCurrentElement() = 0;
+	/*virtual ISaveable* GetCurrentElement() = 0;
 	virtual void Next() = 0;
 	virtual void AddVariable(ISaveable* data) = 0;
-	virtual u64 GetSize() { return -1; }
+	virtual u64 GetSize() = 0;*/
 };
 
-// Similar to CSaveVariableArray, but without io limit safety. More dangerous, use if CSaveVariableArray usage impossible
 class XRCORE_API CSaveVariableArrayUnspec :
-	public CSaveVariableBase,
-	public ISaveVariableArray
+	public ISaveVariableArray//,
+	//public CSaveVariableBase
 {
+	u64 _currentReadPos = 0;
+	xr_vector<ISaveable*> _array;
+
+protected:
+	void* GetValue() override { return nullptr; };
 
 public:
 	CSaveVariableArrayUnspec() {}
@@ -92,17 +104,23 @@ public:
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_arrayUnspec; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
 
+	virtual u64 GetSize() override { return _array.size(); }
 	virtual ISaveable* GetCurrentElement() override { VERIFY(_currentReadPos < _array.size()); return _array[_currentReadPos]; }
 	virtual void Next() override { ++_currentReadPos; }
 
 	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
 };
 
-class XRCORE_API CSaveVariableArray :
-	public CSaveVariableBase,
-	public ISaveVariableArray
+/*class XRCORE_API CSaveVariableArray :
+	public ISaveVariableArray//,
+	//public CSaveVariableBase
 {
 	u64 _size;
+	u64 _currentReadPos = 0;
+	xr_vector<ISaveable*> _array;
+
+protected:
+	void* GetValue() override { return nullptr; };
 
 public:
 	CSaveVariableArray(u64 Size) : _size(Size) {}
@@ -116,7 +134,7 @@ public:
 	virtual void Next() override { ++_currentReadPos; }
 
 	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
-};
+};*/
 
 class XRCORE_API CSaveVariableBool:
 	public CSaveVariableBase 
@@ -346,5 +364,5 @@ public:
 
 struct SSaveVariableGetter {
 	template<typename TType, typename TVarClass>
-	static TType GetValue(CSaveVariableBase* Var) { return *((TType*)((TVarClass*)Var)->GetValue()); }
+	static TType GetValue(ISaveable* Var) { return *((TType*)((TVarClass*)Var)->GetValue()); }
 };

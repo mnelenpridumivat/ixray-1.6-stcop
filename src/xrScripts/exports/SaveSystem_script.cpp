@@ -4,6 +4,7 @@
 #include "Save/SaveChunk.h"
 #include "Save/SaveVariables.h"
 #include "Save/SaveObject.h"
+#include "../../xrGame/xr_time.h"
 
 namespace CSaveChunk_script {
 	bool r_bool(CSaveChunk* Chunk) {
@@ -144,8 +145,15 @@ namespace CSaveObject_script {
 	}
 
 	void r_string(ISaveObject* Chunk, LPSTR& Value) {
-		*Chunk << Value;
+		shared_str temp;
+		*Chunk << temp;
+		Value = (char*)temp.c_str();
 	}
+
+	/*void r_CTime(ISaveObject* Chunk, xrTime*& Value) {
+		Value = new xrTime();
+		Value->Serialize(*Chunk);
+	}*/
 
 	void w_bool(ISaveObject* Chunk, bool Value) {
 		*Chunk << Value;
@@ -167,33 +175,56 @@ namespace CSaveObject_script {
 		*Chunk << Value;
 	}
 
-	void w_u32(ISaveObject* Chunk, u32 Value) {
-		*Chunk << Value;
+	void w_u32(ISaveObject* Chunk, u64 Value) {
+		VERIFY(Value < std::numeric_limits<u32>::min());
+		VERIFY(Value > std::numeric_limits<u32>::max());
+		u32 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
-	void w_s32(ISaveObject* Chunk, s32 Value) {
-		*Chunk << Value;
+	void w_s32(ISaveObject* Chunk, s64 Value) {
+		VERIFY(Value < std::numeric_limits<s32>::min());
+		VERIFY(Value > std::numeric_limits<s32>::max());
+		s32 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
-	void w_u16(ISaveObject* Chunk, u16 Value) {
-		*Chunk << Value;
+	void w_u16(ISaveObject* Chunk, u64 Value) {
+		VERIFY(Value < std::numeric_limits<u16>::min());
+		VERIFY(Value > std::numeric_limits<u16>::max());
+		u16 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
-	void w_s16(ISaveObject* Chunk, s16 Value) {
-		*Chunk << Value;
+	void w_s16(ISaveObject* Chunk, s64 Value) {
+		VERIFY(Value < std::numeric_limits<s16>::min());
+		VERIFY(Value > std::numeric_limits<s16>::max());
+		s16 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
-	void w_u8(ISaveObject* Chunk, u8 Value) {
-		*Chunk << Value;
+	void w_u8(ISaveObject* Chunk, u64 Value) {
+		VERIFY(Value < std::numeric_limits<u8>::min());
+		VERIFY(Value > std::numeric_limits<u8>::max());
+		u8 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
-	void w_s8(ISaveObject* Chunk, s8 Value) {
-		*Chunk << Value;
+	void w_s8(ISaveObject* Chunk, s64 Value) {
+		VERIFY(Value < std::numeric_limits<s8>::min());
+		VERIFY(Value > std::numeric_limits<s8>::max());
+		s8 RealValue = Value;
+		*Chunk << RealValue;
 	}
 
 	void w_string(ISaveObject* Chunk, LPCSTR Value) {
-		*Chunk << (LPSTR)Value;
+		shared_str temp = Value;
+		*Chunk << temp;
 	}
+
+	/*void w_CTime(ISaveObject* Chunk, xrTime* Value) {
+		Value->Serialize(*Chunk);
+	}*/
 
 }
 
@@ -259,7 +290,8 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("s_u8", &CSaveObject_script::w_u8)
 				.def("s_s8", &CSaveObject_script::w_s8)
 				.def("s_bool", &CSaveObject_script::w_bool)
-				.def("s_string", &CSaveObject_script::w_string)
+				.def("s_stringZ", &CSaveObject_script::w_string)
+				//.def("s_CTime", &CSaveObject_script::w_CTime)
 				.def("IsSave", &CSaveObjectSave::IsSave),
 			class_<CSaveObjectLoad, ISaveObject>("SaveObjectLoad")
 				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
@@ -278,7 +310,8 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("s_u8", &CSaveObject_script::r_u8, pure_out_value<2>())
 				.def("s_s8", &CSaveObject_script::r_s8, pure_out_value<2>())
 				.def("s_bool", &CSaveObject_script::r_bool, pure_out_value<2>())
-				.def("s_string", &CSaveObject_script::r_string, pure_out_value<2>())
+				.def("s_stringZ", &CSaveObject_script::r_string, pure_out_value<2>())
+				//.def("s_CTime", &CSaveObject_script::r_CTime, pure_out_value<2>())
 				.def("IsSave", &CSaveObjectLoad::IsSave)
 		];
 }

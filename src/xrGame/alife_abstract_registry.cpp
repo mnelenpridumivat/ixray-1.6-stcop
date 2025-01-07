@@ -21,50 +21,66 @@ namespace SaveSystemDefined {
 	template<>
 	void Serialize2<u16, KNOWN_INFO_VECTOR>(ISaveObject& Object, std::pair<u16, KNOWN_INFO_VECTOR>& Value)
 	{
+		Object.BeginChunk("Registry::u16+KNOWN_INFO_VECTOR");
 		Object << Value.first;
 		((CSaveObject&)Object).Serialize(Value.second);
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, RELATION_DATA>(ISaveObject& Object, std::pair<u16, RELATION_DATA>& Value)
 	{
+		Object.BeginChunk("Registry::u16+RELATION_DATA");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, ARTICLE_VECTOR>(ISaveObject& Object, std::pair<u16, ARTICLE_VECTOR>& Value)
 	{
+		Object.BeginChunk("Registry::u16+ARTICLE_VECTOR");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, GAME_NEWS_VECTOR>(ISaveObject& Object, std::pair<u16, GAME_NEWS_VECTOR>& Value)
 	{
+		Object.BeginChunk("Registry::u16+GAME_NEWS_VECTOR");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<shared_str, int>(ISaveObject& Object, std::pair<shared_str, int>& Value)
 	{
+		Object.BeginChunk("Registry::shared_str+int");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, Locations>(ISaveObject& Object, std::pair<u16, Locations>& Value)
 	{
+		Object.BeginChunk("Registry::u16+Locations");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, vGameTasks>(ISaveObject& Object, std::pair<u16, vGameTasks>& Value)
 	{
+		Object.BeginChunk("Registry::u16+vGameTasks");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>
 	void Serialize2<u16, vStatSectionData>(ISaveObject& Object, std::pair<u16, vStatSectionData>& Value)
 	{
+		Object.BeginChunk("Registry::u16+vStatSectionData");
 		Object << Value.first << Value.second;
+		Object.EndChunk();
 	}
 
 	template<>

@@ -74,11 +74,11 @@ struct CGameTaskRegistry : public CALifeAbstractRegistry<u16, vGameTasks>
 	};*/
 	virtual void serialize(ISaveObject& Object)
 	{
-		Object.BeginChunk("CGameTaskRegistry");
-		{
+		//Object.BeginChunk("CGameTaskRegistry");
+		//{
 			CALifeAbstractRegistry<u16, vGameTasks>::serialize(Object);
 			Object << g_active_task_id;
-		}
-		Object.EndChunk();
+		//}
+		//Object.EndChunk();
 	};
 };

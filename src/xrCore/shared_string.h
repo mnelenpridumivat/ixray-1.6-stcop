@@ -159,6 +159,6 @@ namespace std
 	};
 }
 
-XRCORE_API ISaveObject& operator<<(ISaveObject& Object, shared_str& Value);
+//XRCORE_API ISaveObject& operator<<(ISaveObject& Object, shared_str& Value);
 
 #pragma pack(pop)

@@ -27,7 +27,7 @@ private:
 			//void					Save(CSaveObjectSave* Object, CSE_ALifeDynamicObject* object, u32& object_count) const;
 			void					Serialize(ISaveObject& Object, CSE_ALifeDynamicObject* object, u32& object_count);
 
-			void					SerializeElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, CSE_ALifeDynamicObject*>& elem);
+			void					SerializeElem(ISaveObject& Object, CSE_ALifeDynamicObject* elem);
 			u32 m_serializable_object_count = 0;
 
 public:

@@ -469,17 +469,18 @@ void CSE_ALifeInventoryItem::UPDATE_Serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("CSE_ALifeInventoryItem::UPDATE");
 	{
-		if (!Object.IsSave()) {
-			Object << m_u8NumItems;
-		}
+		Object << m_u8NumItems;
+		//if (!Object.IsSave()) {
+		//	Object << m_u8NumItems;
+		//}
 		//Object->GetCurrentChunk()->r_u8(m_u8NumItems);
 		if (!m_u8NumItems) {
 			Object.EndChunk();
 			return;
 		}
-		if (Object.IsSave()) {
-			Object << m_u8NumItems;
-		}
+		//if (Object.IsSave()) {
+		//	Object << m_u8NumItems;
+		//}
 
 		//mask_num_items					num_items;
 		//num_items.common = m_u8NumItems;

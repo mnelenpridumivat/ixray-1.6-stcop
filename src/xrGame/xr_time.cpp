@@ -26,6 +26,10 @@ xrTime get_time_struct()
 	return xrTime(__game_time());
 }
 
+void ctime_serialize(xrTime* self, ISaveObject* save) {
+	self->Serialize(*save);
+}
+
 LPCSTR	xrTime::dateToString	(int mode)								
 { 
 	return *InventoryUtilities::GetDateAsString(m_time,(InventoryUtilities::EDatePrecision)mode);

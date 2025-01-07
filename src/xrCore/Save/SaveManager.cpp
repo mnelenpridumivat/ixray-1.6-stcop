@@ -216,7 +216,7 @@ void CSaveManager::WriteBools()
 		}
 		BoolQueue->pop();
 	}
-	if (WrittenFlags != 8) {
+	if (WrittenFlags != 8 && WrittenFlags != 0) {
 		Buffers.BufferBools->Write(Flags.get());
 	}
 	Buffers.BufferBools->Write(SaveWriter);

@@ -551,7 +551,7 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_evaluators.begin();
 			auto E = this->m_evaluators.end();
-			Object.BeginArray(this->m_evaluators.size());
+			Object.BeginArray();
 			for (; I != E; ++I)
 			{
 				(*I).second->Serialize(Object);
@@ -575,7 +575,7 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_operators.begin();
 			auto E = this->m_operators.end();
-			Object.BeginArray(this->m_operators.size());
+			Object.BeginArray();
 			for (; I != E; ++I) 
 			{
 				(*I).m_operator->Serialize(Object);
@@ -598,7 +598,7 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 		{
 			auto I = this->m_storage.m_storage.begin();
 			auto E = this->m_storage.m_storage.end();
-			Object.BeginArray(this->m_storage.m_storage.size());
+			Object.BeginArray();
 			for (; I != E; ++I)
 			{
 				Object << I->m_condition << I->m_value;

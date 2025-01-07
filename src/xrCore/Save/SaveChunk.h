@@ -8,22 +8,30 @@ class XRCORE_API CSaveChunk: public ISaveable {
 
 	shared_str _chunkName;
 	xr_map<shared_str, CSaveChunk*> _subchunks;
-	xr_vector<CSaveVariableBase*> _variables;
-	u64 _currentReadIndex;
+	xr_vector<ISaveable*> _variables;
+	u64 _currentReadIndex = 0;
 	xr_stack<ISaveVariableArray*> _currentArrayStack;
 
 	void ParseRec(IReader* stream, ESaveVariableType type_key);
 
+protected:
+	virtual void* GetValue() { return nullptr; };
+
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
 	~CSaveChunk();
+
+	virtual ISaveable* GetCurrentElement() override { return nullptr; };
+	virtual void Next() override {};
+	virtual void AddVariable(ISaveable* data) override {};
+	virtual u64 GetSize() override { return 0; };
 
 	void Write(CMemoryBuffer& Buffer);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
 
 	void ReadArray(u64& Size);
-	void WriteArray(u64 Size);
+	void WriteArray();
 	void EndArray();
 
 	CSaveChunk* BeginChunk(shared_str ChunkName);
@@ -41,7 +49,7 @@ public:
 	void w_s16(s16 a);
 	void w_u8(u8 a);
 	void w_s8(s8 a);
-	void w_string(LPCSTR S);
+	void w_string(shared_str S);
 
 	// reading - utilities
 	void r_bool(bool& A);
@@ -55,7 +63,7 @@ public:
 	void r_s16(s16& A);
 	void r_u8(u8& A);
 	void r_s8(s8& A);
-	void r_string(LPSTR S);
+	void r_string(shared_str& S);
 
 	void Parse(IReader* stream);
 

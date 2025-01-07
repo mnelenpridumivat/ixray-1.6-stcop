@@ -603,10 +603,10 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 {
 	Object.BeginChunk("CSE_Abstract");
 	{
-		if (!s_name_replace) {
-			static auto TempStr = "";
-			s_name_replace = (char*)TempStr;
-		}
+		//if (!s_name_replace.size()) {
+		//	static auto TempStr = "";
+		//	s_name_replace = (char*)TempStr;
+		//}
 		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
 		// generic
 		//Object->GetCurrentChunk()->w_stringZ(s_name);

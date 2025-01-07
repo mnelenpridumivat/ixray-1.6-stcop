@@ -58,9 +58,9 @@ void CSaveObjectSave::BeginChunk(shared_str ChunkName)
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
 }
 
-void CSaveObjectSave::BeginArray(size_t Size)
+void CSaveObjectSave::BeginArray()
 {
-	GetCurrentChunk()->WriteArray(Size);
+	GetCurrentChunk()->WriteArray();
 }
 
 ISaveObject& CSaveObjectSave::operator<<(float& Value)
@@ -129,7 +129,7 @@ ISaveObject& CSaveObjectSave::operator<<(bool& Value)
 	return *this;
 }
 
-ISaveObject& CSaveObjectSave::operator<<(LPSTR S)
+ISaveObject& CSaveObjectSave::operator<<(shared_str& S)
 {
 	GetCurrentChunk()->w_string(S);
 	return *this;
@@ -159,9 +159,10 @@ void CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));
 }
 
-void CSaveObjectLoad::BeginArray(size_t Size)
+void CSaveObjectLoad::BeginArray()
 {
-	GetCurrentChunk()->ReadArray(Size);
+	u64 ArrSize;
+	GetCurrentChunk()->ReadArray(ArrSize);
 }
 
 ISaveObject& CSaveObjectLoad::operator<<(float& Value)
@@ -230,7 +231,7 @@ ISaveObject& CSaveObjectLoad::operator<<(bool& Value)
 	return *this;
 }
 
-ISaveObject& CSaveObjectLoad::operator<<(LPSTR S)
+ISaveObject& CSaveObjectLoad::operator<<(shared_str& S)
 {
 	GetCurrentChunk()->r_string(S);
 	return *this;
@@ -251,4 +252,20 @@ void CSaveObjectLoad::Parse(IReader* stream)
 
 ISaveObject& operator<<(ISaveObject& Object, char& Value) {
 	return Object << (s8&)Value;
+}
+
+XRCORE_API ISaveObject& operator<<(ISaveObject& Object, LPSTR& Value)
+{
+	if (Object.IsSave()) {
+		shared_str temp = Value;
+		Object << temp;
+	}
+	else {
+		xr_free(Value);
+		shared_str temp;
+		Object << temp;
+		Value = xr_strdup(temp.c_str());
+		//Value = (LPSTR)temp.c_str();
+	}
+	return Object;
 }

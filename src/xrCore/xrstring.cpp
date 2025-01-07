@@ -270,12 +270,13 @@ xr_string xr_string::Join(xrStringVector::iterator beginIter, xrStringVector::it
 
 ISaveObject& operator<<(ISaveObject& Object, xr_string& Value) {
 	if (Object.IsSave()) {
-		Object << (char*)Value.c_str();
+		shared_str temp = Value.c_str();
+		Object << temp;
 	}
 	else {
-		LPSTR Str = nullptr;
-		Object << Str;
-		Value = Str;
+		shared_str temp;
+		Object << temp;
+		Value = temp.c_str();
 	}
 	return Object;
 }
