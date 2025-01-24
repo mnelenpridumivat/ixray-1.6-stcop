@@ -1,4 +1,5 @@
 #pragma once
+#include "SaveChunkHandleInterface.h"
 #include "xrCore.h"
 
 class shared_str;
@@ -11,6 +12,8 @@ public:
 	virtual void EndArray() = 0;
 
 	virtual bool IsSave() = 0;
+
+	virtual u64 ExtractCurrentChunk() = 0;
 
 	virtual ISaveObject& operator<<(float& Value) = 0;
 	virtual ISaveObject& operator<<(double& Value) = 0;

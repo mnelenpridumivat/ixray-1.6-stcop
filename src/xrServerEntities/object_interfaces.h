@@ -8,9 +8,11 @@
 
 #pragma once
 #include "Save/SaveObject.h"
+//#include "../xrScripts/exports/SaveSystem_script.h"
 #include "FS.h"
 
 class NET_Packet;
+class ISaveObjectWrapper;
 
 class IPureDestroyableObject {
 public:
@@ -43,9 +45,11 @@ public:
 	//virtual void					STATE_WriteSave(CSaveObjectSave* Object) const = 0;
 	//virtual void					STATE_ReadSave(CSaveObjectLoad* Object) = 0;
 	virtual void					STATE_Serialize(ISaveObject& Object) = 0;
+	//virtual void					STATE_Serialize_wrapper(ISaveObjectWrapper* Object);
 	//virtual void					UPDATE_WriteSave(CSaveObjectSave* Object) const = 0;
 	//virtual void					UPDATE_ReadSave(CSaveObjectLoad* Object) = 0;
 	virtual void					UPDATE_Serialize(ISaveObject& Object) = 0;
+	//virtual void					STATE_Serialize(ISaveObject* Object) = 0;
 };
 
 class IPureServerObject : public IPureSerializeObject<IReader,IWriter>, public IPureStateUpdateObject {};

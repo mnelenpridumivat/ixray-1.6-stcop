@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "../xrScripts/exports/SaveSystem_script.h"
 
 #define MAKE_WRAPPER_NAME(cls)                                                          \
 	cls##_wrapper
@@ -37,6 +38,12 @@
 
 #define DEFINE_LUABIND_VIRTUAL_FUNCTION(a,b,c) \
 	.def(#c, &a::c, &b::c##_static)
+
+#define DEFINE_LUABIND_VIRTUAL_FUNCTION1(a,b,c) \
+	.def(#c, &b::c, &b::c##_static)
+
+#define DEFINE_LUABIND_VIRTUAL_FUNCTION_SERIALIZE(a,b,c) \
+	.def(#c, &a::c##_wrapper, &b::c##_static)
 
 #define DEFINE_LUABIND_VIRTUAL_FUNCTION_EXPLICIT_CONST_0(a,b,c,d) \
 	.def(#c, (d (a::*)() const)(&a::c), (d (*)(const a*))(&b::c##_static))
@@ -326,3 +333,18 @@
 		{																				\
 			ptr->self_type::inherited::v_func_name(p1,p2,*p3);							\
 		}
+
+#define DEFINE_LUA_WRAPPER_METHOD_SERIALIZE(v_func_name,t1, t1w)						\
+		virtual void v_func_name(t1& p1)												\
+		{																				\
+			try {																		\
+				ISaveObjectWrapper Wrapper(&p1);										\
+				call<void>(#v_func_name,&Wrapper);										\
+			}																			\
+			catch(...) {																\
+			}																			\
+		}                                   											\
+		static  void v_func_name##_static(inherited* ptr, t1w* p1)						\
+		{																				\
+			ptr->self_type::inherited::v_func_name(p1);								\
+		}																				\

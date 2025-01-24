@@ -9,7 +9,7 @@ CSaveManager::CSaveManager()
 {
 	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, true);
 	SetFlag(ESaveManagerFlagsGeneral::EUseIntOptimization, true);
-	SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, true);
+	//SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, true);
 	SetFlag(ESaveManagerFlagsGeneral::EHasExtraControlFlags, false);
 }
 
@@ -46,9 +46,17 @@ CSaveObjectSave* CSaveManager::BeginSave()
 CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 {
 	ReadHeader(stream);
-	ReadStrings(stream);
-	ReadBools(stream);
-	auto LoadData = new CSaveObjectLoad();
+	if (TestFlag(ESaveManagerFlagsGeneral::EUseStringOptimization))
+	{
+		ReadStrings(stream);
+	}
+	if (TestFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization))
+	{
+		ReadBools(stream);
+	}
+	VERIFY(!LoadData);
+	_dirtyLoadData = false;
+	LoadData = new CSaveObjectLoad();
 	LoadData->Parse(stream);
 	return LoadData;
 }
@@ -289,6 +297,7 @@ void CSaveManager::ReadBools(IReader* stream)
 
 void CSaveManager::CompileData()
 {
+	Buffers.BufferGeneral->Write(ESaveVariableType::t_chunk);
 	SaveData->Write(Buffers.BufferGeneral);
 }
 
@@ -303,7 +312,7 @@ shared_str CSaveManager::ReadStringInternal(IReader* stream)
 	return buffer;
 }
 
-inline void CSaveManager::SMemoryBuffers::Init() {
+void CSaveManager::SMemoryBuffers::Init() {
 	VERIFY(!(BufferHeader || BufferStrings || BufferBools || BufferGeneral));
 	BufferHeader = new CMemoryBuffer();
 	BufferStrings = new CMemoryBuffer();
@@ -311,9 +320,58 @@ inline void CSaveManager::SMemoryBuffers::Init() {
 	BufferGeneral = new CMemoryBuffer();
 }
 
-inline void CSaveManager::SMemoryBuffers::Clear() {
+void CSaveManager::SMemoryBuffers::Clear() {
 	xr_delete(BufferHeader);
 	xr_delete(BufferStrings);
 	xr_delete(BufferBools);
 	xr_delete(BufferGeneral);
+}
+
+u64 CSaveManager::RegisterHandle(ISaveChunkHandleInterface* handle)
+{
+	auto ID = GetHandlesNum();
+	while (_handles.find(ID) != _handles.end()) {
+		++ID;
+	}
+	VERIFY(ID != u64(-1));
+	_handles[ID] = handle;
+	return ID;
+}
+
+void CSaveManager::UnregisterHandle(u64& ID)
+{
+	auto HandleIt = _handles.find(ID);
+	VERIFY(HandleIt != _handles.end());
+	auto Handle = HandleIt->second;
+	_handles.erase(ID);
+	xr_delete(Handle);
+	ID = u64(-1);
+	if (_dirtyLoadData) {
+		MarkLoadObjectDirty();
+	}
+}
+
+ISaveChunkHandleInterface* CSaveManager::GetHandle(u64 ID)
+{
+	if (ID == u64(-1)) {
+		return nullptr;
+	}
+	auto It = _handles.find(ID);
+	if (It == _handles.end()) {
+		return nullptr;
+	}
+	return It->second;
+}
+
+u64 CSaveManager::GetHandlesNum()
+{
+	return _handles.size();
+}
+
+void CSaveManager::MarkLoadObjectDirty()
+{
+	_dirtyLoadData = true;
+	if (!_handles.size()) {
+		xr_delete(LoadData);
+	}
 }

@@ -6,6 +6,7 @@
 class CMemoryBuffer;
 
 enum class XRCORE_API ESaveVariableType : u8 {
+	t_zero_flag,
 	t_bool,
 	t_float,
 	t_double,

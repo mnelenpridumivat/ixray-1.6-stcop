@@ -180,7 +180,9 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 	}
 
 	registry().Serialize(*SaveObj);
-	xr_delete(SaveObj);
+	//xr_delete(SaveObj);
+	CSaveManager::GetInstance().MarkLoadObjectDirty();
+	//SaveObj->MarkDirty();
 
 	can_register_objects(true);
 

@@ -24,6 +24,9 @@ public:
 	void EndChunk() override;
 	void EndArray() override;
 
+	//void MarkDirty();
+	virtual u64 ExtractCurrentChunk() override;
+
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
 		if (IsSave()) {
@@ -407,7 +410,7 @@ public:
 class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
 	CSaveObjectLoad();
-	CSaveObjectLoad(CSaveChunk* Root);
+	CSaveObjectLoad(ISaveChunkHandleInterface* Root);
 
 	virtual void BeginChunk(shared_str ChunkName) override;
 	virtual void BeginArray() override;
@@ -428,5 +431,55 @@ public:
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
 	void Parse(IReader* stream);
+
+	/*void r_bool(bool& Value) {
+		*this << Value;
+	}
+
+	void r_vec3(Fvector& Value) {
+		*this << Value;
+	}
+
+	void r_float(float& Value) {
+		*this << Value;
+	}
+
+	void r_u64(u64& Value) {
+		*this << Value;
+	}
+
+	void r_s64(s64& Value) {
+		*this << Value;
+	}
+
+	void r_u32(u32& Value) {
+		*this << Value;
+	}
+
+	void r_s32(s32& Value) {
+		*this << Value;
+	}
+
+	void r_u16(u16& Value) {
+		*this << Value;
+	}
+
+	void r_s16(s16& Value) {
+		*this << Value;
+	}
+
+	void r_u8(u8& Value) {
+		*this << Value;
+	}
+
+	void r_s8(s8& Value) {
+		*this << Value;
+	}
+
+	void r_string(LPCSTR& Value) {
+		shared_str temp;
+		*this << temp;
+		Value = temp.c_str();
+	}*/
 
 };

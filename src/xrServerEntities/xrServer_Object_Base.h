@@ -104,7 +104,7 @@ public:
 
 	//client object custom data serialization
 	xr_vector<u8>					client_data;
-	CSaveChunk*					client_data_new;
+	u64					client_data_new = u64(-1);
 	virtual void					load					(NET_Packet	&tNetPacket);
 
 	//////////////////////////////////////////////////////////////////////////

@@ -234,6 +234,7 @@ void CSE_Abstract::Spawn_Write				(NET_Packet	&tNetPacket, BOOL bLocal)
 	if (client_data_size > 0) {
 		tNetPacket.w			(&*client_data.begin(),client_data_size);
 	}
+	tNetPacket.w_u64(client_data_new);
 
 	tNetPacket.w_u16			(m_tSpawnID);
 //	tNetPacket.w_float			(m_spawn_probability);
@@ -331,8 +332,13 @@ BOOL CSE_Abstract::Spawn_Read				(NET_Packet	&tNetPacket)
 		else
 			client_data.clear	();
 	}
-	else
-		client_data.clear		();
+	else {
+		client_data.clear();
+	}
+
+	if (m_wVersion > 129) {
+		tNetPacket.r_u64(client_data_new);
+	}
 
 	if (m_wVersion > 79)
 		tNetPacket.r_u16			(m_tSpawnID);
@@ -631,7 +637,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				}
 				SpawnVersion = SPAWN_VERSION;
 			}
-			Object << FlagsTemp;
+			Object << FlagsTemp << SpawnVersion;
 			if (!Object.IsSave()) {
 				s_flags.assign(FlagsTemp);
 				m_wVersion = SpawnVersion;
@@ -667,10 +673,11 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				if (Object.IsSave()) {
 					auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
 					if (Obj) {
-						Obj->Serialize(Object);
+						Obj->net_Serialize(Object);
 					}
 				}
 				else {
+					client_data_new = Object.ExtractCurrentChunk();
 					// TODO: Implement spawn of client object here
 					/*auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
 					if (Obj) {

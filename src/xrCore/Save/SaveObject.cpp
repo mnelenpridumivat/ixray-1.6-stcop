@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SaveObject.h"
 #include "SaveManager.h"
+#include "SaveChunkHandle.h"
 
 CSaveObject::CSaveObject()
 {
@@ -37,6 +38,31 @@ void CSaveObject::EndChunk()
 void CSaveObject::EndArray()
 {
 	GetCurrentChunk()->EndArray();
+}
+
+/*void CSaveObject::MarkDirty() {
+	_dirty = true;
+	if (!_handles.size()) {
+		xr_delete(this);
+	}
+}*/
+
+/*void CSaveObject::NotifyHandleDestruction(ISaveChunkHandleInterface* handle)
+{
+	VERIFY(_handles.find(handle) != _handles.end());
+	_handles.erase(handle);
+	xr_delete(handle);
+	if (_dirty && !_handles.size()) {
+		xr_delete(this);
+	}
+}*/
+
+u64 CSaveObject::ExtractCurrentChunk()
+{
+	auto CurrentChunk = _chunkStack.top();
+	auto Result = new CSaveChunkHandle(this, CurrentChunk);
+	auto ID = CSaveManager::GetInstance().RegisterHandle(Result);
+	return ID;
 }
 
 CSaveObjectSave::CSaveObjectSave()
@@ -146,9 +172,9 @@ CSaveObjectLoad::CSaveObjectLoad()
 	_chunkStack.push(_rootChunk);
 }
 
-CSaveObjectLoad::CSaveObjectLoad(CSaveChunk* Root)
+CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
 {
-	_rootChunk = Root;
+	_rootChunk = Root->GetChunk();
 	_isPartial = true;
 	_chunkStack.push(_rootChunk);
 }
@@ -239,6 +265,11 @@ ISaveObject& CSaveObjectLoad::operator<<(shared_str& S)
 
 void CSaveObjectLoad::Parse(IReader* stream)
 {
+	{
+		ESaveVariableType type;
+		stream->r(&type, sizeof(ESaveVariableType));
+		VERIFY(type == ESaveVariableType::t_chunk);
+	}
 	{
 		ESaveVariableType type;
 		stream->r(&type, sizeof(ESaveVariableType));

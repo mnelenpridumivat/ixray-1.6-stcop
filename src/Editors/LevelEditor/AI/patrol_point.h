@@ -25,7 +25,7 @@ protected:
 	GameGraph::_GRAPH_ID				m_game_vertex_id;
 
 protected:
-#ifdef DEBUG
+#ifndef MASTER_GOLD
 	bool								m_initialized;
 	const CPatrolPath					*m_path;
 #endif

@@ -44,12 +44,24 @@ class XRCORE_API CSaveManager
 	CSaveManager();
 
 	CSaveObjectSave* SaveData = nullptr;
+
+	CSaveObjectLoad* LoadData = nullptr;
+	xr_hash_map<u64, ISaveChunkHandleInterface*> _handles = {};
+	bool _dirtyLoadData = false;
+
 	IWriter* SaveWriter = nullptr;
 	xr_unique_ptr<xr_map<u32, xr_vector<shared_str>>> StringsHashesMap;
 	xr_unique_ptr<xr_queue<bool>> BoolQueue;
 	u64 BoolsNum = 0;
 
 public:
+
+	u64 RegisterHandle(ISaveChunkHandleInterface* handle);
+	void UnregisterHandle(u64& ID);
+	ISaveChunkHandleInterface* GetHandle(u64 ID);
+	u64 GetHandlesNum();
+	void MarkLoadObjectDirty();
+
 	struct SMemoryBuffers {
 		CMemoryBuffer* BufferHeader = nullptr;
 		CMemoryBuffer* BufferStrings = nullptr;

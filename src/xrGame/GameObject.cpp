@@ -40,6 +40,7 @@ extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 #	include "PHDebug.h"
 #endif
 #include <Save/SaveObject.h>
+#include <Save/SaveManager.h>
 
 ENGINE_API bool g_dedicated_server;
 
@@ -348,11 +349,14 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 #endif
 	//load custom user data from server
-	if(!E->client_data.empty())
+	if(E->client_data_new != u64(-1))
 	{	
-		auto* PartialObj = new CSaveObjectLoad(E->client_data_new);
+		auto Handle = CSaveManager::GetInstance().GetHandle(E->client_data_new);
+		VERIFY(Handle);
+		auto* PartialObj = new CSaveObjectLoad(Handle);
 		net_Serialize(*PartialObj);
 		xr_delete(PartialObj);
+		CSaveManager::GetInstance().UnregisterHandle(E->client_data_new);
 //		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
 		/*IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
 		net_Load		(ireader);*/

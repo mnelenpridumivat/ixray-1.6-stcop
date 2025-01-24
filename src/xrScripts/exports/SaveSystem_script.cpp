@@ -96,135 +96,321 @@ namespace CSaveChunk_script {
 }
 
 namespace CSaveObject_script {
-	//void BeginChunk(CSaveObject* Object, LPCSTR ChunkName) {
-	//	Object->BeginChunk(ChunkName);
-	//}
 
-	void r_bool(ISaveObject* Chunk, bool& Value) {
-		*Chunk << Value;
+void BeginChunk(ISaveObject* Obj, LPCSTR Name){
+	VERIFY(Obj);
+	Obj->BeginChunk(Name);
+}
+
+void EndChunk(ISaveObject* Obj){
+	VERIFY(Obj);
+	Obj->EndChunk();
+}
+
+void BeginArray(ISaveObject* Obj){
+	VERIFY(Obj);
+	Obj->BeginArray();
+}
+
+void EndArray(ISaveObject* Obj){
+	VERIFY(Obj);
+	Obj->EndArray();
+}
+
+/*Fvector s_vec3(ISaveObject* Obj, luabind::object Value) {
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TUSERDATA);
+	Fvector Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<Fvector>(Value);
+		*Obj << Casted;
 	}
-
-	void r_vec3(ISaveObject* Chunk, Fvector& Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void r_float(ISaveObject* Chunk, float& Value) {
-		*Chunk << Value;
+float s_float(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	float Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<float>(Value);
+		*Obj << Casted;
 	}
-
-	void r_u64(ISaveObject* Chunk, u64& Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void r_s64(ISaveObject* Chunk, s64& Value) {
-		*Chunk << Value;
+u64 s_u64(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	u64 Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<u64>(Value);
+		*Obj << Casted;
 	}
-
-	void r_u32(ISaveObject* Chunk, u32& Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void r_s32(ISaveObject* Chunk, s32& Value) {
-		*Chunk << Value;
+s64 s_s64(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	s64 Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<s64>(Value);
+		*Obj << Casted;
 	}
-
-	void r_u16(ISaveObject* Chunk, u16& Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void r_s16(ISaveObject* Chunk, s16& Value) {
-		*Chunk << Value;
+u32 s_u32(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	u32 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<u32>::min());
+		VERIFY(tCasted <= std::numeric_limits<u32>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void r_u8(ISaveObject* Chunk, u8& Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void r_s8(ISaveObject* Chunk, s8& Value) {
-		*Chunk << Value;
+s32 s_s32(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	s32 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<s32>::min());
+		VERIFY(tCasted <= std::numeric_limits<s32>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void r_string(ISaveObject* Chunk, LPSTR& Value) {
-		shared_str temp;
-		*Chunk << temp;
-		Value = (char*)temp.c_str();
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	/*void r_CTime(ISaveObject* Chunk, xrTime*& Value) {
-		Value = new xrTime();
-		Value->Serialize(*Chunk);
-	}*/
-
-	void w_bool(ISaveObject* Chunk, bool Value) {
-		*Chunk << Value;
+u16 s_u16(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	u16 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<u16>::min());
+		VERIFY(tCasted <= std::numeric_limits<u16>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void w_vec3(ISaveObject* Chunk, Fvector Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void w_float(ISaveObject* Chunk, float Value) {
-		*Chunk << Value;
+s16 s_s16(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	s16 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<s16>::min());
+		VERIFY(tCasted <= std::numeric_limits<s16>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void w_u64(ISaveObject* Chunk, u64 Value) {
-		*Chunk << Value;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void w_s64(ISaveObject* Chunk, s64 Value) {
-		*Chunk << Value;
+u8 s_u8(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	u8 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<u8>::min());
+		VERIFY(tCasted <= std::numeric_limits<u8>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void w_u32(ISaveObject* Chunk, u64 Value) {
-		VERIFY(Value < std::numeric_limits<u32>::min());
-		VERIFY(Value > std::numeric_limits<u32>::max());
-		u32 RealValue = Value;
-		*Chunk << RealValue;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void w_s32(ISaveObject* Chunk, s64 Value) {
-		VERIFY(Value < std::numeric_limits<s32>::min());
-		VERIFY(Value > std::numeric_limits<s32>::max());
-		s32 RealValue = Value;
-		*Chunk << RealValue;
+s8 s_s8(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	s8 Casted;
+	if (Obj->IsSave()) {
+		auto tCasted = object_cast<double>(Value);
+		VERIFY(tCasted >= std::numeric_limits<s8>::min());
+		VERIFY(tCasted <= std::numeric_limits<s8>::max());
+		Casted = tCasted;
+		*Obj << Casted;
 	}
-
-	void w_u16(ISaveObject* Chunk, u64 Value) {
-		VERIFY(Value < std::numeric_limits<u16>::min());
-		VERIFY(Value > std::numeric_limits<u16>::max());
-		u16 RealValue = Value;
-		*Chunk << RealValue;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void w_s16(ISaveObject* Chunk, s64 Value) {
-		VERIFY(Value < std::numeric_limits<s16>::min());
-		VERIFY(Value > std::numeric_limits<s16>::max());
-		s16 RealValue = Value;
-		*Chunk << RealValue;
+bool s_bool(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TBOOLEAN);
+	bool Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<bool>(Value);
+		*Obj << Casted;
 	}
-
-	void w_u8(ISaveObject* Chunk, u64 Value) {
-		VERIFY(Value < std::numeric_limits<u8>::min());
-		VERIFY(Value > std::numeric_limits<u8>::max());
-		u8 RealValue = Value;
-		*Chunk << RealValue;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted;
+}
 
-	void w_s8(ISaveObject* Chunk, s64 Value) {
-		VERIFY(Value < std::numeric_limits<s8>::min());
-		VERIFY(Value > std::numeric_limits<s8>::max());
-		s8 RealValue = Value;
-		*Chunk << RealValue;
+LPCSTR s_stringZ(ISaveObject* Obj, luabind::object Value){
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TSTRING);
+	shared_str Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<LPCSTR>(Value);
+		*Obj << Casted;
 	}
-
-	void w_string(ISaveObject* Chunk, LPCSTR Value) {
-		shared_str temp = Value;
-		*Chunk << temp;
+	else {
+		*Obj << Casted;
+		//Value = Casted;
 	}
+	return Casted.c_str();
+}*/
 
-	/*void w_CTime(ISaveObject* Chunk, xrTime* Value) {
-		Value->Serialize(*Chunk);
-	}*/
+Fvector s_vec3(ISaveObject* Obj, Fvector Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+float s_float(ISaveObject* Obj, double Value) {
+	VERIFY(Obj);
+	float Casted;
+	if (Obj->IsSave()) {
+		Casted = Value;
+	}
+	*Obj << Casted;
+	return Casted;
+}
+
+u64 s_u64(ISaveObject* Obj, u64 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+s64 s_s64(ISaveObject* Obj, s64 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+u32 s_u32(ISaveObject* Obj, u32 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+s32 s_s32(ISaveObject* Obj, s32 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+u16 s_u16(ISaveObject* Obj, u16 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+s16 s_s16(ISaveObject* Obj, s16 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+u8 s_u8(ISaveObject* Obj, u8 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+s8 s_s8(ISaveObject* Obj, s8 Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+bool s_bool(ISaveObject* Obj, bool Value) {
+	VERIFY(Obj);
+	*Obj << Value;
+	return Value;
+}
+
+LPCSTR s_stringZ(ISaveObject* Obj, LPCSTR Value) {
+	VERIFY(Obj);
+	shared_str Casted;
+	if (Obj->IsSave()) {
+		Casted = Value;
+	}
+	*Obj << Casted;
+	return Casted.c_str();
+}
+
+bool IsSave(ISaveObject* Obj){
+	VERIFY(Obj);
+	return Obj->IsSave();
+}
+
+/*CSaveObjectSave* GetAsSave(ISaveObject* Obj) {
+	auto Casted = smart_cast<CSaveObjectSave*>(Obj);
+	VERIFY(Casted);
+	return Casted;
+}
+
+CSaveObjectLoad* GetAsLoad(ISaveObject* Obj) {
+	auto Casted = smart_cast<CSaveObjectLoad*>(Obj);
+	VERIFY(Casted);
+	return Casted;
+}*/
 
 }
 
@@ -234,46 +420,25 @@ void SaveSystemScript::script_register(lua_State* L)
 {
 	module(L)
 		[
-			/*class_<CSaveChunk>("SaveChunk")
-				.def("w_vec3", &CSaveChunk::w_vec3)
-				.def("w_float", &CSaveChunk::w_float)
-				.def("w_u64", &CSaveChunk::w_u64)
-				.def("w_s64", &CSaveChunk::w_s64)
-				.def("w_u32", &CSaveChunk::w_u32)
-				.def("w_s32", &CSaveChunk::w_s32)
-				.def("w_u16", &CSaveChunk::w_u16)
-				.def("w_s16", &CSaveChunk::w_s16)
-				.def("w_u8", &CSaveChunk::w_u8)
-				.def("w_s8", &CSaveChunk::w_s8)
-				.def("w_bool", &CSaveChunk::w_bool)
-				.def("w_string", &CSaveChunk::w_string)
-
-				.def("r_vec3", &CSaveChunk_script::r_vec3)
-				.def("r_bool", &CSaveChunk_script::r_bool)
-				.def("r_float", &CSaveChunk_script::r_float)
-				.def("r_u64", &CSaveChunk_script::r_u64)
-				.def("r_s64", &CSaveChunk_script::r_s64)
-				.def("r_u32", &CSaveChunk_script::r_u32)
-				.def("r_s32", &CSaveChunk_script::r_s32)
-				.def("r_u16", &CSaveChunk_script::r_u16)
-				.def("r_s16", &CSaveChunk_script::r_s16)
-				.def("r_u8", &CSaveChunk_script::r_u8)
-				.def("r_s8", &CSaveChunk_script::r_s8)
-				.def("r_string", &CSaveChunk_script::r_string)
-
-				.def("ReadArray", &CSaveChunk_script::ReadArray)
-				.def("WriteArray", &CSaveChunk::WriteArray)
-				.def("EndArray", &CSaveChunk::EndArray),*/
-
-				//.def("BeginChunk", &CSaveChunk_script::BeginChunk)
-				//.def("FindChunk", &CSaveChunk_script::FindChunk),
-			/*class_<CSaveObject>("SaveObject")
-				.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
+			class_<ISaveObject>("SaveObject")
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
-				.def("FindChunk", &CSaveObject_script::FindChunk)
-				.def("EndChunk", &CSaveObject::EndChunk),*/
-			class_<ISaveObject>("SaveObject"),
-			class_<CSaveObjectSave, ISaveObject>("SaveObjectSave")
+				.def("EndChunk", &CSaveObject_script::EndChunk)
+				.def("BeginArray", &CSaveObject_script::BeginArray)
+				.def("EndArray", &CSaveObject_script::EndArray)
+				.def("s_vec3", &CSaveObject_script::s_vec3)
+				.def("s_float", &CSaveObject_script::s_float)
+				.def("s_u64", &CSaveObject_script::s_u64)
+				.def("s_s64", &CSaveObject_script::s_s64)
+				.def("s_u32", &CSaveObject_script::s_u32)
+				.def("s_s32", &CSaveObject_script::s_s32)
+				.def("s_u16", &CSaveObject_script::s_u16)
+				.def("s_s16", &CSaveObject_script::s_s16)
+				.def("s_u8", &CSaveObject_script::s_u8)
+				.def("s_s8", &CSaveObject_script::s_s8)
+				.def("s_bool", &CSaveObject_script::s_bool)
+				.def("s_stringZ", &CSaveObject_script::s_stringZ)
+				.def("IsSave", &CSaveObject_script::IsSave)
+			/*class_<CSaveObjectSave, ISaveObject>("SaveObjectSave")
 				//.def("GetCurrentChunk", &CSaveObject::GetCurrentChunk)
 				.def("BeginChunk", &CSaveObjectSave::BeginChunk)
 				.def("EndChunk", &CSaveObject::EndChunk)
@@ -281,8 +446,8 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("EndArray", &CSaveObject::EndArray)
 				.def("s_vec3", &CSaveObject_script::w_vec3)
 				.def("s_float", &CSaveObject_script::w_float)
-				.def("s_u64", &CSaveObject_script::w_u64)
-				.def("s_s64", &CSaveObject_script::w_s64)
+				//.def("s_u64", &CSaveObject_script::w_u64)
+				//.def("s_s64", &CSaveObject_script::w_s64)
 				.def("s_u32", &CSaveObject_script::w_u32)
 				.def("s_s32", &CSaveObject_script::w_s32)
 				.def("s_u16", &CSaveObject_script::w_u16)
@@ -299,21 +464,254 @@ void SaveSystemScript::script_register(lua_State* L)
 				.def("EndChunk", &CSaveObject::EndChunk)
 				.def("BeginArray", &CSaveObjectLoad::BeginArray)
 				.def("EndArray", &CSaveObject::EndArray)
-				.def("s_vec3", &CSaveObject_script::r_vec3, pure_out_value<2>())
-				.def("s_float", &CSaveObject_script::r_float, pure_out_value<2>())
-				.def("s_u64", &CSaveObject_script::r_u64, pure_out_value<2>())
-				.def("s_s64", &CSaveObject_script::r_s64, pure_out_value<2>())
-				.def("s_u32", &CSaveObject_script::r_u32, pure_out_value<2>())
-				.def("s_s32", &CSaveObject_script::r_s32, pure_out_value<2>())
-				.def("s_u16", &CSaveObject_script::r_u16, pure_out_value<2>())
-				.def("s_s16", &CSaveObject_script::r_s16, pure_out_value<2>())
-				.def("s_u8", &CSaveObject_script::r_u8, pure_out_value<2>())
-				.def("s_s8", &CSaveObject_script::r_s8, pure_out_value<2>())
-				.def("s_bool", &CSaveObject_script::r_bool, pure_out_value<2>())
-				.def("s_stringZ", &CSaveObject_script::r_string, pure_out_value<2>())
+				.def("s_vec3", &CSaveObjectLoad::r_vec3, pure_out_value<2>())
+				.def("s_float", &CSaveObjectLoad::r_float, pure_out_value<2>())
+				//.def("s_u64", &CSaveObject_script::r_u64, pure_out_value<2>())
+				//.def("s_s64", &CSaveObject_script::r_s64, pure_out_value<2>())
+				.def("s_u32", &CSaveObjectLoad::r_u32, pure_out_value<2>())
+				.def("s_s32", &CSaveObjectLoad::r_s32, pure_out_value<2>())
+				.def("s_u16", &CSaveObjectLoad::r_u16, pure_out_value<2>())
+				.def("s_s16", &CSaveObjectLoad::r_s16, pure_out_value<2>())
+				.def("s_u8", &CSaveObjectLoad::r_u8, pure_out_value<2>())
+				.def("s_s8", &CSaveObjectLoad::r_s8, pure_out_value<2>())
+				.def("s_bool", &CSaveObjectLoad::r_bool, pure_out_value<2>())
+				.def("s_stringZ", &CSaveObjectLoad::r_string, pure_out_value<2>())
 				//.def("s_CTime", &CSaveObject_script::r_CTime, pure_out_value<2>())
-				.def("IsSave", &CSaveObjectLoad::IsSave)
+				.def("IsSave", &CSaveObjectLoad::IsSave)*/
 		];
+	/*module(L, "SaveObjectConverter")
+		[
+			def("AsSave", &CSaveObject_script::GetAsSave),
+			def("AsLoad", &CSaveObject_script::GetAsLoad)
+		];*/
 }
 
 SCRIPT_EXPORT1(SaveSystemScript);
+
+/*void ISaveObjectWrapper::BeginChunk(LPCSTR Name)
+{
+	VERIFY(Obj);
+	Obj->BeginChunk(Name);
+}
+
+void ISaveObjectWrapper::EndChunk()
+{
+	VERIFY(Obj);
+	Obj->EndChunk();
+}
+
+void ISaveObjectWrapper::BeginArray()
+{
+	VERIFY(Obj);
+	Obj->BeginArray();
+}
+
+void ISaveObjectWrapper::EndArray()
+{
+	VERIFY(Obj);
+	Obj->EndArray();
+}
+
+void ISaveObjectWrapper::s_vec3(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TUSERDATA);
+	Fvector Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<Fvector>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_float(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	float Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<float>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_u64(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	u64 Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<u64>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_s64(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	s64 Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<s64>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_u32(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<u64>(Value);
+		VERIFY(Casted < std::numeric_limits<u32>::min());
+		VERIFY(Casted > std::numeric_limits<u32>::max());
+		u32 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		u32 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_s32(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<s64>(Value);
+		VERIFY(Casted < std::numeric_limits<s32>::min());
+		VERIFY(Casted > std::numeric_limits<s32>::max());
+		s32 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		s32 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_u16(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<u64>(Value);
+		VERIFY(Casted < std::numeric_limits<u16>::min());
+		VERIFY(Casted > std::numeric_limits<u16>::max());
+		u16 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		u16 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_s16(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<s64>(Value);
+		VERIFY(Casted < std::numeric_limits<s16>::min());
+		VERIFY(Casted > std::numeric_limits<s16>::max());
+		s16 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		s16 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_u8(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<u64>(Value);
+		VERIFY(Casted < std::numeric_limits<u8>::min());
+		VERIFY(Casted > std::numeric_limits<u8>::max());
+		u8 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		u8 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_s8(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TNUMBER);
+	if (Obj->IsSave()) {
+		auto Casted = object_cast<s64>(Value);
+		VERIFY(Casted < std::numeric_limits<s8>::min());
+		VERIFY(Casted > std::numeric_limits<s8>::max());
+		s8 tCasted = Casted;
+		*Obj << tCasted;
+	}
+	else {
+		s8 Casted;
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_bool(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TBOOLEAN);
+	bool Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<bool>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+void ISaveObjectWrapper::s_stringZ(luabind::object Value)
+{
+	VERIFY(Obj);
+	VERIFY(Value.type() == LUA_TSTRING);
+	shared_str Casted;
+	if (Obj->IsSave()) {
+		Casted = object_cast<LPCSTR>(Value);
+		*Obj << Casted;
+	}
+	else {
+		*Obj << Casted;
+		Value = Casted;
+	}
+}
+
+bool ISaveObjectWrapper::IsSave()
+{
+	VERIFY(Obj);
+	return Obj->IsSave();
+}*/
