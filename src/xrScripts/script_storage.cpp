@@ -359,9 +359,8 @@ bool CScriptStorage::load_buffer(lua_State* L, LPCSTR caBuffer, size_t tSize, LP
 	}
 
 	if (l_iErrorCode) {
-#ifdef DEBUG
 		print_output(L, caScriptName, l_iErrorCode);
-#endif
+
 		on_error(L);
 		return (false);
 	}
@@ -393,9 +392,7 @@ bool CScriptStorage::do_file(LPCSTR caScriptName, LPCSTR caNameSpaceName)
 
 	if (l_iErrorCode) 
 	{
-#ifdef DEBUG
 		print_output(lua(), caScriptName, l_iErrorCode);
-#endif
 		on_error(lua());
 		lua_settop(lua(), start);
 		return (false);
@@ -539,7 +536,7 @@ bool CScriptStorage::print_output(lua_State *L, LPCSTR caScriptFileName, int iEr
 	if (iErorCode)
 		print_error		(L,iErorCode);
 
-#if 0
+#if 1
 	lua_getglobal(L, "debug"); // stack: err debug
 	lua_getfield(L, -1, "traceback"); // stack: err debug debug.traceback
 

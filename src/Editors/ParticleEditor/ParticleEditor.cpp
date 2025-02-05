@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "../../xrEngine/xr_input.h"
 
+#include "xrECore/Splash.h"
+
 void BeginRender()
 {
 #define D3DCOLOR_RGBA(r,g,b,a) D3DCOLOR_ARGB(a,r,g,b)
@@ -24,23 +26,41 @@ void EndRender()
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+    splash::show(IDB_PE);
+
+    splash::update(5, "Initializing Debugger");
+
     if (!IsDebuggerPresent()) Debug._initialize(false);
     const char* FSName = "fs.ltx";
 
+    splash::update(10, "Initializing COM Library");
+
     CoInitialize(nullptr);
+
+    splash::update(20, "Core Initialization");
 
     Core._initialize("Patricle", ELogCallback, 1, FSName);
 
     psDeviceFlags.set(rsFullscreen, false);
 
+    splash::update(35, "Initializing Particle Tools");
+
     Tools = new CParticleTool();
     PTools = (CParticleTool*)Tools;
+
+    splash::update(55, "Registering UI Commands");
+
     UI = new CParticleMain();
     UI->RegisterCommands();
     
+    splash::update(75, "Creating Main UI Form");
+
     UIMainForm* MainForm = new UIMainForm();
     ::MainForm = MainForm;
     UI->Push(MainForm, false);
+
+    splash::update(100, "Finalizing");
+    splash::hide();
 
     //MainForm->Frame();
     bool NeedExit = false;
@@ -51,6 +71,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         {
             switch (Event.type)
             {
+            case SDL_EVENT_WINDOW_MAXIMIZED:
+                EDevice->MaximizedWindow();
+                break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 EPrefs->SaveConfig();
                 NeedExit = true;

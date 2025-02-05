@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../../../xrEngine/device.h"
 #include "UI_Camera.h"
@@ -33,7 +33,8 @@ class ECORE_API CEditorRenderDevice :
 {
 	friend class CUI_Camera;
 	friend class TUI;
-	HMODULE hPSGP;
+
+private:
 	float m_fNearer;
 
 	ref_shader m_CurrentShader;
@@ -58,13 +59,16 @@ public:
 	u32 dwFillMode;
 	u32 dwShadeMode;
 
+	RECT NormalWinSize;
+	bool NormalWinSizeSaved = false;
+	bool isZoomed = false;
+	//bool isMoving = false;
 public:
 	// camera
 	CRegistrator<pureDrawUI> seqDrawUI;
 
 	// Dependent classes
 	CResourceManager* Resources;
-	//CEStats*				EStatistic;
 
 public:
 	CEditorRenderDevice();
@@ -87,6 +91,10 @@ public:
 	void Initialize(void);
 	void ShutDown(void);
 	void Reset(IReader* F, BOOL bKeepTextures);
+
+	void MaximizedWindow();
+	void ResoreWindow(bool moving);
+	void InitWindowStyle();
 
 	virtual void DumpResourcesMemoryUsage()
 	{
@@ -151,12 +159,13 @@ public:
 
 
 	void InitTimer();
+
 	// Mode control
-	virtual void Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
+	virtual void Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason) override
 	{
 	}
 
-	virtual void PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_user_input)
+	virtual void PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_user_input) override
 	{
 	}
 
@@ -166,14 +175,13 @@ public:
 	Shader_xrLC_LIB ShaderXRLC;
 
 private:
-	//virtual		CStatsPhysics* _BCL			StatPhysics();
 	virtual void _BCL AddSeqFrame(pureFrame* f, bool mt);
 	virtual void _BCL RemoveSeqFrame(pureFrame* f);
 
 private:
-	WNDCLASSEX m_WC;
-
+	HWND hwnd;
 public:
+	HWND GetHWND() { return hwnd; }
 	void CreateWindow();
 	void DestryWindow();
 	virtual void Reset(bool precache);
@@ -198,10 +206,7 @@ enum
 
 #define DEFAULT_CLEARCOLOR 0x00555555
 
-#define		REQ_CREATE()	if (!EDevice->bReady)	return;
-#define		REQ_DESTROY()	if (EDevice->bReady)	return;
-
-//#include "../../../xrCPU_Pipe/xrCPU_Pipe.h"
-//ENGINE_API extern xrDispatchTable	PSGP;
+#define REQ_CREATE()	if (!EDevice->bReady)	return;
+#define REQ_DESTROY()	if (EDevice->bReady)	return;
 
 #include "../../../Layers/xrRender/R_Backend_Runtime.h"

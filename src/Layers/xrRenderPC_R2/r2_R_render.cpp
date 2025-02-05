@@ -4,6 +4,8 @@
 #include "../../xrEngine/CustomHUD.h"
 #include "../../xrEngine/xr_object.h"
 #include "../xrRender/SkeletonCustom.h"
+#include "../../xrParticles/ParticlesAsyncManager.h"
+
 static	float	CalcSSADynamic				(const Fvector& C, float R)
 {
     Fvector4 v_res1, v_res2;
@@ -167,10 +169,7 @@ void CRender::render_main	(bool deffered, bool zfill)
 				}
 			}
 
-			Fbox sp_box;
-			sp_box.setb(spatial->spatial.sphere.P,Fvector().set(spatial->spatial.sphere.R, spatial->spatial.sphere.R, spatial->spatial.sphere.R));
-			HOM.Enable();
-			if(!HOM.visible(sp_box)) continue;
+			if(!HOM.visible(spatial->spatial.sphere)) continue;
 
 			if ((spatial->spatial.type & STYPE_LIGHTSOURCE) && deffered)
 			{
@@ -186,14 +185,6 @@ void CRender::render_main	(bool deffered, bool zfill)
 						}
 						else
 						{
-							if(Sectors.size()>1)
-							{
-								if(L->b_need_detect_sectors)
-								{
-									L->get_sectors();
-									L->b_need_detect_sectors = false;
-								}
-							}
 							for (u32 s_it = 0; s_it < L->m_sectors.size(); s_it++)
 							{
 								CSector* sector_ = (CSector*)L->m_sectors[s_it];
@@ -460,6 +451,11 @@ void CRender::Render()
 	if (bSUN)									set_Recorder	(&main_coarse_structure);
 	else										set_Recorder	(nullptr);
 	phase										= PHASE_NORMAL;
+	{
+		PROF_EVENT("lights_spatial_move");
+		for (light* L : v_all_lights)
+			L->spatial_move();
+	}
 	render_main									(true);
 	set_Recorder								(nullptr);
 	r_pmask										(true,false);	// disable priority "1"
@@ -614,7 +610,6 @@ void CRender::Render()
 
 	// Lighting, non dependant on OCCQ
 	Target->phase_accumulator				();
-	HOM.Disable								();
 	render_lights							(LP_normal);
 	
 	// Lighting, dependant on OCCQ
@@ -640,6 +635,7 @@ void CRender::render_forward				()
 		render_main								(false);//
 		//	Igor: we don't want to render old lods on next frame.
 		mapLOD.clear							();
+		CParticlesAsync::Wait();
 		r_dsgraph_render_graph					(1)	;					// normal level, secondary priority
 		PortalTraverser.fade_render				()	;					// faded-portals
 		r_dsgraph_render_sorted					()	;					// strict-sorted geoms

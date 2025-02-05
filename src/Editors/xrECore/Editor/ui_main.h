@@ -21,11 +21,13 @@ enum EEditorState{
     esBuildLevel
 };
 
-struct ECORE_API SPBItem{
+struct ECORE_API SPBItem
+{
 	shared_str	text;
     shared_str	info;
-    float 		max;
-    float 		progress;
+    volatile float max;
+    volatile float progress;
+
 public:
                 SPBItem				(LPCSTR txt, LPCSTR inf, float mx):text(txt),info(inf),max(mx),progress(0.f){}
     void		GetInfo				(xr_string& txt, float& p, float& m);
@@ -107,11 +109,12 @@ protected:
 
     // mailslot
     HANDLE			hMailSlot;
+
 public:
-    void ShowObjectHint();
     void ShowHint(const xr_string& s);
     bool ShowHint(const AStringVec& SS);
     void HideHint();
+    void Invalidate();
 
 public:
     // mouse sensetive
@@ -211,16 +214,6 @@ public:
     void 			OnDeviceCreate		();
     void			OnDeviceDestroy		();
 
-    // mailslot
-#if 0
-	bool 			CreateMailslot		();
-	void 			CheckMailslot		();
-	void 			OnReceiveMail		(LPCSTR msg);
-	void 			SendMail			(LPCSTR name, LPCSTR dest, LPCSTR msg);
-#endif
-
-    void			CheckWindowPos		(HWND* form);
-
     virtual LPCSTR 	EditorName			()=0;
     virtual LPCSTR	EditorDesc			()=0;
 
@@ -244,10 +237,6 @@ public:
 	void 			ProgressEnd			(SPBItem*&);
     virtual void	ProgressDraw();
     SPBItem*		ProgressLast		(){return m_ProgressItems.empty()?0:m_ProgressItems.back();}
-
-	void ShowConsole();
-    void WriteConsole(TMsgDlgType mt, const char* txt);
-    void CloseConsole();
 
 public:
     // Progress load
@@ -275,6 +264,14 @@ public:
     size_t ViewID = -1;
     xr_vector<Viewport> Views;
 
+    ref_texture	m_HeaderLogo = nullptr;
+    ref_texture	m_WinMin = nullptr;
+    ref_texture	m_WinRes = nullptr;
+    ref_texture	m_WinMax = nullptr;
+    ref_texture	m_WinClose = nullptr;
+
+    
+    void InitWindowIcons();
 protected:
     virtual void OnDrawUI();
     void RealResetUI();

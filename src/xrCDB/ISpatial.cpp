@@ -73,6 +73,7 @@ void	ISpatial::spatial_register	()
 	} else {
 		// register
 		R_ASSERT				(spatial.space);
+		xrSRWLockGuard guard(&spatial.space->db_lock, false);
 		spatial.space->insert	(this);
 		spatial.sector			=	0;
 	}
@@ -83,6 +84,7 @@ void	ISpatial::spatial_unregister()
 	if (spatial.node_ptr)
 	{
 		// remove
+		xrSRWLockGuard guard(&spatial.space->db_lock, false);
 		spatial.space->remove	(this);
 		spatial.node_ptr		= nullptr;
 		spatial.sector			= nullptr;
@@ -100,6 +102,7 @@ void	ISpatial::spatial_move	()
 
 		//*** check if we are supposed to correct it's spatial location
 		if						(spatial_inside())	return;		// ???
+		xrSRWLockGuard guard(&spatial.space->db_lock, false);
 		spatial.space->remove	(this);
 		spatial.space->insert	(this);
 	} else {
@@ -176,33 +179,35 @@ void ISpatial_DB::initialize(Fbox& BB)
 	if (m_root == nullptr)
 	{
 		// initialize
-		allocator_pool.reserve(128);
+		allocator_pool.reserve(512);
 		rt_insert_object = nullptr;
 		m_root = _node_create();
 		m_root->_init(nullptr);
 	}
 }
 
-ISpatial_NODE*	ISpatial_DB::_node_create		()
+ISpatial_NODE* ISpatial_DB::_node_create()
 {
-	stat_nodes	++;
-	if (allocator_pool.empty())			return allocator.create();
-	else								
+	stat_nodes++;
+	if (allocator_pool.empty())			
+		return allocator.create();
+	else
 	{
-		ISpatial_NODE*	N		= allocator_pool.back();
-		allocator_pool.pop_back	();
+		ISpatial_NODE* N = allocator_pool.back();
+		allocator_pool.pop_back();
 		return			N;
 	}
 }
-void			ISpatial_DB::_node_destroy(ISpatial_NODE* &P)
+
+void ISpatial_DB::_node_destroy(ISpatial_NODE* &P)
 {
-	VERIFY						(P->_empty());
-	stat_nodes					--;
-	allocator_pool.push_back	(P);
-	P							= nullptr;
+	//VERIFY						(P->_empty());
+	stat_nodes--;
+	allocator_pool.push_back(P);
+	P = nullptr;
 }
 
-void			ISpatial_DB::_insert	(ISpatial_NODE* N, Fvector& n_C, float n_R)
+void ISpatial_DB::_insert(ISpatial_NODE* N, Fvector& n_C, float n_R)
 {
 	//*** we are assured that object lives inside our node
 	float	n_vR	= 2*n_R;
@@ -252,7 +257,6 @@ void			ISpatial_DB::_insert	(ISpatial_NODE* N, Fvector& n_C, float n_R)
 
 void			ISpatial_DB::insert		(ISpatial* S)
 {
-	xrSRWLockGuard guard(&db_lock, false);
 #if 0
 	stat_insert.Begin	();
 
@@ -278,9 +282,13 @@ void			ISpatial_DB::insert		(ISpatial* S)
 	} else {
 		// Object outside our DB, put it into root node and hack bounds
 		// Object will reinsert itself until fits into "real", "controlled" space
-		m_root->_insert				(S);
-		S->spatial.node_center.set	(m_center);
-		S->spatial.node_radius		=	m_bounds;
+
+		if (m_root != nullptr)
+		{
+			m_root->_insert(S);
+			S->spatial.node_center.set(m_center);
+			S->spatial.node_radius = m_bounds;
+		}
 	}
 #ifdef DEBUG
 	stat_insert.End		();
@@ -311,7 +319,6 @@ void			ISpatial_DB::_remove	(ISpatial_NODE* N, ISpatial_NODE* N_sub)
 
 void			ISpatial_DB::remove		(ISpatial* S)
 {
-	xrSRWLockGuard guard(&db_lock, false);
 #ifdef DEBUG
 	stat_remove.Begin	();
 #endif
@@ -330,7 +337,6 @@ void			ISpatial_DB::update		(u32 nodes/* =8 */)
 {
 #ifdef DEBUG
 	if (0==m_root)	return;
-	xrSRWLockGuard guard(&db_lock, false);
 	VERIFY			(verify());
 #endif
 }

@@ -5,6 +5,8 @@
 
 #include "../xrEProps/UIBoneView.h"
 
+#include "xrECore/Splash.h"
+
 void DragFile(xr_string File)
 {
 	bool NeedConv = IsUTF8(File.c_str());
@@ -81,24 +83,40 @@ void DragFile(xr_string File)
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+	splash::show(IDB_AE);
+
+	splash::update(2, "Initializing Debugger");
+
 	if (!IsDebuggerPresent())
 		Debug._initialize(false);
+
+	splash::update(5, "Core Initialization");
 
 	const char* FSName = "fs.ltx";
 	Core._initialize("Actor", ELogCallback, 1, FSName);
 
+	splash::update(20, "Initializing Actor Tools");
+
 	Tools = new CActorTools();
 	ATools = (CActorTools*)Tools;
+
+	splash::update(35, "Registering UI Commands");
+
 	UI = new CActorMain();
 	UI->RegisterCommands();
+
+	splash::update(50, "Creating Main UI Form");
 
 	UIMainForm* MainForm = new UIMainForm();
 	::MainForm = MainForm;
 
+	splash::update(75, "Loading Game Materials");
+
 	PGMLib->Load();
 
+	splash::update(85, "Initializing UI");
 	UI->PushBegin(MainForm, false);
-
+	splash::update(90, "Processing Command-Line Arguments");
 	int ArgsCount = 0;
 	auto Commands = CommandLineToArgvW(GetCommandLine(), &ArgsCount);
 
@@ -111,6 +129,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		}
 	}
 
+	splash::update(100, "Finalizing");
+	splash::hide();
+
 	bool NeedExit = false;
 
 	while (!NeedExit)
@@ -120,6 +141,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		{
 			switch (Event.type)
 			{
+			case SDL_EVENT_WINDOW_MAXIMIZED:
+				EDevice->MaximizedWindow();
+				break;
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 				EPrefs->SaveConfig();
 				NeedExit = true;

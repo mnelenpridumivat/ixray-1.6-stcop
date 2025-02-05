@@ -312,7 +312,10 @@ void EScene::Clear(BOOL bEditableToolsOnly)
 	m_game_graph.clear();
 	m_RTFlags.set(flIsBuildedAIMap | flIsBuildedGameGraph | flIsBuildedCForm, FALSE);
 
-	SDL_SetWindowTitle(g_AppInfo.Window, "IX-Ray Level Editor");
+	if (!bEditableToolsOnly)
+	{
+		SDL_SetWindowTitle(g_AppInfo.Window, "IX-Ray Level Editor");
+	}
 }
 
 const Fvector& EScene::GetCameraPosition() const
@@ -491,7 +494,7 @@ bool EScene::Validate(bool bNeedOkMsg, bool bTestPortal, bool bTestHOM, bool bTe
 			if (O->m_objectFlags.is(CEditableObject::eoHOM)){ bHasHOM = true; break; }
 		}
 		if (!bHasHOM)
-			Msg("!Level doesn't contain HOM objects!");
+			Msg("! Level doesn't contain HOM objects!");
 //.			if (mrNo==ELog.DlgMsg(mtConfirmation,mbYes |mbNo,"Level doesn't contain HOM.\nContinue anyway?"))
 //.				return false;
 	}
@@ -565,7 +568,7 @@ bool EScene::Validate(bool bNeedOkMsg, bool bTestPortal, bool bTestHOM, bool bTe
 	if (bRes){
 		if (bNeedOkMsg) ELog.DlgMsg(mtInformation,"Validation OK!");
 	}else{
-		ELog.DlgMsg(mtInformation,"Validation FAILED!");
+		ELog.DlgMsg(mtWarning,"Validation FAILED!");
 	}
 	return bRes;
 }
@@ -715,6 +718,8 @@ void EScene::Play()
 	if (!BuildSpawn())
 		return;
 
+	UI->Invalidate();
+
 	pInput->acquire();
 	UI->IsEnableInput = false;
 
@@ -785,7 +790,6 @@ bool EScene::BuildAIMap()
 		{
 			return false;;
 		}
-		UI->CloseConsole();
 		m_game_graph.clear();
 		m_RTFlags.set(flIsBuildedAIMap, TRUE);
 		m_RTFlags.set(flIsBuildedGameGraph, FALSE);
@@ -803,14 +807,12 @@ bool EScene::BuildGameGraph()
 			if (!BuildAIMap())
 				return false;
 		}
-		UI->ShowConsole();
+
 		if (!m_graph_builder.build_graph())
 		{
-			UI->CloseConsole();
 			return false;
 		}
 
-		UI->CloseConsole();
 		m_RTFlags.set(flIsBuildedGameGraph, TRUE);
 		UI->RedrawScene();
 	}

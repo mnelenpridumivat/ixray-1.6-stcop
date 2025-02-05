@@ -231,12 +231,12 @@ CEditableObject* CSceneObject::UpdateReference()
             if (surf->IsVoid())
             {
                 if (m_pReference->IsSkeleton())
-                    ::Render->shader_option_skinning(4);
+                    Engine.External.SetSkinningMode(4);
 
                 surf->OnDeviceCreate();
 
                 if (m_pReference->IsSkeleton())
-                    ::Render->shader_option_skinning(-1);
+                    Engine.External.SetSkinningMode();
             }
         }
     }
@@ -268,8 +268,25 @@ void CSceneObject::OnFrame()
 
 void CSceneObject::ReferenceChange(PropValue* sender)
 {
+    CSector* OldSector = nullptr;
+    for (auto MeshObJ : m_pReference->Meshes())
+    {
+        OldSector = PortalUtils.FindSector(this, MeshObJ);
+
+        if (OldSector != nullptr)
+            break;
+    }
+
     Scene->BeforeObjectChange(this);
 	UpdateReference	();
+
+    if (OldSector)
+    {
+        for (auto MeshObJ : m_pReference->Meshes())
+        {
+            OldSector->AddMesh(this, MeshObJ);
+        }
+    }
 }
 void CSceneObject::OnChangeShader(PropValue* sender)
 {

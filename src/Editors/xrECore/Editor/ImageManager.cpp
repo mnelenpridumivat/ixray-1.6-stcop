@@ -334,7 +334,7 @@ void CImageManager::SynchronizeTextures(bool sync_thm, bool sync_game, bool bFor
 		xr_string base_name	= EFS.ChangeFileExt(it->name,""); xr_strlwr(base_name);
 		string_path				fn;
 		FS.update_path			(fn,_textures_,EFS.ChangeFileExt(base_name,".tga").c_str());
-		if (!FS.exist(fn)) continue;
+		if (!FS.TryLoad(fn)) continue;
 
 		FS_FileSetIt th 	= M_THUM.find(base_name);
 		bool bThm = ((th==M_THUM.end()) || ((th!=M_THUM.end())&&(th->time_write!=it->time_write)));
@@ -379,7 +379,7 @@ void CImageManager::SynchronizeTextures(bool sync_thm, bool sync_game, bool bFor
 		if (UI->NeedAbort()) break;
 		
 		if (bProgress) 
-			pb->Inc(bUpdated?xr_string(base_name+(bFailed?" - FAILED":" - UPDATED.")).c_str():base_name.c_str(),bUpdated);
+			pb->Inc(bUpdated ? xr_string(base_name+(bFailed?" - FAILED":" - UPDATED.")).c_str() : base_name.c_str(), bFailed);
 			
 		if (bUpdated){
 			string_path             tga_fn,thm_fn,dds_fn;
