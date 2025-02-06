@@ -216,8 +216,8 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 		RadiusOnCollide = RadiusCurrent;
 		m_time_on_collide = m_current_time;
 		m_particles->Stop(false);
-		CParticlesObject::Destroy(m_particles);
-		m_particles_ground = CParticlesObject::Create(*m_sFlameParticlesGround, false);
+		Particles::Details::Destroy(m_particles);
+		m_particles_ground = Particles::Details::Create(*m_sFlameParticlesGround, false);
 		m_particles_ground->Play(false);
 #ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 		m_particle_alpha_handle = m_particles_ground->GetFloatHandle("AlphaHandle");
@@ -409,7 +409,7 @@ BOOL FlamethrowerTrace::CCollision::feel_touch_contact(CObject* O)
 void FlamethrowerTrace::CCollision::Activate()
 {
 	m_State = ETraceState::Air;
-	m_particles = CParticlesObject::Create(*m_sFlameParticles, false);
+	m_particles = Particles::Details::Create(*m_sFlameParticles, false);
 #ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
 	m_particle_alpha_handle = m_particles->GetFloatHandle("AlphaHandle");
 	m_particle_size_handle = m_particles->GetVectorHandle("SizeHandle");
@@ -430,11 +430,11 @@ void FlamethrowerTrace::CCollision::Deactivate()
 #endif
 	if (m_particles) {
 		m_particles->Stop();
-		CParticlesObject::Destroy(m_particles);
+		Particles::Details::Destroy(m_particles);
 	}
 	if (m_particles_ground) {
 		m_particles_ground->Stop();
-		CParticlesObject::Destroy(m_particles_ground);
+		Particles::Details::Destroy(m_particles_ground);
 	}
 }
 
