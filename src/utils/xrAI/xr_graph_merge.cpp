@@ -206,9 +206,10 @@ public:
 			IReader									*O = F->open_chunk_iterator(id);
 			int i = 0;
 			for (; O; O = F->open_chunk_iterator(id,O))	{
-				NET_Packet							P;
-				P.B.count							= O->length();
-				O->r								(P.B.data,P.B.count);
+				NET_Packet							P = NET_Packet_Wrapper::CreateSerialize();
+				P.Buffer->read_data(*O);
+				//P.B.count							= O->length();
+				//O->r								(P.B.data,P.B.count);
 				u16									ID;
 				P.r_begin							(ID);
 				R_ASSERT							(M_SPAWN==ID);

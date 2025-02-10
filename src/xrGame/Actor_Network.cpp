@@ -1766,18 +1766,18 @@ void	CActor::OnRender_Network()
 					UpdateLimits (px, min, max);
 				};
 
-				NET_Packet PX;
+				NET_Packet PX = NET_Packet_Wrapper::CreateNetwork();
 				for(u16 i=0;i<NumBones;i++)
 				{
 					SPHNetState state;
 					PHGetSyncItem(i)->get_State(state);
 
-					PX.B.count = 0;
+					PX.Buffer->w_start();
 					w_vec_q8(PX,state.position,min,max);
 					w_qt_q8(PX,state.quaternion);
 //					w_vec_q8(PX,state.linear_vel,min,max);
 
-					PX.r_pos = 0;
+					PX.Buffer->r_start();
 					r_vec_q8(PX,state.position,min,max);
 					r_qt_q8(PX,state.quaternion);
 //					r_vec_q8(PX,state.linear_vel,min,max);
@@ -1858,7 +1858,7 @@ void				CActor::OnHitHealthLoss					(float NewHealth)
 #ifndef MASTER_GOLD
 		Msg("On hit health loss of actor[%d], last hitter[%d]", ID(), m_iLastHitterID);
 #endif // #ifndef MASTER_GOLD
-		NET_Packet P;
+		NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_GAME_EVENT,ID());
 		P.w_u16(GAME_EVENT_PLAYER_HITTED);
 		P.w_u16(u16(ID()&0xffff));
@@ -1888,7 +1888,7 @@ void				CActor::OnCriticalHitHealthLoss			()
 #ifndef MASTER_GOLD
 		Msg("On hit of actor[%d], last hitter[%d]", ID(), m_iLastHitterID);
 #endif // #ifndef MASTER_GOLD
-		NET_Packet P;
+		NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_GAME_EVENT,ID());
 		P.w_u16(GAME_EVENT_PLAYER_HITTED);
 		P.w_u16(u16(ID()&0xffff));
@@ -1911,7 +1911,7 @@ void				CActor::OnCriticalHitHealthLoss			()
 			{
 				SpecialHit = SKT_HEADSHOT;
 				//-------------------------------
-				NET_Packet P;
+				NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 				u_EventGen(P, GEG_PLAYER_PLAY_HEADSHOT_PARTICLE, ID());
 				P.w_s16(m_s16LastHittedElement);
 				P.w_dir(m_vLastHitDir);
@@ -1943,7 +1943,7 @@ void				CActor::OnCriticalHitHealthLoss			()
 	//-------------------------------
 	if (m_bWasBackStabbed) SpecialHit = SKT_BACKSTAB;
 	//-------------------------------
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	u_EventGen		(P,GE_GAME_EVENT,ID());
 	P.w_u16(GAME_EVENT_PLAYER_KILLED);
 	P.w_u16(u16(ID()&0xffff));
@@ -1982,7 +1982,7 @@ void				CActor::OnCriticalWoundHealthLoss		()
 	Msg("--- %s is bleed out", *cName());
 #endif // #ifdef DEBUG
 	//-------------------------------
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	u_EventGen		(P,GE_GAME_EVENT,ID());
 	P.w_u16(GAME_EVENT_PLAYER_KILLED);
 	P.w_u16(u16(ID()&0xffff));
@@ -1998,7 +1998,7 @@ void				CActor::OnCriticalRadiationHealthLoss	()
 	if (IsGameTypeSingle() || !OnServer()) return;
 	//-------------------------------
 	Msg("%s killed by radiation", *cName());
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	u_EventGen		(P,GE_GAME_EVENT,ID());
 	P.w_u16(GAME_EVENT_PLAYER_KILLED);
 	P.w_u16(u16(ID()&0xffff));

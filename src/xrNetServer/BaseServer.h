@@ -53,9 +53,11 @@ struct ServerMessage
 	NET_Packet P;
 	ClientID Id;
 
-	ServerMessage(const void* data, u32 data_size, u32 id)
+	ServerMessage(const void* data, u32 data_size, u32 id) : P(NET_Packet_Wrapper::CreateNetwork())
 	{
-		P.construct(data, data_size);
+		P.write_start();
+		P.w(data, data_size);
+		//P.construct(data, data_size);
 		Id.set(id);
 	}
 };

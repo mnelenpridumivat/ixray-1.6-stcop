@@ -123,7 +123,7 @@ void CActor::SetCantRunState(bool bDisable)
 {
 	if (g_Alive() && this == Level().CurrentControlEntity())
 	{
-		NET_Packet	P;
+		NET_Packet	P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen	(P, GEG_PLAYER_DISABLE_SPRINT, ID());
 		P.w_s8		(bDisable?1:-1);
 		u_EventSend	(P);
@@ -133,7 +133,7 @@ void CActor::SetWeaponHideState (u16 State, bool bSet)
 {
 	if (g_Alive() && this == Level().CurrentControlEntity())
 	{
-		NET_Packet	P;
+		NET_Packet	P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen	(P, GEG_PLAYER_WEAPON_HIDE_STATE, ID());
 		P.w_u16		(State);
 		P.w_u8		(u8(bSet));

@@ -282,7 +282,7 @@ void CEntity::KillEntity(u16 whoID)
 	set_death_time		();
 
 	if (!getDestroy()){
-		NET_Packet		P;
+		NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_DIE,ID());
 		P.w_u16			(u16(whoID));
 		P.w_u32			(0);
@@ -339,7 +339,7 @@ void CEntity::shedule_Update	(u32 dt)
 	if (!getDestroy() && !g_Alive() && (m_killer_id != u16(-1))) {
 		if (Device.dwTimeGlobal > m_level_death_time + FORGET_KILLER_TIME) {
 			m_killer_id			= u16(-1);
-			NET_Packet			P;
+			NET_Packet			P = NET_Packet_Wrapper::CreateNetwork();
 			u_EventGen			(P,GE_ASSIGN_KILLER,ID());
 			P.w_u16				(u16(-1));
 			if (IsGameTypeSingle())	u_EventSend			(P);

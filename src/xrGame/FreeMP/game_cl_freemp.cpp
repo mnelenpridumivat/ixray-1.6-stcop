@@ -116,7 +116,7 @@ bool game_cl_freemp::OnKeyboardPress(int key)
 		if (b_need_to_send_ready)
 		{
 			CGameObject* GO = smart_cast<CGameObject*>(curr);
-			NET_Packet			P;
+			NET_Packet			P = NET_Packet_Wrapper::CreateNetwork();
 			GO->u_EventGen(P, GE_GAME_EVENT, GO->ID());
 			P.w_u16(GAME_EVENT_PLAYER_READY);
 			GO->u_EventSend(P);

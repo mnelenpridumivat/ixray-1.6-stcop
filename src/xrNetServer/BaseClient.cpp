@@ -144,7 +144,8 @@ void BaseClient::OnMessage(void * data, u32 size)
 	net_Queue.Lock();
 	NET_Packet* P = net_Queue.Create();
 
-	P->construct(data, size);
+	P->write_start();
+	P->w(data, size);
 	P->timeReceive = timeServer_Async();
 
 	u16 m_type;
@@ -166,7 +167,7 @@ void BaseClient::_SendTo_LL(const void* data, u32 size, u32 flags, u32 timeout)
 
 void	BaseClient::Send(NET_Packet& packet, u32 dwFlags, u32 dwTimeout)
 {
-	MultipacketSender::SendPacket(packet.B.data, packet.B.count, dwFlags, dwTimeout);
+	MultipacketSender::SendPacket(packet.Buffer->get_raw(), packet.Buffer->w_pos(), dwFlags, dwTimeout);
 }
 
 void	BaseClient::Flush_Send_Buffer()

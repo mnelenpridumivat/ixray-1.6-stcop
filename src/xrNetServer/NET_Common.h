@@ -74,7 +74,9 @@ private:
     struct
     Buffer
     {
-                    Buffer() : last_flags(0) { buffer.B.count = 0; }
+                    Buffer() : last_flags(0), buffer(NET_Packet_Wrapper::CreateNetwork()) {
+                        //buffer.B.count = 0; 
+                    }
                     
         NET_Packet  buffer;
         u32         last_flags;

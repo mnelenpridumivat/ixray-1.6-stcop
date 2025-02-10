@@ -21,7 +21,7 @@ void						CLevel::OnGameSpyChallenge			(NET_Packet* P)
 	CGameSpy_GCD_Client GCD;
 	GCD.CreateRespond(ResponseStr, ChallengeStr, Reauth);
 	//--------- Send Respond ---------------------------------------------
-	NET_Packet newP;
+	NET_Packet newP = NET_Packet_Wrapper::CreateNetwork();
 
 	newP.w_begin	(M_GAMESPY_CDKEY_VALIDATION_CHALLENGE_RESPOND);
 	newP.w_stringZ(ResponseStr);

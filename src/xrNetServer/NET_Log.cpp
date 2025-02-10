@@ -106,8 +106,8 @@ void		INetLog::LogPacket(u32 Time, NET_Packet* pPacket, bool IsIn)
 	
 	SLogPacket NewPacket;
 	
-	NewPacket.m_u16Type = *((u16*)&pPacket->B.data);
-	NewPacket.m_u32Size = pPacket->B.count;
+	NewPacket.m_u16Type = *((u16*)pPacket->Buffer->get_raw());
+	NewPacket.m_u32Size = pPacket->Buffer->w_pos();
 	NewPacket.m_u32Time = Time - m_dwStartTime;
 	NewPacket.m_bIsIn = IsIn;
 

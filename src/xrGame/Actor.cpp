@@ -953,7 +953,7 @@ void CActor::g_Physics			(Fvector& _accel, float jump, float dt)
 								b_hit_initiated);
 //				Hit(&HDS);
 
-				NET_Packet	l_P;
+				NET_Packet	l_P = NET_Packet_Wrapper::CreateNetwork();
 				HDS.GenHeader(GE_HIT, ID());
 				HDS.whoID = di->DamageInitiator()->ID();
 				HDS.weaponID = di->DamageInitiator()->ID();

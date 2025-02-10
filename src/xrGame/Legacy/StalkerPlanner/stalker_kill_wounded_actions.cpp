@@ -316,7 +316,7 @@ void CStalkerActionKillWounded::execute					()
 	// when it plays animation inside another object
 	// therefore we should use this ugly workaround
 	// and hit enemy virtually
-	NET_Packet				P;
+	NET_Packet				P = NET_Packet_Wrapper::CreateNetwork();
 	SHit					HS;
 	HS.GenHeader			(GE_HIT, enemy->ID());
 	HS.whoID				= object().ID();

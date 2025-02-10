@@ -69,7 +69,7 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
 			{
 				if (IsGameTypeSingle())
 				{
-					NET_Packet		P_;
+					NET_Packet		P_ = NET_Packet_Wrapper::CreateNetwork();
 					u_EventGen		(P_,GE_OWNERSHIP_REJECT,ID());
 					P_.w_u16			(u16(Obj->ID()));
 					u_EventSend		(P_);

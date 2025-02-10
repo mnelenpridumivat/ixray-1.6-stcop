@@ -261,7 +261,7 @@ void CGrenade::PutNextToSlot()
 
 	VERIFY									(!getDestroy());
 	//выкинуть гранату из инвентаря
-	NET_Packet						P;
+	NET_Packet						P = NET_Packet_Wrapper::CreateNetwork();
 	if (m_pInventory)
 	{
 		m_pInventory->Ruck					(this);

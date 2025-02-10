@@ -379,7 +379,7 @@ void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
 							{ ALife::eHitTypeTelepatic, psy_influence		*	one }, 
 							{ ALife::eHitTypeBurn,		fire_influence		*	one }	};
 
- 	NET_Packet	np;
+ 	NET_Packet	np = NET_Packet_Wrapper::CreateNetwork();
 
 	while ( m_f_time_affected + one < tg )
 	{

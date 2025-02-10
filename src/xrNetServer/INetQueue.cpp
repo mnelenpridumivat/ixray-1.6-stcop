@@ -10,7 +10,7 @@ INetQueue::INetQueue()
 {
 	unused.reserve(128);
 	for (int i = 0; i < 16; i++)
-		unused.push_back(new NET_Packet());
+		unused.push_back(NET_Packet_Wrapper::CreateNetworkPtr());
 }
 
 INetQueue::~INetQueue()
@@ -27,7 +27,7 @@ NET_Packet* INetQueue::Create()
 	NET_Packet* P = 0;
 	if (unused.empty())
 	{
-		ready.push_back(new NET_Packet());
+		ready.push_back(NET_Packet_Wrapper::CreateNetworkPtr());
 		P = ready.back();
 		LastTimeCreate = CPU::GetTickCount();
 	}
@@ -46,7 +46,7 @@ NET_Packet* INetQueue::Create(const NET_Packet& _other)
 	cs.Enter();
 	if (unused.empty())
 	{
-		ready.push_back(new NET_Packet());
+		ready.push_back(NET_Packet_Wrapper::CreateNetworkPtr());
 		P = ready.back();
 		//---------------------------------------------
 		LastTimeCreate = CPU::GetTickCount();
@@ -89,7 +89,7 @@ void INetQueue::Release()
 	//---------------------------------------------
 	size_t tmp_time = CPU::GetTickCount() - 60000;
 	size_t size = unused.size();
-	ready.front()->B.count = 0;
+	ready.front()->Buffer->w_start();
 	if ((LastTimeCreate < tmp_time) && (size > 32))
 	{
 		xr_delete(ready.front());

@@ -637,7 +637,7 @@ void CInventory::SendActionEvent(u16 cmd, u32 flags)
 	CActor *pActor = smart_cast<CActor*>(m_pOwner);
 	if (!pActor) return;
 
-	NET_Packet		P;
+	NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 	pActor->u_EventGen		(P,GE_INV_ACTION, pActor->ID());
 	P.w_u16					(cmd);
 	P.w_u32					(flags);
@@ -872,7 +872,7 @@ void CInventory::UpdateDropItem(PIItem pIItem)
 
 		if ( OnServer() ) 
 		{
-			NET_Packet					P;
+			NET_Packet					P = NET_Packet_Wrapper::CreateNetwork();
 			pIItem->object().u_EventGen	(P, GE_OWNERSHIP_REJECT, pIItem->object().H_Parent()->ID());
 			P.w_u16						(u16(pIItem->object().ID()));
 			pIItem->object().u_EventSend(P);
@@ -1126,7 +1126,7 @@ bool CInventory::ClientEat(PIItem pIItem)
 	if ( pInventory != IO->m_inventory )		return false;
 	if ( pItemToEat->object().H_Parent()->ID() != entity_alive->ID() )		return false;
 	
-	NET_Packet						P;
+	NET_Packet						P = NET_Packet_Wrapper::CreateNetwork();
 	CGameObject::u_EventGen			(P, GEG_PLAYER_ITEM_EAT, pIItem->parent_id());
 	P.w_u16							(pIItem->object().ID());
 	CGameObject::u_EventSend		(P);

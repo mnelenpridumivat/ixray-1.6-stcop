@@ -47,7 +47,7 @@ void MultipacketSender::SendPacket( const void* packet_data, u32 packet_sz, u32 
     u32 old_flags = (buf->last_flags) & (~DPNSEND_IMMEDIATELLY);
     u32 new_flags = flags & (~DPNSEND_IMMEDIATELLY);
 
-    if(     (buf->buffer.B.count + packet_sz + sizeof(u16) >= NET_PacketSizeLimit)
+    if(     (buf->buffer.Buffer->w_pos() + packet_sz + sizeof(u16) >= NET_PacketSizeLimit)
         ||  (old_flags != new_flags)
         ||  (flags & DPNSEND_IMMEDIATELLY)
       )
@@ -82,11 +82,11 @@ void MultipacketSender::FlushSendBuffer( u32 timeout )
 void MultipacketSender::_FlushSendBuffer( u32 timeout, Buffer* buf )
 {
     // expected to be called between '_buf_cs' enter/leave
-    if( buf->buffer.B.count )
+    if( buf->buffer.Buffer->w_pos() )
     {
         // compress data
 
-        unsigned            comp_sz     = Compressor.compressed_size( buf->buffer.B.count );        
+        unsigned            comp_sz     = Compressor.compressed_size( buf->buffer.Buffer->w_pos());
         u8                  packet_data[MaxMultipacketSize];
         MultipacketHeader*  header      = (MultipacketHeader*)packet_data;
 
@@ -94,11 +94,11 @@ void MultipacketSender::_FlushSendBuffer( u32 timeout, Buffer* buf )
         R_ASSERT(comp_sz < 65535);
 
         comp_sz = Compressor.Compress( packet_data+sizeof(MultipacketHeader), sizeof(packet_data)-sizeof(MultipacketHeader), 
-                                       buf->buffer.B.data, buf->buffer.B.count 
+                                       (BYTE*)buf->buffer.Buffer->get_raw(), buf->buffer.Buffer->w_pos()
                                      );
 
         header->tag             = NET_TAG_MERGED;
-        header->unpacked_size   = (u16)buf->buffer.B.count;
+        header->unpacked_size   = (u16)buf->buffer.Buffer->w_pos();
 		
         // dump/log if needed
 
@@ -120,17 +120,17 @@ void MultipacketSender::_FlushSendBuffer( u32 timeout, Buffer* buf )
                 first_time = false;
             }
 
-            u16 sz = u16(buf->buffer.B.count);
+            u16 sz = u16(buf->buffer.Buffer->w_pos());
             
             fwrite( &sz, sizeof(u16), 1, dump );
-            fwrite( buf->buffer.B.data, buf->buffer.B.count, 1, dump );
+            fwrite( buf->buffer.Buffer->get_raw(), buf->buffer.Buffer->w_pos(), 1, dump );
 			fclose( dump );
         }
 		
         // do send
         
         _SendTo_LL( packet_data, comp_sz+sizeof(MultipacketHeader), buf->last_flags, timeout );
-        buf->buffer.B.count = 0;        
+        buf->buffer.Buffer->w_start();
     } // if buffer not empty
 }
 

@@ -539,7 +539,7 @@ void CGameObject::spawn_supplies()
 						W->m_addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher, bLauncher);
 				}
 
-				NET_Packet					P;
+				NET_Packet					P = NET_Packet_Wrapper::CreateNetwork();
 				A->Spawn_Write				(P,TRUE);
 				Level().Send				(P,net_flags(TRUE));
 				F_entity_Destroy			(A);
@@ -803,7 +803,7 @@ void CGameObject::DestroyObject()
 
 	if (Local())
 	{	
-		NET_Packet		P;
+		NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_DESTROY,ID());
 		u_EventSend		(P);
 	}

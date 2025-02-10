@@ -151,7 +151,7 @@ void CInventoryBox::set_closed( bool status, LPCSTR reason )
 
 void CInventoryBox::SE_update_status()
 {
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	CGameObject::u_EventGen( P, GE_INV_BOX_STATUS, ID() );
 	P.w_u8( (m_can_take)? 1 : 0 );
 	P.w_u8( (m_closed)? 1 : 0 );

@@ -282,6 +282,7 @@ BOOL CSE_Abstract::Spawn_Read				(NET_Packet	&tNetPacket)
 	tNetPacket.r_u16			(s_flags.flags	); 
 	
 	// dangerous!!!!!!!!!
+	auto prevPos = tNetPacket.r_tell();
 	if (s_flags.is(M_SPAWN_VERSION))
 		tNetPacket.r_u16		(m_wVersion);
 	
@@ -294,7 +295,8 @@ BOOL CSE_Abstract::Spawn_Read				(NET_Packet	&tNetPacket)
 		m_gameType.SetDefaults		();
 
 	if (0==m_wVersion) {
-		tNetPacket.r_pos		-= sizeof(u16);
+		tNetPacket.r_seek(prevPos);
+		//tNetPacket.r_pos		-= sizeof(u16);
 		m_wVersion				= 0;
         return					FALSE;
 	}

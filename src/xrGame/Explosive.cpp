@@ -595,7 +595,7 @@ void CExplosive::GenExplodeEvent (const Fvector& pos, const Fvector& normal)
 	//VERIFY(!m_explosion_flags.test(flExplodEventSent));//!m_bExplodeEventSent
 	VERIFY(0xffff != Initiator());
 
-	NET_Packet		P;
+	NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 	cast_game_object()->u_EventGen		(P,GE_GRENADE_EXPLODE,cast_game_object()->ID());	
 	P.w_u16			(Initiator());
 	P.w_vec3		(pos);
@@ -693,7 +693,7 @@ void CExplosive::ExplodeWaveProcessObject(collide::rq_results& storage, CPhysics
 		l_dir.y += m_fUpThrowFactor;
 		//rmag -модуль l_dir после l_dir.y += m_fUpThrowFactor, модуль=_sqrt(l_dir^2+y^2+2.*(l_dir,y)),y=(0,m_fUpThrowFactor,0) (до этого модуль l_dir =1)
 		l_dir.mul(1.f/rmag);//перенормировка
- 		NET_Packet		P;
+ 		NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 		SHit	HS;
 		HS.GenHeader(GE_HIT, l_pGO->ID());			//		cast_game_object()->u_EventGen		(P,GE_HIT,l_pGO->ID());
 		HS.whoID  =Initiator();						//		P.w_u16			(Initiator());

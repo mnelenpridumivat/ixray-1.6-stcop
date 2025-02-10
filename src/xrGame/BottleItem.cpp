@@ -74,7 +74,7 @@ void	CBottleItem::Hit					(SHit* pHDS)
 		//Generate Expode event
 		if (Local()) 
 		{
-			NET_Packet		P;
+			NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 			u_EventGen		(P,GE_GRENADE_EXPLODE,ID());	
 			u_EventSend		(P);
 		};

@@ -77,7 +77,7 @@ void CScriptNetPacket::script_register(lua_State *L)
 			.def(self == other<ClientID>()),
 
 		class_<NET_Packet>("net_packet")
-			.def(					constructor<>()				)
+			//.def(					constructor<>()				)
 			.def("w_begin",			&NET_Packet::w_begin		)
 //			.def("w",				&NET_Packet::w				)
 //			.def("w_seek",			&NET_Packet::w_seek			)

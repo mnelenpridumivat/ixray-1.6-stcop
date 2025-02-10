@@ -441,7 +441,7 @@ void CLevel::ProcessGameEvents		()
 	PROF_EVENT("CLevel::ProcessGameEvents");
 	// Game events
 	{
-		NET_Packet			P;
+		NET_Packet			P = NET_Packet_Wrapper::CreateNetwork();
 		u32 svT				= timeServer()-NET_Latency;
 
 		/*
@@ -484,7 +484,7 @@ void CLevel::ProcessGameEvents		()
 						OActor->MoveActor(NewPos, NewDir);
 					};
 
-					NET_Packet PRespond;
+					NET_Packet PRespond = NET_Packet_Wrapper::CreateNetwork();
 					PRespond.w_begin(M_MOVE_PLAYERS_RESPOND);
 					Send(PRespond, net_flags(TRUE, TRUE));
 				}break;

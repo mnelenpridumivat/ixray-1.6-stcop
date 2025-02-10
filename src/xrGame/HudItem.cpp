@@ -113,7 +113,7 @@ void CHudItem::SwitchState(u32 S)
 	if (object().Local() && !object().getDestroy())	
 	{
 		// !!! Just single entry for given state !!!
-		NET_Packet				P;
+		NET_Packet				P = NET_Packet_Wrapper::CreateNetwork();
 		object().u_EventGen		(P,GE_WPN_STATE_CHANGE,object().ID());
 		P.w_u8					(u8(S));
 		object().u_EventSend	(P);
@@ -207,7 +207,7 @@ void CHudItem::SendHiddenItem()
 {
 	if (!object().getDestroy())
 	{
-		NET_Packet				P;
+		NET_Packet				P = NET_Packet_Wrapper::CreateNetwork();
 		object().u_EventGen		(P,GE_WPN_STATE_CHANGE,object().ID());
 		P.w_u8					(u8(eHiding));
 		object().u_EventSend	(P, net_flags(TRUE, TRUE, FALSE, TRUE));

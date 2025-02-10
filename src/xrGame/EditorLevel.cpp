@@ -172,7 +172,7 @@ BOOL CLevelEditor::net_Start(LPCSTR op_server, LPCSTR op_client)
 	}
 	if (net_start_result_total)
 	{
-		NET_Packet		NP;
+		NET_Packet		NP = NET_Packet_Wrapper::CreateNetwork();
 		NP.w_begin(M_CLIENTREADY);
 		Game().local_player->net_Export(NP, TRUE);
 		Send(NP, net_flags(TRUE, TRUE));

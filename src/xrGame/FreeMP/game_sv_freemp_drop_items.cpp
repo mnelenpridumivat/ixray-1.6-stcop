@@ -52,9 +52,9 @@ BOOL game_sv_freemp::OnTouchPlayersBag(CSE_ActorMP* actor, CSE_Abstract* item)
 
 	if (!item->children.empty())
 	{
-		NET_Packet	EventPack;
-		NET_Packet	PacketReject;
-		NET_Packet	PacketTake;
+		NET_Packet	EventPack = NET_Packet_Wrapper::CreateNetwork();
+		NET_Packet	PacketReject = NET_Packet_Wrapper::CreateNetwork();
+		NET_Packet	PacketTake = NET_Packet_Wrapper::CreateNetwork();
 
 		EventPack.w_begin(M_EVENT_PACK);
 
@@ -65,7 +65,7 @@ BOOL game_sv_freemp::OnTouchPlayersBag(CSE_ActorMP* actor, CSE_Abstract* item)
 			{
 				if (!OnTouch(actor->ID, e_child_item->ID, FALSE))
 				{
-					NET_Packet P;
+					NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 					u_EventGen(P, GE_OWNERSHIP_REJECT, item->ID);
 					P.w_u16(e_child_item->ID);
 
@@ -76,12 +76,12 @@ BOOL game_sv_freemp::OnTouchPlayersBag(CSE_ActorMP* actor, CSE_Abstract* item)
 
 			m_server->Perform_transfer(PacketReject, PacketTake, e_child_item, item, actor);
 
-			EventPack.w_u8(u8(PacketReject.B.count));
-			EventPack.w(&PacketReject.B.data, PacketReject.B.count);
-			EventPack.w_u8(u8(PacketTake.B.count));
-			EventPack.w(&PacketTake.B.data, PacketTake.B.count);
+			EventPack.w_u8(u8(PacketReject.Buffer->w_pos()));
+			EventPack.w(PacketReject.Buffer->get_raw(), PacketReject.Buffer->w_pos());
+			EventPack.w_u8(u8(PacketTake.Buffer->w_pos()));
+			EventPack.w(PacketTake.Buffer->get_raw(), PacketTake.Buffer->w_pos());
 		}
-		if (EventPack.B.count > 2)
+		if (EventPack.Buffer->w_pos() > 2)
 			u_EventSend(EventPack);
 	}
 
@@ -131,21 +131,21 @@ void game_sv_freemp::OnDetachPlayersBag(CSE_ActorMP* actor, CSE_Abstract* item)
 		}
 	}
 
-	NET_Packet EventPack;
-	NET_Packet PacketReject;
-	NET_Packet PacketTake;
+	NET_Packet EventPack = NET_Packet_Wrapper::CreateNetwork();
+	NET_Packet PacketReject = NET_Packet_Wrapper::CreateNetwork();
+	NET_Packet PacketTake = NET_Packet_Wrapper::CreateNetwork();
 	EventPack.w_begin(M_EVENT_PACK);
 
 	for (auto it = to_transfer.cbegin(); it != to_transfer.cend(); ++it)
 	{
 		m_server->Perform_transfer(PacketReject, PacketTake, *it, actor, item);
-		EventPack.w_u8(u8(PacketReject.B.count));
-		EventPack.w(&PacketReject.B.data, PacketReject.B.count);
-		EventPack.w_u8(u8(PacketTake.B.count));
-		EventPack.w(&PacketTake.B.data, PacketTake.B.count);
+		EventPack.w_u8(u8(PacketReject.Buffer->w_pos()));
+		EventPack.w(PacketReject.Buffer->get_raw(), PacketReject.Buffer->w_pos());
+		EventPack.w_u8(u8(PacketTake.Buffer->w_pos()));
+		EventPack.w(PacketTake.Buffer->get_raw(), PacketTake.Buffer->w_pos());
 	}
 
-	if (EventPack.B.count > 2)
+	if (EventPack.Buffer->w_pos() > 2)
 		u_EventSend(EventPack);
 
 	for (const auto& el : to_destroy)

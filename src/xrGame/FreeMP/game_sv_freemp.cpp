@@ -154,7 +154,7 @@ void game_sv_freemp::OnPlayerConnectFinished(ClientID id_who)
 	if (xrCData)
 	{
 		R_ASSERT2(xrCData->ps, "Player state not created yet");
-		NET_Packet					P;
+		NET_Packet					P = NET_Packet_Wrapper::CreateNetwork();
 		GenerateGameMessage(P);
 		P.w_u32(GAME_EVENT_PLAYER_CONNECTED);
 		P.w_clientID(id_who);

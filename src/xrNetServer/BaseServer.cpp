@@ -456,7 +456,7 @@ void BaseServer::SendTo_LL(ClientID ID, void* data, u32 size, u32 dwFlags, u32 d
 
 void BaseServer::SendTo(ClientID ID, NET_Packet& P, u32 dwFlags, u32 dwTimeout)
 {
-	SendTo_LL(ID, P.B.data, P.B.count, dwFlags, dwTimeout);
+	SendTo_LL(ID, P.Buffer->get_raw(), P.Buffer->w_pos(), dwFlags, dwTimeout);
 }
 
 void BaseServer::SendBroadcast_LL(ClientID exclude, void* data, u32 size, u32 dwFlags)
@@ -497,7 +497,7 @@ void BaseServer::SendBroadcast_LL(ClientID exclude, void* data, u32 size, u32 dw
 void BaseServer::SendBroadcast(ClientID exclude, NET_Packet& P, u32 dwFlags)
 {
 	// Perform broadcasting
-	SendBroadcast_LL(exclude, P.B.data, P.B.count, dwFlags);
+	SendBroadcast_LL(exclude, P.Buffer->get_raw(), P.Buffer->w_pos(), dwFlags);
 }
 
 #pragma endregion

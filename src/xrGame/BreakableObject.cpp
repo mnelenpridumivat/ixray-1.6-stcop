@@ -267,7 +267,7 @@ void CBreakableObject::CollisionHit( u16 source_id, u16 bone_id, float c_damage,
 
 void CBreakableObject::ProcessDamage()
 {
-	NET_Packet			P;
+	NET_Packet			P = NET_Packet_Wrapper::CreateNetwork();
 	SHit				HS;
 	HS.GenHeader		(GE_HIT, ID());
 	HS.whoID			= (ID());			

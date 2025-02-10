@@ -19,14 +19,15 @@ CServerEntityWrapper::~CServerEntityWrapper	()
 
 void CServerEntityWrapper::save				(IWriter &stream)
 {
-	NET_Packet				net_packet;
+	NET_Packet				net_packet = NET_Packet_Wrapper::CreateSerialize();
 
 	// Spawn
 	stream.open_chunk		(0);
 
 	m_object->Spawn_Write	(net_packet,TRUE);
-	stream.w_u16			(u16(net_packet.B.count));
-	stream.w				(net_packet.B.data,net_packet.B.count);
+	net_packet.Buffer->write_data(stream);
+	//stream.w_u16			(u16(net_packet.Buffer->w_pos()));
+	//stream.w				(net_packet.Buffer->get_raw(), net_packet.Buffer->w_pos());
 	
 	stream.close_chunk		();
 
@@ -35,8 +36,9 @@ void CServerEntityWrapper::save				(IWriter &stream)
 
 	net_packet.w_begin		(M_UPDATE);
 	m_object->UPDATE_Write	(net_packet);
-	stream.w_u16			(u16(net_packet.B.count));
-	stream.w				(net_packet.B.data,net_packet.B.count);
+	net_packet.Buffer->write_data(stream);
+	//stream.w_u16			(u16(net_packet.Buffer->w_pos()));
+	//stream.w				(net_packet.Buffer->get_raw(), net_packet.Buffer->w_pos());
 
 //	u16						ID;
 //	net_packet.r_begin		(ID);

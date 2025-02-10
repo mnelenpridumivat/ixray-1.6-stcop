@@ -1152,7 +1152,7 @@ void CCustomZone::SwitchZoneState(EZoneState new_state)
 	if (OnServer())
 	{
 		// !!! Just single entry for given state !!!
-		NET_Packet		P;
+		NET_Packet		P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_ZONE_STATE_CHANGE,ID());
 		P.w_u8			(u8(new_state));
 		u_EventSend		(P);
@@ -1277,7 +1277,7 @@ void CCustomZone::CreateHit	(	u16 id_to,
 		if(m_owner_id != u32(-1) )
 			id_from	= (u16)m_owner_id;
 
-		NET_Packet			l_P;
+		NET_Packet			l_P = NET_Packet_Wrapper::CreateNetwork();
 		Fvector hdir		= hit_dir;
 		SHit Hit			= SHit(hit_power, hdir, this, bone_id, pos_in_bone, hit_impulse, hit_type, 0.0f, false);		
 		Hit.GenHeader		(GE_HIT, id_to);
@@ -1385,7 +1385,7 @@ void CCustomZone::UpdateOnOffState()
 void CCustomZone::GoDisabledState()
 {
 	//switch to disable	
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	u_EventGen		(P,GE_ZONE_STATE_CHANGE,ID());
 	P.w_u8			(u8(eZoneStateDisabled));
 	u_EventSend		(P);
@@ -1403,7 +1403,7 @@ void CCustomZone::GoDisabledState()
 void CCustomZone::GoEnabledState()
 {
 		//switch to idle	
-		NET_Packet P;
+		NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen		(P,GE_ZONE_STATE_CHANGE,ID());
 		P.w_u8			(u8(eZoneStateIdle));
 		u_EventSend		(P);

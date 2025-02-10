@@ -295,7 +295,7 @@ bool CSpawnPoint::SSpawnData::LoadLTX	(CInifile& ini, LPCSTR sect_name)
 	if(ini.line_exist(sect_name,"fl"))
 		m_flags.assign		(ini.r_u8(sect_name,"fl"));
 		
-	NET_Packet 				Packet;
+	NET_Packet 				Packet = NET_Packet_Wrapper::CreateSerialize();
 	SIniFileStream 			ini_stream;
 	ini_stream.ini 			= &ini;
 	ini_stream.sect 		= sect_name;
@@ -314,7 +314,7 @@ void CSpawnPoint::SSpawnData::SaveLTX	(CInifile& ini, LPCSTR sect_name)
 	ini.w_string(sect_name, "name", m_Data->name());
 	ini.w_u8			(sect_name,"fl", m_flags.get());
 	
-	NET_Packet 				Packet;
+	NET_Packet 				Packet = NET_Packet_Wrapper::CreateSerialize();
 	SIniFileStream 			ini_stream;
 	ini_stream.ini 			= &ini;
 	ini_stream.sect 		= sect_name;
@@ -335,10 +335,12 @@ void CSpawnPoint::SSpawnData::SaveStream(IWriter& F)
 	F.close_chunk		();
 
 	F.open_chunk		(SPAWNPOINT_CHUNK_SPAWNDATA);
-	NET_Packet 			Packet;
+	NET_Packet 			Packet = NET_Packet_Wrapper::CreateSerialize();
 	m_Data->Spawn_Write	(Packet,TRUE);
-	F.w_u32				(Packet.B.count);
-	F.w					(Packet.B.data,Packet.B.count);
+
+	Packet.Buffer->write_data(F);
+	//F.w_u32				(Packet.B.count);
+	//F.w					(Packet.B.data,Packet.B.count);
 	F.close_chunk		();
 }
 
@@ -351,10 +353,11 @@ bool CSpawnPoint::SSpawnData::LoadStream(IReader& F)
 	if(F.find_chunk(SPAWNPOINT_CHUNK_FLAGS))
 		m_flags.assign	(F.r_u8());
 
-	NET_Packet 			Packet;
+	NET_Packet 			Packet = NET_Packet_Wrapper::CreateSerialize();
 	R_ASSERT(F.find_chunk(SPAWNPOINT_CHUNK_SPAWNDATA));
-	Packet.B.count 		= F.r_u32();
-	F.r					(Packet.B.data,Packet.B.count);
+	Packet.Buffer->read_data(F);
+	//Packet.B.count 		= F.r_u32();
+	//F.r					(Packet.B.data,Packet.B.count);
 	Create				(temp);
 	if (Valid())
 		if (!m_Data->Spawn_Read(Packet))
@@ -384,7 +387,7 @@ bool CSpawnPoint::SSpawnData::ExportGame(SExportStreams* F, CSpawnPoint* owner)
 	}
 	// end
 
-	NET_Packet					Packet;
+	NET_Packet					Packet = NET_Packet_Wrapper::CreateSerialize();
 	m_Data->Spawn_Write			(Packet,TRUE);
 
 	SExportStreamItem& tgt 		= (m_flags.test(eSDTypeRespawn))? F->spawn_rs : F->spawn;
@@ -400,7 +403,7 @@ void CSpawnPoint::SSpawnData::ExportSpawn(xr_vector<NET_Packet>& Ps, CSpawnPoint
 	m_Data->set_name_replace(owner->GetName());
 	m_Data->position().set(owner->GetPosition());
 	m_Data->angle().set(owner->GetRotation());
-	Ps.push_back(NET_Packet());
+	Ps.push_back(NET_Packet_Wrapper::CreateSerialize());
 	m_Data->Spawn_Write(Ps.back(), TRUE);
 }
 

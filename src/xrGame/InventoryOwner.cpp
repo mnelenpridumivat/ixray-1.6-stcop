@@ -397,7 +397,7 @@ void CInventoryOwner::spawn_supplies()
 		R_ASSERT(pda);
 		pda->m_original_owner = (u16)game_object->ID();
 
-		NET_Packet P;
+		NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 		abstract->Spawn_Write(P, TRUE);
 		Level().Send(P, net_flags(TRUE));
 		F_entity_Destroy(abstract);
@@ -635,7 +635,7 @@ void CInventoryOwner::set_money		(u32 amount, bool bSendEvent)
 	if(bSendEvent)
 	{
 		CGameObject				*object = smart_cast<CGameObject*>(this);
-		NET_Packet				packet;
+		NET_Packet				packet = NET_Packet_Wrapper::CreateNetwork();
 		object->u_EventGen		(packet,GE_MONEY,object->ID());
 		packet.w_u32			(m_money);
 		object->u_EventSend		(packet);
@@ -675,7 +675,7 @@ void CInventoryOwner::deadbody_can_take( bool status )
 	}
 	m_deadbody_can_take = status;
 
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	CGameObject::u_EventGen( P, GE_INV_OWNER_STATUS, object_id() );
 	P.w_u8( (m_deadbody_can_take)? 1 : 0 );
 	P.w_u8( (m_deadbody_closed)? 1 : 0 );
@@ -690,7 +690,7 @@ void CInventoryOwner::deadbody_closed( bool status )
 	}
 	m_deadbody_closed = status;
 
-	NET_Packet P;
+	NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 	CGameObject::u_EventGen( P, GE_INV_OWNER_STATUS, object_id() );
 	P.w_u8( (m_deadbody_can_take)? 1 : 0 );
 	P.w_u8( (m_deadbody_closed)? 1 : 0 );

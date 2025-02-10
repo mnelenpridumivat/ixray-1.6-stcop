@@ -305,7 +305,7 @@ void CHelicopter::startRocket(u16 idx)
 		VERIFY2(_valid(xform),"CHelicopter::startRocket. Invalid xform");
 		LaunchRocket(xform,  vel, zero_vel);
 
-		NET_Packet P;
+		NET_Packet P = NET_Packet_Wrapper::CreateNetwork();
 		u_EventGen(P,GE_LAUNCH_ROCKET,ID());
 		P.w_u16(u16( getCurrentRocket()->ID()));
 		u_EventSend(P);
