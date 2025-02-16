@@ -245,7 +245,7 @@ BOOL					CRender::occ_visible			(vis_data& P)		{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(sPoly& P)			{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(Fbox& P)			{ return HOM.visible(P);								}
 ENGINE_API	extern xr_atomic_bool g_bRendering;
-void					CRender::add_Visual				(IRenderVisual* V, bool ignore_opt)
+void					CRender::add_Visual				(IRenderVisual* V, bool ignore_opt, bool Force)
 {
 	VERIFY				(g_bRendering);
 	add_leafs_Dynamic	((dxRender_Visual*)V, ignore_opt, Force);
