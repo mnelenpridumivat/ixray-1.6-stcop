@@ -95,11 +95,11 @@ static class cl_sun_shafts_intensity : public R_constant_setup
 extern ENGINE_API BOOL r2_sun_static;
 //////////////////////////////////////////////////////////////////////////
 // Just two static storage
-void					CRender::create					()
+void CRender::create()
 {
 	Device.seqFrame.Add	(this,REG_PRIORITY_HIGH+0x12345678);
 
-	m_skinning			= -1;
+	Engine.External.SetSkinningMode();
 
 	// hardware
 	o.smapsize			= ps_r2_smapsize;
@@ -338,6 +338,13 @@ void CRender::OnFrame()
 void CRender::OnFrame()
 {
 	Models->DeleteQueue();
+
+	{
+		//Lights Delete queue
+		for (light*L:v_all_lights_dque)
+			xr_delete(L);
+		v_all_lights_dque.clear();
+	}
 }
 
 
@@ -351,6 +358,12 @@ void					CRender::model_Delete			(IRenderVisual* &V, BOOL bDiscard)
 { 
 	dxRender_Visual* pVisual = (dxRender_Visual*)V;
 	Models->Delete(pVisual, bDiscard);
+	V = 0;
+}
+void					CRender::model_Delete_Deffered			(IRenderVisual* &V)	
+{ 
+	dxRender_Visual* pVisual = (dxRender_Visual*)V;
+	Models->DeleteDeffered(pVisual);
 	V = 0;
 }
 IRender_DetailModel*	CRender::model_CreateDM			(IReader*	F)
@@ -679,6 +692,7 @@ HRESULT	CRender::shader_compile			(
 	}
 
 	// options
+	const int m_skinning = Engine.External.GetSkinningMode();
 	{
 		xr_sprintf						(c_smapsize,"%04d",u32(o.smapsize));
 		defines[def_it].Name		=	"SMAP_size";

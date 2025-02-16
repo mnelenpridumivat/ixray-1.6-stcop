@@ -13,13 +13,11 @@
 #include "../../script_entity_action.h"
 #include "../../Inventory.h"
 #include "../../ef_storage.h"
-#include "../../stalker_decision_space.h"
 #include "../../script_game_object.h"
 #include "../../CustomZone.h"
 #include "../../../Include/xrRender/KinematicsAnimated.h"
 #include "../../agent_manager.h"
 #include "../../stalker_animation_manager.h"
-#include "../../stalker_planner.h"
 #include "../../ef_pattern.h"
 #include "../../memory_manager.h"
 #include "../../hit_memory_manager.h"
@@ -46,11 +44,10 @@
 #include "../../stalker_animation_names.h"
 #include "../../agent_corpse_manager.h"
 #include "../../CharacterPhysicsSupport.h"
-#include "../../stalker_planner.h"
-#include "../../stalker_decision_space.h"
 #include "../../script_game_object.h"
 #include "../../Inventory.h"
 
+#include "Legacy/StalkerPlanner/stalker_planner.h"
 #include "../../trajectories.h"
 
 #if USE_OLD_OBJECT_PLANNER
@@ -355,6 +352,16 @@ void CAI_Stalker::Hit(SHit* pHDS)
 
 void CAI_Stalker::HitSignal				(float amount, Fvector& vLocalDir, CObject* who, s16 element)
 {
+}
+
+bool CAI_Stalker::CanPutInSlot(PIItem item, u32 slot)
+{
+	if (slot == INV_SLOT_2 || slot == INV_SLOT_3)
+	{
+		return !!g_Alive();
+	}
+
+	return(slot != OUTFIT_SLOT) && (slot != PDA_SLOT);
 }
 
 void CAI_Stalker::OnItemTake			(CInventoryItem *inventory_item)

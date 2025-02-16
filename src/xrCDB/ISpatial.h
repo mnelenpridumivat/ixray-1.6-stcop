@@ -90,7 +90,7 @@ public:
 	}							spatial;
 public:
 	BOOL						spatial_inside		()			;
-				void			spatial_updatesector_internal()	;
+	virtual		void			spatial_updatesector_internal()	;
 public:
 	virtual		void			spatial_register	()	;
 	virtual		void			spatial_unregister	()	;
@@ -154,13 +154,12 @@ public:
 class XRCDB_API	ISpatial_DB
 {
 private:
-	xrSRWLock						db_lock;
-
 	poolSS< ISpatial_NODE, 128 >	allocator;
 
 	xr_vector<ISpatial_NODE*>		allocator_pool;
 	ISpatial*						rt_insert_object;
 public:
+	xrSRWLock						db_lock;
 	ISpatial_NODE*					m_root;
 	Fvector							m_center;
 	float							m_bounds;

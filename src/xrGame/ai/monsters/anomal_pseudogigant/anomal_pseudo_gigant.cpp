@@ -269,7 +269,7 @@ void	CAnomalPseudoGigant::Hit(SHit* pHDS)
 		CParticlesPlayer::MakeXFORM(this, pHDS->bone(), pHDS->dir, pHDS->p_in_bone_space, pos);
 
 		// установить particles
-		CParticlesObject* ps = CParticlesObject::Create(particle_fire_shield, TRUE);
+		auto ps = Particles::Details::Create(particle_fire_shield, TRUE);
 
 		ps->UpdateParent(pos, Fvector().set(0.f, 0.f, 0.f));
 		GamePersistent().ps_needtoplay.push_back(ps);

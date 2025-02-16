@@ -54,7 +54,7 @@ void UIObjectList::Draw()
 			for (UITreeItem* Item : m_Root.Items)
 			{
 				UIObjectListItem* RItem = (UIObjectListItem*)Item;
-				if (RItem->bIsSelected)
+				if (RItem->Object->Selected())
 				{
 					RItem->Object->Select(true);
 					Fbox bb;
@@ -95,6 +95,9 @@ void UIObjectList::Draw()
 		ImGui::Separator();
 
 		DrawObjects();
+
+		ImGui::Text("Find: ", "");
+		ImGui::SameLine();
 		if (ImGui::InputText("##value", m_Filter, sizeof(m_Filter)))
 		{
 			m_Root.ClearSelcted();
@@ -186,10 +189,11 @@ void UIObjectList::Refresh()
 				}
 				else
 				{
-					UIObjectListItem* Item = static_cast<UIObjectListItem*>(Form->m_Root.AppendItem(Obj->GetName(), 0)); 
+					UIObjectListItem* Item = static_cast<UIObjectListItem*>(Form->m_Root.AppendItem(Obj->GetName(), 0));
 					VERIFY(Item);
 
-					Item->Object = Obj;
+					Item->bIsSelected = Obj->Selected();
+					Item->Object = Obj; 
 				}
 				
 			}
@@ -207,8 +211,8 @@ void UIObjectList::DrawObjects()
 
 	if (ImGui::BeginTable("objects", 1, flags, ImVec2(0, -ImGui::GetFrameHeight() - 4)))
 	{
-		IsDocked = ImGui::IsWindowDocked();
-		IsFocused = ImGui::IsWindowFocused();
+		//IsDocked = ImGui::IsWindowDocked();
+		IsFocused = IsDocked || ImGui::IsWindowFocused();
 
 		ImGui::TableSetupScrollFreeze(1, 1);
 		ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch);

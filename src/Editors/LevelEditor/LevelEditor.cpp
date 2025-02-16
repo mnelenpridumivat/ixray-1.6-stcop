@@ -11,6 +11,7 @@
 #include "Engine/XRayEditor.h"
 #include "../../xrEngine/xr_input.h"
 #include "Editor/Utils/ContentView.h"
+#include "xrECore/Splash.h"
 
 ECORE_API extern bool bIsLevelEditor;
 void DragDrop(const xr_string&, int);
@@ -19,44 +20,76 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 {
 	bIsLevelEditor = true;
 
+	splash::show(IDB_LE);
+
+	splash::update(5, "Initializing Debugger");
+
 	if (!IsDebuggerPresent())
 		Debug._initialize(false);
 	
+	splash::update(10, "Initializing Core System");
+
 	const char* FSName = "fs.ltx";
 	Core._initialize("LevelEditor", ELogCallback, 1, FSName);
+
+	splash::update(20, "Initializing Level Tools");
+
 	Tools = new CLevelTool();
 	LTools = static_cast<CLevelTool*>(Tools);
+
+	splash::update(25, "Registering UI Commands");
 
 	UI = new CLevelMain();
 	UI->RegisterCommands();
 
 	LUI = static_cast<CLevelMain*>(UI);
 
+	splash::update(30, "Creating Editor Scene");
+
 	Scene = new EScene();
 	EditorScene = Scene;
+
+	splash::update(25, "Initializing Content View");
+
 	GContentView = new CContentView;
+
+	splash::update(30, "Creating Main UI Form");
 	UIMainForm* MainForm = new UIMainForm();
 	pApp = new XRayEditor();
 	g_pStringTable = new CStringTable();
 	g_XrGameManager = new XrGameManager();
 	g_SEFactoryManager = new XrSEFactoryManager();
 
+	splash::update(40, "Loading Game Materials");
+
 	// Initialize APP
 	GameMaterialLibraryEditors->Load();
 
+	splash::update(55, "Initializing Game Persistent Objects");
+
 	g_pGamePersistent = static_cast<IGame_Persistent*>(g_XrGameManager->Create(CLSID_GAME_PERSISTANT));
 	EDevice->seqAppStart.Process(rp_AppStart);
+
+	splash::update(65, "Setting Up Console");
+
 	Console->Execute("default_controls");
 	Console->Hide();
 
+	splash::update(75, "Performing Final UI Setup");
+
 	::MainForm = MainForm;
 	UI->Push(MainForm, false);
+	
+
 	bool NeedExit = false;
+	splash::update(85, "Performing Final Checks");
 	MainForm->GetRenderForm()->DragFunctor = DragDrop;
 	
+	splash::update(90, "Finalizing UI Setup");
 	GContentView->Init();
 	UI->PushBegin(GContentView);
-
+	splash::update(100, "Finalizing");
+	splash::hide();
 	while (!NeedExit)
 	{
 		SDL_Event Event;
@@ -64,6 +97,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		{
 			switch (Event.type)
 			{
+			case SDL_EVENT_WINDOW_MAXIMIZED:
+				EDevice->MaximizedWindow();
+				break;
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 				//EPrefs->SaveConfig();
 				GContentView->Destroy();
@@ -158,7 +194,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 			if (!UI->ProcessEvent(&Event))
 				break;
 		}
+
 		MainForm->Frame();
+
+		if (g_pGamePersistent)
+			g_pGamePersistent->UpdateParticles();
 	}
 
 	xr_delete(g_FontManager);

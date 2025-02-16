@@ -68,10 +68,11 @@ public:
 	virtual CObject* get_decor_object					(int index = 0)						= 0;
 
 	virtual ~IRender_Light()		;
+	virtual void					destroy(bool deffered = true)							= 0;
 };
 struct ENGINE_API		resptrcode_light	: public resptr_base<IRender_Light>
 {
-	void				destroy			()				{ _set(nullptr);						}
+	void				destroy			()				{ if(p_){p_->destroy(); p_ = NULL;} }
 };
 typedef	resptr_core<IRender_Light,resptrcode_light >	ref_light;
 
@@ -180,8 +181,6 @@ public:
 		SM_forcedword				= u32(-1)
 	};
 public:
-	// options
-	s32								m_skinning;
 
 	// data
 	CFrustum						ViewBase;
@@ -208,7 +207,6 @@ public:
 	virtual BOOL					InIndoor				()											{ return false; }
 	virtual size_t					SectorsCount			()											{ return size_t(0); }
 
-			void					shader_option_skinning	(s32 mode)									{ m_skinning=mode;	}
 	virtual HRESULT					shader_compile			(
 		LPCSTR							name,
 		DWORD const*                    pSrcData,
@@ -272,6 +270,7 @@ public:
 	virtual IRenderVisual*			model_CreateChild		(LPCSTR name, IReader*	data)				{return 0;};
 	virtual IRenderVisual*			model_Duplicate			(IRenderVisual*	V)							{return 0;};
 	virtual void					model_Delete			(IRenderVisual* &	V, BOOL bDiscard=FALSE)	{};
+	virtual void					model_Delete_Deffered	(IRenderVisual* &	V)						{};
 	virtual void					model_Logging			(BOOL bEnable)								{};
 	virtual void					models_Prefetch			()											{};
 	virtual void					models_Clear			(BOOL b_complete)							{};

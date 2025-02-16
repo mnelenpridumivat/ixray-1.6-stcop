@@ -21,8 +21,39 @@ extern int	rsDIB_Size;
 void	   _BCL			CEditorRenderDevice::AddSeqFrame(pureFrame* f, bool mt) { seqFrame.Add(f, REG_PRIORITY_LOW); }
 void	   _BCL			CEditorRenderDevice::RemoveSeqFrame(pureFrame* f) { seqFrame.Remove(f); }
 
-ENGINE_API BOOL g_bRendering;
+ENGINE_API xr_atomic_bool g_bRendering;
 //---------------------------------------------------------------------------
+#include <luabind/luabind.hpp>
+
+static LPVOID __cdecl luabind_allocator(
+	luabind::memory_allocation_function_parameter const,
+	void const* const pointer,
+	size_t const size
+)
+{
+	if (!size)
+	{
+		LPVOID	non_const_pointer = const_cast<LPVOID>(pointer);
+		xr_free(non_const_pointer);
+		return	(0);
+	}
+
+	if (!pointer)
+	{
+		return	(Memory.mem_alloc(size));
+	}
+
+	LPVOID non_const_pointer = const_cast<LPVOID>(pointer);
+	return (Memory.mem_realloc(non_const_pointer, size));
+}
+
+void setup_luabind_allocator()
+{
+	luabind::allocator = &luabind_allocator;
+	luabind::allocator_parameter = 0;
+}
+
+
 CEditorRenderDevice::CEditorRenderDevice()
 {
 	RadiusRender = 400;
@@ -64,15 +95,16 @@ CEditorRenderDevice::CEditorRenderDevice()
 
 	DevicePtr = this;
 	g_bIsEditor = true;
+
+	setup_luabind_allocator();
 }
 
-CEditorRenderDevice::~CEditorRenderDevice(){
+CEditorRenderDevice::~CEditorRenderDevice()
+{
 	VERIFY(!b_is_Ready);
-	//xr_delete(GameMaterialLibrary);
 	GameMaterialLibraryEditors = nullptr;
 }
 
-//extern void Surface_Init();
 #include "../../../xrCore/API/xrAPI.h"
 #include "../../../Layers/xrRender/dxRenderFactory.h"
 #include "../../../Layers/xrRender/dxUIRender.h"
@@ -93,6 +125,7 @@ void CEditorRenderDevice::Initialize()
 #endif
 
 	SDL_Init(0);
+
 	// compiler shader
     string_path fn;
     FS.update_path(fn,_game_data_,"shaders_xrlc.xr");
@@ -111,7 +144,6 @@ void CEditorRenderDevice::Initialize()
 	UIRenderImpl.CreateUIGeom();
 
 	Resize(EPrefs->start_w, EPrefs->start_h, EPrefs->start_maximized);
-	//HW.updateWindowProps(m_hWnd);
 
 	SDL_GetWindowSizeInPixels(g_AppInfo.Window, &Width, &Height);
 	SDL_GetWindowPosition(g_AppInfo.Window, &PosX, &PosY);
@@ -128,34 +160,20 @@ void CEditorRenderDevice::ShutDown()
 	::RImplementation.ShutDown	();
 
 	ShaderXRLC.Unload	();
-	//GameMaterialLibraryEditors->Unload		();
 
 	// destroy context
 	Destroy				();
-	//xr_delete			(pSystemFont);
-
-	//if (hPSGP)
-	//{
-	//	ttapi_Done_func* ttapi_Done = (ttapi_Done_func*)GetProcAddress(hPSGP, "ttapi_Done");	R_ASSERT(ttapi_Done);
-	//	if (ttapi_Done)
-	//		ttapi_Done();
-	//
-	//	FreeLibrary(hPSGP);
-	//	hPSGP = 0;
-	//	ZeroMemory(&PSGP, sizeof(PSGP));
-	//}
-	// destroy shaders
-//	PSLib.xrShutDown	();
 }
 
-void CEditorRenderDevice::InitTimer(){
-	Timer_MM_Delta	= 0;
+void CEditorRenderDevice::InitTimer()
+{
+	Timer_MM_Delta = 0;
 	{
-		u32 time_mm			= clock	();
-		while (clock()==time_mm);			// wait for next tick
-		u32 time_system		= clock();
-		u32 time_local		= TimerAsync	();
-		Timer_MM_Delta			= time_system-time_local;
+		u32 time_mm = clock();
+		while (clock() == time_mm);			// wait for next tick
+		u32 time_system = clock();
+		u32 time_local = TimerAsync();
+		Timer_MM_Delta = time_system - time_local;
 	}
 }
 
@@ -199,7 +217,7 @@ bool CEditorRenderDevice::Create()
 	//HW.CreateDevice		(m_hWnd, true);
 	if (UI)
 	{
-		HWND hwnd = (HWND)SDL_GetProperty(SDL_GetWindowProperties(g_AppInfo.Window), "SDL.window.win32.hwnd", nullptr);
+		hwnd = (HWND)SDL_GetProperty(SDL_GetWindowProperties(g_AppInfo.Window), "SDL.window.win32.hwnd", nullptr);
 		string_path 		ini_path;
 		string_path			ini_name;
 		xr_strcpy			(ini_name, UI->EditorName());
@@ -311,17 +329,13 @@ void CEditorRenderDevice::_Create(IReader* F)
 	UIChooseForm::SetNullTexture(texture_null->pSurface);
 
 	// signal another objects
-    UI->OnDeviceCreate			();           
-//.	seqDevCreate.Process		(rp_DeviceCreate);
+    UI->OnDeviceCreate			();       
 
-	//pSystemFont					= new CGameFont("hud_font_small");
-//	pSystemFont					= new CGameFont("hud_font_medium");
+	EDevice->InitWindowStyle();
 }
 
 void CEditorRenderDevice::_Destroy(BOOL	bKeepTextures)
 {
-	//xr_delete					(pSystemFont);
-
 	b_is_Ready 						= FALSE;
     m_CurrentShader				= 0;
 
@@ -330,8 +344,6 @@ void CEditorRenderDevice::_Destroy(BOOL	bKeepTextures)
 	m_WireShader.destroy		();
 	m_SelectionShader.destroy	();
 	texture_null.destroy		();
-
-//.	seqDevDestroy.Process		(rp_DeviceDestroy);
 
 	::RImplementation.Models->OnDeviceDestroy	();
 
@@ -356,8 +368,6 @@ void  CEditorRenderDevice::Resize(int w, int h, bool maximized)
 void CEditorRenderDevice::Reset(bool)
 {
 	u32 tm_start = TimerAsync();
-
-	//UIChooseForm::SetNullTexture(nullptr);
 
 	Resources->reset_begin();
 	Resources->DeferredUnload();
@@ -386,6 +396,56 @@ void CEditorRenderDevice::Reset(IReader* F, BOOL bKeepTextures)
 	_Destroy(bKeepTextures);
 	_Create(F);
 	Msg("*** RESET [%d ms]", tm.GetElapsed_ms());
+}
+
+void CEditorRenderDevice::MaximizedWindow()
+{
+	if (IsZoomed(hwnd))
+		SendMessageW(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+
+	//
+	LONG style = GetWindowLong(hwnd, GWL_STYLE);
+	style &= ~WS_THICKFRAME;
+	SetWindowLong(hwnd, GWL_STYLE, style);
+
+	GetWindowRect(hwnd, &EDevice->NormalWinSize);
+	EDevice->NormalWinSizeSaved = true;
+	EDevice->isZoomed = true;
+
+	auto CurrentMonitor = ::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+
+	MONITORINFO minfo;
+	minfo.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(CurrentMonitor, &minfo);
+
+	const RECT& workArea = minfo.rcWork;
+
+	SDL_SetWindowSize(g_AppInfo.Window, workArea.right - workArea.left, workArea.bottom - workArea.top);
+	SDL_SetWindowPosition(g_AppInfo.Window, workArea.left, workArea.top);
+}
+
+void CEditorRenderDevice::ResoreWindow(bool moving)
+{
+	if (EDevice->NormalWinSizeSaved)
+	{
+		auto& r = EDevice->NormalWinSize;
+		MoveWindow(hwnd, r.left, r.top, r.right - r.left, r.bottom - r.top, TRUE);
+
+		if (moving)
+		{
+			float mouseX, mouseY;
+			SDL_GetMouseState(&mouseX, &mouseY);
+			SDL_SetWindowPosition(g_AppInfo.Window, mouseX / 2, mouseY - 10);
+		}
+	}
+	{
+		LONG style = GetWindowLong(hwnd, GWL_STYLE);
+		style |= WS_THICKFRAME;
+		SetWindowLong(hwnd, GWL_STYLE, style);
+	}
+	EDevice->isZoomed = false;
+
+
 }
 
 bool CEditorRenderDevice::Begin()
@@ -471,6 +531,20 @@ void CEditorRenderDevice::FrameMove()
 
     // process objects
 	seqFrame.Process(rp_Frame);
+}
+
+void CEditorRenderDevice::InitWindowStyle()
+{
+	UI->InitWindowIcons();
+
+#if _WINDOWS
+	LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
+	style &= ~WS_CAPTION;
+	SetWindowLongPtr(hwnd, GWL_STYLE, style);
+#else
+	SDL_SetWindowResizable(g_AppInfo.Window, SDL_TRUE);
+	SDL_SetWindowHitTest(g_AppInfo.Window, HitTestCallback, 0);
+#endif
 }
 
 void CEditorRenderDevice::DP(D3DPRIMITIVETYPE pt, ref_geom geom, u32 vBase, u32 pc)

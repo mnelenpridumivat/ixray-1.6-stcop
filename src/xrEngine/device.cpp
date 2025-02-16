@@ -29,9 +29,9 @@ ENGINE_API CLoadScreenRenderer load_screen_renderer;
 #endif
 ENGINE_API CTimer loading_save_timer;
 ENGINE_API bool loading_save_timer_started = false;
-ENGINE_API BOOL g_bRendering = FALSE;
+ENGINE_API xr_atomic_bool g_bRendering = false;
 extern ENGINE_API float psHUD_FOV;
-static HANDLE RenderEventMT = nullptr;
+static HANDLE Event3rdFirstStep = nullptr;
 
 BOOL		g_bLoaded = FALSE;
 ref_light	precache_light = 0;
@@ -69,7 +69,7 @@ BOOL CRenderDevice::Begin()
 	m_pRender->Begin();
 
 	FPU::m24r();
-	g_bRendering = TRUE;
+	g_bRendering = true;
 #endif
 
 	return TRUE;
@@ -118,7 +118,7 @@ void CRenderDevice::End		(void)
 		}
 	}
 
-	g_bRendering		= FALSE;
+	g_bRendering		= false;
 	// end scene
 
 	m_pRender->End();
@@ -129,23 +129,31 @@ void CRenderDevice::End		(void)
 static void mt_3rdThread(void* ptr)
 {
 	PROF_THREAD("3rd Thread");
-	while (FALSE==Device.mt_bMustExit)
+	while (FALSE == Device.mt_bMustExit)
 	{
-		WaitForSingleObject(RenderEventMT, INFINITE);
+		WaitForSingleObject(Event3rdFirstStep, INFINITE);
 		PROF_EVENT("CPU Frame: Render");
 
 		{
 			PROF_EVENT("Discord Sync");
 			g_Discord.Update();
 		}
+		{
+			PROF_EVENT("Process Render");
+			for (auto& it : Device.seqParallelRender)
+				it();
+		}
 
-		for (u32 pit = 0; pit < Device.seqParallelRender.size(); pit++)
-			Device.seqParallelRender[pit]();
-
-		ResetEvent(RenderEventMT);
+		{
+			PROF_EVENT("Process Particles");
+			if (Device.ParticleWorkerCallback)
+				Device.ParticleWorkerCallback();
+		}
+		ResetEvent(Event3rdFirstStep);
 	}
 }
-
+#include "CustomHUD.h"
+#include "IGame_Level.h"
 volatile u32 mt_Thread_marker = 0x12345678;
 static void mt_Thread(void* ptr)
 {
@@ -161,6 +169,13 @@ static void mt_Thread(void* ptr)
 			// we has granted permission to execute
 			mt_Thread_marker = Device.dwFrame;
 			{
+				if(g_hud)
+					g_hud->OnFrameMT();
+				if (g_pGameLevel && g_pGameLevel->bReady)
+					g_pGameLevel->SoundEvent_Dispatch();
+
+				if (!Device.Paused())
+					Engine.Sheduler.Update();
 				PROF_EVENT("Parallel Sync");
 				for (u32 pit = 0; pit < Device.seqParallel.size(); pit++)
 					Device.seqParallel[pit]();
@@ -247,6 +262,12 @@ void CRenderDevice::on_idle		()
 
 	PROF_THREAD("MainThread");
 	PROF_FRAME("Main Thread");
+	{
+		PROF_EVENT("Update Particles");
+		if (g_pGamePersistent)
+			g_pGamePersistent->UpdateParticles();
+	}
+	SetEvent(Event3rdFirstStep);
 
 	Device.BeginRender();
 	const bool Minimized = SDL_GetWindowFlags(g_AppInfo.Window) & SDL_WINDOW_MINIMIZED;
@@ -266,12 +287,6 @@ void CRenderDevice::on_idle		()
 	}
 	else 
 	{
-		if (g_pGamePersistent != nullptr)
-		{
-			PROF_EVENT("Update Particles");
-			g_pGamePersistent->UpdateParticles();
-		}
-
 		for (auto it = m_time_callbacks.begin(); it != m_time_callbacks.end();)
 		{
 		    if (Device.dwTimeGlobal >= it->first)
@@ -325,8 +340,6 @@ void CRenderDevice::on_idle		()
 
 	vCameraPosition_saved	= vCameraPosition;
 
-	SetEvent(RenderEventMT);
-
 	// *** Resume threads
 	// Capture end point - thread must run only ONE cycle
 	// Release start point - allow thread to run
@@ -360,7 +373,11 @@ void CRenderDevice::on_idle		()
 	}
 
 	// Ensure, that second thread gets chance to execute anyway
-	if (dwFrame!=mt_Thread_marker)			{
+	if (dwFrame!=mt_Thread_marker)
+	{
+		if (!Device.Paused())
+			Engine.Sheduler.Update();
+
 		for (u32 pit=0; pit<seqParallel.size(); pit++)
 			seqParallel[pit]();
 		seqParallel.resize(0);
@@ -422,7 +439,7 @@ void CRenderDevice::Run()
 	mt_bMustExit = FALSE;
 
 	g_AppInfo.MainThread = GetCurrentThread();
-	RenderEventMT = CreateEventA(nullptr, true, false, "Render Helper Event");
+	Event3rdFirstStep = CreateEventA(nullptr, true, false, "3rd thread Helper Event");
 	// Start Balance-Threads
 	thread_spawn(mt_Thread, "X-RAY Secondary thread", 0, 0);
 	thread_spawn(mt_3rdThread, "X-RAY 3rd thread", 0, 0);
@@ -437,9 +454,10 @@ void CRenderDevice::Run()
 
 	// Stop Balance-Threads
 	mt_bMustExit = TRUE;
-	SetEvent(RenderEventMT); // Important for correct thread closing!!!
+	SetEvent(Event3rdFirstStep); // Important for correct thread closing!!!
 	mt_csEnter.Leave();
 	while (mt_bMustExit)	Sleep(0);
+	ParticleWorkerCallback = nullptr;
 #endif
 }
 

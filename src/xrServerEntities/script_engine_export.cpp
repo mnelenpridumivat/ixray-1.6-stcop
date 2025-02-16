@@ -27,8 +27,10 @@
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
-#	include "EmiZone.h"
-#include "xrServer_Objects_ALife.h"
+#	include "xrServer_Objects_ALife.h"
+#	include <EmiZone.h>
+#	include <MagnetZone.h>
+#	include <Flamethrower.h>
 #endif
 
 void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
@@ -117,11 +119,13 @@ void export_classes	(lua_State *L)
 	CSE_ALifeItem::script_register(L);
 	CSE_ALifeItemTorch::script_register(L);
 	CSE_ALifeItemAmmo::script_register(L);
+	CSE_ALifeItemFuel::script_register(L);
 	CSE_ALifeItemWeapon::script_register(L);
 	CSE_ALifeItemWeaponMagazined::script_register(L);
 	CSE_ALifeItemWeaponMagazinedWGL::script_register(L);
 	CSE_ALifeItemWeaponShotGun::script_register(L);
 	CSE_ALifeItemWeaponAutoShotGun::script_register(L);
+	CSE_ALifeItemFlamethrower::script_register(L);
 	CSE_ALifeItemDetector::script_register(L);
 	CSE_ALifeItemArtefact::script_register(L);
 	CSE_ALifeItemPDA::script_register(L);
@@ -152,8 +156,8 @@ void export_classes	(lua_State *L)
 	CSE_ALifeHumanStalker::script_register(L);
 	CSE_ALifeOnlineOfflineGroup::script_register(L);
 	CSE_SmartCover::script_register(L);
-	CSE_ALifeItemFlamethrower::script_register(L);
-	CSE_ALifeItemFuel::script_register(L);
+	//CSE_ALifeItemFlamethrower::script_register(L);
+	//CSE_ALifeItemFuel::script_register(L);
 	
 #ifdef XRSE_FACTORY_EXPORTS
 	CScriptPropertiesListHelper::script_register(L);
@@ -308,6 +312,9 @@ void export_classes	(lua_State *L)
 
 	CAnomalPseudoGigant::script_register(L);
 	CEmiZone::script_register(L);
+	CMagnetZone::script_register(L);
+
+	
 
 #endif
 }

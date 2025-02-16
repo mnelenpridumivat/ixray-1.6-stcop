@@ -21,7 +21,8 @@
 #include "../xrRender/dxUIShader.h"
 #include "../../xrCore/git_version.h"
 
-using	namespace		R_dsgraph;
+#include "../../xrParticles/ParticlesAsyncManager.h"
+using namespace R_dsgraph;
 
 CRender													RImplementation;
 
@@ -78,7 +79,7 @@ void					CRender::create					()
 	o.color_mapping = v_dev >= v_need && !Core.ParamsData.test(ECoreParams::nocolormap);
 	Msg("* color_mapping: %s, dev(%d),need(%d)", o.color_mapping ? "used" : "unavailable", v_dev, v_need);
 
-	m_skinning					= -1;
+	Engine.External.SetSkinningMode();
 
 	// disasm
 	o.disasm					= Core.ParamsData.test(ECoreParams::disasm);
@@ -151,6 +152,13 @@ void CRender::reset_end()
 void					CRender::OnFrame				()
 {
 	Models->DeleteQueue	();
+
+	{
+		//Lights Delete queue
+		for (light*L:v_all_lights_dque)
+			xr_delete(L);
+		v_all_lights_dque.clear();
+	}
 }
 
 // Implementation
@@ -163,6 +171,12 @@ void					CRender::model_Delete			(IRenderVisual* &V, BOOL bDiscard)
 { 
 	dxRender_Visual* pVisual = (dxRender_Visual*)V;
 	Models->Delete(pVisual, bDiscard);
+	V = 0;
+}
+void					CRender::model_Delete_Deffered			(IRenderVisual* &V)		
+{ 
+	dxRender_Visual* pVisual = (dxRender_Visual*)V;
+	Models->DeleteDeffered(pVisual);
 	V = 0;
 }
 IRender_DetailModel*	CRender::model_CreateDM			(IReader*F)
@@ -230,8 +244,8 @@ void					CRender::flush					()					{ r_dsgraph_render_graph	(0);						}
 BOOL					CRender::occ_visible			(vis_data& P)		{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(sPoly& P)			{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(Fbox& P)			{ return HOM.visible(P);								}
-ENGINE_API	extern BOOL g_bRendering;
-void					CRender::add_Visual				(IRenderVisual* V, bool ignore_opt, bool Force)
+ENGINE_API	extern xr_atomic_bool g_bRendering;
+void					CRender::add_Visual				(IRenderVisual* V, bool ignore_opt)
 {
 	VERIFY				(g_bRendering);
 	add_leafs_Dynamic	((dxRender_Visual*)V, ignore_opt, Force);
@@ -425,6 +439,11 @@ void CRender::Calculate				()
 	marker	++;
 	if (pLastSector)
 	{
+		{
+			PROF_EVENT("lights_spatial_move");
+			for (light* L : v_all_lights)
+				L->spatial_move();
+		}
 		// Traverse sector/portal structure
 		PortalTraverser.traverse	
 			(
@@ -618,7 +637,6 @@ void	CRender::Render		()
 
 	r_pmask										(true,false);	// disable priority "1"
 	o.vis_intersect								= TRUE			;
-	HOM.Disable									();
 	L_Dynamic->render							(0);				// addititional light sources
 	if(Wallmarks){
 		g_r										= 0;
@@ -630,6 +648,7 @@ void	CRender::Render		()
 	r_pmask										(true,true);	// enable priority "0" and "1"
 	if(L_Shadows)L_Shadows->render				();				// ... and shadows
 	r_dsgraph_render_lods						(false,true);	// lods - FB
+	CParticlesAsync::Wait();
 	r_dsgraph_render_graph						(1);			// normal level, secondary priority
 	L_Dynamic->render							(1);			// addititional light sources, secondary priority
 	phase = PHASE_NORMAL;
@@ -820,6 +839,8 @@ HRESULT	CRender::shader_compile			(
 		void*&							result
 	)
 {
+	const int m_skinning = Engine.External.GetSkinningMode();
+
 	D3D_SHADER_MACRO defines[128];
 	int def_it = 0;
 
