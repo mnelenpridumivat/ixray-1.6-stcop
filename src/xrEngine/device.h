@@ -9,7 +9,8 @@
 #include "../xrCore/FTimer.h"
 #include "Stats.h"
 
-#define VIEWPORT_NEAR  0.2f
+//#define VIEWPORT_NEAR  0.2f
+#define VIEWPORT_NEAR  0.01f
 #define HUD_VIEWPORT_NEAR  0.01f
 
 #define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
