@@ -1,5 +1,5 @@
 #pragma once
-#include "script_export_space.h"
+#include "../script_export_space.h"
 
 class ISaveObject;
 
@@ -28,6 +28,6 @@ public:
 	bool IsSave();
 };*/
 
-class SaveSystemScript {
+class SCRIPTS_API SaveSystemScript {
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

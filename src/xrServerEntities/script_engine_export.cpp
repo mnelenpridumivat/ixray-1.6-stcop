@@ -14,6 +14,8 @@
 #include "alife_human_brain.h"
 #include "alife_monster_brain.h"
 
+#include "../xrScripts/exports/SaveSystem_script.h"
+
 #ifdef XRSE_FACTORY_EXPORTS
 
 #else
@@ -158,6 +160,8 @@ void export_classes	(lua_State *L)
 	CSE_SmartCover::script_register(L);
 	//CSE_ALifeItemFlamethrower::script_register(L);
 	//CSE_ALifeItemFuel::script_register(L);
+
+	SaveSystemScript::script_register(L);
 	
 #ifdef XRSE_FACTORY_EXPORTS
 	CScriptPropertiesListHelper::script_register(L);
@@ -313,7 +317,6 @@ void export_classes	(lua_State *L)
 	CAnomalPseudoGigant::script_register(L);
 	CEmiZone::script_register(L);
 	CMagnetZone::script_register(L);
-
 	
 
 #endif
