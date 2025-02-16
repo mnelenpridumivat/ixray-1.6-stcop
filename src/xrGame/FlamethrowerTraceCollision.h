@@ -160,8 +160,8 @@ namespace FlamethrowerTrace
 		//float m_GravityVelocity = 0.0f;
 		//float m_GravityAcceleration = 0.0f;
 
-		CParticlesObject* m_particles = nullptr;
-		CParticlesObject* m_particles_ground = nullptr;
+		xr_shared_ptr<CParticlesObject> m_particles = nullptr;
+		xr_shared_ptr<CParticlesObject> m_particles_ground = nullptr;
 
 		//PAPI::Handle<float> m_particle_alpha_handle;
 		//PAPI::Handle<PAPI::pVector> m_particle_size_handle;

@@ -297,7 +297,7 @@ void CTorch::OnH_B_Independent(bool just_before_destroy)
 
 void CTorch::UpdateCL() 
 {
-	PROF_EVENT_DYNAMIC(cNameSect_str())
+	PROF_EVENT("CTorch::UpdateCL")
 	inherited::UpdateCL			();
 	
 	if (!m_switched_on)			return;

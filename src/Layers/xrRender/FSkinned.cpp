@@ -340,7 +340,7 @@ void CSkeletonX_ST::Copy	(dxRender_Visual *P)
 //////////////////////////////////////////////////////////////////////
 void CSkeletonX_PM::Render	(float LOD) 
 {
-	PROF_EVENT("CSkeletonX_PM::Render");
+	//PROF_EVENT("CSkeletonX_PM::Render");
 	int lod_id				= inherited1::last_lod;
 	if (LOD>=0.f){
 		clamp				(LOD,0.f,1.f);
@@ -353,7 +353,7 @@ void CSkeletonX_PM::Render	(float LOD)
 }
 void CSkeletonX_ST::Render	(float LOD) 
 {
-	PROF_EVENT("CSkeletonX_ST::Render");
+	//PROF_EVENT("CSkeletonX_ST::Render");
 	_Render		(rm_geom,vCount,0,dwPrimitives);
 }
 
@@ -372,19 +372,20 @@ void CSkeletonX_PM::Load(const char* N, IReader *data, u32 dwFlags)
 	_Load							(N,data,vCount);
 	void*	_verts_					= data->pointer	();
 	inherited1::Load				(N,data,dwFlags|VLOAD_NOVERTICES);
-	::Render->shader_option_skinning(-1);
+	Engine.External.SetSkinningMode();
 #ifdef USE_DX11
 	_DuplicateIndices(N, data);
 #endif //USE_DX11
 	vBase							= 0;
 	_Load_hw						(*this,_verts_);
 }
+
 void CSkeletonX_ST::Load(const char* N, IReader *data, u32 dwFlags) 
 {
 	_Load							(N,data,vCount);
 	void*	_verts_					= data->pointer	();
 	inherited1::Load				(N,data,dwFlags|VLOAD_NOVERTICES);
-	::Render->shader_option_skinning(-1);
+	Engine.External.SetSkinningMode();
 #ifdef USE_DX11
 	_DuplicateIndices(N, data);
 #endif //USE_DX11

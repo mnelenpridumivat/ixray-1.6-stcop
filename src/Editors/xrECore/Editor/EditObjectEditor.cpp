@@ -128,7 +128,7 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 				RenderEdge(parent);
 
 			if (IsSkeleton())
-				::Render->shader_option_skinning(4);
+				Engine.External.SetSkinningMode(4);
 
 			size_t s_id = 0;
 			for (SurfaceIt s_it = m_Surfaces.begin(); s_it != m_Surfaces.end(); s_it++)
@@ -163,7 +163,7 @@ void CEditableObject::Render(const Fmatrix& parent, int priority, bool strictB2F
 				s_id++;
 			}
 
-			::Render->shader_option_skinning(-1);
+			Engine.External.SetSkinningMode();
 		}
 	}
 }
@@ -404,7 +404,9 @@ bool CEditableObject::CheckShaderCompatible()
 			bRes 		= false;
 		}else{
 			if (!BE(B->canBeLMAPped(),!C->flags.bLIGHT_Vertex)){
-				ELog.Msg	(mtError,"Object '%s': engine shader '%s' non compatible with compiler shader '%s'",GetName(),(*s_it)->_ShaderName(),(*s_it)->_ShaderXRLCName());
+				ELog.Msg	(mtError,"Object '%s', material '%s': engine shader '%s' non compatible with compiler shader '%s'", GetName(),
+					(*s_it)->_Name(), (*s_it)->_ShaderName(), (*s_it)->_ShaderXRLCName());
+				
 				bRes 		= false;
 			}
 		}

@@ -54,7 +54,7 @@ public:
 	virtual		void	net_Export						(NET_Packet& P);
 	virtual		void	Load							(LPCSTR section);
 	virtual		void	net_Destroy						();
-	virtual		bool	is_ai_obstacle					() const {return true;};
+
 	virtual		void	save							(NET_Packet &output_packet);
 	virtual		void	load							(IReader &input_packet);
 
@@ -246,7 +246,7 @@ protected:
 	ref_sound				m_entrance_sound;
 
 	//объект партиклов обычного состояния зоны
-	CParticlesObject*		m_pIdleParticles;
+	xr_shared_ptr<CParticlesObject>		m_pIdleParticles;
 
 	//////////////////////////////
 	//подсветка аномалии

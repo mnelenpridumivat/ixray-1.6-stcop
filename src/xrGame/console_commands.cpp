@@ -171,11 +171,6 @@ static void full_memory_stats()
 #endif // SEVERAL_ALLOCATORS
 
 	Msg("* [x-ray]: economy: strings[%d K], smem[%d K]", _eco_strings / 1024, _eco_smem);
-
-#ifdef DEBUG
-	Msg("* [x-ray]: file mapping: memory[%d K], count[%d]", g_file_mapped_memory / 1024, g_file_mapped_count);
-	dump_file_mappings();
-#endif // DEBUG
 }
 
 class CCC_MemStats : public IConsole_Command
@@ -2185,7 +2180,7 @@ public:
 			sscanf(args, "%s %d", &string, &count);
 			for (int i = 0; i < count; ++i)
 			{
-				CParticlesObject* pParticle = CParticlesObject::Create(string, FALSE);
+				xr_shared_ptr<CParticlesObject> pParticle = Particles::Details::Create(string, FALSE);
 
 				// вычислить позицию и направленность партикла
 				Fmatrix pos;

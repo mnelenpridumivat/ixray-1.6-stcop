@@ -112,7 +112,6 @@ void XrUIManager::BeginFrame()
 
 void XrUIManager::EndFrame()
 {
-	ImGui::GetForegroundDrawList()->AddCircle({ 66, 56 }, 55, 512351, 4);
 	ImGui::Render();
 	ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 
@@ -263,15 +262,18 @@ void XrUIManager::Draw()
 	ImGui::PushFont(FontsStorage[ImCurrentFont]);
 	//ImGui::DockSpaceOverViewport();
 	{
+		m_MenuBarHeight = 32;
+		int headerSize = 10;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + UIToolBarSize / 2));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - (UIToolBarSize / 2)));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_MenuBarHeight - headerSize));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - headerSize));
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGuiWindowFlags window_flags = 0
 			| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
 			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
 			| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
+			| ImGuiWindowFlags_NoBackground;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, UIToolBarSize / 2));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -280,8 +282,7 @@ void XrUIManager::Draw()
 		ImGui::Begin("MyDockspace", NULL, window_flags);
 		ImGuiID dockMain = ImGui::GetID("MyDockspace");
 
-		m_MenuBarHeight = ImGui::GetWindowBarHeight();
-		// Save off menu bar height for later.
+		////// Save off menu bar height for later.
 
 		ImGui::DockSpace(dockMain);
 		ImGui::End();
@@ -297,7 +298,7 @@ void XrUIManager::Draw()
 	}
 	
 	OnDrawUI();
-
+	
 	for (IEditorWnd* ui : m_UIArray)
 	{
 		ui->BeginDraw();

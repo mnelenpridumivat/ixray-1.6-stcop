@@ -23,9 +23,36 @@ UITopBarForm::UITopBarForm()
     m_tReloadConfigs         = EDevice->Resources->_CreateTexture("ed\\bar\\reload_configs");
     m_tOpenGameData          = EDevice->Resources->_CreateTexture("ed\\bar\\open_gamedata");
     m_VerifySpaceRestrictors = false;
+
+	m_PreferencesIcon = EDevice->Resources->_CreateTexture("ed\\bar\\win_preferences");
 }
 
 UITopBarForm::~UITopBarForm() {}
+
+#define IMGUI_HINT_BUTTON(Name, Ptr, Hint, Callback) \
+			Ptr->Load(); \
+			if (ImGui::ImageButton("##" Name, Ptr->pSurface, ImVec2(20, 20))) \
+				Callback(); \
+			if (ImGui::IsItemHovered()) \
+			{ \
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); \
+				ImGui::SetTooltip(Hint); \
+			} \
+			ImGui::SameLine()
+
+#define IMGUI_HINT_BUTTON_EX(Name, Ptr, Timer, Hint, Callback) \
+			Ptr->Load(); \
+			if (ImGui::ImageButton("##" Name, Ptr->pSurface, ImVec2(20, 20), ImVec2(Timer > EDevice->TimerAsync() ? 0.5 : 0, 0), ImVec2(m_timeUndo > EDevice->TimerAsync() ? 1 : 0.5, 1))) \
+			{ \
+				Callback(); \
+				Timer = EDevice->TimerAsync() + 130;\
+			} \
+			if (ImGui::IsItemHovered()) \
+			{ \
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); \
+				ImGui::SetTooltip(Hint); \
+			} \
+			ImGui::SameLine()
 
 void UITopBarForm::Draw()
 {
@@ -40,243 +67,126 @@ void UITopBarForm::Draw()
 		| ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoMove
 		| ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoSavedSettings
 		;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,ImVec2( 2,2));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,ImVec2( 2,0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(2, 2));
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 2));
-	ImGui::Begin("TOOLBAR", NULL, window_flags);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(-2, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+
+	if (ImGui::Begin("TOOLBAR", NULL, window_flags))
 	{
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 6);
 
+		if (ImGui::BeginTable("##ToolbarTable", 9, ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_Hideable))
+		{
+			ImGui::TableSetupColumn("Actions");
+			ImGui::TableSetupColumn("File");
+			ImGui::TableSetupColumn("PIE Pre-Build");
+			ImGui::TableSetupColumn("PIE Actions");
+			ImGui::TableSetupColumn("Compile Actions");
+			ImGui::TableSetupColumn("Engine");
+			ImGui::TableSetupColumn("Directory Actions");
+			ImGui::TableSetupColumn("Sound Preferences");
+			ImGui::TableSetupColumn("Preferences");
 
-		m_tUndo->Load();
-		if (ImGui::ImageButton(m_tUndo->pSurface, ImVec2(20, 20), ImVec2(m_timeUndo > EDevice->TimerAsync() ? 0.5 : 0, 0), ImVec2(m_timeUndo > EDevice->TimerAsync() ? 1 : 0.5, 1), 0))
-		{
-			m_timeUndo = EDevice->TimerAsync() + 130;
-			ClickUndo();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Undo the last action.");
-		}
-		ImGui::SameLine();
-		m_tRedo->Load();
-		if (ImGui::ImageButton(m_tRedo->pSurface, ImVec2(20, 20), ImVec2(m_timeRedo > EDevice->TimerAsync() ? 0.5 : 0, 0), ImVec2(m_timeRedo > EDevice->TimerAsync() ? 1 : 0.5, 1), 0))
-		{
-			m_timeRedo = EDevice->TimerAsync() + 130;
-			ClickRedo();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Repeat the last action.");
-		}
-		ImGui::SameLine();
-
-		m_tNew->Load();
-		if (ImGui::ImageButton(m_tNew->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickNew();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Clear/New Scene");
-		}
-		ImGui::SameLine();
-		m_tOpen->Load();
-		if (ImGui::ImageButton(m_tOpen->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickOpen();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Open level");
-		}
-		ImGui::SameLine();
-		m_tSave->Load();
-		if (ImGui::ImageButton(m_tSave->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickSave();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Save level");
-		}
-		ImGui::SameLine();
-
-		m_tCForm->Load();
-		if (ImGui::ImageButton(m_tCForm->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickCForm();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Build CFORM");
-		}
-		ImGui::SameLine();
-		m_tAIMap->Load();
-		if (ImGui::ImageButton(m_tAIMap->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickAIMap();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Build AI Map");
-		}
-		ImGui::SameLine();
-		m_tGGraph->Load();
-		if (ImGui::ImageButton(m_tGGraph->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickGGraph();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Build game graph");
-		}
-		ImGui::SameLine();
-
-
-
-		if (LTools->IsCompilerRunning() || LTools->IsGameRunning())
-		{
-			m_tTerminated->Load();
-			if (ImGui::ImageButton(m_tTerminated->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
+			if (ImGui::TableNextColumn())
 			{
-				ClickTerminated();
+				IMGUI_HINT_BUTTON_EX("Undo", m_tUndo, m_timeUndo, "Undo the last action", ClickUndo);
+				IMGUI_HINT_BUTTON_EX("Redo", m_tRedo, m_timeRedo, "Repeat the last action", ClickRedo);
 			}
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-				ImGui::SetTooltip("Stop Play in Editor");
-			}
-		}
-		else if (Scene->IsPlayInEditor())
-		{
-			m_tTerminated->Load();
-			if (ImGui::ImageButton(m_tTerminated->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-			{
-				Scene->Stop();
-			}
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-				ImGui::SetTooltip("Stop Play in Editor");
-			}
-		}
-		else
-		{
-			m_tPlayInEditor->Load();
-			if (ImGui::ImageButton(m_tPlayInEditor->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-			{
-				ClickPlayInEditor();
-			}
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-				ImGui::SetTooltip("Start Play in Editor");
-			}
-		}
-		{
-			ImGui::SameLine(0,0);
-			if (ImGui::ArrowButton("##PlaySettings", ImGuiDir_Down, ImVec2(ImGui::GetFrameHeight(), 20), 0))
-			{
-				ImGui::OpenPopup("test");
-			}
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-				ImGui::SetTooltip("Play in Editor settings");
-			}
-			ImGui::SameLine();
-			if (ImGui::BeginPopup("test"))
-			{
-				ImGui::Checkbox("Verify space restrictors",&m_VerifySpaceRestrictors);
-				ImGui::Checkbox("Build artefact spawn positions",&((CLevelPreferences*)EPrefs)->PIEArtSpawnPos);
-				ImGui::EndPopup();
-			}
-		}
 
-		if (LTools->IsCompilerRunning() || LTools->IsGameRunning())
-		{
-			ImGui::BeginDisabled();
-		}
-		ImGui::SameLine();
-		m_tReloadConfigs->Load();
-		if (ImGui::ImageButton(m_tReloadConfigs->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickReloadConfigs();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Reload configs");
-		}
-		ImGui::SameLine();
 
-		m_tBuildAndMake->Load();
-		if (ImGui::ImageButton(m_tBuildAndMake->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickBuildAndMake();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Build and Make");
-		}
-		ImGui::SameLine();
-		m_tPlayPC->Load();
+			if (ImGui::TableNextColumn())
+			{
+				IMGUI_HINT_BUTTON("New", m_tNew, "Clear/New Scene", ClickNew);
+				IMGUI_HINT_BUTTON("Open", m_tOpen, "Open level", ClickOpen);
+				IMGUI_HINT_BUTTON("Save", m_tSave, "Save level", ClickSave);
+			}
 
-		if (ImGui::ImageButton(m_tPlayPC->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickPlayPC();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Play level");
-		}
-		ImGui::SameLine();
-		m_tPlayCleanGame->Load();
-		if (ImGui::ImageButton(m_tPlayCleanGame->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickPlayCleanGame();
-		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Play level in-game");
-		}
-		ImGui::SameLine();
+			if (ImGui::TableNextColumn())
+			{
+				IMGUI_HINT_BUTTON("BuildCForm", m_tCForm, "Build CFORM", ClickCForm);
+				IMGUI_HINT_BUTTON("BuildAIMap", m_tAIMap, "Build AI-Map", ClickAIMap);
+				IMGUI_HINT_BUTTON("BuildGameGraph", m_tGGraph, "Build Game Graph", ClickGGraph);
+			}
 
-		
-		if (LTools->IsCompilerRunning() || LTools->IsGameRunning())
-		{
-			ImGui::EndDisabled();
-		}
+			if (ImGui::TableNextColumn())
+			{
+				if (LTools->IsCompilerRunning() || LTools->IsGameRunning())
+				{
+					IMGUI_HINT_BUTTON("StopPIE", m_tTerminated, "Stop Play in Editor", ClickTerminated);
+				}
+				else if (Scene->IsPlayInEditor())
+				{
+					IMGUI_HINT_BUTTON("StopPIE", m_tTerminated, "Stop Play in Editor", Scene->Stop);
+				}
+				else
+				{
+					IMGUI_HINT_BUTTON("StartPIE", m_tPlayInEditor, "Start Play in Editor", ClickPlayInEditor);
+				}
 
-		m_tOpenGameData->Load();
-		if (ImGui::ImageButton(m_tOpenGameData->pSurface, ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			ClickOpenGameData();
+				if (ImGui::ArrowButton("##PlaySettings", ImGuiDir_Down, ImVec2(ImGui::GetFrameHeight(), 20), 0))
+				{
+					ImGui::OpenPopup("test");
+				}
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+					ImGui::SetTooltip("Play in Editor settings");
+				}
+
+				ImGui::SameLine();
+				if (ImGui::BeginPopup("test"))
+				{
+					ImGui::Checkbox("Verify space restrictors", &m_VerifySpaceRestrictors);
+					ImGui::Checkbox("Build artefact spawn positions", &((CLevelPreferences*)EPrefs)->PIEArtSpawnPos);
+					ImGui::EndPopup();
+				}
+			}
+
+			if (ImGui::TableNextColumn())
+			{
+				ImGui::BeginDisabled(LTools->IsCompilerRunning() || LTools->IsGameRunning());
+				IMGUI_HINT_BUTTON("ReloadCfg", m_tReloadConfigs, "Reload Configs", ClickReloadConfigs);
+				IMGUI_HINT_BUTTON("BuildAndMake", m_tBuildAndMake, "Build and Make", ClickBuildAndMake);
+				ImGui::EndDisabled();
+			}
+
+			if (ImGui::TableNextColumn())
+			{
+				ImGui::BeginDisabled(LTools->IsCompilerRunning() || LTools->IsGameRunning());
+				IMGUI_HINT_BUTTON("PlayPC", m_tPlayPC, "Play level", ClickPlayPC);
+				IMGUI_HINT_BUTTON("PlayLIG", m_tPlayCleanGame, "Play level in game", ClickPlayCleanGame);
+				ImGui::EndDisabled();
+			}
+
+			if (ImGui::TableNextColumn())
+			{
+				IMGUI_HINT_BUTTON("OpenGamedata", m_tOpenGameData, "Open 'gamedata' folder", ClickOpenGameData);
+			}
+
+			if (ImGui::TableNextColumn())
+			{
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
+				ImGui::SetNextItemWidth(150);
+				ImGui::SliderFloat("Volume", &psSoundVEffects, 0, 1, "%.2f");
+			}
+			
+			if (ImGui::TableNextColumn())
+			{
+				IMGUI_HINT_BUTTON("Preferences", m_PreferencesIcon, "Preferences", ClickPreferences);
+			}
+
 		}
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			ImGui::SetTooltip("Open 'gamedata' folder");
-		}
+		ImGui::EndTable();
 	}
-	ImGui::SameLine(0,1);
+
 	ImGui::End();
-	ImGui::PopStyleVar(5);
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar(6);
 	
 }
 
@@ -364,4 +274,9 @@ void UITopBarForm::ClickPlayPC()
 void UITopBarForm::ClickPlayCleanGame()
 {
 	LTools->RunGame("");
+}
+
+void UITopBarForm::ClickPreferences()
+{
+	ExecCommand(COMMAND_EDITOR_PREF);
 }

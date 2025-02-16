@@ -234,6 +234,12 @@ void UIMainForm::DrawContextMenu()
 	}
 	if(ImGui::BeginMenu("Locking"))
 	{
+		ESceneToolBase* SceneTool = Scene->GetTool(LTools->CurrentClassID());
+		ESceneToolBase::ETestResult TestOut = SceneTool->TestSelectedObjectsFlag(CCustomObject::flRT_Locked);
+		bool CanLock = TestOut != ESceneToolBase::ETestResult::All;
+		bool CanUnlock = TestOut != ESceneToolBase::ETestResult::None;
+
+		ImGui::BeginDisabled(!CanLock);
 		if(ImGui::MenuItem("Lock selection"))
 		{
             ExecCommand(COMMAND_LOCK_SEL, TRUE);
@@ -246,7 +252,11 @@ void UIMainForm::DrawContextMenu()
 		{
 			ExecCommand(COMMAND_LOCK_ALL, TRUE);
 		}
+		ImGui::EndDisabled();
+
         ImGui::Separator();
+
+		ImGui::BeginDisabled(!CanUnlock);
 		if(ImGui::MenuItem("Unlock selection"))
 		{
 			ExecCommand(COMMAND_LOCK_SEL, FALSE);
@@ -259,6 +269,7 @@ void UIMainForm::DrawContextMenu()
 		{
 			ExecCommand(COMMAND_LOCK_ALL, FALSE);
 		}
+		ImGui::EndDisabled();
 		ImGui::EndMenu();
 	}
 
@@ -387,7 +398,14 @@ void UIMainForm::DrawRenderToolBar(ImVec2 Pos, ImVec2 Size)
 				{
 					if (ImGui::BeginMenu("Quality"))
 					{
-						static bool selected[4] = { false,false,true,false };
+						static bool selected[4] = 
+						{
+							EDevice->m_ScreenQuality < 0.3f,
+							!selected[0] && EDevice->m_ScreenQuality < 0.6f,
+							!selected[1] && EDevice->m_ScreenQuality < 1.1f,
+							!selected[2] && EDevice->m_ScreenQuality < 2.1f 
+						};
+
 						if (ImGui::MenuItem("25%", "", &selected[0]))
 						{
 							selected[1] = selected[2] = selected[3] = false;

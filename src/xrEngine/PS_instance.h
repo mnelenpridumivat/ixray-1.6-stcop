@@ -7,7 +7,6 @@
 
 class ENGINE_API CPS_Instance	:
 	public ISpatial,
-	public ISheduled,
 	public IRenderable
 {
 	friend class			IGame_Persistent;
@@ -22,7 +21,7 @@ protected:
 	int						m_iLifeTime			;
 	BOOL					m_bAutoRemove		;
 	BOOL					m_bDead				;
-
+	volatile bool			m_NeedDestroy = false;
 protected:
 	virtual					~CPS_Instance		();
 	virtual void			PSI_internal_delete	();
