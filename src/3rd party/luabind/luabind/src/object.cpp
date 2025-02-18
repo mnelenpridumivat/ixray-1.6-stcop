@@ -46,6 +46,30 @@ namespace luabind
 		OutputDebugStringA(msg.c_str());
 	}
 
+	LUABIND_API void DebugGetVar(lua_State* L, int index) {
+		lua_Debug ar;
+		if (lua_getstack(L, 0, &ar))
+		{
+			int i = 1;
+			const char* name;
+			while ((name = lua_getlocal(L, &ar, i)) != nullptr)
+			{
+				if (lua_rawequal(L, -1, index))
+				{
+					string_class msg("Local variable: ");
+					msg += name;
+					msg += "\n";
+					OutputDebugStringA(msg.c_str());
+					//std::cout << "Local variable: " << name << "\n";
+					lua_pop(L, 1);
+					break;
+				}
+				lua_pop(L, 1);
+				++i;
+			}
+		}
+	}
+
 	namespace detail
 	{
 

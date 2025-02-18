@@ -36,6 +36,7 @@
 namespace luabind
 {
 	LUABIND_API void DebugPrintStack(lua_State* L);
+	LUABIND_API void DebugGetVar(lua_State* L, int index);
 
 	class LUABIND_API object
 	{
