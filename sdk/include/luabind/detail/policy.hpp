@@ -35,6 +35,8 @@
 #include <luabind/detail/class_cache.hpp>
 #include <luabind/detail/implicit_cast.hpp>
 
+#include <Windows.h>
+
 #undef max
 #undef min
 
@@ -461,8 +463,15 @@ namespace luabind { namespace detail
 			// object_rep->flags() & object_rep::constant == 0
 
 			if (lua_isnil(L, index)) return 0;
+
+			// log the callstack
+
+			
 			
 			object_rep* obj = static_cast<object_rep*>(lua_touserdata(L, index));
+			if (!obj) {
+				luabind::DebugPrintStack(L);
+			}
 			assert((obj != nullptr) && "internal error, please report"); // internal error
 			const class_rep* crep = obj->crep();
 

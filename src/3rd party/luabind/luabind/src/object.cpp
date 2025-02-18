@@ -35,6 +35,17 @@ namespace luabind
 		return L;
 	}
 
+	LUABIND_API void DebugPrintStack(lua_State* L) {
+		string_class msg("");
+		luabind::object debug_space = luabind::get_globals(L)["debug"];
+		luabind::object traceback = debug_space["traceback"];
+		string_class tracebackstr = luabind::call_function<string_class>(traceback);
+		msg += "\n traceback: \n";
+		msg += tracebackstr;
+
+		OutputDebugStringA(msg.c_str());
+	}
+
 	namespace detail
 	{
 
