@@ -415,7 +415,7 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 	else if (mstate_rl&mcRStrafe)	M_legs	= AS->legs_rs;
 	else is_standing = true;
 
-	if(g_player_hud && is_standing && IsFocused() && g_player_hud->m_legs_model) {
+	if(g_player_hud && is_standing && IsFocused() && g_player_hud->GetLegsModel()) {
 		is_standing = false;
 	}
 

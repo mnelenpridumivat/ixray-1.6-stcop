@@ -402,7 +402,7 @@ void CActor::g_Orientate	(u32 mstate_rl, float dt)
 
 	float scale_yaw_offset = 1.0f;
 
-	if(cam_active == eacFirstEye && g_player_hud && g_player_hud->m_legs_model) {
+	if(cam_active == eacFirstEye && g_player_hud && g_player_hud->GetLegsModel()) {
 	 	scale_yaw_offset = 0.15f;
 	}
 
@@ -507,7 +507,7 @@ void CActor::g_cl_Orientate	(u32 mstate_rl, float dt)
 		r_torso.pitch = 0;
 
 	// если есть движение - выровнять модель по камере
-	if(mstate_rl & mcAnyMove || (g_player_hud && g_player_hud->m_legs_model)) {
+	if(mstate_rl & mcAnyMove || (g_player_hud && g_player_hud->GetLegsModel())) {
 		r_model_yaw		= angle_normalize(r_torso.yaw);
 		mstate_real		&=~mcTurn;
 	} else {

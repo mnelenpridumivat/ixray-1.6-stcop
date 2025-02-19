@@ -678,8 +678,9 @@ void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 attachable_hud_item* CHudItem::HudItemData()
 {
 	attachable_hud_item* hi = nullptr;
-	if(!g_player_hud)		
+	if (!CPlayerModelController::GetInstance().IsHudValid()) {
 		return				hi;
+	}
 
 	hi = g_player_hud->attached_item(0);
 	if (hi && hi->m_parent_hud_item == this)

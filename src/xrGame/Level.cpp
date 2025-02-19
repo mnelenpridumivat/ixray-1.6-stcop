@@ -171,9 +171,11 @@ CLevel::CLevel():IPureClient	(Device.GetTimerGlobal())
 	m_demoplay_control = nullptr;
 	m_demo_info	= nullptr;
 
-	R_ASSERT				(nullptr==g_player_hud);
-	g_player_hud			= new player_hud();
-	g_player_hud->load_default();
+	//R_ASSERT				(nullptr==g_player_hud);
+	//g_player_hud			= new player_hud();
+	//g_player_hud->load_default();
+
+	CPlayerModelController::GetInstance().CreateModel();
 	
 	hud_zones_list = nullptr;
 

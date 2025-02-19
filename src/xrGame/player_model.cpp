@@ -1,0 +1,910 @@
+#include "StdAfx.h"
+#include "player_model.h"
+#include "HudItem.h"
+#include "../../xrUI/ui_base.h"
+#include "Actor.h"
+#include "physic_item.h"
+#include "ActorEffector.h"
+#include "../xrEngine/IGame_Persistent.h"
+#include "InertionData.h"
+#include "Inventory.h"
+
+//player_hud* g_player_hud = nullptr;
+//player_hud* g_player_hud2 = nullptr;
+//Fvector _ancor_pos;
+//Fvector _wpn_root_pos;
+
+float player_model::CalcMotionSpeed(const shared_str& anim_name)
+{
+	if(!IsGameTypeSingle() && (anim_name=="anm_show" || anim_name=="anm_hide") )
+		return 2.0f;
+	else
+		return 1.0f;
+}
+
+
+player_model::player_model(bool invert)
+{
+	m_attached_items[0] = nullptr;
+	m_attached_items[1] = nullptr;
+	m_transform.identity();
+	m_transformL.identity();
+	m_binverted = invert;
+	m_blocked_part_idx = u16(-1);
+	m_bhands_visible = false;
+}
+
+
+player_model::~player_model()
+{
+	IRenderVisual* v			= m_model.AsRV();
+	::Render->model_Delete		(v);
+	m_model.Reset();
+
+	xr_vector<attachable_hud_item*>::iterator it	= m_pool.begin();
+	xr_vector<attachable_hud_item*>::iterator it_e	= m_pool.end();
+	for(;it!=it_e;++it)
+	{
+		attachable_hud_item* a	= *it;
+		xr_delete				(a);
+	}
+	m_pool.clear				();
+}
+
+void player_model::load(const shared_str& player_hud_sect)
+{
+	if(player_hud_sect == m_sect_name) {
+		return;
+	}
+
+	bool b_reload = (m_model.IsValid());
+
+	if(m_model.IsValid())
+	{
+		IRenderVisual* v = m_model.AsRV();
+		::Render->model_Delete(v);
+	}
+
+	m_sect_name = player_hud_sect;
+
+	const shared_str& model_name = pSettings->r_string(player_hud_sect, "visual");
+	m_model = ::Render->model_Create(model_name.c_str());
+
+	auto pathOmfs = EngineExternal().GetPlayerHudOmfAdditional();
+	if (pathOmfs && pathOmfs[0])
+	{
+		string_path nm = {};
+		for (int i = 0, n = _GetItemCount(pathOmfs); i < n; ++i)
+		{
+			auto path = _GetItem(pathOmfs, i, nm);
+			m_model.AsKA()->append_motion_from_path(model_name.c_str(), path);
+		}
+	}
+
+	u16 l_arm = m_model.AsK()->LL_BoneID("l_clavicle");
+	if(l_arm != BI_NONE) {
+		m_model.AsK()->LL_GetBoneInstance(l_arm).set_callback(bctCustom, [](CBoneInstance* B) {((player_model*)g_player_hud)->LeftArmCallback(B); }, NULL);
+	}
+
+	auto& _sect = pSettings->r_section(player_hud_sect);
+	auto _b = _sect.Data.begin();
+	auto _e = _sect.Data.end();
+
+	m_ancors.clear();
+
+	for(; _b != _e; ++_b) 
+	{
+		if(strstr(_b->first.c_str(), "ancor_") == _b->first.c_str())
+		{
+			const shared_str& _bone = _b->second;
+			m_ancors.push_back(m_model.AsK()->LL_BoneID(_bone));
+		}
+	}
+
+	if(!b_reload) {
+		m_model.AsKA()->PlayCycle("hand_idle_doun");
+	}
+	else {
+		if(m_attached_items[1]) {
+			m_attached_items[1]->m_parent_hud_item->on_a_hud_attach();
+		}
+
+		if(m_attached_items[0]) {
+			m_attached_items[0]->m_parent_hud_item->on_a_hud_attach();
+		}
+	}
+
+	m_model.AsK()->CalculateBones_Invalidate();
+	m_model.AsK()->CalculateBones(TRUE);
+
+	if(Actor()) {
+		float m_fLegs_shift = READ_IF_EXISTS(pSettings, r_float, "actor_hud", "legs_shift_delta", -0.55f);
+		Actor()->m_fLegs_shift = READ_IF_EXISTS(pSettings, r_float, player_hud_sect, "legs_shift_delta", m_fLegs_shift);
+	}
+}
+
+bool player_model::render_item_ui_query()
+{
+	bool res = false;
+	if(m_attached_items[0])
+		res |= m_attached_items[0]->render_item_ui_query();
+
+	if(m_attached_items[1])
+		res |= m_attached_items[1]->render_item_ui_query();
+
+	return res;
+}
+
+void player_model::render_item_ui()
+{
+	if(m_attached_items[0])
+		m_attached_items[0]->render_item_ui();
+
+	if(m_attached_items[1])
+		m_attached_items[1]->render_item_ui();
+}
+
+void player_model::render_hud()
+{
+	bool b_r0 = (m_attached_items[0] && m_attached_items[0]->need_renderable());
+	bool b_r1 = (m_attached_items[1] && m_attached_items[1]->need_renderable());
+
+	if(b_r0 || b_r1 || m_bhands_visible) {
+		::Render->set_Transform(&m_transform);
+		::Render->add_Visual(m_model.AsRV(), true);
+	}
+
+	if(b_r0) {
+		m_attached_items[0]->render();
+	}
+
+	if(b_r1) {
+		m_attached_items[1]->render();
+	}
+
+	//if(m_show_legs && Actor() && m_legs_model)
+	//{
+		bool isClimb = Actor()->GetMovementState(ACTOR_DEFS::EMovementStates::eReal) & mcClimb;
+		if(!isClimb) {
+			auto bHud = ::Render->get_HUD();
+			IKinematics* actor_model = Actor()->Visual()->dcast_PKinematics();
+
+			actor_model->CalculateBones(TRUE);
+
+			m_model.AsK()->CalculateBones_Invalidate();
+			m_model.AsK()->CalculateBones(TRUE);
+
+			if(m_model.AsK()->LL_BoneCount() == actor_model->LL_BoneCount()) {
+				for(u16 i = 0; i < m_model.AsK()->LL_BoneCount(); ++i) {
+					auto& BoneInstance = m_model.AsK()->LL_GetBoneInstance(i);
+					BoneInstance.mTransform.set(actor_model->LL_GetBoneInstance(i).mTransform);
+					BoneInstance.mRenderTransform.mul_43(BoneInstance.mTransform, m_model.AsK()->LL_GetData(i).m2b_transform);
+				}
+			}
+			else {
+				auto setBoneTransform = [actor_model, this](u16 ID, shared_str bonename) {
+					auto BoneID = actor_model->LL_BoneID(bonename);
+					if(BoneID != BI_NONE) {
+						auto& BoneInstance = m_model.AsK()->LL_GetBoneInstance(ID);
+						BoneInstance.mTransform.set(actor_model->LL_GetBoneInstance(BoneID).mTransform);
+						BoneInstance.mRenderTransform.mul_43(BoneInstance.mTransform, m_model.AsK()->LL_GetData(ID).m2b_transform);
+					}
+				};
+
+				setBoneTransform(0, "root_stalker");
+				setBoneTransform(1, "bip01");
+
+				shared_str bonename;
+				for(u16 i = 0; i < m_model.AsK()->LL_BoneCount(); ++i) {
+					bonename = m_model.AsK()->LL_BoneName_dbg(i);
+					setBoneTransform(i, bonename);
+				}
+			}
+
+			const u16 BoneID = m_model.AsK()->LL_BoneID("bip01_spine");
+			auto& BoneInstance = m_model.AsK()->LL_GetData(BoneID);
+			m_model.AsK()->Bone_Calculate(&BoneInstance, &m_model.AsK()->LL_GetTransform(BoneInstance.GetParentID()));
+
+			::Render->set_HUD(FALSE);
+
+			::Render->set_Transform(&Actor()->XFORM());
+			::Render->add_Visual(m_model.AsK()->dcast_RenderVisual(), true);
+
+			::Render->set_HUD(bHud);
+		}
+	//}
+}
+
+
+#include "../xrEngine/motion.h"
+
+u32 player_model::motion_length(const shared_str& anim_name, const shared_str& hud_name, const CMotionDef*& md)
+{
+	float speed						= CalcMotionSpeed(anim_name);
+	attachable_hud_item* pi			= create_hud_item(hud_name);
+	player_hud_motion*	pm			= pi->m_hand_motions.find_motion(anim_name);
+	if(!pm)
+		return						100; // ms TEMPORARY
+	R_ASSERT2						(pm, 
+		make_string<const char*>("hudItem model [%s] has no motion with alias [%s]", hud_name.c_str(), anim_name.c_str() )
+		);
+	return motion_length			(pm->m_animations[0].mid, md, speed);
+}
+
+u32 player_model::motion_length(const MotionID& M, const CMotionDef*& md, float speed)
+{
+	md					= m_model.AsKA()->LL_GetMotionDef(M);
+	VERIFY				(md);
+	if (md->flags & esmStopAtEnd) 
+	{
+		CMotion*			motion		= m_model.AsKA()->LL_GetRootMotion(M);
+		return				iFloor( 0.5f + 1000.f*motion->GetLength() / (md->Dequantize(md->speed) * speed) );
+	}
+	return					0;
+}
+
+const Fvector& player_model::attach_rot() const
+{
+	static Fvector m_last_rot = zero_vel;
+	if (m_attached_items[0])
+		return m_last_rot=m_attached_items[0]->hands_attach_rot();
+	else
+	{
+		if (m_attached_items[1])
+			return m_last_rot=m_attached_items[1]->hands_attach_rot();
+	}
+	return m_last_rot;
+}
+
+const Fvector& player_model::attach_pos() const
+{
+	static Fvector m_last_pos = zero_vel;
+	if (m_attached_items[0])
+		return m_last_pos=m_attached_items[0]->hands_attach_pos();
+	else
+	{
+		if (m_attached_items[1])
+			return m_last_pos=m_attached_items[1]->hands_attach_pos();
+	}
+	return m_last_pos;
+}
+
+void player_model::LeftArmCallback(CBoneInstance* B)
+{
+	if(!m_attached_items[1])
+		return;
+
+	B->mTransform.mulA_44(m_attached_items[1]?m_transformL:m_transform);
+	B->mTransform.mulA_44(Fmatrix(m_transform).invert());
+}
+
+/*void angle_inertion(Fvector& c_hpb, const Fvector& t_hpb, float speed)
+{
+	c_hpb.x = angle_inertion(c_hpb.x, t_hpb.x, speed, PI, Device.fTimeDelta);
+	c_hpb.x = angle_inertion(c_hpb.x, t_hpb.x, speed, PI, Device.fTimeDelta);
+	c_hpb.x = angle_inertion(c_hpb.x, t_hpb.x, speed, PI, Device.fTimeDelta);
+}*/
+
+#include "Missile.h"
+
+void player_model::update(const Fmatrix& cam_trans)
+{
+	if(!m_attached_items[0] && !m_attached_items[1])
+	{
+		m_transform.set(cam_trans);
+		m_transformL.set(cam_trans);
+		return;
+	}
+
+	Fmatrix	trans					= cam_trans;
+	update_inertion					(trans);
+	update_additional				(trans);
+
+
+	{
+		m_attach_offsetr.setHPB(VPUSH(Fvector(attach_rot()).mul(PI / 180.f)));//generate and set Euler angles
+		m_attach_offsetr.c.set(attach_pos());
+		m_transform.mul(trans, m_attach_offsetr);
+	}
+
+	{
+		CMissile* pMiss = m_attached_items[0] ? smart_cast<CMissile*>(m_attached_items[0]->m_parent_hud_item) : NULL;
+		bool throwing_missile = pMiss && (pMiss->GetState()>=CMissile::EMissileStates::eThrowStart&&pMiss->GetState()<=CMissile::EMissileStates::eThrow);
+		bool left_hand_active = !throwing_missile && m_attached_items[1];
+
+		Fmatrix attach_offset;
+		attach_offset.setHPB(VPUSH(Fvector(left_hand_active ? m_attached_items[1]->hands_attach_rot() : attach_rot()).mul(PI / 180.f)));//generate and set Euler angles
+		attach_offset.c.set(left_hand_active ? m_attached_items[1]->hands_attach_pos() : attach_pos());
+		m_transformL.mul(trans, left_hand_active ? m_attach_offsetl.set(attach_offset) : m_attach_offsetl.inertion(attach_offset, 1-Device.fTimeDelta*10.f));
+	}
+
+	m_model.AsKA()->UpdateTracks();
+	m_model.AsK()->CalculateBones_Invalidate();
+	m_model.AsK()->CalculateBones(TRUE);
+
+	if(m_attached_items[0])
+		m_attached_items[0]->update(true);
+
+	if(m_attached_items[1])
+		m_attached_items[1]->update(true);
+}
+
+u32 player_model::anim_play(u16 part, const MotionID& M, BOOL bMixIn, const CMotionDef*& md, float speed)
+{
+	///partitions info
+	// 0==default (root_bone)
+	// 1==left_hand (left hand bone hierarchy)
+	// 2==right_hand (right hand bone hierarchy)
+	// please append new bone parts for more realistic behavior of animations
+	bool disable_root_part = false;
+	u16 part_id							= u16(-1);
+	if(attached_item(0) && attached_item(1))
+	{
+		disable_root_part = part==1;//if we run the animation for the left hand, we don't include the animation for the root bone (only if attached_item 1 active).
+		part_id = m_model.AsKA()->partitions().part_id((part==0)?"right_hand":"left_hand");
+	}
+
+	CMissile* pMiss = m_attached_items[0] ? smart_cast<CMissile*>(m_attached_items[0]->m_parent_hud_item) : NULL;
+	bool throwing_missile = pMiss && (pMiss->GetState()>=CMissile::EMissileStates::eThrowStart&&pMiss->GetState()<=CMissile::EMissileStates::eThrow) && attached_item(1);
+	if (throwing_missile)//is the only when attached_item 1 is active and we have started throwing the item
+	{
+		if(part==0)
+		{
+			CBlend* B = NULL;
+			B	= m_model.AsKA()->PlayCycle(0, M, bMixIn);
+			B	= m_model.AsKA()->PlayCycle(1, M, bMixIn);
+			B	= m_model.AsKA()->PlayCycle(2, M, bMixIn);
+			B->speed *= speed;
+		}
+	}
+	else
+	{
+		u16 pc					= m_model.AsKA()->partitions().count();
+		for(u16 pid=0; pid<pc; ++pid)
+		{
+			if(pid==0 && disable_root_part)continue;
+
+			if(pid==0 || pid==part_id || part_id==u16(-1))
+			{
+				if(m_blocked_part_idx==pid) continue;
+				CBlend* B = m_model.AsKA()->PlayCycle(pid, M, part==0&&pid==0&&attached_item(1)?TRUE:bMixIn);
+				B->speed *= speed;
+			}
+		}
+	}
+	m_model.AsK()->CalculateBones_Invalidate	();
+
+	return				motion_length(M, md, speed);
+}
+
+void player_model::update_additional	(Fmatrix& trans)
+{
+	if(m_attached_items[0] || m_attached_items[0]&&m_attached_items[1])
+		m_attached_items[0]->update_hud_additional(trans);
+	else
+	{
+		if(m_attached_items[1])
+			m_attached_items[1]->update_hud_additional(trans);
+	}
+}
+
+IKinematics* player_model::GetLegsModel()
+{
+	return m_model.AsK();
+}
+
+void player_model::update_inertion(Fmatrix& trans)
+{
+	auto hi = m_attached_items[0] ? m_attached_items[0] : m_attached_items[1];
+
+	if (hi)
+	{
+		auto& inertion = hi->m_parent_hud_item->CurrentInertionData();
+
+		Fmatrix								xform;
+		Fvector& origin						= trans.c; 
+		xform								= trans;
+
+		static Fvector						st_last_dir={0,0,0};
+
+		// calc difference
+		Fvector								diff_dir;
+		diff_dir.sub						(xform.k, st_last_dir);
+
+		// clamp by PI_DIV_2
+		Fvector last;						last.normalize_safe(st_last_dir);
+		float dot							= last.dotproduct(xform.k);
+		if (dot<EPS){
+			Fvector v0;
+			v0.crossproduct					(st_last_dir,xform.k);
+			st_last_dir.crossproduct		(xform.k,v0);
+			diff_dir.sub					(xform.k, st_last_dir);
+		}
+
+		// tend to forward
+		st_last_dir.mad						(diff_dir, inertion.TendtoSpeed*Device.fTimeDelta);
+		origin.mad							(diff_dir, inertion.OriginOffset);
+
+		// pitch compensation
+		float pitch							= angle_normalize_signed(xform.k.getP());
+		origin.mad							(xform.k,	-pitch * inertion.PitchOffsetD);
+		origin.mad							(xform.i,	-pitch * inertion.PitchOffsetR);
+		origin.mad							(xform.j,	-pitch * inertion.PitchOffsetN);
+	}
+}
+
+
+attachable_hud_item* player_model::create_hud_item(const shared_str& sect)
+{
+	xr_vector<attachable_hud_item*>::iterator it = m_pool.begin();
+	xr_vector<attachable_hud_item*>::iterator it_e = m_pool.end();
+	for(;it!=it_e;++it)
+	{
+		attachable_hud_item* itm = *it;
+		if(itm->m_sect_name==sect)
+			return itm;
+	}
+	attachable_hud_item* res	= new attachable_hud_item(this);
+	res->load					(sect);
+	res->m_hand_motions.load	(m_model.AsKA(), sect);
+	m_pool.push_back			(res);
+
+	return	res;
+}
+
+void player_model::RemoveHudItem(const shared_str& sect)
+{
+	attachable_hud_item* itm = nullptr;
+	for (attachable_hud_item* Item : m_pool)
+	{
+		if (Item->m_sect_name == sect)
+		{
+			itm = Item;
+		}
+	}
+
+	auto Iter = std::find(m_pool.begin(), m_pool.end(), itm);
+	m_pool.erase(Iter);
+
+	xr_delete(itm);
+}
+
+bool player_model::allow_activation(CHudItem* item)
+{
+	if(m_attached_items[1])
+		return m_attached_items[1]->m_parent_hud_item->CheckCompatibility(item);
+	else
+	{
+		CEntity* pEntity = smart_cast<CEntity*>(Level().CurrentEntity());
+		if (pEntity)
+		{
+			CActor* pActor = smart_cast<CActor*>(pEntity);
+			if(pActor)
+			{
+				CHudItem* pDetector = smart_cast<CHudItem*>(pActor->inventory().ItemFromSlot(DETECTOR_SLOT));
+				if(pDetector && pDetector->GetState()!=CHUDState::eHidden)
+					return pDetector->CheckCompatibility(item);
+			}
+		}
+	}
+
+	return true;
+}
+
+void player_model::attach_item(CHudItem* item)
+{
+	attachable_hud_item* pi			= create_hud_item(item->HudSection());
+	int item_idx					= pi->m_attach_place_idx;
+	
+	if (m_attached_items[item_idx] != pi || pi->m_parent_hud_item != item) {
+		if(m_attached_items[item_idx])
+			m_attached_items[item_idx]->m_parent_hud_item->on_b_hud_detach();
+
+		m_attached_items[item_idx]						= pi;
+		pi->m_parent_hud_item							= item;
+
+		if(item_idx==0 && m_attached_items[1])
+			m_attached_items[1]->m_parent_hud_item->CheckCompatibility(item);
+
+		item->on_a_hud_attach();
+	}
+	pi->m_parent_hud_item							= item;
+}
+void player_model::RestoreHandBlends(LPCSTR ignored_part)
+{
+	u16 part_id			= m_model.AsKA()->partitions().part_id(ignored_part);
+	u32 blends_count	= m_model.AsKA()->LL_PartBlendsCount(part_id);
+	for(u32 blend_id=0; blend_id<blends_count; ++blend_id)
+	{
+		CBlend* parallel_blend			= m_model.AsKA()->LL_PartBlend(part_id, blend_id);
+		if(!parallel_blend)
+			continue;
+
+		MotionID M			= parallel_blend->motionID;
+
+		u16 parts_count	= m_model.AsKA()->partitions().count();
+		for(u16 pid=0; pid<parts_count; ++pid)
+		{
+			if(pid==part_id)
+				continue;
+			CBlend* B			= m_model.AsKA()->PlayCycle(pid, M, TRUE);//this can destroy BR calling UpdateTracks !
+			if( parallel_blend->blend_state() != CBlend::eFREE_SLOT )
+			{
+				u16 bop				= B->bone_or_part;
+				*B					= *parallel_blend;
+				B->bone_or_part		= bop;
+			}
+		}
+	}
+}
+void player_model::detach_item_idx(u16 idx)
+{
+	if( nullptr==attached_item(idx) )					return;
+
+	m_attached_items[idx]->m_parent_hud_item->on_b_hud_detach();
+
+	m_attached_items[idx]->m_parent_hud_item		= nullptr;
+	m_attached_items[idx]							= nullptr;
+
+	if(idx==1 && m_attached_items[0])
+	{
+		m_attached_items[0]->m_parent_hud_item->OnMovementChanged(mcAnyMove);
+		RestoreHandBlends("right_hand");
+	}
+	else if(idx==0 && m_attached_items[1])
+	{
+		m_model.AsKA()->PlayCycle(2, m_model.AsKA()->ID_Cycle("hand_idle_doun"), FALSE);
+		m_attached_items[1]->m_parent_hud_item->OnMovementChanged(mcAnyMove);
+	}
+}
+
+void player_model::detach_item(CHudItem* item)
+{
+	if( nullptr==item->HudItemData() )		return;
+	u16 item_idx						= item->HudItemData()->m_attach_place_idx;
+
+	if( m_attached_items[item_idx]==item->HudItemData() )
+	{
+		detach_item_idx	(item_idx);
+	}
+}
+
+void player_model::calc_transform(u16 attach_slot_idx, const Fmatrix& offset, Fmatrix& result)
+{
+	Fmatrix ancor_m			= m_model.AsK()->LL_GetTransform(m_ancors[attach_slot_idx]);
+	result.mul				(m_transform, ancor_m);
+	result.mulB_43			(offset);
+}
+
+void player_model::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
+{
+	CEntity* pEntity = smart_cast<CEntity*>(Level().CurrentEntity());
+	if (pEntity)
+	{
+		CActor* pActor = smart_cast<CActor*>(pEntity);
+		if(pActor)
+		{
+			if(pActor->HUDview())
+			{
+				if(cmd==0)
+				{
+					if(m_attached_items[0])
+					{
+						if(m_attached_items[0]->m_parent_hud_item->GetState()==CHUDState::eIdle)
+							m_attached_items[0]->m_parent_hud_item->PlayAnimIdle();
+					}
+					if(m_attached_items[1])
+					{
+						if(m_attached_items[1]->m_parent_hud_item->GetState()==CHUDState::eIdle)
+							m_attached_items[1]->m_parent_hud_item->PlayAnimIdle();
+					}
+				}else
+				{
+					if(m_attached_items[0])
+						m_attached_items[0]->m_parent_hud_item->OnMovementChanged(cmd);
+
+					if(m_attached_items[1])
+						m_attached_items[1]->m_parent_hud_item->OnMovementChanged(cmd);
+				}
+			}
+			else
+			{
+				if(cmd==0)
+				{
+					if(pActor->inventory().ActiveItem())
+					{
+						CHudItem* pWeap = smart_cast<CHudItem*>(pActor->inventory().ActiveItem());
+						if(pWeap && pWeap->GetState()==CHUDState::eIdle)
+							pWeap->PlayAnimIdle();
+					}
+					if(pActor->inventory().ItemFromSlot(DETECTOR_SLOT))
+					{
+						CHudItem* pDetector = smart_cast<CHudItem*>(pActor->inventory().ItemFromSlot(DETECTOR_SLOT));
+						if(pDetector && pDetector->GetState()==CHUDState::eIdle)
+							pDetector->PlayAnimIdle();
+					}
+
+				}
+				else
+				{
+					if(pActor->inventory().GetActiveSlot() != NO_ACTIVE_SLOT)
+					{
+						CHudItem* pWeap = smart_cast<CHudItem*>(pActor->inventory().ActiveItem());
+						if(pWeap && pWeap->GetState()!=CHUDState::eHidden)
+							pWeap->OnMovementChanged(cmd);
+					}
+					if(pActor->inventory().ItemFromSlot(DETECTOR_SLOT))
+					{
+						CHudItem* pDetector = smart_cast<CHudItem*>(pActor->inventory().ItemFromSlot(DETECTOR_SLOT));
+						if(pDetector && pDetector->GetState()!=CHUDState::eHidden)
+							pDetector->OnMovementChanged(cmd);
+					}
+				}
+			}
+		}
+	}
+}
+
+bool player_model::check_anim(const shared_str& anim_name, u16 place_idx)
+{
+	if(!m_attached_items[place_idx]) return false;
+
+	string256				anim_name_r;
+	bool is_16x9			= UI().is_widescreen();
+	xr_sprintf				(anim_name_r,"%s%s",anim_name.c_str(),((place_idx==1)&&is_16x9)?"_16x9":"");
+
+	return !!m_attached_items[place_idx]->m_hand_motions.find_motion(anim_name_r);
+
+	MotionID motion;
+	if(m_attached_items[place_idx] && place_idx>=0&&place_idx!=u16(-1))///ищем анимацию в библиотеке айтема на пример anm_show
+	{
+		string256				anim_name_r;
+		bool is_16x9			= UI().is_widescreen();
+		xr_sprintf				(anim_name_r,"%s%s",anim_name.c_str(),((place_idx==1)&&is_16x9)?"_16x9":"");
+
+		if(m_attached_items[place_idx]->m_hand_motions.find_motion(anim_name_r))
+			return true;
+	}
+	else//иначе будем искать по прямому названию на пример abakan_draw или fn_2000_reload и тп
+	{
+		motion = m_model.AsKA()->ID_Cycle_Safe(anim_name);
+
+		if(motion && motion.valid())
+			return true;
+	}
+	return false;
+}
+
+//	HUD_HANDS_ANIMATOR
+//	anim_name название анимации
+//	place_idx индекс айтема 0 - оружие, 1 - детектор, любые другие значения заставят аниматор искать анимацию в библиотеке рук по прямым названиям
+//	part_id индекс бон парта 0 - default 1 - left_hand, 2 - right_hand, -1 - означает что будет взят бон парт назначенный в анимации, любые другие значения запустят анимацию для всех бонпартов
+//	bMixIn сглаживание с предыдущей анимацией
+//	speed множитель скорости анимации
+//	anm_idx индекс анимации из конфига худайтема
+//	impact_on_item запуск анимации на айтиме
+//	similar_check для того если нужно запретить запускать анимацию если она уже была запущена
+//	static void Callback статическая функция которая будет вызвана по завершению анимации
+//	void* CallbackParam параметр в который можно поместить что угодно
+//	UpdateCallbackType тип каллбека 0 - сработает по окончанию анимации 1 - будет срабатывать пока анимация не закончится
+bool player_model::animator_play(const shared_str& anim_name, u16 place_idx, u16 part_id, BOOL bMixIn, float speed, u8 anm_idx, bool impact_on_item, bool similar_check, PlayCallback Callback, LPVOID CallbackParam, BOOL UpdateCallbackType)
+{
+	MotionID motion;
+	if(m_attached_items[place_idx] && place_idx>=0&&place_idx!=u16(-1))///ищем анимацию в библиотеке айтема на пример anm_show
+	{
+		string256				anim_name_r;
+		bool is_16x9			= UI().is_widescreen();
+		xr_sprintf				(anim_name_r,"%s%s",anim_name.c_str(),((place_idx==1)&&is_16x9)?"_16x9":"");
+
+		player_hud_motion* anm	= m_attached_items[place_idx]->m_hand_motions.find_motion(anim_name_r);
+
+		if(anm)
+		{
+			motion_descr M	= anm->m_animations[ anm_idx ];
+			motion = M.mid;
+			speed *=anm->m_anim_speed;
+			if(impact_on_item)
+			{
+				shared_str item_anm_name;
+				if(anm->m_base_name!=anm->m_additional_name)
+					item_anm_name = anm->m_additional_name;
+				else
+					item_anm_name = M.name;
+
+				m_attached_items[place_idx]->anim_play(item_anm_name, bMixIn, speed);
+			}
+		}
+		else
+		{
+			Msg("! Animation [%s] not found in %s motion container!", anim_name_r, m_attached_items[place_idx]->m_sect_name.c_str());
+		}
+	}
+	else//иначе будем искать по прямому названию на пример abakan_draw или fn_2000_reload и тп
+	{
+		motion = m_model.AsKA()->ID_Cycle_Safe(anim_name);
+
+		if(!motion || !motion.valid())
+		{
+			Msg("! Animation [%s] not found in %s motion container!", anim_name.c_str(), section_name().c_str());
+		}
+	}
+
+	//если играется анимация stop_at_end то не будем запускать
+	u16 pc = m_model.AsKA()->partitions().count();
+	for(u16 pid=0; pid<pc; ++pid)
+	{
+		u32 blends_count = m_model.AsKA()->LL_PartBlendsCount(pid);
+		for(u32 blend_id=0; blend_id<blends_count; ++blend_id)
+		{
+			CBlend* blend = m_model.AsKA()->LL_PartBlend(pid, blend_id);
+			if(!blend) continue;
+			MotionID M = blend->motionID;
+			if(M != motion)	
+			{
+				if(blend->stop_at_end)
+				{
+					ResetBlockedPartID();
+					return false;
+				}
+			}
+		}
+	}
+	m_blocked_part_idx = part_id;//блокируем чтобы стандартные анимации не могли перебить запущенную
+
+	CBlend* B = NULL;
+	switch (part_id)
+	{
+		case 0:
+		case 1:
+		case 2:
+		{
+			if(similar_check)//проверим на выбранном бон парте
+			{
+				u32 blends_count = m_model.AsKA()->LL_PartBlendsCount(part_id);
+				for(u32 blend_id=0; blend_id<blends_count; ++blend_id)
+				{
+					CBlend* blend = m_model.AsKA()->LL_PartBlend(part_id, blend_id);
+					if(!blend) continue;
+					MotionID M = blend->motionID;
+					if(M==motion)
+					{
+						ResetBlockedPartID();
+						return false;
+					}
+				}
+			}
+			//запустим на выбранном бон парте
+			B = m_model.AsKA()->PlayCycle(part_id, motion, bMixIn, Callback, CallbackParam);
+		}break;
+		case u16(-1):
+		{
+			if(similar_check)//проверим на бон парте который указанв настройках анимации
+			{
+				CMotionDef* m_def = m_model.AsKA()->LL_GetMotionDef(motion);
+				u32 blends_count = m_model.AsKA()->LL_PartBlendsCount(m_def->bone_or_part);
+				for(u32 blend_id=0; blend_id<blends_count; ++blend_id)
+				{
+					CBlend* blend = m_model.AsKA()->LL_PartBlend(m_def->bone_or_part, blend_id);
+					if(!blend) continue;
+					MotionID M = blend->motionID;
+					if(M==motion)
+					{
+						ResetBlockedPartID();
+						return false;
+					}
+				}
+			}
+			//запустим для того бон парта который указан в настройках анимации
+			B = m_model.AsKA()->PlayCycle(motion, bMixIn, Callback, CallbackParam);
+		}break;
+		default:
+		{
+			if(similar_check)//проверим на всех бон партах
+			{
+				u16 pc = m_model.AsKA()->partitions().count();
+				for(u16 pid=0; pid<pc; ++pid)
+				{
+					u32 blends_count = m_model.AsKA()->LL_PartBlendsCount(pid);
+					for(u32 blend_id=0; blend_id<blends_count; ++blend_id)
+					{
+						CBlend* blend = m_model.AsKA()->LL_PartBlend(pid, blend_id);
+						if(!blend) continue;
+						MotionID M = blend->motionID;
+						if(M==motion)
+						{
+							ResetBlockedPartID();
+							return false;
+						}
+					}
+				}
+			}
+			//запустим на всех бон партах
+			B = m_model.AsKA()->PlayCycle(0, motion, bMixIn, Callback, CallbackParam);
+			B = m_model.AsKA()->PlayCycle(1, motion, bMixIn, Callback, CallbackParam);
+			B = m_model.AsKA()->PlayCycle(2, motion, bMixIn, Callback, CallbackParam);
+		}break;
+	}
+	if(B)
+	{
+		B->update_callback = UpdateCallbackType;
+		B->speed *= speed;
+	}
+	else
+	{
+		if(Callback)
+		{
+			CBlend B;
+			B.CallbackParam = CallbackParam;
+			Callback(&B);
+		}
+		ResetBlockedPartID();
+		return false;
+	}
+
+	return true;
+}
+// анимация-эффект которая не будет отключать обычные анимации но позволит создать подрагивания уклонения и прочие анимационные эффекты
+void player_model::animator_fx_play(const shared_str& anim_name, u16 place_idx, u16 part_id, u8 anm_idx, float blendAccrue, float blendFalloff, float Speed, float Power)
+{
+	MotionID motion;
+	if(m_attached_items[place_idx] && place_idx>=0)///ищем анимацию относительно айтема на пример anm_show
+	{
+		string256				anim_name_r;
+		bool is_16x9			= UI().is_widescreen();
+		xr_sprintf				(anim_name_r,"%s%s",anim_name.c_str(),((place_idx==1)&&is_16x9)?"_16x9":"");
+
+		player_hud_motion* anm	= m_attached_items[place_idx]->m_hand_motions.find_motion(anim_name_r);
+
+		if(anm)
+		{
+			motion_descr M	= anm->m_animations[ anm_idx ];
+			motion = M.mid;
+			Speed *=anm->m_anim_speed;
+		}
+		else
+		{
+			Msg("! Animation [%s] not found in %s motion container!", anim_name_r, m_attached_items[place_idx]->m_sect_name.c_str());
+		}
+	}
+	else//иначе будем искать по прямому названию на пример abakan_draw или fn_2000_reload и тп
+	{
+		motion = m_model.AsKA()->ID_Cycle_Safe(anim_name);
+
+		if(!motion || !motion.valid())
+		{
+			Msg("! Animation [%s] not found in %s motion container!", anim_name.c_str(), section_name().c_str());
+		}
+	}
+	CMotionDef* m_def = m_model.AsKA()->LL_GetMotionDef(motion);
+	if(m_def)
+	{
+		switch (part_id)
+		{
+			case 0:
+			case 1:
+			case 2://запустим на выбранном бонпарте
+			{
+				auto bones_vec = m_model.AsKA()->partitions().part(part_id).bones;
+				for (u32 &it : bones_vec)
+					m_model.AsKA()->LL_PlayFX(it, motion, m_def->Accrue()*blendAccrue, m_def->Falloff()*blendFalloff, m_def->Speed()*Speed, m_def->Power()*Power);
+			}break;
+			case -1://запустим для того который указан в настройках анимации
+			{
+				auto bones_vec = m_model.AsKA()->partitions().part(m_def->bone_or_part).bones;
+				for (u32 &it : bones_vec)
+					m_model.AsKA()->LL_PlayFX(it, motion, m_def->Accrue()*blendAccrue, m_def->Falloff()*blendFalloff, m_def->Speed()*Speed, m_def->Power()*Power);
+			}break;
+			default://запустим на всех бон партах
+			{
+				for (auto &[first,second] : *m_model.AsK()->LL_Bones())
+					m_model.AsKA()->LL_PlayFX(second, motion, m_def->Accrue()*blendAccrue, m_def->Falloff()*blendFalloff, m_def->Speed()*Speed, m_def->Power()*Power);
+			}break;
+		}
+	}
+}
+
+const shared_str& player_model::section_name() const { return m_sect_name; }
+
+attachable_hud_item* player_model::attached_item(u16 item_idx) { return m_attached_items[item_idx]; }
+
+void player_model::detach_all_items() { m_attached_items[0] = NULL; m_attached_items[1] = NULL; }

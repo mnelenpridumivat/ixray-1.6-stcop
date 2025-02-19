@@ -54,8 +54,11 @@ void CUIGameSP::SetClGame (game_cl_GameState* g)
 #ifndef MASTER_GOLD
 	void attach_adjust_mode_keyb(int dik);
 	void attach_draw_adjust_mode();
+namespace player_hud_tune {
 	void hud_adjust_mode_keyb(int dik);
 	void hud_draw_adjust_mode();
+}
+using namespace player_hud_tune;
 #endif
 
 void CUIGameSP::OnFrame()

@@ -480,7 +480,7 @@ if(!g_dedicated_server)
 
 void CActor::legs_shift_callback(CBoneInstance* B) {
 	if(cam_active == eacFirstEye) {
-		if(g_player_hud && g_player_hud->m_legs_model) {
+		if(g_player_hud && g_player_hud->GetLegsModel()) {
 			B->mTransform.c.mad(B->mTransform.k, m_fLegs_shift);
 		}
 	}
