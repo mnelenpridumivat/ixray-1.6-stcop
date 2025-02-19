@@ -17,6 +17,7 @@
 #include "PHDebug.h"
 #endif
 #include "../../xrUI/UIFontDefines.h"
+#include "player_model_controller.h"
 
 extern CUIGameCustom* CurrentGameUI() {return HUD().GetGameUI();}
 
@@ -117,7 +118,10 @@ void CHUDManager::Render_Last()
 
 	CObject*	O					= g_pGameLevel->CurrentViewEntity();
 	// hud itself
-	::Render->set_HUD				(TRUE);
+	bool RenderAsHud = CPlayerModelController::GetInstance().IsUseFullBodyModel();
+	if (!RenderAsHud) {
+		::Render->set_HUD(TRUE);
+	}
 	::Render->set_Object			(O->H_Root());
 	O->OnHUDDraw					(this);
 	::Render->set_HUD				(FALSE);

@@ -67,7 +67,7 @@ void player_model::load(const shared_str& player_hud_sect)
 
 	m_sect_name = player_hud_sect;
 
-	const shared_str& model_name = pSettings->r_string(player_hud_sect, "visual");
+	const shared_str& model_name = pSettings->r_string(player_hud_sect, "visual_full");
 	m_model = ::Render->model_Create(model_name.c_str());
 
 	auto pathOmfs = EngineExternal().GetPlayerHudOmfAdditional();
