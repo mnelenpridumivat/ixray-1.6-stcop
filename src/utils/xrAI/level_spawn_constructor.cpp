@@ -620,7 +620,7 @@ void CLevelSpawnConstructor::Execute							()
 	init								();
 	
 	correct_objects						();
-	generate_artefact_spawn_positions	();
+	//generate_artefact_spawn_positions	();
 	correct_level_changers				();
 	verify_space_restrictors			();
 	

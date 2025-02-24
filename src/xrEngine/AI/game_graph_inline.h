@@ -60,14 +60,16 @@ IC	bool IGameGraph::valid_vertex_id								(u32 const vertex_id) const
 
 IC	void IGameGraph::begin(u32 const vertex_id, const_iterator& start, const_iterator& end) const
 {
+	auto VertexEdgeOffset = vertex(_GRAPH_ID(vertex_id))->edge_offset();
+	auto VertexEdgeCount = vertex(_GRAPH_ID(vertex_id))->edge_count();
 	if (m_edges == nullptr)
 	{
-		end = (start = (const CEdge*)(m_nodes + vertex(_GRAPH_ID(vertex_id))->edge_offset())) + vertex(_GRAPH_ID(vertex_id))->edge_count();
+		end = (start = (const CEdge*)(m_nodes + VertexEdgeOffset)) + VertexEdgeCount;
 	}
 	else
 	{
 		// FX: TODO: Разберись!!!Ы
-		end = (start = (const CEdge*)(m_edges + vertex(_GRAPH_ID(vertex_id))->edge_offset())) + vertex(_GRAPH_ID(vertex_id))->edge_count();
+		end = (start = (const CEdge*)(m_edges + VertexEdgeOffset)) + VertexEdgeCount;
 	}
 }
 
