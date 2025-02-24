@@ -236,3 +236,5 @@ void CScriptEngine::script_register(lua_State *L)
 		def("set_stage", &ixray::save::SaveStage)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptEngine);

@@ -36,11 +36,13 @@ void account_manager::script_register	(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(account_manager);
+
 } //namespace gamespy_gp
 
-DEFINE_MIXED_DELEGATE_SCRIPT(gamespy_gp::suggest_nicks_cb,		"suggest_nicks_cb");
-DEFINE_MIXED_DELEGATE_SCRIPT(gamespy_gp::account_operation_cb,	"account_operation_cb");
-DEFINE_MIXED_DELEGATE_SCRIPT(gamespy_gp::account_profiles_cb,	"account_profiles_cb");
-DEFINE_MIXED_DELEGATE_SCRIPT(gamespy_gp::found_email_cb,		"found_email_cb");
+DEFINE_MIXED_DELEGATE_SCRIPT_NAME(gamespy_gp::suggest_nicks_cb, "suggest_nicks_cb", suggest_nicks_cb);
+DEFINE_MIXED_DELEGATE_SCRIPT_NAME(gamespy_gp::account_operation_cb, "account_operation_cb", account_operation_cb);
+DEFINE_MIXED_DELEGATE_SCRIPT_NAME(gamespy_gp::account_profiles_cb, "account_profiles_cb", account_profiles_cb);
+DEFINE_MIXED_DELEGATE_SCRIPT_NAME(gamespy_gp::found_email_cb, "found_email_cb", found_email_cb);
 
 

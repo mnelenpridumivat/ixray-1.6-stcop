@@ -13,7 +13,7 @@
 #pragma section(".Hook",read)
 
 BOOL		mem_initialized	= FALSE;
-bool		shared_str_initialized	= false;
+//bool		shared_str_initialized	= false;
 
 //fake fix of memory corruptions in multiplayer game :(
 XRCORE_API	bool g_allow_heap_min = true;
@@ -64,15 +64,15 @@ void xrMemory::_initialize(BOOL bDebug)
 
 	mem_initialized = TRUE;
 
-	g_pStringContainer = new str_container();
-	shared_str_initialized = true;
+	//g_pStringContainer = new str_container();
+	//shared_str_initialized = true;
 	g_pSharedMemoryContainer = new smem_container();
 }
 
 void xrMemory::_destroy()
 {
 	xr_delete					(g_pSharedMemoryContainer);
-	xr_delete					(g_pStringContainer);
+	//xr_delete					(g_pStringContainer);
 
 	mem_initialized				= FALSE;
 }
@@ -88,7 +88,7 @@ void xrMemory::mem_compact()
 	}
 
 	HeapCompact(GetProcessHeap(), 0);
-	if (g_pStringContainer)			g_pStringContainer->clean();
+	str_container::GetInstance().clean();
 	if (g_pSharedMemoryContainer)	g_pSharedMemoryContainer->clean();
 #endif
 }

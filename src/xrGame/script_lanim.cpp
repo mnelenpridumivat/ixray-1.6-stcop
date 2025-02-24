@@ -49,3 +49,5 @@ void lanim_registrator::script_register(lua_State *L)
 			.def("length",			&lanim_wrapper::length)
 		];
 }
+
+SCRIPT_EXPORT1(lanim_registrator);

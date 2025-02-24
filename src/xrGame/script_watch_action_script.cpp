@@ -47,3 +47,5 @@ void CScriptWatchAction::script_register(lua_State *L)
 			.def("completed",					(bool (CScriptWatchAction::*)())(&CScriptWatchAction::completed))
 	];
 }
+
+SCRIPT_EXPORT1(CScriptWatchAction);

@@ -26,3 +26,5 @@ void CUIMessageBox::script_register(lua_State *L)
 	];
 
 }
+
+SCRIPT_EXPORT3(CUIMessageBox, CUIStatic, CUIWindow);

@@ -59,3 +59,5 @@ void CScriptActionPlanner::script_register(lua_State *L)
 		,def("cast_planner",					&cast_planner)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptActionPlanner);

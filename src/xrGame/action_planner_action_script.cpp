@@ -32,3 +32,5 @@ void CActionPlannerAction<CScriptGameObject>::script_register(lua_State *L)
 			.def("weight",						&CScriptActionPlannerAction::weight,		&CScriptActionPlannerActionWrapper::weight_static)
 	];
 }
+
+SCRIPT_EXPORT3(CScriptActionPlannerAction, CScriptActionPlanner, CScriptActionBase);

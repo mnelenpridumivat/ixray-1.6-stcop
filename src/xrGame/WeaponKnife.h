@@ -65,6 +65,8 @@ public:
 	IC		float		GetHit2Dist						()	const	{ return m_Hit2Distance; }
 	bool				m_bShowKnifeStats;
 
+	void		FastStrike(u32 state);
+
 #ifdef DEBUG
 	virtual void		OnRender						();
 #endif

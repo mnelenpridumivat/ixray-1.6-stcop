@@ -54,3 +54,5 @@ void console_registrator::script_register(lua_State *L)
 			.def("get_token",				&CConsole::GetToken)
 	];
 }
+
+SCRIPT_EXPORT1(console_registrator);

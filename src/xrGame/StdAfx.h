@@ -18,6 +18,7 @@
 #pragma warning(disable:4995)
 #include "../xrUI/stdafx.h"
 #include "../xrScripts/stdafx.h"
+//#include "xrGame_Script_container.h"
 #pragma warning(default:4995)
 
 #include "../xrEngine/GameFont.h"
@@ -33,6 +34,7 @@
 #include "../xrEngine/AI/game_graph.h"
 #include "../xrEngine/AI/game_level_cross_table.h"
 #include "../xrEngine/AI/level_graph.h"
+#include "base_client_classes.h"
 
 #ifndef _EDITOR
 #	include "pch_script.h"
@@ -45,3 +47,5 @@ extern void DestroyImGuiInGame();
 #undef max
 
 #define USE_OLD_OBJECT_PLANNER 0
+
+#define TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC

@@ -105,3 +105,5 @@ void CScriptFmatrix::script_register(lua_State *L)
 //			.def("getXYZi",						(void	   (Fmatrix::*)(float &, float &, float &) const)(&Fmatrix::getXYZi))
 	];
 }
+
+SCRIPT_EXPORT1(CScriptFmatrix);

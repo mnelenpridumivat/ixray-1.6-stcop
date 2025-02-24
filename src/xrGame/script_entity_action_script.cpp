@@ -39,3 +39,5 @@ void CScriptEntityAction::script_register(lua_State *L)
 			.def("completed",					(bool (CScriptEntityAction::*)())(&CScriptEntityAction::CheckIfActionCompleted))
 	];
 }
+
+SCRIPT_EXPORT1(CScriptEntityAction);

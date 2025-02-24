@@ -52,6 +52,8 @@ public:
 
 	//CAttachableItem
 	virtual	void	enable					(bool value);
+
+	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
  
 public:
 			void	SwitchNightVision		();

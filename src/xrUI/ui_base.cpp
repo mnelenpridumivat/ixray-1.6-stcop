@@ -289,3 +289,12 @@ shared_str	ui_core::get_xml_name(LPCSTR fn)
 	}
 	return str;
 }
+
+
+extern "C"
+{
+	DLL_API void __cdecl xrUIInitialize()
+	{
+		Msg("xrUI loaded");
+	}
+}

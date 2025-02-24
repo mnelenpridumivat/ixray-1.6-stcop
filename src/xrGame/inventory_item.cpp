@@ -26,6 +26,8 @@
 #include "object_broker.h"
 #include "../xrEngine/IGame_Persistent.h"
 
+#include "Artefact.h"
+
 #ifdef DEBUG_DRAW
 #	include "debug_renderer.h"
 #endif
@@ -143,8 +145,8 @@ void CInventoryItem::Load(LPCSTR section)
 
 	u32 inv_grid_x = pSettings->r_u32(m_object->cNameSect(), "inv_grid_x");
 	u32 inv_grid_y = pSettings->r_u32(m_object->cNameSect(), "inv_grid_y");
-	u32 inv_grid_width = pSettings->r_u32(m_object->cNameSect(), "inv_grid_width");
-	u32 inv_grid_height = pSettings->r_u32(m_object->cNameSect(), "inv_grid_height");
+	u32 inv_grid_width = READ_IF_EXISTS(pSettings, r_u32, m_object->cNameSect(), "inv_grid_width", 1);
+	u32 inv_grid_height = READ_IF_EXISTS(pSettings, r_u32, m_object->cNameSect(), "inv_grid_height", 1);
 
 	m_inv_rect.set(inv_grid_x, inv_grid_y, inv_grid_width, inv_grid_height);
 	
@@ -425,6 +427,14 @@ void CInventoryItem::save(NET_Packet &packet)
 
 	if (object().H_Parent()) {
 		packet.w_u8			(0);
+		return;
+	}
+
+	CArtefact* artefact = smart_cast<CArtefact*>(this);
+
+	if (artefact && artefact->IsInContainer())
+	{
+		packet.w_u8(0);
 		return;
 	}
 
@@ -1546,6 +1556,24 @@ void CInventoryItem::setWeight(float value)
 {
 	m_weight = value;
 }
+
+bool CInventoryItem::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (object().cNameSect() != other->object().cNameSect())
+	{
+		return false;
+	}
+	if (!fsimilar(GetCondition(), other->GetCondition(), 0.01f))
+	{
+		return false;
+	}
+	if (!equal_upgrades(other->upgardes()))
+	{
+		return false;
+	}
+	return true;
+}
+
 
 u16 CInventoryItem::object_id()const
 {

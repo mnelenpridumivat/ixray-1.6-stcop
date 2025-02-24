@@ -39,6 +39,7 @@ namespace GameObject {
 
 		eHelicopterOnPoint,
 		eHelicopterOnHit,
+		eHelicopterOnSamHit,
 
 		eOnItemTake,
 		eOnItemDrop,
@@ -58,6 +59,10 @@ namespace GameObject {
 		eMouseMove,
 		eMouseWheel,
 
+		eShieldOn,
+		eShieldOff,
+		eJump,
+
 		eOnWeaponFired,
 		eOnWeaponJammed,
 		eOnWeaponZoomIn,
@@ -69,12 +74,17 @@ namespace GameObject {
 		eItemToRuck,
 		eOnFootStep,
 
+		//Dance Maniac
+		eOnActorJump,
+
 		eAttachVehicle,
 		eDetachVehicle,
 		eUseVehicle,
 
 		eActorBeforeDeath,
 		eActorHudAnimationEnd,
+
+		eDangerousMaterialTouch,
 
 		eDummy = u32(-1),
 	};

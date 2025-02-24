@@ -33,3 +33,5 @@ void CScriptActionCondition::script_register(lua_State *L)
 			.def(					constructor<u32,double>())
 	];
 }
+
+SCRIPT_EXPORT1(CScriptActionCondition);

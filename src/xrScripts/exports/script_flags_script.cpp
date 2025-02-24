@@ -123,3 +123,5 @@ void CScriptFlags::script_register(lua_State *L)
 			.def("equal",	(bool (*)(Flags32*,const Flags32&,const Flags32::TYPE))(&equal<Flags32>))
 	];
 }
+
+SCRIPT_EXPORT1(CScriptFlags);

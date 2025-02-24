@@ -19,3 +19,5 @@ void CWeaponUSP45::script_register	(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CWeaponUSP45, CObjectScript);

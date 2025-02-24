@@ -799,6 +799,41 @@ void CSE_ALifeItemWeaponMagazined::FillProps			(LPCSTR pref, PropItemVec& items)
 #endif // #ifndef XRGAME_EXPORTS
 
 ////////////////////////////////////////////////////////////////////////////
+// CSE_ALifeItemWeaponFlamethrower
+////////////////////////////////////////////////////////////////////////////
+CSE_ALifeItemFlamethrower::CSE_ALifeItemFlamethrower(LPCSTR caSection) : CSE_ALifeItemWeapon(caSection)
+{
+}
+
+CSE_ALifeItemFlamethrower::~CSE_ALifeItemFlamethrower()
+{
+}
+
+void CSE_ALifeItemFlamethrower::UPDATE_Read(NET_Packet& P)
+{
+	inherited::UPDATE_Read(P);
+}
+void CSE_ALifeItemFlamethrower::UPDATE_Write(NET_Packet& P)
+{
+	inherited::UPDATE_Write(P);
+}
+void CSE_ALifeItemFlamethrower::STATE_Read(NET_Packet& P, u16 size)
+{
+	inherited::STATE_Read(P, size);
+}
+void CSE_ALifeItemFlamethrower::STATE_Write(NET_Packet& P)
+{
+	inherited::STATE_Write(P);
+}
+
+#ifndef XRGAME_EXPORTS
+void CSE_ALifeItemFlamethrower::FillProps(LPCSTR pref, PropItemVec& items)
+{
+	inherited::FillProps(pref, items);
+}
+#endif // #ifndef XRGAME_EXPORTS
+
+////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItemWeaponMagazinedWGL
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemWeaponMagazinedWGL::CSE_ALifeItemWeaponMagazinedWGL	(LPCSTR caSection) : CSE_ALifeItemWeaponMagazined(caSection)
@@ -893,6 +928,55 @@ bool CSE_ALifeItemAmmo::can_switch_online	() const
 bool CSE_ALifeItemAmmo::can_switch_offline	() const
 {
 	return ( inherited::can_switch_offline() && a_elapsed!=0 );
+}
+
+////////////////////////////////////////////////////////////////////////////
+// CSE_ALifeItemFuel
+////////////////////////////////////////////////////////////////////////////
+CSE_ALifeItemFuel::CSE_ALifeItemFuel(LPCSTR caSection) : CSE_ALifeItem(caSection)
+{
+	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection, "visual"))
+		set_visual(pSettings->r_string(caSection, "visual"));
+}
+
+CSE_ALifeItemFuel::~CSE_ALifeItemFuel()
+{
+}
+
+void CSE_ALifeItemFuel::STATE_Read(NET_Packet& tNetPacket, u16 size)
+{
+	inherited::STATE_Read(tNetPacket, size);
+}
+
+void CSE_ALifeItemFuel::STATE_Write(NET_Packet& tNetPacket)
+{
+	inherited::STATE_Write(tNetPacket);
+}
+
+void CSE_ALifeItemFuel::UPDATE_Read(NET_Packet& tNetPacket)
+{
+	inherited::UPDATE_Read(tNetPacket);
+}
+
+void CSE_ALifeItemFuel::UPDATE_Write(NET_Packet& tNetPacket)
+{
+	inherited::UPDATE_Write(tNetPacket);
+}
+
+#ifndef XRGAME_EXPORTS
+void CSE_ALifeItemFuel::FillProps(LPCSTR pref, PropItemVec& values) {
+	inherited::FillProps(pref, values);
+}
+#endif // #ifndef XRGAME_EXPORTS
+
+bool CSE_ALifeItemFuel::can_switch_online() const
+{
+	return inherited::can_switch_online();
+}
+
+bool CSE_ALifeItemFuel::can_switch_offline() const
+{
+	return (inherited::can_switch_offline());
 }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -39,12 +39,17 @@
 #include "xrServer_Objects_ALife_Monsters.h"
 #include "HUDAnimItem.h"
 #include "ActorCondition.h"
+#include "../xrEngine/XR_IOConsole.h"
+#include "Inventory.h"
+#include "ShootingObject.h"
+#include "Weapon.h"
 #include "player_hud.h"
 #include "../xrEngine/XR_IOConsole.h"
 #include "Inventory.h"
 #include "ShootingObject.h"
 #include "Weapon.h"
 #include "raypick.h"
+#include "SamZone.h"
 
 
 #include "ai_object_location.h"
@@ -120,7 +125,7 @@ void UnLockActor_script() {
 	Level().UnLockActor();
 }
 
-LPCSTR command_line	()
+LPCSTR command_line()
 {
 	return		(Core.Params);
 }
@@ -143,39 +148,39 @@ float get_compass_direction()
 }
 
 #ifdef DEBUG
-void check_object(CScriptGameObject *object)
+void check_object(CScriptGameObject* object)
 {
 	try {
-		Msg	("check_object %s",object->Name());
+		Msg("check_object %s", object->Name());
 	}
-	catch(...) {
+	catch (...) {
 		object = object;
 	}
 }
 
 
-CScriptGameObject *tpfGetActor()
+CScriptGameObject* tpfGetActor()
 {
 	static bool first_time = true;
 	if (first_time)
-		ai().script_engine().script_log(eLuaMessageTypeError,"Do not use level.actor function!");
+		ai().script_engine().script_log(eLuaMessageTypeError, "Do not use level.actor function!");
 	first_time = false;
-	
-	CActor *l_tpActor = smart_cast<CActor*>(Level().CurrentEntity());
+
+	CActor* l_tpActor = smart_cast<CActor*>(Level().CurrentEntity());
 	if (l_tpActor)
 		return	(smart_cast<CGameObject*>(l_tpActor)->lua_game_object());
 	else
 		return	(0);
 }
 
-CScriptGameObject *get_object_by_name(LPCSTR caObjectName)
+CScriptGameObject* get_object_by_name(LPCSTR caObjectName)
 {
 	static bool first_time = true;
 	if (first_time)
-		ai().script_engine().script_log(eLuaMessageTypeError,"Do not use level.object function!");
+		ai().script_engine().script_log(eLuaMessageTypeError, "Do not use level.object function!");
 	first_time = false;
-	
-	CGameObject		*l_tpGameObject	= smart_cast<CGameObject*>(Level().Objects.FindObjectByName(caObjectName));
+
+	CGameObject* l_tpGameObject = smart_cast<CGameObject*>(Level().Objects.FindObjectByName(caObjectName));
 	if (l_tpGameObject)
 		return		(l_tpGameObject->lua_game_object());
 	else
@@ -183,10 +188,10 @@ CScriptGameObject *get_object_by_name(LPCSTR caObjectName)
 }
 #endif
 
-CScriptGameObject *get_object_by_id(u16 id)
+CScriptGameObject* get_object_by_id(u16 id)
 {
 	CGameObject* pGameObject = smart_cast<CGameObject*>(Level().Objects.net_Find(id));
-	if(!pGameObject)
+	if (!pGameObject)
 		return nullptr;
 
 	return pGameObject->lua_game_object();
@@ -233,32 +238,32 @@ void set_next_wdesc(LPCSTR WeatherSection)
 	}
 }
 
-LPCSTR get_weather	()
+LPCSTR get_weather()
 {
 	return			(*g_pGamePersistent->Environment().GetWeather());
 }
 
-void set_weather	(LPCSTR weather_name, bool forced)
+void set_weather(LPCSTR weather_name, bool forced)
 {
-		g_pGamePersistent->Environment().SetWeather(weather_name,forced);
+	g_pGamePersistent->Environment().SetWeather(weather_name, forced);
 }
 
-bool set_weather_fx	(LPCSTR weather_name)
+bool set_weather_fx(LPCSTR weather_name)
 {
-		return		(g_pGamePersistent->Environment().SetWeatherFX(weather_name));
+	return		(g_pGamePersistent->Environment().SetWeatherFX(weather_name));
 }
 
-bool start_weather_fx_from_time	(LPCSTR weather_name, float time)
+bool start_weather_fx_from_time(LPCSTR weather_name, float time)
 {
 	return		(g_pGamePersistent->Environment().StartWeatherFXFromTime(weather_name, time));
 }
 
-bool is_wfx_playing	()
+bool is_wfx_playing()
 {
 	return			(g_pGamePersistent->Environment().IsWFXPlaying());
 }
 
-float get_wfx_time	()
+float get_wfx_time()
 {
 	return			(g_pGamePersistent->Environment().wfx_time);
 }
@@ -292,9 +297,9 @@ float get_global_time_factor() { return (Device.time_factor()); }
 
 void set_game_difficulty(ESingleGameDifficulty dif)
 {
-	g_SingleGameDifficulty		= dif;
-	game_cl_Single* game		= smart_cast<game_cl_Single*>(Level().game); VERIFY(game);
-	game->OnDifficultyChanged	();
+	g_SingleGameDifficulty = dif;
+	game_cl_Single* game = smart_cast<game_cl_Single*>(Level().game); VERIFY(game);
+	game->OnDifficultyChanged();
 }
 ESingleGameDifficulty get_game_difficulty()
 {
@@ -324,37 +329,37 @@ u32 get_time_minutes()
 
 void change_game_time(u32 days, u32 hours, u32 mins)
 {
-	game_sv_Single	*tpGame = smart_cast<game_sv_Single *>(Level().Server->game);
-	if(tpGame && ai().get_alife())
+	game_sv_Single* tpGame = smart_cast<game_sv_Single*>(Level().Server->game);
+	if (tpGame && ai().get_alife())
 	{
-		u32 value		= days*86400+hours*3600+mins*60;
-		float fValue	= static_cast<float> (value);
-		value			*= 1000;//msec		
+		u32 value = days * 86400 + hours * 3600 + mins * 60;
+		float fValue = static_cast<float> (value);
+		value *= 1000;//msec		
 		g_pGamePersistent->Environment().ChangeGameTime(fValue);
 		tpGame->alife().time_manager().change_game_time(value);
 	}
 }
 
-float high_cover_in_direction(u32 level_vertex_id, const Fvector &direction)
+float high_cover_in_direction(u32 level_vertex_id, const Fvector& direction)
 {
-    if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
-        return 0.0f;
-    }
+	if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
+		return 0.0f;
+	}
 
-	float			y,p;
-	direction.getHP	(y,p);
-	return			(ai().level_graph().high_cover_in_direction(y,level_vertex_id));
+	float			y, p;
+	direction.getHP(y, p);
+	return			(ai().level_graph().high_cover_in_direction(y, level_vertex_id));
 }
 
-float low_cover_in_direction(u32 level_vertex_id, const Fvector &direction)
+float low_cover_in_direction(u32 level_vertex_id, const Fvector& direction)
 {
-    if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
-        return 0.0f;
-    }
+	if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
+		return 0.0f;
+	}
 
-	float			y,p;
-	direction.getHP	(y,p);
-	return			(ai().level_graph().low_cover_in_direction(y,level_vertex_id));
+	float			y, p;
+	direction.getHP(y, p);
+	return			(ai().level_graph().low_cover_in_direction(y, level_vertex_id));
 }
 
 float rain_factor()
@@ -364,31 +369,31 @@ float rain_factor()
 
 u32	vertex_in_direction(u32 level_vertex_id, Fvector direction, float max_distance)
 {
-    if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
-        return u32(-1);
-    }
+	if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
+		return u32(-1);
+	}
 
 	direction.normalize_safe();
-	direction.mul	(max_distance);
+	direction.mul(max_distance);
 	Fvector			start_position = ai().level_graph().vertex_position(level_vertex_id);
 	Fvector			finish_position = Fvector(start_position).add(direction);
 	u32				result_ = u32(-1);
-	ai().level_graph().farthest_vertex_in_direction(level_vertex_id,start_position,finish_position,result_,0);
+	ai().level_graph().farthest_vertex_in_direction(level_vertex_id, start_position, finish_position, result_, 0);
 	return			(ai().level_graph().valid_vertex_id(result_) ? result_ : level_vertex_id);
 }
 
 Fvector vertex_position(u32 level_vertex_id)
 {
-    if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
-        return Fvector{};
-    }
+	if (!ai().level_graph().valid_vertex_id(level_vertex_id)) {
+		return Fvector{};
+	}
 	return			(ai().level_graph().vertex_position(level_vertex_id));
 }
 
 void map_add_object_spot(u16 id, LPCSTR spot_type, LPCSTR text)
 {
-	CMapLocation* ml = Level().MapManager().AddMapLocation(spot_type,id);
-	if ( xr_strlen(text) )
+	CMapLocation* ml = Level().MapManager().AddMapLocation(spot_type, id);
+	if (xr_strlen(text))
 	{
 		ml->SetHint(text);
 	}
@@ -396,18 +401,18 @@ void map_add_object_spot(u16 id, LPCSTR spot_type, LPCSTR text)
 
 void map_add_object_spot_ser(u16 id, LPCSTR spot_type, LPCSTR text)
 {
-	CMapLocation* ml = Level().MapManager().AddMapLocation(spot_type,id);
-	if( xr_strlen(text) )
-			ml->SetHint(text);
+	CMapLocation* ml = Level().MapManager().AddMapLocation(spot_type, id);
+	if (xr_strlen(text))
+		ml->SetHint(text);
 
 	ml->SetSerializable(true);
 }
 
 void map_change_spot_hint(u16 id, LPCSTR spot_type, LPCSTR text)
 {
-	CMapLocation* ml	= Level().MapManager().GetMapLocation(spot_type, id);
-	if(!ml)				return;
-	ml->SetHint			(text);
+	CMapLocation* ml = Level().MapManager().GetMapLocation(spot_type, id);
+	if (!ml)				return;
+	ml->SetHint(text);
 }
 
 void map_remove_object_spot(u16 id, LPCSTR spot_type)
@@ -422,7 +427,7 @@ u16 map_has_object_spot(u16 id, LPCSTR spot_type)
 
 bool patrol_path_exists(LPCSTR patrol_path)
 {
-	return		(!!ai().patrol_paths().path(patrol_path,true));
+	return		(!!ai().patrol_paths().path(patrol_path, true));
 }
 
 LPCSTR get_name()
@@ -430,13 +435,13 @@ LPCSTR get_name()
 	return		(*Level().name());
 }
 
-void prefetch_sound	(LPCSTR name)
+void prefetch_sound(LPCSTR name)
 {
 	Level().PrefetchSound(name);
 }
 
 
-CClientSpawnManager	&get_client_spawn_manager()
+CClientSpawnManager& get_client_spawn_manager()
 {
 	return		(Level().client_spawn_manager());
 }
@@ -462,7 +467,7 @@ void remove_dialog_to_render(CUIDialogWnd* pDialog)
 
 void hide_indicators()
 {
-	if(CurrentGameUI())
+	if (CurrentGameUI())
 	{
 		CurrentGameUI()->HideShownDialogs();
 		CurrentGameUI()->ShowGameIndicators(false);
@@ -473,7 +478,7 @@ void hide_indicators()
 
 void hide_indicators_safe()
 {
-	if(CurrentGameUI())
+	if (CurrentGameUI())
 	{
 		CurrentGameUI()->ShowGameIndicators(false);
 		CurrentGameUI()->ShowCrosshair(false);
@@ -485,7 +490,7 @@ void hide_indicators_safe()
 
 void show_indicators()
 {
-	if(CurrentGameUI())
+	if (CurrentGameUI())
 	{
 		CurrentGameUI()->ShowGameIndicators(true);
 		CurrentGameUI()->ShowCrosshair(true);
@@ -495,7 +500,7 @@ void show_indicators()
 
 void show_weapon(bool b)
 {
-	psHUD_Flags.set	(HUD_WEAPON_RT2, b);
+	psHUD_Flags.set(HUD_WEAPON_RT2, b);
 }
 
 bool is_level_present()
@@ -503,62 +508,62 @@ bool is_level_present()
 	return (!!g_pGameLevel);
 }
 
-void add_call(const luabind::functor<bool> &condition,const luabind::functor<void> &action)
+void add_call(const luabind::functor<bool>& condition, const luabind::functor<void>& action)
 {
 	luabind::functor<bool>		_condition = condition;
 	luabind::functor<void>		_action = action;
-	CPHScriptCondition	* c=new CPHScriptCondition(_condition);
-	CPHScriptAction		* a=new CPHScriptAction(_action);
-	Level().ph_commander_scripts().add_call(c,a);
+	CPHScriptCondition* c = new CPHScriptCondition(_condition);
+	CPHScriptAction* a = new CPHScriptAction(_action);
+	Level().ph_commander_scripts().add_call(c, a);
 }
 
-void remove_call(const luabind::functor<bool> &condition,const luabind::functor<void> &action)
+void remove_call(const luabind::functor<bool>& condition, const luabind::functor<void>& action)
 {
 	CPHScriptCondition	c(condition);
 	CPHScriptAction		a(action);
-	Level().ph_commander_scripts().remove_call(&c,&a);
+	Level().ph_commander_scripts().remove_call(&c, &a);
 }
 
-void add_call(const luabind::object &lua_object, LPCSTR condition,LPCSTR action)
+void add_call(const luabind::object& lua_object, LPCSTR condition, LPCSTR action)
 {
-//	try{	
-//		CPHScriptObjectCondition	*c=new CPHScriptObjectCondition(lua_object,condition);
-//		CPHScriptObjectAction		*a=new CPHScriptObjectAction(lua_object,action);
-		luabind::functor<bool>		_condition = object_cast<luabind::functor<bool> >(lua_object[condition]);
-		luabind::functor<void>		_action = object_cast<luabind::functor<void> >(lua_object[action]);
-		CPHScriptObjectConditionN	*c=new CPHScriptObjectConditionN(lua_object,_condition);
-		CPHScriptObjectActionN		*a=new CPHScriptObjectActionN(lua_object,_action);
-		Level().ph_commander_scripts().add_call_unique(c,c,a,a);
-//	}
-//	catch(...)
-//	{
-//		Msg("add_call excepted!!");
-//	}
+	//	try{	
+	//		CPHScriptObjectCondition	*c=new CPHScriptObjectCondition(lua_object,condition);
+	//		CPHScriptObjectAction		*a=new CPHScriptObjectAction(lua_object,action);
+	luabind::functor<bool>		_condition = object_cast<luabind::functor<bool>>(lua_object[condition]);
+	luabind::functor<void>		_action = object_cast<luabind::functor<void>>(lua_object[action]);
+	CPHScriptObjectConditionN* c = new CPHScriptObjectConditionN(lua_object, _condition);
+	CPHScriptObjectActionN* a = new CPHScriptObjectActionN(lua_object, _action);
+	Level().ph_commander_scripts().add_call_unique(c, c, a, a);
+	//	}
+	//	catch(...)
+	//	{
+	//		Msg("add_call excepted!!");
+	//	}
 }
 
-void remove_call(const luabind::object &lua_object, LPCSTR condition,LPCSTR action)
+void remove_call(const luabind::object& lua_object, LPCSTR condition, LPCSTR action)
 {
-	CPHScriptObjectCondition	c(lua_object,condition);
-	CPHScriptObjectAction		a(lua_object,action);
-	Level().ph_commander_scripts().remove_call(&c,&a);
+	CPHScriptObjectCondition	c(lua_object, condition);
+	CPHScriptObjectAction		a(lua_object, action);
+	Level().ph_commander_scripts().remove_call(&c, &a);
 }
 
-void add_call(const luabind::object &lua_object, const luabind::functor<bool> &condition,const luabind::functor<void> &action)
+void add_call(const luabind::object& lua_object, const luabind::functor<bool>& condition, const luabind::functor<void>& action)
 {
 
-	CPHScriptObjectConditionN	*c=new CPHScriptObjectConditionN(lua_object,condition);
-	CPHScriptObjectActionN		*a=new CPHScriptObjectActionN(lua_object,action);
-	Level().ph_commander_scripts().add_call(c,a);
+	CPHScriptObjectConditionN* c = new CPHScriptObjectConditionN(lua_object, condition);
+	CPHScriptObjectActionN* a = new CPHScriptObjectActionN(lua_object, action);
+	Level().ph_commander_scripts().add_call(c, a);
 }
 
-void remove_call(const luabind::object &lua_object, const luabind::functor<bool> &condition,const luabind::functor<void> &action)
+void remove_call(const luabind::object& lua_object, const luabind::functor<bool>& condition, const luabind::functor<void>& action)
 {
-	CPHScriptObjectConditionN	c(lua_object,condition);
-	CPHScriptObjectActionN		a(lua_object,action);
-	Level().ph_commander_scripts().remove_call(&c,&a);
+	CPHScriptObjectConditionN	c(lua_object, condition);
+	CPHScriptObjectActionN		a(lua_object, action);
+	Level().ph_commander_scripts().remove_call(&c, &a);
 }
 
-void remove_calls_for_object(const luabind::object &lua_object)
+void remove_calls_for_object(const luabind::object& lua_object)
 {
 	CPHSriptReqObjComparer c(lua_object);
 	Level().ph_commander_scripts().remove_calls(&c);
@@ -568,12 +573,12 @@ cphysics_world_scripted* physics_world_scripted()
 {
 	return	get_script_wrapper<cphysics_world_scripted>(*physics_world());
 }
-CEnvironment *environment()
+CEnvironment* environment()
 {
 	return		(g_pGamePersistent->pEnvironment);
 }
 
-CEnvDescriptor *current_environment(CEnvironment *self_)
+CEnvDescriptor* current_environment(CEnvironment* self_)
 {
 	return		(self_->CurrentEnv);
 }
@@ -593,7 +598,7 @@ void enable_input()
 #endif // #ifdef DEBUG
 }
 
-void spawn_phantom(const Fvector &position)
+void spawn_phantom(const Fvector& position)
 {
 	Level().spawn_item("m_phantom", position, u32(-1), u16(-1), false);
 }
@@ -603,46 +608,46 @@ Fbox get_bounding_volume()
 	return Level().ObjectSpace.GetBoundingVolume();
 }
 
-void iterate_sounds					(LPCSTR prefix, u32 max_count, const CScriptCallbackEx<void> &callback)
+void iterate_sounds(LPCSTR prefix, u32 max_count, const CScriptCallbackEx<void>& callback)
 {
-	for (int j=0, N = _GetItemCount(prefix); j<N; ++j) {
+	for (int j = 0, N = _GetItemCount(prefix); j < N; ++j) {
 		string_path					fn, s;
 		LPSTR						S = (LPSTR)&s;
-		_GetItem					(prefix,j,s);
-		if (FS.exist(fn,"$game_sounds$",S,".ogg"))
-			callback				(prefix);
+		_GetItem(prefix, j, s);
+		if (FS.exist(fn, "$game_sounds$", S, ".ogg"))
+			callback(prefix);
 
-		for (u32 i=0; i<max_count; ++i)
+		for (u32 i = 0; i < max_count; ++i)
 		{
 			string_path					name;
-			xr_sprintf					(name,"%s%d",S,i);
-			if (FS.exist(fn,"$game_sounds$",name,".ogg"))
-				callback			(name);
+			xr_sprintf(name, "%s%d", S, i);
+			if (FS.exist(fn, "$game_sounds$", name, ".ogg"))
+				callback(name);
 		}
 	}
 }
 
-void iterate_sounds1				(LPCSTR prefix, u32 max_count, luabind::functor<void> functor)
+void iterate_sounds1(LPCSTR prefix, u32 max_count, luabind::functor<void> functor)
 {
 	CScriptCallbackEx<void>		temp;
-	temp.set					(functor);
-	iterate_sounds				(prefix,max_count,temp);
+	temp.set(functor);
+	iterate_sounds(prefix, max_count, temp);
 }
 
-void iterate_sounds2				(LPCSTR prefix, u32 max_count, luabind::object object, luabind::functor<void> functor)
+void iterate_sounds2(LPCSTR prefix, u32 max_count, luabind::object object, luabind::functor<void> functor)
 {
 	CScriptCallbackEx<void>		temp;
-	temp.set					(functor,object);
-	iterate_sounds				(prefix,max_count,temp);
+	temp.set(functor, object);
+	iterate_sounds(prefix, max_count, temp);
 }
 
 #include "ActorEffector.h"
 float add_cam_effector(LPCSTR fn, int id, bool cyclic, LPCSTR cb_func)
 {
-	CAnimatorCamEffectorScriptCB* e		= new CAnimatorCamEffectorScriptCB(cb_func);
-	e->SetType					((ECamEffectorType)id);
-	e->SetCyclic				(cyclic);
-	e->Start					(fn);
+	CAnimatorCamEffectorScriptCB* e = new CAnimatorCamEffectorScriptCB(cb_func);
+	e->SetType((ECamEffectorType)id);
+	e->SetCyclic(cyclic);
+	e->Start(fn);
 	Actor()->Cameras().AddCamEffector(e);
 	return						e->GetAnimatorLength();
 }
@@ -660,21 +665,21 @@ float add_cam_effector_without_fov(LPCSTR fn, int id, bool cyclic, LPCSTR cb_fun
 
 float add_cam_effector2(LPCSTR fn, int id, bool cyclic, LPCSTR cb_func, float cam_fov)
 {
-	CAnimatorCamEffectorScriptCB* e		= new CAnimatorCamEffectorScriptCB(cb_func);
-	e->m_bAbsolutePositioning	= true;
-	e->m_fov					= cam_fov;
-	e->SetType					((ECamEffectorType)id);
-	e->SetCyclic				(cyclic);
-	e->Start					(fn);
+	CAnimatorCamEffectorScriptCB* e = new CAnimatorCamEffectorScriptCB(cb_func);
+	e->m_bAbsolutePositioning = true;
+	e->m_fov = cam_fov;
+	e->SetType((ECamEffectorType)id);
+	e->SetCyclic(cyclic);
+	e->Start(fn);
 	Actor()->Cameras().AddCamEffector(e);
 	return						e->GetAnimatorLength();
 }
 
 void remove_cam_effector(int id)
 {
-	Actor()->Cameras().RemoveCamEffector((ECamEffectorType)id );
+	Actor()->Cameras().RemoveCamEffector((ECamEffectorType)id);
 }
-		
+
 float get_snd_volume()
 {
 	return psSoundVFactor;
@@ -683,7 +688,7 @@ float get_snd_volume()
 void set_snd_volume(float v)
 {
 	psSoundVFactor = v;
-	clamp(psSoundVFactor,0.0f,1.0f);
+	clamp(psSoundVFactor, 0.0f, 1.0f);
 }
 #include "actor_statistic_mgr.h"
 void add_actor_points(LPCSTR sect, LPCSTR detail_key, int cnt, int pts)
@@ -706,106 +711,106 @@ int get_actor_points(LPCSTR sect)
 #include "ActorEffector.h"
 void add_complex_effector(LPCSTR section, int id)
 {
-	AddEffector(Actor(),id, section);
+	AddEffector(Actor(), id, section);
 }
 
 void remove_complex_effector(int id)
 {
-	RemoveEffector(Actor(),id);
+	RemoveEffector(Actor(), id);
 }
 
 #include "PostprocessAnimator.h"
 void add_pp_effector(LPCSTR fn, int id, bool cyclic)
 {
-	CPostprocessAnimator* pp		= new CPostprocessAnimator(id, cyclic);
-	pp->Load						(fn);
-	Actor()->Cameras().AddPPEffector	(pp);
+	CPostprocessAnimator* pp = new CPostprocessAnimator(id, cyclic);
+	pp->Load(fn);
+	Actor()->Cameras().AddPPEffector(pp);
 }
 
 void remove_pp_effector(int id)
 {
-	CPostprocessAnimator*	pp	= smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
+	CPostprocessAnimator* pp = smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
 
-	if(pp) pp->Stop(1.0f);
+	if (pp) pp->Stop(1.0f);
 
 }
 
 void set_pp_effector_factor(int id, float f, float f_sp)
 {
-	CPostprocessAnimator*	pp	= smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
+	CPostprocessAnimator* pp = smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
 
-	if(pp) pp->SetDesiredFactor(f,f_sp);
+	if (pp) pp->SetDesiredFactor(f, f_sp);
 }
 
 void set_pp_effector_factor2(int id, float f)
 {
-	CPostprocessAnimator*	pp	= smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
+	CPostprocessAnimator* pp = smart_cast<CPostprocessAnimator*>(Actor()->Cameras().GetPPEffector((EEffectorPPType)id));
 
-	if(pp) pp->SetCurrentFactor(f);
+	if (pp) pp->SetCurrentFactor(f);
 }
 
 #include "relation_registry.h"
 
 int g_community_goodwill(LPCSTR _community, int _entity_id)
- {
-	 CHARACTER_COMMUNITY c;
-	 c.set					(_community);
+{
+	CHARACTER_COMMUNITY c;
+	c.set(_community);
 
- 	return RELATION_REGISTRY().GetCommunityGoodwill(c.index(), u16(_entity_id));
- }
+	return RELATION_REGISTRY().GetCommunityGoodwill(c.index(), u16(_entity_id));
+}
 
 void g_set_community_goodwill(LPCSTR _community, int _entity_id, int val)
 {
 	CHARACTER_COMMUNITY	c;
-	c.set					(_community);
+	c.set(_community);
 	RELATION_REGISTRY().SetCommunityGoodwill(c.index(), u16(_entity_id), val);
 }
 
 void g_change_community_goodwill(LPCSTR _community, int _entity_id, int val)
 {
 	CHARACTER_COMMUNITY	c;
-	c.set					(_community);
+	c.set(_community);
 	RELATION_REGISTRY().ChangeCommunityGoodwill(c.index(), u16(_entity_id), val);
 }
 
-int g_get_community_relation( LPCSTR comm_from, LPCSTR comm_to )
+int g_get_community_relation(LPCSTR comm_from, LPCSTR comm_to)
 {
 	CHARACTER_COMMUNITY	community_from;
-	community_from.set( comm_from );
+	community_from.set(comm_from);
 	CHARACTER_COMMUNITY	community_to;
-	community_to.set( comm_to );
+	community_to.set(comm_to);
 
-	return RELATION_REGISTRY().GetCommunityRelation( community_from.index(), community_to.index() );
+	return RELATION_REGISTRY().GetCommunityRelation(community_from.index(), community_to.index());
 }
 
-void g_set_community_relation( LPCSTR comm_from, LPCSTR comm_to, int value )
+void g_set_community_relation(LPCSTR comm_from, LPCSTR comm_to, int value)
 {
 	CHARACTER_COMMUNITY	community_from;
-	community_from.set( comm_from );
+	community_from.set(comm_from);
 	CHARACTER_COMMUNITY	community_to;
-	community_to.set( comm_to );
+	community_to.set(comm_to);
 
-	RELATION_REGISTRY().SetCommunityRelation( community_from.index(), community_to.index(), value );
+	RELATION_REGISTRY().SetCommunityRelation(community_from.index(), community_to.index(), value);
 }
 
-int g_get_general_goodwill_between ( u16 from, u16 to)
+int g_get_general_goodwill_between(u16 from, u16 to)
 {
-	CHARACTER_GOODWILL presonal_goodwill		= RELATION_REGISTRY().GetGoodwill(from, to); VERIFY(presonal_goodwill != NO_GOODWILL);
+	CHARACTER_GOODWILL presonal_goodwill = RELATION_REGISTRY().GetGoodwill(from, to); VERIFY(presonal_goodwill != NO_GOODWILL);
 
-	CSE_ALifeTraderAbstract* from_obj	= smart_cast<CSE_ALifeTraderAbstract*>(ai().alife().objects().object(from));
-	CSE_ALifeTraderAbstract* to_obj		= smart_cast<CSE_ALifeTraderAbstract*>(ai().alife().objects().object(to));
+	CSE_ALifeTraderAbstract* from_obj = smart_cast<CSE_ALifeTraderAbstract*>(ai().alife().objects().object(from));
+	CSE_ALifeTraderAbstract* to_obj = smart_cast<CSE_ALifeTraderAbstract*>(ai().alife().objects().object(to));
 
-	if (!from_obj||!to_obj){
-		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"RELATION_REGISTRY::get_general_goodwill_between  : cannot convert obj to CSE_ALifeTraderAbstract!");
+	if (!from_obj || !to_obj) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "RELATION_REGISTRY::get_general_goodwill_between  : cannot convert obj to CSE_ALifeTraderAbstract!");
 		return (0);
-	}	
-	CHARACTER_GOODWILL community_to_obj_goodwill		= RELATION_REGISTRY().GetCommunityGoodwill	(from_obj->Community(), to					);
-	CHARACTER_GOODWILL community_to_community_goodwill	= RELATION_REGISTRY().GetCommunityRelation	(from_obj->Community(), to_obj->Community()	);
-	
+	}
+	CHARACTER_GOODWILL community_to_obj_goodwill = RELATION_REGISTRY().GetCommunityGoodwill(from_obj->Community(), to);
+	CHARACTER_GOODWILL community_to_community_goodwill = RELATION_REGISTRY().GetCommunityRelation(from_obj->Community(), to_obj->Community());
+
 	return presonal_goodwill + community_to_obj_goodwill + community_to_community_goodwill;
 }
 
-u32 vertex_id	(Fvector position)
+u32 vertex_id(Fvector position)
 {
 	return	(ai().level_graph().vertex_id(position));
 }
@@ -824,22 +829,22 @@ void start_tutorial(LPCSTR name)
 		return;
 	}
 
-	if(g_tutorial){
-		VERIFY				(!g_tutorial2);
-		g_tutorial2			= g_tutorial;
+	if (g_tutorial) {
+		VERIFY(!g_tutorial2);
+		g_tutorial2 = g_tutorial;
 	};
 
-	g_tutorial							= new CUISequencer();
-	g_tutorial->Start					(name);
-	if(g_tutorial2)
+	g_tutorial = new CUISequencer();
+	g_tutorial->Start(name);
+	if (g_tutorial2)
 		g_tutorial->m_pStoredInputReceiver = g_tutorial2->m_pStoredInputReceiver;
 
 }
 
 void stop_tutorial()
 {
-	if(g_tutorial)
-		g_tutorial->Stop();	
+	if (g_tutorial)
+		g_tutorial->Stop();
 }
 
 LPCSTR translate_string(LPCSTR str)
@@ -849,7 +854,7 @@ LPCSTR translate_string(LPCSTR str)
 
 bool has_active_tutotial()
 {
-	return (g_tutorial!=nullptr);
+	return (g_tutorial != nullptr);
 }
 
 bool valid_vertex_id(u32 level_vertex_id) {
@@ -902,6 +907,7 @@ void spawn_section(LPCSTR sSection, Fvector3 vPosition, u32 LevelVertexID, u16 P
 }
 
 #include "HUDManager.h"
+#include <CustomTimer.h>
 //ability to get the target game_object at crosshair
 CScriptGameObject* g_get_target_obj()
 {
@@ -1014,74 +1020,174 @@ namespace level_nearest
 	}
 }
 
+void create_custom_timer(LPCSTR name, int start_value, int mode = 0)
+{
+	CTimerManager::GetInstance().CreateTimer(name, start_value, mode);
+}
+
+void bind_timer(LPCSTR function, const CBinderParams& params, int start_value, int mode = 0)
+{
+	CBinderManager::GetInstance().CreateBinder(function, params, start_value, mode);
+}
+
+void bind_timer_no_params(LPCSTR function, int start_value, int mode = 0)
+{
+	CBinderManager::GetInstance().CreateBinder(function, CBinderParams(), start_value, mode);
+}
+
+void start_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().StartTimer(name);
+}
+
+void stop_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().StopTimer(name);
+}
+
+void reset_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().ResetTimer(name);
+}
+
+void delete_custom_timer(LPCSTR name)
+{
+	CTimerManager::GetInstance().DeleteTimer(name);
+}
+
+int get_custom_timer(LPCSTR name)
+{
+	return CTimerManager::GetInstance().GetTimerValue(name);
+}
+
+void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
+{
+	if (!launch_object)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is NULL!");
+		return;
+	}
+	auto sam = smart_cast<CSamZone*>(&launch_object->object());
+	if (!sam)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is not a CSamZone!");
+		return;
+	}
+	if (!target)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "target_sam: target is NULL!");
+		return;
+	}
+	if (OnClient()) {
+		return;
+	}
+	sam->LaunchMissile(&target->object());
+}
+
 #pragma optimize("s",on)
-void CLevel::script_register(lua_State *L)
+void CLevel::script_register(lua_State* L)
 {
 	class_<CEnvDescriptor>("CEnvDescriptor")
-		.def_readonly("fog_density",			&CEnvDescriptor::fog_density)
-		.def_readonly("far_plane",				&CEnvDescriptor::far_plane),
+		.def_readonly("fog_density", &CEnvDescriptor::fog_density)
+		.def_readonly("far_plane", &CEnvDescriptor::far_plane),
 
 	class_<CEnvironment>("CEnvironment")
-		.def("current",							current_environment);
+		.def("current", current_environment);
 
-	module(L,"level")
+	module(L)
 	[
-		// obsolete\deprecated
-		def("object_by_id",						get_object_by_id),
+		class_<CBinderParam>("CBinderParam")
+			.def(constructor<>())
+			.def(constructor<const CBinderParam&>())
+			.def(constructor<LPCSTR>())
+			.def(constructor<double>())
+			.enum_("type")
+			[
+				value("string", static_cast<int>(EBinderParamType::eBinderParamString)),
+				value("u64", static_cast<int>(EBinderParamType::eBinderParamU64)),
+				value("s64", static_cast<int>(EBinderParamType::eBinderParamS64)),
+				value("double", static_cast<int>(EBinderParamType::eBinderParamDouble))
+			]
+			.def("get_type", &CBinderParam::GetType)
+			.def("get_string", &CBinderParam::GetString)
+			.def("get_u64", &CBinderParam::GetU64)
+			.def("get_s64", &CBinderParam::GetS64)
+			.def("get_double", &CBinderParam::GetDouble)
+			.def("set_string", &CBinderParam::SetString)
+			.def("set_u64", &CBinderParam::SetU64)
+			.def("set_s64", &CBinderParam::SetS64)
+			.def("set_double", &CBinderParam::SetDouble)
+	];
+
+	module(L)
+	[
+		class_<CBinderParams>("CBinderParams")
+			.def(constructor<>())
+			.def("add", &CBinderParams::Add)
+			.def("insert", &CBinderParams::Insert)
+			.def("remove", &CBinderParams::Remove)
+			.def("get", &CBinderParams::Get)
+			.def("size", &CBinderParams::Size)
+	];
+
+	module(L, "level")
+		[
+			// obsolete\deprecated
+			def("object_by_id", get_object_by_id),
 #ifdef DEBUG
-		def("debug_object",						get_object_by_name),
-		def("debug_actor",						tpfGetActor),
-		def("check_object",						check_object),
+				def("debug_object", get_object_by_name),
+				def("debug_actor", tpfGetActor),
+				def("check_object", check_object),
 #endif
-		
-		def("get_weather",						get_weather),
-		def("set_weather",						set_weather),
-		def("set_weather_fx",					set_weather_fx),
-		def("set_past_weather", set_past_wdesc),
-		def("set_next_weather", set_next_wdesc),
-		def("get_weather_game_time", get_weather_game_time),
-		def("get_past_wdesc_execution_time", get_past_wdesc_execution_time),
-		def("get_next_wdesc_execution_time", get_next_wdesc_execution_time),
-		def("get_past_weather", get_past_wdesc),
-		def("get_next_weather", get_next_wdesc),
-		def("start_weather_fx_from_time",		start_weather_fx_from_time),
-		def("is_wfx_playing",					is_wfx_playing),
-		def("get_wfx_time",						get_wfx_time),
-		def("stop_weather_fx",					stop_weather_fx),
 
-		def("environment",						environment),
-		
-		def("set_time_factor",					set_time_factor),
-		def("get_time_factor",					get_time_factor),
+				def("get_weather", get_weather),
+				def("set_weather", set_weather),
+				def("set_weather_fx", set_weather_fx),
+				def("set_past_weather", set_past_wdesc),
+				def("set_next_weather", set_next_wdesc),
+				def("get_weather_game_time", get_weather_game_time),
+				def("get_past_wdesc_execution_time", get_past_wdesc_execution_time),
+				def("get_next_wdesc_execution_time", get_next_wdesc_execution_time),
+				def("get_past_weather", get_past_wdesc),
+				def("get_next_weather", get_next_wdesc),
+				def("start_weather_fx_from_time", start_weather_fx_from_time),
+				def("is_wfx_playing", is_wfx_playing),
+				def("get_wfx_time", get_wfx_time),
+				def("stop_weather_fx", stop_weather_fx),
 
-		def("set_global_time_factor", &set_global_time_factor),
-		def("get_global_time_factor", &get_global_time_factor),
+				def("environment", environment),
 
-		def("set_game_difficulty",				set_game_difficulty),
-		def("get_game_difficulty",				get_game_difficulty),
-		
-		def("get_time_days",					get_time_days),
-		def("get_time_hours",					get_time_hours),
-		def("get_time_minutes",					get_time_minutes),
-		def("change_game_time",					change_game_time),
+				def("set_time_factor", set_time_factor),
+				def("get_time_factor", get_time_factor),
 
-		def("high_cover_in_direction",			high_cover_in_direction),
-		def("low_cover_in_direction",			low_cover_in_direction),
-		def("vertex_in_direction",				vertex_in_direction),
-		def("rain_factor",						rain_factor),
-		def("patrol_path_exists",				patrol_path_exists),
-		def("vertex_position",					vertex_position),
-		def("name",								get_name),
-		def("prefetch_sound",					prefetch_sound),
+				def("set_global_time_factor", &set_global_time_factor),
+				def("get_global_time_factor", &get_global_time_factor),
 
-		def("client_spawn_manager",				get_client_spawn_manager),
+				def("set_game_difficulty", set_game_difficulty),
+				def("get_game_difficulty", get_game_difficulty),
 
-		def("map_add_object_spot_ser",			map_add_object_spot_ser),
-		def("map_add_object_spot",				map_add_object_spot),
-//-		def("map_add_object_spot_complex",		map_add_object_spot_complex),
-		def("map_remove_object_spot",			map_remove_object_spot),
-		def("map_has_object_spot",				map_has_object_spot),
-		def("map_change_spot_hint",				map_change_spot_hint),
+				def("get_time_days", get_time_days),
+				def("get_time_hours", get_time_hours),
+				def("get_time_minutes", get_time_minutes),
+				def("change_game_time", change_game_time),
+
+				def("high_cover_in_direction", high_cover_in_direction),
+				def("low_cover_in_direction", low_cover_in_direction),
+				def("vertex_in_direction", vertex_in_direction),
+				def("rain_factor", rain_factor),
+				def("patrol_path_exists", patrol_path_exists),
+				def("vertex_position", vertex_position),
+				def("name", get_name),
+				def("prefetch_sound", prefetch_sound),
+
+				def("client_spawn_manager", get_client_spawn_manager),
+
+				def("map_add_object_spot_ser", map_add_object_spot_ser),
+				def("map_add_object_spot", map_add_object_spot),
+				//-		def("map_add_object_spot_complex",		map_add_object_spot_complex),
+				def("map_remove_object_spot", map_remove_object_spot),
+				def("map_has_object_spot", map_has_object_spot),
+				def("map_change_spot_hint", map_change_spot_hint),
 
 		def("start_stop_menu", start_stop_menu),
 		def("add_dialog_to_render",				add_dialog_to_render),
@@ -1089,21 +1195,21 @@ void CLevel::script_register(lua_State *L)
 		def("hide_indicators",					hide_indicators),
 		def("hide_indicators_safe",				hide_indicators_safe),
 
-		def("show_indicators",					show_indicators),
-		def("show_weapon",						show_weapon),
-		def("add_call",							((void (*) (const luabind::functor<bool> &,const luabind::functor<void> &)) &add_call)),
-		def("add_call",							((void (*) (const luabind::object &,const luabind::functor<bool> &,const luabind::functor<void> &)) &add_call)),
-		def("add_call",							((void (*) (const luabind::object &, LPCSTR, LPCSTR)) &add_call)),
-		def("remove_call",						((void (*) (const luabind::functor<bool> &,const luabind::functor<void> &)) &remove_call)),
-		def("remove_call",						((void (*) (const luabind::object &,const luabind::functor<bool> &,const luabind::functor<void> &)) &remove_call)),
-		def("remove_call",						((void (*) (const luabind::object &, LPCSTR, LPCSTR)) &remove_call)),
-		def("remove_calls_for_object",			remove_calls_for_object),
-		def("present",							is_level_present),
-		def("disable_input",					disable_input),
-		def("enable_input",						enable_input),
-		def("spawn_phantom",					spawn_phantom),
+				def("show_indicators", show_indicators),
+				def("show_weapon", show_weapon),
+				def("add_call", ((void (*) (const luabind::functor<bool> &, const luabind::functor<void> &)) & add_call)),
+				def("add_call", ((void (*) (const luabind::object&, const luabind::functor<bool> &, const luabind::functor<void> &)) & add_call)),
+				def("add_call", ((void (*) (const luabind::object&, LPCSTR, LPCSTR)) & add_call)),
+				def("remove_call", ((void (*) (const luabind::functor<bool> &, const luabind::functor<void> &)) & remove_call)),
+				def("remove_call", ((void (*) (const luabind::object&, const luabind::functor<bool> &, const luabind::functor<void> &)) & remove_call)),
+				def("remove_call", ((void (*) (const luabind::object&, LPCSTR, LPCSTR)) & remove_call)),
+				def("remove_calls_for_object", remove_calls_for_object),
+				def("present", is_level_present),
+				def("disable_input", disable_input),
+				def("enable_input", enable_input),
+				def("spawn_phantom", spawn_phantom),
 
-		def("get_bounding_volume",				get_bounding_volume),
+				def("get_bounding_volume", get_bounding_volume),
 
 		def("iterate_sounds",					&iterate_sounds1),
 		def("iterate_sounds",					&iterate_sounds2),
@@ -1120,56 +1226,69 @@ void CLevel::script_register(lua_State *L)
 		def("remove_pp_effector",				&remove_pp_effector),
 		def("get_compass_direction",			&get_compass_direction),
 
-		def("add_complex_effector",				&add_complex_effector),
-		def("remove_complex_effector",			&remove_complex_effector),
-		
-		def("valid_vertex_id", valid_vertex_id),
-		def("is_accessible_vertex_id", is_accessible_vertex_id),
-		def("disable_vertex", disable_vertex),
-		def("enable_vertex", enable_vertex),
-		def("vertex_id",						&vertex_id),
+				def("add_complex_effector", &add_complex_effector),
+				def("remove_complex_effector", &remove_complex_effector),
 
-		def("game_id", &GameID),
+				def("valid_vertex_id", valid_vertex_id),
+				def("is_accessible_vertex_id", is_accessible_vertex_id),
+				def("disable_vertex", disable_vertex),
+				def("enable_vertex", enable_vertex),
+				def("vertex_id", &vertex_id),
 
-		def("block_action", &block_action_script),
-		def("is_block_action", &is_block_action_script),
-		def("unblock_action", &unblock_action_script),
-		def("press_action", &press_action_script),
-		def("hold_action", &hold_action_script),
-		def("release_action", &release_action_script),
-		def("lock_actor", &LockActorWithCameraRotation_script),
-		def("unlock_actor", &UnLockActor_script),
-		
-		def("u_event_gen", &u_event_gen), //Send events via packet
-		def("u_event_send", &u_event_send),
-		def("send", &g_send), //allow the ability to send netpacket to level
-		def("send", &g_send2), //allow the ability to send netpacket to level
-		def("get_target_obj", &g_get_target_obj), //intentionally named to what is in xray extensions
-		def("get_target_dist", &g_get_target_dist),
-		def("press_action", &LevelPressAction),
-		def("release_action", &LevelReleaseAction),
-		def("hold_action", &LevelHoldAction),
-		def("get_target_element", &g_get_target_element), //Can get bone cursor is targetting
-		def("get_view_entity", &get_view_entity_script),
-		def("set_view_entity", &set_view_entity_script),
-		def("spawn_item", &spawn_section),
-		def("get_active_cam", &get_active_cam),
-		def("set_active_cam", &set_active_cam),
-		def("get_start_time", &get_start_time),
-		def("valid_vertex", &valid_vertex)
-	],
-	
-	module(L,"nearest")
-	[
-		def("set",						&level_nearest::Set),
-		def("size",						&level_nearest::Size),
-		def("get",						&level_nearest::Get)
-	];
-	
+				def("game_id", &GameID),
+
+				def("block_action", &block_action_script),
+				def("is_block_action", &is_block_action_script),
+				def("unblock_action", &unblock_action_script),
+				def("press_action", &press_action_script),
+				def("hold_action", &hold_action_script),
+				def("release_action", &release_action_script),
+				def("lock_actor", &LockActorWithCameraRotation_script),
+				def("unlock_actor", &UnLockActor_script),
+
+				def("u_event_gen", &u_event_gen), //Send events via packet
+				def("u_event_send", &u_event_send),
+				def("send", &g_send), //allow the ability to send netpacket to level
+				def("send", &g_send2), //allow the ability to send netpacket to level
+				def("get_target_obj", &g_get_target_obj), //intentionally named to what is in xray extensions
+				def("get_target_dist", &g_get_target_dist),
+				def("press_action", &LevelPressAction),
+				def("release_action", &LevelReleaseAction),
+				def("hold_action", &LevelHoldAction),
+				def("get_target_element", &g_get_target_element), //Can get bone cursor is targetting
+				def("get_view_entity", &get_view_entity_script),
+				def("set_view_entity", &set_view_entity_script),
+				def("spawn_item", &spawn_section),
+				def("get_active_cam", &get_active_cam),
+				def("set_active_cam", &set_active_cam),
+				def("get_start_time", &get_start_time),
+				def("valid_vertex", &valid_vertex),
+
+				def("create_custom_timer", &create_custom_timer),
+				def("start_custom_timer", &start_custom_timer),
+				def("stop_custom_timer", &stop_custom_timer),
+				def("reset_custom_timer", &reset_custom_timer),
+				def("delete_custom_timer", &delete_custom_timer),
+				def("get_custom_timer", &get_custom_timer),
+
+				def("bind_timer", &bind_timer),
+
+				def("get_user_name", &get_user_name),
+
+				def("launch_sam", &launch_sam)
+		],
+
+		module(L, "nearest")
+		[
+			def("set", &level_nearest::Set),
+				def("size", &level_nearest::Size),
+				def("get", &level_nearest::Get)
+		];
+
 	module(L, "animslot")
-	[
-		def("play", &CHUDAnimItem::PlayHudAnim)
-	];
+		[
+			def("play", &CHUDAnimItem::PlayHudAnim)
+		];
 
 	module(L, "player_hud")
 	[
@@ -1216,76 +1335,78 @@ void CLevel::script_register(lua_State *L)
 	];  
 
 	module(L)
-	[
-		def("command_line",						&command_line),
-		def("IsGameTypeSingle",					&IsGameTypeSingle),
-		def("IsDynamicMusic",					&IsDynamicMusic),
-		def("render_get_dx_level",				&render_get_dx_level),
-		def("IsImportantSave",					&IsImportantSave),
-		def("IsDedicated",						&is_dedicated),
-		def("OnClient",							&OnClient),
-		def("OnServer",							&OnServer)
-	];
+		[
+			def("command_line", &command_line),
+				def("IsGameTypeSingle", &IsGameTypeSingle),
+				def("IsDynamicMusic", &IsDynamicMusic),
+				def("render_get_dx_level", &render_get_dx_level),
+				def("IsImportantSave", &IsImportantSave),
+				def("IsDedicated", &is_dedicated),
+				def("OnClient", &OnClient),
+				def("OnServer", &OnServer)
+		];
 
-	module(L,"relation_registry")
-	[
-		def("community_goodwill",				&g_community_goodwill),
-		def("set_community_goodwill",			&g_set_community_goodwill),
-		def("change_community_goodwill",		&g_change_community_goodwill),
-		
-		def("community_relation",				&g_get_community_relation),
-		def("set_community_relation",			&g_set_community_relation),
-		def("get_general_goodwill_between",		&g_get_general_goodwill_between)
-	];
+	module(L, "relation_registry")
+		[
+			def("community_goodwill", &g_community_goodwill),
+				def("set_community_goodwill", &g_set_community_goodwill),
+				def("change_community_goodwill", &g_change_community_goodwill),
 
-	module(L,"game")
-	[
-		class_< xrTime >("CTime")
-			.enum_("date_format")
-			[
-				value("DateToDay",		int(InventoryUtilities::edpDateToDay)),
-				value("DateToMonth",	int(InventoryUtilities::edpDateToMonth)),
-				value("DateToYear",		int(InventoryUtilities::edpDateToYear))
-			]
-			.enum_("time_format")
-			[
-				value("TimeToHours",	int(InventoryUtilities::etpTimeToHours)),
-				value("TimeToMinutes",	int(InventoryUtilities::etpTimeToMinutes)),
-				value("TimeToSeconds",	int(InventoryUtilities::etpTimeToSeconds)),
-				value("TimeToMilisecs",	int(InventoryUtilities::etpTimeToMilisecs))
-			]
-			.def(						constructor<>()				)
-			.def(						constructor<const xrTime&>())
-			.def(const_self <			xrTime()					)
-			.def(const_self <=			xrTime()					)
-			.def(const_self >			xrTime()					)
-			.def(const_self >=			xrTime()					)
-			.def(const_self ==			xrTime()					)
-			.def(self +					xrTime()					)
-			.def(self -					xrTime()					)
+				def("community_relation", &g_get_community_relation),
+				def("set_community_relation", &g_set_community_relation),
+				def("get_general_goodwill_between", &g_get_general_goodwill_between)
+		];
 
-			.def("diffSec"				,&xrTime::diffSec_script)
-			.def("add"					,&xrTime::add_script)
-			.def("sub"					,&xrTime::sub_script)
+	module(L, "game")
+		[
+			class_< xrTime >("CTime")
+				.enum_("date_format")
+				[
+					value("DateToDay", int(InventoryUtilities::edpDateToDay)),
+						value("DateToMonth", int(InventoryUtilities::edpDateToMonth)),
+						value("DateToYear", int(InventoryUtilities::edpDateToYear))
+				]
+				.enum_("time_format")
+				[
+					value("TimeToHours", int(InventoryUtilities::etpTimeToHours)),
+						value("TimeToMinutes", int(InventoryUtilities::etpTimeToMinutes)),
+						value("TimeToSeconds", int(InventoryUtilities::etpTimeToSeconds)),
+						value("TimeToMilisecs", int(InventoryUtilities::etpTimeToMilisecs))
+				]
+				.def(constructor<>())
+				.def(constructor<const xrTime&>())
+				.def(const_self < xrTime())
+				.def(const_self <= xrTime())
+				.def(const_self > xrTime())
+				.def(const_self >= xrTime())
+				.def(const_self == xrTime())
+				.def(self + xrTime())
+				.def(self - xrTime())
 
-			.def("save"					,&xrTime::Save)
-			.def("load"					,&xrTime::Load)
+				.def("diffSec", &xrTime::diffSec_script)
+				.def("add", &xrTime::add_script)
+				.def("sub", &xrTime::sub_script)
 
-			.def("setHMS"				,&xrTime::setHMS)
-			.def("setHMSms"				,&xrTime::setHMSms)
-			.def("set"					,&xrTime::set)
-			.def("get"					,&xrTime::get, out_value<2>() + out_value<3>() + out_value<4>() + out_value<5>() + out_value<6>() + out_value<7>() + out_value<8>())
-			.def("dateToString"			,&xrTime::dateToString)
-			.def("timeToString"			,&xrTime::timeToString),
-			// declarations
-			def("time",					get_time),
-			def("get_game_time",		get_time_struct),
-//			def("get_surge_time",	Game::get_surge_time),
-//			def("get_object_by_name",Game::get_object_by_name),
-		
-		def("start_tutorial",		&start_tutorial),
-		def("stop_tutorial",		&stop_tutorial),
-		def("has_active_tutorial",	&has_active_tutotial),
-		def("translate_string",		&translate_string)
-	];
+				.def("save", &xrTime::Save)
+				.def("load", &xrTime::Load)
+
+				.def("setHMS", &xrTime::setHMS)
+				.def("setHMSms", &xrTime::setHMSms)
+				.def("set", &xrTime::set)
+				.def("get", &xrTime::get, out_value<2>() + out_value<3>() + out_value<4>() + out_value<5>() + out_value<6>() + out_value<7>() + out_value<8>())
+				.def("dateToString", &xrTime::dateToString)
+				.def("timeToString", &xrTime::timeToString),
+				// declarations
+				def("time", get_time),
+				def("get_game_time", get_time_struct),
+				//			def("get_surge_time",	Game::get_surge_time),
+				//			def("get_object_by_name",Game::get_object_by_name),
+
+				def("start_tutorial", &start_tutorial),
+				def("stop_tutorial", &stop_tutorial),
+				def("has_active_tutorial", &has_active_tutotial),
+				def("translate_string", &translate_string)
+		];
 }
+
+SCRIPT_EXPORT1(CLevel);

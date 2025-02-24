@@ -127,6 +127,15 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemAmmo,CSE_ALifeItem)
 	virtual bool					can_switch_offline	() const;
 SERVER_ENTITY_DECLARE_END
 
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemFuel, CSE_ALifeItem)
+
+CSE_ALifeItemFuel(LPCSTR caSection);
+virtual							~CSE_ALifeItemFuel();
+virtual CSE_ALifeItemFuel* cast_item_fuel() override { return this; };
+virtual bool					can_switch_online() const;
+virtual bool					can_switch_offline() const;
+SERVER_ENTITY_DECLARE_END
+
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemWeapon,CSE_ALifeItem)
 
 	typedef	ALife::EWeaponAddonStatus	EWeaponAddonStatus;
@@ -195,6 +204,13 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemWeapon,CSE_ALifeItem)
 	virtual BOOL					Net_Relevant		();
 
 	virtual CSE_ALifeItemWeapon		*cast_item_weapon	() {return this;}
+SERVER_ENTITY_DECLARE_END
+
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemFlamethrower, CSE_ALifeItemWeapon)
+CSE_ALifeItemFlamethrower(LPCSTR caSection);
+virtual							~CSE_ALifeItemFlamethrower();
+
+virtual CSE_ALifeItemFlamethrower* cast_item_flamethrower() override { return this; }
 SERVER_ENTITY_DECLARE_END
 
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemWeaponMagazined,CSE_ALifeItemWeapon)

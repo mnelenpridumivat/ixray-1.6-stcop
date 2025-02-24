@@ -89,6 +89,8 @@ public:
 	PIItem					Get					(CLASS_ID cls_id,  bool bSearchRuck) const;
 	PIItem					GetAny				(LPCSTR name) const;//search both (ruck and belt)
 	PIItem					item				(CLASS_ID cls_id) const;
+
+	void GetAll(LPCSTR name, xr_vector<PIItem>& Output);
 	
 	// get all the items with the same section name
 	virtual u32				dwfGetSameItemCount	(LPCSTR caSection, bool SearchAll = false);	
@@ -129,6 +131,18 @@ public:
 
 protected:
 	TISlotArr				m_slots;
+
+	bool					m_bTakeItemActivated;
+	bool					m_bItemTaken;
+	bool					m_bUsePickupAnim;
+	int						m_iTakeAnimLength;
+	int						m_iActionTiming;
+
+	CGameObject* GameObject;
+	CObject* Object;
+
+	ref_sound				m_action_anim_sound;
+
 public:
 	//возвращает все кроме PDA в слоте и болта
 	void				AddAvailableItems			(TIItemContainer& items_container, bool for_trade) const;

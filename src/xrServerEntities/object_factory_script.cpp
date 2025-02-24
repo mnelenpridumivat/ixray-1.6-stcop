@@ -121,3 +121,5 @@ void CObjectFactory::script_register(lua_State *L)
 			.def("register",	(void (CObjectFactory::*)(LPCSTR,LPCSTR,LPCSTR))(&CObjectFactory::register_script_class))
 	];
 }
+
+SCRIPT_EXPORT1(CObjectFactory);

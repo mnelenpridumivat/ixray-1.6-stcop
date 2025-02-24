@@ -140,3 +140,5 @@ void CScriptIniFile::script_register(lua_State *L)
 		def("create_ini_file",		&create_ini_file,	adopt<0>())
 	];
 }
+
+SCRIPT_EXPORT1(CScriptIniFile);

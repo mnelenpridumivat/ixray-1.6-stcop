@@ -33,6 +33,8 @@
 
 #include "../InventoryBox.h"
 
+#include "script_ui_registrator.h"
+
 using namespace luabind;
 
 CUIActorMenu* GetActorMenu()
@@ -156,7 +158,7 @@ void CUIActorMenu::CurModeToScript()
 #pragma optimize("s",on)
 void CUIActorMenu::script_register(lua_State *L)
 {
-	/* TODO: St4lker0k765: Port this?
+	// TODO: St4lker0k765: Port this?
 	module(L)
 	[
 		class_< enum_exporter<EDDListType> >("EDDListType")
@@ -186,26 +188,19 @@ void CUIActorMenu::script_register(lua_State *L)
 				.def("IsShown", &CUIActorMenu::IsShown)
 				.def("ShowDialog", &CUIActorMenu::ShowDialog)
 				.def("HideDialog", &CUIActorMenu::HideDialog)
-				.def("ToSlot", &CUIActorMenu::ToSlotScript)
-				.def("ToBelt", &CUIActorMenu::ToBeltScript)
 				.def("SetMenuMode", &CUIActorMenu::SetMenuMode)
-				.def("GetMenuMode", &CUIActorMenu::GetMenuMode)
-				.def("GetPartner", &ActorMenuGetPartner_script)
-				.def("GetInvBox", &ActorMenuGetInvbox_script)
-				.def("SetPartner", &ActorMenuSetPartner_script)
-				.def("SetInvBox", &ActorMenuSetInvbox_script)
-				.def("SetActor", &ActorMenuSetActor_script),
+				.def("GetMenuMode", &CUIActorMenu::GetMenuMode),
 				
 			class_< CUIPdaWnd, CUIDialogWnd>("CUIPdaWnd")
 				.def(constructor<>())
 				.def("IsShown", &CUIPdaWnd::IsShown)
 				.def("ShowDialog", &CUIPdaWnd::ShowDialog)
-				.def("HideDialog", &CUIPdaWnd::HideDialog)
-				.def("SetActiveSubdialog", &CUIPdaWnd::SetActiveSubdialog_script)
+				.def("HideDialog", &CUIPdaWnd::HideDialog),
+				/*.def("SetActiveSubdialog", &CUIPdaWnd::SetActiveSubdialog_script)
 				.def("SetActiveDialog", &CUIPdaWnd::SetActiveDialog)
 				.def("GetActiveDialog", &CUIPdaWnd::GetActiveDialog)
 				.def("GetActiveSection", &CUIPdaWnd::GetActiveSection)
-				.def("GetTabControl", &CUIPdaWnd::GetTabControl),
+				.def("GetTabControl", &CUIPdaWnd::GetTabControl),*/
 
 				class_< CUIMainIngameWnd, CUIWindow>("CUIMainIngameWnd")
 				.def(constructor<>())
@@ -232,7 +227,7 @@ void CUIActorMenu::script_register(lua_State *L)
 
 				class_< CUIZoneMap >("CUIZoneMap")
 				.def(constructor<>())
-				.def_readwrite("disabled", &CUIZoneMap::disabled)
+				//.def_readwrite("disabled", &CUIZoneMap::disabled)
 				.def_readonly("visible", &CUIZoneMap::visible)
 				.def("MapFrame", &CUIZoneMap::MapFrame)
 				.def("Background", &CUIZoneMap::Background),
@@ -243,12 +238,12 @@ void CUIActorMenu::script_register(lua_State *L)
 				class_< CUIHudStatesWnd, CUIWindow>("CUIHudStatesWnd")
 				.def(constructor<>())
 				.def_readonly("m_back", &CUIHudStatesWnd::m_back)
-				.def_readonly("m_ui_weapon_ammo_color_active", &CUIHudStatesWnd::m_ui_weapon_ammo_color_active)
-				.def_readonly("m_ui_weapon_ammo_color_inactive", &CUIHudStatesWnd::m_ui_weapon_ammo_color_inactive)
+				//.def_readonly("m_ui_weapon_ammo_color_active", &CUIHudStatesWnd::m_ui_weapon_ammo_color_active)
+				//.def_readonly("m_ui_weapon_ammo_color_inactive", &CUIHudStatesWnd::m_ui_weapon_ammo_color_inactive)
 				.def_readonly("m_ui_weapon_cur_ammo", &CUIHudStatesWnd::m_ui_weapon_cur_ammo)
 				.def_readonly("m_ui_weapon_fmj_ammo", &CUIHudStatesWnd::m_ui_weapon_fmj_ammo)
 				.def_readonly("m_ui_weapon_ap_ammo", &CUIHudStatesWnd::m_ui_weapon_ap_ammo)
-				.def_readonly("m_ui_weapon_third_ammo", &CUIHudStatesWnd::m_ui_weapon_third_ammo)
+				//.def_readonly("m_ui_weapon_third_ammo", &CUIHudStatesWnd::m_ui_weapon_third_ammo)
 				.def_readonly("m_fire_mode", &CUIHudStatesWnd::m_fire_mode)
 				.def_readonly("m_ui_grenade", &CUIHudStatesWnd::m_ui_grenade)
 				.def_readonly("m_ui_weapon_icon", &CUIHudStatesWnd::m_ui_weapon_icon)
@@ -257,7 +252,7 @@ void CUIActorMenu::script_register(lua_State *L)
 				.def_readonly("m_radia_damage", &CUIHudStatesWnd::m_radia_damage)
 				
 	];
-	*/
+	
 	module(L, "ActorMenu")
 	[
 		def("get_pda_menu", &GetPDAMenu),
@@ -266,3 +261,5 @@ void CUIActorMenu::script_register(lua_State *L)
 		def("get_maingame",&GetMainGameMenu)
 	];
 }
+
+SCRIPT_EXPORT2(CUIActorMenu, UIRegistrator);

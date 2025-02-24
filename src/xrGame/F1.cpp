@@ -8,6 +8,7 @@
 #include "BottleItem.h"
 #include "ExplosiveItem.h"
 #include "InventoryBox.h"
+#include "FlameCanister.h"
 
 CF1::CF1(void) {
 }
@@ -27,6 +28,8 @@ void CF1::script_register	(lua_State *L)
 			//new 14.10.08 peacemaker
 		class_<CWeaponAmmo,CGameObject>("CWeaponAmmo")
 			.def(constructor<>()),
+		class_<CFlameCanister, CGameObject>("CFlameCanister")
+			.def(constructor<>()),
 		class_<CMedkit,CGameObject>("CMedkit")
 			.def(constructor<>()),
 		class_<CAntirad,CGameObject>("CAntirad")
@@ -41,3 +44,5 @@ void CF1::script_register	(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CF1, CObjectScript);

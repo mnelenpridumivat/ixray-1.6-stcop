@@ -48,6 +48,12 @@ public:
 	IC		const u32					&flags				() const;
 	IC		const shared_str			&name				() const;
 
+	void set_name(shared_str name);
+	void set_position(Fvector position);
+	void set_flags(u32 flags);
+	void set_level_vertex(u32 level_vertex_id);
+	void set_game_vertex(GameGraph::_GRAPH_ID game_vertex_id);
+
 public:
 #ifdef XRGAME_EXPORTS
 			const u32					&level_vertex_id	() const;

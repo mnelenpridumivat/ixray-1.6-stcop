@@ -78,6 +78,8 @@ void cphysics_shell_scripted::script_register( lua_State *L )
 		];
 }
 
+SCRIPT_EXPORT1(cphysics_shell_scripted);
+
 
 /*
 Fmatrix	global_transform(CPhysicsElement* E)

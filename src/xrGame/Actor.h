@@ -25,6 +25,7 @@ class CInfoPortion;
 struct GAME_NEWS_DATA;
 class CActorCondition;
 class CCustomOutfit;
+class CEncyclopediaRegistryWrapper;
 class CGameTaskRegistryWrapper;
 class CGameNewsRegistryWrapper;
 class CCharacterPhysicsSupport;
@@ -144,10 +145,14 @@ public:
 	virtual void	AddGameNews				 (GAME_NEWS_DATA& news_data);
 protected:
 	CActorStatisticMgr*				m_statistic_manager;
+
+	virtual void AddEncyclopediaArticle(const CInfoPortion* info_portion) const;
+
 public:
 	virtual void StartTalk			(CInventoryOwner* talk_partner);
 			void RunTalkDialog		(CInventoryOwner* talk_partner, bool disable_break);
 	CActorStatisticMgr&				StatisticMgr()	{return *m_statistic_manager;}
+	CEncyclopediaRegistryWrapper* encyclopedia_registry;
 	CGameNewsRegistryWrapper		*game_news_registry;
 	CCharacterPhysicsSupport		*m_pPhysics_support;
 

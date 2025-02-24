@@ -26,7 +26,10 @@ ObjectFactory::CLIENT_BASE_CLASS *CObjectItemScript::client_object	() const
 	R_ASSERT	(object);
 	return		(object->_construct());
 }
-
+#else
+ObjectFactory::CLIENT_BASE_CLASS* CObjectItemScript::client_object() const {
+	return nullptr;
+}
 #endif
 
 ObjectFactory::SERVER_BASE_CLASS *CObjectItemScript::server_object	(LPCSTR section) const

@@ -15,6 +15,11 @@ CHelmet::CHelmet()
 		m_HitTypeProtection[i] = 1.0f;
 
 	m_boneProtection = new SBoneProtections();
+
+	m_NightVisionType = 0;
+	m_fNightVisionLumFactor = 0.0f;
+
+	m_b_HasGlass = false;
 }
 
 CHelmet::~CHelmet()
@@ -57,6 +62,11 @@ void CHelmet::Load(LPCSTR section)
 
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
+
+	m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
+	m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
+
+	m_b_HasGlass = READ_IF_EXISTS(pSettings, r_bool, section, "has_glass", false);
 }
 
 void CHelmet::ReloadBonesProtection()
@@ -170,6 +180,8 @@ bool CHelmet::install_upgrade_impl( LPCSTR section, bool test )
 	if ( result2 && !test )
 	{
 		m_NightVisionSect._set( str );
+		m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
+		m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
 	}
 	result |= result2;
 
@@ -259,4 +271,16 @@ float CHelmet::HitThroughArmor(float hit_power, s16 element, float ap, bool& add
 	Hit(hit_power, hit_type);
 
 	return NewHitPower;
+}
+
+bool CHelmet::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	return true;
+	/*auto helmet = smart_cast<CHelmet*>(other);
+	VERIFY(other);
+	return fsimilar(helmet->GetFilterCondition(), GetFilterCondition(), 0.01f);*/
 }

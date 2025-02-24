@@ -88,6 +88,7 @@ void CScriptGameObject::script_register(lua_State *L)
 				value("hud_animation_end",			int(GameObject::eActorHudAnimationEnd)),
 				value("helicopter_on_point",		int(GameObject::eHelicopterOnPoint)),
 				value("helicopter_on_hit",			int(GameObject::eHelicopterOnHit)),
+				value("helicopter_on_sam_hit", static_cast<int>(GameObject::eHelicopterOnSamHit)),
 				value("on_item_take",				int(GameObject::eOnItemTake)),
 				value("on_item_drop",				int(GameObject::eOnItemDrop)),
 				value("script_animation",			int(GameObject::eScriptAnimation)),
@@ -107,6 +108,16 @@ void CScriptGameObject::script_register(lua_State *L)
 				value("item_to_slot",				int(GameObject::eItemToSlot)),
 				value("item_to_ruck",				int(GameObject::eItemToRuck)),
 				value("on_foot_step",				int(GameObject::eOnFootStep)),
+				//Dance Maniac
+				value("on_actor_jump", int(GameObject::eOnActorJump)),
+
+				// anomal pseudogigant
+				value("shield_on", static_cast<int>(GameObject::eShieldOn)),
+				value("shield_off", static_cast<int>(GameObject::eShieldOff)),
+				value("jump", static_cast<int>(GameObject::eJump)),
+
+				// dangerous material touch
+				value("dangerous_material_touch", static_cast<int>(GameObject::eDangerousMaterialTouch)),
 				
 				// car
 				value("on_attach_vehicle", 			int(GameObject::eAttachVehicle)),
@@ -130,3 +141,5 @@ void CScriptGameObject::script_register(lua_State *L)
 		def("show_condition",				&::show_condition)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptGameObject);

@@ -135,3 +135,5 @@ void CScriptNetPacket::script_register(lua_State *L)
 
 	];
 }
+
+SCRIPT_EXPORT1(CScriptNetPacket);

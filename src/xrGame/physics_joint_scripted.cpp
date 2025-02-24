@@ -52,3 +52,5 @@ void cphysics_joint_scripted::script_register(lua_State *L)
 			.def("is_breakable",						&cphysics_joint_scripted::isBreakable)
 		];
 }
+
+SCRIPT_EXPORT1(cphysics_joint_scripted);

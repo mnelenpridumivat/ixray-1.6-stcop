@@ -26,10 +26,53 @@
 #	include "../../xrUI/Widgets/UIListBox.h"
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
+#	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
+#	include "xrServer_Objects_ALife.h"
+#	include <EmiZone.h>
+#	include <MagnetZone.h>
+#	include <Flamethrower.h>
 #endif
+
+void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
+	//auto& container = get_script_export_container();
+	auto data = container.find(class_key);
+	VERIFY(data != container.end());
+	if (data->second->inited) {
+		return;
+	}
+	for (auto& elem : data->second->dependencies) {
+		register_script_class_rec(container, elem, L);
+	}
+	((script_exporter_base*)data->second->exporter)->script_register(L);
+	data->second->inited = true;
+#ifdef XRSE_FACTORY_EXPORTS
+	auto nonse_container = get_script_export_container();
+	auto nonse_data = nonse_container.find(class_key);
+	if (nonse_data != nonse_container.end() && nonse_data != data) {
+		nonse_data->second->inited = true;
+	}
+#endif
+}
 
 void export_classes	(lua_State *L)
 {
+	/*auto& container = get_script_export_container();
+	for (auto& elem : container) {
+		elem.second->inited = false;
+	}
+#ifdef XRSE_FACTORY_EXPORTS
+	auto se_container = get_script_export_container_xrSE_Factory();
+	for (auto& elem : se_container) {
+		elem.second->inited = false;
+	}
+	for (auto& elem : se_container) {
+		register_script_class_rec(se_container, elem.first, L);
+	}
+#endif
+	for (auto& elem : container) {
+		register_script_class_rec(container, elem.first, L);
+	}*/
+
 	CScriptEngine::script_register(L);
 	CScriptNetPacket::script_register(L);
 	CScriptFcolor::script_register(L);
@@ -76,11 +119,13 @@ void export_classes	(lua_State *L)
 	CSE_ALifeItem::script_register(L);
 	CSE_ALifeItemTorch::script_register(L);
 	CSE_ALifeItemAmmo::script_register(L);
+	CSE_ALifeItemFuel::script_register(L);
 	CSE_ALifeItemWeapon::script_register(L);
 	CSE_ALifeItemWeaponMagazined::script_register(L);
 	CSE_ALifeItemWeaponMagazinedWGL::script_register(L);
 	CSE_ALifeItemWeaponShotGun::script_register(L);
 	CSE_ALifeItemWeaponAutoShotGun::script_register(L);
+	CSE_ALifeItemFlamethrower::script_register(L);
 	CSE_ALifeItemDetector::script_register(L);
 	CSE_ALifeItemArtefact::script_register(L);
 	CSE_ALifeItemPDA::script_register(L);
@@ -111,6 +156,8 @@ void export_classes	(lua_State *L)
 	CSE_ALifeHumanStalker::script_register(L);
 	CSE_ALifeOnlineOfflineGroup::script_register(L);
 	CSE_SmartCover::script_register(L);
+	//CSE_ALifeItemFlamethrower::script_register(L);
+	//CSE_ALifeItemFuel::script_register(L);
 	
 #ifdef XRSE_FACTORY_EXPORTS
 	CScriptPropertiesListHelper::script_register(L);
@@ -262,5 +309,12 @@ void export_classes	(lua_State *L)
 	CALifeHumanBrain::script_register(L);
 	CGameGraph::script_register(L);
 	CUIActorMenu::script_register(L);
+
+	CAnomalPseudoGigant::script_register(L);
+	CEmiZone::script_register(L);
+	CMagnetZone::script_register(L);
+
+	
+
 #endif
 }

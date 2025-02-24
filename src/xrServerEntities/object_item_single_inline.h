@@ -20,14 +20,14 @@ IC	CSObjectItemSingle::CObjectItemSingle	(const CLASS_ID &clsid, LPCSTR script_c
 {
 }
 
-#ifndef NO_XR_GAME
+//#ifndef NO_XR_GAME
 TEMPLATE_SPECIALIZATION
 ObjectFactory::CLIENT_BASE_CLASS *CSObjectItemSingle::client_object	() const
 {
 	FATAL				("Cannot instantiate client object, because client class is not declared!");
 	return				(0);
 }
-#endif
+//#endif
 
 TEMPLATE_SPECIALIZATION
 ObjectFactory::SERVER_BASE_CLASS *CSObjectItemSingle::server_object	(LPCSTR section) const

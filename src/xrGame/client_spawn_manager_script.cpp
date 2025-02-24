@@ -23,3 +23,5 @@ void CClientSpawnManager::script_register(lua_State *L)
 			.def("remove",	(void (CClientSpawnManager::*)(ALife::_OBJECT_ID,ALife::_OBJECT_ID))(&CClientSpawnManager::remove))
 	];
 }
+
+SCRIPT_EXPORT1(CClientSpawnManager);

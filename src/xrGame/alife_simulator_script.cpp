@@ -384,11 +384,17 @@ void IterateInfo(const CALifeSimulator* alife, const ALife::_OBJECT_ID& id, cons
 	if (!known_info)
 		return;
 
-	xr_vector<shared_str>::const_iterator	I = known_info->begin();
+	for (auto& it : *known_info) {
+		if (functor(id, it)) {
+			return;
+		}
+	}
+
+	/*xr_vector<shared_str>::const_iterator	I = known_info->begin();
 	xr_vector<shared_str>::const_iterator	E = known_info->end();
 	for (; I != E; ++I)
 		if (functor(id, (LPCSTR)(*I).c_str()) == true)
-			return;
+			return;*/
 }
 
 CSE_Abstract* reprocess_spawn(CALifeSimulator* self, CSE_Abstract* object)
@@ -535,6 +541,8 @@ void CALifeSimulator::script_register			(lua_State *L)
 		luabind::module(L)[std::move(instance)];
 	}
 }
+
+SCRIPT_EXPORT1(CALifeSimulator);
 
 #if 0//def DEBUG
 struct dummy {

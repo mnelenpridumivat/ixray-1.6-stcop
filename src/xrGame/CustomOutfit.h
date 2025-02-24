@@ -29,6 +29,8 @@ public:
 	virtual void			OnMoveToRuck		(const SInvItemPlace& previous_place);
 	virtual void			OnH_A_Chield		();
 
+	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+
 protected:
 	HitImmunity::HitTypeSVec		m_HitTypeProtection;
 

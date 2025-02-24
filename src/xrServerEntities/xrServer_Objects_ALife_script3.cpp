@@ -37,6 +37,9 @@ void CSE_ALifeObjectHangingLamp::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT3(CSE_ALifeObjectHangingLamp, CSE_ALifeDynamicObjectVisual, CSE_PHSkeleton);
+
 void CSE_ALifeObjectPhysic::script_register(lua_State *L)
 {
 	module(L)[
@@ -50,6 +53,8 @@ void CSE_ALifeObjectPhysic::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT3(CSE_ALifeObjectPhysic, CSE_ALifeDynamicObjectVisual, CSE_PHSkeleton);
+
 void CSE_ALifeSmartZone::script_register(lua_State *L)
 {
 	module(L)[
@@ -61,4 +66,6 @@ void CSE_ALifeSmartZone::script_register(lua_State *L)
 		)
 	];
 }
+
+SCRIPT_EXPORT3(CSE_ALifeSmartZone, CSE_ALifeSpaceRestrictor, CSE_ALifeSchedulable);
 

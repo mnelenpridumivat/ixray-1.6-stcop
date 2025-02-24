@@ -150,6 +150,7 @@ void CEngineAPI::Initialize(void)
 		}
 	}
 
+
 	// GameSpy
 	{
 		LPCSTR g_name = "xrGameSpy.dll";

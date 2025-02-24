@@ -20,3 +20,5 @@ void CALifeHumanBrain::script_register	(lua_State *L)
 		class_<CALifeHumanBrain,CALifeMonsterBrain>("CALifeHumanBrain")
 	];
 }
+
+SCRIPT_EXPORT2(CALifeHumanBrain, CALifeMonsterBrain);

@@ -175,6 +175,17 @@ float CEatableItem::Weight() const
 	return res;
 }
 
+bool CEatableItem::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	auto eatable = smart_cast<CEatableItem*>(other);
+	VERIFY(eatable);
+	return eatable->GetRemainingUses() == GetRemainingUses();
+}
+
 
 using namespace luabind;
 
@@ -198,3 +209,5 @@ void CEatableItem::script_register(lua_State *L)
 			.def("Cost", &CEatableItem::Cost)
 		];
 }
+
+SCRIPT_EXPORT1(CEatableItem);

@@ -1,3 +1,4 @@
+#include "patrol_point.h"
 ////////////////////////////////////////////////////////////////////////////
 //	Module 		: patrol_point_inline.h
 //	Created 	: 15.06.2004
@@ -24,6 +25,31 @@ IC	const shared_str &CPatrolPoint::name						() const
 {
 	VERIFY				(m_initialized);
 	return				(m_name);
+}
+
+inline void CPatrolPoint::set_name(shared_str name)
+{
+	m_name = name;
+}
+
+inline void CPatrolPoint::set_position(Fvector position)
+{
+	m_position = position;
+}
+
+inline void CPatrolPoint::set_flags(u32 flags)
+{
+	m_flags = flags;
+}
+
+inline void CPatrolPoint::set_level_vertex(u32 level_vertex_id)
+{
+	m_level_vertex_id = level_vertex_id;
+}
+
+inline void CPatrolPoint::set_game_vertex(GameGraph::_GRAPH_ID game_vertex_id)
+{
+	m_game_vertex_id = game_vertex_id;
 }
 
 IC	const u32 &CPatrolPoint::level_vertex_id					(const ILevelGraph *level_graph, const IGameLevelCrossTable *cross, const IGameGraph *game_graph) const

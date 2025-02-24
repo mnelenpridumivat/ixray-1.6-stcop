@@ -56,3 +56,5 @@ void CUIButton::script_register(lua_State *L)
 		.def("SetCurrentValue",			&CUITrackBar::SetCurrentOptValue)
 	];
 }
+
+SCRIPT_EXPORT2(CUIButton, CUIStatic);

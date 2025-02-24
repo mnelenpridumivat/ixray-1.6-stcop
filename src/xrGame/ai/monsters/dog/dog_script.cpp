@@ -13,3 +13,5 @@ void CAI_Dog::script_register(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CAI_Dog, CObjectScript);

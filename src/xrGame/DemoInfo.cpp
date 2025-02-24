@@ -204,6 +204,8 @@ void demo_player_info::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT1(demo_player_info);
+
 void demo_info::script_register(lua_State *L)
 {
 	module(L)
@@ -218,3 +220,5 @@ void demo_info::script_register(lua_State *L)
 			.def("get_player",			&demo_info::get_player)
 	];
 }
+
+SCRIPT_EXPORT1(demo_info);

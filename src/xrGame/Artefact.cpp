@@ -42,6 +42,8 @@ CArtefact::CArtefact()
 	m_detectorObj				= nullptr;
 	m_additional_weight			= 0.0f;
 	has_detector_visibling		= false;
+
+	m_bInContainer = false;
 }
 
 
@@ -673,4 +675,28 @@ void CArtefact::OnHiddenItem ()
 	inherited::OnHiddenItem		();
 	SetState					(eHidden);
 	SetNextState				(eHidden);
+}
+
+bool CArtefact::CheckInventoryIconItemSimilarity(CInventoryItem* other)
+{
+	if (!inherited::CheckInventoryIconItemSimilarity(other))
+	{
+		return false;
+	}
+	auto artefact = smart_cast<CArtefact*>(other);
+	VERIFY(artefact);
+	/*if (!fsimilar(artefact->GetCurrentChargeLevel(), GetCurrentChargeLevel(), 0.01f))
+	{
+		return false;
+	}
+	if (artefact->GetCurrentAfRank() != GetCurrentAfRank())
+	{
+		return false;
+	}*/
+	return true;
+}
+
+bool CArtefact::IsInContainer()
+{
+	return m_bInContainer;
 }

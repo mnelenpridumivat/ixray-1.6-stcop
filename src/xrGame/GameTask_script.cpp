@@ -56,3 +56,5 @@ void CGameTask::script_register(lua_State *L)
 				.def("change_map_location",					&CGameTask::ChangeMapLocation			)
 		];
 }
+
+SCRIPT_EXPORT1(CGameTask);

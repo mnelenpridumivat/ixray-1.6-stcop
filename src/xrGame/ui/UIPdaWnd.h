@@ -19,6 +19,29 @@ class CUIRankingWnd;
 class CUILogsWnd;
 class CUIAnimatedStatic;
 class UIHint;
+class CUIEncyclopediaWnd; 
+
+namespace pda_section {
+	enum part {
+		quests = (1 << 8),
+		map = (1 << 9),
+		diary = (1 << 10),
+		contacts = (1 << 11),
+		ranking = (1 << 12),
+		statistics = (1 << 13),
+		encyclopedia = (1 << 14),
+		skills = (1 << 15),
+		downloads = (1 << 16),
+		games = (1 << 17),
+		mplayer = (1 << 18),
+
+
+		news = diary | (1 << 1),
+		info = diary | (1 << 2),
+		journal = diary | (1 << 3),
+
+	};
+};
 
 
 class CUIPdaWnd: public CUIDialogWnd
@@ -47,6 +70,7 @@ public:
 //-	CUIFactionWarWnd*		pUIFactionWarWnd;
 	CUIRankingWnd*			pUIRankingWnd;
 	CUILogsWnd*				pUILogsWnd;
+	CUIEncyclopediaWnd* pUIEncyclopediaWnd;
 
 	virtual void			Reset				();
 
@@ -72,10 +96,18 @@ public:
 			void			Show_SecondTaskWnd	(bool status);
 			void			Show_MapLegendWnd	(bool status);
 
+			void SetActiveDialog(CUIWindow* pUI) { m_pActiveDialog = pUI; };
+			CUIWindow* GetActiveDialog() { return m_pActiveDialog; };
+			LPCSTR GetActiveSection() { return m_sActiveSection.c_str(); };
+			CUITabControl* GetTabControl() { return UITabControl; };
+
 			void			SetActiveSubdialog	(const shared_str& section);
+			void SetActiveSubdialog_script(LPCSTR section) { SetActiveSubdialog((const shared_str&)section); };
 	virtual bool			StopAnyMove			(){return false;}
 
 			void			UpdatePda			();
 			void			UpdateRankingWnd	();
+
+			void PdaContentsChanged(pda_section::part type);
 
 };

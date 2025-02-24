@@ -19,6 +19,9 @@
 #include "../../../visual_memory_manager.h"
 #include "ActorEffector.h"
 #include "../../../ActorCondition.h"
+#include "../abilities/poltergeist/PolterTele.h"
+#include "../abilities/poltergeist/PolterFlame.h"
+#include "../abilities/poltergeist/PolterChem.h"
 
 void SetActorVisibility(u16 who, float value);
 
@@ -113,14 +116,19 @@ void CPoltergeist::Load(LPCSTR section)
 	m_fly_around_change_direction_time	 
 							 = READ_IF_EXISTS(pSettings,r_float,section,"detection_fly_around_change_direction_time", 7);
 
-	LPCSTR polter_type = pSettings->r_string(section,"type");
-	
-	if (xr_strcmp(polter_type,"flamer") == 0) {
-		m_flame			= new CPolterFlame(this);
-		m_flame->load	(section);
-	} else {
-		m_tele			= new CPolterTele(this);
-		m_tele->load	(section);
+	if (READ_IF_EXISTS(pSettings, r_bool, section, "use_flame", false)) {
+		m_flame = new CPolterFlame(this);
+		m_flame->load(section);
+	}
+
+	if (READ_IF_EXISTS(pSettings, r_bool, section, "use_tele", false)) {
+		m_tele = new CPolterTele(this);
+		m_tele->load(section);
+	}
+
+	if (READ_IF_EXISTS(pSettings, r_bool, section, "use_chem", false)) {
+		m_chem = new CPolterChem(this);
+		m_chem->load(section);
 	}
 
 	m_detection_pp_effector_name		= READ_IF_EXISTS(pSettings,r_string,section, "detection_pp_effector_name",		"");

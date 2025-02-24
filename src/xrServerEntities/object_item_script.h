@@ -35,6 +35,8 @@ public:
 													LPCSTR script_clsid
 												);
 	virtual ObjectFactory::CLIENT_BASE_CLASS	*client_object		() const;
+#else
+	virtual ObjectFactory::CLIENT_BASE_CLASS* client_object() const;
 #endif
 	virtual ObjectFactory::SERVER_BASE_CLASS	*server_object		(LPCSTR section) const;
 };

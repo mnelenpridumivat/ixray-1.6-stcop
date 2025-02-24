@@ -38,6 +38,8 @@ void CUIDialogWndEx::script_register(lua_State *L)
 	];
 }
 
+SCRIPT_EXPORT2(CUIDialogWndEx, CUIWindow);
+
 export_class script_register_ui_window1(export_class &&instance)
 {
 	return std::move(instance)

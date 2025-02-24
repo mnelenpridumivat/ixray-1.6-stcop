@@ -51,6 +51,8 @@ public:
 	float			m_fAfDetectRadius;
 	virtual bool	CheckCompatibility	(CHudItem* itm);
 
+	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+
 	virtual u32		ef_detector_type	() const	{return 1;};
 
 	virtual bool	NeedActivation		() const	{return m_bNeedActivation;};

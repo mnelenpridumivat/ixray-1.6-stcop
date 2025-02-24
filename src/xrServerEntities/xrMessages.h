@@ -3,6 +3,7 @@
 // CL	== client 2 server message
 // SV	== server 2 client message
 
+// TODO: Remove anonimus enums
 enum {
 	M_UPDATE			= 0,	// DUAL: Update state
 	M_SPAWN,					// DUAL: Spawning, full state
@@ -75,6 +76,8 @@ enum {
 	M_CREATE_PLAYER_STATE,
 	M_COMPRESSED_UPDATE_OBJECTS,
 	M_VOICE_MESSAGE,
+
+	GE_TRADER_FLAGS = 64,
 
 	MSG_FORCEDWORD				= u32(-1)
 };

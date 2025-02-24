@@ -14,6 +14,7 @@
 #include "../xrScripts/exports/script_token_list.h"
 #include <luabind/out_value_policy.hpp>
 #include "../../Editors/xrEProps/ChooseTypesHelper.H"
+#include "../xrScripts/script_export_space.h"
 
 using namespace luabind;
 
@@ -210,3 +211,5 @@ void CScriptPropertiesListHelper::script_register(lua_State *L)
 		,def("properties_helper",	&properties_helper)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptPropertiesListHelper);

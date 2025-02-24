@@ -31,3 +31,5 @@ void CScriptTokenList::script_register(lua_State *L)
 			.def("name",			&CScriptTokenList::name)
 	];
 }
+
+SCRIPT_EXPORT1(CScriptTokenList);

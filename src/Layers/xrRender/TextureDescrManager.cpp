@@ -123,6 +123,7 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 			}
 
 		}
+
 	}
 }
 

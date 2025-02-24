@@ -28,3 +28,5 @@ void CScriptFcolor::script_register(lua_State *L)
 			.def("set",							(Fcolor & (Fcolor::*)(u32))(&Fcolor::set),																			return_reference_to<1>())
 	];
 }
+
+SCRIPT_EXPORT1(CScriptFcolor);

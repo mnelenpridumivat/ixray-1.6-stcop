@@ -26,6 +26,7 @@
 #include "UITaskWnd.h"
 #include "UIRankingWnd.h"
 #include "UILogsWnd.h"
+#include "UIEncyclopediaWnd.h"
 
 #define PDA_XML		"pda.xml"
 
@@ -39,6 +40,7 @@ CUIPdaWnd::CUIPdaWnd()
 //-	pUIFactionWarWnd = nullptr;
 	pUIRankingWnd    = nullptr;
 	pUILogsWnd       = nullptr;
+	pUIEncyclopediaWnd = nullptr;
 	m_hint_wnd       = nullptr;
 	Init();
 }
@@ -49,6 +51,7 @@ CUIPdaWnd::~CUIPdaWnd()
 //-	delete_data( pUIFactionWarWnd );
 	delete_data( pUIRankingWnd );
 	delete_data( pUILogsWnd );
+	delete_data(pUIEncyclopediaWnd);
 	delete_data( m_hint_wnd );
 	delete_data( UINoice );
 }
@@ -76,20 +79,27 @@ void CUIPdaWnd::Init()
 	m_btn_close				= UIHelper::Create3tButton( uiXml, "close_button", this );
 	m_hint_wnd				= UIHelper::CreateHint( uiXml, "hint_wnd" );
 
-	pUITaskWnd					= new CUITaskWnd();
-	pUITaskWnd->hint_wnd		= m_hint_wnd;
-	pUITaskWnd->Init			();
+
+	if ( IsGameTypeSingle() )
+	{
+		pUITaskWnd					= new CUITaskWnd();
+		pUITaskWnd->hint_wnd		= m_hint_wnd;
+		pUITaskWnd->Init			();
 
 //-		pUIFactionWarWnd				= new CUIFactionWarWnd();
 //-		pUIFactionWarWnd->hint_wnd		= m_hint_wnd;
 //-		pUIFactionWarWnd->Init			();
 
-	pUIRankingWnd					= new CUIRankingWnd();
-	pUIRankingWnd->Init				();
+		pUIRankingWnd					= new CUIRankingWnd();
+		pUIRankingWnd->Init				();
 
-	pUILogsWnd						= new CUILogsWnd();
-	pUILogsWnd->Init				();
+		pUILogsWnd						= new CUILogsWnd();
+		pUILogsWnd->Init				();
 
+		pUIEncyclopediaWnd = new CUIEncyclopediaWnd();
+		pUIEncyclopediaWnd->Init();
+
+	}
 
 	UITabControl					= new CUITabControl();
 	UITabControl->SetAutoDelete		(true);
@@ -181,27 +191,20 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 //-	{
 //-		m_pActiveDialog = pUIFactionWarWnd;
 //-	}
-	/*
-	if (IsGameTypeSingle())
+	else if ( section == "eptRanking" )
 	{
-	    if (section == "eptRanking")
-	{
-		    m_pActiveDialog = pUIRankingWnd;
-	    }
-	}
-	*/
-	else if (section == "eptRanking")
-	{
-		if (IsGameTypeSingle()) {
-			m_pActiveDialog = pUIRankingWnd;
-		}
+		m_pActiveDialog = pUIRankingWnd;
 	}
 	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
 	}
+	else if (section == "eptEnc")
+	{
+		m_pActiveDialog = pUIEncyclopediaWnd;
+	}
 
-	R_ASSERT2                       (m_pActiveDialog, "active dialog is not initialized");
+	R_ASSERT						(m_pActiveDialog);
 	UIMainPdaFrame->AttachChild		(m_pActiveDialog);
 	m_pActiveDialog->Show			(true);
 
@@ -301,6 +304,7 @@ void CUIPdaWnd::Reset()
 //-	if ( pUIFactionWarWnd )	pUITaskWnd->ResetAll();
 	if ( pUIRankingWnd )	pUIRankingWnd->ResetAll();
 	if ( pUILogsWnd )		pUILogsWnd->ResetAll();
+	if (pUIEncyclopediaWnd)		pUIEncyclopediaWnd->ResetAll();
 }
 
 void CUIPdaWnd::SetCaption( LPCSTR text )
@@ -344,4 +348,14 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	}	
 
 	return inherited::OnKeyboardAction(dik,keyboard_action);
+}
+
+void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
+{
+	//if (type == pda_section::encyclopedia)
+	//{
+	pUIEncyclopediaWnd->ReloadArticles();
+	CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
+
+	//}
 }

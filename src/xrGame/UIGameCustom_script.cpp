@@ -35,3 +35,5 @@ void CUIGameCustom::script_register(lua_State *L)
 			def("get_hud",					&get_hud)
 		];
 }
+
+SCRIPT_EXPORT1(CUIGameCustom);

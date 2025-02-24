@@ -19,3 +19,5 @@ void CWeaponLR300::script_register	(lua_State *L)
 			.def(constructor<>())
 	];
 }
+
+SCRIPT_EXPORT2(CWeaponLR300, CObjectScript);

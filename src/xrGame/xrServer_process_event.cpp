@@ -380,6 +380,15 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 		    	SendBroadcast(BroadcastCID, P, MODE);
 		    }
 		}break;
+	case GE_TRADER_FLAGS:
+	{
+		CSE_ALifeTraderAbstract* pTa = smart_cast<CSE_ALifeTraderAbstract*>(receiver);
+		if (pTa)
+		{
+			pTa->m_trader_flags.assign(P.r_u32());
+			//Msg("GE_TRADER_FLAGS event received %d",pTa->m_trader_flags.get());
+		}
+	}break;
 	case GE_FREEZE_OBJECT:
 		break;
 	case GE_REQUEST_PLAYERS_INFO:

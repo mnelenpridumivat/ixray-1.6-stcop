@@ -32,3 +32,5 @@ void CScriptMonsterAction::script_register(lua_State *L)
 			.def(				constructor<MonsterSpace::EScriptMonsterGlobalAction, CScriptGameObject*>())
 	];
 }
+
+SCRIPT_EXPORT1(CScriptMonsterAction);
