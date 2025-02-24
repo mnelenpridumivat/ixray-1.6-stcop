@@ -763,7 +763,6 @@ void CHudItem::SetMultipleBonesStatus(const char* section, const char* line, BOO
 		}
 	}
 }
-}
 
 inline void CHUDState::SetState(u32 v) {
 	m_hud_item_state = v;

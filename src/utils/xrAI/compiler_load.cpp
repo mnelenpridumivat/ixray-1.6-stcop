@@ -159,55 +159,59 @@ void xrLoad(LPCSTR name, bool draft_mode)
 						if (!THM) {
 							clMsg("cannot find thm: %s", N_);
 							is_thm_missing = true;
-							continue;
+							BT.bHasAlpha = false;
+							BT.pSurface = 0;
 						}
+						else {
 
-						// version
-						u32 version_				= 0;
-						R_ASSERT				(THM->r_chunk(THM_CHUNK_VERSION,&version_));
-						// if( version!=THM_CURRENT_VERSION )	FATAL	("Unsupported version of THM file.");
+							// version
+							u32 version_ = 0;
+							R_ASSERT(THM->r_chunk(THM_CHUNK_VERSION, &version_));
+							// if( version!=THM_CURRENT_VERSION )	FATAL	("Unsupported version of THM file.");
 
-						// analyze thumbnail information
-						R_ASSERT(THM->find_chunk(THM_CHUNK_TEXTUREPARAM));
-						THM->r                  (&BT.THM.fmt,sizeof(STextureParams::ETFormat));
-						BT.THM.flags.assign		(THM->r_u32());
-						BT.THM.border_color		= THM->r_u32();
-						BT.THM.fade_color		= THM->r_u32();
-						BT.THM.fade_amount		= THM->r_u32();
-						BT.THM.mip_filter		= THM->r_u32();
-						BT.THM.width			= THM->r_u32();
-						BT.THM.height           = THM->r_u32();
-						BOOL			bLOD=FALSE;
-						if (N_[0]=='l' && N_[1]=='o' && N_[2]=='d' && N_[3]=='\\') bLOD = TRUE;
+							// analyze thumbnail information
+							R_ASSERT(THM->find_chunk(THM_CHUNK_TEXTUREPARAM));
+							THM->r(&BT.THM.fmt, sizeof(STextureParams::ETFormat));
+							BT.THM.flags.assign(THM->r_u32());
+							BT.THM.border_color = THM->r_u32();
+							BT.THM.fade_color = THM->r_u32();
+							BT.THM.fade_amount = THM->r_u32();
+							BT.THM.mip_filter = THM->r_u32();
+							BT.THM.width = THM->r_u32();
+							BT.THM.height = THM->r_u32();
+							BOOL			bLOD = FALSE;
+							if (N_[0] == 'l' && N_[1] == 'o' && N_[2] == 'd' && N_[3] == '\\') bLOD = TRUE;
 
-						// load surface if it has an alpha channel or has "implicit lighting" flag
-						BT.dwWidth				= BT.THM.width;
-						BT.dwHeight				= BT.THM.height;
-						BT.bHasAlpha			= BT.THM.HasAlphaChannel();
-						BT.pSurface				= 0;
-						if (!bLOD) 
-						{
-							if (BT.bHasAlpha || BT.THM.flags.test(STextureParams::flImplicitLighted))
+							// load surface if it has an alpha channel or has "implicit lighting" flag
+							BT.dwWidth = BT.THM.width;
+							BT.dwHeight = BT.THM.height;
+							BT.bHasAlpha = BT.THM.HasAlphaChannel();
+							BT.pSurface = 0;
+							if (!bLOD)
 							{
-								clMsg		("- loading: %s",N_);
-								u32			w=0, h=0;
-								BT.pSurface = Surface_Load(N_,w,h); 
+								if (BT.bHasAlpha || BT.THM.flags.test(STextureParams::flImplicitLighted))
+								{
+									clMsg("- loading: %s", N_);
+									u32			w = 0, h = 0;
+									BT.pSurface = Surface_Load(N_, w, h);
 
-								if (!BT.pSurface) {
-									clMsg("cannot find tga texture: %s", N);
-									is_tga_missing = true;
-									continue;
+									if (!BT.pSurface) {
+										clMsg("cannot find tga texture: %s", N);
+										is_tga_missing = true;
+										continue;
+									}
+
+									if ((w != BT.dwWidth) || (h != BT.dwHeight)) {
+										Msg("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
+
+										BT.dwWidth = BT.THM.width = w;
+										BT.dwHeight = BT.THM.height = h;
+									}
+									BT.Vflip();
 								}
-
-								if ((w != BT.dwWidth) || (h != BT.dwHeight)) {
-									Msg("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
-
-									BT.dwWidth = BT.THM.width = w;
-									BT.dwHeight = BT.THM.height = h;
+								else {
+									// Free surface memory
 								}
-								BT.Vflip	();
-							} else {
-								// Free surface memory
 							}
 						}
 					}
