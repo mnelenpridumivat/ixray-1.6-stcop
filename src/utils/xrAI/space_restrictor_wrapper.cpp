@@ -261,10 +261,10 @@ void CSpaceRestrictorWrapper::verify				(CLevelGraph &level_graph,  bool no_sepa
 	m_level_graph					= &level_graph;
 
 
-	build_border					();
-
 	if (!no_separator_check)
-		verify_connectivity			();
-
-	clear							();
+	{
+		build_border();
+		verify_connectivity();
+		clear();
+	}
 }
