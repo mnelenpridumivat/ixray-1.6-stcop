@@ -1,18 +1,27 @@
 #include "StdAfx.h"
 #include "game_graph.h"
-CGameGraph::CGameGraph(const IReader& _stream)
+CGameGraph::CGameGraph(IReader& _stream)
 {
 	VERIFY(!Device.IsEditorMode());
 	IReader& stream = const_cast<IReader&>(_stream);
 	m_header.load(&stream);
 	R_ASSERT2(header().version() == XRAI_CURRENT_VERSION, "Graph version mismatch!");
-	m_nodes = (CVertex*)stream.pointer();
-	m_edges = (BYTE*)stream.pointer();
+
+	m_nodes.resize(header().vertex_count());
+	for (auto& elem : m_nodes) {
+		elem.Serialize(_stream);
+	}
 	m_current_level_some_vertex_id = _GRAPH_ID(-1);
 	m_enabled.assign(header().vertex_count(), true);
-	u8* temp = (u8*)(m_nodes + header().vertex_count());
-	temp += header().edge_count() * sizeof(CGameGraph::CEdge);
-	m_cross_tables = (u32*)(((CLevelPoint*)temp) + header().death_point_count());
+
+	auto LevelNum = _stream.r_u32();
+	m_cross_tables.reserve(LevelNum);
+	for (u32 i = 0; i < LevelNum; ++i) {
+		_LEVEL_ID LevelID;
+		_stream.r(&LevelID, sizeof(LevelID));
+		m_cross_tables.insert_or_assign(LevelID, CGameLevelCrossTable(_stream));
+	}
+
 	m_current_level_cross_table = 0;
 }
 
@@ -24,21 +33,8 @@ CGameGraph::~CGameGraph()
 
 void CGameGraph::set_current_level(u32  level_id)
 {
-	xr_delete(m_current_level_cross_table);
-	u32* current_cross_table = m_cross_tables;
-	auto	I = header().levels().begin();
-	auto	E = header().levels().end();
-	for (; I != E; ++I) {
-		if (level_id != (*I).first) {
-			current_cross_table = (u32*)((u8*)current_cross_table + *current_cross_table);
-			continue;
-		}
-
-		m_current_level_cross_table = new CGameLevelCrossTable(current_cross_table + 1, *current_cross_table);
-		break;
-	}
-
-	VERIFY(m_current_level_cross_table);
+	VERIFY(level_id < m_cross_tables.size());
+	m_current_level_cross_table = &m_cross_tables[level_id];
 
 	m_current_level_some_vertex_id = _GRAPH_ID(-1);
 	for (_GRAPH_ID i = 0, n = header().vertex_count(); i < n; ++i) {

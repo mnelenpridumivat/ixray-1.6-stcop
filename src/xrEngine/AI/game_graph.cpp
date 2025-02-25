@@ -9,25 +9,17 @@ IGameGraph::~IGameGraph()
 void IGameGraph::save(IWriter& stream)
 {
 	m_header.save(&stream);
-
-	u8* buffer = (u8*)m_nodes;
-	stream.w(buffer, header().vertex_count() * sizeof(CVertex));
-	buffer += header().vertex_count() * sizeof(CVertex);
-
-	stream.w(buffer, header().edge_count() * sizeof(IGameGraph::CEdge));
-	buffer += header().edge_count() * sizeof(IGameGraph::CEdge);
-
-	stream.w(buffer, header().death_point_count() * sizeof(CLevelPoint));
-	buffer += header().death_point_count() * sizeof(CLevelPoint);
-
-	VERIFY((u8*)m_cross_tables == buffer);
-
-	GameGraph::LEVEL_MAP::const_iterator	I = header().levels().begin();
-	GameGraph::LEVEL_MAP::const_iterator	E = header().levels().end();
-	for (; I != E; ++I) {
-		u32						size = *(u32*)buffer;
-		stream.w(buffer, size);
-		buffer += size;
+	for (auto& elem : m_nodes) {
+		elem.Serialize(stream);
+	}
+	stream.w_u32(m_cross_tables.size());
+	for (auto& elem : m_cross_tables) {
+		stream.w(&elem.first, sizeof(elem.first));
+		stream.w(&elem.second.header(), sizeof(IGameLevelCrossTable::CHeader));
+		for (size_t i = 0; i < elem.second.header().level_vertex_count(); i++)
+		{
+			stream.w(&elem.second.vertex(i), sizeof(IGameLevelCrossTable::CCell));
+		}
 	}
 }
 
@@ -131,7 +123,7 @@ bool IGameGraph::Search(u32 start_vertex_id, u32 dest_vertex_id, xr_vector<u32>&
 			MaxIterationCount--;
 
 			const CVertex* Neighbor = vertex(NeighborID);
-			float NewCost = TempCostSoFar[CurrentNodeID] + CalcCost(Node, Neighbor,i);
+			float NewCost = TempCostSoFar[CurrentNodeID] + CalcCost(Node, Neighbor,&*i);
 			auto TempCostSoFarIterator = TempCostSoFar.find(NeighborID);
 			if ((TempCostSoFarIterator != TempCostSoFar.end() &&TempCostSoFarIterator->second > NewCost)|| (TempCostSoFarIterator == TempCostSoFar.end() &&MaxVisitedNodeCount > TempCostSoFar.size()))
 			{
@@ -229,7 +221,7 @@ bool IGameGraph::SearchNearestVertex(u32 start_vertex_id, u8 LevelID, u32& Resul
 
 
 			const CVertex* Neighbor = vertex(NeighborID);
-			float NewCost = TempCostSoFar[CurrentNodeID] + CalcCost(Node, Neighbor,i);
+			float NewCost = TempCostSoFar[CurrentNodeID] + CalcCost(Node, Neighbor,&*i);
 			auto TempCostSoFarIterator = TempCostSoFar.find(NeighborID);
 			if ((TempCostSoFarIterator != TempCostSoFar.end() &&TempCostSoFarIterator->second > NewCost)|| (TempCostSoFarIterator == TempCostSoFar.end()))
 			{
@@ -260,4 +252,28 @@ bool IGameGraph::SearchNearestVertex(u32 start_vertex_id, u8 LevelID, u32& Resul
 		}
 	}
 	return false;
+}
+
+void CVertexWithEdges::Serialize(IWriter& writer)
+{
+	writer.w(&vertex, sizeof(CVertex));
+	for (auto& elem : edges) {
+		writer.w(&elem, sizeof(CEdge));
+	}
+	for (auto& elem : death_points) {
+		writer.w(&elem, sizeof(CLevelPoint));
+	}
+}
+
+void CVertexWithEdges::Serialize(IReader& reader)
+{
+	reader.r(&vertex, sizeof(CVertex));
+	edges.resize(vertex.edge_count());
+	for (auto& elem : edges) {
+		reader.r(&elem, sizeof(CEdge));
+	}
+	death_points.resize(vertex.death_point_count());
+	for (auto& elem : death_points) {
+		reader.r(&elem, sizeof(CLevelPoint));
+	}
 }

@@ -17,7 +17,7 @@ class CGameGraph:public IGameGraph
 private:
 	friend class CRenumbererConverter;
 public:
-	CGameGraph(const IReader &stream);
+	CGameGraph(IReader &stream);
 	virtual ~CGameGraph();
 	virtual void set_current_level(u32 const level_id);
 	DECLARE_SCRIPT_REGISTER_FUNCTION

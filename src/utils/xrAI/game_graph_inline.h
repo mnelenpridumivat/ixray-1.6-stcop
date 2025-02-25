@@ -10,51 +10,64 @@
 
 IC CGameGraph::CGameGraph									(LPCSTR file_name, u32 current_version)
 {
-	m_reader						= FS.r_open(file_name);
+	auto m_reader						= FS.r_open(file_name);
 	VERIFY							(m_reader);
 	m_header.load					(m_reader);
 	R_ASSERT2						(header().version() == XRAI_CURRENT_VERSION,"Graph version mismatch!");
-	m_nodes							= (CVertex*)m_reader->pointer();
+
+	m_nodes.resize(header().vertex_count());
+	for (auto& elem : m_nodes) {
+		elem.Serialize(*m_reader);
+	}
+
 	m_current_level_some_vertex_id	= _GRAPH_ID(-1);
 	m_enabled.assign				(header().vertex_count(),true);
-	u8								*temp = (u8*)(m_nodes + header().vertex_count());
-	temp							+= header().edge_count()*sizeof(CGameGraph::CEdge);
-	m_cross_tables					= (u32*)(((CLevelPoint*)temp) + header().death_point_count());
+	
+	{
+		auto LevelsNum = m_reader->r_u32();
+		m_cross_tables.reserve(LevelsNum);
+		for (u32 i = 0; i < LevelsNum; ++i) {
+			_LEVEL_ID LevelID;
+			LevelID = m_reader->r_u32();
+			m_cross_tables.insert_or_assign(LevelID, CGameLevelCrossTable(*m_reader));
+		}
+	}
+
 	m_current_level_cross_table		= 0;
 }
 
-IC CGameGraph::CGameGraph											(const IReader &_stream)
+IC CGameGraph::CGameGraph											(IReader &_stream)
 {
 	IReader							&stream = const_cast<IReader&>(_stream);
 	m_header.load					(&stream);
 	R_ASSERT2						(header().version() == XRAI_CURRENT_VERSION,"Graph version mismatch!");
-	m_nodes							= (CVertex*)stream.pointer();
+
+	m_nodes.resize(header().vertex_count());
+	for (auto& elem : m_nodes) {
+		elem.Serialize(stream);
+	}
+
 	m_current_level_some_vertex_id	= _GRAPH_ID(-1);
 	m_enabled.assign				(header().vertex_count(),true);
-	u8								*temp = (u8*)(m_nodes + header().vertex_count());
-	temp							+= header().edge_count()*sizeof(CGameGraph::CEdge);
-	m_cross_tables					= (u32*)(((CLevelPoint*)temp) + header().death_point_count());
+	
+	{
+		auto LevelsNum = header().levels().size();
+		m_cross_tables.reserve(LevelsNum);
+		for (u32 i = 0; i < LevelsNum; ++i) {
+			_LEVEL_ID LevelID;
+			_stream.r(&LevelID, sizeof(LevelID));
+			m_cross_tables.insert_or_assign(LevelID, CGameLevelCrossTable(stream));
+		}
+	}
+
 	m_current_level_cross_table		= 0;
 }
 
 
 IC	void CGameGraph::set_current_level								(u32 const level_id)
 {
-	xr_delete					(m_current_level_cross_table);
-	u32							*current_cross_table = m_cross_tables;
-	GameGraph::LEVEL_MAP::const_iterator	I = header().levels().begin();
-	GameGraph::LEVEL_MAP::const_iterator	E = header().levels().end();
-	for ( ; I != E; ++I) {
-		if (level_id != (*I).first) {
-			current_cross_table	= (u32*)((u8*)current_cross_table + *current_cross_table);
-			continue;
-		}
-
-		m_current_level_cross_table	= new CGameLevelCrossTable(current_cross_table + 1,*current_cross_table);
-		break;
-	}
-
-	VERIFY						(m_current_level_cross_table);
+	VERIFY(m_cross_tables.contains(level_id));
+	m_current_level_cross_table = &m_cross_tables[level_id];
 
 	m_current_level_some_vertex_id = _GRAPH_ID(-1);
 	for (_GRAPH_ID i=0, n = header().vertex_count(); i<n; ++i) {
@@ -72,23 +85,15 @@ IC	void CGameGraph::set_current_level								(u32 const level_id)
 IC void CGameGraph::save								(IWriter &stream)
 {
 	m_header.save				(&stream);
-	
-	u8							*buffer = (u8*)m_nodes;
-	stream.w					(buffer,header().vertex_count()*sizeof(CVertex));
-	buffer						+= header().vertex_count()*sizeof(CVertex);
-
-	stream.w					(buffer,header().edge_count()*sizeof(CGameGraph::CEdge));
-	buffer						+= header().edge_count()*sizeof(CGameGraph::CEdge);
-
-	stream.w					(buffer,header().death_point_count()*sizeof(CLevelPoint));
-	buffer						+= header().death_point_count()*sizeof(CLevelPoint);
-
-	VERIFY						((u8*)m_cross_tables == buffer);
-	GameGraph::LEVEL_MAP::const_iterator	I = header().levels().begin();
-	GameGraph::LEVEL_MAP::const_iterator	E = header().levels().end();
-	for ( ; I != E; ++I) {
-		u32						size = *(u32*)buffer;
-		stream.w				(buffer,size);
-		buffer					+= size;
+	for (auto& elem : m_nodes) {
+		elem.Serialize(stream);
+	}
+	for (auto& elem : m_cross_tables) {
+		stream.w_u32(elem.first);
+		stream.w(&elem.second.header(), sizeof(IGameLevelCrossTable::CHeader));
+		for (size_t i = 0; i < elem.second.header().level_vertex_count(); i++)
+		{
+			stream.w(&elem.second.vertex(i), sizeof(IGameLevelCrossTable::CCell));
+		}
 	}
 }

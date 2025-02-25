@@ -60,17 +60,9 @@ IC	bool IGameGraph::valid_vertex_id								(u32 const vertex_id) const
 
 IC	void IGameGraph::begin(u32 const vertex_id, const_iterator& start, const_iterator& end) const
 {
-	auto VertexEdgeOffset = vertex(_GRAPH_ID(vertex_id))->edge_offset();
-	auto VertexEdgeCount = vertex(_GRAPH_ID(vertex_id))->edge_count();
-	if (m_edges == nullptr)
-	{
-		end = (start = (const CEdge*)(m_nodes + VertexEdgeOffset)) + VertexEdgeCount;
-	}
-	else
-	{
-		// FX: TODO: Разберись!!!Ы
-		end = (start = (const CEdge*)(m_edges + VertexEdgeOffset)) + VertexEdgeCount;
-	}
+	VERIFY(vertex_id < m_nodes.size());
+	start = m_nodes[vertex_id].edges.begin();
+	end = m_nodes[vertex_id].edges.end();
 }
 
 IC	const IGameGraph::_GRAPH_ID &IGameGraph::value					(u32 const vertex_id, const_iterator &i) const
@@ -85,7 +77,8 @@ IC	const float &IGameGraph::edge_weight							(const_iterator i) const
 
 IC	const IGameGraph::CVertex *IGameGraph::vertex					(u32 const vertex_id) const
 {
-	return						(m_nodes + vertex_id);
+	VERIFY(vertex_id < m_nodes.size());
+	return						&(m_nodes[vertex_id].vertex);
 }
 
 IC	const u8 &IGameGraph::CHeader::version							() const
@@ -194,16 +187,6 @@ IC	const u8 &GameGraph::CVertex::death_point_count					() const
 	return						(tDeathPointCount);
 }
 
-IC	const u32 &GameGraph::CVertex::edge_offset						() const
-{
-	return						(dwEdgeOffset);
-}
-
-IC	const u32 &GameGraph::CVertex::death_point_offset				() const
-{
-	return						(dwPointOffset);
-}
-
 IC	const GameGraph::_GRAPH_ID &GameGraph::CEdge::vertex_id			() const
 {
 	return						(m_vertex_id);
@@ -216,9 +199,9 @@ IC	const float &GameGraph::CEdge::distance							() const
 
 IC	void IGameGraph::begin_spawn									(u32 const vertex_id, const_spawn_iterator &start, const_spawn_iterator &end) const
 {
-	const CVertex				*object = vertex(vertex_id);
-	start						= (const_spawn_iterator)((u8*)m_nodes + object->death_point_offset());
-	end							= start + object->death_point_count();
+	VERIFY(vertex_id < m_nodes.size());
+	start = m_nodes[vertex_id].death_points.begin();
+	end = m_nodes[vertex_id].death_points.end();
 }
 
 IC	void IGameGraph::set_invalid_vertex								(_GRAPH_ID &vertex_id) const
@@ -229,8 +212,7 @@ IC	void IGameGraph::set_invalid_vertex								(_GRAPH_ID &vertex_id) const
 
 IC	GameGraph::_GRAPH_ID IGameGraph::vertex_id						(const IGameGraph::CVertex *vertex) const
 {
-	VERIFY						(valid_vertex_id(_GRAPH_ID(vertex - m_nodes)));
-	return						(_GRAPH_ID(vertex - m_nodes));
+	return vertex->tVertexID;
 }
 
 IC	const GameGraph::_GRAPH_ID &IGameGraph::current_level_vertex	() const
