@@ -405,6 +405,7 @@ void CGameGraphBuilder::load_cross_table	(const float &start, const float &amoun
 	R_ASSERT2(reader, "Can't open cross table!");
 	VERIFY					(!m_cross_table);
 	m_cross_table			= new CGameLevelCrossTable(*reader, true);
+	reader->close();
 
 	Progress				(start + amount);
 }

@@ -110,6 +110,7 @@ public:
 		auto reader = FS.r_open(caFileName);
 		R_ASSERT2(reader, "Can't open cross table!");
 		CGameLevelCrossTable	*l_tpCrossTable = new CGameLevelCrossTable(*reader, true);
+		reader->close();
 
 		CLevelGraph				*l_tpAI_Map = new CLevelGraph(S);
 
@@ -173,6 +174,7 @@ public:
 			for (auto& elem : m_cross_table->m_tpaCrossTable) {
 				elem.tGraphIndex += dwOffset;
 			}
+			reader->close();
 		}
 
 		// fill vertex map

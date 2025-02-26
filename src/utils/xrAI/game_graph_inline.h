@@ -32,6 +32,7 @@ IC CGameGraph::CGameGraph									(LPCSTR file_name, u32 current_version)
 			m_cross_tables.insert_or_assign(LevelID, CGameLevelCrossTable(*m_reader));
 		}
 	}
+	m_reader->close();
 
 	m_current_level_cross_table		= 0;
 }
