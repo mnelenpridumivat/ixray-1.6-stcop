@@ -174,6 +174,7 @@ public:
 			for (auto& elem : m_cross_table->m_tpaCrossTable) {
 				elem.tGraphIndex += dwOffset;
 			}
+			m_cross_table->m_tCrossTableHeader.m_game_guid = tGraphHeader.m_guid;
 			reader->close();
 		}
 

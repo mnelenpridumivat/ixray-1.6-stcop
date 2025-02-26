@@ -89,6 +89,7 @@ IC void CGameGraph::save								(IWriter &stream)
 	for (auto& elem : m_nodes) {
 		elem.Serialize(stream);
 	}
+	stream.w_u32(m_cross_tables.size());
 	for (auto& elem : m_cross_tables) {
 		stream.w_u32(elem.first);
 		stream.w(&elem.second.header(), sizeof(IGameLevelCrossTable::CHeader));

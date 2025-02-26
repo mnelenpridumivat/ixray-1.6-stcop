@@ -17,8 +17,7 @@ CGameGraph::CGameGraph(IReader& _stream)
 	auto LevelNum = _stream.r_u32();
 	m_cross_tables.reserve(LevelNum);
 	for (u32 i = 0; i < LevelNum; ++i) {
-		_LEVEL_ID LevelID;
-		_stream.r(&LevelID, sizeof(LevelID));
+		_LEVEL_ID LevelID = _stream.r_u32();
 		m_cross_tables.insert_or_assign(LevelID, CGameLevelCrossTable(_stream));
 	}
 
@@ -28,12 +27,12 @@ CGameGraph::CGameGraph(IReader& _stream)
 CGameGraph::~CGameGraph()
 {
 	VERIFY(Device.IsEditorMode() == false);
-	xr_delete(m_current_level_cross_table);
+	//xr_delete(m_current_level_cross_table);
 }
 
 void CGameGraph::set_current_level(u32  level_id)
 {
-	VERIFY(level_id < m_cross_tables.size());
+	VERIFY(m_cross_tables.contains(level_id));
 	m_current_level_cross_table = &m_cross_tables[level_id];
 
 	m_current_level_some_vertex_id = _GRAPH_ID(-1);
