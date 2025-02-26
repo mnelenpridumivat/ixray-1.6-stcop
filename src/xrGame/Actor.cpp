@@ -74,6 +74,7 @@
 #include "ui/UIDragDropReferenceList.h"
 #include "../../xrUI/UIFontDefines.h"
 #include "PickupManager.h"
+#include <CustomTimer.h>
 
 const u32		patch_frames	= 50;
 const float		respawn_delay	= 1.f;
@@ -1191,6 +1192,8 @@ void CActor::UpdateCL	()
 		g_player_hud->update			(trans);
 
 	pPickup->SetPickupMode(false);
+
+	CBinderManager::GetInstance().Update();
 }
 
 void CActor::UpdatePlayerView()

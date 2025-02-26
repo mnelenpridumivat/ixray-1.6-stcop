@@ -13,6 +13,7 @@
 #include "Feel_Sound.h"
 
 #include "FPSCounter.h"
+#include "../xrGame/CustomTimer.h"
 
 ENGINE_API	IGame_Level*	g_pGameLevel	= nullptr;
 extern	BOOL g_bLoaded;
