@@ -228,14 +228,19 @@ void CActorCondition::UpdateCondition()
 	
 	float base_weight			= object().MaxCarryWeight();
 	float cur_weight			= object().inventory().TotalWeight();
+	float max_weight			= object().MaxWalkWeight();
 
 	if (m_object->Holder() == nullptr)
 	{
 		if ((object().mstate_real & mcAnyMove))
 		{
-			ConditionWalk(cur_weight / base_weight,
+			ConditionWalk(
+				cur_weight, 
+				base_weight, 
+				max_weight, 
 				isActorAccelerated(object().mstate_real, object().IsZoomAimingMode()),
-				(object().mstate_real & mcSprint) != 0);
+				(object().mstate_real & mcSprint) != 0
+			);
 		}
 		else
 		{
@@ -531,12 +536,22 @@ void CActorCondition::ConditionJump(float weight)
 	m_fPower			-=	HitPowerEffect(power);
 }
 
-void CActorCondition::ConditionWalk(float weight, bool accel, bool sprint)
-{	
-	float power			=	m_fWalkPower;
-	power				+=	m_fWalkWeightPower*weight*(weight>1.f?m_fOverweightWalkK:1.f);
-	power				*=	m_fDeltaTime*(accel?(sprint?m_fSprintK:m_fAccelK):1.f);
-	m_fPower			-=	HitPowerEffect(power);
+void CActorCondition::ConditionWalk(float current_weight, float max_normal_weight, float max_weight, bool accel, bool sprint)
+{
+	float power = m_fWalkPower;
+	auto normal_weight_alpha = current_weight / max_normal_weight;
+	if (current_weight < max_normal_weight) {
+		power += m_fWalkWeightPower * normal_weight_alpha;
+	}
+	else {
+		auto diff = current_weight - max_normal_weight;
+		auto overwight_diff = max_weight - max_normal_weight;
+		auto alpha = diff / overwight_diff;
+		auto overweight_additional_alpha = alpha * m_fOverweightWalkK;
+		power += m_fWalkWeightPower * (normal_weight_alpha + overweight_additional_alpha);
+	}
+	power *= m_fDeltaTime * (accel ? (sprint ? m_fSprintK : m_fAccelK) : 1.f);
+	m_fPower -= HitPowerEffect(power);
 }
 
 void CActorCondition::ConditionStand(float weight)

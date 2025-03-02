@@ -76,7 +76,7 @@ public:
 			float		GetPower					() const { return m_fPower; }
 
 			void		ConditionJump				(float weight);
-			void		ConditionWalk				(float weight, bool accel, bool sprint);
+			void		ConditionWalk(float current_weight, float max_normal_weight, float max_weight, bool accel, bool sprint);
 			void		ConditionStand				(float weight);
 	IC		float		MaxWalkWeight				() const	{ return m_MaxWalkWeight; }
 			
