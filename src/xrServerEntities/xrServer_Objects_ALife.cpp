@@ -18,12 +18,11 @@
 #	include "character_info.h"
 #endif // AI_COMPILER
 
+#	include "../xrEngine/bone.h"
 #ifndef XRGAME_EXPORTS
-#	include "bone.h"
 #	include "../xrEngine/defines.h"
 	LPCSTR GAME_CONFIG = "game.ltx";
 #else // XRGAME_EXPORTS
-#	include "../xrEngine/bone.h"
 #	include "../xrEngine/render.h"
 #endif // XRGAME_EXPORTS
 

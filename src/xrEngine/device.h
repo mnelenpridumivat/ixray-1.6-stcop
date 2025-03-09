@@ -9,7 +9,7 @@
 #include "../xrCore/FTimer.h"
 #include "Stats.h"
 
-#define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
+constexpr auto DEVICE_RESET_PRECACHE_FRAME_COUNT = 10;
 
 #include "../Include/xrRender/FactoryPtr.h"
 #include "../Include/xrRender/RenderDeviceRender.h"

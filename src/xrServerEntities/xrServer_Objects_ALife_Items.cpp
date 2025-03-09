@@ -12,10 +12,8 @@
 #include "clsid_game.h"
 #include "object_broker.h"
 
-#ifndef XRGAME_EXPORTS
-#	include "bone.h"
-#else
 #	include "../xrEngine/bone.h"
+#ifdef XRGAME_EXPORTS
 #	ifdef DEBUG
 #		define PHPH_DEBUG
 #	endif

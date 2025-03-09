@@ -1,15 +1,17 @@
 //----------------------------------------------------
-#ifndef BoneH
-#define BoneH
+#pragma once
+
+#ifdef _LW_EXPORT
+#include <lwrender.h>
+#include <lwhost.h>
+#endif
 
 // refs
 class CBone;
 
-#define	BI_NONE				(u16(-1))
-
-#define OGF_IKDATA_VERSION	0x0001
-
-#define	MAX_BONE_PARAMS		4
+constexpr auto BI_NONE = (u16(-1));
+constexpr auto OGF_IKDATA_VERSION = 0x0001;
+constexpr auto MAX_BONE_PARAMS = 4;
 
 class ENGINE_API CBoneInstance;
 // callback
@@ -348,7 +350,6 @@ public:
     Fmatrix			    rest_i_transform;
 
     //Fmatrix			    last_transform;
-
     //Fmatrix				render_transform;
 
 	int				    SelfID;
@@ -405,6 +406,10 @@ public:
 	void			    Save			(IWriter& F);
 	void			    Load_0			(IReader& F);
 	void			    Load_1			(IReader& F);
+
+#ifdef _LW_EXPORT
+	void			    ParseBone(LWItemID bone);
+#endif
 
 IC	float	_BCL		engine_lo_limit ( u8 k ) const	{ return -IK_data.limits[k].limit.y; }
 IC	float	_BCL		engine_hi_limit ( u8 k ) const	{ return -IK_data.limits[k].limit.x; }
@@ -565,5 +570,3 @@ IC void		CBoneInstance::construct	()
 	Callback_overwrite			= FALSE;
 }
 
-
-#endif

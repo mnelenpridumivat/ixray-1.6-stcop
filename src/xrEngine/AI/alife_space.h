@@ -6,24 +6,23 @@
 //	Description : ALife space
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef XRAY_ALIFE_SPACE
-#define XRAY_ALIFE_SPACE
+#pragma once
 //#include "../xrcore/_std_extensions.h"
 
 // ALife objects, events and tasks
-#define ALIFE_VERSION				0x0006
-#define ALIFE_CHUNK_DATA			0x0000
-#define SPAWN_CHUNK_DATA			0x0001
-#define OBJECT_CHUNK_DATA			0x0002
-#define GAME_TIME_CHUNK_DATA		0x0005
-#define REGISTRY_CHUNK_DATA			0x0009
-#define SECTION_HEADER				"location_"
-#define SAVE_EXTENSION				".scop"
-#define SPAWN_NAME					"game.spawn"
+constexpr auto ALIFE_VERSION = 0x0006;
+enum CHUNK_DATA {
+	ALIFE_CHUNK_DATA = 0x0000,
+	SPAWN_CHUNK_DATA = 0x0001,
+	OBJECT_CHUNK_DATA = 0x0002,
+	GAME_TIME_CHUNK_DATA = 0x0005,
+	REGISTRY_CHUNK_DATA = 0x0009,
+};
+constexpr auto SECTION_HEADER = "location_";
+constexpr auto SAVE_EXTENSION = ".scop";
+constexpr auto SPAWN_NAME = "game.spawn";
 // inventory rukzak size
-#define MAX_ITEM_VOLUME				100
-#define INVALID_STORY_ID			ALife::_STORY_ID(-1)
-#define INVALID_SPAWN_STORY_ID		ALife::_SPAWN_STORY_ID(-1)
+constexpr auto MAX_ITEM_VOLUME = 100;
 
 class CSE_ALifeDynamicObject;
 class CSE_ALifeMonsterAbstract;
@@ -205,4 +204,5 @@ namespace ALife {
 	using STORY_P_PAIR_IT = STORY_P_MAP::iterator;
 };
 
-#endif //XRAY_ALIFE_SPACE
+constexpr auto INVALID_STORY_ID = ALife::_STORY_ID(-1);
+constexpr auto INVALID_SPAWN_STORY_ID = ALife::_SPAWN_STORY_ID(-1);
