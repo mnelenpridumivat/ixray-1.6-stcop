@@ -43,12 +43,12 @@ inline bool DrawNumeric<float>(PropItem* item, bool& change, bool read_only)
 	change = ImGui::InputFloat("##value", &temp, 0.01, 0.1, V->dec, read_only ? ImGuiInputTextFlags_ReadOnly : 0);
 	if (change)
 	{
-		if (!isinf(V->lim_mn) &&V->lim_mn > temp)
-			temp = V->lim_mn;
-		if (!isinf(V->lim_mx) && V->lim_mx < temp)
-			temp = V->lim_mx;
 		if ( item->AfterEdit< NumericValue<float>, float>(temp) && !read_only)
 		{
+			if (!isinf(V->lim_mn) && V->lim_mn > temp)
+				temp = V->lim_mn;
+			if (!isinf(V->lim_mx) && V->lim_mx < temp)
+				temp = V->lim_mx;
 			change = item->ApplyValue< NumericValue<float>, float>(temp);
 		}
 	}
