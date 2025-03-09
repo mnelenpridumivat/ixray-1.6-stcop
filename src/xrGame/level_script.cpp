@@ -54,6 +54,10 @@
 
 #include "ai_object_location.h"
 
+#include "ActorHelmet.h"
+#include "PickupManager.h"
+#include "UIActorMenu.h"
+
 using namespace luabind;
 
 void show_legs(bool val)
@@ -1020,6 +1024,37 @@ namespace level_nearest
 	}
 }
 
+void ReloadLanguage(const char* lang)
+{
+	g_pStringTable->ReloadLanguage(lang);
+}
+
+
+void RefreshNamesNPC()
+{
+	for (auto& [id, pointer] : ai().alife().objects().objects())
+	{
+		auto trader = pointer->cast_trader_abstract();
+		if (trader == nullptr)
+		{
+			continue;
+		}
+
+		trader->m_character_name = TranslateName(trader->m_character_name_raw.c_str());
+		if (g_pGameLevel == nullptr)
+		{
+			continue;
+		}
+
+		auto obj = g_pGameLevel->Objects.net_Find(id);
+		CInventoryOwner* owner = obj->cast_inventory_owner();
+		if (owner)
+		{
+			owner->RefreshNamesNPC();
+		}
+	}
+}
+
 void create_custom_timer(LPCSTR name, int start_value, int mode = 0)
 {
 	CTimerManager::GetInstance().CreateTimer(name, start_value, mode);
@@ -1082,6 +1117,132 @@ void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
 		return;
 	}
 	sam->LaunchMissile(&target->object());
+}
+
+bool IsUIShown()
+{
+	return CurrentGameUI()->GameIndicatorsShown();
+}
+
+bool IndicatorsShown()
+{
+	if (!IsUIShown())
+		return false;
+
+	auto actor = Level().CurrentViewEntity()->cast_actor();
+	if (actor == nullptr)
+		return false;
+
+	if (actor->inventory().ActiveItem() == nullptr)
+	{
+		return false;
+	}
+
+	auto wpn = actor->inventory().ActiveItem()->cast_weapon();
+	if (wpn == nullptr)
+	{
+		return true;
+	}
+	
+	if (wpn->IsUIForceHiding())
+	{
+		return false;
+	}
+	else if (wpn->IsUIForceUnhiding())
+	{
+		return true;
+	}
+	else if (wpn->IsGrenadeMode())
+	{
+		return true;
+	}
+
+	if (wpn->IsZoomed() && (wpn->get_ScopeStatus() == 1 || (wpn->get_ScopeStatus() == 2 && wpn->IsScopeAttached())))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool InventoryShown()
+{
+	return CurrentGameUI()->ActorMenu().IsShown();
+}
+
+bool ElectronicsBreak()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+		return false; // TODO: IMPL actor->ElectronicsProblemsInc();
+
+	return false;
+}
+
+bool IsPickupMode()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+		return actor->GetPickupManager()->GetPickupMode();
+
+	return false;
+}
+
+bool IsActorBurned()
+{
+	return false;
+}
+
+bool IsElectronicsRestore()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+		return false; //actor->ElectronicsProblemsDec();
+
+	return false;
+}
+
+bool electronics_reset()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+	{
+		// IMPL: actor->ResetElectronicsProblems();
+		return true;
+	}
+
+	return false;
+}
+
+bool IsElectronicsApply()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+		return false; // IMPL: actor->ElectronicsProblemsImmediateApply();
+
+	return false;
+}
+
+int GetParameterUpgradedInt()
+{
+	return 0;
+}
+
+int ValidSavedGameInt(int number, const char* name)
+{
+	return 1;
+}
+
+bool IsTacticalHud()
+{
+	auto actor = Level().CurrentControlEntity()->cast_actor();
+	if (actor != nullptr)
+	{
+		if (CHelmet* helmet = smart_cast<CHelmet*>(actor->inventory().ItemFromSlot(HELMET_SLOT)))
+			return false; //helmet->m_fShowNearestEnemiesDistance > 0.0f;
+	}
+
+	return false;
 }
 
 #pragma optimize("s",on)
@@ -1237,54 +1398,67 @@ void CLevel::script_register(lua_State* L)
 
 				def("game_id", &GameID),
 
-				def("block_action", &block_action_script),
-				def("is_block_action", &is_block_action_script),
-				def("unblock_action", &unblock_action_script),
-				def("press_action", &press_action_script),
-				def("hold_action", &hold_action_script),
-				def("release_action", &release_action_script),
-				def("lock_actor", &LockActorWithCameraRotation_script),
-				def("unlock_actor", &UnLockActor_script),
+		def("block_action", &block_action_script),
+		def("is_block_action", &is_block_action_script),
+		def("unblock_action", &unblock_action_script),
+		def("press_action", &press_action_script),
+		def("hold_action", &hold_action_script),
+		def("release_action", &release_action_script),
+		def("lock_actor", &LockActorWithCameraRotation_script),
+		def("unlock_actor", &UnLockActor_script),
+		
+		def("u_event_gen", &u_event_gen), //Send events via packet
+		def("u_event_send", &u_event_send),
+		def("send", &g_send), //allow the ability to send netpacket to level
+		def("send", &g_send2), //allow the ability to send netpacket to level
+		def("get_target_obj", &g_get_target_obj), //intentionally named to what is in xray extensions
+		def("get_target_dist", &g_get_target_dist),
+		def("press_action", &LevelPressAction),
+		def("release_action", &LevelReleaseAction),
+		def("hold_action", &LevelHoldAction),
+		def("get_target_element", &g_get_target_element), //Can get bone cursor is targetting
+		def("get_view_entity", &get_view_entity_script),
+		def("set_view_entity", &set_view_entity_script),
+		def("spawn_item", &spawn_section),
+		def("get_active_cam", &get_active_cam),
+		def("set_active_cam", &set_active_cam),
+		def("get_start_time", &get_start_time),
+		def("valid_vertex", &valid_vertex),
+		def("is_ui_shown", &IsUIShown),
+		def("is_actor_burned", &IsActorBurned),
+		def("indicators_shown", &IndicatorsShown),
+		def("inventory_shown", &InventoryShown),
+		def("pickup_mode", &IsPickupMode),
+		// TODO Guns: Drombeys to all: not impl
+		def("electronics_break", &ElectronicsBreak),
+		def("electronics_restore", &IsElectronicsRestore),
+		def("electronics_reset", &electronics_reset),
+		def("electronics_apply", &IsElectronicsApply),
+		def("get_parameter_upgraded_int", &GetParameterUpgradedInt),
+		def("valid_saved_game_int", &ValidSavedGameInt),
+		def("is_tactical_hud", &IsTacticalHud),
 
-				def("u_event_gen", &u_event_gen), //Send events via packet
-				def("u_event_send", &u_event_send),
-				def("send", &g_send), //allow the ability to send netpacket to level
-				def("send", &g_send2), //allow the ability to send netpacket to level
-				def("get_target_obj", &g_get_target_obj), //intentionally named to what is in xray extensions
-				def("get_target_dist", &g_get_target_dist),
-				def("press_action", &LevelPressAction),
-				def("release_action", &LevelReleaseAction),
-				def("hold_action", &LevelHoldAction),
-				def("get_target_element", &g_get_target_element), //Can get bone cursor is targetting
-				def("get_view_entity", &get_view_entity_script),
-				def("set_view_entity", &set_view_entity_script),
-				def("spawn_item", &spawn_section),
-				def("get_active_cam", &get_active_cam),
-				def("set_active_cam", &set_active_cam),
-				def("get_start_time", &get_start_time),
-				def("valid_vertex", &valid_vertex),
+		def("create_custom_timer", &create_custom_timer),
+		def("start_custom_timer", &start_custom_timer),
+		def("stop_custom_timer", &stop_custom_timer),
+		def("reset_custom_timer", &reset_custom_timer),
+		def("delete_custom_timer", &delete_custom_timer),
+		def("get_custom_timer", &get_custom_timer),
 
-				def("create_custom_timer", &create_custom_timer),
-				def("start_custom_timer", &start_custom_timer),
-				def("stop_custom_timer", &stop_custom_timer),
-				def("reset_custom_timer", &reset_custom_timer),
-				def("delete_custom_timer", &delete_custom_timer),
-				def("get_custom_timer", &get_custom_timer),
+		def("bind_timer", &bind_timer),
 
-				def("bind_timer", &bind_timer),
+		def("get_user_name", &get_user_name),
 
-				def("get_user_name", &get_user_name),
-
-				def("launch_sam", &launch_sam)
-		],
-
-		module(L, "nearest")
-		[
-			def("set", &level_nearest::Set),
-				def("size", &level_nearest::Size),
-				def("get", &level_nearest::Get)
-		];
-
+		def("launch_sam", &launch_sam)
+	],
+	
+	module(L,"nearest")
+	[
+		def("set",						&level_nearest::Set),
+		def("size",						&level_nearest::Size),
+		def("get",						&level_nearest::Get)
+	];
+	
 	module(L, "animslot")
 		[
 			def("play", &CHUDAnimItem::PlayHudAnim)
@@ -1390,23 +1564,24 @@ void CLevel::script_register(lua_State* L)
 				.def("save", &xrTime::Save)
 				.def("load", &xrTime::Load)
 
-				.def("setHMS", &xrTime::setHMS)
-				.def("setHMSms", &xrTime::setHMSms)
-				.def("set", &xrTime::set)
-				.def("get", &xrTime::get, out_value<2>() + out_value<3>() + out_value<4>() + out_value<5>() + out_value<6>() + out_value<7>() + out_value<8>())
-				.def("dateToString", &xrTime::dateToString)
-				.def("timeToString", &xrTime::timeToString),
-				// declarations
-				def("time", get_time),
-				def("get_game_time", get_time_struct),
-				//			def("get_surge_time",	Game::get_surge_time),
-				//			def("get_object_by_name",Game::get_object_by_name),
-
-				def("start_tutorial", &start_tutorial),
-				def("stop_tutorial", &stop_tutorial),
-				def("has_active_tutorial", &has_active_tutotial),
-				def("translate_string", &translate_string)
-		];
+			.def("setHMS"				,&xrTime::setHMS)
+			.def("setHMSms"				,&xrTime::setHMSms)
+			.def("set"					,&xrTime::set)
+			.def("get"					,&xrTime::get, out_value<2>() + out_value<3>() + out_value<4>() + out_value<5>() + out_value<6>() + out_value<7>() + out_value<8>())
+			.def("dateToString"			,&xrTime::dateToString)
+			.def("timeToString"			,&xrTime::timeToString),
+			// declarations
+			def("time",					get_time),
+			def("get_game_time",		get_time_struct),
+//			def("get_surge_time",	Game::get_surge_time),
+//			def("get_object_by_name",Game::get_object_by_name),
+		
+			def("start_tutorial",		&start_tutorial),
+			def("stop_tutorial",		&stop_tutorial),
+			def("has_active_tutorial",	&has_active_tutotial),
+			def("translate_string",		&translate_string),
+			def("reload_language", &ReloadLanguage)
+	];
 }
 
 SCRIPT_EXPORT1(CLevel);

@@ -48,6 +48,8 @@ CHudItem::~CHudItem()
 void CHudItem::Load(LPCSTR section)
 {
 	hud_sect				= pSettings->r_string		(section,"hud");
+	hud_sect_cache = hud_sect;
+
 	m_animation_slot		= pSettings->r_u32			(section,"animation_slot");
 
 	m_nearwall_dist_min = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_min", .2f);
@@ -560,7 +562,7 @@ u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 
 {
 	if (HudItemData() && !HudAnimationExist(M.c_str()))
 	{
-		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M);
+		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M.c_str());
 		return 0;
 	}
 
@@ -723,6 +725,15 @@ float CHudItem::GetHudFov()
 	}
 
 	return m_nearwall_last_hud_fov;
+}
+
+void CHudItem::PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allowOverlap)
+{
+	HUD_SOUND_ITEM* SndIter = m_sounds.FindSoundItem(alias, false);
+	if (SndIter != nullptr)
+	{
+		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap);
+	}
 }
 
 void CHudItem::SetModelBoneStatus(const char* bone, BOOL show)

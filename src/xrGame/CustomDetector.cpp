@@ -95,6 +95,13 @@ bool CCustomDetector::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 
 void CCustomDetector::HideDetector(bool bFastMode)
 {
+	if (force)
+	{
+		m_bFastAnimMode = bFastMode;
+		SwitchState(eHiding);
+		return;
+	}
+
 	const CHUDState::EHudStates CurrentState = (CHUDState::EHudStates) GetState();
 	switch (CurrentState) {
 		case CHUDState::EHudStates::eIdle:

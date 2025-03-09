@@ -24,6 +24,7 @@
 #include "Torch.h"
 #include "CustomDetector.h"
 #include "script_game_object.h"
+#include <WeaponBinoculars.h>
 
 #define WEAPON_REMOVE_TIME		60000
 #define ROTATION_TIME			0.25f
@@ -64,7 +65,7 @@ CWeapon::CWeapon()
 	m_pFlameParticles2		= nullptr;
 	m_sFlameParticles2		= nullptr;
 
-
+	m_bIAmWeaponRPG7 = false;
 	m_fCurrentCartirdgeDisp = 1.f;
 
 	m_strap_bone0			= 0;
@@ -459,38 +460,10 @@ void CWeapon::Load		(LPCSTR section)
 	m_zoom_params.m_bZoomEnabled		= !!pSettings->r_bool(section,"zoom_enabled");
 	m_zoom_params.m_fZoomRotateTime		= pSettings->r_float(section,"zoom_rotate_time");
 
-	if ( m_eScopeStatus == ALife::eAddonAttachable )
-	{
-		if(pSettings->line_exist(section, "scopes_sect"))		
-		{
-			LPCSTR str = pSettings->r_string(section, "scopes_sect");
-			for(int i = 0, count = _GetItemCount(str); i < count; ++i )	
-			{
-				string128						scope_section;
-				_GetItem						(str, i, scope_section);
-				m_scopes.push_back				(scope_section);
-			}
-		}
-		else
-		{
-			m_scopes.push_back(section);
-		}
-	}
-	else if( m_eScopeStatus == ALife::eAddonPermanent )
-	{
-		shared_str scope_tex_name			= pSettings->r_string(cNameSect(), "scope_texture");
-		m_zoom_params.m_fScopeZoomFactor	= pSettings->r_float( cNameSect(), "scope_zoom_factor");
-		if ( !g_dedicated_server )
-		{
-			m_UIScope				= new CUIWindow();
-			if(!pWpnScopeXml)
-			{
-				pWpnScopeXml			= new CUIXml();
-				pWpnScopeXml->Load		(CONFIG_PATH, UI_PATH, "scopes.xml");
-			}
-			CUIXmlInit::InitWindow	(*pWpnScopeXml, scope_tex_name.c_str(), 0, m_UIScope);
-		}
-	}
+	bUseAltScope = !!bLoadAltScopesParams(section);
+
+	if (!bUseAltScope)
+		LoadOriginalScopesParams(section);
     
 	if ( m_eSilencerStatus == ALife::eAddonAttachable )
 	{
@@ -508,7 +481,9 @@ void CWeapon::Load		(LPCSTR section)
 		m_iGrenadeLauncherY = pSettings->r_s32(section, "grenade_launcher_y") * (1 + isHQIcons);
 	}
 
+	UpdateAltScope();
 	InitAddons();
+
 	if(pSettings->line_exist(section,"weapon_remove_time"))
 		m_dwWeaponRemoveTime = pSettings->r_u32(section,"weapon_remove_time");
 	else
@@ -548,6 +523,19 @@ void CWeapon::Load		(LPCSTR section)
 	m_zoom_params.m_bUseDynamicZoom				= READ_IF_EXISTS(pSettings,r_bool,section,"scope_dynamic_zoom",FALSE);
 	m_zoom_params.m_sUseZoomPostprocess			= 0;
 	m_zoom_params.m_sUseBinocularVision			= 0;
+
+	m_bUseSilHud = READ_IF_EXISTS(pSettings, r_bool, section, "hud_when_silencer_is_attached", false);
+	m_bUseScopeHud = READ_IF_EXISTS(pSettings, r_bool, section, "hud_when_scope_is_attached", false);
+	m_bUseGLHud = READ_IF_EXISTS(pSettings, r_bool, section, "hud_when_gl_is_attached", false);
+
+	if (m_bUseSilHud)
+		hud_silencer = pSettings->r_string(section, "hud_silencer");
+
+	if (m_bUseScopeHud)
+		hud_scope = pSettings->r_string(section, "hud_scope");
+
+	if (m_bUseGLHud)
+		hud_gl = pSettings->r_string(section, "hud_gl");
 
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
@@ -630,6 +618,7 @@ BOOL CWeapon::net_Spawn		(CSE_Abstract* DC)
 			m_magazine.push_back(m_DefaultCartridge);
 	}
 
+	UpdateAltScope();
 	UpdateAddonsVisibility();
 	UpdateHUDAddonsVisibility();
 	ProcessScope();
@@ -945,14 +934,21 @@ extern u32 hud_adj_mode;
 void CWeapon::UpdateCL		()
 {
 	bool need_update_hud = false;
+	bool isHudItemData = HudItemData() != nullptr;
 
-	if (HudItemData() && !bUpdateHUDBonesVisibility)
+	if (isHudItemData && bUseAltScope) {
+		need_update_hud = true;
+	}
+	
+	if (isHudItemData && !bUpdateHUDBonesVisibility)
 	{
 		bUpdateHUDBonesVisibility = true;
 		need_update_hud = true;
 	}
-	else if (HudItemData() == nullptr)
+	else if (!isHudItemData)
+	{
 		bUpdateHUDBonesVisibility = false;
+	}
 
 	if (need_update_hud)
 	{
@@ -972,11 +968,9 @@ void CWeapon::UpdateCL		()
 	if(!IsGameTypeSingle())
 		make_Interpolation		();
 
-	auto i1 = g_player_hud->attached_item(1);
-	if (i1 && HudItemData())
+	if (ParentIsActor())
 	{
-		auto det = smart_cast<CCustomDetector*>(i1->m_parent_hud_item);
-		if (det && (det->GetState() == CCustomDetector::eIdle || !det->NeedActivation()))
+		if (Actor()->GetDetector() && (Actor()->GetDetector()->GetState() == CCustomDetector::eIdle || !Actor()->GetDetector()->NeedActivation()))
 		{
 			if (bAmmotypeKeyPressed || bReloadKeyPressed)
 			{
@@ -1348,13 +1342,8 @@ bool CWeapon::SwitchAmmoType( u32 flags )
 	
 	bAmmotypeKeyPressed = true;
 
-	auto i1 = g_player_hud->attached_item(1);
-	if (i1 && HudItemData())
-	{
-		auto det = smart_cast<CCustomDetector*>(i1->m_parent_hud_item);
-		if (det && det->GetState() != CCustomDetector::eIdle)
-			return false;
-	}
+	if (ParentIsActor() && Actor()->GetDetector() && Actor()->GetDetector()->GetState() != CCustomDetector::eIdle)
+		return false;
 
 	u8 l_newType = m_ammoType;
 	bool b1, b2;
@@ -1972,6 +1961,8 @@ void CWeapon::reload(LPCSTR section) {
 	m_strapped_mode = false;
 	m_strapped_mode_rifle = false;
 
+	bUseAltScope = !!bReloadSectionScope(section);
+
 	if (m_eScopeStatus == ALife::eAddonAttachable) {
 		m_addon_holder_range_modifier = READ_IF_EXISTS(
 			pSettings, r_float, GetScopeName(), "holder_range_modifier", m_holder_range_modifier);
@@ -2572,7 +2563,20 @@ bool CWeapon::unlimited_ammo()
 	return ((GameID() == eGameIDDeathmatch) && 
 			m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited)); 
 			
-};
+}
+bool CWeapon::infinite_fire()
+{
+	if (IsGameTypeSingle())
+	{
+		if (m_pInventory)
+		{
+			return inventory_owner().infinite_fire();
+		}
+	}
+
+	return false;
+}
+;
 
 float CWeapon::GetMagazineWeight(const decltype(CWeapon::m_magazine)& mag) const {
 	float res = 0;
@@ -2615,7 +2619,7 @@ bool CWeapon::show_crosshair()
 
 bool CWeapon::show_indicators()
 {
-	return ! ( IsZoomed() && ZoomTexture() );
+	return !(IsZoomed() && ZoomTexture() && IsUIForceHiding() && !IsUIForceUnhiding());
 }
 
 float CWeapon::GetConditionToShow	() const
@@ -2792,4 +2796,258 @@ const CameraRecoil& CWeapon::getCameraZoomRecoil(void) const
 {
 	return zoom_cam_recoil;
 }
- 
+
+bool CWeapon::IsUIForceHiding() const
+{
+	auto bino = smart_cast<CWeaponBinoculars*>(this);
+
+	if (bino && IsZoomed())
+		return READ_IF_EXISTS(pSettings, r_bool, cNameSect(), "zoom_hide_ui", true);
+	else if (get_ScopeStatus() == 1 && IsZoomed())
+		return READ_IF_EXISTS(pSettings, r_bool, cNameSect(), "zoom_hide_ui", false);
+	else if (get_ScopeStatus() == 2 && IsScopeAttached() && IsZoomed())
+		return READ_IF_EXISTS(pSettings, r_bool, GetCurrentScopeSection(), "zoom_hide_ui", false);
+	else
+		return false;
+}
+
+bool CWeapon::IsCollimatorInstalled() const
+{
+	if (!IsScopeAttached() || get_ScopeStatus() != 2)
+		return false;
+
+	shared_str scope = GetCurrentScopeSection();
+	scope = pSettings->r_string(scope, "scope_name");
+
+	return READ_IF_EXISTS(pSettings, r_bool, scope, "collimator", false);
+}
+
+bool CWeapon::IsHudModelForceUnhide() const
+{
+	return IsCollimatorInstalled() /* || IsLensedScopeInstalled(wpn) && IsLensEnabled() || IsAlterZoomMode()*/;
+}
+
+bool CWeapon::IsUIForceUnhiding() const
+{
+	bool result = IsHudModelForceUnhide();
+
+	if (result)
+	{
+		/*if (buf.IsAlterZoomMode())
+			result = true;
+		else */if (get_ScopeStatus() == 1)
+			result = !READ_IF_EXISTS(pSettings, r_bool, cNameSect(), "zoom_hide_ui", false);
+		else if (get_ScopeStatus() == 2 && IsScopeAttached())
+			result = !READ_IF_EXISTS(pSettings, r_bool, pSettings->r_string(GetCurrentScopeSection(), "scope_name"), "zoom_hide_ui", false);
+	}
+
+	return result;
+}
+
+int CWeapon::GetScopeX()
+{
+	const static int useHQ = EngineExternal()[EEngineExternalUI::HQIcons];
+
+	if (bUseAltScope)
+	{
+		if (m_eScopeStatus != ALife::eAddonPermanent && IsScopeAttached())
+		{
+			return pSettings->r_s32(GetNameWithAttachmentScope(), "scope_x") * (1 + useHQ);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	return pSettings->r_s32(m_scopes[m_cur_scope], "scope_x") * (1 + useHQ);
+}
+
+int CWeapon::GetScopeY()
+{
+	const static int useHQ = EngineExternal()[EEngineExternalUI::HQIcons];
+	if (bUseAltScope)
+	{
+		if (m_eScopeStatus != ALife::eAddonPermanent && IsScopeAttached())
+		{
+			return pSettings->r_s32(GetNameWithAttachmentScope(), "scope_y") * (1 + useHQ);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	return pSettings->r_s32(m_scopes[m_cur_scope], "scope_y") * (1 + useHQ);
+}
+
+
+const shared_str CWeapon::GetScopeName() const
+{
+	if (bUseAltScope)
+	{
+		return m_scopes[m_cur_scope];
+	}
+	else
+	{
+		return pSettings->r_string(m_scopes[m_cur_scope], "scope_name");
+	}
+}
+
+void CWeapon::UpdateAltScope()
+{
+	if (m_eScopeStatus != ALife::eAddonAttachable || !bUseAltScope)
+		return;
+
+	shared_str sectionNeedLoad;
+
+	sectionNeedLoad = IsScopeAttached() ? GetNameWithAttachmentScope() : m_section_id;
+
+	if (!pSettings->section_exist(sectionNeedLoad))
+		return;
+
+	shared_str vis = pSettings->r_string(sectionNeedLoad, "visual");
+
+	if (vis != cNameVisual())
+	{
+		cNameVisual_set(vis);
+	}
+
+	shared_str new_hud = pSettings->r_string(sectionNeedLoad, "hud");
+	if (new_hud != hud_sect)
+	{
+		hud_sect = new_hud;
+	}
+
+	hud_sect_cache = hud_sect;
+}
+
+shared_str CWeapon::GetNameWithAttachmentScope()
+{
+	string64 str;
+	if (pSettings->line_exist(m_section_id.c_str(), "parent_section"))
+	{
+		shared_str parent = pSettings->r_string(m_section_id.c_str(), "parent_section");
+		xr_sprintf(str, "%s_%s", parent.c_str(), GetScopeName().c_str());
+	}
+	else
+	{
+		xr_sprintf(str, "%s_%s", m_section_id.c_str(), GetScopeName().c_str());
+	}
+	return (shared_str)str;
+}
+
+bool CWeapon::bReloadSectionScope(LPCSTR section)
+{
+	if (!pSettings->line_exist(section, "scopes"))
+		return false;
+
+	if (pSettings->r_string(section, "scopes") == NULL)
+		return false;
+
+	if (xr_strcmp(pSettings->r_string(section, "scopes"), "none") == 0)
+		return false;
+
+	return true;
+}
+
+bool CWeapon::bLoadAltScopesParams(LPCSTR section)
+{
+	if (!pSettings->line_exist(section, "scopes"))
+		return false;
+
+	if (pSettings->r_string(section, "scopes") == NULL)
+		return false;
+
+	if (xr_strcmp(pSettings->r_string(section, "scopes"), "none") == 0)
+		return false;
+
+	if (m_eScopeStatus == ALife::eAddonAttachable)
+	{
+		LPCSTR str = pSettings->r_string(section, "scopes");
+		for (int i = 0, count = _GetItemCount(str); i < count; ++i)
+		{
+			string128 scope_section;
+			_GetItem(str, i, scope_section);
+			m_scopes.push_back(scope_section);
+		}
+	}
+	else if (m_eScopeStatus == ALife::eAddonPermanent)
+	{
+		LoadCurrentScopeParams(section);
+	}
+
+	return true;
+}
+
+void CWeapon::LoadOriginalScopesParams(LPCSTR section)
+{
+
+	if (m_eScopeStatus == ALife::eAddonAttachable)
+	{
+		if (pSettings->line_exist(section, "scopes_sect"))
+		{
+			LPCSTR str = pSettings->r_string(section, "scopes_sect");
+			for (int i = 0, count = _GetItemCount(str); i < count; ++i)
+			{
+				string128						scope_section;
+				_GetItem(str, i, scope_section);
+				m_scopes.push_back(scope_section);
+			}
+		}
+		else
+		{
+			m_scopes.push_back(section);
+		}
+	}
+	else if (m_eScopeStatus == ALife::eAddonPermanent)
+	{
+		LoadCurrentScopeParams(section);
+	}
+}
+
+void createWpnScopeXML()
+{
+	if (!pWpnScopeXml)
+	{
+		pWpnScopeXml = new CUIXml();
+		pWpnScopeXml->Load(CONFIG_PATH, UI_PATH, "scopes.xml");
+	}
+}
+
+void CWeapon::LoadCurrentScopeParams(LPCSTR section)
+{
+	shared_str scope_tex_name = "none";
+	bScopeIsHasTexture = false;
+	if (pSettings->line_exist(section, "scope_texture"))
+	{
+		scope_tex_name = pSettings->r_string(section, "scope_texture");
+		if (xr_strcmp(scope_tex_name, "none") != 0)
+			bScopeIsHasTexture = true;
+	}
+
+	m_zoom_params.m_fScopeZoomFactor = pSettings->r_float(section, "scope_zoom_factor");
+
+	if (bScopeIsHasTexture)
+	{
+		m_zoom_params.m_sUseZoomPostprocess = READ_IF_EXISTS(pSettings, r_string, section, "scope_nightvision", 0);
+		m_zoom_params.m_bUseDynamicZoom = READ_IF_EXISTS(pSettings, r_bool, section, "scope_dynamic_zoom", FALSE);
+
+		m_zoom_params.m_sUseBinocularVision = READ_IF_EXISTS(pSettings, r_string, section, "scope_alive_detector", 0);
+	}
+
+	if (m_UIScope)
+	{
+		xr_delete(m_UIScope);
+	}
+
+	if (!g_dedicated_server)
+	{
+		if (bScopeIsHasTexture)
+		{
+			m_UIScope = new CUIWindow();
+			createWpnScopeXML();
+			CUIXmlInit::InitWindow(*pWpnScopeXml, scope_tex_name.c_str(), 0, m_UIScope);
+		}
+	}
+}

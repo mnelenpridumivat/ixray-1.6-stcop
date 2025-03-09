@@ -1,17 +1,22 @@
 // LevelEditor.cpp : Определяет точку входа для приложения.
 //
 #include "stdafx.h"
+
 #include "Engine/XrGameManager.h"
-#include "..\xrEngine\std_classes.h"
-#include "..\xrEngine\IGame_Persistent.h"
-#include "..\xrEngine\XR_IOConsole.h"
-#include "..\xrEngine\IGame_Level.h"
-#include "..\xrEngine/string_table.h"
-#include "..\xrEngine\x_ray.h"
 #include "Engine/XRayEditor.h"
-#include "../../xrEngine/xr_input.h"
+
 #include "Editor/Utils/ContentView.h"
-#include "xrECore/Splash.h"
+#include "Editor/Scene/LEPhysics.h"
+
+#include "../xrECore/Splash.h"
+
+#include "../../xrEngine/std_classes.h"
+#include "../../xrEngine/IGame_Persistent.h"
+#include "../../xrEngine/XR_IOConsole.h"
+#include "../../xrEngine/IGame_Level.h"
+#include "../../xrEngine/string_table.h"
+#include "../../xrEngine/x_ray.h"
+#include "../../xrEngine/xr_input.h"
 #include "../../xrEngine/FPSCounter.h"
 
 ECORE_API extern bool bIsLevelEditor;
@@ -55,9 +60,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	GContentView = new CContentView;
 
 	splash::update(30, "Creating Main UI Form");
+
 	UIMainForm* MainForm = new UIMainForm();
+
 	pApp = new XRayEditor();
-	g_pStringTable = new CStringTable();
 	g_XrGameManager = new XrGameManager();
 	g_SEFactoryManager = new XrSEFactoryManager();
 
@@ -215,11 +221,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 
 	xr_delete(g_FontManager);
+
+	g_scene_physics.DestroyAll();
+	g_scene_physics.DestroyObjectSpace();
+
 	xr_delete(MainForm);
+	//очищение памяти таблицы строк
+	CStringTable::Destroy();
 	xr_delete(pApp);
 	xr_delete(g_XrGameManager);
 	xr_delete(g_SEFactoryManager);
-
 	Core._destroy();
 	return 0;
 }

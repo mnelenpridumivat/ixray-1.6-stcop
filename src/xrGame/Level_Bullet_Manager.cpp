@@ -1049,8 +1049,12 @@ void CBulletManager::CommitEvents			()	// @ the start of frame
 			{
 				if (E.bullet.flags.allow_sendhit && !IsGameTypeSingle())
 					Game().m_WeaponUsageStatistic->OnBullet_Remove(&E.bullet);
-				m_Bullets[E.tgt_material] = m_Bullets.back();
-				m_Bullets.pop_back();
+
+				if (E.tgt_material < m_Bullets.size())
+				{
+					m_Bullets[E.tgt_material] = m_Bullets.back();
+					m_Bullets.pop_back();
+				}
 			}break;
 		}		
 	}
@@ -1059,14 +1063,6 @@ void CBulletManager::CommitEvents			()	// @ the start of frame
 
 void CBulletManager::RegisterEvent			(EventType Type, BOOL _dynamic, SBullet* bullet, const Fvector& end_point, collide::rq_result& R, u16 tgt_material)
 {
-#if 0//def DEBUG
-	if (m_Events.size() > 1000) {
-		static bool breakpoint = true;
-		if (breakpoint)
-			__debugbreak();
-	}
-#endif // #ifdef DEBUG
-
 	m_Events.push_back	(_event())		;
 	_event&	E		= m_Events.back()	;
 	E.Type			= Type				;

@@ -149,7 +149,7 @@ XRCORE_API full_memory_stats_callback_type g_full_memory_stats_callback;
 static void full_memory_stats()
 {
 	Memory.mem_compact();
-	u32		_process_heap = mem_usage_impl(nullptr, nullptr);
+	u32		_process_heap = mem_usage_impl((HANDLE)_get_heap_handle(), 0, 0);
 #ifdef SEVERAL_ALLOCATORS
 	u32		_render = ::Render->memory_usage();
 #endif // SEVERAL_ALLOCATORS
@@ -2242,10 +2242,91 @@ public:
 	}
 };
 
+extern void RefreshNamesNPC();
+extern void execute_console_command_deferred(CConsole* c, LPCSTR string_to_execute);
+
+class CCC_ChangeLanguage : public CCC_Token
+{
+	u32 _dummy;
+public:
+	CCC_ChangeLanguage(LPCSTR N): CCC_Token(N, &_dummy, nullptr)
+	{
+		bEmptyArgsHandled = FALSE;
+	}
+
+	virtual void Execute(LPCSTR args)
+	{
+		if (xr_strcmp(args, g_pStringTable->LangName().c_str()) == 0)
+		{
+			return;
+		}
+
+		auto it = std::find_if(g_pStringTable->languages_token.begin(), g_pStringTable->languages_token.end(),
+			[args](const xr_token& item)
+			{
+				if (item.name == nullptr)
+				{
+					return false;
+				}
+				return !xr_strcmp(item.name, args);
+			});
+
+		if (it == g_pStringTable->languages_token.end())
+		{
+			return;
+		}
+		
+		// reload language
+		g_pStringTable->ReloadLanguage(args);
+		
+		if (g_pGamePersistent == nullptr)
+		{
+			return;
+		}
+		
+		// reload language in menu
+		if (MainMenu()->IsActive())
+		{
+			execute_console_command_deferred(Console, "main_menu 0");
+			execute_console_command_deferred(Console, "main_menu 1");
+		}
+		
+		if (g_pGameLevel != nullptr)
+		{
+			RefreshNamesNPC();
+		}
+	}
+
+	virtual void Status(TStatus& S) override
+	{
+		xr_sprintf(S, sizeof(S), "%s", g_pStringTable->LangName().c_str());
+	}
+
+	virtual xr_token* GetToken()
+	{
+		return g_pStringTable->languages_token.data();
+	}
+
+	virtual void fill_tips(vecTips& tips, u32 mode) override {
+		TStatus  cur;
+		Status(cur);
+		
+		for (size_t i = 0; i < g_pStringTable->languages_token.size() - 1; i++)
+		{
+			if (g_pStringTable->languages_token[i].name != nullptr || g_pStringTable->languages_token[i].name[0])
+			{
+				tips.push_back(g_pStringTable->languages_token[i].name);
+			}
+		}
+		IConsole_Command::fill_tips(tips, mode);
+	}
+};
+
 void CCC_RegisterCommands()
 {
 	// options
 	g_OptConCom.Init();
+	CMD1(CCC_ChangeLanguage, "language");
 
 #ifndef MASTER_GOLD
 	CMD1(CCC_SetActorPosition, "set_actor_position");
@@ -2264,6 +2345,8 @@ void CCC_RegisterCommands()
 
 	CMD3(CCC_Mask, "dbg_draw_lchangers", &dbg_net_Draw_Flags, dbg_draw_lchangers);
 
+	CMD3(CCC_Mask, "g_infinite_fire", &psActorFlags, AF_INFINITEFIRE);
+	CMD3(CCC_Mask, "g_infinite_durability", &psActorFlags, AF_INFINITEDURABILITY);
 #endif
 
 	CMD1(CCC_MemStats, "stat_memory");

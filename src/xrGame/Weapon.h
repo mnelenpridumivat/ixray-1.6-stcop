@@ -96,6 +96,10 @@ public:
 
 	const CameraRecoil& getCameraRecoil(void) const;
 	const CameraRecoil& getCameraZoomRecoil(void) const;
+	bool IsUIForceHiding() const;
+	bool IsCollimatorInstalled() const;
+	bool IsHudModelForceUnhide() const;
+	bool IsUIForceUnhiding() const;
 protected:
 	//время удаления оружия
 	ALife::_TIME_ID			m_dwWeaponRemoveTime;
@@ -163,15 +167,8 @@ public:
 
 	//для отоброажения иконок апгрейдов в интерфейсе
 
-	int	GetScopeX()
-	{ 
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_x") * (1 + isHQIcons);
-	}
-
-	int	GetScopeY()
-	{
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_y") * (1 + isHQIcons);
-	}
+	int	GetScopeX();
+	int	GetScopeY();
 
 	int	GetSilencerX() {return m_iSilencerX;}
 	int	GetSilencerY() {return m_iSilencerY;}
@@ -181,7 +178,13 @@ public:
 	int	GetGrenadeLauncherY() {return m_iGrenadeLauncherY;}
 
 	const shared_str& GetGrenadeLauncherName	() const{return m_sGrenadeLauncherName;}
-	const shared_str GetScopeName				() const{return pSettings->r_string(m_scopes[m_cur_scope], "scope_name");}
+	const shared_str GetScopeName() const;
+	void UpdateAltScope();
+	shared_str GetNameWithAttachmentScope();
+	bool bReloadSectionScope(LPCSTR section);
+	bool bLoadAltScopesParams(LPCSTR section);
+	void LoadOriginalScopesParams(LPCSTR section);
+	void LoadCurrentScopeParams(LPCSTR section);
 	const shared_str& GetSilencerName			() const{return m_sSilencerName;}
 
 	IC void	ForceUpdateAmmo						()		{ m_BriefInfo_CalcFrame = 0; }
@@ -189,12 +192,19 @@ public:
 	u8		GetAddonsState						()		const		{return m_flagsAddOnState;};
 	void	SetAddonsState						(u8 st)	{m_flagsAddOnState=st;}//dont use!!! for buy menu only!!!
 
-	bool	NeedBlockSprint						() const; 
+	bool	NeedBlockSprint						() const;
 
+	bool bUpdateHUDBonesVisibility = false;
 	bool bReloadKeyPressed;
 	bool bAmmotypeKeyPressed;
 	bool bStopReloadSignal;
+	bool m_bUseSilHud = false;
+	bool m_bUseScopeHud = false;
+	bool m_bUseGLHud = false;
 
+	shared_str hud_silencer;
+	shared_str hud_scope;
+	shared_str hud_gl;
 protected:
 	//состояние подключенных аддонов
 	u8 m_flagsAddOnState;
@@ -246,7 +256,7 @@ protected:
 
 	InertionData	m_base_inertion;
 	InertionData	m_zoom_inertion;
-
+	bool m_bIAmWeaponRPG7;
 	shared_str GetCurrentScopeSection() const { return m_scopes[m_cur_scope]; }
 	shared_str GetScopeSection(int idx) const { return m_scopes[idx]; }
 
@@ -256,12 +266,11 @@ private:
 		m_bHideBonesGLAttached {}, m_bHideBonesSilAttached {}, m_bHideBonesScopeAttached {},
 		m_bHideBonesUpgrade {}, m_bScopeShowBones{}, m_bScopeHideBones{}, m_bShowBonesUpgToHide{}, m_bShowBonesUpgToShow{};
 
-	bool bUpdateHUDBonesVisibility = false;
-
 	void HideOneUpgradeLevel(const char* section);
 	void LoadUpgradeBonesToHide(const char* section, const char* line);
 
 public:
+	virtual bool IsGrenadeMode() const { return false; }
 
 	virtual IC bool					IsZoomEnabled		()	const		{return m_zoom_params.m_bZoomEnabled;}
 	virtual	void			ZoomInc				();
@@ -527,6 +536,7 @@ public:
 	float					m_fCurrentCartirdgeDisp;
 
 		bool				unlimited_ammo				();
+		bool				infinite_fire();
 	IC	bool				can_be_strapped				() const {return m_can_be_strapped;};
 
 	float GetMagazineWeight(const decltype(m_magazine)& mag) const;
@@ -558,6 +568,12 @@ private:
 			bool			install_upgrade_disp		( LPCSTR section, bool test );
 			bool			install_upgrade_hit			( LPCSTR section, bool test );
 			bool			install_upgrade_addon		( LPCSTR section, bool test );
+			
+			bool			install_upgrade_hud_sect(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_silencer(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_scope(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_gl(LPCSTR section, bool test);
+
 			bool			install_upgrade_bones		( LPCSTR section, bool test );
 protected:
 	virtual bool			install_upgrade_impl		( LPCSTR section, bool test );
@@ -581,4 +597,10 @@ public:
 	
 	virtual void				DumpActiveParams			(shared_str const & section_name, CInifile & dst_ini) const;
 	virtual shared_str const	GetAnticheatSectionName		() const { return cNameSect(); };
+
+public:
+	bool bUseAltScope{};
+	bool bScopeIsHasTexture{};
+
+	float GetAimFactor() const { return m_zoom_params.m_fZoomRotationFactor; }
 };

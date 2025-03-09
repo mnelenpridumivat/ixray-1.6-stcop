@@ -14,6 +14,7 @@
 
 #include "game_cl_mp.h"
 #include "reward_event_generator.h"
+#include "WeaponRPG7.h"
 
 #define FLAME_TIME 0.05f
 
@@ -70,9 +71,12 @@ void CWeapon::FireTrace		(const Fvector& P, const Fvector& D)
 	//повысить изношенность оружия с учетом влияния конкретного патрона
 //	float Deterioration = GetWeaponDeterioration();
 //	Msg("Deterioration = %f", Deterioration);
-	ChangeCondition(-GetWeaponDeterioration()*l_cartridge.param_s.impair);
 
-	
+	if (!psActorFlags.test(AF_INFINITEDURABILITY))
+	{
+		ChangeCondition(-GetWeaponDeterioration() * l_cartridge.param_s.impair);
+	}
+
 	float fire_disp = 0.f;
 	CActor* tmp_actor = nullptr;
 	if (!IsGameTypeSingle())
@@ -120,8 +124,11 @@ void CWeapon::FireTrace		(const Fvector& P, const Fvector& D)
 
 	
 	// Ammo
-	m_magazine.pop_back	();
-	--iAmmoElapsed;
+	if (!infinite_fire() || m_bIAmWeaponRPG7)
+	{
+		m_magazine.pop_back();
+		--iAmmoElapsed;
+	}
 
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 }
@@ -134,6 +141,8 @@ void CWeapon::StopShooting()
 	if(m_pFlameParticles && m_pFlameParticles->IsLooped())
 		StopFlameParticles	();	
 
+	SwitchState(eIdle);
+	
 	bWorking = false;
 }
 

@@ -20,6 +20,8 @@ class CALifeMonsterBrain;
 class CALifeHumanBrain;
 class CALifeOnlineOfflineGroupBrain;
 
+xr_string TranslateName(LPCSTR nameStr);
+
 #pragma warning(push)
 #pragma warning(disable:4005)
 
@@ -49,6 +51,8 @@ SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
 	CHARACTER_RANK_VALUE			m_rank;
 	xr_string						m_character_name;
 	shared_str						m_icon_name;
+	xr_string						m_character_name_raw;
+
 	bool							m_deadbody_can_take;
 	bool							m_deadbody_closed;
 

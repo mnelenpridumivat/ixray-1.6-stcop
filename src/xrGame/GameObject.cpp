@@ -111,8 +111,8 @@ void CGameObject::net_Destroy	()
 	xr_delete				(m_ini_file);
 
 	m_script_clsid			= -1;
-	if (Visual() && smart_cast<IKinematics*>(Visual()))
-		smart_cast<IKinematics*>(Visual())->Callback	(0,0);
+	if (Visual() && Visual()->dcast_PKinematics())
+		Visual()->dcast_PKinematics()->Callback(0,0);
 
 	inherited::net_Destroy						();
 	setReady									(FALSE);
@@ -768,6 +768,11 @@ void VisualCallback	(IKinematics *tpKinematics)
 	CGameObject						*game_object = static_cast<CGameObject*>(static_cast<CObject*>(tpKinematics->GetUpdateCallbackParam()));
 	VERIFY							(game_object);
 	
+	if (game_object == nullptr)
+	{
+		return;
+	}
+
 	CGameObject::CALLBACK_VECTOR_IT	I = game_object->visual_callbacks().begin();
 	CGameObject::CALLBACK_VECTOR_IT	E = game_object->visual_callbacks().end();
 	for ( ; I != E; ++I)

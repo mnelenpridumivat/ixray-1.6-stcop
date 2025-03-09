@@ -18,6 +18,7 @@
 
 #include "step_manager.h"
 #include "../xrScripts/script_export_space.h"
+#include "CustomDetector.h"
 
 using namespace ACTOR_DEFS;
 
@@ -62,6 +63,7 @@ class CActorStatisticMgr;
 
 class CLocationManager;
 class CPickUpManager;
+class CCustomDetector;
 
 class CActor: 
 	public IGame_Actor, 
@@ -200,11 +202,11 @@ public:
 	virtual	float						missile_throw_force		(); 
 
 	virtual bool						unlimited_ammo			();
-
+	virtual bool						infinite_fire();
 	virtual bool						NeedToDestroyObject()  const;
 	virtual ALife::_TIME_ID				TimePassedAfterDeath() const;
 
-
+	CPickUpManager* GetPickupManager() { return pPickup; }
 public:
 
 	//свойства артефактов
@@ -704,6 +706,9 @@ public:
 	virtual void				OnPrevWeaponSlot				();
 			void				SwitchNightVision				();
 			void				SwitchTorch						();
+
+	CCustomDetector*			GetDetector						(bool in_slot = false);
+
 #ifndef MASTER_GOLD
 			void				NoClipFly						(int cmd);
 #endif //DEBUG

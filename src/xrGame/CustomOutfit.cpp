@@ -128,7 +128,10 @@ void CCustomOutfit::ReloadBonesProtection()
 void CCustomOutfit::Hit(float hit_power, ALife::EHitType hit_type)
 {
 	hit_power *= GetHitImmunity(hit_type);
-	ChangeCondition(-hit_power);
+	if (!psActorFlags.test(AF_INFINITEDURABILITY))
+	{
+		ChangeCondition(-hit_power);
+	}
 }
 
 float CCustomOutfit::GetDefHitTypeProtection(ALife::EHitType hit_type)
@@ -262,8 +265,11 @@ void CCustomOutfit::ApplySkinModel(CActor* pActor, bool bDress, bool bHUDOnly)
 		}
 
 
-		if (pActor == Level().CurrentViewEntity())	
-			g_player_hud->load(pSettings->r_string(cNameSect(),"player_hud_section"));
+		if (pActor == Level().CurrentViewEntity())
+		{
+			//g_player_hud->load(pSettings->r_string(cNameSect(),"player_hud_section"));
+			g_player_hud->m_need_reload = false;
+		}
 	}else
 	{
 		if (!bHUDOnly && m_ActorVisual.size())
@@ -275,8 +281,11 @@ void CCustomOutfit::ApplySkinModel(CActor* pActor, bool bDress, bool bHUDOnly)
 			};
 		}
 
-		if (pActor == Level().CurrentViewEntity())	
-			g_player_hud->load_default();
+		if (pActor == Level().CurrentViewEntity())
+		{
+			//g_player_hud->load_default();
+			g_player_hud->m_need_reload = false;
+		}
 	}
 
 }

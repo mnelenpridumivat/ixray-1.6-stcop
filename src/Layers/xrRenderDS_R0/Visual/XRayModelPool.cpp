@@ -1,6 +1,6 @@
-#include "XRayModelPool.h"
-
 #include "stdafx.h"
+
+#include "XRayModelPool.h"
 #include "XRayFHierrarhyVisual.h"
 #include "XRayFLOD.h"
 #include "XRayFProgressive.h"
@@ -12,33 +12,33 @@
 #include "../../xrEngine/IGame_Persistent.h"
 #include "../../xrEngine/fmesh.h"
 
-XRayModelPool* GModelPool;
-XRayRenderVisual* XRayModelPool::Instance_Create(u32 type)
+CDS0_ModelPool* GModelPool;
+CDS0_RenderVisual* CDS0_ModelPool::Instance_Create(u32 type)
 {
-	XRayRenderVisual* V = NULL;
+	CDS0_RenderVisual* V = NULL;
 
 	// Check types
 	switch (type) {
 	case MT_NORMAL:				// our base visual
-		V = new XRayFVisual;
+		V = new CDS0_FVisual;
 		break;
 	case MT_HIERRARHY:
-		V = new XRayFHierrarhyVisual;
+		V = new CDS0_FHierrarhyVisual;
 		break;
 	case MT_PROGRESSIVE:		// dynamic-resolution visual
-		V = new XRayFProgressive;
+		V = new CDS0_FProgressive;
 		break;
 	case MT_SKELETON_ANIM:
-		V = new XRayKinematicsAnimated;
+		V = new CDS0_KinematicsAnimated;
 		break;
 	case MT_SKELETON_RIGID:
-		V = new XRayKinematics;
+		V = new CDS0_Kinematics;
 		break;
 	case MT_SKELETON_GEOMDEF_PM:
-		V = new XRaySkeletonX_PM;
+		V = new CDS0_SkeletonX_PM;
 		break;
 	case MT_SKELETON_GEOMDEF_ST:
-		V = new XRaySkeletonX_ST;
+		V = new CDS0_SkeletonX_ST;
 		break;
 	case MT_PARTICLE_EFFECT:
 		break;
@@ -47,13 +47,13 @@ XRayRenderVisual* XRayModelPool::Instance_Create(u32 type)
 #ifndef _EDITOR
 	case MT_LOD:
 		//R_ASSERT(0);
-		V = new XRayFLOD;
+		V = new CDS0_FLOD;
 		break;
 	case MT_TREE_ST:
-		V = new XRayTreeVisual_ST;
+		V = new CDS0_TreeVisual_ST;
 		break;
 	case MT_TREE_PM:
-		V = new XRayTreeVisual_PM;
+		V = new CDS0_TreeVisual_PM;
 		break;
 #endif
 	default:
@@ -65,10 +65,10 @@ XRayRenderVisual* XRayModelPool::Instance_Create(u32 type)
 	return		V;
 }
 
-XRayRenderVisual* XRayModelPool::Instance_Duplicate(XRayRenderVisual* V)
+CDS0_RenderVisual* CDS0_ModelPool::Instance_Duplicate(CDS0_RenderVisual* V)
 {
 	R_ASSERT(V);
-	XRayRenderVisual* N = Instance_Create(V->Type);
+	CDS0_RenderVisual* N = Instance_Create(V->Type);
 	N->Copy(V);
 	N->Spawn();
 	// inc ref counter
@@ -81,9 +81,9 @@ XRayRenderVisual* XRayModelPool::Instance_Duplicate(XRayRenderVisual* V)
 	return N;
 }
 
-XRayRenderVisual* XRayModelPool::Instance_Load(const char* N, BOOL allow_register)
+CDS0_RenderVisual* CDS0_ModelPool::Instance_Load(const char* N, BOOL allow_register)
 {
-	XRayRenderVisual* V;
+	CDS0_RenderVisual* V;
 	string_path		name;
 
 	string_path fn;
@@ -120,9 +120,9 @@ XRayRenderVisual* XRayModelPool::Instance_Load(const char* N, BOOL allow_registe
 	return V;
 }
 
-XRayRenderVisual* XRayModelPool::Instance_Load(LPCSTR name, IReader* data, BOOL allow_register)
+CDS0_RenderVisual* CDS0_ModelPool::Instance_Load(LPCSTR name, IReader* data, BOOL allow_register)
 {
-	XRayRenderVisual* V;
+	CDS0_RenderVisual* V;
 
 	ogf_header			H;
 	data->r_chunk_safe(OGF_HEADER, &H, sizeof(H));
@@ -134,7 +134,7 @@ XRayRenderVisual* XRayModelPool::Instance_Load(LPCSTR name, IReader* data, BOOL 
 	return V;
 }
 
-void		XRayModelPool::Instance_Register(LPCSTR N, XRayRenderVisual* V)
+void		CDS0_ModelPool::Instance_Register(LPCSTR N, CDS0_RenderVisual* V)
 {
 	// Registration
 	ModelDef			M;
@@ -144,7 +144,7 @@ void		XRayModelPool::Instance_Register(LPCSTR N, XRayRenderVisual* V)
 }
 
 
-void XRayModelPool::Destroy()
+void CDS0_ModelPool::Destroy()
 {
 	// Pool
 	Pool.clear();
@@ -152,7 +152,7 @@ void XRayModelPool::Destroy()
 	// Registry
 	while (!Registry.empty()) {
 		REGISTRY_IT it = Registry.begin();
-		XRayRenderVisual* V = (XRayRenderVisual*)it->first;
+		CDS0_RenderVisual* V = (CDS0_RenderVisual*)it->first;
 #ifdef _DEBUG
 		Msg("ModelPool: Destroy object: '%s'", *V->getDebugName().c_str());
 #endif
@@ -174,7 +174,7 @@ void XRayModelPool::Destroy()
 	g_pMotionsContainer->clean(false);
 }
 
-XRayModelPool::XRayModelPool()
+CDS0_ModelPool::CDS0_ModelPool()
 {
 	bLogging = TRUE;
 	bForceDiscard = FALSE;
@@ -182,15 +182,15 @@ XRayModelPool::XRayModelPool()
 	g_pMotionsContainer = new motions_container;
 }
 
-XRayModelPool::~XRayModelPool()
+CDS0_ModelPool::~CDS0_ModelPool()
 {
 	Destroy();
 	xr_delete(g_pMotionsContainer);
 }
 
-XRayRenderVisual* XRayModelPool::Instance_Find(LPCSTR N)
+CDS0_RenderVisual* CDS0_ModelPool::Instance_Find(LPCSTR N)
 {
-	XRayRenderVisual* Model = 0;
+	CDS0_RenderVisual* Model = 0;
 	xr_vector<ModelDef>::iterator	I;
 	for (I = Models.begin(); I != Models.end(); I++)
 	{
@@ -202,7 +202,7 @@ XRayRenderVisual* XRayModelPool::Instance_Find(LPCSTR N)
 	return Model;
 }
 
-XRayRenderVisual* XRayModelPool::Create(const char* name, IReader* data)
+CDS0_RenderVisual* CDS0_ModelPool::Create(const char* name, IReader* data)
 {
 #ifdef _EDITOR
 	if (!name || !name[0])	return 0;
@@ -217,14 +217,14 @@ XRayRenderVisual* XRayModelPool::Create(const char* name, IReader* data)
 	if (it != Pool.end())
 	{
 		// 1. Instance found
-		XRayRenderVisual* Model = it->second;
+		CDS0_RenderVisual* Model = it->second;
 		Model->Spawn();
 		Pool.erase(it);
 		return				Model;
 	}
 	else {
 		// 1. Search for already loaded model (reference, base model)
-		XRayRenderVisual* Base = Instance_Find(low_name);
+		CDS0_RenderVisual* Base = Instance_Find(low_name);
 
 		if (0 == Base) {
 			// 2. If not found
@@ -237,20 +237,20 @@ XRayRenderVisual* XRayModelPool::Create(const char* name, IReader* data)
 #endif
 		}
 		// 3. If found - return (cloned) reference
-		XRayRenderVisual* Model = Instance_Duplicate(Base);
+		CDS0_RenderVisual* Model = Instance_Duplicate(Base);
 		Registry.insert(std::make_pair(Model, low_name));
 		return				Model;
 	}
 }
 
-XRayRenderVisual* XRayModelPool::CreateChild(LPCSTR name, IReader* data)
+CDS0_RenderVisual* CDS0_ModelPool::CreateChild(LPCSTR name, IReader* data)
 {
 	string256 low_name;		VERIFY(xr_strlen(name) < 256);
 	xr_strcpy(low_name, name);	xr_strlwr(low_name);
 	if (strext(low_name))	*strext(low_name) = 0;
 
 	// 1. Search for already loaded model
-	XRayRenderVisual* Base = Instance_Find(low_name);
+	CDS0_RenderVisual* Base = Instance_Find(low_name);
 	//.	if (0==Base) Base	 	= Instance_Load(name,data,FALSE);
 	if (0 == Base)
 	{
@@ -258,20 +258,24 @@ XRayRenderVisual* XRayModelPool::CreateChild(LPCSTR name, IReader* data)
 		else			Base = Instance_Load(low_name, FALSE);
 	}
 
-	XRayRenderVisual* Model = bAllowChildrenDuplicate ? Instance_Duplicate(Base) : Base;
+	CDS0_RenderVisual* Model = bAllowChildrenDuplicate ? Instance_Duplicate(Base) : Base;
 	return					Model;
 }
 
 extern ENGINE_API xr_atomic_bool g_bRendering;
-void XRayModelPool::DeleteInternal(XRayRenderVisual*& V, BOOL bDiscard)
+void CDS0_ModelPool::DeleteInternal(CDS0_RenderVisual*& V, BOOL bDiscard)
 {
 	VERIFY(!g_bRendering);
-	if (!V)					return;
+	if (!V)
+		return;
+
 	V->Depart();
-	if (bDiscard || bForceDiscard) {
+	if (bDiscard || bForceDiscard)
+	{
 		Discard(V, TRUE);
 	}
-	else {
+	else 
+	{
 		//
 		REGISTRY_IT	it = Registry.find(V);
 		if (it != Registry.end())
@@ -287,9 +291,11 @@ void XRayModelPool::DeleteInternal(XRayRenderVisual*& V, BOOL bDiscard)
 	V = NULL;
 }
 
-void	XRayModelPool::Delete(XRayRenderVisual*& V, BOOL bDiscard)
+void CDS0_ModelPool::Delete(CDS0_RenderVisual*& V, BOOL bDiscard)
 {
-	if (NULL == V)				return;
+	if (NULL == V)
+		return;
+
 	if (g_bRendering) {
 		VERIFY(!bDiscard);
 		ModelsToDelete.push_back(V);
@@ -300,14 +306,14 @@ void	XRayModelPool::Delete(XRayRenderVisual*& V, BOOL bDiscard)
 	V = NULL;
 }
 
-void	XRayModelPool::DeleteQueue()
+void CDS0_ModelPool::DeleteQueue()
 {
 	for (u32 it = 0; it < ModelsToDelete.size(); it++)
 		DeleteInternal(ModelsToDelete[it]);
 	ModelsToDelete.clear();
 }
 
-void	XRayModelPool::Discard(XRayRenderVisual*& V, BOOL b_complete)
+void CDS0_ModelPool::Discard(CDS0_RenderVisual*& V, BOOL b_complete)
 {
 	//
 	REGISTRY_IT	it = Registry.find(V);
@@ -357,7 +363,7 @@ void	XRayModelPool::Discard(XRayRenderVisual*& V, BOOL b_complete)
 	V = NULL;
 }
 
-void XRayModelPool::Prefetch()
+void CDS0_ModelPool::Prefetch()
 {
 	Logging(FALSE);
 	// prefetch visuals
@@ -368,13 +374,13 @@ void XRayModelPool::Prefetch()
 
 	for (const CInifile::Item& it : sect.Data)
 	{
-		XRayRenderVisual* pVis = Create(it.first.c_str());
+		CDS0_RenderVisual* pVis = Create(it.first.c_str());
 	}
 
 	Logging(TRUE);
 }
 
-void XRayModelPool::ClearPool(BOOL b_complete)
+void CDS0_ModelPool::ClearPool(BOOL b_complete)
 {
 	POOL_IT	_I = Pool.begin();
 	POOL_IT	_E = Pool.end();
@@ -383,133 +389,16 @@ void XRayModelPool::ClearPool(BOOL b_complete)
 	}
 	Pool.clear();
 }
-void XRayModelPool::Render()
+
+void CDS0_ModelPool::Render()
 {
-	for (auto [_, Obj] : Pool)
+#if 0
+	for (auto [Model, _] : Registry)
 	{
-		if (auto Kinematic = Obj->dcast_PKinematics())
+		if (IKinematics* IK = Model->dcast_PKinematics())
 		{
-			Kinematic->CalculateBones(true);
+			IK->CalculateBones(true);
 		}
 	}
-}
-/*
-XRayRenderVisual* XRayModelPool::CreatePE(PS::CPEDef* source)
-{
-	PS::CParticleEffect* V = (PS::CParticleEffect*)Instance_Create(MT_PARTICLE_EFFECT);
-	V->Compile(source);
-	return V;
-}
-
-XRayRenderVisual* XRayModelPool::CreatePG(PS::CPGDef* source)
-{
-	PS::CParticleGroup* V = (PS::CParticleGroup*)Instance_Create(MT_PARTICLE_GROUP);
-	V->Compile(source);
-	return V;
-}*/
-
-
-#ifdef _EDITOR
-IC bool	_IsBoxVisible(XRayRenderVisual* visual, const Fmatrix& transform)
-{
-	Fbox 		bb;
-	bb.xform(visual->vis.box, transform);
-	return 		::Render->occ_visible(bb);
-}
-IC bool	_IsValidShader(XRayRenderVisual* visual, u32 priority, bool strictB2F)
-{
-	if (visual->shader)
-		return (priority == visual->shader->E[0]->flags.iPriority) && (strictB2F == visual->shader->E[0]->flags.bStrictB2F);
-	return false;
-}
-
-void 	XRayModelPool::Render(XRayRenderVisual* m_pVisual, const Fmatrix& mTransform, int priority, bool strictB2F, float m_fLOD)
-{
-	// render visual
-	xr_vector<XRayRenderVisual*>::iterator I, E;
-	switch (m_pVisual->Type) {
-	case MT_SKELETON_ANIM:
-	case MT_SKELETON_RIGID: {
-		if (_IsBoxVisible(m_pVisual, mTransform)) {
-			CKinematics* pV = dynamic_cast<CKinematics*>(m_pVisual); VERIFY(pV);
-			if (fis_zero(m_fLOD, EPS) && pV->m_lod) {
-				if (_IsValidShader(pV->m_lod, priority, strictB2F)) {
-					RCache.set_Shader(pV->m_lod->shader ? pV->m_lod->shader : EDevice->m_WireShader);
-					RCache.set_xform_world(mTransform);
-					pV->m_lod->Render(1.f);
-				}
-			}
-			else {
-				I = pV->children.begin();
-				E = pV->children.end();
-				for (; I != E; I++) {
-					if (_IsValidShader(*I, priority, strictB2F)) {
-						RCache.set_Shader((*I)->shader ? (*I)->shader : EDevice->m_WireShader);
-						RCache.set_xform_world(mTransform);
-						(*I)->Render(m_fLOD);
-					}
-				}
-			}
-		}
-	}break;
-	case MT_HIERRARHY: {
-		if (_IsBoxVisible(m_pVisual, mTransform)) {
-			FHierrarhyVisual* pV = dynamic_cast<FHierrarhyVisual*>(m_pVisual); VERIFY(pV);
-			I = pV->children.begin();
-			E = pV->children.end();
-			for (; I != E; I++) {
-				if (_IsValidShader(*I, priority, strictB2F)) {
-					RCache.set_Shader((*I)->shader ? (*I)->shader : EDevice->m_WireShader);
-					RCache.set_xform_world(mTransform);
-					(*I)->Render(m_fLOD);
-				}
-			}
-		}
-	}break;
-	case MT_PARTICLE_GROUP: {
-		PS::CParticleGroup* pG = dynamic_cast<PS::CParticleGroup*>(m_pVisual); VERIFY(pG);
-		//		if (_IsBoxVisible(m_pVisual,mTransform))
-		{
-			RCache.set_xform_world(mTransform);
-			for (PS::CParticleGroup::SItemVecIt i_it = pG->items.begin(); i_it != pG->items.end(); i_it++) {
-				xr_vector<XRayRenderVisual*>	visuals;
-				i_it->GetVisuals(visuals);
-				for (xr_vector<XRayRenderVisual*>::iterator it = visuals.begin(); it != visuals.end(); it++)
-					Render(*it, Fidentity, priority, strictB2F, m_fLOD);
-			}
-		}
-	}break;
-	case MT_PARTICLE_EFFECT: {
-		//		if (_IsBoxVisible(m_pVisual,mTransform))
-		{
-			if (_IsValidShader(m_pVisual, priority, strictB2F)) {
-				RCache.set_Shader(m_pVisual->shader ? m_pVisual->shader : EDevice->m_WireShader);
-				RCache.set_xform_world(mTransform);
-				m_pVisual->Render(m_fLOD);
-			}
-		}
-	}break;
-	default:
-		if (_IsBoxVisible(m_pVisual, mTransform)) {
-			if (_IsValidShader(m_pVisual, priority, strictB2F)) {
-				RCache.set_Shader(m_pVisual->shader ? m_pVisual->shader : EDevice->m_WireShader);
-				RCache.set_xform_world(mTransform);
-				m_pVisual->Render(m_fLOD);
-			}
-		}
-		break;
-	}
-}
-
-void 	XRayModelPool::RenderSingle(XRayRenderVisual* m_pVisual, const Fmatrix& mTransform, float m_fLOD)
-{
-	for (int p = 0; p < 4; p++) {
-		Render(m_pVisual, mTransform, p, false, m_fLOD);
-		Render(m_pVisual, mTransform, p, true, m_fLOD);
-	}
-}
-void XRayModelPool::OnDeviceDestroy()
-{
-	Destroy();
-}
 #endif
+}

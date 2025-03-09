@@ -3,15 +3,13 @@
 
 #include "IGame_Persistent.h"
 
-#ifndef _EDITOR
 #include "Environment.h"
-#	include "x_ray.h"
-#	include "IGame_Level.h"
-#	include "XR_IOConsole.h"
-#	include "Render.h"
-#	include "ps_instance.h"
-#	include "CustomHUD.h"
-#endif
+#include "x_ray.h"
+#include "IGame_Level.h"
+#include "XR_IOConsole.h"
+#include "Render.h"
+#include "ps_instance.h"
+#include "CustomHUD.h"
 
 #ifdef _EDITOR
 	bool g_dedicated_server	= false;
@@ -159,13 +157,10 @@ void IGame_Persistent::OnGameEnd	()
 #endif
 }
 
-void IGame_Persistent::OnFrame		()
+void IGame_Persistent::OnFrame()
 {
-#ifndef _EDITOR
-
-	if(!Device.Paused() || Device.dwPrecacheFrame)
-		Environment().OnFrame	();
-#endif
+    if (!Device.Paused() || Device.dwPrecacheFrame)
+        Environment().OnFrame();
 }
 
 void IGame_Persistent::UpdateParticles()
@@ -176,6 +171,17 @@ void IGame_Persistent::UpdateParticles()
 		xr_shared_ptr<CPS_Instance> pInstance = ps_needtoplay.back();
 		ps_needtoplay.pop_back();
 		pInstance->Play(false);
+	}
+
+	if (!ps_active_deffer.empty())
+	{
+		ps_active.reserve(ps_active.size() + ps_active_deffer.size());
+
+		for (xr_shared_ptr<CPS_Instance>& Part : ps_active_deffer)
+		{
+			ps_active.push_back(Part);
+		}
+		ps_active_deffer.clear();
 	}
 
 	ps_active.erase(std::remove_if

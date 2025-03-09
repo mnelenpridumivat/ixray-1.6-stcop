@@ -14,6 +14,7 @@
 #include "CharacterPhysicsSupport.h"
 #include "Inventory.h"
 #include "../xrEngine/IGame_Persistent.h"
+#include "../xrSound/ai_sounds.h"
 #ifdef DEBUG
 #	include "phdebug.h"
 #endif
@@ -74,6 +75,18 @@ void CMissile::Load(LPCSTR section)
 	m_vThrowDir			= pSettings->r_fvector3(section,"throw_dir");
 
 	m_ef_weapon_type	= READ_IF_EXISTS(pSettings,r_u32,section,"ef_weapon_type",u32(-1));
+
+	if (pSettings->line_exist(section, "snd_draw"))
+		m_sounds.LoadSound(section, "snd_draw", "SndShow", false, ESoundTypes(SOUND_TYPE_ITEM_TAKING));
+
+	if (pSettings->line_exist(section, "snd_holster"))
+		m_sounds.LoadSound(section, "snd_holster", "SndHide", false, ESoundTypes(SOUND_TYPE_ITEM_HIDING));
+
+	if (pSettings->line_exist(section, "snd_throw_begin"))
+		m_sounds.LoadSound(section, "snd_throw_begin", "sndThrowBegin", false, ESoundTypes(SOUND_TYPE_ITEM_TAKING));
+
+	if (pSettings->line_exist(section, "snd_throw"))
+		m_sounds.LoadSound(section, "snd_throw", "sndThrow", false, ESoundTypes(SOUND_TYPE_ITEM_HIDING));
 
 	if (pSettings->line_exist(section, "checkout_bones"))
 	{
@@ -252,7 +265,27 @@ void CMissile::UpdateCL()
 		}
 	}
 
+	if (Device.dwFrame == dwUpdateSounds_Frame)
+		return;
+
+	dwUpdateSounds_Frame = Device.dwFrame;
+
+	Fvector P;
+	Center(P);
+
+	if (m_sounds.FindSoundItem("SndShow", false))
+		m_sounds.SetPosition("SndShow", P);
+
+	if (m_sounds.FindSoundItem("SndHide", false))
+		m_sounds.SetPosition("SndHide", P);
+
+	if (m_sounds.FindSoundItem("sndThrow", false))
+		m_sounds.SetPosition("sndThrow", P);
+
+	if (m_sounds.FindSoundItem("sndThrowBegin", false))
+		m_sounds.SetPosition("sndThrowBegin", P);
 }
+
 void CMissile::shedule_Update(u32 dt)
 {
 	inherited::shedule_Update(dt);
@@ -276,6 +309,7 @@ void CMissile::State(u32 state)
         {
 			SetPending			(TRUE);
 			PlayHUDMotion("anm_show", FALSE, this, GetState());
+			PlaySoundIfExist("SndShow", Position());
 		} break;
 	case eIdle:
 		{
@@ -288,6 +322,7 @@ void CMissile::State(u32 state)
 			{
 				SetPending			(TRUE);
 				PlayHUDMotion		("anm_hide", TRUE, this, GetState());
+				PlaySoundIfExist("SndHide", Position());
 			}
 		} break;
 	case eHidden:
@@ -309,6 +344,7 @@ void CMissile::State(u32 state)
 		{
 			SetPending			(TRUE);
 			m_fThrowForce		= m_fMinForce;
+			PlaySoundIfExist("sndThrowBegin", Position());
 			PlayHUDMotion		("anm_throw_begin", TRUE, this, GetState());
 		} break;
 	case eReady:
@@ -319,6 +355,7 @@ void CMissile::State(u32 state)
 		{
 			SetPending			(TRUE);
 			m_throw				= false;
+			PlaySoundIfExist("sndThrow", Position());
 			PlayHUDMotion		("anm_throw", TRUE, this, GetState());
 		} break;
 	case eThrowEnd:
