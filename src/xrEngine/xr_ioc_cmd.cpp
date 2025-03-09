@@ -96,20 +96,6 @@ public:
 		g_pEventManager->Event.Defer("KERNEL:quit");
 	}
 };
-//-----------------------------------------------------------------------
-class CCC_DbgStrCheck : public IConsole_Command
-{
-public:
-	CCC_DbgStrCheck(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) { str_container::GetInstance().verify(); }
-};
-
-class CCC_DbgStrDump : public IConsole_Command
-{
-public:
-	CCC_DbgStrDump(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) { str_container::GetInstance().dump();}
-};
 
 //-----------------------------------------------------------------------
 class CCC_MotionsStat : public IConsole_Command
