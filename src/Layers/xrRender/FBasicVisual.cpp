@@ -11,6 +11,7 @@
 
 #include "FBasicVisual.h"
 #include "../../xrEngine/Fmesh.h"
+#include "../../xrCore/StatGather/StatGather.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -66,6 +67,11 @@ void dxRender_Visual::Load		(const char* N, IReader *data, u32 )
 		data->r_stringZ	(fnT,sizeof(fnT));
 		data->r_stringZ	(fnS,sizeof(fnS));
 		shader.create	(fnS,fnT);
+
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddShader(fnS);
+			//CStatGather::GetInstance().AddTexture(fnT);
+		}
 	}
 
     // desc

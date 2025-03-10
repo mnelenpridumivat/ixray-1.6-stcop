@@ -16,6 +16,7 @@
 #include "../xrRender/ShaderResourceTraits.h"
 
 #include "../../xrParticles/ParticlesAsyncManager.h"
+#include "../../xrCore/StatGather/StatGather.h"
 
 CRender										RImplementation;
 
@@ -373,9 +374,15 @@ IRenderVisual* CRender::model_CreatePE(LPCSTR name) {
 IRenderVisual* CRender::model_CreateParticles(LPCSTR name) {
 	PS::CPEDef* SE = PSLibrary.FindPED(name);
 	if(SE) {
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddPE(name);
+		}
 		return Models->CreatePE(SE);
 	}
 	else {
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddPG(name);
+		}
 		PS::CPGDef* SG = PSLibrary.FindPGD(name);
 		R_ASSERT3(SG, "Particle effect or group doesn't exist", name);
 		return Models->CreatePG(SG);

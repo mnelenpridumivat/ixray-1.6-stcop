@@ -24,6 +24,7 @@
 #include "FHierrarhyVisual.h"
     #include "SkeletonAnimated.h"
 #endif
+#include "../../xrCore/StatGather/StatGather.h"
 
 dxRender_Visual*	CModelPool::Instance_Create(u32 type)
 {
@@ -149,6 +150,11 @@ dxRender_Visual*	CModelPool::Instance_Load(LPCSTR name, IReader* data, BOOL allo
 
 	// Registration
 	if (allow_register) Instance_Register(name,V);
+
+	if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+		CStatGather::GetInstance().AddModel(name);
+	}
+
 	return V;
 }
 

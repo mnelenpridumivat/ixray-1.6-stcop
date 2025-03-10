@@ -10,6 +10,7 @@
 #ifdef DEBUG
 #include "../../xrCore/dump_string.h"
 #endif
+#include "../../xrCore/StatGather/StatGather.h"
 extern int	psSkeletonUpdate;
 using	namespace animation;
 //////////////////////////////////////////////////////////////////////////
@@ -714,6 +715,10 @@ void CKinematicsAnimated::LoadOmf(const char* path, const char* name)
 	{
 		m_Motions.pop_back();
 		Msg("! error in model [%s]. Unable to load motion file '%s'.", name, path);
+	}
+
+	if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+		CStatGather::GetInstance().AddOMF(fn);
 	}
 }
 

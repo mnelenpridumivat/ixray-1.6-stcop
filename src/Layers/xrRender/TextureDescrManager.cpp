@@ -2,6 +2,7 @@
 #pragma hdrstop
 #include "TextureDescrManager.h"
 #include "ETextureParams.h"
+#include "../../xrCore/StatGather/StatGather.h"
 
 // eye-params
 float					r__dtex_range	= 50;
@@ -233,6 +234,9 @@ BOOL CTextureDescrMngr::GetDetailTexture(const shared_str& tex_name, LPCSTR& res
 	map_TD::const_iterator I = m_texture_details.find	(tex_name);
 	if (I!=m_texture_details.end())
 	{
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddTexture(tex_name.c_str());
+		}
 		if(I->second.m_assoc)
 		{
             texture_assoc* TA = I->second.m_assoc;

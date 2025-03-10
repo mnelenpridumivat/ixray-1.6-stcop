@@ -56,6 +56,7 @@
 
 #include "ai_object_location.h"
 #include "xrServer_Objects_ALife_Monsters.h"
+#include "../../xrCore/StatGather/StatGather.h"
 
 #include "Level.h"
 string_path		g_last_saved_game;
@@ -994,6 +995,20 @@ struct CCC_ReloadSystemLtx : public IConsole_Command {
 			make_string<const char*>("Cannot find file %s.\nReinstalling application may fix this problem.",
 				fname));
 		Msg("system.ltx was reloaded.");
+	}
+};
+
+struct CCC_DumpStatGather : public IConsole_Command {
+	CCC_DumpStatGather(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = true; };
+
+	virtual void Execute(LPCSTR args) {
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().DumpStats();
+			Msg("Asset usage statistic dump created");
+		}
+		else {
+			Msg("! Asset usage statistic not activated");
+		}
 	}
 };
 
@@ -2529,6 +2544,7 @@ void CCC_RegisterCommands()
 #endif // MASTER_GOLD
 
 	CMD1(CCC_ReloadSystemLtx, "reload_system_ltx");
+	CMD1(CCC_DumpStatGather, "dump_asset_stats");
 	CMD3(CCC_Mask, "g_autopickup", &psActorFlags, AF_AUTOPICKUP);
 	CMD3(CCC_Mask, "g_dynamic_music", &psActorFlags, AF_DYNAMIC_MUSIC);
 	CMD3(CCC_Mask, "g_important_save", &psActorFlags, AF_IMPORTANT_SAVE);

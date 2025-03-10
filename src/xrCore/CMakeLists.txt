@@ -61,6 +61,10 @@ file(GLOB CORE_SOURCE_FS_FILES
     "Locator*.*"
 )
 
+file(GLOB CORE_SOURCE_STAT_GATHER_FILES
+    "StatGather/*.*"
+)
+
 file(GLOB_RECURSE CORE_SOURCE_ALL_FILES CONFIGURE_DEPENDS
     "*.cpp"
     "*.c"
@@ -100,6 +104,7 @@ source_group("core/Crypto" FILES ${CORE_SOURCE_CRYPTO_FILES})
 source_group("core/StackTrace" FILES ${CORE_SOURCE_STACK_FILES})
 source_group("discord" FILES ${CORE_SOURCE_DISCORD_FILES})
 source_group("discord/api" FILES ${CORE_SOURCE_DISCORD_API_FILES})
+source_group("StatGather" FILES ${CORE_SOURCE_STAT_GATHER_FILES})
 
 # Apply list
 list(APPEND CORE_SRC_FILES ${CORE_SOURCE_ALL_FILES})

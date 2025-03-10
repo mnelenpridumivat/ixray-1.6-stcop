@@ -16,6 +16,7 @@
 #include "../xrRender/dxWallMarkArray.h"
 #include "../xrRender/dxUIShader.h"
 #include "../../xrCore/git_version.h"
+#include "../../xrCore/StatGather/StatGather.h"
 
 CRender										RImplementation;
 
@@ -367,9 +368,18 @@ IRenderVisual*			CRender::model_CreatePE			(LPCSTR name)
 IRenderVisual*			CRender::model_CreateParticles	(LPCSTR name)	
 { 
 	PS::CPEDef*	SE			= PSLibrary.FindPED	(name);
-	if (SE) return			Models->CreatePE	(SE);
+	if (SE) {
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddPE(name);
+		}
+		return			Models->CreatePE(SE); 
+	}
 	else{
-		PS::CPGDef*	SG		= PSLibrary.FindPGD	(name);		R_ASSERT3(SG,"Particle effect or group doesn't exist",name);
+		if (Core.ParamsData.test(ECoreParams::stat_gather)) {
+			CStatGather::GetInstance().AddPG(name);
+		}
+		PS::CPGDef*	SG		= PSLibrary.FindPGD	(name);		
+		R_ASSERT3(SG,"Particle effect or group doesn't exist",name);
 		return				Models->CreatePG	(SG);
 	}
 }

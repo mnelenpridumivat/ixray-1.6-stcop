@@ -44,6 +44,9 @@ enum ECoreParams
 	keep_lua = 1 << 28,
 
 	no_debug_panel = 1 << 29,
+
+	// StatGather
+	stat_gather = 1 << 30,
 };
 
 void LoadParams();
