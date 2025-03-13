@@ -172,6 +172,7 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 		.def("make_item_active",			&CScriptGameObject::MakeItemActive)
 
 		.def("switch_to_trade",				&CScriptGameObject::SwitchToTrade)
+		.def("switch_to_barter",			&CScriptGameObject::SwitchToBarter)
 		.def("switch_to_upgrade",			&CScriptGameObject::SwitchToUpgrade)
 		.def("switch_to_talk",				&CScriptGameObject::SwitchToTalk)
 		.def("run_talk_dialog",				&CScriptGameObject::RunTalkDialog)
@@ -295,6 +296,14 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 		.def("sell_condition",				(void (CScriptGameObject::*)(float,float))(&CScriptGameObject::sell_condition))
 		.def("buy_supplies",				&CScriptGameObject::buy_supplies)
 		.def("buy_item_condition_factor",	&CScriptGameObject::buy_item_condition_factor)
+
+		.def("barter_buy_condition", (void (CScriptGameObject::*)(CScriptIniFile*, LPCSTR))(&CScriptGameObject::barter_buy_condition))
+		.def("barter_buy_condition", (void (CScriptGameObject::*)(float, float))(&CScriptGameObject::barter_buy_condition))
+		.def("barter_show_condition", &CScriptGameObject::barter_show_condition)
+		.def("barter_sell_condition", (void (CScriptGameObject::*)(CScriptIniFile*, LPCSTR))(&CScriptGameObject::barter_sell_condition))
+		.def("barter_sell_condition", (void (CScriptGameObject::*)(float, float))(&CScriptGameObject::barter_sell_condition))
+		.def("barter_buy_supplies", &CScriptGameObject::barter_buy_supplies)
+		.def("barter_buy_item_condition_factor", &CScriptGameObject::barter_buy_item_condition_factor)
 
 		.def("sound_prefix",				(LPCSTR (CScriptGameObject::*)() const)(&CScriptGameObject::sound_prefix))
 		.def("sound_prefix",				(void (CScriptGameObject::*)(LPCSTR))(&CScriptGameObject::sound_prefix))

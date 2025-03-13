@@ -57,18 +57,21 @@ DLL_Pure *CInventoryOwner::_construct		()
 {
 	m_trade_parameters			= 0;
 	m_purchase_list				= 0;
+	m_barter_parameters = nullptr;
 
 	return						(smart_cast<DLL_Pure*>(this));
 }
 
 CInventoryOwner::~CInventoryOwner			() 
 {
-	xr_delete					(m_inventory);
-	xr_delete					(m_pTrade);
-	xr_delete					(m_pCharacterInfo);
-	xr_delete					(m_known_info_registry);
-	xr_delete					(m_trade_parameters);
-	xr_delete					(m_purchase_list);
+	xr_delete(m_inventory);
+	xr_delete(m_pTrade);
+	xr_delete(m_pCharacterInfo);
+	xr_delete(m_known_info_registry);
+	xr_delete(m_trade_parameters);
+	xr_delete(m_barter_parameters);
+	xr_delete(m_purchase_list);
+	xr_delete(m_barter_purchase_list);
 }
 
 void CInventoryOwner::Load					(LPCSTR section)
@@ -113,10 +116,16 @@ BOOL CInventoryOwner::net_Spawn		(CSE_Abstract* DC)
 	if (!m_pTrade)
 		m_pTrade				= new CTrade(this);
 
-	if (m_trade_parameters)
-		xr_delete				(m_trade_parameters);
+	if (m_trade_parameters) {
+		xr_delete(m_trade_parameters);
+	}
 
-	m_trade_parameters			= new CTradeParameters(trade_section());
+	if (m_barter_parameters) {
+		xr_delete(m_barter_parameters);
+	}
+
+	m_trade_parameters = new CTradeParameters(trade_section());
+	m_barter_parameters = new CTradeParameters(barter_section());
 
 	//получить указатель на объект, InventoryOwner
 	//m_inventory->setSlotsBlocked(false);
@@ -584,6 +593,16 @@ LPCSTR CInventoryOwner::trade_section			() const
 	return						(READ_IF_EXISTS(pSettings,r_string,game_object->cNameSect(),"trade_section","trade"));
 }
 
+LPCSTR CInventoryOwner::barter_section() const
+{
+	const CGameObject* game_object = smart_cast<const CGameObject*>(this);
+	VERIFY(game_object);
+	if (pSettings->line_exist(game_object->cNameSect(), "barter_section")) {
+		return pSettings->r_string(game_object->cNameSect(), "barter_section");
+	}
+	return (READ_IF_EXISTS(pSettings, r_string, game_object->cNameSect(), "trade_section", "trade"));
+}
+
 float CInventoryOwner::deficit_factor			(const shared_str &section) const
 {
 	if (!m_purchase_list)
@@ -592,12 +611,30 @@ float CInventoryOwner::deficit_factor			(const shared_str &section) const
 	return						(m_purchase_list->deficit(section));
 }
 
+float CInventoryOwner::barter_deficit_factor(const shared_str& section) const
+{
+	if (!m_barter_purchase_list)
+		return					(1.f);
+
+	return						(m_barter_purchase_list->deficit(section));
+}
+
 void CInventoryOwner::buy_supplies				(CInifile &ini_file, LPCSTR section)
 {
-	if (!m_purchase_list)
-		m_purchase_list			= new CPurchaseList();
+	if (!m_purchase_list) {
+		m_purchase_list = new CPurchaseList();
+	}
 
 	m_purchase_list->process	(ini_file,section,*this);
+}
+
+void CInventoryOwner::barter_buy_supplies(CInifile& ini_file, LPCSTR section)
+{
+	if (!m_barter_purchase_list) {
+		m_barter_purchase_list = new CPurchaseList();
+	}
+
+	m_barter_purchase_list->process(ini_file, section, *this);
 }
 
 void CInventoryOwner::sell_useless_items		()
@@ -636,6 +673,16 @@ bool CInventoryOwner::AllowItemToTrade 			(CInventoryItem const * item, const SI
 			item->object().cNameSect()
 		)
 	);
+}
+
+bool CInventoryOwner::AllowItemToBarter(CInventoryItem const* item, const SInvItemPlace& place) const
+{
+	return						(
+		barter_parameters()->enabled(
+			CTradeParameters::action_sell(0),
+			item->object().cNameSect()
+		)
+		);
 }
 
 void CInventoryOwner::set_money		(u32 amount, bool bSendEvent)

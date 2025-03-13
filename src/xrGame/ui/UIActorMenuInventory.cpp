@@ -434,7 +434,7 @@ void CUIActorMenu::InitCellForSlot( u16 slot_idx )
 	CUIDragDropListEx* curr_list	= GetSlotList( slot_idx );
 	CUICellItem* cell_item			= create_cell_item( item );
 	curr_list->SetItem( cell_item );
-	if ( m_currMenuMode == mmTrade && m_pPartnerInvOwner )
+	if ( (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter) && m_pPartnerInvOwner )
 		ColorizeItem( cell_item, !CanMoveToPartner( item ) );
 
 	//CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(item);
@@ -472,7 +472,7 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
 	{
 		CUICellItem* itm		= create_cell_item(*itb);
 		curr_list->SetItem		(itm);
-		if ( m_currMenuMode == mmTrade && m_pPartnerInvOwner )
+		if ( (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter) && m_pPartnerInvOwner )
 			ColorizeItem( itm, !CanMoveToPartner( *itb ) );
 	}
 
@@ -492,7 +492,7 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
 
 		CUICellItem* itm = create_cell_item( *itb );
 		curr_list->SetItem(itm);
-		if ( m_currMenuMode == mmTrade && m_pPartnerInvOwner )
+		if ( (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter) && m_pPartnerInvOwner )
 			ColorizeItem( itm, !CanMoveToPartner( *itb ) );
 
 		//CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(*itb);
@@ -660,7 +660,7 @@ bool CUIActorMenu::ToBag(CUICellItem* itm, bool b_use_cursor_pos)
 		if(!b_already || !b_own_item)
 			SendEvent_Item2Ruck					(iitem, m_pActorInvOwner->object_id());
 
-		if ( m_currMenuMode == mmTrade && m_pPartnerInvOwner )
+		if ( (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter) && m_pPartnerInvOwner )
 		{
 			ColorizeItem( itm, !CanMoveToPartner( iitem ) );
 		}
@@ -737,7 +737,7 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
 	if (slot_idx == GRENADE_SLOT)
 	{
 		//fake
-		if (m_currMenuMode == mmTrade)
+		if (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter)
 		{
 			return m_pTradeActorBagList;
 		}
@@ -747,7 +747,7 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
 	if (slot_idx == GRENADE_SLOT)
 	{
 		//fake
-		if (m_currMenuMode == mmTrade)
+		if (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter)
 		{
 			return m_pTradeActorBagList;
 		}
@@ -757,7 +757,7 @@ CUIDragDropListEx* CUIActorMenu::GetSlotList(u16 slot_idx)
 	if (m_pInvList[slot_idx])
 		return m_pInvList[slot_idx];
 
-	if (m_currMenuMode == mmTrade)
+	if (m_currMenuMode == mmTrade || m_currMenuMode == mmBarter)
 		return m_pTradeActorBagList;
 
 	return m_pInventoryBagList;

@@ -210,7 +210,7 @@ void CScriptGameObject::ForEachInventoryItems(const luabind::functor<void> &func
 	
 	CInventory* pInv = &owner->inventory();
 	TIItemContainer item_list;
-	pInv->AddAvailableItems(item_list, true);
+	pInv->AddAvailableItems(item_list, true, mmUndefined);
 
 	TIItemContainer::iterator it;
 	for(it =  item_list.begin(); item_list.end() != it; ++it) 
@@ -756,6 +756,20 @@ void  CScriptGameObject::SwitchToTrade		()
 	if(pGameSP->TalkMenu->IsShown())
 	{
 		pGameSP->TalkMenu->SwitchToTrade();
+	}
+}
+
+void  CScriptGameObject::SwitchToBarter()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());	if (!pActor) return;
+
+	//только если находимся в режиме single
+	CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+	if (!pGameSP) return;
+
+	if (pGameSP->TalkMenu->IsShown())
+	{
+		pGameSP->TalkMenu->SwitchToBarter();
 	}
 }
 

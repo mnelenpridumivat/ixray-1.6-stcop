@@ -23,6 +23,7 @@
 #include "ai/stalker/ai_stalker.h"
 #include "WeaponMagazined.h"
 #include "Car.h"
+#include "purchase_list.h"
 
 using namespace InventoryUtilities;
 
@@ -1270,13 +1271,32 @@ u32  CInventory::BeltWidth() const
 	return 0; //m_iMaxBelt;
 }
 
-void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_trade) const
+void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_trade, EMenuMode mode, CPurchaseList* quota_list) const
 {
+	xr_hash_map<shared_str, u32> quota_map = {};
+	if (quota_list) {
+		quota_list->CopyList(quota_map);
+	}
+
 	for(TIItemContainer::const_iterator it = m_ruck.begin(); m_ruck.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(!for_trade || pIItem->CanTrade())
-			items_container.push_back(pIItem);
+		if (for_trade) {
+			if (mode == mmTrade && !pIItem->CanTrade()) {
+				continue;
+			}
+			if (mode == mmBarter && !pIItem->CanBarter()) {
+				continue;
+			}
+			if (quota_list) {
+				auto elem = quota_map.find(pIItem->m_section_id);
+				if (elem == quota_map.end() || !elem->second) {
+					continue;
+				}
+				--elem->second;
+			}
+		}
+		items_container.push_back(pIItem);
 	}
 
 	if(m_bBeltUseful)
@@ -1284,8 +1304,22 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		for(TIItemContainer::const_iterator it = m_belt.begin(); m_belt.end() != it; ++it) 
 		{
 			PIItem pIItem = *it;
-			if(!for_trade || pIItem->CanTrade())
-				items_container.push_back(pIItem);
+			if (for_trade) {
+				if (mode == mmTrade && !pIItem->CanTrade()) {
+					continue;
+				}
+				if (mode == mmBarter && !pIItem->CanBarter()) {
+					continue;
+				}
+				if (quota_list) {
+					auto elem = quota_map.find(pIItem->m_section_id);
+					if (elem == quota_map.end() || !elem->second) {
+						continue;
+					}
+					--elem->second;
+				}
+			}
+			items_container.push_back(pIItem);
 		}
 	}
 	
@@ -1295,8 +1329,9 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		std::uint16_t E = LastSlot();
 		for (; I <= E; ++I) {
 			PIItem item = ItemFromSlot(I);
-			if (item && (item->BaseSlot() != BOLT_SLOT))
+			if (item && (item->BaseSlot() != BOLT_SLOT)) {
 				items_container.push_back(item);
+			}
 		}
 	}
 	else if (m_bSlotsUseful) {
@@ -1305,8 +1340,23 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		for(;I<=E;++I)
 		{
 			PIItem item = ItemFromSlot(I);
-			if(item && (!for_trade || item->CanTrade())  )
+			if(item  )
 			{
+				if (for_trade) {
+					if (mode == mmTrade && !item->CanTrade()) {
+						continue;
+					}
+					if (mode == mmBarter && !item->CanBarter()) {
+						continue;
+					}
+					if (quota_list) {
+						auto elem = quota_map.find(item->m_section_id);
+						if (elem == quota_map.end() || !elem->second) {
+							continue;
+						}
+						--elem->second;
+					}
+				}
 				const auto& Slot = m_slots.find(I);
 				if (!(*Slot).second.m_bPersistent || item->BaseSlot() == GRENADE_SLOT) {
 					if (pOwner) {

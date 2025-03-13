@@ -342,6 +342,22 @@ void CUITalkWnd::SwitchToTrade()
 	}
 }
 
+void CUITalkWnd::SwitchToBarter()
+{
+	if (m_pOurInvOwner->IsTradeEnabled() && m_pOthersInvOwner->IsTradeEnabled())
+	{
+		CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+		if (pGameSP)
+		{
+			/*			if ( pGameSP->MainInputReceiver() )
+						{
+							pGameSP->MainInputReceiver()->HideDialog();
+						}*/
+			pGameSP->StartBarter(m_pOurInvOwner, m_pOthersInvOwner);
+		} // pGameSP
+	}
+}
+
 void CUITalkWnd::SwitchToUpgrade()
 {
 	//if ( m_pOurInvOwner->IsInvUpgradeEnabled() && m_pOthersInvOwner->IsInvUpgradeEnabled() )

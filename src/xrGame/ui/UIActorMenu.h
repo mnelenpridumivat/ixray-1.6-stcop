@@ -4,6 +4,7 @@
 #include "../../xrUI/Widgets/UIWndCallback.h"
 #include "../../xrServerEntities/inventory_space.h"
 #include "../../xrUI/Widgets/UIHint.h"
+#include "MenuMode.h"
 
 class CUICharacterInfo;
 class CUIDragDropListEx;
@@ -43,14 +44,6 @@ enum EDDListType{
 		iQuickSlot,
 		iTrashSlot,
 		iListTypeMax
-};
-
-enum EMenuMode{
-		mmUndefined,
-		mmInventory,
-		mmTrade,
-		mmUpgrade,
-		mmDeadBodySearch,
 };
 
 class CUIActorMenu :	public CUIDialogWnd, 
@@ -164,6 +157,8 @@ protected:
 
 	CUI3tButton*				m_trade_buy_button;
 	CUI3tButton*				m_trade_sell_button;
+	CUI3tButton*				m_trade_exchange_button;
+	CUI3tButton*				m_trade_barter_button;
 	CUI3tButton*				m_takeall_button;
 	CUI3tButton*				m_putall_button;
 	CUI3tButton*				m_exit_button;
@@ -239,6 +234,8 @@ protected:
 	void						DeInitInventoryMode			();
 	void						InitTradeMode				();
 	void						DeInitTradeMode				();
+	void						InitBarterMode();
+	void						DeInitBarterMode();
 	void						InitUpgradeMode				();
 	void						DeInitUpgradeMode			();
 	void						InitDeadBodySearchMode		();
@@ -304,8 +301,11 @@ protected:
 	u32							CalcItemsPrice				(CUIDragDropListEx* pList, CTrade* pTrade, bool bBuying);
 	void						UpdatePrices				();
 	bool						CanMoveToPartner			(PIItem pItem);
-	void						TransferItems				(CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying);
+	void						TransferItems				(CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying, bool bBarter = false);
 	void						TransferItemsMp             (CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying);
+
+	void UpdateBoughtInfo(CUIDragDropListEx* pList, CTrade* pTrade);
+	void UpdateSoldInfo(CUIDragDropListEx* pList, CTrade* pTrade);
 
 public:
 								CUIActorMenu				();
@@ -338,6 +338,8 @@ public:
 
 	void				OnBtnPerformTradeBuy		(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeSell		(CUIWindow* w, void* d);
+	void				OnBtnPerformTradeExchange	(CUIWindow* w, void* d);
+	void				OnBtnPerformTradeBarter(CUIWindow* w, void* d);
 	void				OnBtnExitClicked			(CUIWindow* w, void* d);
 	void				TakeAllFromPartner			(CUIWindow* w, void* d);
 	void				PutAllToPartner			(CUIWindow* w, void* d);

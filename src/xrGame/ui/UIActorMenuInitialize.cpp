@@ -241,6 +241,8 @@ void CUIActorMenu::Construct()
 
 	m_trade_buy_button	= UIHelper::Create3tButton(uiXml, "trade_buy_button", this);
 	m_trade_sell_button	= UIHelper::Create3tButton(uiXml, "trade_sell_button", this);
+	m_trade_exchange_button = UIHelper::Create3tButton(uiXml, "trade_exchange_button", this);
+	m_trade_barter_button = UIHelper::Create3tButton(uiXml, "trade_barter_button", this);
 	m_takeall_button	= UIHelper::Create3tButton(uiXml, "takeall_button", this);
 
 	if (uiXml.NavigateToNode("putall_button", 0))
@@ -396,6 +398,8 @@ void CUIActorMenu::InitCallbacks()
 {
 	Register						(m_trade_buy_button);
 	Register						(m_trade_sell_button);
+	Register						(m_trade_exchange_button);
+	Register						(m_trade_barter_button);
 	Register						(m_takeall_button);
 
 	if (m_putall_button != nullptr)
@@ -410,6 +414,8 @@ void CUIActorMenu::InitCallbacks()
 
 	AddCallback(m_trade_buy_button,BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBuy));
 	AddCallback(m_trade_sell_button,BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeSell));
+	AddCallback(m_trade_exchange_button, BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeExchange));
+	AddCallback(m_trade_barter_button, BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBarter));
 	AddCallback(m_takeall_button,  BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::TakeAllFromPartner));
 
 	if (m_putall_button != nullptr)

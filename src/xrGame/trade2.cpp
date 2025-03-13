@@ -61,11 +61,11 @@ bool CTrade::CanTrade()
 	return true;
 }
 
-void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying)
+void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying, bool bBarter)
 {
 	// сумма сделки учитывая ценовой коэффициент
 	// актер цену не говорит никогда, все делают за него
-	u32 dwTransferMoney					= GetItemPrice(pItem, bBuying);
+	u32 dwTransferMoney					= GetItemPrice(pItem, bBuying, bBarter ? mmBarter : mmTrade);
 
 	if(bBuying)
 	{
@@ -88,21 +88,28 @@ void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying)
 	P.w_u16					(pItem->object().ID());
 	O1->u_EventSend			(P);
 
-	if(bBuying)
-		pPartner.inv_owner->set_money( pPartner.inv_owner->get_money() + dwTransferMoney, false );
-	else
-		pThis.inv_owner->set_money( pThis.inv_owner->get_money() + dwTransferMoney, false );
+	if (!bBarter) {
+		if (bBuying) {
+			pPartner.inv_owner->set_money(pPartner.inv_owner->get_money() + dwTransferMoney, false);
+		}
+		else {
+			pThis.inv_owner->set_money(pThis.inv_owner->get_money() + dwTransferMoney, false);
+		}
+	}
 
 	// взять у партнера
 	O2->u_EventGen			(P,GE_TRADE_BUY,O2->ID());
 	P.w_u16					(pItem->object().ID());
 	O2->u_EventSend			(P);
 
-	if(bBuying)
-		pThis.inv_owner->set_money( pThis.inv_owner->get_money() - dwTransferMoney, false );
-	else
-		pPartner.inv_owner->set_money( pPartner.inv_owner->get_money() - dwTransferMoney, false );
-
+	if (!bBarter) {
+		if (bBuying) {
+			pThis.inv_owner->set_money(pThis.inv_owner->get_money() - dwTransferMoney, false);
+		}
+		else {
+			pPartner.inv_owner->set_money(pPartner.inv_owner->get_money() - dwTransferMoney, false);
+		}
+	}
 
 	CAI_Trader* pTrader		= nullptr;
 
@@ -146,7 +153,7 @@ CInventoryOwner* CTrade::GetPartner()
 	return pPartner.inv_owner;
 }
 
-u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying)
+u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying, EMenuMode mode)
 {
 	CArtefact				*pArtefact = smart_cast<CArtefact*>(pItem);
 
@@ -193,13 +200,24 @@ u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying)
 	// computing action factor
 	const CTradeFactors		*p_trade_factors;
 
-
+	CTradeParameters* trade_params = nullptr;
+	switch (mode) {
+	case mmTrade: {
+		trade_params = &pThis.inv_owner->trade_parameters();
+		break;
+	}
+	case mmBarter: {
+		trade_params = pThis.inv_owner->barter_parameters();
+	}
+	}
+	VERIFY(trade_params);
+	
 	if (buying){
-		if( ! pThis.inv_owner->trade_parameters().enabled(CTradeParameters::action_buy(0),pItem->object().cNameSect()) ) return 0;
-		p_trade_factors		= &pThis.inv_owner->trade_parameters().factors(CTradeParameters::action_buy(0),pItem->object().cNameSect());
+		if( !trade_params->enabled(CTradeParameters::action_buy(0),pItem->object().cNameSect()) ) return 0;
+		p_trade_factors		= &trade_params->factors(CTradeParameters::action_buy(0),pItem->object().cNameSect());
 	}else{
-		if( ! pThis.inv_owner->trade_parameters().enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
-		p_trade_factors		= &pThis.inv_owner->trade_parameters().factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
+		if( !trade_params->enabled(CTradeParameters::action_sell(0),pItem->object().cNameSect()) ) return 0;
+		p_trade_factors		= &trade_params->factors(CTradeParameters::action_sell(0),pItem->object().cNameSect());
 	}
 	const CTradeFactors		&trade_factors = *p_trade_factors;
 

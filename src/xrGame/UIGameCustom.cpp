@@ -266,6 +266,17 @@ void  CUIGameCustom::StartTrade(CInventoryOwner* pActorInv, CInventoryOwner* pOt
 	m_ActorMenu->ShowDialog(true);
 }
 
+void  CUIGameCustom::StartBarter(CInventoryOwner* pActorInv, CInventoryOwner* pOtherOwner)
+{
+	//.	if( MainInputReceiver() )	return;
+
+	m_ActorMenu->SetActor(pActorInv);
+	m_ActorMenu->SetPartner(pOtherOwner);
+
+	m_ActorMenu->SetMenuMode(mmBarter);
+	m_ActorMenu->ShowDialog(true);
+}
+
 void  CUIGameCustom::StartUpgrade(CInventoryOwner* pActorInv, CInventoryOwner* pMech)
 {
 	//.	if( MainInputReceiver() )	return;

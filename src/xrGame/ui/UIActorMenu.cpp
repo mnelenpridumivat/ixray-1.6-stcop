@@ -139,23 +139,33 @@ void CUIActorMenu::SetMenuMode(EMenuMode mode)
 	{
 		switch(m_currMenuMode)
 		{
-		case mmUndefined:
+		case mmUndefined: {
 			break;
-		case mmInventory:
+		}
+		case mmInventory: {
 			DeInitInventoryMode();
 			break;
-		case mmTrade:
+		}
+		case mmTrade: {
 			DeInitTradeMode();
 			break;
-		case mmUpgrade:
+		}
+		case mmBarter: {
+			DeInitBarterMode();
+			break;
+		}
+		case mmUpgrade: {
 			DeInitUpgradeMode();
 			break;
-		case mmDeadBodySearch:
+		}
+		case mmDeadBodySearch: {
 			DeInitDeadBodySearchMode();
 			break;
-		default:
+		}
+		default: {
 			R_ASSERT(0);
 			break;
+		}
 		}
 
 		CurrentGameUI()->UIMainIngameWnd->ShowZoneMap(false);
@@ -163,39 +173,52 @@ void CUIActorMenu::SetMenuMode(EMenuMode mode)
 		m_currMenuMode = mode;
 		switch(mode)
 		{
-		case mmUndefined:
+		case mmUndefined: {
 #ifdef DEBUG
 			Msg("* now is Undefined mode");
 #endif // #ifdef DEBUG
 			ResetMode();
 			break;
-		case mmInventory:
+		}
+		case mmInventory: {
 			InitInventoryMode();
 #ifdef DEBUG
 			Msg("* now is Inventory mode");
 #endif // #ifdef DEBUG
 			break;
-		case mmTrade:
+		}
+		case mmTrade: {
 			InitTradeMode();
 #ifdef DEBUG
 			Msg("* now is Trade mode");
 #endif // #ifdef DEBUG
 			break;
-		case mmUpgrade:
+		}
+		case mmBarter: {
+			InitBarterMode();
+#ifdef DEBUG
+			Msg("* now is Barter mode");
+#endif // #ifdef DEBUG
+			break;
+		}
+		case mmUpgrade: {
 			InitUpgradeMode();
 #ifdef DEBUG
 			Msg("* now is Upgrade mode");
 #endif // #ifdef DEBUG
 			break;
-		case mmDeadBodySearch:
+		}
+		case mmDeadBodySearch: {
 			InitDeadBodySearchMode();
 #ifdef DEBUG
 			Msg("* now is DeadBodySearch mode");
 #endif // #ifdef DEBUG
 			break;
-		default:
+		}
+		default: {
 			R_ASSERT(0);
 			break;
+		}
 		}
 		UpdateConditionProgressBars();
 		CurModeToScript();
@@ -274,6 +297,13 @@ void CUIActorMenu::Update()
 			CheckDistance					();
 			break;
 		}
+	case mmBarter:
+	{
+		if (m_pPartnerInvOwner->inventory().ModifyFrame() != m_trade_partner_inventory_state)
+			InitPartnerInventoryContents();
+		CheckDistance();
+		break;
+	}
 	case mmUpgrade:
 		{
 			UpdateUpgradeItem();
@@ -301,6 +331,7 @@ bool CUIActorMenu::StopAnyMove()  // true = актёр не идёт при от
 		return false;
 	case mmUndefined:
 	case mmTrade:
+	case mmBarter:
 	case mmUpgrade:
 	case mmDeadBodySearch:
 		return true;
@@ -429,14 +460,16 @@ void CUIActorMenu::InfoCurItem( CUICellItem* cell_item )
 		compare_item = m_pActorInvOwner->inventory().ItemFromSlot(compare_slot);
 	}
 
-	if(GetMenuMode()==mmTrade)
+	if(GetMenuMode()==mmTrade || GetMenuMode() == mmBarter)
 	{
 		CInventoryOwner* item_owner = smart_cast<CInventoryOwner*>(current_item->m_pInventory->GetOwner());
 		u32 item_price = u32(-1);
-		if(item_owner && item_owner==m_pActorInvOwner)
-			item_price = m_partner_trade->GetItemPrice(current_item, true);
-		else
-			item_price = m_partner_trade->GetItemPrice(current_item, false);
+		if (item_owner && item_owner == m_pActorInvOwner) {
+			item_price = m_partner_trade->GetItemPrice(current_item, true, GetMenuMode());
+		}
+		else {
+			item_price = m_partner_trade->GetItemPrice(current_item, false, GetMenuMode());
+		}
 
 		//if(item_price>500)
 		//	item_price = iFloor(item_price/10+0.5f)*10;
@@ -450,9 +483,9 @@ void CUIActorMenu::InfoCurItem( CUICellItem* cell_item )
 				PIItem jitem	= (PIItem)cell_item->Child(j)->m_pData;
 				CInventoryOwner* ammo_owner = smart_cast<CInventoryOwner*>(jitem->m_pInventory->GetOwner());
 				if(ammo_owner && ammo_owner==m_pActorInvOwner)
-					tmp_price = m_partner_trade->GetItemPrice(jitem, true);
+					tmp_price = m_partner_trade->GetItemPrice(jitem, true, GetMenuMode());
 				else
-					tmp_price = m_partner_trade->GetItemPrice(jitem, false);
+					tmp_price = m_partner_trade->GetItemPrice(jitem, false, GetMenuMode());
 
 				//if(tmp_price>500)
 				//	tmp_price = iFloor(tmp_price/10+0.5f)*10;
@@ -461,19 +494,36 @@ void CUIActorMenu::InfoCurItem( CUICellItem* cell_item )
 			}
 		}
 
-		if(	!current_item->CanTrade() || 
-			(!m_pPartnerInvOwner->trade_parameters().enabled(CTradeParameters::action_buy(0), 
-															current_item->object().cNameSect()) &&
-			item_owner && item_owner==m_pActorInvOwner)
-		)
-			m_ItemInfo->InitItem	( cell_item, compare_item, u32(-1), "st_no_trade_tip_1" );
-		else if(current_item->GetCondition()<m_pPartnerInvOwner->trade_parameters().buy_item_condition_factor)
-			m_ItemInfo->InitItem	( cell_item, compare_item, u32(-1), "st_no_trade_tip_2" );
-		else
-			m_ItemInfo->InitItem	( cell_item, compare_item, item_price );
+		CTradeParameters* trade_params = nullptr;
+		switch (GetMenuMode()) {
+		case mmTrade: {
+			trade_params = &m_pPartnerInvOwner->trade_parameters();
+			break;
+		}
+		case mmBarter: {
+			trade_params = m_pPartnerInvOwner->barter_parameters();
+			break;
+		}
+		}
+		VERIFY(trade_params);
+
+		if (!(GetMenuMode() == mmTrade ? current_item->CanTrade() : current_item->CanBarter()) ||
+			(!trade_params->enabled(CTradeParameters::action_buy(0),
+				current_item->object().cNameSect()) &&
+				item_owner && item_owner == m_pActorInvOwner)
+			) {
+			m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_1");
+		}
+		else if (current_item->GetCondition() < trade_params->buy_item_condition_factor) {
+			m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_2");
+		}
+		else {
+			m_ItemInfo->InitItem(cell_item, compare_item, item_price);
+		}
 	}
-	else
-		m_ItemInfo->InitItem	( cell_item, compare_item, u32(-1));
+	else {
+		m_ItemInfo->InitItem(cell_item, compare_item, u32(-1));
+	}
 
 //	m_ItemInfo->InitItem	( current_item, compare_item );
 	float dx_pos = GetWndRect().left;
@@ -484,23 +534,33 @@ void CUIActorMenu::UpdateItemsPlace()
 {
 	switch ( m_currMenuMode )
 	{
-	case mmUndefined:
+	case mmUndefined: {
 		break;
-	case mmInventory:
-		
+	}
+	case mmInventory: {
+
 		break;
-	case mmTrade:
+	}
+	case mmTrade: {
 		UpdatePrices();
 		break;
-	case mmUpgrade:
+	}
+	case mmBarter: {
+		UpdatePrices();
+		break;
+	}
+	case mmUpgrade: {
 		SetupUpgradeItem();
 		break;
-	case mmDeadBodySearch:
+	}
+	case mmDeadBodySearch: {
 		UpdateDeadBodyBag();
 		break;
-	default:
+	}
+	default: {
 		R_ASSERT(0);
 		break;
+	}
 	}
 
 	if ( m_pActorInvOwner )
@@ -529,21 +589,33 @@ void CUIActorMenu::clear_highlight_lists()
 
 	switch ( m_currMenuMode )
 	{
-	case mmUndefined:
+	case mmUndefined: {
 		break;
-	case mmInventory:
+	}
+	case mmInventory: {
 		break;
-	case mmTrade:
+	}
+	case mmTrade: {
 		m_pTradeActorBagList->clear_select_armament();
 		m_pTradeActorList->clear_select_armament();
 		m_pTradePartnerBagList->clear_select_armament();
 		m_pTradePartnerList->clear_select_armament();
 		break;
-	case mmUpgrade:
+	}
+	case mmBarter: {
+		m_pTradeActorBagList->clear_select_armament();
+		m_pTradeActorList->clear_select_armament();
+		m_pTradePartnerBagList->clear_select_armament();
+		m_pTradePartnerList->clear_select_armament();
 		break;
-	case mmDeadBodySearch:
+	}
+	case mmUpgrade: {
+		break;
+	}
+	case mmDeadBodySearch: {
 		m_pDeadBodyBagList->clear_select_armament();
 		break;
+	}
 	}
 	m_highlight_clear = true;
 }
@@ -623,6 +695,14 @@ void CUIActorMenu::set_highlight_item( CUICellItem* cell_item )
 			highlight_armament( item, m_pTradePartnerList );
 			break;
 		}
+	case mmBarter:
+	{
+		highlight_armament(item, m_pTradeActorBagList);
+		highlight_armament(item, m_pTradeActorList);
+		highlight_armament(item, m_pTradePartnerBagList);
+		highlight_armament(item, m_pTradePartnerList);
+		break;
+	}
 	case mmDeadBodySearch:
 		{
 			highlight_armament( item, m_pInventoryBagList );

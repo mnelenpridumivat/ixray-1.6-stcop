@@ -176,7 +176,7 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 		}
 	case iActorBag:
 		{
-			if ( m_currMenuMode == mmTrade )
+			if ( m_currMenuMode == mmTrade || m_currMenuMode == mmBarter )
 			{
 				ToActorTrade( itm, false );
 				break;
@@ -301,7 +301,7 @@ bool CUIActorMenu::OnItemFocusedUpdate(CUICellItem* itm)
 		return true;
 	}	
 
-	InfoCurItem( itm );
+	InfoCurItem( itm);
 	return true;
 }
 
@@ -388,6 +388,9 @@ void CUIActorMenu::OnPressUserKey()
 	case mmTrade:			
 //		OnBtnPerformTrade( this, 0 );
 		break;
+	case mmBarter:
+		//		OnBtnPerformTrade( this, 0 );
+		break;
 	case mmUpgrade:			
 		TrySetCurUpgrade();
 		break;
@@ -415,6 +418,8 @@ void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
 	case mmInventory:
 		break;
 	case mmTrade:
+		break;
+	case mmBarter:
 		break;
 	case mmUpgrade:
 		if ( m_repair_mode )
@@ -445,6 +450,8 @@ void CUIActorMenu::OnMesBoxNo(CUIWindow*, void*)
 	case mmInventory:
 		break;
 	case mmTrade:
+		break;
+	case mmBarter:
 		break;
 	case mmUpgrade:
 		m_repair_mode = false;

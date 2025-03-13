@@ -74,6 +74,7 @@ public:
 	//торговля и общение с персонажем
 
 	virtual bool	AllowItemToTrade 	(CInventoryItem const * item, const SInvItemPlace& place) const;
+	virtual bool	AllowItemToBarter(CInventoryItem const* item, const SInvItemPlace& place) const;
 	virtual void	OnFollowerCmd		(int cmd)		{};//redefine for CAI_Stalkker
 			bool	bDisableBreakDialog;
 	//инициализация объекта торговли
@@ -225,16 +226,25 @@ public:
 
 private:
 	CTradeParameters			*m_trade_parameters;
+	CTradeParameters* m_barter_parameters = nullptr;
 	CPurchaseList				*m_purchase_list;
+	CPurchaseList* m_barter_purchase_list = nullptr;
 	BOOL						m_need_osoznanie_mode;
 	bool						m_deadbody_can_take;
 	bool						m_deadbody_closed;
 
 public:
 	IC		CTradeParameters	&trade_parameters		() const;
+	IC		bool can_barter() const;
+	IC		CTradeParameters* barter_parameters() const;
+	IC		CPurchaseList& trade_purchase_list() const;
+	IC		CPurchaseList& barter_purchase_list() const;
 	virtual	LPCSTR				trade_section			() const;
+	virtual	LPCSTR				barter_section() const;
 			float				deficit_factor			(const shared_str &section) const;
+			float				barter_deficit_factor(const shared_str& section) const;
 			void				buy_supplies			(CInifile &ini_file, LPCSTR section);
+			void				barter_buy_supplies(CInifile& ini_file, LPCSTR section);
 			void				sell_useless_items		();
 	virtual	void				on_before_sell			(CInventoryItem *item) {}
 	virtual	void				on_before_buy			(CInventoryItem *item) {}

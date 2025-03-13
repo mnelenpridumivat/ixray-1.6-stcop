@@ -1498,6 +1498,16 @@ bool	CInventoryItem::CanTrade() const
 	return (res && m_flags.test(FCanTrade) && !IsQuestItem());
 }
 
+bool	CInventoryItem::CanBarter() const
+{
+	bool res = true;
+#pragma todo("Dima to Andy : why CInventoryItem::CanTrade can be called for the item, which doesn't have owner?")
+	if (m_pInventory)
+		res = inventory_owner().AllowItemToBarter(this, m_ItemCurrPlace);
+
+	return (res && m_flags.test(FCanTrade) && !IsQuestItem());
+}
+
 Frect CInventoryItem::GetKillMsgRect() const
 {
 	float x,y,w,h;
