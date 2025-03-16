@@ -542,14 +542,18 @@ void	CActor::Hit(SHit* pHDS)
 
 				// установить particles
 				xr_shared_ptr<CParticlesObject> ps_ = nullptr;
-
+#if 0
 				if (eacFirstEye == cam_active && this == Level().CurrentEntity())
 					ps_ = Particles::Details::Create(invincibility_fire_shield_1st,TRUE);
 				else
 					ps_ = Particles::Details::Create(invincibility_fire_shield_3rd,TRUE);
-
-				ps_->UpdateParent(pos,Fvector().set(0.f,0.f,0.f));
-				GamePersistent().ps_needtoplay.push_back(ps_);
+#endif 
+				if (ps_ != nullptr)
+				{
+					ps_->UpdateParent(pos, Fvector().set(0.f, 0.f, 0.f));
+					GamePersistent().ps_needtoplay.push_back(ps_);
+				}
+				
 			};
 		};
 		 
@@ -589,6 +593,24 @@ void	CActor::Hit(SHit* pHDS)
 	//slow actor, only when he gets hit
 	m_hit_slowmo = conditions().HitSlowmo(pHDS);
 
+#if 0
+	if (g_pGamePersistent->GameType() == eGameIDFreeMP)
+	{
+		IsWaunded = conditions().GetHealth() < 0.5f;
+
+		if (IsWaunded)
+		{
+			cam_Set(eacFreeLook);
+
+			IKinematicsAnimated* K = smart_cast<IKinematicsAnimated*>(Visual());
+			if (K)
+			{
+				K->PlayCycle("waunded_1_idle_0");
+			}
+		}
+	}
+#endif
+
 	//---------------------------------------------------------------
 	if(		(Level().CurrentViewEntity()==this) && 
 			!g_dedicated_server && 
@@ -619,8 +641,33 @@ void	CActor::Hit(SHit* pHDS)
 
 	if(IsGameTypeSingle())	
 	{
-		float hit_power				= HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
+		if (GodMode())
+		{
+			HDS.power = 0.0f;
+			inherited::Hit(&HDS);
+			return;
+		}
+		else
+		{
+			float hit_power				= HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
+			HDS.power = hit_power;
+			HDS.add_wound = true;
+			if (g_Alive())
+			{
+				/* AVO: send script callback*/
+				callback(GameObject::eHit)(
+					this->lua_game_object(),
+					HDS.damage(),
+					HDS.direction(),
+					smart_cast<const CGameObject*>(HDS.who)->lua_game_object(),
+					HDS.boneID
+					);
+			}
+			inherited::Hit(&HDS);
+		}
 
+		/* AVO: rewritten above and added hit callback*/
+		/*float hit_power = HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
 		if(GodMode())
 		{
 			HDS.power				= 0.0f;
@@ -632,7 +679,7 @@ void	CActor::Hit(SHit* pHDS)
 			HDS.add_wound			= true;
 			HitArtefactsCondition	(HDS);
 			inherited::Hit			(&HDS);
-		}
+		}*/
 	}else
 	{
 		m_bWasBackStabbed			= false;
@@ -942,14 +989,30 @@ void CActor::g_Physics			(Fvector& _accel, float jump, float dt)
 
 	accel.mul					(1.f-m_hit_slowmo);
 
-	
-	
-
 	if(g_Alive())
 	{
 		if(mstate_real&mcClimb&&!cameras[eacFirstEye]->bClampYaw)
 				accel.set(0.f,0.f,0.f);
-		character_physics_support()->movement()->Calculate			(accel,cameras[cam_active]->vDirection,0,jump,dt,false);
+
+		Fvector Pos = Position();
+		Fvector PosTo = Position();
+
+		// Позиция до начала расчёта физики
+		character_physics_support()->movement()->GetPosition(Pos);
+
+		// Позиция после расчёта физики
+		character_physics_support()->movement()->Calculate(accel, cameras[cam_active]->vDirection, 0, jump, dt, false);
+		character_physics_support()->movement()->GetPosition(PosTo);
+
+		if (!IsGameTypeSingle())
+		{
+			// Проверка на телепортацию актёра
+			if (IsFocused() && PosTo.distance_to_sqr(Pos) > 16.0f)
+			{
+				character_physics_support()->movement()->SetPosition(Pos);
+			}
+		}
+
 		bool new_border_state=character_physics_support()->movement()->isOutBorder();
 		if(m_bOutBorder!=new_border_state && Level().CurrentControlEntity() == this)
 		{
@@ -1658,23 +1721,32 @@ void CActor::shedule_Update	(u32 DT)
 
 	if (!input_external_handler_installed() && RQ.O && RQ.O->getVisible() && ActorPos.distance_to_sqr(PickPos) < 6.0f)
 	{
-		m_pObjectWeLookingAt			= smart_cast<CGameObject*>(RQ.O);
-		
-		CGameObject						*game_object = smart_cast<CGameObject*>(RQ.O);
-		m_pUsableObject					= smart_cast<CUsableScriptObject*>(game_object);
-		m_pInvBoxWeLookingAt			= smart_cast<CInventoryBox*>(game_object);
-		m_pPersonWeLookingAt			= smart_cast<CInventoryOwner*>(game_object);
-		m_pVehicleWeLookingAt			= smart_cast<CHolderCustom*>(game_object);
-		CEntityAlive* pEntityAlive		= smart_cast<CEntityAlive*>(game_object);
+		m_pObjectWeLookingAt = smart_cast<CGameObject*>(RQ.O);
+
+		CGameObject* game_object = smart_cast<CGameObject*>(RQ.O);
+		m_pUsableObject = smart_cast<CUsableScriptObject*>(game_object);
+		m_pInvBoxWeLookingAt = smart_cast<CInventoryBox*>(game_object);
+		m_pPersonWeLookingAt = smart_cast<CInventoryOwner*>(game_object);
+		m_pVehicleWeLookingAt = smart_cast<CHolderCustom*>(game_object);
+		CEntityAlive* pEntityAlive = smart_cast<CEntityAlive*>(game_object);
+
+		CActor* IsPlayerPtr = smart_cast<CActor*>(pEntityAlive);
 		
 		if (m_pVehicleWeLookingAt != nullptr)
 		{
 			m_pPersonWeLookingAt = nullptr;
 		}
 
-		if (IsGameTypeSingle())
+		if (IsGameTypeSingleCompatible())
 		{
-			if (m_pUsableObject && m_pUsableObject->tip_text())
+			if (IsPlayerPtr != nullptr)
+			{
+				if (!IsPlayerPtr->IsWaunded)
+				{
+					m_pPersonWeLookingAt = nullptr;
+				}
+			}
+			else if (m_pUsableObject && m_pUsableObject->tip_text())
 			{
 				m_sDefaultObjAction = g_pStringTable->translate( m_pUsableObject->tip_text() );
 			}
@@ -1718,7 +1790,7 @@ void CActor::shedule_Update	(u32 DT)
 				}
 				else if (m_pVehicleWeLookingAt)
 				{
-					m_sDefaultObjAction = m_sCarCharacterUseAction;
+					m_sDefaultObjAction = m_pVehicleWeLookingAt->m_sUseAction == 0 ? m_sCarCharacterUseAction : m_pVehicleWeLookingAt->m_sUseAction;
 
 					if (CCar* pCar = smart_cast<CCar*>(m_pVehicleWeLookingAt))
 					{

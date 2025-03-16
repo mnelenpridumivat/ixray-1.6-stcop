@@ -84,6 +84,13 @@ void CActor::IR_OnKeyboardPress(int cmd)
 		return;
 	}
 #endif //DEBUG
+
+
+	if (IsWaunded)
+	{
+		return;
+	}
+
 	switch(cmd)
 	{
 	case kJUMP:		
@@ -129,25 +136,6 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				return;
 			}
 		}break;
-/*
-	case kFLARE:{
-			PIItem fl_active = inventory().ItemFromSlot(FLARE_SLOT);
-			if(fl_active)
-			{
-				CFlare* fl			= smart_cast<CFlare*>(fl_active);
-				fl->DropFlare		();
-				return				;
-			}
-
-			PIItem fli = inventory().Get(CLSID_DEVICE_FLARE, true);
-			if(!fli)			return;
-
-			CFlare* fl			= smart_cast<CFlare*>(fli);
-			
-			if(inventory().Slot(fl))
-				fl->ActivateFlare	();
-		}break;
-*/
 	case kUSE:
 		ActorUse();
 		break;
@@ -190,6 +178,11 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				break;
 			}
 
+			if (!CurrentGameUI()->ActorMenu().m_pQuickSlot)
+			{
+				break;
+			}
+			
 			const shared_str& item_name		= g_quick_use_slots[cmd-kQUICK_USE_1];
 			if(item_name.size())
 			{
@@ -242,9 +235,15 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 {
 	if(hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))	return;
 
-	if (Remote())	return;
+	if (Remote())
+		return;
 
 	if (m_input_external_handler && !m_input_external_handler->authorized(cmd))	return;
+
+	if (IsWaunded)
+	{
+		return;
+	}
 
 	if (g_Alive())	
 	{
@@ -289,6 +288,12 @@ void CActor::IR_OnKeyboardHold(int cmd)
 		return;
 	}
 #endif //DEBUG
+
+	if (IsWaunded)
+	{
+		return;
+	}
+
 	float LookFactor = GetLookFactor();
 	switch(cmd)
 	{
@@ -481,8 +486,8 @@ bool CActor::use_Holder				(CHolderCustom* holder)
 		if(smart_cast<CCar*>(holderGO))
 			b = use_Vehicle(0);
 		else
-			if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN)
-				b = use_MountedWeapon(0);
+			if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN || holderGO->CLS_ID==CLSID_OBJECT_HOLDER_ENT)
+				b = use_HolderEx(0,false);
 
 		if(inventory().ActiveItem()){
 			CHudItem* hi = smart_cast<CHudItem*>(inventory().ActiveItem());
@@ -496,8 +501,8 @@ bool CActor::use_Holder				(CHolderCustom* holder)
 		if(smart_cast<CCar*>(holder))
 			b = use_Vehicle(holder);
 
-		if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN)
-			b = use_MountedWeapon(holder);
+		if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN || holderGO->CLS_ID==CLSID_OBJECT_HOLDER_ENT)
+			b = use_HolderEx(holder,false);
 		
 		if(b){//used succesfully
 			// switch off torch...
@@ -558,7 +563,7 @@ void CActor::ActorUse()
 
 			VERIFY(pEntityAliveWeLookingAt);
 
-			if (IsGameTypeSingle())
+			if (IsGameTypeSingleCompatible())
 			{			
 				CBaseMonster* pMonster = smart_cast<CBaseMonster*>(pEntityAliveWeLookingAt);
 				const static bool isMonstersInventory = EngineExternal()[EEngineExternalGame::EnableMonstersInventory];
@@ -572,7 +577,7 @@ void CActor::ActorUse()
 				else
 				{
 					//только если находимся в режиме single
-					CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+					CUIGameCustom* pGameSP = CurrentGameUI();
 					if (pGameSP && TestMonster)
 					{
 						if (!m_pPersonWeLookingAt->deadbody_closed_status())

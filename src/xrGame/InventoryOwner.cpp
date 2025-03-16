@@ -177,13 +177,15 @@ BOOL CInventoryOwner::net_Spawn		(CSE_Abstract* DC)
 
 	return TRUE;
 }
-
+#include "map_manager.h"
 void CInventoryOwner::net_Destroy()
 {
 	CAttachmentOwner::net_Destroy();
 	
 	inventory().Clear();
 	inventory().SetActiveSlot(NO_ACTIVE_SLOT);
+
+	Level().MapManager().RemoveRelationLocation(this);
 }
 
 
@@ -306,9 +308,11 @@ void CInventoryOwner::StopTalk()
 	m_pTalkPartner			= nullptr;
 	m_bTalking				= false;
 
-	CUIGameSP* ui_sp = smart_cast<CUIGameSP*>(CurrentGameUI());
-	if(ui_sp && ui_sp->TalkMenu->IsShown())
-		ui_sp->TalkMenu->Stop();
+	if (CurrentGameUI() == nullptr)
+		return;
+
+	if(CurrentGameUI()->TalkMenu->IsShown())
+		CurrentGameUI()->TalkMenu->Stop();
 }
 
 bool CInventoryOwner::IsTalking()
@@ -325,11 +329,10 @@ void CInventoryOwner::StopTrading()
 {
 	m_bTrading = false;
 
-	CUIGameSP* ui_sp = smart_cast<CUIGameSP*>( CurrentGameUI() );
-	if ( ui_sp )
-	{
-		ui_sp->HideActorMenu();
-	}
+	if (CurrentGameUI())
+		return;
+	 
+	CurrentGameUI()->HideActorMenu(); 
 }
 
 bool CInventoryOwner::IsTrading()

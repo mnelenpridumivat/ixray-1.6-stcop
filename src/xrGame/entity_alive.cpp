@@ -202,6 +202,7 @@ void CEntityAlive::reload		(LPCSTR section)
 
 	m_fFood					= 100*pSettings->r_float	(section,"ph_mass");
 }
+
 BOOL	g_fight_fast_respawn = FALSE;
 void CEntityAlive::shedule_Update(u32 dt)
 {
@@ -211,6 +212,7 @@ void CEntityAlive::shedule_Update(u32 dt)
 	//condition update with the game time pass
 	conditions().UpdateConditionTime	();
 	conditions().UpdateCondition		();
+	
 	//Обновление партиклов огня
 	UpdateFireParticles	();
 	//капли крови
@@ -218,18 +220,18 @@ void CEntityAlive::shedule_Update(u32 dt)
 	//обновить раны
 	conditions().UpdateWounds		();
 
-	if(!g_Alive() && g_fight_fast_respawn && IsGameTypeSingle())
+	if(!g_Alive() && g_fight_fast_respawn && OnServer())
 		DestroyObject();
 
 	//убить сущность
 	if(Local() && !g_Alive() && !AlreadyDie())
 	{
-		if(conditions().GetWhoHitLastTime()) {
-//			Msg			("%6d : KillEntity from CEntityAlive (using who hit last time) for object %s",Device.dwTimeGlobal,*cName());
+		if(conditions().GetWhoHitLastTime())
+		{
 			KillEntity	(conditions().GetWhoHitLastTimeID());
 		}
-		else {
-//			Msg			("%6d : KillEntity from CEntityAlive for object %s",Device.dwTimeGlobal,*cName());
+		else
+		{
 			KillEntity	(ID());
 		}
 	}
@@ -314,10 +316,14 @@ void	CEntityAlive::Hit(SHit* pHDS)
 #include "monster_community.h"
 #include "relation_registry.h"
 #include "alife_registry_wrappers.h"
+ 
 void CEntityAlive::Die	(CObject* who)
 {
-	if(g_fight_fast_respawn && IsGameTypeSingle())
-		const_cast<CALifeSimulator*>(g_ai_space->get_alife())->spawn_item(cNameSect_str(), Position(), ai_location().level_vertex_id(), ai_location().game_vertex_id(), ALife::_OBJECT_ID(-1));
+	if (g_fight_fast_respawn && OnServer())
+	{
+  		g_ai_space->get_alife()->spawn_item(cNameSect_str(), Position(), ai_location().level_vertex_id(), ai_location().game_vertex_id(), ALife::_OBJECT_ID(-1));
+ 	}
+	
 	if(who)
 		RELATION_REGISTRY().Action(who->cast_entity_alive(), this, RELATION_REGISTRY::KILL);
 
@@ -843,6 +849,12 @@ void CEntityAlive::fill_hit_bone_surface_areas		( ) const
 				surface_area			= 2.f * PI * shape.cylinder.m_radius*( shape.cylinder.m_radius + shape.cylinder.m_height );
 				break;
 			}
+			// clear sky - red forest trader (forester) 
+			case 62:
+			{
+				surface_area = 100.0f;
+				break;
+			}
 			default :					NODEFAULT;
 		}
 
@@ -960,6 +972,12 @@ Fvector	CEntityAlive::get_new_local_point_on_mesh	( u16& bone_id ) const
 			result.mul					( shape.cylinder.m_direction, height );
 			result.add					( normal );
 			result.add					( shape.cylinder.m_center );
+			break;
+		}
+		// clear sky - red forest trader (forester)
+		case 62:
+		{
+			result.random_dir().mul(5.0f).add(10.0f);
 			break;
 		}
 		default :						NODEFAULT;

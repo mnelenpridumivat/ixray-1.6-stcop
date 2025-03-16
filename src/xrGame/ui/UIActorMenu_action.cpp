@@ -146,8 +146,8 @@ bool CUIActorMenu::OnItemDrop(CUICellItem* itm)
 
 	OnItemDropped				(CurrentIItem(), new_owner, old_owner);
 
-	UpdateItemsPlace			();
 	UpdateConditionProgressBars	();
+	UpdateItemsPlace			();
 
 	return true;
 }
@@ -160,6 +160,7 @@ bool CUIActorMenu::OnItemStartDrag(CUICellItem* itm)
 
 bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 {
+	SetCurrentItem(itm);
 	InfoCurItem( nullptr );
 	CUIDragDropListEx*	old_owner		= itm->OwnerList();
 	EDDListType t_old					= GetListType(old_owner);
@@ -236,8 +237,8 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 
 	}; //switch 
 
-	UpdateItemsPlace();
 	UpdateConditionProgressBars();
+	UpdateItemsPlace();
 
 	return true;
 }

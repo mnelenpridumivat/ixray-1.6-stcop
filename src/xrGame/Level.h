@@ -16,6 +16,7 @@
 #include "../xrEngine/xr_level_controller.h"
 
 #include "game_cl_base.h"
+#include "FreeMP/ScriptEvents.h"
 
 class	CHUDManager;
 class	CParticlesObject;
@@ -113,6 +114,9 @@ protected:
 	IReader						*m_chunk;
 	IReader						*spawn;
 	IGameGraph					*m_game_graph;
+
+	xr_deque<NET_Packet>		script_client_events;
+
 public:
 #ifdef DEBUG
 	// level debugger
@@ -137,6 +141,9 @@ public:
 	virtual void				OnSessionFull			();
 	virtual void				OnConnectRejected		();
 
+	NET_Packet* GetLastClientScriptEvent();
+	void PopLastClientScriptEvent();
+	u32 GetSizeClientScriptEvent();
 private:
 			
 			void				OnSecureMessage			(NET_Packet & P);
@@ -308,7 +315,6 @@ public:
 	void						ClientSend				();
 	void						ClientSendProfileData	();
 	void						ClientSave				();
-			u32					Objects_net_Save		(NET_Packet* _Packet, u32 start, u32 count);
 	virtual	void				Send					(NET_Packet& P, u32 dwFlags=DPNSEND_GUARANTEED, u32 dwTimeout=0);
 	
 	void						g_cl_Spawn				(LPCSTR name, u8 rp, u16 flags, Fvector pos);	// only ask server

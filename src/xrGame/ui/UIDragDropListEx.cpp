@@ -4,6 +4,7 @@
 #include "object_broker.h"
 #include "UICellItem.h"
 #include "../../xrUI/UICursor.h"
+#include "../Inventory.h"
 
 
 CUIDragItem* CUIDragDropListEx::m_drag_item = nullptr;
@@ -550,31 +551,31 @@ CUICellContainer::~CUICellContainer()
 
 bool CUICellContainer::AddSimilar(CUICellItem* itm)
 {
-	if(!m_pParentDragDropList->IsGrouping())	return false;
+	if (!m_pParentDragDropList->IsGrouping())	return false;
 
-	CUICellItem* i		= FindSimilar(itm);
-	R_ASSERT			(i!=itm);
-	R_ASSERT			(0==itm->ChildsCount());
-	if(i)
-	{	
-		i->PushChild			(itm);
-		itm->SetOwnerList		(m_pParentDragDropList);
+	CUICellItem* i = FindSimilar(itm);
+	R_ASSERT(i != itm);
+	R_ASSERT(0 == itm->ChildsCount());
+	if (i)
+	{
+		i->PushChild(itm);
+		itm->SetOwnerList(m_pParentDragDropList);
 	}
-	
-	return (i!=nullptr);
+
+	return (i != nullptr);
 }
 
 CUICellItem* CUICellContainer::FindSimilar(CUICellItem* itm)
 {
-	for(WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end()!=it; ++it)
+	for (WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end() != it; ++it)
 	{
 #ifdef DEBUG
 		CUICellItem* i = smart_cast<CUICellItem*>(*it);
 #else
 		CUICellItem* i = (CUICellItem*)(*it);
 #endif
-		R_ASSERT		(i!=itm);
-		if(i->EqualTo(itm))
+		R_ASSERT(i != itm);
+		if (i->EqualTo(itm))
 			return i;
 	}
 	return nullptr;
@@ -934,6 +935,10 @@ void CUICellContainer::Draw()
 				else if ( ui_cell.m_item->m_select_armament )
 				{
 					select_mode = 3;
+				}
+				else if (ui_cell.m_item->m_select_equipped)
+				{
+					select_mode = 2;
 				}
 			}
 			

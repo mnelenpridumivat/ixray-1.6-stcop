@@ -20,6 +20,7 @@ enum CHUNK_DATA {
 };
 constexpr auto SECTION_HEADER = "location_";
 constexpr auto SAVE_EXTENSION = ".scop";
+constexpr auto IXRAY_DEF_SAVE_EXTENSION = ".scop";
 constexpr auto SPAWN_NAME = "game.spawn";
 // inventory rukzak size
 constexpr auto MAX_ITEM_VOLUME = 100;

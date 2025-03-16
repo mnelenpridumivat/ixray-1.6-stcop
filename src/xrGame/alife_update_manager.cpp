@@ -56,7 +56,9 @@ public:
 CALifeUpdateManager::CALifeUpdateManager	(xrServer *server, LPCSTR section) :
 	CALifeSwitchManager		(server,section),
 	CALifeSurgeManager		(server,section),
-	CALifeStorageManager	(server,section) {
+	CALifeStorageManager	(server,section),
+	CALifeSimulatorBase		(server,section)
+{
 	shedule.t_min			= pSettings->r_s32	(section,"schedule_min");
 	shedule.t_max			= pSettings->r_s32	(section,"schedule_max");
 	shedule_register		();
@@ -319,11 +321,12 @@ bool CALifeUpdateManager::load_game		(LPCSTR game_name, bool no_assert)
 {
 	{
 		string_path				temp,file_name;
-		xr_strconcat(temp,game_name,SAVE_EXTENSION);
+		xr_strconcat(temp,game_name, IXRAY_DEF_SAVE_EXTENSION);
 		FS.update_path			(file_name,"$game_saves$",temp);
-		if (!FS.exist(file_name)) {
-			R_ASSERT3			(no_assert,"There is no saved game ",file_name);
-			return				(false);
+		if (!FS.exist(file_name)) 
+		{
+			R_ASSERT3(no_assert, "There is no saved game ", file_name);
+			return (false);
 		}
 	}
 	string512					S,S1;

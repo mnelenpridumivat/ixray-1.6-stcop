@@ -6,6 +6,8 @@
 #include "../../xrUI/Widgets/UIHint.h"
 #include "MenuMode.h"
 
+#include "../script_game_object.h" //Alundaio
+
 class CUICharacterInfo;
 class CUIDragDropListEx;
 class CUIDragDropReferenceList;
@@ -143,18 +145,19 @@ protected:
 
 	// delimiter ------------------------------
 	CUIStatic*					m_LeftDelimiter;
-//	CUITextWnd*					m_PartnerTradeCaption;
+	CUITextWnd*					m_PartnerTradeCaption;
 	CUITextWnd*					m_PartnerTradePrice;
 	CUITextWnd*					m_PartnerTradeWeightMax;
 
 	CUIStatic*					m_RightDelimiter;
-//	CUITextWnd*					m_ActorTradeCaption;
+	CUITextWnd*					m_ActorTradeCaption;
 	CUITextWnd*					m_ActorTradePrice;
 	CUITextWnd*					m_ActorTradeWeightMax;
 
 	CTrade*						m_actor_trade;
 	CTrade*						m_partner_trade;
 
+	CUI3tButton*				m_trade_button;
 	CUI3tButton*				m_trade_buy_button;
 	CUI3tButton*				m_trade_sell_button;
 	CUI3tButton*				m_trade_exchange_button;
@@ -162,7 +165,7 @@ protected:
 	CUI3tButton*				m_takeall_button;
 	CUI3tButton*				m_putall_button;
 	CUI3tButton*				m_exit_button;
-//	CUIStatic*					m_clock_value;
+	CUIStatic*					m_clock_value;
 
 	u32							m_last_time;
 	bool						m_repair_mode;
@@ -244,8 +247,6 @@ protected:
 	void						CurModeToScript				();
 	void						RepairEffect_CurItem		();
 
-	void						SetCurrentItem				(CUICellItem* itm);
-	CUICellItem*				CurrentItem					();
 	PIItem						CurrentIItem				();
 
 	void						InfoCurItem					(CUICellItem* cell_item); //on update item
@@ -263,8 +264,10 @@ protected:
 	void						UpdateButtonsLayout			();
 
 	// inventory
+	bool						ToSlotScript				(CScriptGameObject* GO, bool force_place, u16 slot_id);
 	bool						ToSlot						(CUICellItem* itm, bool force_place, u16 slot_id);
 	bool						ToBag						(CUICellItem* itm, bool b_use_cursor_pos);
+	bool						ToBeltScript				(CScriptGameObject* GO, bool b_use_cursor_pos);
 	bool						ToBelt						(CUICellItem* itm, bool b_use_cursor_pos);
 	bool						TryUseItem					(CUICellItem* cell_itm);
 	bool						ToQuickSlot					(CUICellItem* itm);
@@ -311,6 +314,8 @@ public:
 								CUIActorMenu				();
 	virtual						~CUIActorMenu				();
 
+	CUICellItem*				CurrentItem					();
+	void						SetCurrentItem				(CUICellItem* itm);
 	virtual bool				StopAnyMove					();
 	virtual void				SendMessage					(CUIWindow* pWnd, s16 msg, void* pData = NULL);
 	virtual void				Draw						();
@@ -335,7 +340,9 @@ public:
 	void						UpdateActor					();
 	void						UpdatePartnerBag			();
 	void						UpdateDeadBodyBag			();
+	void						RefreshCurrentItemCell		();
 
+    void				OnBtnPerformTrade			(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeBuy		(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeSell		(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeExchange	(CUIWindow* w, void* d);
@@ -355,5 +362,9 @@ public:
 	void						RefreshCurrentItemCell();
 
 	IC	UIHint*					get_hint_wnd				() { return m_hint_wnd; }
+
+	void HighlightSectionInSlot(LPCSTR section, u8 type, u16 slot_id = 0);
+	CScriptGameObject* GetCurrentItemAsGameObject();
+	void HighlightForEachInSlot(const luabind::functor<bool>& functor, u8 type, u16 slot_id);
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 }; // class CUIActorMenu

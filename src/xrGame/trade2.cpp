@@ -245,6 +245,9 @@ u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying, EMenuMode mode)
 		_max(trade_factors.enemy_factor(),trade_factors.friend_factor())
 	);
 	
+	if (action_factor == 0)
+		return 0;
+
 	// computing deficit_factor
 #if 0
 	float					deficit_factor = partner.inv_owner->deficit_factor(pItem->object().cNameSect());
@@ -263,11 +266,12 @@ u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying, EMenuMode mode)
 	// use some script discounts
 	luabind::functor<float>	func;
 	if(b_buying)
-		R_ASSERT(ai().script_engine().functor("trade_manager.get_buy_discount", func));
+		ai().script_engine().functor("trade_manager.get_buy_discount", func);
 	else
-		R_ASSERT(ai().script_engine().functor("trade_manager.get_sell_discount", func));
+		ai().script_engine().functor("trade_manager.get_sell_discount", func);
 
-	result			= iFloor(result * func(smart_cast<const CGameObject*>(pThis.inv_owner)->ID()));
+	if (func)
+		result			= iFloor(result * func(smart_cast<const CGameObject*>(pThis.inv_owner)->ID()));
 	//if(result>500)
 	//	result		= iFloor(result/10+0.5f)*10;
 

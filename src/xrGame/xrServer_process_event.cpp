@@ -380,6 +380,10 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 		    	SendBroadcast(BroadcastCID, P, MODE);
 		    }
 		}break;
+	case GE_STALKER_ANIMATION:
+	case GE_STALKER_DIALOG:
+		SendBroadcast(BroadcastCID, P, MODE);
+		break;
 	case GE_TRADER_FLAGS:
 	{
 		CSE_ALifeTraderAbstract* pTa = smart_cast<CSE_ALifeTraderAbstract*>(receiver);

@@ -48,10 +48,10 @@ void CUIActorMenu::SetActor(CInventoryOwner* io)
 	m_last_time			= Device.dwTimeGlobal;
 	m_pActorInvOwner	= io;
 	
-	if ( IsGameTypeSingle() )
+	if (IsGameTypeSingle())
 	{
-		if ( io )
-			m_ActorCharacterInfo->InitCharacter	(m_pActorInvOwner->object_id());
+		if (io)
+			m_ActorCharacterInfo->InitCharacter(m_pActorInvOwner);
 		else
 			m_ActorCharacterInfo->ClearInfo();
 	}
@@ -84,7 +84,7 @@ void CUIActorMenu::SetPartner(CInventoryOwner* io)
 					icon = pSettings->r_string(pMonster->cNameSect(), "icon");
 				}
 
-				m_PartnerCharacterInfo->InitCharacterMP("", icon);
+				m_PartnerCharacterInfo->InitCharacter("", icon);
 			}
 		}
 		else if (pCar != nullptr)
@@ -99,7 +99,7 @@ void CUIActorMenu::SetPartner(CInventoryOwner* io)
 					Name = g_pStringTable->translate(Name);
 				}
 
-				m_PartnerCharacterInfo->InitCharacterMP
+				m_PartnerCharacterInfo->InitCharacter
 				(
 					Name.c_str(),
 					pSettings->r_string(pCar->cNameSect(), "icon")
@@ -108,7 +108,7 @@ void CUIActorMenu::SetPartner(CInventoryOwner* io)
 		}
 		else
 		{
-			m_PartnerCharacterInfo->InitCharacter(m_pPartnerInvOwner->object_id());
+			m_PartnerCharacterInfo->InitCharacter(m_pPartnerInvOwner);
 		}
 
 		SetInvBox(nullptr);
@@ -265,7 +265,7 @@ void CUIActorMenu::Draw()
 	CurrentGameUI()->UIMainIngameWnd->DrawMainIndicatorsForInventory();
 
 	inherited::Draw	();
-	m_ActorStateInfo->Draw();
+	//m_ActorStateInfo->Draw();
 	m_ItemInfo->Draw();
 	m_hint_wnd->Draw();
 }
@@ -286,7 +286,11 @@ void CUIActorMenu::Update()
 		break;
 	case mmInventory:
 		{
-//			m_clock_value->TextItemControl()->SetText( InventoryUtilities::GetGameTimeAsString( InventoryUtilities::etpTimeToMinutes ).c_str() );
+			if (m_clock_value)
+			{
+				m_clock_value->SetText(InventoryUtilities::GetGameTimeAsString(
+			    InventoryUtilities::etpTimeToMinutes).c_str());
+			}
 			CurrentGameUI()->UIMainIngameWnd->UpdateZoneMap();
 			break;
 		}
@@ -383,7 +387,7 @@ EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
 	if(l==m_pTradePartnerList)			return iPartnerTrade;
 	if(l==m_pDeadBodyBagList)			return iDeadBodyBag;
 
-	if(l==m_pQuickSlot)					return iQuickSlot;
+	if(l==m_pQuickSlot && m_pQuickSlot)					return iQuickSlot;
 	if(l==m_pTrashList)					return iTrashSlot;
 
 	R_ASSERT(0);
@@ -580,10 +584,16 @@ void CUIActorMenu::clear_highlight_lists()
 			m_pInvSlotHighlight[i]->Show(false);
 	}
 
-	for(u8 i=0; i<4; i++)
-		m_QuickSlotsHighlight[i]->Show(false);
-	for(u8 i=0; i<e_af_count; i++)
-		m_ArtefactSlotsHighlight[i]->Show(false);
+	if (m_QuickSlotsHighlight[0])
+	{
+		for (u8 i = 0; i < 4; i++)
+			m_QuickSlotsHighlight[i]->Show(false);
+	}
+	if (m_ArtefactSlotsHighlight[0])
+	{
+		for (u8 i = 0; i < e_af_count; i++)
+			m_ArtefactSlotsHighlight[i]->Show(false);
+	}
 
 	m_pInventoryBagList->clear_select_armament();
 
@@ -654,8 +664,11 @@ void CUIActorMenu::highlight_item_slot(CUICellItem* cell_item)
 		if(cell_item->OwnerList() && GetListType(cell_item->OwnerList())==iQuickSlot)
 			return;
 
-		for(u8 i=0; i<4; i++)
-			m_QuickSlotsHighlight[i]->Show(true);
+		if (m_QuickSlotsHighlight[0])
+		{
+			for (u8 i = 0; i < 4; i++)
+				m_QuickSlotsHighlight[i]->Show(true);
+		}
 		return;
 	}
 	if(artefact)
@@ -664,8 +677,11 @@ void CUIActorMenu::highlight_item_slot(CUICellItem* cell_item)
 			return;
 
 		Ivector2 cap = m_pInventoryBeltList->CellsCapacity();
-		for(u8 i=0; i<cap.x; i++)
-			m_ArtefactSlotsHighlight[i]->Show(true);
+		if (m_ArtefactSlotsHighlight[0])
+		{
+			for (u8 i = 0; i < cap.x; i++)
+				m_ArtefactSlotsHighlight[i]->Show(true);
+		}
 		return;
 	}
 }
@@ -932,7 +948,8 @@ void CUIActorMenu::ClearAllLists()
 			m_pInvList[i]->ClearAll(true);
 	}
 
-	m_pQuickSlot->ClearAll(true);
+	if (m_pQuickSlot)
+		m_pQuickSlot->ClearAll(true);
 
 	m_pTradeActorBagList->ClearAll(true);
 	m_pTradeActorList->ClearAll(true);
@@ -989,11 +1006,11 @@ void CUIActorMenu::SetActorInfoMP()
 
 	if (IsGameTypeSingleCompatible())
 	{
-		m_ActorCharacterInfo->InitCharacterMP(m_pActorInvOwner);
+		m_ActorCharacterInfo->InitCharacter(m_pActorInvOwner);
 	}
 	else
 	{
-		m_ActorCharacterInfo->InitCharacterMP(Game().local_player->getName(), "ui_npc_u_nebo_1");
+		m_ActorCharacterInfo->InitCharacter(Game().local_player->getName(), "ui_npc_u_nebo_1");
 	}
 
 	UpdateActorMoneyMP();
@@ -1007,13 +1024,14 @@ bool CUIActorMenu::CanSetItemToList(PIItem item, CUIDragDropListEx* l, u16& ret_
 		return		true;
 	}
 
-	if (item_slot == INV_SLOT_3 && l == m_pInvList[INV_SLOT_2])
+	const static bool pistolsOnly = EngineExternal()[EEngineExternalGame::EnableInventoryPistolSlot];
+	if (item_slot == INV_SLOT_3 && l == m_pInvList[INV_SLOT_2] && !pistolsOnly)
 	{
 		ret_slot	= INV_SLOT_2;
 		return		true;
 	}
 
-	if (item_slot == INV_SLOT_2&& l == m_pInvList[INV_SLOT_3])
+	if (item_slot == INV_SLOT_2&& l == m_pInvList[INV_SLOT_3] && !pistolsOnly)
 	{
 		ret_slot	= INV_SLOT_3;
 		return		true;
@@ -1028,6 +1046,22 @@ void CUIActorMenu::UpdateConditionProgressBars()
 		PIItem itm = m_pActorInvOwner->inventory().ItemFromSlot(i);
 		if (m_pInvSlotProgress[i])
 			m_pInvSlotProgress[i]->SetProgressPos(itm ? iCeil(itm->GetCondition() * 10.f) / 10.f : 0);
+	}
+
+	//Highlight 'equipped' items in actor bag
+	CUIDragDropListEx* slot_list = m_pInventoryBagList;
+	u32 const cnt = slot_list->ItemsCount();
+	for (u32 i = 0; i < cnt; ++i)
+	{
+		CUICellItem* ci = slot_list->GetItemIdx(i);
+		PIItem item = (PIItem)ci->m_pData;
+		if (!item)
+			continue;
+
+		if (item->m_highlight_equipped && item->m_pInventory && item->m_pInventory->ItemFromSlot(item->BaseSlot()) == item)
+			ci->m_select_equipped = true;
+		else
+			ci->m_select_equipped = false;
 	}
 }
 

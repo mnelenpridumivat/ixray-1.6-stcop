@@ -104,7 +104,7 @@ public:
 	virtual BOOL						Ready				()					{ return Props.net_Ready;	}
 	BOOL								GetTmpPreDestroy		()		const	{ return Props.bPreDestroy;	}
 	void								SetTmpPreDestroy	(BOOL b)			{ Props.bPreDestroy = b;}
-	virtual float						shedule_Scale		()					{ return Device.vCameraPosition.distance_to(Position())/200.f; }
+	virtual float						shedule_Scale();
 	virtual bool						shedule_Needed		()					{return processing_enabled();};
 
 	// Parentness
@@ -200,6 +200,10 @@ virtual	const IObjectPhysicsCollision	*physics_collision	()					{ return  0; }
 	virtual void						net_Destroy			();
 	virtual void						net_Export			(NET_Packet& P) {};					// export to server
 	virtual void						net_Import			(NET_Packet& P) {};					// import from server
+
+	virtual void						SyncRead			(NET_Packet& Packet) {};
+	virtual void						SyncWrite			(NET_Packet& Packet) {};
+
 	virtual	void						net_ImportInput		(NET_Packet& P)	{};
 	virtual BOOL						net_Relevant		()				{ return FALSE; };	// relevant for export to server
 	virtual void						net_MigrateInactive	(NET_Packet& P)	{ Props.net_Local = FALSE;		};

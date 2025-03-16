@@ -21,7 +21,6 @@ private:
 	typedef CUIWindow						inherited;
 //-	typedef ALife::EInfluenceType	EIndicatorType;
 
-public:
 	CUIStatic*			m_back;
 	CUIStatic*			m_back_v;
 	CUIStatic*			m_back_over_arrow;
