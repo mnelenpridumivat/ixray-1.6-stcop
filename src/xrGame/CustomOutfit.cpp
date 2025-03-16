@@ -211,7 +211,7 @@ BOOL	CCustomOutfit::BonePassBullet					(int boneID)
 }
 
 #include "Torch.h"
-void	CCustomOutfit::OnMoveToSlot		(const SInvItemPlace& prev)
+void	CCustomOutfit::OnMoveToSlot		(const SInvItemPlace prev)
 {
 	if ( m_pInventory )
 	{
@@ -290,7 +290,7 @@ void CCustomOutfit::ApplySkinModel(CActor* pActor, bool bDress, bool bHUDOnly)
 
 }
 
-void	CCustomOutfit::OnMoveToRuck		(const SInvItemPlace& prev)
+void	CCustomOutfit::OnMoveToRuck		(const SInvItemPlace prev)
 {
 	if(m_pInventory && prev.type==eItemPlaceSlot)
 	{

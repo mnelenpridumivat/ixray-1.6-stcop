@@ -2093,12 +2093,12 @@ void CActor::OnItemDropUpdate ()
 }
 
 
-void CActor::OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place)
+void CActor::OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace previous_place)
 {
 	CInventoryOwner::OnItemRuck(inventory_item, previous_place);
 }
 
-void CActor::OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place)
+void CActor::OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace previous_place)
 {
 	CInventoryOwner::OnItemBelt(inventory_item, previous_place);
 }
@@ -2183,8 +2183,10 @@ float CActor::HitArtefactsOnBelt(float hit_power, ALife::EHitType hit_type)
 		}
 	}
 
-	if (sum == 0.0f)
+	if (fabs(sum) < std::numeric_limits<float>::epsilon())
+	{
 		return hit_power;
+	}
 
 	clamp(sum, -0.99f, 0.99f);
 
@@ -2372,7 +2374,7 @@ bool CActor::is_ai_obstacle				() const
 	return							(false);//true);
 }
 
-float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
+float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const type )
 {
 	float res = 0.0f;
 	switch ( type )
@@ -2457,7 +2459,7 @@ float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
 		if ( outfit )
 		{
 			res += outfit->m_fPowerRestoreSpeed;
-			VERIFY(outfit->m_fPowerLoss!=0.0f);
+			VERIFY(fabs(outfit->m_fPowerLoss) > std::numeric_limits<float>::epsilon());
 			res /= outfit->m_fPowerLoss;
 		}
 		else

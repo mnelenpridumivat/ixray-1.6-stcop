@@ -57,7 +57,7 @@ public:
 		m_buffer[0] = char_t(0);
 	}
 
-	~stack_string() {}
+	~stack_string() = default;
 
 
 	// const

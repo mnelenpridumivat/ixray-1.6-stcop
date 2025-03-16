@@ -108,7 +108,7 @@ void CHelmet::OnH_A_Chield()
 //	ReloadBonesProtection();
 }
 
-void CHelmet::OnMoveToSlot(const SInvItemPlace& previous_place)
+void CHelmet::OnMoveToSlot(const SInvItemPlace previous_place)
 {
 	inherited::OnMoveToSlot		(previous_place);
 	if (m_pInventory && (previous_place.type==eItemPlaceSlot))
@@ -123,7 +123,7 @@ void CHelmet::OnMoveToSlot(const SInvItemPlace& previous_place)
 	}
 }
 
-void CHelmet::OnMoveToRuck(const SInvItemPlace& previous_place)
+void CHelmet::OnMoveToRuck(const SInvItemPlace previous_place)
 {
 	inherited::OnMoveToRuck		(previous_place);
 	if (m_pInventory && (previous_place.type==eItemPlaceSlot))

@@ -25,8 +25,8 @@ public:
 
 	float					HitThroughArmor		(float hit_power, s16 element, float ap, bool& add_wound, ALife::EHitType hit_type);
 
-	virtual void			OnMoveToSlot		(const SInvItemPlace& prev);
-	virtual void			OnMoveToRuck		(const SInvItemPlace& previous_place);
+	virtual void			OnMoveToSlot		(const SInvItemPlace prev) override;
+	virtual void			OnMoveToRuck		(const SInvItemPlace previous_place) override;
 	virtual void			OnH_A_Chield		();
 
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;

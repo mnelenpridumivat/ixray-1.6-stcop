@@ -166,9 +166,9 @@ public:
 	SInvItemPlace				m_ItemCurrPlace;
 
 
-	virtual void				OnMoveToSlot		(const SInvItemPlace& prev) {};
-	virtual void				OnMoveToBelt		(const SInvItemPlace& prev) {};
-	virtual void				OnMoveToRuck		(const SInvItemPlace& prev) {};
+	virtual void				OnMoveToSlot		(const SInvItemPlace prev) {};
+	virtual void				OnMoveToBelt		(const SInvItemPlace prev) {};
+	virtual void				OnMoveToRuck		(const SInvItemPlace prev) {};
 					
 			Irect				GetInvGridRect		() const;
 			void SetInvGridRect(const Irect& rect);

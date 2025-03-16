@@ -92,18 +92,18 @@ IC int iCeil (float x)
 }
 
 // Validity checks
-IC bool fis_gremlin		( const float &f ) 
+IC bool fis_gremlin		( const float f ) 
 {
 	u8		value = u8(((*(int*)&f & 0x7f800000)>>23)-0x20);
     return	value > 0xc0;
 }
-IC bool fis_denormal	( const float &f ) 
+IC bool fis_denormal	( const float f ) 
 {
   return !(*(int*)&f & 0x7f800000);
 }
 
 // Approximated calculations
-IC float apx_InvSqrt( const float& n )
+IC float apx_InvSqrt( const float n )
 {
 	return 1.0f / std::sqrt(n);
 }

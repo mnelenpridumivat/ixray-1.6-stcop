@@ -61,7 +61,7 @@ CAI_Bloodsucker::CAI_Bloodsucker()
 	m_force_visibility_state		=	unset;
 	m_runaway_invisible_time		=	0;
 
-	using namespace						detail::bloodsucker;
+	using namespace						::detail::bloodsucker;
 	m_critical_hit_chance			=	default_critical_hit_chance;
 }
 

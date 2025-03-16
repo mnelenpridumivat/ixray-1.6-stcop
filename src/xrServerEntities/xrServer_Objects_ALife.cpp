@@ -1090,7 +1090,7 @@ void CSE_ALifeObjectPhysic::STATE_Write		(NET_Packet	&tNetPacket)
 
 }
 
-static inline bool check (const u8 &mask, const u8 &test)
+static inline bool check (const u8 mask, const u8 test)
 {
 	return							(!!(mask & test));
 }

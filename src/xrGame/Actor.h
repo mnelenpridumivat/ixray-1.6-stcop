@@ -175,8 +175,8 @@ public:
 
 	virtual void OnItemTake		(CInventoryItem *inventory_item);
 	
-	virtual void OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
-	virtual void OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
+	virtual void OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace previous_place) override;
+	virtual void OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace previous_place) override;
 	
 	virtual void OnItemDrop		(CInventoryItem *inventory_item, bool just_before_destroy);
 	virtual void OnItemDropUpdate ();
@@ -761,7 +761,7 @@ public:
 	virtual bool				register_schedule				() const {return false;}
 	virtual	bool				is_ai_obstacle					() const;
 	
-			float				GetRestoreSpeed					(ALife::EConditionRestoreType const& type);
+			float				GetRestoreSpeed					(ALife::EConditionRestoreType const type);
 
 public:
 	virtual void			On_SetEntity();

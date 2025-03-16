@@ -17,13 +17,13 @@ IC CTradeParameters* CInventoryOwner::barter_parameters() const
 	return m_barter_parameters;
 }
 
-inline IC CPurchaseList& CInventoryOwner::trade_purchase_list() const
+IC CPurchaseList& CInventoryOwner::trade_purchase_list() const
 {
 	VERIFY(m_purchase_list);
 	return *m_purchase_list;
 }
 
-inline IC CPurchaseList& CInventoryOwner::barter_purchase_list() const
+IC CPurchaseList& CInventoryOwner::barter_purchase_list() const
 {
 	VERIFY(m_barter_purchase_list);
 	return *m_barter_purchase_list;

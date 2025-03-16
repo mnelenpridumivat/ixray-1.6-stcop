@@ -67,6 +67,8 @@ public:
         : r(red), g(green), b(blue), a(alpha)
         {}
 
+    constexpr _color(const _color& other) = default;
+
     constexpr explicit _color(u32 rgba_val) 
     {
         constexpr float f = 1.0f / 255.0f;

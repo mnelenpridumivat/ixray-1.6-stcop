@@ -412,7 +412,7 @@ void CCustomDetector::OnH_B_Independent(bool just_before_destroy)
 }
 
 
-void CCustomDetector::OnMoveToRuck(const SInvItemPlace& prev)
+void CCustomDetector::OnMoveToRuck(const SInvItemPlace prev)
 {
 	inherited::OnMoveToRuck	(prev);
 	m_bDetectorActive			= false;
@@ -425,7 +425,7 @@ void CCustomDetector::OnMoveToRuck(const SInvItemPlace& prev)
 	StopCurrentAnimWithoutCallback	();
 }
 
-void CCustomDetector::OnMoveToSlot(const SInvItemPlace& prev)
+void CCustomDetector::OnMoveToSlot(const SInvItemPlace prev)
 {
 	inherited::OnMoveToSlot	(prev);
 }
