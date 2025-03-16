@@ -421,7 +421,7 @@ void CUIActorMenu::script_register(lua_State *L)
 				.def_readonly("m_radia_damage", &CUIHudStatesWnd::m_radia_damage)
 				
 	];
-	*/
+		
 	module(L, "ActorMenu")
 	[
 		def("get_pda_menu", &GetPDAMenu),

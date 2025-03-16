@@ -356,15 +356,10 @@ public:
 	void OnSuccessRepairMP(PIItem item);
 
 	CScriptGameObject* GetCurrentItemAsGameObject();
-	void						HighlightSectionInSlot(pcstr section, EDDListType type, u16 slot_id = 0);
-	void						HighlightForEachInSlot(const luabind::functor<bool>& functor, EDDListType type, u16 slot_id);
-
-	void						RefreshCurrentItemCell();
 
 	IC	UIHint*					get_hint_wnd				() { return m_hint_wnd; }
 
 	void HighlightSectionInSlot(LPCSTR section, u8 type, u16 slot_id = 0);
-	CScriptGameObject* GetCurrentItemAsGameObject();
 	void HighlightForEachInSlot(const luabind::functor<bool>& functor, u8 type, u16 slot_id);
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 }; // class CUIActorMenu
