@@ -2,6 +2,7 @@
 
 #include "space_restrictor.h"
 #include "../xrEngine/Feel_Touch.h"
+#include "../xrScripts/script_export_space.h"
 
 class CActor;
 class CLAItem;
@@ -312,7 +313,52 @@ public:
 // Lain: adde
 private:
 	virtual bool            light_in_slow_mode () { return true; }
+	DECLARE_SCRIPT_REGISTER_FUNCTION
+};
 
+//информация о объекте, находящемся в зоне
+struct SZoneObjectInfo
+{
+	SZoneObjectInfo() :object(NULL), zone_ignore(false), dw_time_in_zone(0), f_time_affected(Device.fTimeGlobal), small_object(false), nonalive_object(false) {}
+	CGameObject* object;
+	bool					small_object;
+	bool					nonalive_object;
+	//игнорирование объекта в зоне
+	bool					zone_ignore;
+	//присоединенные партиклы
+	xr_vector<CParticlesObject*>	particles_vector;
+	//время прибывания в зоне
+	u32						dw_time_in_zone;
+	float					f_time_affected;
+
+	static xr_vector<SZoneObjectInfo>::iterator find(CCustomZone* zone, CGameObject* GO)
+	{
+		xr_vector<SZoneObjectInfo>& zone_objects_map = zone->GetObjectInfoMap();
+		return std::find(zone_objects_map.begin(), zone_objects_map.end(), GO);
+	}
+
+	static bool get(CCustomZone* zone, CGameObject* GO)
+	{
+		xr_vector<SZoneObjectInfo>& zone_objects_map = zone->GetObjectInfoMap();
+		return std::find(zone_objects_map.begin(), zone_objects_map.end(), GO)!= zone_objects_map.end();
+	}
+
+	static void remove(CCustomZone* zone, CGameObject* GO)
+	{
+		xr_vector<SZoneObjectInfo>& zone_objects_map = zone->GetObjectInfoMap();
+
+		if (zone_objects_map.empty()) return;
+
+		xr_vector<SZoneObjectInfo>::iterator it = std::find(zone_objects_map.begin(), zone_objects_map.end(), GO);
+
+		if(it!= zone_objects_map.end())
+		{
+			zone->exit_Zone(*it);
+			zone_objects_map.erase(it);
+		}
+	}
+
+	bool operator == (const CGameObject* O) const { return object == O; }
 };
 
 //информация о объекте, находящемся в зоне

@@ -597,7 +597,11 @@ void CInventory::Activate(u16 slot, bool bForce)
 
 PIItem CInventory::ItemFromSlot(u16 slot) const
 {
-	VERIFY(NO_ACTIVE_SLOT != slot);
+	if (NO_ACTIVE_SLOT == slot)
+	{
+		return nullptr;
+	}
+
 	const auto& Slot = m_slots.find(slot);
 	return (*Slot).second.m_pIItem;
 }
@@ -1046,14 +1050,32 @@ bool CInventory::Eat(PIItem pIItem)
 	Msg( "--- Actor [%d] use or eat [%d][%s]", entity_alive->ID(), pItemToEat->object().ID(), pItemToEat->object().cNameSect().c_str() );
 #endif // MP_LOGGING
 
-	if(IsGameTypeSingle() && Actor()->m_inventory == this)
-		Actor()->callback(GameObject::eUseObject)((smart_cast<CGameObject*>(pIItem))->lua_game_object());
-
-	if(pItemToEat->Empty())
+	luabind::functor<bool>	funct;
+	if (ai().script_engine().functor("_G.CInventory__eat", funct))
 	{
-		pIItem->SetDropManual(TRUE);
-		return		false;
+		if (!funct(smart_cast<CGameObject*>(pItemToEat->object().H_Parent())->lua_game_object(), (smart_cast<CGameObject*>(pIItem))->lua_game_object()))
+			return false;
 	}
+
+	if (Actor()->m_inventory == this)
+	{
+		if (IsGameTypeSingle())
+			Actor()->callback(GameObject::eUseObject)((smart_cast<CGameObject*>(pIItem))->lua_game_object());
+
+		if (pItemToEat->IsUsingCondition() && pItemToEat->GetRemainingUses() < 1 && pItemToEat->CanDelete())
+			CurrentGameUI()->ActorMenu().RefreshCurrentItemCell();
+		
+		CurrentGameUI()->ActorMenu().SetCurrentItem(NULL);
+	}
+
+	if (pItemToEat->Empty())
+	{
+		if (!pItemToEat->CanDelete())
+			return false;
+
+		pIItem->SetDropManual(TRUE);
+	}
+
 	return			true;
 }
 

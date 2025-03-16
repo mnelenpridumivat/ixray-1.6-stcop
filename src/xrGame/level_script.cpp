@@ -422,6 +422,11 @@ u16 map_has_object_spot(u16 id, LPCSTR spot_type)
 	return Level().MapManager().HasMapLocation(spot_type, id);
 }
 
+CMapManager* get_map_manager()
+{
+	return &Level().MapManager();
+}
+
 bool patrol_path_exists(LPCSTR patrol_path)
 {
 	return		(!!ai().patrol_paths().path(patrol_path,true));
@@ -844,6 +849,13 @@ void stop_tutorial()
 		g_tutorial->Stop();	
 }
 
+LPCSTR tutorial_name()
+{
+	if (g_tutorial)
+		return g_tutorial->m_name;
+	return "invalid";
+}
+
 LPCSTR translate_string(LPCSTR str)
 {
 	return *g_pStringTable->translate(str);
@@ -1016,11 +1028,20 @@ namespace level_nearest
 	}
 }
 
+void patrol_path_add(LPCSTR patrol_path, CPatrolPath* path)
+{
+	ai().patrol_paths_raw().add_path(shared_str(patrol_path), path);
+}
+
+void patrol_path_remove(LPCSTR patrol_path)
+{
+	ai().patrol_paths_raw().remove_path(shared_str(patrol_path));
+}
+
 void ReloadLanguage(const char* lang)
 {
 	g_pStringTable->ReloadLanguage(lang);
 }
-
 
 void RefreshNamesNPC()
 {
@@ -1173,6 +1194,83 @@ bool IsTacticalHud()
 	return false;
 }
 
+CScriptGameObject* get_object_by_client(u32 clientID)
+{
+	xrClientData* xrCData = Level().Server->ID_to_client(clientID);
+	if (!xrCData || !xrCData->owner) return NULL;
+
+	CGameObject* pGameObject = smart_cast<CGameObject*>(Level().Objects.net_Find(xrCData->owner->ID));
+	if (!pGameObject)
+		return NULL;
+
+	return pGameObject->lua_game_object();
+}
+
+int get_local_player_id()
+{
+	return Game().local_player->GameID;
+}
+
+int get_g_actor_id()
+{
+	if (!Actor())
+		return -1;
+
+	return Actor()->ID();
+}
+
+void send_script_event_to_client(u32 cleintId, NET_Packet& P)
+{
+	R_ASSERT2(OnServer(), "Avaliable only on server");
+	Level().Server->SendTo(ClientID(cleintId), P, net_flags(TRUE, TRUE));
+}
+
+void send_script_event_broadcast(NET_Packet& P)
+{
+	R_ASSERT2(OnServer(), "Avaliable only on server");
+	Level().Server->SendBroadcast(BroadcastCID, P, net_flags(TRUE, TRUE));
+}
+
+ScriptEvent* get_last_server_event()
+{
+	return Level().Server->GetLastServerScriptEvent();
+}
+
+void pop_last_server_event()
+{
+	Level().Server->PopLastServerScriptEvent();
+}
+
+u32 get_size_server_events()
+{
+	return Level().Server->GetSizeServerScriptEvent();
+}
+
+void send_script_event_to_server(NET_Packet& P)
+{
+	Level().Send(P, net_flags(TRUE, TRUE));
+}
+
+NET_Packet* get_last_client_event()
+{
+	return Level().GetLastClientScriptEvent();
+}
+
+void pop_last_client_event()
+{
+	Level().PopLastClientScriptEvent();
+}
+
+u32 get_size_client_events()
+{
+	return Level().GetSizeClientScriptEvent();
+}
+
+u32 get_build_id()
+{
+	return Core.BuildId;
+}
+
 #pragma optimize("s",on)
 void CLevel::script_register(lua_State *L)
 {
@@ -1241,6 +1339,7 @@ void CLevel::script_register(lua_State *L)
 		def("map_remove_object_spot",			map_remove_object_spot),
 		def("map_has_object_spot",				map_has_object_spot),
 		def("map_change_spot_hint",				map_change_spot_hint),
+		def("map_manager",						get_map_manager),
 
 		def("start_stop_menu", start_stop_menu),
 		def("add_dialog_to_render",				add_dialog_to_render),
@@ -1298,7 +1397,9 @@ void CLevel::script_register(lua_State *L)
 		def("release_action", &release_action_script),
 		def("lock_actor", &LockActorWithCameraRotation_script),
 		def("unlock_actor", &UnLockActor_script),
-		
+
+		def("patrol_path_add", &patrol_path_add),
+		def("patrol_path_remove", &patrol_path_remove),
 		def("u_event_gen", &u_event_gen), //Send events via packet
 		def("u_event_send", &u_event_send),
 		def("send", &g_send), //allow the ability to send netpacket to level
@@ -1328,7 +1429,12 @@ void CLevel::script_register(lua_State *L)
 		def("electronics_apply", &IsElectronicsApply),
 		def("get_parameter_upgraded_int", &GetParameterUpgradedInt),
 		def("valid_saved_game_int", &ValidSavedGameInt),
-		def("is_tactical_hud", &IsTacticalHud)
+		def("is_tactical_hud", &IsTacticalHud),
+
+		// new for fmp
+		def("get_object_by_client", &get_object_by_client),
+		def("get_local_player_id", &get_local_player_id),
+		def("get_g_actor_id", &get_g_actor_id)
 	],
 	
 	module(L,"nearest")
@@ -1396,7 +1502,8 @@ void CLevel::script_register(lua_State *L)
 		def("IsImportantSave",					&IsImportantSave),
 		def("IsDedicated",						&is_dedicated),
 		def("OnClient",							&OnClient),
-		def("OnServer",							&OnServer)
+		def("OnServer",							&OnServer),
+		def("EngineBuildId", &get_build_id)
 	];
 
 	module(L,"relation_registry")
@@ -1408,6 +1515,21 @@ void CLevel::script_register(lua_State *L)
 		def("community_relation",				&g_get_community_relation),
 		def("set_community_relation",			&g_set_community_relation),
 		def("get_general_goodwill_between",		&g_get_general_goodwill_between)
+	];
+	
+	module(L, "script_events")
+	[
+		def("send_to_server", &send_script_event_to_server),
+		def("send_to_client", &send_script_event_to_client),
+		def("send_broadcast", &send_script_event_broadcast),
+
+		def("get_last_client_event", &get_last_client_event),
+		def("pop_last_client_event", &pop_last_client_event),
+		def("get_size_client_events", &get_size_client_events),
+
+		def("get_last_server_event", &get_last_server_event),
+		def("pop_last_server_event", &pop_last_server_event),
+		def("get_size_server_events", &get_size_server_events)
 	];
 
 	module(L,"game")
@@ -1458,6 +1580,7 @@ void CLevel::script_register(lua_State *L)
 			def("start_tutorial",		&start_tutorial),
 			def("stop_tutorial",		&stop_tutorial),
 			def("has_active_tutorial",	&has_active_tutotial),
+			def("active_tutorial_name", &tutorial_name),
 			def("translate_string",		&translate_string),
 			def("reload_language", &ReloadLanguage)
 	];

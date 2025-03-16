@@ -25,7 +25,8 @@ void CUIActorMenu::InitUpgradeMode()
 	m_PartnerCharacterInfo->Show( true );
 	m_PartnerMoney->Show( false );
 	m_pUpgradeWnd->Show( true );
-	m_pQuickSlot->Show(true);
+	if (m_pQuickSlot)
+		m_pQuickSlot->Show(true);
 	
 	InitInventoryContents( m_pInventoryBagList );
 	VERIFY( m_pPartnerInvOwner );
@@ -52,13 +53,10 @@ void CUIActorMenu::DeInitUpgradeMode()
 
 	if(!CurrentGameUI())
 		return;
-	//только если находимся в режиме single
-	CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-	if(!pGameSP) return;
-
-	if(pGameSP->TalkMenu->IsShown())
+  
+	if(CurrentGameUI()->TalkMenu->IsShown())
 	{
-		pGameSP->TalkMenu->NeedUpdateQuestions();
+		CurrentGameUI()->TalkMenu->NeedUpdateQuestions();
 	}
 }
 

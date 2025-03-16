@@ -14,7 +14,7 @@ class CUIFrameWindow;
 class UIHint;
 
 class CUITaskWnd;
-//-class CUIFactionWarWnd;
+class CUIFactionWarWnd;
 class CUIRankingWnd;
 class CUILogsWnd;
 class CUIAnimatedStatic;
@@ -31,9 +31,9 @@ protected:
 	CUIStatic*				UIMainPdaFrame;
 	CUIStatic*				UINoice;
 	
-	CUITextWnd*				m_caption;
+	CUIStatic*				m_caption;
 	shared_str				m_caption_const;
-//	CUIAnimatedStatic*		m_anim_static;
+	CUIAnimatedStatic*		m_anim_static;
 	CUITextWnd*				m_clock;
 
 	// Текущий активный диалог
@@ -44,7 +44,7 @@ protected:
 
 public:
 	CUITaskWnd*				pUITaskWnd;
-//-	CUIFactionWarWnd*		pUIFactionWarWnd;
+	CUIFactionWarWnd*		pUIFactionWarWnd;
 	CUIRankingWnd*			pUIRankingWnd;
 	CUILogsWnd*				pUILogsWnd;
 
@@ -72,7 +72,14 @@ public:
 			void			Show_SecondTaskWnd	(bool status);
 			void			Show_MapLegendWnd	(bool status);
 
+			void 			SetActiveDialog		(CUIWindow* pUI) 	{ m_pActiveDialog = pUI; };
+			CUIWindow*		GetActiveDialog		() 					{return m_pActiveDialog;};
+			LPCSTR			GetActiveSection	()					{return m_sActiveSection.c_str();};
+			CUITabControl*	GetTabControl		()					{return UITabControl;};
+	
+
 			void			SetActiveSubdialog	(const shared_str& section);
+			void			SetActiveSubdialog_script(LPCSTR section)				{ SetActiveSubdialog((const shared_str&)section); };
 	virtual bool			StopAnyMove			(){return false;}
 
 			void			UpdatePda			();

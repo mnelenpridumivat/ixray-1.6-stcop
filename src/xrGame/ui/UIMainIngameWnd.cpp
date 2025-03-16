@@ -760,7 +760,7 @@ void CUIMainIngameWnd::UpdateMainIndicators()
 		return;
 
 	UpdateQuickSlots();
-	if (IsGameTypeSingle())
+	if (IsGameTypeSingleCompatible())
 		CurrentGameUI()->PdaMenu().UpdateRankingWnd();
 
 	u8 flags = 0;
@@ -1070,8 +1070,8 @@ void CUIMainIngameWnd::DrawMainIndicatorsForInventory()
 	UpdateQuickSlots();
 	UpdateBoosterIndicators(pActor->conditions().GetCurBoosterInfluences());
 
-	for(int i=0;i<4;i++)
-		m_quick_slots_icons[i]->Draw();
+	for (const auto& slot : m_quick_slots_icons)
+		slot->Draw();
 
 	if (m_QuickSlotText1)
 		m_QuickSlotText1->Draw();

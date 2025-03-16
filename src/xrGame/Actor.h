@@ -223,6 +223,8 @@ protected:
 	float					m_hit_probability;
 	s8						m_block_sprint_counter;
 
+	bool IsWaunded = false;
+
 	// media
 	SndShockEffector*		m_sndShockEffector;
 	xr_vector<ref_sound>	sndHit[ALife::eHitTypeMax];
@@ -261,7 +263,7 @@ public:
 	void					detach_Vehicle			();
 	void					steer_Vehicle			(float angle);
 	void					attach_Vehicle			(CHolderCustom* vehicle);
-	bool					use_MountedWeapon		(CHolderCustom* object);
+	bool					use_HolderEx			(CHolderCustom* object, bool bForce);
 
 	virtual bool			can_attach				(const CInventoryItem *inventory_item) const;
 protected:
@@ -512,8 +514,13 @@ protected:
 			void						ConvState			(u32 mstate_rl, string128 *buf);
 public:
 	virtual BOOL						net_Spawn			( CSE_Abstract* DC);
+
 	virtual void						net_Export			( NET_Packet& P);				// export to server
 	virtual void						net_Import			( NET_Packet& P);				// import from server
+
+	virtual void						SyncRead(NET_Packet& Packet);
+	virtual void						SyncWrite(NET_Packet& Packet);
+
 	virtual void						net_Destroy			();
 	virtual BOOL						net_Relevant		();//	{ return getSVU() | getLocal(); };		// relevant for export to server
 	virtual	void						net_Relcase			( CObject* O );					//

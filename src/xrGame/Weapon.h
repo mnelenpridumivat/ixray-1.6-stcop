@@ -365,6 +365,7 @@ protected:
 
 	//трассирование полета пули
 	virtual	void			FireTrace			(const Fvector& P, const Fvector& D);
+	virtual	void			FireTraceChamber			(const Fvector& P, const Fvector& D);
 	virtual float			GetWeaponDeterioration	();
 
 	virtual void			FireStart			() {CShootingObject::FireStart();}
@@ -462,8 +463,10 @@ protected:
 	int						GetAmmoCount		(u8 ammo_type) const;
 
 public:
-	IC int					GetAmmoElapsed		()	const		{	return /*int(m_magazine.size())*/iAmmoElapsed;}
-	IC int					GetAmmoMagSize		()	const		{	return iMagazineSize;						}
+	IC int					GetAmmoElapsed		()	const		{ return iAmmoElapsed; }
+	int						GetAmmoChamberElapsed()	const		{ return iAmmoChamberElapsed; }
+	IC int					GetAmmoMagSize		()	const		{ return iMagazineSize; }
+	bool					IsChamber			()  const		{ return m_bAmmoInChamber ;}
 	void SetAmmoMagSize(int size);
 	int						GetSuitableAmmoTotal(bool use_item_to_spawn = false) const;
 
@@ -488,9 +491,17 @@ public:
 	virtual	float			GetCrosshairInertion()	const	{ return m_crosshair_inertion; };
 	void setCrosshairInertion(float value);
 			float			GetFirstBulletDisp	()	const	{ return m_first_bullet_controller.get_fire_dispertion(); };
+
+	virtual void			UnloadChamber(bool spawn_ammo = true);
+
 protected:
 	int						iAmmoElapsed;		// ammo in magazine, currently
 	int						iMagazineSize;		// size (in bullets) of magazine
+
+	int						iAmmoChamberElapsed;
+	int						iChamberSize;
+
+	bool					m_bAmmoInChamber;
 
 	//для подсчета в GetSuitableAmmoTotal
 	mutable int				m_iAmmoCurrentTotal;
@@ -498,6 +509,9 @@ protected:
 	bool					m_bAmmoWasSpawned;
 
 	virtual bool			IsNecessaryItem	    (const shared_str& item_sect);
+
+	virtual void			GiveAmmoFromMagToChamber();
+	virtual void			DeleteAmmoInChamber();
 
 public:
 	const xr_vector<shared_str>& getAmmoTypes(void) const { return m_ammoTypes; }
@@ -525,13 +539,16 @@ public:
 
 	CWeaponAmmo*			m_pCurrentAmmo;
 	u8						m_ammoType;
+	u8						m_ChamberAmmoType;
 //-	shared_str				m_ammoName; <== deleted
 	bool					m_bHasTracers;
 	u8						m_u8TracerColorID;
 	u8						m_set_next_ammoType_on_reload;
 	// Multitype ammo support
 	xr_vector<CCartridge>	m_magazine;
+	xr_vector<CCartridge>	m_chamber;
 	CCartridge				m_DefaultCartridge;
+	CCartridge				m_DefaultCartridgeInChamber;
 	float					m_fCurrentCartirdgeDisp;
 
 		bool				unlimited_ammo				();
@@ -547,6 +564,11 @@ protected:
 public:
 	virtual u32				ef_main_weapon_type	() const;
 	virtual u32				ef_weapon_type		() const;
+	
+	virtual void			set_ef_main_weapon_type(u32 type){ m_ef_main_weapon_type = type; };
+	virtual void			set_ef_weapon_type(u32 type){ m_ef_weapon_type = type; };
+	virtual void			SetAmmoType(u8 type) { m_ammoType = type; };
+	u8						GetAmmoType() { return m_ammoType; };
 
 protected:
 	// This is because when scope is attached we can't ask scope for these params
