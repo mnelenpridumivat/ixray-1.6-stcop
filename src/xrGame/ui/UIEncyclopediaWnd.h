@@ -45,17 +45,21 @@ public:
 	virtual void		ResetAll();
 protected:
 	u32					prevArticlesCount;
-	// Элементы графического оформления
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-	CUIFrameLineWnd* UIBackground;
-	CUIFrameLineWnd* UIEncyclopediaIdxBkg;
-	CUIFrameLineWnd* UIEncyclopediaInfoBkg;
-	CUIStatic* UIEncyclopediaIdxHeader;
-	CUIStatic* UIEncyclopediaInfoHeader;
-	CUIAnimatedStatic* UIAnimation;
-	CUIStatic* UIArticleHeader;
+	CUIFrameWindow* UIBackground = nullptr;
+	CUIFrameWindow*		m_left_background = nullptr;
+	CUIFrameWindow*		m_right_background = nullptr;
+	
+	CUIFrameLineWnd* UIEncyclopediaIdxBkg = nullptr;
+	CUIFrameLineWnd* UIEncyclopediaInfoBkg = nullptr;
+	
+	CUIStatic* UIEncyclopediaIdxHeader = nullptr;
+	CUIStatic* UIEncyclopediaInfoHeader = nullptr;
+	CUIAnimatedStatic* UIAnimation = nullptr;
+	CUIStatic* UIArticleHeader = nullptr;
 
-	// Хранилище статей
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	typedef xr_vector<CEncyclopediaArticle*>			ArticlesDB;
 	typedef ArticlesDB::iterator						ArticlesDB_it;
 

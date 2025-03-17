@@ -24,7 +24,8 @@
 #include "../actor.h"
 #include "object_broker.h"
 
-#define				ENCYCLOPEDIA_DIALOG_XML		"encyclopedia.xml"
+#define				ENCYCLOPEDIA_DIALOG_XML		"pda_encyclopedia.xml"
+#define				ENCYCLOPEDIA_DIALOG_ITEM_XML		"pda_encyclopedia_item.xml"
 
 CUIEncyclopediaWnd::CUIEncyclopediaWnd()
 {
@@ -48,31 +49,68 @@ void CUIEncyclopediaWnd::Init()
 
 	// Load xml data
 
-	UIBackground = UIHelper::CreateFrameLine(uiXml, "background", this);
+	if(uiXml.NavigateToNode("background", 0))
+	{
+		UIBackground = UIHelper::CreateFrameWindow(uiXml, "background", this);
+	}
+	if(uiXml.NavigateToNode("left_background", 0))
+	{
+		m_left_background = UIHelper::CreateFrameWindow(uiXml, "left_background", this, false);
+	}
+	if(uiXml.NavigateToNode("right_background", 0))
+	{
+		m_right_background = UIHelper::CreateFrameWindow(uiXml, "right_background", this, false);
+		if(uiXml.NavigateToNode("article_header_static", 0))
+		{
+			UIArticleHeader = UIHelper::CreateStatic(uiXml, "article_header_static", m_right_background);
+		}
+	}
 
-	UIEncyclopediaIdxBkg = UIHelper::CreateFrameLine(uiXml, "left_background", this);
-	UIEncyclopediaIdxHeader = UIHelper::CreateStatic(uiXml, "left_caption", UIEncyclopediaIdxBkg);
+	if(uiXml.NavigateToNode("left_background1", 0))
+	{
+		UIEncyclopediaIdxBkg = UIHelper::CreateFrameLine(uiXml, "left_background1", this);
+		if(uiXml.NavigateToNode("left_caption", 0))
+		{
+			UIEncyclopediaIdxHeader = UIHelper::CreateStatic(uiXml, "left_caption", UIEncyclopediaIdxBkg);
+		}
+	}
 
-	UIEncyclopediaInfoBkg = UIHelper::CreateFrameLine(uiXml, "right_background", this);
-	UIEncyclopediaInfoHeader = UIHelper::CreateStatic(uiXml, "right_caption", UIEncyclopediaInfoBkg);
+	if(uiXml.NavigateToNode("right_background1", 0))
+	{
+		UIEncyclopediaInfoBkg = UIHelper::CreateFrameLine(uiXml, "right_background1", this);
+		if(uiXml.NavigateToNode("right_caption", 0))
+		{
+			UIEncyclopediaInfoHeader = UIHelper::CreateStatic(uiXml, "right_caption", UIEncyclopediaInfoBkg);
+		}
+	}
 
-	UIArticleHeader = UIHelper::CreateStatic(uiXml, "article_header_static", UIEncyclopediaInfoBkg);
 
-	UIIdxList = new CUIListBox(); UIIdxList->SetAutoDelete(true);
-	UIEncyclopediaIdxBkg->AttachChild(UIIdxList);
-	CUIXmlInit::InitListBox(uiXml, "idx_list", 0, UIIdxList);
-	UIIdxList->SetMessageTarget(this);
+	if(uiXml.NavigateToNode("idx_list", 0))
+	{
+		UIIdxList = new CUIListBox(); UIIdxList->SetAutoDelete(true);
+		if(m_left_background)
+		{
+			m_left_background->AttachChild(UIIdxList);
+		}
+		CUIXmlInit::InitListBox(uiXml, "idx_list", 0, UIIdxList);
+		UIIdxList->SetMessageTarget(this);
+	}
 
 	/*UIInfoList = xr_new <CUIScrollView>();
 	UIInfoList->SetAutoDelete(true);
 	UIEncyclopediaInfoBkg->AttachChild(UIInfoList);
 	CUIXmlInit::InitScrollView(uiXml, "info_list", 0, UIInfoList);*/
 
-	CUIXmlInit::InitFont(uiXml, "tree_item_font", 0, m_uTreeItemColor, m_pTreeItemFont);
-	CUIXmlInit::InitFont(uiXml, "tree_root_font", 0, m_uTreeRootColor, m_pTreeRootFont);
-
-	R_ASSERT(m_pTreeItemFont);
-	R_ASSERT(m_pTreeRootFont);
+	if(uiXml.NavigateToNode("tree_item_font", 0))
+	{
+		CUIXmlInit::InitFont(uiXml, "tree_item_font", 0, m_uTreeItemColor, m_pTreeItemFont);
+		R_ASSERT(m_pTreeItemFont);
+	}
+	if(uiXml.NavigateToNode("tree_root_font", 0))
+	{
+		CUIXmlInit::InitFont(uiXml, "tree_root_font", 0, m_uTreeRootColor, m_pTreeRootFont);
+		R_ASSERT(m_pTreeRootFont);
+	}
 }
 
 #include "../string_table.h"
@@ -220,16 +258,16 @@ void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem* pTVItem)
 
 	if (!pTVItem) return;
 
-	// для начала проверим, что нажатый элемент не рутовый
+	// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	if (!pTVItem->IsRoot())
 	{
 
 		CUIEncyclopediaArticleWnd* article_info = new CUIEncyclopediaArticleWnd();
-		article_info->Init("encyclopedia_item.xml", "encyclopedia_wnd:objective_item");
+		article_info->Init(ENCYCLOPEDIA_DIALOG_ITEM_XML, "encyclopedia_wnd:objective_item");
 		article_info->SetArticle(m_ArticlesDB[pTVItem->GetValue()]);
 		UIIdxList->AddWindow(article_info, true);
 
-		// Пометим как прочитанную
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		if (!pTVItem->IsArticleReaded())
 		{
 			if (Actor()->encyclopedia_registry->registry().objects_ptr())
@@ -256,14 +294,14 @@ void CUIEncyclopediaWnd::AddArticle(shared_str article_id, bool bReaded)
 		if (m_ArticlesDB[i]->Id() == article_id) return;
 	}
 
-	// Добавляем элемент
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	m_ArticlesDB.resize(m_ArticlesDB.size() + 1);
 	CEncyclopediaArticle*& a = m_ArticlesDB.back();
 	a = new CEncyclopediaArticle();
 	a->Load(article_id);
 
 
-	// Теперь создаем иерархию вещи по заданному пути
+	// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 
 	CreateTreeBranch(a->data()->group, a->data()->name, UIIdxList, m_ArticlesDB.size() - 1,
 		m_pTreeRootFont, m_uTreeRootColor, m_pTreeItemFont, m_uTreeItemColor, bReaded);
