@@ -55,8 +55,6 @@ void CUIActorMenu::InitTradeMode()
 		m_trade_buy_button->Show		(true);
     if (m_trade_sell_button)
 		m_trade_sell_button->Show		(true);
-    if (m_trade_exchange_button)
-		m_trade_exchange_button->Show	(true);
     if (m_trade_barter_button)
 		m_trade_barter_button->Show		(false);
 
@@ -102,8 +100,6 @@ void CUIActorMenu::InitBarterMode()
 		m_trade_buy_button->Show(false);
 	if (m_trade_sell_button)
 		m_trade_sell_button->Show(false);
-	if (m_trade_exchange_button)
-		m_trade_exchange_button->Show(false);
 	if (m_trade_barter_button)
 		m_trade_barter_button->Show(true);
 
@@ -208,8 +204,6 @@ void CUIActorMenu::DeInitTradeMode()
 		m_trade_buy_button->Show		(false);
 	if (m_trade_sell_button)
 		m_trade_sell_button->Show		(false);
-	if (m_trade_exchange_button)
-		m_trade_exchange_button->Show	(false);
 
 	if (!CurrentGameUI())
 		return;
@@ -681,51 +675,6 @@ void CUIActorMenu::OnBtnPerformTradeSell(CUIWindow* w, void* d)
 	SetCurrentItem					( nullptr );
 
 	UpdateItemsPlace				();
-}
-
-void CUIActorMenu::OnBtnPerformTradeExchange(CUIWindow* w, void* d)
-{
-	if (m_pTradePartnerList->ItemsCount() == 0)
-	{
-		return;
-	}
-
-	int actor_money = (int)m_pActorInvOwner->get_money();
-	int partner_money = (int)m_pPartnerInvOwner->get_money();
-	int actor_price = (int)CalcItemsPrice( m_pTradeActorList,   m_partner_trade, true  );
-	int partner_price = (int)CalcItemsPrice(m_pTradePartnerList, m_partner_trade, false);
-
-	int delta_price = actor_price - partner_price;
-	actor_money += delta_price;
-	partner_money -= delta_price;
-
-	if ((actor_money >= 0) && ( partner_money >= 0 ) && (actor_price >= 0 || partner_price > 0))
-	{
-		m_partner_trade->OnPerformTrade(partner_price, actor_price);
-
-		UpdateBoughtInfo(m_pTradeActorList, m_partner_trade);
-		UpdateSoldInfo(m_pTradePartnerList, m_partner_trade);
-		TransferItems( m_pTradeActorList,   m_pTradePartnerBagList, m_partner_trade, true );
-		TransferItems(m_pTradePartnerList, m_pTradeActorBagList, m_partner_trade, false);
-	}
-	else
-	{
-		if (actor_money < 0)
-		{
-			CallMessageBoxOK("not_enough_money_actor");
-		}
-		else if ( partner_money < 0 )
-		{
-			CallMessageBoxOK( "not_enough_money_partner" );
-		}
-		else
-		{
-			CallMessageBoxOK("trade_dont_make");
-		}
-	}
-	SetCurrentItem(nullptr);
-
-	UpdateItemsPlace();
 }
 
 void CUIActorMenu::OnBtnPerformTradeBarter(CUIWindow* w, void* d)

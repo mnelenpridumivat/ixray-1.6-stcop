@@ -160,7 +160,6 @@ protected:
 	CUI3tButton*				m_trade_button;
 	CUI3tButton*				m_trade_buy_button;
 	CUI3tButton*				m_trade_sell_button;
-	CUI3tButton*				m_trade_exchange_button;
 	CUI3tButton*				m_trade_barter_button;
 	CUI3tButton*				m_takeall_button;
 	CUI3tButton*				m_putall_button;
@@ -345,7 +344,6 @@ public:
     void				OnBtnPerformTrade			(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeBuy		(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeSell		(CUIWindow* w, void* d);
-	void				OnBtnPerformTradeExchange	(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeBarter(CUIWindow* w, void* d);
 	void				OnBtnExitClicked			(CUIWindow* w, void* d);
 	void				TakeAllFromPartner			(CUIWindow* w, void* d);

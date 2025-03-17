@@ -284,9 +284,6 @@ void CUIActorMenu::Construct()
 	if (uiXml.NavigateToNode("trade_sell_button", 0))
 		m_trade_sell_button	= UIHelper::Create3tButton(uiXml, "trade_sell_button", this);
 
-	if (uiXml.NavigateToNode("trade_exchange_button", 0))
-		m_trade_exchange_button = UIHelper::Create3tButton(uiXml, "trade_exchange_button", this);
-
 	if (uiXml.NavigateToNode("trade_barter_button", 0))
 		m_trade_barter_button = UIHelper::Create3tButton(uiXml, "trade_barter_button", this);
 
@@ -454,9 +451,6 @@ void CUIActorMenu::InitCallbacks()
 	if (m_trade_sell_button)
 		Register						(m_trade_sell_button);
 	
-	if (m_trade_exchange_button)
-		Register						(m_trade_exchange_button);
-	
 	if (m_trade_barter_button)
 		Register						(m_trade_barter_button);
 	Register						(m_takeall_button);
@@ -478,30 +472,35 @@ void CUIActorMenu::InitCallbacks()
 	}
 	if (m_trade_buy_button)
 	{
-		AddCallback(m_trade_buy_button,BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBuy));
+		AddCallback(m_trade_buy_button,BUTTON_CLICKED,
+			CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBuy));
 	}
 	if (m_trade_sell_button)
 	{
-		AddCallback(m_trade_sell_button,BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeSell));
+		AddCallback(m_trade_sell_button,BUTTON_CLICKED,
+			CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeSell));
 	}
-		if (m_trade_exchange_button)
+	
+	if (m_trade_barter_button)
 	{
-		AddCallback(m_trade_exchange_button, BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeExchange));
+		AddCallback(m_trade_barter_button, BUTTON_CLICKED,
+			CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBarter));
 	}
-		if (m_trade_barter_button)
-	{
-		AddCallback(m_trade_barter_button, BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnPerformTradeBarter));
-	}
-	AddCallback(m_takeall_button,  BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::TakeAllFromPartner));
+	AddCallback(m_takeall_button,  BUTTON_CLICKED,
+		CUIWndCallback::void_function(this, &CUIActorMenu::TakeAllFromPartner));
 
 	if (m_putall_button != nullptr)
 	{
-		AddCallback(m_putall_button, BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::PutAllToPartner));
+		AddCallback(m_putall_button, BUTTON_CLICKED,
+			CUIWndCallback::void_function(this, &CUIActorMenu::PutAllToPartner));
 	}
 
-	AddCallback(m_exit_button,     BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnExitClicked));
-	AddCallback(m_UIPropertiesBox, PROPERTY_CLICKED, CUIWndCallback::void_function(this, &CUIActorMenu::ProcessPropertiesBoxClicked));
-	AddCallback(m_pUpgradeWnd->m_btn_repair, BUTTON_CLICKED,   CUIWndCallback::void_function(this, &CUIActorMenu::TryRepairItem));
+	AddCallback(m_exit_button,     BUTTON_CLICKED,
+		CUIWndCallback::void_function(this, &CUIActorMenu::OnBtnExitClicked));
+	AddCallback(m_UIPropertiesBox, PROPERTY_CLICKED,
+		CUIWndCallback::void_function(this, &CUIActorMenu::ProcessPropertiesBoxClicked));
+	AddCallback(m_pUpgradeWnd->m_btn_repair, BUTTON_CLICKED,
+		CUIWndCallback::void_function(this, &CUIActorMenu::TryRepairItem));
 }
 
 void CUIActorMenu::UpdateButtonsLayout()
