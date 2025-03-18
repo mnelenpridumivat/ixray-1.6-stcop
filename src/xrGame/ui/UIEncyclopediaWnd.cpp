@@ -17,6 +17,7 @@
 #include "../xrUI/Widgets/UIStatic.h"
 #include "../xrUI/Widgets/UIScrollView.h"
 #include "../xrUI/Widgets/UIListBox.h"
+#include "../xrUI/Widgets/UIListWnd.h"
 #include "../xrUI/Widgets/UITreeViewItem.h"
 #include "UIEncyclopediaArticleWnd.h"
 #include "../encyclopedia_article.h"
@@ -53,10 +54,26 @@ void CUIEncyclopediaWnd::Init()
 	{
 		UIBackground = UIHelper::CreateFrameWindow(uiXml, "background", this);
 	}
+
+	if(uiXml.NavigateToNode("tab_background", 0))
+	{
+		UITabBackground = UIHelper::CreateFrameWindow(uiXml, "tab_background", this);
+	}
+
+	if(uiXml.NavigateToNode("tab", 0))
+	{
+		UITabControl					= new CUITabControl();
+		UITabControl->SetAutoDelete		(true);
+		AttachChild						(UITabControl);
+		CUIXmlInit::InitTabControl		(uiXml, "tab", 0, UITabControl);
+		UITabControl->SetMessageTarget	(this);
+	}
+	
 	if(uiXml.NavigateToNode("left_background", 0))
 	{
 		m_left_background = UIHelper::CreateFrameWindow(uiXml, "left_background", this, false);
 	}
+	
 	if(uiXml.NavigateToNode("right_background", 0))
 	{
 		m_right_background = UIHelper::CreateFrameWindow(uiXml, "right_background", this, false);
@@ -87,19 +104,22 @@ void CUIEncyclopediaWnd::Init()
 
 	if(uiXml.NavigateToNode("idx_list", 0))
 	{
-		UIIdxList = new CUIListBox(); UIIdxList->SetAutoDelete(true);
+		UIIdxList = new CUIListWnd(); UIIdxList->SetAutoDelete(true);
 		if(m_left_background)
 		{
 			m_left_background->AttachChild(UIIdxList);
 		}
-		CUIXmlInit::InitListBox(uiXml, "idx_list", 0, UIIdxList);
+		CUIXmlInit::InitListWnd(uiXml, "idx_list", 0, UIIdxList);
 		UIIdxList->SetMessageTarget(this);
 	}
 
-	/*UIInfoList = xr_new <CUIScrollView>();
-	UIInfoList->SetAutoDelete(true);
-	UIEncyclopediaInfoBkg->AttachChild(UIInfoList);
-	CUIXmlInit::InitScrollView(uiXml, "info_list", 0, UIInfoList);*/
+	if(uiXml.NavigateToNode("info_list", 0))
+	{
+		UIInfoList = new CUIScrollView();
+		UIInfoList->SetAutoDelete(true);
+		m_right_background->AttachChild(UIInfoList);
+		CUIXmlInit::InitScrollView(uiXml, "info_list", 0, UIInfoList);
+	}
 
 	if(uiXml.NavigateToNode("tree_item_font", 0))
 	{
@@ -123,7 +143,10 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 
 		if (pTVItem->vSubItems.size())
 		{
-			CEncyclopediaArticle* A = m_ArticlesDB[pTVItem->vSubItems[0]->GetValue()];
+			VERIFY(m_ArticlesFull.contains(CurrentArticleType));
+			auto& ArticlesDB = m_ArticlesFull[CurrentArticleType];
+			
+			CEncyclopediaArticle* A = ArticlesDB[pTVItem->vSubItems[0]->GetValue()].first;
 
 			xr_string caption = "# ";
 			std::string str(A->data()->group.c_str());
@@ -150,7 +173,7 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 					caption += "/";
 			}
 
-			UIEncyclopediaInfoHeader->TextItemControl()->SetText(caption.c_str());
+			//UIEncyclopediaInfoHeader->TextItemControl()->SetText(caption.c_str());
 			//UIArticleHeader->SetText(caption.c_str());
 			SetCurrentArtice(nullptr);
 		}
@@ -158,7 +181,11 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 		{
 			int idx = pTVItem->GetValue();
 			if (idx == -1) return;
-			CEncyclopediaArticle* A = m_ArticlesDB[idx];
+			
+			VERIFY(m_ArticlesFull.contains(CurrentArticleType));
+			auto& ArticlesDB = m_ArticlesFull[CurrentArticleType];
+			
+			CEncyclopediaArticle* A = ArticlesDB[idx].first;
 			xr_string caption = "# ";
 			std::string str(A->data()->group.c_str());
 
@@ -183,10 +210,15 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 
 			caption += CStringTable().translate(A->data()->name).c_str();
 
-			UIEncyclopediaInfoHeader->TextItemControl()->SetText(caption.c_str());
+			//UIEncyclopediaInfoHeader->TextItemControl()->SetText(caption.c_str());
 			SetCurrentArtice(pTVItem);
 			UIArticleHeader->TextItemControl()->SetText(CStringTable().translate(A->data()->name).c_str());
 		}
+	}
+
+	if(pWnd == UITabControl && msg == TAB_CHANGED)
+	{
+		SetActiveSubdialog(UITabControl->GetActiveId());
 	}
 
 	inherited::SendMessage(pWnd, msg, pData);
@@ -203,10 +235,7 @@ void CUIEncyclopediaWnd::Draw()
 			std::advance(it, prevArticlesCount);
 			for (; it != Actor()->encyclopedia_registry->registry().objects_ptr()->end(); it++)
 			{
-				if (ARTICLE_DATA::eEncyclopediaArticle == it->article_type)
-				{
-					AddArticle(it->article_id, it->readed);
-				}
+				AddArticle(it->article_type, it->article_id, it->readed);
 			}
 			prevArticlesCount = Actor()->encyclopedia_registry->registry().objects_ptr()->size();
 		}
@@ -235,9 +264,15 @@ void CUIEncyclopediaWnd::Show(bool status)
 bool CUIEncyclopediaWnd::HasArticle(shared_str id)
 {
 	ReloadArticles();
-	for (std::size_t i = 0; i < m_ArticlesDB.size(); ++i)
+	for(const auto& ArticleGroup : m_ArticlesFull)
 	{
-		if (m_ArticlesDB[i]->Id() == id) return true;
+		for(const auto& Article : ArticleGroup.second)
+		{
+			if(Article.first->Id() == id)
+			{
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -245,27 +280,36 @@ bool CUIEncyclopediaWnd::HasArticle(shared_str id)
 
 void CUIEncyclopediaWnd::DeleteArticles()
 {
-	UIIdxList->Clear();
-	//UIIdxList->RemoveAll();
-	delete_data(m_ArticlesDB);
+	//UIIdxList->Clear();
+	UIIdxList->RemoveAll();
+	for(const auto& ArticleGroup : m_ArticlesFull)
+	{
+		for(const auto& Article : ArticleGroup.second)
+		{
+			auto ptr = Article.first;
+			xr_delete(ptr);
+		}
+	}
+	m_ArticlesFull.clear();
 }
 
 void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem* pTVItem)
 {
-	//UIInfoList->ScrollToBegin();
-	//UIInfoList->Clear();
-	UIIdxList->Clear();
+	UIInfoList->ScrollToBegin();
+	UIInfoList->Clear();
 
 	if (!pTVItem) return;
 
 	// ��� ������ ��������, ��� ������� ������� �� �������
 	if (!pTVItem->IsRoot())
 	{
-
+		VERIFY(m_ArticlesFull.contains(CurrentArticleType));
+		auto& CurrentArticleDB = m_ArticlesFull[CurrentArticleType];
+		
 		CUIEncyclopediaArticleWnd* article_info = new CUIEncyclopediaArticleWnd();
 		article_info->Init(ENCYCLOPEDIA_DIALOG_ITEM_XML, "encyclopedia_wnd:objective_item");
-		article_info->SetArticle(m_ArticlesDB[pTVItem->GetValue()]);
-		UIIdxList->AddWindow(article_info, true);
+		article_info->SetArticle(CurrentArticleDB[pTVItem->GetValue()].first);
+		UIInfoList->AddWindow(article_info, true);
 
 		// ������� ��� �����������
 		if (!pTVItem->IsArticleReaded())
@@ -275,10 +319,11 @@ void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem* pTVItem)
 				for (ARTICLE_VECTOR::iterator it = Actor()->encyclopedia_registry->registry().objects().begin();
 					it != Actor()->encyclopedia_registry->registry().objects().end(); it++)
 				{
-					if (ARTICLE_DATA::eEncyclopediaArticle == it->article_type &&
-						m_ArticlesDB[pTVItem->GetValue()]->Id() == it->article_id)
+					if (CurrentArticleType == it->article_type &&
+						CurrentArticleDB[pTVItem->GetValue()].first->Id() == it->article_id)
 					{
 						it->readed = true;
+						CurrentArticleDB[pTVItem->GetValue()].second = true;
 						break;
 					}
 				}
@@ -287,24 +332,70 @@ void CUIEncyclopediaWnd::SetCurrentArtice(CUITreeViewItem* pTVItem)
 	}
 }
 
-void CUIEncyclopediaWnd::AddArticle(shared_str article_id, bool bReaded)
+void CUIEncyclopediaWnd::SetActiveSubdialog(const shared_str& section)
 {
-	for (std::size_t i = 0; i < m_ArticlesDB.size(); i++)
+	if ( section == "tasks" )
 	{
-		if (m_ArticlesDB[i]->Id() == article_id) return;
+		CurrentArticleType = ARTICLE_DATA::eTaskArticle;
+	}
+	else if ( section == "journal" )
+	{
+		CurrentArticleType = ARTICLE_DATA::eJournalArticle;
+	}
+	else if (section == "info")
+	{
+		CurrentArticleType = ARTICLE_DATA::eInfoArticle;
+	}
+	else if ( section == "enc" )
+	{
+		CurrentArticleType = ARTICLE_DATA::eEncyclopediaArticle;
+	}
+	SetActiveArticlesType(CurrentArticleType);
+}
+
+void CUIEncyclopediaWnd::SetActiveArticlesType(ARTICLE_DATA::EArticleType articleType)
+{
+	UIIdxList->RemoveAll();
+	auto ArticleDB = m_ArticlesFull.find(articleType);
+	if (ArticleDB == m_ArticlesFull.end())
+	{
+		return;
+	}
+	for(u64 i = 0; i < ArticleDB->second.size(); i++)
+	{
+		const auto& articlePair = ArticleDB->second[i];
+		const auto& article = articlePair.first;
+		CreateTreeBranch(article->data()->group, article->data()->name, UIIdxList, i,
+			m_pTreeRootFont, m_uTreeRootColor, m_pTreeItemFont, m_uTreeItemColor, articlePair.second);
+	}
+}
+
+void CUIEncyclopediaWnd::AddArticle(ARTICLE_DATA::EArticleType articleType, shared_str article_id, bool bReaded)
+{
+	if(!m_ArticlesFull.contains(articleType))
+	{
+		m_ArticlesFull[articleType] = {};
+	}
+	auto& ArticlesDB = m_ArticlesFull[articleType];
+	for (std::size_t i = 0; i < ArticlesDB.size(); i++)
+	{
+		if (ArticlesDB[i].first->Id() == article_id) return;
 	}
 
 	// ��������� �������
-	m_ArticlesDB.resize(m_ArticlesDB.size() + 1);
-	CEncyclopediaArticle*& a = m_ArticlesDB.back();
+	ArticlesDB.resize(ArticlesDB.size() + 1);
+	auto& NewArticle = ArticlesDB.back();
+	CEncyclopediaArticle*& a = NewArticle.first;
 	a = new CEncyclopediaArticle();
 	a->Load(article_id);
-
+	NewArticle.second = bReaded;
 
 	// ������ ������� �������� ���� �� ��������� ����
 
-	CreateTreeBranch(a->data()->group, a->data()->name, UIIdxList, m_ArticlesDB.size() - 1,
-		m_pTreeRootFont, m_uTreeRootColor, m_pTreeItemFont, m_uTreeItemColor, bReaded);
+	//CreateTreeBranch(a->data()->group, a->data()->name, UIIdxList, m_ArticlesDB.size() - 1,
+	//	m_pTreeRootFont, m_uTreeRootColor, m_pTreeItemFont, m_uTreeItemColor, bReaded);
+	
+	SetActiveArticlesType(CurrentArticleType);
 }
 
 void CUIEncyclopediaWnd::ResetAll()

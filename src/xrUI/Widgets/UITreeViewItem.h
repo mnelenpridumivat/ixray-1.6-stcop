@@ -10,11 +10,14 @@
 #include "UIListBox.h"
 #include "UIListBoxItem.h"
 #include "UIStatic.h"
+#include "UIListItem.h"
+
+class CUIListWnd;
 
 class UI_API CUITreeViewItem:
-	public CUIListBox
+	public CUIListItem
 {
-	typedef CUIListBox inherited;
+	typedef CUIListItem inherited;
 	// Являемся ли мы началом подыерархии
 	bool			isRoot;
 	// Если мы рут, то этот флаг показывает открыта наша подыерархия или нет
@@ -30,7 +33,7 @@ public:
 	bool			IsRoot() const						{ return isRoot; }
 
 	// Устанавливаем смещение текста
-	void			SetTextShift(int delta)				{ iTextShift += delta; }
+	void			SetTextShift(int delta)				{ iTextShift = delta; }
 
 	inline int GetValue() { return m_iValue; }
 	inline void SetValue(int value) { m_iValue = value; }
@@ -97,7 +100,7 @@ public:
 	// Устанавливаем цвет в зависимости от состояния элемента
 	void	SetItemColor()
 	{
-		m_bArticleRead ? SetTextColor(m_uReadedColor) :SetTextColor(m_uUnreadedColor);
+		m_bArticleRead ? TextItemControl()->SetTextColor(m_uReadedColor) : TextItemControl()->SetTextColor(m_uUnreadedColor);
 	}
 
 private:
@@ -125,5 +128,5 @@ using GroupTree_it = GroupTree::iterator;
 
 //////////////////////////////////////////////////////////////////////////
 
-UI_API void CreateTreeBranch(shared_str nestingTree, shared_str leafName, CUIListBox *pListToAdd, int leafProperty,
+UI_API void CreateTreeBranch(shared_str nestingTree, shared_str leafName, CUIListWnd* pListToAdd, int leafProperty,
 					  CGameFont *pRootFont, u32 rootColor, CGameFont *pLeafFont, u32 leafColor, bool markRead);

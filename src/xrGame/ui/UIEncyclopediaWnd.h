@@ -37,7 +37,7 @@ public:
 	void		SendMessage(CUIWindow* pWnd, s16 msg, void* pData = nullptr) override;
 	void		Draw() override;
 
-	void				AddArticle(shared_str, bool bReaded);
+	void				AddArticle(ARTICLE_DATA::EArticleType articleType, shared_str, bool bReaded);
 	void				DeleteArticles();
 	bool				HasArticle(shared_str);
 
@@ -48,6 +48,8 @@ protected:
 	// �������� ������������ ����������
 
 	CUIFrameWindow* UIBackground = nullptr;
+	CUIFrameWindow* UITabBackground = nullptr;
+	CUITabControl* UITabControl = nullptr;
 	CUIFrameWindow*		m_left_background = nullptr;
 	CUIFrameWindow*		m_right_background = nullptr;
 	
@@ -60,16 +62,25 @@ protected:
 	CUIStatic* UIArticleHeader = nullptr;
 
 	// ��������� ������
-	typedef xr_vector<CEncyclopediaArticle*>			ArticlesDB;
-	typedef ArticlesDB::iterator						ArticlesDB_it;
+	//typedef xr_vector<xr_pair<CEncyclopediaArticle*, bool>>			ArticlesDB;
+	//typedef ArticlesDB::iterator						ArticlesDB_it;
 
-	ArticlesDB				m_ArticlesDB;
+	using ArticlesDB = xr_vector<xr_pair<CEncyclopediaArticle*, bool>>;
+	using ArticlesDB_it = ArticlesDB::iterator;
+	using ArticlesFullDB = xr_map<ARTICLE_DATA::EArticleType, ArticlesDB>;
+
+	ArticlesFullDB			m_ArticlesFull;
 	CGameFont* m_pTreeRootFont;
 	u32						m_uTreeRootColor;
 	CGameFont* m_pTreeItemFont;
 	u32						m_uTreeItemColor;
 
-	CUIListBox* UIIdxList;
+	CUIListWnd* UIIdxList;
+	CUIScrollView*			UIInfoList;
+
+	ARTICLE_DATA::EArticleType CurrentArticleType = ARTICLE_DATA::eTaskArticle;
 
 	void				SetCurrentArtice(CUITreeViewItem* pTVItem);
+	void			SetActiveSubdialog	(const shared_str& section);
+	void SetActiveArticlesType(ARTICLE_DATA::EArticleType articleType);
 };
