@@ -78,7 +78,7 @@ void CUITreeViewItem::OnRootChanged()
 			str.replace(pos, 1, "+");
 
 //		inherited::SetText(str.c_str());
-		GetSelectedItem()->SetText(str.c_str());
+		SetSelectedText(str.c_str());
 	}
 	else
 	{
@@ -95,7 +95,7 @@ void CUITreeViewItem::OnRootChanged()
 			str.replace(pos, 1, " ");
 
 //		inherited::SetText(str.c_str());
-		GetSelectedItem()->SetText(str.c_str());
+		SetSelectedText(str.c_str());
 	}
 }
 
@@ -122,7 +122,7 @@ void CUITreeViewItem::OnOpenClose()
 	}
 
 //	inherited::SetText(str.c_str());
-	GetSelectedItem()->SetText(str.c_str());
+	SetSelectedText(str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ void CUITreeViewItem::SetText(LPCSTR str)
 	}
 
 //	inherited::SetText(s.c_str());
-	GetSelectedItem()->SetText(s.c_str());
+	SetSelectedText(s.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -269,7 +269,7 @@ void CUITreeViewItem::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 			MarkArticleAsRead(true);
 		}
 	}
-	else if (pWnd == this && STATIC_FOCUS_RECEIVED == msg)
+	else if (pWnd == this && WINDOW_FOCUS_RECEIVED == msg)
 	{
 		UIBkg.TextureOn();
 
@@ -279,7 +279,7 @@ void CUITreeViewItem::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 		}
 		pPrevFocusedItem = this;
 	}
-	else if (pWnd == this && STATIC_FOCUS_LOST == msg)
+	else if (pWnd == this && WINDOW_FOCUS_LOST  == msg)
 	{
 		UIBkg.TextureOff();
 		pPrevFocusedItem = NULL;
