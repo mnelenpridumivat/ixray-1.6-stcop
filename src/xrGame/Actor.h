@@ -81,6 +81,14 @@ class CActor:
 private:
 	typedef CEntityAlive	inherited;
 	CPickUpManager* pPickup = nullptr;
+
+	struct LookAtData
+	{
+		CObject* LookAtObject = nullptr;
+		Fvector PickPos;
+		bool IsNearEnoght = false;
+	} LookAtData;
+	void UpdateLookAt();
 public:
 										CActor				();
 	virtual								~CActor				();
@@ -370,6 +378,7 @@ public:
 	CGameObject*			ObjectWeLookingAt			() {return m_pObjectWeLookingAt;}
 	CInventoryOwner*		PersonWeLookingAt			() {return m_pPersonWeLookingAt;}
 	LPCSTR					GetDefaultActionForObject	() {return *m_sDefaultObjAction;}
+	LPCSTR					GetSecondaryDefaultActionForObject	() {return *m_sSecondaryDefaultObjAction;}
 protected:
 	CUsableScriptObject*	m_pUsableObject;
 	// Person we're looking at
@@ -380,6 +389,7 @@ protected:
 
 	// Tip for action for object we're looking at
 	shared_str				m_sDefaultObjAction;
+	shared_str				m_sSecondaryDefaultObjAction;
 	shared_str				m_sCarTrunk;
 	shared_str				m_sCarUse;
 	shared_str				m_sCharacterUseAction;
@@ -389,6 +399,7 @@ protected:
 	shared_str				m_sCarCharacterUseAction;
 	shared_str				m_sInventoryItemUseAction;
 	shared_str				m_sInventoryBoxUseAction;
+	shared_str				m_sWeaponQuickReloadAction;
 	
 	//расстояние (в метрах) на котором актер чувствует гранату (любую)
 	float					m_fFeelGrenadeRadius;

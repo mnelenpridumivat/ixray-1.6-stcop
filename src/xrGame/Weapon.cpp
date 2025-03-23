@@ -1449,10 +1449,21 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 //.		D->s_gameid					= u8(GameID());
 		D->s_RP						= 0xff;
 		D->ID						= 0xffff;
-		if (ParentID == 0xffffffff)	
-			D->ID_Parent			= (u16)H_Parent()->ID();
+		if (ParentID == 0xffffffff)
+			if(IsQuickUnloading)
+			{
+				auto CurActor = Actor();
+				VERIFY(CurActor);
+				D->ID_Parent = CurActor->ID();
+			} else
+			{
+				VERIFY(H_Parent());
+				D->ID_Parent			= (u16)H_Parent()->ID();
+			}
 		else
+		{
 			D->ID_Parent			= (u16)ParentID;
+		}
 
 		D->ID_Phantom				= 0xffff;
 		D->s_flags.assign			(M_SPAWN_OBJECT_LOCAL);

@@ -62,6 +62,24 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				u_EventSend(P);
 			}
 		}break;
+	case kWPN_RELOAD:
+		{
+			if(IsGameTypeSingle())
+			{
+				if(!LookAtData.LookAtObject || !LookAtData.IsNearEnoght)
+				{
+					break;
+				}
+				auto Weapon = smart_cast<CWeaponMagazined*>(LookAtData.LookAtObject);
+				if(!Weapon)
+				{
+					break;
+				}
+				Weapon->SetIsQuickUnloading(true);
+				Weapon->UnloadMagazine();
+				Weapon->SetIsQuickUnloading(false);
+			}
+		}
 	default:
 		{
 		}break;

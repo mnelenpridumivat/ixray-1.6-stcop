@@ -97,6 +97,26 @@ static Fvector	vFootExt;
 Flags32			psActorFlags={AF_DISABLE_CONDITION_TEST|AF_AUTOPICKUP|AF_RUN_BACKWARD|AF_IMPORTANT_SAVE|AF_DISPLAY_VOICE_ICON};
 
 
+void CActor::UpdateLookAt()
+{
+	collide::rq_result& RQ				= HUD().GetCurrentRayQuery();
+
+	LookAtData.PickPos = { 0.0f, 0.0f, 0.0f };
+	Fvector ActorPos;
+	ActorPos = Position();
+	ActorPos.y += ACTOR_HEIGHT * 0.5f;
+
+	LookAtData.PickPos.mad(Device.vCameraPosition, Device.vCameraDirection, RQ.range);
+	LookAtData.LookAtObject = nullptr;
+	if (RQ.O)
+	{
+		//PickPos = RQ.O->Position();
+		RQ.O->Center(LookAtData.PickPos);
+		LookAtData.LookAtObject = RQ.O->getVisible() ? RQ.O : nullptr;
+	}
+
+	LookAtData.IsNearEnoght = ActorPos.distance_to_sqr(LookAtData.PickPos) < 6.0f;
+}
 
 CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 {
@@ -171,6 +191,7 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 	SetZoomAimingMode		(false);
 
 	m_sDefaultObjAction		= nullptr;
+	m_sSecondaryDefaultObjAction = nullptr;
 
 	m_fSprintFactor			= 4.f;
 
@@ -474,6 +495,7 @@ if(!g_dedicated_server)
 	m_sCarCharacterUseAction		= "car_character_use";
 	m_sInventoryItemUseAction		= "inventory_item_use";
 	m_sInventoryBoxUseAction		= "inventory_box_use";
+	m_sWeaponQuickReloadAction		= "weapon_quick_reload";
 	//---------------------------------------------------------------------
 	m_sHeadShotParticle	= READ_IF_EXISTS(pSettings,r_string,section,"HeadShotParticle",0);
 	m_fLegs_shift = READ_IF_EXISTS(pSettings, r_float, "actor_hud", "legs_shift_delta", -0.55f);
@@ -1624,6 +1646,7 @@ void CActor::shedule_Update	(u32 DT)
 	if(m_holder || !getEnabled() || !Ready())
 	{
 		m_sDefaultObjAction				= nullptr;
+		m_sSecondaryDefaultObjAction				= nullptr;
 		inherited::shedule_Update		(DT);
 		return;
 	}
@@ -1704,7 +1727,7 @@ void CActor::shedule_Update	(u32 DT)
 	}
 
 	//что актер видит перед собой
-	collide::rq_result& RQ				= HUD().GetCurrentRayQuery();
+	/*collide::rq_result& RQ				= HUD().GetCurrentRayQuery();
 	
 	Fvector ActorPos, PickPos = { 0.0f, 0.0f, 0.0f };
 	//Center(ActorPos);
@@ -1716,14 +1739,16 @@ void CActor::shedule_Update	(u32 DT)
 	{
 		//PickPos = RQ.O->Position();
 		RQ.O->Center(PickPos);
-	}
+	}*/
+	UpdateLookAt();
+	
 	const static bool isMonstersInventory = EngineExternal()[EEngineExternalGame::EnableMonstersInventory];
 
-	if (!input_external_handler_installed() && RQ.O && RQ.O->getVisible() && ActorPos.distance_to_sqr(PickPos) < 6.0f)
+	if (!input_external_handler_installed() && LookAtData.LookAtObject && LookAtData.IsNearEnoght)
 	{
-		m_pObjectWeLookingAt = smart_cast<CGameObject*>(RQ.O);
+		m_pObjectWeLookingAt = smart_cast<CGameObject*>(LookAtData.LookAtObject);
 
-		CGameObject* game_object = smart_cast<CGameObject*>(RQ.O);
+		CGameObject* game_object = smart_cast<CGameObject*>(LookAtData.LookAtObject);
 		m_pUsableObject = smart_cast<CUsableScriptObject*>(game_object);
 		m_pInvBoxWeLookingAt = smart_cast<CInventoryBox*>(game_object);
 		m_pPersonWeLookingAt = smart_cast<CInventoryOwner*>(game_object);
@@ -1804,15 +1829,23 @@ void CActor::shedule_Update	(u32 DT)
 						}
 					}
 				}
-				else if (	m_pObjectWeLookingAt && 
-							m_pObjectWeLookingAt->cast_inventory_item() && 
-							m_pObjectWeLookingAt->cast_inventory_item()->CanTake() )
+				else if (m_pObjectWeLookingAt)
 				{
+					auto CastedObj = m_pObjectWeLookingAt->cast_inventory_item();
+					if(!CastedObj || !CastedObj->CanTake() )
+					{
+						return;
+					}
 					m_sDefaultObjAction = m_sInventoryItemUseAction;
+					if(auto WeaponObj = CastedObj->cast_weapon(); WeaponObj)
+					{
+						m_sSecondaryDefaultObjAction = WeaponObj->GetAmmoElapsed() > 0 ? m_sWeaponQuickReloadAction : nullptr;
+					}
 				}
 				else 
 				{
 					m_sDefaultObjAction = nullptr;
+					m_sSecondaryDefaultObjAction = nullptr;
 				}
 			}
 		}
@@ -1821,6 +1854,7 @@ void CActor::shedule_Update	(u32 DT)
 	{
 		m_pPersonWeLookingAt	= nullptr;
 		m_sDefaultObjAction		= nullptr;
+		m_sSecondaryDefaultObjAction = nullptr;
 		m_pUsableObject			= nullptr;
 		m_pObjectWeLookingAt	= nullptr;
 		m_pVehicleWeLookingAt	= nullptr;

@@ -133,6 +133,7 @@ void CUIMainIngameWnd::Init()
 
 	// Подсказки, которые возникают при наведении прицела на объект
 	UIStaticQuickHelp			= UIHelper::CreateTextWnd(uiXml, "quick_info", this);
+	UIStaticQuickHelp2			= UIHelper::CreateTextWnd(uiXml, "quick_info2", this);
 
 	uiXml.SetLocalRoot			(uiXml.GetRoot());
 
@@ -489,18 +490,27 @@ void CUIMainIngameWnd::RenderQuickInfos()
 
 	static CGameObject *pObject			= nullptr;
 	LPCSTR actor_action					= pActor->GetDefaultActionForObject();
+	LPCSTR secondary_actor_action		= pActor->GetSecondaryDefaultActionForObject();
 	UIStaticQuickHelp->Show				(nullptr!=actor_action);
+	UIStaticQuickHelp2->Show			(nullptr!=secondary_actor_action);
 
 	if(nullptr!=actor_action)
 	{
 		if(_stricmp(actor_action,UIStaticQuickHelp->GetText()))
 			UIStaticQuickHelp->SetTextST				(actor_action);
 	}
+	if(nullptr!=secondary_actor_action)
+	{
+		if(_stricmp(secondary_actor_action,UIStaticQuickHelp2->GetText()))
+			UIStaticQuickHelp2->SetTextST				(secondary_actor_action);
+	}
 
 	if(pObject!=pActor->ObjectWeLookingAt())
 	{
 		UIStaticQuickHelp->SetTextST				(actor_action?actor_action:" ");
 		UIStaticQuickHelp->ResetColorAnimation	();
+		UIStaticQuickHelp2->SetTextST				(secondary_actor_action?secondary_actor_action:" ");
+		UIStaticQuickHelp2->ResetColorAnimation	();
 		pObject	= pActor->ObjectWeLookingAt	();
 	}
 }

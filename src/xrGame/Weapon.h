@@ -32,7 +32,11 @@ class CWeapon : public CHudItemObject,
 private:
 	typedef CHudItemObject inherited;
 
+	bool IsQuickUnloading = false;
+
 public:
+	void SetIsQuickUnloading(bool Unloading) {IsQuickUnloading = Unloading;};
+	
 							CWeapon				();
 	virtual					~CWeapon			();
 
