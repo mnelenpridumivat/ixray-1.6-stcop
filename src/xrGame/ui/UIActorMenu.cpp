@@ -374,6 +374,7 @@ EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
 {
 	if(l==m_pInventoryBagList)			return iActorBag;
 	if(l==m_pInventoryBeltList)			return iActorBelt;
+	if(l==m_pInventoryStackList)		return iStackList;
 
 	for (u8 i = 1; i <= m_slot_count; ++i)
 	{
@@ -406,6 +407,10 @@ CUIDragDropListEx* CUIActorMenu::GetListByType(EDDListType t)
 				else
 					return m_pInventoryBagList;
 			}break;
+		case iStackList:
+			{
+				return m_pInventoryStackList;
+			}
 		case iDeadBodyBag:
 			{
 				return m_pDeadBodyBagList;
@@ -941,6 +946,7 @@ void CUIActorMenu::ClearAllLists()
 {
 	m_pInventoryBagList->ClearAll(true);
 	m_pInventoryBeltList->ClearAll(true);
+	m_pInventoryStackList->ClearAll(true);
 
 	for (u8 i = 1; i <= m_slot_count; ++i)
 	{
