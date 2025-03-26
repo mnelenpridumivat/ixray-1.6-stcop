@@ -57,11 +57,12 @@ xr_token							qsun_quality_token							[ ]={
 
 u32			ps_r2_aa_type			= 0;			//	=	0;
 xr_token							aa_type_token[] = {
-	{ "st_opt_off",						0												},
+	{ "st_opt_off",						0											},
 	{ "fxaa",						1												},
 #if RENDER != R_R1
 	{ "smaa",						2												},
-#endif // DEBUG
+	{ "taa",						3												},
+#endif // DEBUG	
 	{ 0,							0												}
 };
 
@@ -207,6 +208,8 @@ float		ps_r__test_exp_to_shaders_3	= 1.0f;
 float		ps_r__test_exp_to_shaders_4	= 1.0f;
 
 BOOL		ps_r2_particle_dt			= FALSE;
+
+int			r_debug_render_depth		= 0;
 
 #ifndef _EDITOR
 #include "../../xrEngine/XR_IOConsole.h"
@@ -826,6 +829,8 @@ void		xrRender_initconsole	()
 	CMD3(CCC_Mask, "r2_shadow_cascede_zcul", &ps_r2_ls_flags_ext, R2FLAGEXT_SUN_ZCULLING);
 	CMD3(CCC_Mask, "r2_exp_splitscene", &ps_r2_ls_flags, R2FLAG_EXP_SPLIT_SCENE);
 	CMD3(CCC_Mask, "r2_exp_donttest_uns", &ps_r2_ls_flags, R2FLAG_EXP_DONT_TEST_UNSHADOWED);
+
+	CMD4(CCC_Integer, "rs_dbg_draw_depth", &r_debug_render_depth, 0, 1);
 #endif
 }
 

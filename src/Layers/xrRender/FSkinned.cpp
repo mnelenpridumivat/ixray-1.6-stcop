@@ -76,8 +76,10 @@ struct	vertHW_1W
 	u16 get_bone() const
 	{
 		u8 delimeter = 1;
-		if (Device.IsEditorMode())
-			delimeter = 3;
+
+#ifndef USE_DX11
+		delimeter = 3;
+#endif
 
 		return	(u16)color_get_A(_N_I) / delimeter;
 	}
@@ -134,8 +136,9 @@ struct	vertHW_2W
 	u16 get_bone(u16 w) const
 	{
 		u8 delimeter = 1;
-		if (Device.IsEditorMode())
-			delimeter = 3;
+#ifndef USE_DX11
+		delimeter = 3;
+#endif
 
 		return	(u16)_tc_i[w+2] / delimeter;
 	}
@@ -199,8 +202,9 @@ struct	vertHW_3W
 	u16 get_bone(u16 w) const
 	{
 		u8 delimeter = 1;
-		if (Device.IsEditorMode())
-			delimeter = 3;
+#ifndef USE_DX11
+		delimeter = 3;
+#endif
 
 		switch(w)
 		{
@@ -288,9 +292,9 @@ struct	vertHW_4W
 	u16 get_bone(u16 w) const
 	{
 		u8 delimeter = 1;
-		if (Device.IsEditorMode())
-			delimeter = 3;
-
+#ifndef USE_DX11
+		delimeter = 3;
+#endif
 		switch(w)
 		{
 		case 0:
