@@ -359,3 +359,13 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 
 	return inherited::OnKeyboardAction(dik,keyboard_action);
 }
+
+void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
+{
+	//if (type == pda_section::encyclopedia)
+	//{
+	pUIEncyclopediaWnd->ReloadArticles();
+	CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
+
+	//}
+}
