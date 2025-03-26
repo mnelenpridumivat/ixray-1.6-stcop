@@ -10,6 +10,8 @@ class CAnomalyDetector {
 
 	bool					m_active;
 
+	xr_hash_set<CLASS_ID> IgnoredCLSIDS;
+
 	struct SAnomalyInfo {
 		CObject		*object;
 		u32			time_registered;

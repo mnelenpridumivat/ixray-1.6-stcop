@@ -106,7 +106,6 @@ void CGameGraphBuilder::load_graph_point(CSE_Abstract* entity)
 	                GameGraph::LOCATION_TYPE_COUNT * sizeof(GameGraph::_LOCATION_ID));
 	vertex.tLevelID = 0;
 	vertex.tDeathPointCount = 0;
-	vertex.dwPointOffset = 0;
 
 	graph().add_vertex(vertex, graph().vertices().size());
 }
@@ -643,7 +642,6 @@ bool CGameGraphBuilder::build_graph()
 	m_cross_table = nullptr;
 
 	{
-		u32 edge_offset = 0;
 		size_t index = 0;
 		graph_type::const_vertex_iterator I = graph().vertices().begin();
 		graph_type::const_vertex_iterator E = graph().vertices().end();
@@ -653,9 +651,7 @@ bool CGameGraphBuilder::build_graph()
 
 			VERIFY((*I).second->edges().size() < 256);
 			vertex.tNeighbourCount = (u8)(*I).second->edges().size();
-			vertex.dwEdgeOffset = edge_offset;
 			*game_graph->vertex(index++) = vertex;
-			edge_offset += vertex.tNeighbourCount * sizeof(IGameGraph::CEdge);
 		}
 	}
 	size_t count_edges = 0;

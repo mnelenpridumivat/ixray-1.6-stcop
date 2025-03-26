@@ -39,6 +39,11 @@ enum ECoreParams
 	
 	// API
 	renderdoc = 1<<27,
+
+	// Lua
+	keep_lua = 1 << 28,
+
+	no_debug_panel = 1 << 29,
 };
 
 void LoadParams();

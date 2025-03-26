@@ -4,6 +4,7 @@
 #include "object_broker.h"
 #include "UICellItem.h"
 #include "../../xrUI/UICursor.h"
+#include "../Inventory.h"
 
 
 CUIDragItem* CUIDragDropListEx::m_drag_item = nullptr;
@@ -36,6 +37,7 @@ CUIDragDropListEx::CUIDragDropListEx()
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_DRAG,			CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemStartDragging)	);
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_DROP,			CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemDrop)			);
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_SELECTED,		CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemSelected)			);
+	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_DESELECTED,		CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemDeselected)			);
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_LBUTTON_CLICK,	CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemLButtonClick)			);
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_RBUTTON_CLICK,	CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemRButtonClick)			);
 	AddCallbackStr				("cell_item",	DRAG_DROP_ITEM_DB_CLICK,		CUIWndCallback::void_function		(this, &CUIDragDropListEx::OnItemDBClick)			);
@@ -114,6 +116,14 @@ void CUIDragDropListEx::InitDragDropList(Fvector2 pos, Fvector2 size)
 	inherited::SetWndSize				(size);
 	m_vScrollBar->InitScrollBar			(Fvector2().set(size.x, 0.0f), size.y, false);
 	m_vScrollBar->SetWndPos				(Fvector2().set(m_vScrollBar->GetWndPos().x - m_vScrollBar->GetWidth(), m_vScrollBar->GetWndPos().y));
+}
+
+void CUIDragDropListEx::VerifyDeselected(CUICellItem* new_selected)
+{
+	if (m_selected_item && m_selected_item != new_selected)
+	{
+		OnItemDeselected(m_selected_item, nullptr);
+	}
 }
 
 void CUIDragDropListEx::OnScrollV(CUIWindow* w, void* pData)
@@ -221,10 +231,20 @@ void CUIDragDropListEx::OnItemDBClick(CUIWindow* w, void* pData)
 
 void CUIDragDropListEx::OnItemSelected(CUIWindow* w, void* pData)
 {
-	m_selected_item						= smart_cast<CUICellItem*>(w);
+	auto NewSelected = smart_cast<CUICellItem*>(w);
+	VerifyDeselected(NewSelected);
+	m_selected_item						= NewSelected;
 	VERIFY								(m_selected_item);
 	if(m_f_item_selected)
 		m_f_item_selected(m_selected_item);
+}
+
+void CUIDragDropListEx::OnItemDeselected(CUIWindow* w, void* pData)
+{
+	m_selected_item						= smart_cast<CUICellItem*>(w);
+	VERIFY								(m_selected_item);
+	if(m_f_item_deselected)
+		m_f_item_deselected(m_selected_item);
 }
 
 void  CUIDragDropListEx::OnItemFocusReceived(CUIWindow* w, void* pData)
@@ -364,6 +384,11 @@ bool CUIDragDropListEx::OnMouseAction(float x, float y, EUIMessages mouse_action
 {
 	bool b = inherited::OnMouseAction		(x,y,mouse_action);
 
+	if(!b && mouse_action == WINDOW_LBUTTON_DOWN)
+	{
+		VerifyDeselected(nullptr);
+	}
+	
 	if(m_vScrollBar->IsShown())
 	{
 		switch(mouse_action){
@@ -550,31 +575,31 @@ CUICellContainer::~CUICellContainer()
 
 bool CUICellContainer::AddSimilar(CUICellItem* itm)
 {
-	if(!m_pParentDragDropList->IsGrouping())	return false;
+	if (!m_pParentDragDropList->IsGrouping())	return false;
 
-	CUICellItem* i		= FindSimilar(itm);
-	R_ASSERT			(i!=itm);
-	R_ASSERT			(0==itm->ChildsCount());
-	if(i)
-	{	
-		i->PushChild			(itm);
-		itm->SetOwnerList		(m_pParentDragDropList);
+	CUICellItem* i = FindSimilar(itm);
+	R_ASSERT(i != itm);
+	R_ASSERT(0 == itm->ChildsCount());
+	if (i)
+	{
+		i->PushChild(itm);
+		itm->SetOwnerList(m_pParentDragDropList);
 	}
-	
-	return (i!=nullptr);
+
+	return (i != nullptr);
 }
 
 CUICellItem* CUICellContainer::FindSimilar(CUICellItem* itm)
 {
-	for(WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end()!=it; ++it)
+	for (WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end() != it; ++it)
 	{
 #ifdef DEBUG
 		CUICellItem* i = smart_cast<CUICellItem*>(*it);
 #else
 		CUICellItem* i = (CUICellItem*)(*it);
 #endif
-		R_ASSERT		(i!=itm);
-		if(i->EqualTo(itm))
+		R_ASSERT(i != itm);
+		if (i->EqualTo(itm))
 			return i;
 	}
 	return nullptr;
@@ -934,6 +959,10 @@ void CUICellContainer::Draw()
 				else if ( ui_cell.m_item->m_select_armament )
 				{
 					select_mode = 3;
+				}
+				else if (ui_cell.m_item->m_select_equipped)
+				{
+					select_mode = 2;
 				}
 			}
 			

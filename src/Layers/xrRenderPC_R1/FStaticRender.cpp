@@ -100,6 +100,7 @@ void					CRender::create					()
 
 	xrRender_apply_tf			();
 	::PortalTraverser.initialize();
+	Device.ModelDefferClear = xr_make_delegate(Models, &CModelPool::DeleteQueuedDeffer);
 }
 
 void CRender::destroy()
@@ -117,6 +118,7 @@ void CRender::destroy()
 	Device.seqFrame.Remove(this);
 
 	r_dsgraph_destroy();
+	Device.ModelDefferClear = nullptr;
 }
 
 void CRender::reset_begin()
@@ -149,16 +151,15 @@ void CRender::reset_end()
 	m_bFirstFrameAfterReset = true;
 }
 
-void					CRender::OnFrame				()
+void CRender::OnFrame()
 {
-	Models->DeleteQueue	();
+	Models->DeleteQueue();
 
-	{
-		//Lights Delete queue
-		for (light*L:v_all_lights_dque)
-			xr_delete(L);
-		v_all_lights_dque.clear();
-	}
+	//Lights Delete queue
+	for (light* L : v_all_lights_dque)
+		xr_delete(L);
+
+	v_all_lights_dque.clear();
 }
 
 // Implementation
@@ -245,30 +246,31 @@ BOOL					CRender::occ_visible			(vis_data& P)		{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(sPoly& P)			{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(Fbox& P)			{ return HOM.visible(P);								}
 ENGINE_API	extern xr_atomic_bool g_bRendering;
-void					CRender::add_Visual				(IRenderVisual* V, bool ignore_opt)
+void					CRender::add_Visual				(IRenderVisual* V)
 {
 	VERIFY				(g_bRendering);
-	add_leafs_Dynamic	((dxRender_Visual*)V, ignore_opt);
+	add_leafs_Dynamic	((dxRender_Visual*)V);
 }
 void					CRender::add_Geometry			(IRenderVisual* V ){ add_Static((dxRender_Visual*)V,View->getMask());						}
-void					CRender::add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts)
+
+void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts, bool UseCameraDirection)
 {
 	if (T->suppress_wm)	return;
-	VERIFY2							(_valid(P) && _valid(s) && T && verts && (s>EPS_L), "Invalid static wallmark params");
-	Wallmarks->AddStaticWallmark	(T,verts,P,&*S,s);
+	VERIFY2(_valid(P) && _valid(s) && T && verts && (s > EPS_L), "Invalid static wallmark params");
+	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s, UseCameraDirection);
 }
 
-void CRender::add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
+void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection)
 {
-	dxWallMarkArray *pWMA = (dxWallMarkArray *)pArray;
-	ref_shader *pShader = pWMA->dxGenerateWallmark();
-	if (pShader) add_StaticWallmark		(*pShader, P, s, T, V);
+	dxWallMarkArray* pWMA = (dxWallMarkArray*)pArray;
+	ref_shader* pShader = pWMA->dxGenerateWallmark();
+	if (pShader) add_StaticWallmark(*pShader, P, s, T, V, UseCameraDirection);
 }
 
-void CRender::add_StaticWallmark			(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
+void CRender::add_StaticWallmark(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
 {
 	dxUIShader* pShader = (dxUIShader*)&*S;
-	add_StaticWallmark		(pShader->hShader, P, s, T, V);
+	add_StaticWallmark(pShader->hShader, P, s, T, V);
 }
 
 void					CRender::clear_static_wallmarks	()
@@ -374,13 +376,6 @@ extern float		r_ssaLOD_A,			r_ssaLOD_B;
 extern float		r_ssaGLOD_start,	r_ssaGLOD_end;
 extern float		r_ssaHZBvsTEX;
 
-ICF bool			pred_sp_sort		(ISpatial* _1, ISpatial* _2)
-{
-	float	d1		= _1->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
-	float	d2		= _2->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
-	return	d1<d2;
-}
-
 void CRender::Calculate				()
 {
 	Device.Statistic->RenderCALC.Begin();
@@ -439,11 +434,6 @@ void CRender::Calculate				()
 	marker	++;
 	if (pLastSector)
 	{
-		{
-			PROF_EVENT("lights_spatial_move");
-			for (light* L : v_all_lights)
-				L->spatial_move();
-		}
 		// Traverse sector/portal structure
 		PortalTraverser.traverse	
 			(
@@ -471,15 +461,11 @@ void CRender::Calculate				()
 		// Traverse object database
 		if  (psDeviceFlags.test(rsDrawDynamic))	{
 			g_SpatialSpace->q_frustum
-				(
-				lstRenderables,
-				ISpatial_DB::O_ORDERED,
-				STYPE_RENDERABLE + STYPE_PARTICLE + STYPE_LIGHTSOURCE,
-				ViewBase
-				);
-
-			// Exact sorting order (front-to-back)
-			std::sort							(lstRenderables.begin(),lstRenderables.end(),pred_sp_sort);
+			(
+			lstRenderables,
+			ISpatial_DB::O_ORDERED,
+			STYPE_RENDERABLE + STYPE_PARTICLE + STYPE_LIGHTSOURCE,
+			ViewBase);//nearest sorting
 
 			// Determine visibility for dynamic part of scene
 			set_Object							(0);
@@ -503,7 +489,7 @@ void CRender::Calculate				()
 			}
 			for (u32 o_it=0; o_it<lstRenderables.size(); o_it++)
 			{
-				ISpatial*	spatial		= lstRenderables[o_it];		spatial->spatial_updatesector	();
+				ISpatial*	spatial		= lstRenderables[o_it].get();		spatial->spatial_updatesector	();
 				CSector*	sector		= (CSector*)spatial->spatial.sector	;
 				if	(0==sector)										
 					continue;	// disassociated from S/P structure
@@ -542,12 +528,10 @@ void CRender::Calculate				()
 							renderable->renderable_Render	();
 							set_Object						(0);	//? is it needed at all
 						}
-						else
+						else if (CGlow* glow = spatial->dcast_CGlow())
 						{
 							// It may be an glow
-							CGlow*		glow				= fast_dynamic_cast<CGlow*>(spatial);
-							VERIFY							(glow);
-							L_Glows->add					(glow);
+							L_Glows->add(glow);
 						}
 						break;	// exit loop on frustums
 					}
@@ -557,13 +541,14 @@ void CRender::Calculate				()
 				{
 					if ( ViewBase.testSphere_dirty(spatial->spatial.sphere.P,spatial->spatial.sphere.R) )
 					{
-						VERIFY								(spatial->spatial.type & STYPE_LIGHTSOURCE);
+						VERIFY(spatial->spatial.type & STYPE_LIGHTSOURCE);
 						// lightsource
-						if(light*			L					= (light*)	spatial->dcast_Light	())
+						if (light* L = (light*)spatial->dcast_Light())
 						{
-							if (L->spatial.sector)				{
-								vis_data&		vis		= L->get_homdata	( );
-								if	(HOM.visible(vis))	L_DB->add_light		(L);
+							if (L->SpatialComponent->spatial.sector)
+							{
+								vis_data& vis = L->get_homdata();
+								if (HOM.visible(vis))	L_DB->add_light(L);
 							}
 						}
 					}

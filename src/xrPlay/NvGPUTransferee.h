@@ -4,7 +4,7 @@
 #include "../xrEngine/ICore_GPU.h"
 #include <NVAPI\nvapi.h>
 
-#define NVAPI_MAX_USAGES_PER_GPU  34
+constexpr auto NVAPI_MAX_USAGES_PER_GPU = 34;
 class CNvReader :
 	public ICore_GPU
 {

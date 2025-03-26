@@ -8,6 +8,7 @@
 #include "object_broker.h"
 #include "../../xrUI/UIXmlInit.h"
 #include "../../xrUI/Widgets/UIProgressBar.h"
+#include "../eatable_item.h"
 
 #include "CustomOutfit.h"
 
@@ -29,6 +30,7 @@ CUICellItem::CUICellItem()
 	m_b_destroy_childs	= true;
 	m_selected			= false;
 	m_select_armament	= false;
+	m_select_equipped	= false;
 	m_cur_mark			= false;
 	m_has_upgrade		= false;
 	m_with_custom_text	= false;
@@ -161,15 +163,9 @@ void CUICellItem::UpdateCustomMarksAndText() {
 			m_custom_text->SetWndPos(pos);
 			m_custom_text->TextItemControl()->SetTextST(*item->m_custom_text);
 
-			if (item->m_custom_text_clr_inv != 0) {
-				//CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame());
-				//if (pGameSP && pGameSP->ActorMenu().IsShown())// Hrust: used for pick_up_item on CUICellItem class
-				{
-					m_custom_text->TextItemControl()->SetTextColor(item->m_custom_text_clr_inv);
-				}
-				/*else {
-					m_custom_text->SetTextColor(item->m_custom_text_clr_hud);
-				}*/
+			if (item->m_custom_text_clr_inv != 0) 
+			{
+				m_custom_text->TextItemControl()->SetTextColor(item->m_custom_text_clr_inv);
 			}
 			if (item->m_custom_text_font != nullptr) {
 				m_custom_text->TextItemControl()->SetFont(item->m_custom_text_font);
@@ -220,7 +216,7 @@ bool CUICellItem::OnMouseAction(float x, float y, EUIMessages mouse_action)
 		GetMessageTarget()->SendMessage( this, DRAG_DROP_ITEM_LBUTTON_CLICK, nullptr );
 		GetMessageTarget()->SendMessage( this, DRAG_DROP_ITEM_SELECTED, nullptr );
 		m_mouse_selected_item = this;
-		return false;
+		return true;
 	}
 	else if ( mouse_action == WINDOW_MOUSE_MOVE )
 	{
@@ -251,7 +247,7 @@ bool CUICellItem::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	{
 		if (GetAccelerator() == dik)
 		{
-			GetMessageTarget()->SendMessage(this, DRAG_DROP_ITEM_DB_CLICK, nullptr);
+			GetMessageTarget()->SendMessage(this, DRAG_DROP_ITEM_DB_CLICK, NULL);
 			return		true;
 		}
 	}
@@ -285,7 +281,6 @@ CUIDragItem* CUICellItem::CreateDragItem()
 void CUICellItem::SetOwnerList(CUIDragDropListEx* p)	
 {
 	m_pParentList = p;
-	UpdateConditionProgressBar();
 }
 
 void CUICellItem::UpdateConditionProgressBar()
@@ -298,6 +293,37 @@ void CUICellItem::UpdateConditionProgressBar()
 		PIItem itm = (PIItem)m_pData;
 		if (itm && itm->IsUsingCondition())
 		{
+			float cond = itm->GetCondition();
+
+			CEatableItem* eitm = smart_cast<CEatableItem*>(itm);
+			if (eitm)
+			{
+				u8 max_uses = eitm->GetMaxUses();
+				if (max_uses > 0)
+				{
+					u8 remaining_uses = eitm->GetRemainingUses();
+
+					if (max_uses < 8)
+					{
+						m_pConditionState->ShowBackground(false);
+					}
+					if (remaining_uses < 1)
+					{
+						cond = 0.f;
+					}
+					else if (max_uses > 8)
+					{
+						cond = (float)remaining_uses / (float)max_uses;
+					}
+					else
+					{
+						cond = ((float)remaining_uses * 0.125f) - 0.0625f;
+					}
+
+					m_pConditionState->m_bUseGradient = false;
+				}
+			}
+
 			Ivector2 itm_grid_size = GetGridSize();
 			if(m_pParentList->GetVerticalPlacement())
 				std::swap(itm_grid_size.x, itm_grid_size.y);
@@ -308,7 +334,7 @@ void CUICellItem::UpdateConditionProgressBar()
 			float y = itm_grid_size.y * (cell_size.y + cell_space.y) - m_pConditionState->GetHeight() - 2.f;
 
 			m_pConditionState->SetWndPos(Fvector2().set(x,y));
-			m_pConditionState->SetProgressPos(iCeil(itm->GetCondition()*13.0f)/13.0f);
+			m_pConditionState->SetProgressPos( iCeil( cond * 13.0f ) / 13.0f );
 			m_pConditionState->Show(true);
 			return;
 		}

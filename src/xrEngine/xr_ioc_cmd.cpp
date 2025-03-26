@@ -96,20 +96,6 @@ public:
 		g_pEventManager->Event.Defer("KERNEL:quit");
 	}
 };
-//-----------------------------------------------------------------------
-class CCC_DbgStrCheck : public IConsole_Command
-{
-public:
-	CCC_DbgStrCheck(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) { str_container::GetInstance().verify(); }
-};
-
-class CCC_DbgStrDump : public IConsole_Command
-{
-public:
-	CCC_DbgStrDump(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) { str_container::GetInstance().dump();}
-};
 
 //-----------------------------------------------------------------------
 class CCC_MotionsStat : public IConsole_Command
@@ -126,11 +112,9 @@ class CCC_TexturesStat : public IConsole_Command
 {
 public:
 	CCC_TexturesStat(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
-	virtual void Execute(LPCSTR args) {
+	virtual void Execute(LPCSTR args) 
+	{
 		Device.DumpResourcesMemoryUsage();
-		//Device.Resources->_DumpMemoryUsage();
-		//	TODO: move this console commant into renderer
-		//VERIFY(0);
 	}
 };
 //-----------------------------------------------------------------------
@@ -689,9 +673,6 @@ void CCC_Register()
 
 #ifdef DEBUG
 
-	CMD1(CCC_DbgStrCheck,	"dbg_str_check"		);
-	CMD1(CCC_DbgStrDump,	"dbg_str_dump"		);
-
 	CMD3(CCC_Mask,		"mt_sound",				&psDeviceFlags,			mtSound);
 	CMD3(CCC_Mask,		"mt_physics",			&psDeviceFlags,			mtPhysics);
 	CMD3(CCC_Mask,		"mt_network",			&psDeviceFlags,			mtNetwork);
@@ -789,6 +770,9 @@ void CCC_Register()
 	CMD4(CCC_Float,		"cam_inert", &psCamInert, 0.0f, 0.9f);
 	CMD2(CCC_Float,		"cam_slide_inert",		&psCamSlideInert);
 
+	CMD4(CCC_Float, "cam_viewport_near", &Device.fViewportNear, EPS_S, 10.f);
+	CMD4(CCC_Float, "cam_hud_viewport_near", &Device.fHUDViewportNear, EPS_S, 10.f);
+
 	if(!Device.IsEditorMode()) {
 		CMD1(CCC_r2, "renderer");
 	}
@@ -811,6 +795,9 @@ void CCC_Register()
 
 	extern int g_svDedicateServerUpdateReate;
 	CMD4(CCC_Integer, "sv_dedicated_server_update_rate", &g_svDedicateServerUpdateReate, 1, 1000);
+	
+	extern float SheduleScaleDedicated;
+	CMD4(CCC_Float, "sv_shedule_scale", &SheduleScaleDedicated, 0, 5);
 
 	CMD1(CCC_HideConsole,		"hide");
 

@@ -4,6 +4,9 @@
 #include "../../xrUI/Widgets/UIWndCallback.h"
 #include "../../xrServerEntities/inventory_space.h"
 #include "../../xrUI/Widgets/UIHint.h"
+#include "MenuMode.h"
+
+#include "../script_game_object.h" //Alundaio
 
 class CUICharacterInfo;
 class CUIDragDropListEx;
@@ -42,15 +45,8 @@ enum EDDListType{
 		iDeadBodyBag,
 		iQuickSlot,
 		iTrashSlot,
+		iStackList,
 		iListTypeMax
-};
-
-enum EMenuMode{
-		mmUndefined,
-		mmInventory,
-		mmTrade,
-		mmUpgrade,
-		mmDeadBodySearch,
 };
 
 class CUIActorMenu :	public CUIDialogWnd, 
@@ -90,6 +86,7 @@ protected:
 
 	CUIDragDropListEx*			m_pInventoryBeltList;
 	CUIDragDropListEx*			m_pInventoryBagList;
+	CUIDragDropListEx*			m_pInventoryStackList;
 
 	CUIDragDropListEx*			m_pTradeActorBagList;
 	CUIDragDropListEx*			m_pTradeActorList;
@@ -150,24 +147,26 @@ protected:
 
 	// delimiter ------------------------------
 	CUIStatic*					m_LeftDelimiter;
-//	CUITextWnd*					m_PartnerTradeCaption;
+	CUITextWnd*					m_PartnerTradeCaption;
 	CUITextWnd*					m_PartnerTradePrice;
 	CUITextWnd*					m_PartnerTradeWeightMax;
 
 	CUIStatic*					m_RightDelimiter;
-//	CUITextWnd*					m_ActorTradeCaption;
+	CUITextWnd*					m_ActorTradeCaption;
 	CUITextWnd*					m_ActorTradePrice;
 	CUITextWnd*					m_ActorTradeWeightMax;
 
 	CTrade*						m_actor_trade;
 	CTrade*						m_partner_trade;
 
+	CUI3tButton*				m_trade_button;
 	CUI3tButton*				m_trade_buy_button;
 	CUI3tButton*				m_trade_sell_button;
+	CUI3tButton*				m_trade_barter_button;
 	CUI3tButton*				m_takeall_button;
 	CUI3tButton*				m_putall_button;
 	CUI3tButton*				m_exit_button;
-//	CUIStatic*					m_clock_value;
+	CUIStatic*					m_clock_value;
 
 	u32							m_last_time;
 	bool						m_repair_mode;
@@ -227,6 +226,7 @@ protected:
 	bool				OnItemStartDrag				(CUICellItem* itm);
 	bool				OnItemDbClick				(CUICellItem* itm);
 	bool				OnItemSelected				(CUICellItem* itm);
+	bool				OnItemDeselected				(CUICellItem* itm);
 	bool				OnItemRButtonClick			(CUICellItem* itm);
 	bool				OnItemFocusReceive			(CUICellItem* itm);
 	bool				OnItemFocusLost				(CUICellItem* itm);
@@ -234,11 +234,15 @@ protected:
 	void				OnDragItemOnTrash			(CUIDragItem* item, bool b_receive);
 	bool						OnItemDropped				(PIItem itm, CUIDragDropListEx* new_owner, CUIDragDropListEx* old_owner);
 
+	void ActivateStackList(CUICellItem* cell_item);
+
 	void						ResetMode					();
 	void						InitInventoryMode			();
 	void						DeInitInventoryMode			();
 	void						InitTradeMode				();
 	void						DeInitTradeMode				();
+	void						InitBarterMode();
+	void						DeInitBarterMode();
 	void						InitUpgradeMode				();
 	void						DeInitUpgradeMode			();
 	void						InitDeadBodySearchMode		();
@@ -247,15 +251,13 @@ protected:
 	void						CurModeToScript				();
 	void						RepairEffect_CurItem		();
 
-	void						SetCurrentItem				(CUICellItem* itm);
-	CUICellItem*				CurrentItem					();
 	PIItem						CurrentIItem				();
 
 	void						InfoCurItem					(CUICellItem* cell_item); //on update item
 
 	void						ActivatePropertiesBox		();
 	void						TryHidePropertiesBox		();
-	void				ProcessPropertiesBoxClicked	(CUIWindow* w, void* d);
+	void				        ProcessPropertiesBoxClicked	(CUIWindow* w, void* d);
 	
 	void						CheckDistance				();
 	void						UpdateItemsPlace			();
@@ -266,8 +268,10 @@ protected:
 	void						UpdateButtonsLayout			();
 
 	// inventory
+	bool						ToSlotScript				(CScriptGameObject* GO, bool force_place, u16 slot_id);
 	bool						ToSlot						(CUICellItem* itm, bool force_place, u16 slot_id);
 	bool						ToBag						(CUICellItem* itm, bool b_use_cursor_pos);
+	bool						ToBeltScript				(CScriptGameObject* GO, bool b_use_cursor_pos);
 	bool						ToBelt						(CUICellItem* itm, bool b_use_cursor_pos);
 	bool						TryUseItem					(CUICellItem* cell_itm);
 	bool						ToQuickSlot					(CUICellItem* itm);
@@ -277,7 +281,7 @@ protected:
 	void						UpdateOutfit				();
 	void						MoveArtefactsToBag			();
 	bool						TryActiveSlot				(CUICellItem* itm);
-	void				TryRepairItem				(CUIWindow* w, void* d);
+	void			  	        TryRepairItem				(CUIWindow* w, void* d);
 	bool						CanUpgradeItem				(PIItem item);
 
 	bool						ToActorTrade				(CUICellItem* itm, bool b_use_cursor_pos);
@@ -304,12 +308,18 @@ protected:
 	u32							CalcItemsPrice				(CUIDragDropListEx* pList, CTrade* pTrade, bool bBuying);
 	void						UpdatePrices				();
 	bool						CanMoveToPartner			(PIItem pItem);
-	void						TransferItems				(CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying);
+	void						TransferItems				(CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying, bool bBarter = false);
+	void						TransferItemsMp             (CUIDragDropListEx* pSellList, CUIDragDropListEx* pBuyList, CTrade* pTrade, bool bBuying);
+
+	void UpdateBoughtInfo(CUIDragDropListEx* pList, CTrade* pTrade);
+	void UpdateSoldInfo(CUIDragDropListEx* pList, CTrade* pTrade);
 
 public:
 								CUIActorMenu				();
 	virtual						~CUIActorMenu				();
 
+	CUICellItem*				CurrentItem					();
+	void						SetCurrentItem				(CUICellItem* itm);
 	virtual bool				StopAnyMove					();
 	virtual void				SendMessage					(CUIWindow* pWnd, s16 msg, void* pData = NULL);
 	virtual void				Draw						();
@@ -334,21 +344,25 @@ public:
 	void						UpdateActor					();
 	void						UpdatePartnerBag			();
 	void						UpdateDeadBodyBag			();
+	void						RefreshCurrentItemCell		();
 
+    void				OnBtnPerformTrade			(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeBuy		(CUIWindow* w, void* d);
 	void				OnBtnPerformTradeSell		(CUIWindow* w, void* d);
+	void				OnBtnPerformTradeBarter(CUIWindow* w, void* d);
 	void				OnBtnExitClicked			(CUIWindow* w, void* d);
 	void				TakeAllFromPartner			(CUIWindow* w, void* d);
 	void				PutAllToPartner			(CUIWindow* w, void* d);
 	void						TakeAllFromInventoryBox		();
 	void						UpdateConditionProgressBars	();
 
-	CScriptGameObject* GetCurrentItemAsGameObject();
-	void						HighlightSectionInSlot(pcstr section, EDDListType type, u16 slot_id = 0);
-	void						HighlightForEachInSlot(const luabind::functor<bool>& functor, EDDListType type, u16 slot_id);
+	void OnSuccessRepairMP(PIItem item);
 
-	void						RefreshCurrentItemCell();
+	CScriptGameObject* GetCurrentItemAsGameObject();
 
 	IC	UIHint*					get_hint_wnd				() { return m_hint_wnd; }
+
+	void HighlightSectionInSlot(LPCSTR section, u8 type, u16 slot_id = 0);
+	void HighlightForEachInSlot(const luabind::functor<bool>& functor, u8 type, u16 slot_id);
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 }; // class CUIActorMenu

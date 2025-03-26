@@ -17,14 +17,14 @@ void	light::vis_prepare			()
 	u32	frame	= Device.dwFrame;
 	if (frame	<	vis.frame2test)		return;
 
-	float	safe_area					= VIEWPORT_NEAR;
+	float	safe_area					= Device.fViewportNear;
 	{
 		float	a0	= deg2rad(Device.fFOV*Device.fASPECT/2.f);
 		float	a1	= deg2rad(Device.fFOV/2.f);
-		float	x0	= VIEWPORT_NEAR/_cos	(a0);
-		float	x1	= VIEWPORT_NEAR/_cos	(a1);
+		float	x0	= Device.fViewportNear /_cos	(a0);
+		float	x1	= Device.fViewportNear /_cos	(a1);
 		float	c	= _sqrt					(x0*x0 + x1*x1);
-		safe_area	= _max(_max(VIEWPORT_NEAR,_max(x0,x1)),c);
+		safe_area	= _max(_max(Device.fViewportNear,_max(x0,x1)),c);
 	}
 
 	//Msg	("sc[%f,%f,%f]/c[%f,%f,%f] - sr[%f]/r[%f]",VPUSH(spatial.center),VPUSH(position),spatial.radius,range);
@@ -36,7 +36,9 @@ void	light::vis_prepare			()
 	//	TODO: DX10: Remove this pessimization
 	//skiptest	= true;
 
-	if (skiptest || Device.vCameraPosition.distance_to(spatial.sphere.P)<=(spatial.sphere.R*1.01f+safe_area))	{	// small error
+	if (skiptest || Device.vCameraPosition.distance_to(SpatialComponent->spatial.sphere.P)<=(SpatialComponent->spatial.sphere.R*1.01f+safe_area + (SpatialComponent->spatial.sphere.R * 0.1f)))	
+	{	
+		// small error
 		vis.visible		=	true;
 		vis.pending		=	false;
 		vis.frame2test	=	frame	+ ::Random.randI(delay_small_min,delay_small_max);
@@ -72,12 +74,7 @@ void	light::vis_update			()
 
 	u32	frame			= Device.dwFrame;
 
-
-#if USE_DX11
-	u64 fragments		= RImplementation.occq_get	(vis.query_id);
-#else
-	u32 fragments		= RImplementation.occq_get	(vis.query_id);
-#endif
+	R_occlusion::occq_result fragments = RImplementation.occq_get(vis.query_id);
 
 	//Log					("",fragments);
 	vis.visible			= (fragments > cullfragments);

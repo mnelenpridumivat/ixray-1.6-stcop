@@ -20,6 +20,7 @@ struct player_hud_motion
 	shared_str				m_alias_name;
 	shared_str				m_base_name;
 	shared_str				m_additional_name;
+	xr_vector<shared_str>	m_bone_parts;
 	float					m_anim_speed;
 	xr_vector<motion_descr>	m_animations;
 };
@@ -119,7 +120,7 @@ public:
 					player_hud			(bool invert = false);
 					~player_hud			();
 	void			load				(const shared_str& model_name);
-	void			load_default		(){load("actor_hud");};
+	void			load_default		();
 	void			update				(const Fmatrix& trans);
 	void			render_hud			();	
 	void			render_item_ui		();
@@ -155,6 +156,7 @@ public:
 
 	IKinematics*	m_legs_model;
 	bool			m_show_legs = true;
+	bool			m_need_reload = true;
 
 private:
 	void			update_inertion		(Fmatrix& trans);

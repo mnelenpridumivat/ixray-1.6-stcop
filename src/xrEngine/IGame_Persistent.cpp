@@ -3,15 +3,13 @@
 
 #include "IGame_Persistent.h"
 
-#ifndef _EDITOR
 #include "Environment.h"
-#	include "x_ray.h"
-#	include "IGame_Level.h"
-#	include "XR_IOConsole.h"
-#	include "Render.h"
-#	include "ps_instance.h"
-#	include "CustomHUD.h"
-#endif
+#include "x_ray.h"
+#include "IGame_Level.h"
+#include "XR_IOConsole.h"
+#include "Render.h"
+#include "ps_instance.h"
+#include "CustomHUD.h"
 
 #ifdef _EDITOR
 	bool g_dedicated_server	= false;
@@ -121,7 +119,7 @@ void IGame_Persistent::OnGameStart()
 	loading_save_timer.Start();
 	loading_save_timer_started = true;
 	Msg("* Game Loading Timer: Started!");
-//	LoadTitle("st_prefetching_objects");
+	SetLoadStageTitle("st_prefetching_objects");
 	LoadTitle();
 	if(!Core.ParamsData.test(ECoreParams::noprefetch))
 		Prefetch();
@@ -132,21 +130,12 @@ void IGame_Persistent::OnGameStart()
 void IGame_Persistent::Prefetch()
 {
 	// prefetch game objects & models
-	float	p_time		=			1000.f*Device.GetTimerGlobal()->GetElapsed_sec();
-	u32	mem_0			=			Memory.mem_usage()	;
-
 	Log("Loading objects...");
 	ObjectPool.prefetch();
 	Log("Loading models...");
 	Render->models_Prefetch();
 	Log("Loading textures...");
 	Device.m_pRender->ResourcesDeferredUpload();
-
-	p_time				=			1000.f*Device.GetTimerGlobal()->GetElapsed_sec() - p_time;
-	u32		p_mem		=			Memory.mem_usage() - mem_0	;
-
-	Msg					("* [prefetch] time:    %d ms",	iFloor(p_time));
-	Msg					("* [prefetch] memory:  %dKb",	p_mem/1024);
 }
 #endif
 
@@ -159,13 +148,10 @@ void IGame_Persistent::OnGameEnd	()
 #endif
 }
 
-void IGame_Persistent::OnFrame		()
+void IGame_Persistent::OnFrame()
 {
-#ifndef _EDITOR
-
-	if(!Device.Paused() || Device.dwPrecacheFrame)
-		Environment().OnFrame	();
-#endif
+    if (!Device.Paused() || Device.dwPrecacheFrame)
+        Environment().OnFrame();
 }
 
 void IGame_Persistent::UpdateParticles()
@@ -178,6 +164,17 @@ void IGame_Persistent::UpdateParticles()
 		pInstance->Play(false);
 	}
 
+	if (!ps_active_deffer.empty())
+	{
+		ps_active.reserve(ps_active.size() + ps_active_deffer.size());
+
+		for (xr_shared_ptr<CPS_Instance>& Part : ps_active_deffer)
+		{
+			ps_active.push_back(Part);
+		}
+		ps_active_deffer.clear();
+	}
+
 	ps_active.erase(std::remove_if
 	(
 		ps_active.begin(), ps_active.end(),
@@ -186,10 +183,6 @@ void IGame_Persistent::UpdateParticles()
 			return Obj->m_NeedDestroy;
 		}
 	), ps_active.end());
-
-#ifdef _DEBUG
-	Msg("Suck my particles counter: %ull", ps_active.size());
-#endif
 }
 
 void IGame_Persistent::destroy_particles		(const bool &all_particles)

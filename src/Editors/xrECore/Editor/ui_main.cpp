@@ -17,6 +17,7 @@
 #include "UIImageEditorForm.h"
 #include "UISoundEditorForm.h"
 #include "UIMinimapEditorForm.h"
+#include "UIWeatherPropForm.h"
 #include "../utils/ETools/ETools.h"
 #include "UILogForm.h"
 #include "../xrEngine/gamefont.h"
@@ -289,24 +290,17 @@ void TUI::OnAppDeactivate()
 bool TUI::ShowHint(const AStringVec& SS)
 {
 	VERIFY(m_bReady);
-  /*  if (SS.size()){
-		xr_string S=_ListToSequence2(SS);
-		if (m_bHintShowing&&(S==m_LastHint)) return true;
-		m_LastHint = S;
-		m_bHintShowing = true;
-		if (!m_pHintWindow){
-			m_pHintWindow = new THintWindow((TComponent*)0);
-			m_pHintWindow->Brush->Color = (TColor)0x0d9F2FF;
+
+	if (!SS.empty() && ImGui::BeginTooltip())
+	{
+		for (const xr_string& Hint : SS)
+		{
+			ImGui::Text(Hint.c_str());
 		}
-		TRect rect = m_pHintWindow->CalcHintRect(320,S,0);
-		rect.Left+=m_HintPoint.x;    rect.Top+=m_HintPoint.y;
-		rect.Right+=m_HintPoint.x;   rect.Bottom+=m_HintPoint.y;
-		m_pHintWindow->ActivateHint(rect,S);
-	}else{
-		m_bHintShowing = false;
-		m_LastHint = "";
-	}*/
-	not_implemented();
+		ImGui::EndTooltip();
+	}
+
+	//not_implemented();
 	return m_bHintShowing;
 }
 //---------------------------------------------------------------------------
@@ -318,15 +312,17 @@ void TUI::HideHint()
 }
 //---------------------------------------------------------------------------
 
-void TUI::ShowHint(const xr_string& s)
+void TUI::ShowHint()
 {
-	VERIFY			(m_bReady);
-	GetCursorPos	(&m_HintPoint);
-	AStringVec 		SS;
-	SS.push_back	(s);
+	VERIFY(m_bReady);
+	GetCursorPos(&m_HintPoint);
+	AStringVec SS;
 	Tools->OnShowHint(SS);
-	if (!ShowHint(SS)) HideHint();
+
+	if (!ShowHint(SS)) 
+		HideHint();
 }
+
 //---------------------------------------------------------------------------
 
 #include "..\xrEngine\IGame_Persistent.h"
@@ -617,11 +613,11 @@ void TUI::OnFrame()
 	// Progress
 	ProgressDraw		();
 }
-bool TUI::Idle()         
+
+bool TUI::Idle()
 {
 	VERIFY(m_bReady);
-   // EDevice->b_is_Active  = Application->Active;
-	// input
+
 	MSG msg;
 	do
 	{
@@ -638,23 +634,47 @@ bool TUI::Idle()
 		}
 
 	} while (msg.message);
-	if (m_Flags.is(flResetUI))RealResetUI();
+
+	if (m_Flags.is(flResetUI))
+		RealResetUI();
+
 	Sleep(1);
 
-	OnFrame			();
+	OnFrame();
+
+	Device.secondary_tasks.run([]()
+	{
+		PROF_THREAD("Secondary async")
+		{
+			PROF_EVENT("Sheduler")
+			Engine.Sheduler.Update();
+		}
+
+		{
+			PROF_EVENT("seqParallel")
+			for (u32 pit = 0; pit < EDevice->seqParallel.size(); pit++)
+				EDevice->seqParallel[pit]();
+			EDevice->seqParallel.clear();
+		}
+
+		{
+			PROF_EVENT("seqFrameMT")
+			EDevice->seqFrameMT.Process(rp_Frame);
+		}
+	});
+
 	if (EDevice->b_is_Active && !m_Flags.is(flNeedQuit) && !m_AppClosed)
 		RealRedrawScene();
 
-	{
-		for (u32 pit = 0; pit < EDevice->seqParallel.size(); pit++)
-			EDevice->seqParallel[pit]();
-		EDevice->seqParallel.clear();
-		EDevice->seqFrameMT.Process(rp_Frame);
-	}
 	// test quit
-	if (m_Flags.is(flNeedQuit))	RealQuit();
+	if (m_Flags.is(flNeedQuit))	
+		RealQuit();
+
+	Device.secondary_tasks.wait();
+
 	return !m_AppClosed;
 }
+
 //---------------------------------------------------------------------------
 void ResetActionToSelect()
 {
@@ -832,6 +852,7 @@ void TUI::OnDrawUI()
 	UIImageEditorForm::Update();
 	UISoundEditorForm::Update();
 	UIMinimapEditorForm::Update();
+    UIWeatherPropForm::Update();
 	UIIconPicker::Update();
 	UILogForm::Update();
 	EDevice->seqDrawUI.Process(rp_DrawUI);

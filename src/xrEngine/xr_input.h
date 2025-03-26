@@ -1,5 +1,4 @@
-#ifndef __XR_INPUT__
-#define __XR_INPUT__
+#pragma once
 
 #define DIRECTINPUT_VERSION 0x0800
 
@@ -95,5 +94,3 @@ public:
 };
 
 extern ENGINE_API CInput *		pInput;
-
-#endif //__XR_INPUT__

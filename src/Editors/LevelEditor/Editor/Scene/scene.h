@@ -95,7 +95,9 @@ struct st_LevelOptions{
 	void			Reset			();
 };
 
-class EScene :public XrEditorSceneInterface
+class EScene :
+	public XrEditorSceneInterface,
+	private pureFrame
 {
 	CMemoryWriter 	m_SaveCache;
 public:
@@ -351,6 +353,13 @@ protected:
 public:
 	void            RegisterSubstObjectName(const xr_string& from, const xr_string& to);
 	bool            GetSubstObjectName(const xr_string& from, xr_string& to) const;
+
+private:
+	virtual void OnFrame() override;
+
+public:
+	xr_string full_name;
+
 private:
 	CLevelGraphEditor m_level_graph;
 	CGameGraphEditor m_game_graph;
@@ -358,6 +367,11 @@ private:
 
 	CGameGraphBuilder m_graph_builder;
 	CFormBuilder m_cform_builder;
+
+	bool IsAppliedPos = false;
+	Fvector ActorNewPos = {};
+	Fvector ActorNewDir = {};
+	xrSRWLock PickUpLock;
 };
 
 

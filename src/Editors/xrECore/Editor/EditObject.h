@@ -86,8 +86,8 @@ public:
 #if 1
 					~CSurface		(){R_ASSERT(!m_Shader);xr_delete(m_ImageData);}
 	IC void			CopyFrom		(CSurface* surf){*this = *surf; m_Shader=0; m_RTFlags.set(rtValidShader, FALSE);}
-	IC int			_Priority		()	{return _Shader()?_Shader()->E[0]->flags.iPriority:1;}
-	IC bool			_StrictB2F		()	{return _Shader()?_Shader()->E[0]->flags.bStrictB2F:false;}
+	IC int			_Priority		()	{return (_Shader() && _Shader()->E[0]) ?_Shader()->E[0]->flags.iPriority:1;}
+	IC bool			_StrictB2F		()	{return (_Shader() && _Shader()->E[0]) ?_Shader()->E[0]->flags.bStrictB2F:false;}
 	IC ref_shader	_Shader			()	{if (!m_RTFlags.is(rtValidShader)) OnDeviceCreate(); return m_Shader;}
 #endif
 	IC LPCSTR		_Name			()const {return *m_Name;}
@@ -538,8 +538,32 @@ private:
 	int m_VertexCount;
 
 };
+
+enum EOBJ_IDS {
+	EOBJ_CURRENT_VERSION = 0x0010,
+	EOBJ_CHUNK_OBJECT_BODY=0x7777,
+	EOBJ_CHUNK_VERSION = 0x0900,
+	EOBJ_CHUNK_REFERENCE = 0x0902,
+	EOBJ_CHUNK_FLAGS = 0x0903,
+	EOBJ_CHUNK_SURFACES = 0x0905,
+	EOBJ_CHUNK_SURFACES2 = 0x0906,
+	EOBJ_CHUNK_SURFACES3 = 0x0907,
+	EOBJ_CHUNK_EDITMESHES = 0x0910,
+	EOBJ_CHUNK_CLASSSCRIPT = 0x0912,
+	EOBJ_CHUNK_BONES = 0x0913,
+	EOBJ_CHUNK_SMOTIONS = 0x0916,
+	EOBJ_CHUNK_SURFACES_XRLC = 0x0918,
+	EOBJ_CHUNK_BONEPARTS = 0x0919,
+	EOBJ_CHUNK_ACTORTRANSFORM = 0x0920,
+	EOBJ_CHUNK_BONES2 = 0x0921,
+	EOBJ_CHUNK_DESC	= 0x0922,
+	EOBJ_CHUNK_BONEPARTS2 = 0x0923,
+	EOBJ_CHUNK_SMOTIONS2 = 0x0924,
+	EOBJ_CHUNK_LODS	= 0x0925,
+	EOBJ_CHUNK_SMOTIONS3 = 0x0926,
+};
 //----------------------------------------------------
-#define EOBJ_CURRENT_VERSION		0x0010
+/*#define EOBJ_CURRENT_VERSION		0x0010
 //----------------------------------------------------
 #define EOBJ_CHUNK_OBJECT_BODY		0x7777
 #define EOBJ_CHUNK_VERSION		  	0x0900
@@ -560,7 +584,7 @@ private:
 #define EOBJ_CHUNK_BONEPARTS2		0x0923
 #define EOBJ_CHUNK_SMOTIONS2		0x0924
 #define EOBJ_CHUNK_LODS				0x0925
-#define EOBJ_CHUNK_SMOTIONS3		0x0926
+#define EOBJ_CHUNK_SMOTIONS3		0x0926*/
 //----------------------------------------------------
 
 

@@ -41,7 +41,7 @@ CUIItemInfo::CUIItemInfo()
 	UIWeight					= nullptr;
 	UIItemImage					= nullptr;
 	UIDesc						= nullptr;
-//	UIConditionWnd				= nullptr;
+	UIConditionWnd				= nullptr;
 	UIWpnParams					= nullptr;
 	UIKnifeParams				= nullptr;
 	UIProperties				= nullptr;
@@ -58,7 +58,7 @@ CUIItemInfo::CUIItemInfo()
 
 CUIItemInfo::~CUIItemInfo()
 {
-//	xr_delete	(UIConditionWnd);
+	xr_delete	(UIConditionWnd);
 	xr_delete	(UIWpnParams);
 	xr_delete	(UIKnifeParams);
 	xr_delete	(UIArtefactParams);
@@ -68,10 +68,14 @@ CUIItemInfo::~CUIItemInfo()
 	xr_delete	(UIBoosterInfo);
 }
 
-void CUIItemInfo::InitItemInfo(LPCSTR xml_name)
+bool CUIItemInfo::InitItemInfo(LPCSTR xml_name)
 {
 	CUIXml						uiXml;
 	uiXml.Load					(CONFIG_PATH, UI_PATH, xml_name);
+
+	if (uiXml.GetNodesNum(uiXml.GetRoot(), nullptr) == 0)
+		return false;
+
 	CUIXmlInit					xml_init;
 
 	if(uiXml.NavigateToNode("main_frame",0))
@@ -130,8 +134,8 @@ void CUIItemInfo::InitItemInfo(LPCSTR xml_name)
 
 	if(uiXml.NavigateToNode("descr_list",0))
 	{
-//		UIConditionWnd					= new CUIConditionParams();
-//		UIConditionWnd->InitFromXml		(uiXml);
+		UIConditionWnd					= new CUIConditionParams();
+		UIConditionWnd->InitFromXml		(uiXml);
 		UIWpnParams						= new CUIWpnParams();
 		UIWpnParams->InitFromXml		(uiXml);
 		UIKnifeParams					= new CUIKnifeParams();
@@ -184,6 +188,7 @@ void CUIItemInfo::InitItemInfo(LPCSTR xml_name)
 	}
 
 	xml_init.InitAutoStaticGroup	(uiXml, "auto", 0, this);
+	return true;
 }
 
 void CUIItemInfo::InitItemInfo(Fvector2 pos, Fvector2 size, LPCSTR xml_name)
@@ -249,7 +254,7 @@ void CUIItemInfo::InitItem(CUICellItem* pCellItem, CInventoryItem* pCompareItem,
 
 	if (UICost != nullptr)
 	{
-		if (IsGameTypeSingle() && item_price != u32(-1))
+		if (IsGameTypeSingleCompatible() && item_price != u32(-1))
 		{
 			xr_sprintf(str, "%d RU", item_price);// will be owerwritten in multiplayer
 			UICost->SetText(str);
@@ -266,7 +271,7 @@ void CUIItemInfo::InitItem(CUICellItem* pCellItem, CInventoryItem* pCompareItem,
 		}
 	}
 	
-	if ( UITradeTip && IsGameTypeSingle())
+	if ( UITradeTip && IsGameTypeSingleCompatible())
 	{
 		pos.y = UITradeTip->GetWndPos().y;
 		if ( UIWeight && m_complex_desc )
@@ -335,7 +340,8 @@ void CUIItemInfo::InitItem(CUICellItem* pCellItem, CInventoryItem* pCompareItem,
 	if(UIItemImage)
 	{
 		// Загружаем картинку
-		UIItemImage->SetShader				(InventoryUtilities::GetEquipmentIconsShader());
+		const char* icons_texture = READ_IF_EXISTS(pSettings, r_string, m_pInvItem->m_section_id.c_str(), "icons_texture", nullptr);
+		UIItemImage->SetShader(InventoryUtilities::GetEquipmentIconsShader(icons_texture));
 
 		Irect item_grid_rect				= pInvItem->GetInvGridRect();
 		Frect texture_rect = {};
@@ -371,8 +377,8 @@ void CUIItemInfo::TryAddConditionInfo( CInventoryItem& pInvItem, CInventoryItem*
 {
 	if ( pInvItem.IsUsingCondition() )
 	{
-//		UIConditionWnd->SetInfo( pCompareItem, pInvItem );
-//		UIDesc->AddWindow( UIConditionWnd, false );
+		UIConditionWnd->SetInfo( pCompareItem, pInvItem );
+		UIDesc->AddWindow( UIConditionWnd, false );
 	}
 }
 

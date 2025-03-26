@@ -213,7 +213,7 @@ void CShootingObject::StartParticles (CParticlesObject*& pParticles, LPCSTR part
 	pParticles->SetLiveUpdate(TRUE);
 
 	UpdateParticles(pParticles, pos, vel);
-	CSpectator* tmp_spectr = smart_cast<CSpectator*>(Level().CurrentControlEntity());
+	CSpectator* tmp_spectr = IsGameTypeSingle() ? NULL : smart_cast<CSpectator*>(Level().CurrentControlEntity());
 	bool in_hud_mode = IsHudModeNow();
 	if (in_hud_mode && tmp_spectr &&
 		(tmp_spectr->GetActiveCam() != CSpectator::eacFirstEye))
@@ -300,7 +300,7 @@ void CShootingObject::OnShellDrop	(const Fvector& play_pos,
 	particles_pos.c.set		(play_pos);
 
 	pShellParticles->UpdateParent		(particles_pos, parent_vel);
-	CSpectator* tmp_spectr = smart_cast<CSpectator*>(Level().CurrentControlEntity());
+	CSpectator* tmp_spectr = IsGameTypeSingle() ? NULL : smart_cast<CSpectator*>(Level().CurrentControlEntity());
 	bool in_hud_mode = IsHudModeNow();
 	if (in_hud_mode && tmp_spectr &&
 		(tmp_spectr->GetActiveCam() != CSpectator::eacFirstEye))
@@ -333,20 +333,21 @@ void CShootingObject::StartFlameParticles	()
 	}
 
 	StopFlameParticles();
-	m_pFlameParticles = Particles::Details::Create(*m_sFlameParticlesCurrent,FALSE).get();
+	m_pFlameParticles = Particles::Details::Create(*m_sFlameParticlesCurrent,FALSE);
 	m_pFlameParticles->SetLiveUpdate(TRUE);
 
 	UpdateFlameParticles();
 	
 	
-	CSpectator* tmp_spectr = smart_cast<CSpectator*>(Level().CurrentControlEntity());
+	CSpectator* tmp_spectr = IsGameTypeSingle() ? NULL : smart_cast<CSpectator*>(Level().CurrentControlEntity());
 	bool in_hud_mode = IsHudModeNow();
 	if (in_hud_mode && tmp_spectr &&
 		(tmp_spectr->GetActiveCam() != CSpectator::eacFirstEye))
 	{
 		in_hud_mode = false;
 	}
-	m_pFlameParticles->Play(in_hud_mode);
+	if(m_pFlameParticles)
+		m_pFlameParticles->Play(in_hud_mode);
 		
 
 }
@@ -416,7 +417,7 @@ bool CShootingObject::SendHitAllowed		(CObject* pUser)
 
 	if (OnServer())
 	{
-		if (smart_cast<CActor*>(pUser))
+		if (pUser->cast_actor())
 		{
 			if (Level().CurrentControlEntity() != pUser)
 			{
@@ -427,7 +428,7 @@ bool CShootingObject::SendHitAllowed		(CObject* pUser)
 	}
 	else
 	{
-		if (smart_cast<CActor*>(pUser))
+		if (pUser->cast_actor())
 		{
 			if (Level().CurrentControlEntity() == pUser)
 			{

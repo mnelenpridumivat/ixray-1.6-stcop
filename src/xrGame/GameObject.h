@@ -44,7 +44,14 @@ class CBlend;
 class ai_obstacle;
 class CSaveObjectSave;
 class CSaveObjectLoad;
+class CMissile;
+class CExplosiveRocket;
+class CGrenade;
+class CUsableScriptObject;
+class CBreakableObject;
+
 class IKinematics;
+class CAI_Trader;
 
 template <typename _return_type>
 class CScriptCallbackEx;
@@ -70,13 +77,14 @@ public:
 	CScriptBinder* GetScriptBinderComponent() { return m_ScriptBinderComponent.get(); }
 
 	//functions used for avoiding most of the smart_cast
-	virtual CAttachmentOwner*			cast_attachment_owner		()						{return NULL;}
-	virtual CInventoryOwner*			cast_inventory_owner		()						{return NULL;}
-	virtual CInventoryItem*				cast_inventory_item			()						{return NULL;}
-	virtual CEntity*					cast_entity					()						{return NULL;}
-	virtual CEntityAlive*				cast_entity_alive			()						{return NULL;}
-	virtual CActor*						cast_actor					()						{return NULL;}
 	virtual CGameObject*				cast_game_object			()						{return this;}
+	virtual CAttachmentOwner*			cast_attachment_owner		()						{return nullptr;}
+	virtual CInventoryOwner*			cast_inventory_owner		()						{return nullptr;}
+	virtual CInventoryItem*				cast_inventory_item			()						{return nullptr;}
+	virtual CEntity*					cast_entity					()						{return nullptr;}
+	virtual CEntityAlive*				cast_entity_alive			()						{return nullptr;}
+	virtual CActor*						cast_actor					()						{return nullptr;}
+	virtual CAI_Trader*					cast_trader					()						{return nullptr;}
 	virtual CCustomZone*				cast_custom_zone			()						{return nullptr;}
 	virtual CPhysicsShellHolder*		cast_physics_shell_holder	()						{return nullptr;}
 	virtual IInputReceiver*				cast_input_receiver			()						{return nullptr;}
@@ -92,7 +100,11 @@ public:
 	virtual CHolderCustom*				cast_holder_custom			()						{return nullptr;}
 	virtual CBaseMonster*				cast_base_monster			()						{return nullptr;}
 	virtual CCar*						cast_car					()						{return nullptr;}
-
+	virtual CMissile					*cast_missile				()						{return nullptr;}
+	virtual CExplosiveRocket			*cast_explosive_rocket		()						{return nullptr;}
+	virtual CGrenade					*cast_grenade				()						{return nullptr;}
+	virtual CUsableScriptObject			*cast_usable_script_object	()						{return nullptr;}
+	virtual CBreakableObject			*cast_breakable_object		()						{return nullptr;}
 public:
 	virtual BOOL						feel_touch_on_contact	(CObject *)					{return TRUE;}
 	virtual bool						use						(CGameObject* who_use)		{return CUsableScriptObject::use(who_use);};
@@ -271,7 +283,7 @@ public:
 		return				(m_story_id);
 	}
 	
-	void FootStepCallback(float power, bool b_play, bool b_on_ground, bool b_hud_view);
+	virtual void FootStepCallback(float power, bool b_play, bool b_on_ground, bool b_hud_view);
 
 public:
 	virtual u32				ef_creature_type	() const;

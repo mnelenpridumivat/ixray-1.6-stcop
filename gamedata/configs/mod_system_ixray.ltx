@@ -1,6 +1,11 @@
 ;system.ltx
 #include "misc\anim_slot.ltx"
 
+; This is due to the fact that GSC has prescribed the sound of a gun being pulled out
+; w_knife.ltx
+![wpn_knife]
+snd_draw = weapons\draw_silent
+
 ![inventory]
 slot_persistent_4 = false ;grenades
 
@@ -13,8 +18,8 @@ offset_right = -0.4,0.2,0.0
 offset_left = 0.314,0.2,0.0
 
 ;actor.ltx
-![actor_hud]
-visual = dynamics\weapons\wpn_hand\wpn_hand_0
+![actor]
+player_hud_default = actor_hud_05
 
 ;m_burer.ltx
 ![m_burer_e]
@@ -53,20 +58,12 @@ snd_click = device\torch_click
 ;anm_bore = dev_detector_3_idle_bore
 ;anm_bore_16x9 = dev_detector_3_idle_bore_ws, dev_detector_1_idle_bore
 
-;w_binoc.ltx
-![wpn_binoc]
-use_condition = false
-
 ;w_f1.ltx
 ![grenade_f1]
 detonation_threshold_hit= 0.3
 explosion_on_hit = true
 explosion_hit_types = 6, 8 
 explosive_while_not_activated = true
-
-;w_rg6.ltx
-![wpn_rg-6]
-!reload_dof
 
 ;w_rgd5.ltx
 ![grenade_rgd5]
@@ -87,3 +84,11 @@ ssa_d_cam = 300.0
 
 [prefetch_objects_freemp]:prefetch_objects_mp
 [prefetch_visuals_freemp]:prefetch_visuals_mp
+
+[night_vision_base]
+snd_night_vision_on			= weapons\nv_start
+snd_night_vision_off		= weapons\nv_off
+snd_night_vision_idle		= weapons\nv_loop
+snd_night_vision_broken		= weapons\nv_off
+
+night_vision_disabled_maps						= ai_test,ai_test2, andy_test_

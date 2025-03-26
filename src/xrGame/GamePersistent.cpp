@@ -487,6 +487,7 @@ void CGamePersistent::game_loaded()
 			load_screen_renderer.b_need_user_input	&& 
 			m_game_params.m_e_game_type == eGameIDSingle)
 		{
+			pApp->SetLoadStageTitle("");
 			VERIFY				(nullptr==m_intro);
 			m_intro				= new CUISequencer();
 			m_intro->Start		("game_loaded");
@@ -614,7 +615,7 @@ if (!g_pGameLevel)
 						C = Actor()->Holder()->Camera();
 
 					Actor()->Cameras().UpdateFromCamera		(C);
-					Actor()->Cameras().ApplyDevice			(VIEWPORT_NEAR);
+					Actor()->Cameras().ApplyDevice			(Device.fViewportNear);
 #ifdef DEBUG
 					if(psActorFlags.test(AF_NO_CLIP))
 					{
@@ -660,7 +661,7 @@ if (!g_pGameLevel)
 				C = Actor()->Holder()->Camera();
 
 			Actor()->Cameras().UpdateFromCamera			(C);
-			Actor()->Cameras().ApplyDevice				(VIEWPORT_NEAR);
+			Actor()->Cameras().ApplyDevice				(Device.fViewportNear);
 
 		}
 #endif // MASTER_GOLD
@@ -670,11 +671,6 @@ if (!g_pGameLevel)
 
 	if (!Device.Paused())
 	{
-		if (Device.IsEditorMode())
-		{
-			Engine.Sheduler.Update();
-		}
-
 		// update weathers ambient
 		WeathersUpdate();
 	}
@@ -838,7 +834,8 @@ void CGamePersistent::OnRenderPPUI_PP()
 void CGamePersistent::LoadTitle(bool change_tip, shared_str map_name)
 {
 	pApp->LoadStage();
-	if(change_tip)
+	const static bool disableLoadScreenTips = EngineExternal()[EEngineExternalRender::DisableLoadScreenTips];
+	if(change_tip && !disableLoadScreenTips)
 	{
 		string512				buff;
 		u8						tip_num;
@@ -865,6 +862,21 @@ void CGamePersistent::LoadTitle(bool change_tip, shared_str map_name)
 
 		pApp->LoadTitleInt		(g_pStringTable->translate("ls_header").c_str(), tmp.c_str(), g_pStringTable->translate(buff).c_str());
 	}
+}
+
+void CGamePersistent::SetLoadStageTitle(pcstr ls_title)
+{
+	if (Device.IsEditorMode()) // idk why, but SDK keeps crashing here for some reason, so I decided to just turn off load stages for SDK
+		return;
+
+	string256 buff;
+	if (ls_title)
+	{
+		xr_sprintf(buff, "%s%s", g_pStringTable->translate(ls_title).c_str(), "...");
+		pApp->SetLoadStageTitle(buff);
+	}
+	else
+		pApp->SetLoadStageTitle("");
 }
 
 bool CGamePersistent::CanBePaused()

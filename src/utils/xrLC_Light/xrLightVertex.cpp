@@ -16,7 +16,7 @@ xrCriticalSection						g_trans_CS
 #endif // PROFILE_CRITICAL_SECTIONS
 ;
 extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
-
+ 
 void	g_trans_register_internal		(Vertex* V)
 {
 	R_ASSERT	(V);
@@ -134,7 +134,10 @@ public:
 
 				CDB::COLLIDER	DB;
 				DB.ray_options	(0);
-				LightPoint			(&DB, lc_global_data()->RCAST_Model(), vC, V->P, V->N, lc_global_data()->L_static(), (lc_global_data()->b_nosun()?LP_dont_sun:0)|LP_dont_hemi, 0);
+
+				u32 flags = (lc_global_data()->b_nosun() ? LP_dont_sun : 0) | LP_dont_hemi;
+  				LightPoint			(&DB, lc_global_data()->RCAST_Model(), vC, V->P, V->N, lc_global_data()->L_static(), flags, 0);
+
 				vC._tmp_			= v_trans;
 				vC.mul				(.5f);
 				vC.hemi				= old.hemi;			// preserve pre-calculated hemisphere
@@ -143,63 +146,69 @@ public:
 				g_trans_register	(V);
 			}
 
-			thProgress			= float(counter) / float(lc_global_data()->g_vertices().size());
+			thProgress = float(counter) / float(lc_global_data()->g_vertices().size());
 		}
 	}
 };
-namespace lc_net{
-void RunLightVertexNet();
-}
-#define NUM_THREADS			4
-void LightVertex	()
+
+void LightVertex()
 {
-	g_trans				= new mapVert	();
+	g_trans = new mapVert();
 
 	// Start threads, wait, continue --- perform all the work
-	Status				("Calculating...");
+	Status("Calculating...");
 
- 
-	CThreadManager		Threads;
-	VLT.init			();
-	CTimer	start_time;	start_time.Start();				
-	for (u32 thID=0; thID<NUM_THREADS; thID++)	Threads.start(new CVertexLightThread(thID));
-	Threads.wait		();
-	clMsg				("%f seconds",start_time.GetElapsed_sec());
-	 
+	CThreadManager Threads;
+	VLT.init();
+	CTimer start_time;	
+	start_time.Start();
+
+	const u32 NUM_THREADS = CPU::ID.n_threads - 2;
+
+	for (u32 thID = 0; thID < NUM_THREADS; thID++)
+	{
+		Threads.start(new CVertexLightThread(thID));
+	}
+	
+	Threads.wait();
+	clMsg("%f seconds", start_time.GetElapsed_sec());
+
 
 	// Process all groups
-	Status				("Transluenting...");
-	for (mapVertIt it=g_trans->begin(); it!=g_trans->end(); it++)
+	Status("Transluenting...");
+	for (mapVertIt it = g_trans->begin(); it != g_trans->end(); it++)
 	{
 		// Unique
-		vecVertex&	VL	= it->second;
-		std::sort		(VL.begin(),VL.end());
-		VL.erase		(std::unique(VL.begin(),VL.end()),VL.end());
+		vecVertex& VL = it->second;
+		std::sort(VL.begin(), VL.end());
+		VL.erase(std::unique(VL.begin(), VL.end()), VL.end());
 
 		// Calc summary color
-		base_color_c	C;
-		for (u32 v=0; v<VL.size(); v++)
+		base_color_c C;
+		for (u32 v = 0; v < VL.size(); v++)
 		{
-			base_color_c	cc;	VL[v]->C._get(cc);
-			C.max			(cc);
+			base_color_c cc;
+			VL[v]->C._get(cc);
+			C.max(cc);
 		}
 
 		// Calculate final vertex color
-		for (u32 v=0; v<VL.size(); v++)
+		for (u32 v = 0; v < VL.size(); v++)
 		{
-			base_color_c		vC;
-			VL[v]->C._get		(vC);
+			base_color_c vC;
+			VL[v]->C._get(vC);
 
 			// trans-level
-			float	level		= vC._tmp_;
+			float level = vC._tmp_;
 
 			// 
-			base_color_c		R;
-			R.lerp				(vC,C,level);
-			R.max				(vC);
-			VL[v]->C._set		(R);
+			base_color_c R;
+			R.lerp(vC, C, level);
+			R.max(vC);
+			VL[v]->C._set(R);
 		}
 	}
-	xr_delete	(g_trans);
-	Status				("Wating...");
+
+	xr_delete(g_trans);
+	Status("Wating...");
 }

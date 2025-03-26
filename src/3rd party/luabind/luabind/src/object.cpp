@@ -35,41 +35,17 @@ namespace luabind
 		return L;
 	}
 
-	LUABIND_API void DebugPrintStack(lua_State* L) {
+	LUABIND_API string_class DebugPrintStack(lua_State* L)
+	{
 		string_class msg("");
 		luabind::object debug_space = luabind::get_globals(L)["debug"];
 		luabind::object traceback = debug_space["traceback"];
 		string_class tracebackstr = luabind::call_function<string_class>(traceback);
 		msg += "\n traceback: \n";
 		msg += tracebackstr;
-
-		OutputDebugStringA(msg.c_str());
+		
+		return msg;
 	}
-
-	LUABIND_API void DebugGetVar(lua_State* L, int index) {
-		lua_Debug ar;
-		if (lua_getstack(L, 0, &ar))
-		{
-			int i = 1;
-			const char* name;
-			while ((name = lua_getlocal(L, &ar, i)) != nullptr)
-			{
-				if (lua_rawequal(L, -1, index))
-				{
-					string_class msg("Local variable: ");
-					msg += name;
-					msg += "\n";
-					OutputDebugStringA(msg.c_str());
-					//std::cout << "Local variable: " << name << "\n";
-					lua_pop(L, 1);
-					break;
-				}
-				lua_pop(L, 1);
-				++i;
-			}
-		}
-	}
-
 	namespace detail
 	{
 

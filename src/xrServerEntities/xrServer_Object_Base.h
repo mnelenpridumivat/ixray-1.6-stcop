@@ -177,6 +177,10 @@ public:
 	virtual CSE_ALifeSmartZone			*cast_smart_zone			() {return nullptr;};
 	virtual CSE_ALifeOnlineOfflineGroup	*cast_online_offline_group	() {return nullptr;};
 	virtual CSE_ALifeItemPDA			*cast_item_pda				() {return nullptr;};
+
+	// For new sync system
+	virtual void SyncRead(NET_Packet& Packet)  {};
+	virtual void SyncWrite(NET_Packet& Packet) {};
 };
 
 #pragma warning(pop)

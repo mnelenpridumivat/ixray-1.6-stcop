@@ -152,7 +152,6 @@ public:
 	CLight_Compute_XFORM_and_VIS LR;
 
 	xr_list<light*> v_all_lights_dque;
-	xr_list<light*> v_all_lights;
 
 public:
 	// Occlusion culling
@@ -175,7 +174,7 @@ public:
 	virtual void					Render();
 
 	virtual void					set_Transform(Fmatrix* M);
-	virtual void					add_Visual(IRenderVisual* visual, bool ignore_opt = false);
+	virtual void					add_Visual(IRenderVisual* visual);
 
 	virtual ref_shader		getShader(int id);
 	virtual	CRenderTarget* getTarget() { return Target; }
@@ -337,7 +336,7 @@ protected:
 		void*& result
 	) override;
 	private:
-		xr_vector<ISpatial*> lstRenderables;
+		xr_vector<ISpatialShared> lstRenderables;
 };
 #ifdef REDITOR
 #include "ui_main.h"

@@ -11,39 +11,52 @@
 #include "game_graph_space.h"
 #include "game_level_cross_table.h"
 
+struct ENGINE_API CVertexWithEdges {
+	using CEdge = GameGraph::CEdge;
+	using CVertex = GameGraph::CVertex;
+	using CLevelPoint = GameGraph::CLevelPoint;
+
+	CVertex vertex;
+	xr_vector<CEdge> edges;
+	xr_vector<CLevelPoint> death_points;
+
+	void Serialize(IWriter& writer);
+	void Serialize(IReader& reader);
+};
+
 class ENGINE_API IGameGraph 
 {
 private:
 	friend class CRenumbererConverter;
 
 public:
-	typedef GameGraph::_GRAPH_ID    _GRAPH_ID;
-	typedef GameGraph::_LEVEL_ID	_LEVEL_ID;
-	typedef GameGraph::_LOCATION_ID	_LOCATION_ID;
-	typedef GameGraph::SLevel		SLevel;
-	typedef GameGraph::CEdge		CEdge;
-	typedef GameGraph::CVertex		CVertex;
-	typedef GameGraph::CHeader		CHeader;
-	typedef GameGraph::CLevelPoint	CLevelPoint;
+	using _GRAPH_ID =		GameGraph::_GRAPH_ID;
+	using _LEVEL_ID =		GameGraph::_LEVEL_ID;
+	using _LOCATION_ID =	GameGraph::_LOCATION_ID;
+	using SLevel =			GameGraph::SLevel;
+	using CEdge =			GameGraph::CEdge;
+	using CVertex =			GameGraph::CVertex;
+	using CHeader =			GameGraph::CHeader;
+	using CLevelPoint =		GameGraph::CLevelPoint;
 
-public:		
-	typedef const CEdge				*const_iterator;
-	typedef const CLevelPoint		*const_spawn_iterator;
-	typedef xr_vector<CLevelPoint>	LEVEL_POINT_VECTOR;
-	typedef xr_vector<bool>			ENABLED;
+	using const_iterator = xr_vector<CEdge>::const_iterator;
+	using LEVEL_POINT_VECTOR = xr_vector<CLevelPoint>;
+	using const_spawn_iterator = xr_vector<CLevelPoint>::const_iterator;
+	using ENABLED = xr_vector<bool>;
 
 protected:
-	CHeader							m_header;
-	CVertex							*m_nodes;
-	BYTE							*m_edges;
+	CHeader										m_header;
+	xr_vector<CVertexWithEdges>	m_nodes;
+	LEVEL_POINT_VECTOR							m_points;
 	mutable ENABLED					m_enabled;
 	_GRAPH_ID						m_current_level_some_vertex_id;
 
 protected:
-	u32								*m_cross_tables;
+	xr_hash_map<_LEVEL_ID, IGameLevelCrossTable> m_cross_tables;
 	IGameLevelCrossTable			*m_current_level_cross_table;
 
 public:
+
 						IGameGraph();
 	virtual				~IGameGraph();
 	virtual		void	save						(IWriter &stream);

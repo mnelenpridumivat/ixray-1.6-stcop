@@ -53,6 +53,7 @@ public:
 	void				InitOthersStartDialog	();
 	virtual bool		OnKeyboardAction				(int dik, EUIMessages keyboard_action);
 	void				SwitchToTrade			();
+	void				SwitchToBarter();
 	void				SwitchToUpgrade			();
 	void				AddIconedMessage		(LPCSTR caption, LPCSTR text, LPCSTR texture_name, LPCSTR templ_name);
 

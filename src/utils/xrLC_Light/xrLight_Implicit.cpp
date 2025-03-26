@@ -2,7 +2,6 @@
 
 #include "xrLight_Implicit.h"
 #include "xrLight_ImplicitDeflector.h"
-#include "xrLight_ImplicitRun.h"
 
 #include "tga.h"
 
@@ -43,7 +42,7 @@ void	ImplicitThread::Execute()
 }
 
 // 2 : Mainthread + UI thread
-#define	NUM_THREADS	 CPU::ID.n_threads - 1
+#define	NUM_THREADS	 CPU::ID.n_threads
 ImplicitCalcGlobs cl_globs;
 int ThreadTaskID_Implication = 0;
 
@@ -92,6 +91,9 @@ void	ImplicitExecute::	Execute	( )
 				break;
 			}
 			ThreadTaskID_Implication++;
+
+			Progress( float(V) / float(defl.Height()) );
+
 			csLockImplicit.Leave();
 
 
@@ -124,7 +126,11 @@ void	ImplicitExecute::	Execute	( )
 								wP.from_bary(V1->P,V2->P,V3->P,B);
 								wN.from_bary(V1->N,V2->N,V3->N,B);
 								wN.normalize();
-								LightPoint	(&DB, inlc_global_data()->RCAST_Model(), C, wP, wN, inlc_global_data()->L_static(), (inlc_global_data()->b_nosun()?LP_dont_sun:0), F);
+							
+								
+
+								u32 flags = (inlc_global_data()->b_nosun() ? LP_dont_sun : 0);
+ 								LightPoint	(&DB, inlc_global_data()->RCAST_Model(), C, wP, wN, inlc_global_data()->L_static(), flags, F);
 								Fcount		++;
 							}
 						}
@@ -143,7 +149,10 @@ void	ImplicitExecute::	Execute	( )
 					defl.Marker(U,V)	= 0;
 				}
 			}
-	//		thProgress	= float(V - y_start) / float(y_end-y_start);
+
+			if (V % 64 == 0)
+				Status("CurrentV: %d", V);
+			
 		}
 }
 
@@ -228,11 +237,14 @@ void ImplicitLightingExec()
 		// base
 		Status	("Saving base...");
 		{
-			string_path				name, out_name;
-			sscanf					(strstr(Core.Params,"-f")+2,"%s",name);
+			string128				name; 
+			string_path				out_name;
+ 			xr_strcpy (name, lc_global_data()->GetLavelName() );
+			
 			R_ASSERT				(name[0] && defl.texture);
+
 			b_BuildTexture& TEX		=	*defl.texture;
-			xr_strconcat(out_name,name,"\\",TEX.name,".dds");
+			xr_strconcat(out_name, name, "\\", TEX.name, ".dds");
 			FS.update_path			(out_name,"$game_levels$",out_name);
 			clMsg					("Saving texture '%s'...",out_name);
 			VerifyPath				(out_name);
@@ -251,11 +263,10 @@ void ImplicitLightingExec()
 		// lmap
 		Status	("Saving lmap...");
 		{
-			//xr_vector<u32>			packed;
-			//defl.lmap.Pack			(packed);
-
-			string_path				name, out_name;
-			sscanf					(strstr(GetCommandLineA(),"-f")+2,"%s",name);
+			string128				name;
+			string_path				out_name;
+			xr_strcpy(name, lc_global_data()->GetLavelName());
+			 
 			b_BuildTexture& TEX		=	*defl.texture;
 			xr_strconcat(out_name,name,"\\",TEX.name,"_lm.dds");
 			FS.update_path			(out_name,"$game_levels$",out_name);

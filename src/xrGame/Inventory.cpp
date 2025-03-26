@@ -23,6 +23,7 @@
 #include "ai/stalker/ai_stalker.h"
 #include "WeaponMagazined.h"
 #include "Car.h"
+#include "purchase_list.h"
 
 using namespace InventoryUtilities;
 
@@ -609,7 +610,7 @@ void CInventory::Activate(u16 slot, bool bForce)
 			CHudItem* tempItem = active_item->cast_hud_item();
 			R_ASSERT2(tempItem, active_item->object().cNameSect().c_str());
 			
-			if (!tempItem->SendDeactivateItem())
+			if (tempItem == nullptr || !tempItem->SendDeactivateItem())
 				return;
 
 		} else //in case where weapon is going to destroy
@@ -627,7 +628,11 @@ void CInventory::Activate(u16 slot, bool bForce)
 
 PIItem CInventory::ItemFromSlot(u16 slot) const
 {
-	VERIFY(NO_ACTIVE_SLOT != slot);
+	if (NO_ACTIVE_SLOT == slot)
+	{
+		return nullptr;
+	}
+
 	const auto& Slot = m_slots.find(slot);
 	return (*Slot).second.m_pIItem;
 }
@@ -715,7 +720,7 @@ bool CInventory::Action(u16 cmd, u32 flags)
 	case kWPN_6:
 		{
 			b_send_event = true;
-			if (cmd == kWPN_6 && !IsGameTypeSingle()) return false;
+			if (cmd == kWPN_6 && !IsGameTypeSingleCompatible()) return false;
 			
 			u16 slot = u16(cmd - kWPN_1 + 1);
 			if ( flags & CMD_START )
@@ -728,11 +733,11 @@ bool CInventory::Action(u16 cmd, u32 flags)
 		    b_send_event = true;
 			if(flags&CMD_START)
 			{
-                if(GetActiveSlot() == ARTEFACT_SLOT &&
-					ActiveItem() /*&& IsGameTypeSingle()*/)
+                if(GetActiveSlot() == ARTEFACT_SLOT && ActiveItem())
 				{
 					Activate(NO_ACTIVE_SLOT);
-				}else {
+				}else 
+				{
 					Activate(ARTEFACT_SLOT);
 				}
 			}
@@ -828,7 +833,7 @@ void CInventory::Update()
 			
 			m_iActiveSlot			= GetNextActiveSlot();
 		}
-		if((GetNextActiveSlot()!=NO_ACTIVE_SLOT) && ActiveItem() && (!ActiveItem()->cast_hud_item() || ActiveItem()->cast_hud_item()->IsHidden()))
+		if((GetNextActiveSlot()!=NO_ACTIVE_SLOT) && ActiveItem() && ActiveItem()->cast_hud_item() && ActiveItem()->cast_hud_item()->IsHidden())
 				ActiveItem()->ActivateItem();
 	}
 	UpdateDropTasks	();
@@ -1099,14 +1104,32 @@ bool CInventory::Eat(PIItem pIItem)
 	Msg( "--- Actor [%d] use or eat [%d][%s]", entity_alive->ID(), pItemToEat->object().ID(), pItemToEat->object().cNameSect().c_str() );
 #endif // MP_LOGGING
 
-	if(IsGameTypeSingle() && Actor()->m_inventory == this)
-		Actor()->callback(GameObject::eUseObject)((smart_cast<CGameObject*>(pIItem))->lua_game_object());
-
-	if(pItemToEat->Empty())
+	luabind::functor<bool>	funct;
+	if (ai().script_engine().functor("_G.CInventory__eat", funct))
 	{
-		pIItem->SetDropManual(TRUE);
-		return		false;
+		if (!funct(smart_cast<CGameObject*>(pItemToEat->object().H_Parent())->lua_game_object(), (smart_cast<CGameObject*>(pIItem))->lua_game_object()))
+			return false;
 	}
+
+	if (Actor()->m_inventory == this)
+	{
+		if (IsGameTypeSingle())
+			Actor()->callback(GameObject::eUseObject)((smart_cast<CGameObject*>(pIItem))->lua_game_object());
+
+		if (pItemToEat->IsUsingCondition() && pItemToEat->GetRemainingUses() < 1 && pItemToEat->CanDelete())
+			CurrentGameUI()->ActorMenu().RefreshCurrentItemCell();
+		
+		CurrentGameUI()->ActorMenu().SetCurrentItem(NULL);
+	}
+
+	if (pItemToEat->Empty())
+	{
+		if (!pItemToEat->CanDelete())
+			return false;
+
+		pIItem->SetDropManual(TRUE);
+	}
+
 	return			true;
 }
 
@@ -1270,13 +1293,32 @@ u32  CInventory::BeltWidth() const
 	return 0; //m_iMaxBelt;
 }
 
-void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_trade) const
+void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_trade, EMenuMode mode, CPurchaseList* quota_list) const
 {
+	xr_hash_map<shared_str, u32> quota_map = {};
+	if (quota_list) {
+		quota_list->CopyList(quota_map);
+	}
+
 	for(TIItemContainer::const_iterator it = m_ruck.begin(); m_ruck.end() != it; ++it) 
 	{
 		PIItem pIItem = *it;
-		if(!for_trade || pIItem->CanTrade())
-			items_container.push_back(pIItem);
+		if (for_trade) {
+			if (mode == mmTrade && !pIItem->CanTrade()) {
+				continue;
+			}
+			if (mode == mmBarter && !pIItem->CanBarter()) {
+				continue;
+			}
+			if (quota_list) {
+				auto elem = quota_map.find(pIItem->m_section_id);
+				if (elem == quota_map.end() || !elem->second) {
+					continue;
+				}
+				--elem->second;
+			}
+		}
+		items_container.push_back(pIItem);
 	}
 
 	if(m_bBeltUseful)
@@ -1284,8 +1326,22 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		for(TIItemContainer::const_iterator it = m_belt.begin(); m_belt.end() != it; ++it) 
 		{
 			PIItem pIItem = *it;
-			if(!for_trade || pIItem->CanTrade())
-				items_container.push_back(pIItem);
+			if (for_trade) {
+				if (mode == mmTrade && !pIItem->CanTrade()) {
+					continue;
+				}
+				if (mode == mmBarter && !pIItem->CanBarter()) {
+					continue;
+				}
+				if (quota_list) {
+					auto elem = quota_map.find(pIItem->m_section_id);
+					if (elem == quota_map.end() || !elem->second) {
+						continue;
+					}
+					--elem->second;
+				}
+			}
+			items_container.push_back(pIItem);
 		}
 	}
 	
@@ -1295,8 +1351,9 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		std::uint16_t E = LastSlot();
 		for (; I <= E; ++I) {
 			PIItem item = ItemFromSlot(I);
-			if (item && (item->BaseSlot() != BOLT_SLOT))
+			if (item && (item->BaseSlot() != BOLT_SLOT)) {
 				items_container.push_back(item);
+			}
 		}
 	}
 	else if (m_bSlotsUseful) {
@@ -1305,8 +1362,23 @@ void  CInventory::AddAvailableItems(TIItemContainer& items_container, bool for_t
 		for(;I<=E;++I)
 		{
 			PIItem item = ItemFromSlot(I);
-			if(item && (!for_trade || item->CanTrade())  )
+			if(item  )
 			{
+				if (for_trade) {
+					if (mode == mmTrade && !item->CanTrade()) {
+						continue;
+					}
+					if (mode == mmBarter && !item->CanBarter()) {
+						continue;
+					}
+					if (quota_list) {
+						auto elem = quota_map.find(item->m_section_id);
+						if (elem == quota_map.end() || !elem->second) {
+							continue;
+						}
+						--elem->second;
+					}
+				}
 				const auto& Slot = m_slots.find(I);
 				if (!(*Slot).second.m_bPersistent || item->BaseSlot() == GRENADE_SLOT) {
 					if (pOwner) {

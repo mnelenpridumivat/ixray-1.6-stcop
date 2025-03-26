@@ -978,7 +978,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 	FS.TryLoad(fn.c_str());
 
-	auto ltxFile = new CInifile(fn.c_str(), TRUE);
+	xr_unique_ptr<CInifile> ltxFile = xr_make_unique<CInifile>(fn.c_str(), TRUE);
 
 	if (ltxFile->section_exist("global_map"))
 	{
@@ -1066,7 +1066,6 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 	ActiveFile = fn;
 	ActiveFileShort = FS.fix_path(fn);
 
-	xr_delete(ltxFile);
 	isEdited = false;
 }
 
@@ -1200,7 +1199,7 @@ void UIMinimapEditorForm::Update()
 		if (!Form->IsClosed())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(500, 500));
-			if (ImGui::Begin("MinimapEditor", &Form->bOpen))
+			if (ImGui::Begin("Minimap Editor", &Form->bOpen))
 			{
 				Form->Draw();
 			}

@@ -20,8 +20,7 @@ CHelicopter::CHelicopter()
 	m_light_render	= nullptr;
 	m_lanim			= nullptr;
 
-	ISpatial*		self				=	smart_cast<ISpatial*> (this);
-	if (self)		self->spatial.type  |=  STYPE_VISIBLEFORAI;
+	SpatialComponent->spatial.type  |=  STYPE_VISIBLEFORAI;
 
 	m_movement.parent	= this;
 	m_body.parent		= this;
@@ -369,10 +368,8 @@ void CHelicopter::MoveStep()
 	
 	float needBodyB = -ang_diff*sign*m_body.model_bank_k*m_movement.curLinearSpeed;
 	angle_lerp	(m_body.currBodyHPB.z, needBodyB, m_body.model_angSpeedBank, STEP);
-	
 
 	XFORM().setHPB(m_body.currBodyHPB.x,m_body.currBodyHPB.y,m_body.currBodyHPB.z);
-
 	XFORM().translate_over(m_movement.currP);
 }
 
@@ -401,7 +398,9 @@ void CHelicopter::UpdateCL()
 	m_movement.Update();
 
 	m_stepRemains+=Device.fTimeDelta;
-	while(m_stepRemains>STEP){
+
+	while(m_stepRemains>STEP)
+	{
 		MoveStep();
 		m_stepRemains-=STEP;
 	}
@@ -433,20 +432,24 @@ void CHelicopter::UpdateCL()
 
 void CHelicopter::shedule_Update(u32 time_delta)
 {
-	if (!getEnabled())	return;
+	if (!getEnabled() || OnClient())
+		return;
 
-	inherited::shedule_Update	(time_delta);
-	if(CPHDestroyable::Destroyed())CPHDestroyable::SheduleUpdate(time_delta);
-	else	CPHSkeleton::Update(time_delta);
-	
-	if(state() != CHelicopter::eDead){
-		for(u32 i=getRocketCount(); i<4; ++i)
+	inherited::shedule_Update(time_delta);
+	if (CPHDestroyable::Destroyed())
+		CPHDestroyable::SheduleUpdate(time_delta);
+	else
+		CPHSkeleton::Update(time_delta);
+
+	if (state() != CHelicopter::eDead) 
+	{
+		for (u32 i = getRocketCount(); i < 4; ++i)
 			CRocketLauncher::SpawnRocket(*m_sRocketSection, this);
 	}
-	if(m_ready_explode)ExplodeHelicopter();
+
+	if (m_ready_explode)
+		ExplodeHelicopter();
 }
-
-
 
 void CHelicopter::goPatrolByPatrolPath (LPCSTR path_name, int start_idx)
 {
@@ -576,6 +579,36 @@ void CHelicopter::net_Relcase(CObject* O )
 {
 	CExplosive::net_Relcase(O);
 	inherited::net_Relcase(O);
+}
+
+void CHelicopter::net_Import(NET_Packet& P)
+{
+	inherited::net_Import(P);
+}
+
+void CHelicopter::net_Export(NET_Packet& P)
+{
+	inherited::net_Export(P);
+}
+
+BOOL CHelicopter::net_Relevant()
+{
+	return !IsGameTypeSingle();
+}
+
+void CHelicopter::SyncRead(NET_Packet& Packet)
+{
+	Fvector Pos = Packet.r_vec3();
+
+	m_movement.SetDestPosition(&Pos);
+	SetMaxVelocity(150);
+
+	m_movement.AlreadyOnPoint();
+}
+
+void CHelicopter::SyncWrite(NET_Packet& Packet)
+{
+	Packet.w_vec3(m_movement.currP);
 }
 void CHelicopter::DropFlares()
 {

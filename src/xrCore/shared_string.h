@@ -7,7 +7,7 @@ using str_c = const char*;
 #pragma warning(disable : 4200)
 struct XRCORE_API str_value
 {
-	u32 dwReference;
+	xr_atomic_u32 dwReference;
 	u32 dwLength;
 	u32 dwCRC;
 
@@ -50,13 +50,7 @@ public:
 
 	str_value* dock(str_c value);
 	void clean();
-	void dump();
-	void dump(IWriter* W);
-	void verify();
 	u32  stat_economy();
-//#ifdef PROFILE_CRITICAL_SECTIONS
-//	str_container() :cs(MUTEX_PROFILE_ID(str_container)) {}
-//#endif // PROFILE_CRITICAL_SECTIONS
 };
 
 /*class XRCORE_API str_container_handle {

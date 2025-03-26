@@ -1,10 +1,12 @@
 #pragma once
 #include "inventory_item.h"
+#include "UIActorMenu.h"
 
 class CInventory;
 class CInventoryItem;
 class CHudItem;
 class CInventoryOwner;
+class CPurchaseList;
 
 class CInventorySlot
 {									
@@ -145,7 +147,7 @@ protected:
 
 public:
 	//возвращает все кроме PDA в слоте и болта
-	void				AddAvailableItems			(TIItemContainer& items_container, bool for_trade) const;
+	void				AddAvailableItems			(TIItemContainer& items_container, bool for_trade, EMenuMode mode, CPurchaseList* quota_list = nullptr) const;
 
 	float				GetMaxWeight				() const				{return m_fMaxWeight;}
 	void				SetMaxWeight				(float weight)			{m_fMaxWeight = weight;}

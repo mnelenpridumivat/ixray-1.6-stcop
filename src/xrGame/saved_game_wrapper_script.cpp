@@ -15,9 +15,14 @@
 
 using namespace luabind;
 
-xrTime CSavedGameWrapper__game_time		(const CSavedGameWrapper *self_)
+xrTime CSavedGameWrapper__game_time		(const CSavedGameWrapper *self)
 {
-	return			(xrTime(self_->game_time()));
+	return			(xrTime(self->game_time()));
+}
+
+LPCSTR CSavedGameWrapper__save_extension()
+{
+	return IXRAY_DEF_SAVE_EXTENSION;
 }
 
 #pragma optimize("s",on)
@@ -32,7 +37,8 @@ void CSavedGameWrapper::script_register	(lua_State *L)
 			.def("level_name",		&CSavedGameWrapper::level_name)
 			.def("actor_health",	&CSavedGameWrapper::actor_health),
 
-		def("valid_saved_game",		(bool (*)(LPCSTR))(&valid_saved_game))
+		def("valid_saved_game",		(bool (*)(LPCSTR))(&valid_saved_game)),
+		def("save_extension",	&CSavedGameWrapper__save_extension)
 	];
 }
 

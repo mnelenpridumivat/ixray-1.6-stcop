@@ -130,6 +130,14 @@ void CDangerManager::update			()
 	STOP_PROFILE
 }
 
+void CDangerManager::remove(const CDangerObject& object)
+{
+	if (m_selected && m_selected == &object)
+		m_selected = 0;
+	m_objects.erase(std::remove_if(m_objects.begin(), m_objects.end(), CFindPredicate(object)), m_objects.end());
+	update();
+}
+
 void CDangerManager::remove_links	(const CObject *object)
 {
 	if (m_selected && (m_selected->object() == object))
@@ -238,8 +246,8 @@ void CDangerManager::add			(const CVisibleObject &object)
 		return;
 
 	PROF_EVENT("DangerManager::add_VisibleObject");
-
-	const CEntityAlive		*obj = smart_cast<const CEntityAlive*>(object.m_object);
+	CGameObject* GO = const_cast<CGameObject*>(object.m_object);
+	const CEntityAlive		*obj = GO->cast_entity_alive();
 	if (obj && !obj->g_Alive() && (obj->killer_id() != ALife::_OBJECT_ID(-1))) {
 		add					(CDangerObject(obj,obj->Position(),object.m_level_time,CDangerObject::eDangerTypeFreshEntityCorpse,CDangerObject::eDangerPerceiveTypeVisual));
 		return;
@@ -248,12 +256,13 @@ void CDangerManager::add			(const CVisibleObject &object)
 
 void CDangerManager::add			(const CSoundObject &object)
 {
-	if (!object.m_enabled || object.m_object->getDestroy())
+	if (!object.m_object || !object.m_enabled || object.m_object->getDestroy())
 		return;
 	
 	PROF_EVENT("DangerManager::add_SoundObject");
 
-	const CEntityAlive		*obj = smart_cast<const CEntityAlive*>(object.m_object);
+	CGameObject* GO = const_cast<CGameObject*>(object.m_object);
+	const CEntityAlive		*obj = GO->cast_entity_alive();
 	
 	if ((object.m_sound_type & SOUND_TYPE_BULLET_HIT) == SOUND_TYPE_BULLET_HIT) {
 		add					(CDangerObject(obj,object.m_object_params.m_position,object.m_level_time,CDangerObject::eDangerTypeBulletRicochet,CDangerObject::eDangerPerceiveTypeSound));
@@ -268,7 +277,7 @@ void CDangerManager::add			(const CSoundObject &object)
 	if ((object.m_sound_type & SOUND_TYPE_INJURING) == SOUND_TYPE_INJURING) {
 		bool				do_add = true;
 		if (object.m_object) {
-			const CActor	*actor = smart_cast<const CActor*>(object.m_object);
+			const CActor	*actor = GO->cast_actor();
 			if (actor && !m_object->is_relation_enemy(actor))
 				do_add		= false;
 		}
@@ -290,7 +299,7 @@ void CDangerManager::add			(const CSoundObject &object)
 
 void CDangerManager::add			(const CHitObject &object)
 {
-	if (!object.m_enabled || object.m_object->getDestroy())
+	if (!object.m_object || !object.m_enabled || object.m_object->getDestroy())
 		return;
 
 	if (fis_zero(object.m_amount))
@@ -301,7 +310,7 @@ void CDangerManager::add			(const CHitObject &object)
 
 	PROF_EVENT("DangerManager::add_HitObject");
 
-	const CEntityAlive		*obj = smart_cast<const CEntityAlive*>(object.m_object);
+	CEntityAlive		*obj = const_cast<CEntityAlive*>(object.m_object);
 	add						(CDangerObject(obj,obj->Position(),object.m_level_time,CDangerObject::eDangerTypeAttacked,CDangerObject::eDangerPerceiveTypeHit));
 }
 

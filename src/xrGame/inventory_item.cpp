@@ -67,6 +67,7 @@ CInventoryItem::CInventoryItem()
 	m_Description					= "";
 	m_section_id					= 0;
 	m_flags.set						(FIsHelperItem,FALSE);
+	m_flags.set						(FCanStack, TRUE);
 
 	m_custom_text					= nullptr;
 	m_custom_text_font				= nullptr;
@@ -108,8 +109,10 @@ void CInventoryItem::Load(LPCSTR section)
 {
 	CHitImmunity::LoadImmunities	(pSettings->r_string(section,"immunities_sect"),pSettings);
 
-	ISpatial*			self				=	smart_cast<ISpatial*> (this);
-	if (self)			self->spatial.type	|=	STYPE_VISIBLEFORAI;	
+	if (cast_game_object())
+	{
+		cast_game_object()->SpatialComponent->spatial.type |= STYPE_VISIBLEFORAI;
+	}
 
 	m_section_id._set	( section );
 	m_name				= g_pStringTable->translate( pSettings->r_string(section, "inv_name") );
@@ -125,13 +128,16 @@ void CInventoryItem::Load(LPCSTR section)
 	m_Description = g_pStringTable->translate( pSettings->r_string(section, "description") );
 
 	m_flags.set(Fbelt,			READ_IF_EXISTS(pSettings, r_bool, section, "belt",		FALSE));
-	m_can_trade = READ_IF_EXISTS(pSettings, r_bool, section, "can_take",	TRUE);
-	m_flags.set(FCanTake,		m_can_trade);
-	m_flags.set(FCanTrade,		READ_IF_EXISTS(pSettings, r_bool, section, "can_trade",	TRUE));
+	m_can_trade = READ_IF_EXISTS(pSettings, r_bool, section, "can_trade", TRUE);
+	m_flags.set(FCanTake, READ_IF_EXISTS(pSettings, r_bool, section, "can_take", TRUE));
+	m_flags.set(FCanTrade, m_can_trade);
+	m_flags.set(FCanStack,		READ_IF_EXISTS(pSettings, r_bool, section, "can_stack", TRUE));
 	m_flags.set(FIsQuestItem,	READ_IF_EXISTS(pSettings, r_bool, section, "quest_item",FALSE));
 
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", false));
+
+	m_highlight_equipped = !!READ_IF_EXISTS(pSettings, r_bool, section, "highlight_equipped", FALSE);
 
 	if ( BaseSlot() != NO_ACTIVE_SLOT || Belt())
 	{
@@ -300,6 +306,11 @@ void CInventoryItem::OnEvent (NET_Packet& P, u16 type)
 			P.r_stringZ			(i_name);
 			Detach(i_name, true);
 		}break;	
+
+	case GE_REPAIR_ITEM:
+	{
+		SetCondition(1.0f);
+	}break;
 	case GE_CHANGE_POS:
 		{
 			Fvector p; 
@@ -718,13 +729,7 @@ void CInventoryItem::net_Export			(NET_Packet& P)
 
 	net_Export_PH_Params(P,State,num_items);
 	
-	if (object().PPhysicsShell() && object().PPhysicsShell()->isEnabled())
-	{
-		P.w_u8(1);	//not freezed
-	} else
-	{
-		P.w_u8(0);  //freezed
-	}
+	P.w_u8(!!object().PPhysicsShell() && object().PPhysicsShell()->isEnabled());	//not freezed
 };
 
 void CInventoryItem::load(IReader &packet)
@@ -1501,6 +1506,16 @@ bool	CInventoryItem::CanTrade() const
 #pragma todo("Dima to Andy : why CInventoryItem::CanTrade can be called for the item, which doesn't have owner?")
 	if(m_pInventory)
 		res = inventory_owner().AllowItemToTrade(this,m_ItemCurrPlace);
+
+	return (res && m_flags.test(FCanTrade) && !IsQuestItem());
+}
+
+bool	CInventoryItem::CanBarter() const
+{
+	bool res = true;
+#pragma todo("Dima to Andy : why CInventoryItem::CanTrade can be called for the item, which doesn't have owner?")
+	if (m_pInventory)
+		res = inventory_owner().AllowItemToBarter(this, m_ItemCurrPlace);
 
 	return (res && m_flags.test(FCanTrade) && !IsQuestItem());
 }

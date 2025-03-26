@@ -1,7 +1,7 @@
 // xrCore.cpp : Defines the entry point for the DLL application.
 //
 #include "stdafx.h"
-#include "XmlParser/Expression.h"
+#include "FormatParsers/XML/Expression.h"
 #pragma hdrstop
 
 #ifdef IXR_WINDOWS
@@ -14,6 +14,8 @@
 #ifdef DEBUG
 #	include	<malloc.h>
 #endif // DEBUG
+
+#include "stack_string.h"
 
 XRCORE_API		xrCore	Core;
 XRCORE_API		u32		build_id;
@@ -97,6 +99,7 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, xrLogger::LogCallback cb, BOO
 		flags |= CLocatorAPI::flScanAppRoot;
 
 		FS._initialize		(flags,0,fs_fname);
+		BuildId             = build_id;
 		Msg					("'%s' build %d, %s\n","xrCore",build_id, build_date);
 		EFS._initialize		();
 #if defined(DEBUG) && defined(IXR_WINDOWS)

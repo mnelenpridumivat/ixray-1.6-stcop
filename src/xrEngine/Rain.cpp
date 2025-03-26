@@ -9,30 +9,12 @@
 #ifdef _EDITOR
     #include "ui_toolscustom.h"
 #else
-#include "Render.h"
-#include "IGame_Level.h"
-#include "../xrCDB/xr_area.h"
-	#include "xr_object.h"
+    #include "Render.h"
+    #include "IGame_Level.h"
+    #include "../xrCDB/xr_area.h"
+    #include "xr_object.h"
 #endif
 
-//	Warning: duplicated in dxRainRender
-static const int	max_desired_items	= 2500;
-static const float	source_radius		= 12.5f;
-static const float	source_offset		= 40.f;
-static const float	max_distance		= source_offset*1.25f;
-static const float	sink_offset			= -(max_distance-source_offset);
-static const float	drop_length			= 5.f;
-static const float	drop_width			= 0.30f;
-static const float	drop_angle			= 3.0f;
-static const float	drop_max_angle		= deg2rad(10.f);
-static const float	drop_max_wind_vel	= 20.0f;
-static const float	drop_speed_min		= 40.f;
-static const float	drop_speed_max		= 80.f;
-
-const int	max_particles		= 1000;
-const int	particles_cache		= 400;
-const float particles_time		= .3f;
- 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -55,39 +37,106 @@ CEffect_Rain::~CEffect_Rain()
 }
 
 // Born
-void	CEffect_Rain::Born		(Item& dest, float radius)
+void CEffect_Rain::Born(Item& dest, float radius, shared_str& rainType)
 {
-	Fvector		axis;	
-    axis.set			(0,-1,0);
-	float gust			= g_pGamePersistent->Environment().wind_strength_factor/10.f;
-	float k				= g_pGamePersistent->Environment().CurrentEnv->wind_velocity*gust/drop_max_wind_vel;
-	clamp				(k,0.f,1.f);
-	float	pitch		= drop_max_angle*k-PI_DIV_2;
-    axis.setHP			(g_pGamePersistent->Environment().CurrentEnv->wind_direction,pitch);
-    
-	Fvector&	view	= Device.vCameraPosition;
-	float		angle	= ::Random.randF	(0,PI_MUL_2);
-	float		dist	= ::Random.randF	(); dist = _sqrt(dist)*radius; 
-	float		x		= dist*_cos		(angle);
-	float		z		= dist*_sin		(angle);
-	dest.D.random_dir	(axis,deg2rad(drop_angle));
-	dest.P.set			(x+view.x-dest.D.x*source_offset,source_offset+view.y,z+view.z-dest.D.z*source_offset);
-//	dest.P.set			(x+view.x,height+view.y,z+view.z);
-	dest.fSpeed			= ::Random.randF	(drop_speed_min,drop_speed_max);
+	static shared_str st_drizzle = "drizzle";
+	static shared_str st_dense = "dense";
+	static shared_str st_spherical = "spherical";
 
-	float height		= max_distance;
-	RenewItem			(dest,height,RayPick(dest.P,dest.D,height,collide::rqtBoth));
+	static auto computeDirection = [](float variation, Item& dest)
+	{
+		Fvector axis = {};
+		axis.set(0.f, -1.f, 0.f);
+		float k = g_pGamePersistent->Environment().CurrentEnv->rain_angle / g_pGamePersistent->Environment().drop_max_wind_vel;
+		float pitch = g_pGamePersistent->Environment().drop_max_angle * k - PI_DIV_2;
+
+		axis.setHP(g_pGamePersistent->Environment().CurrentEnv->rain_angle_rotation, pitch);
+
+		dest.D.random_dir(axis, deg2rad(::Random.randF(0.f, variation)));
+	};
+
+	const Fvector& view = Device.vCameraPosition_saved;
+
+	if (rainType.equal(st_drizzle))
+	{
+		float angle = ::Random.randF(0.f, PI_MUL_2);
+		float dist = _sqrt(::Random.randF()) * radius;
+		float x = dist * _cos(angle);
+		float z = dist * _sin(angle);
+
+		computeDirection(10.f, dest);
+
+		dest.P.set(x + view.x - dest.D.x * g_pGamePersistent->Environment().source_offset,
+			g_pGamePersistent->Environment().source_offset + view.y,
+			z + view.z - dest.D.z * g_pGamePersistent->Environment().source_offset);
+
+		dest.fSpeed = ::Random.randF(g_pGamePersistent->Environment().CurrentEnv->rain_speed_min * 0.5f,
+			g_pGamePersistent->Environment().CurrentEnv->rain_speed_max * 0.7f);
+	}
+	else if (rainType.equal(st_dense))
+	{
+		float angle = ::Random.randF(0.f, PI_MUL_2);
+		float dist = _sqrt(::Random.randF()) * (radius * 0.5f);
+		float x = dist * _cos(angle);
+		float z = dist * _sin(angle);
+
+		computeDirection(5.f, dest);
+
+		dest.P.set(x + view.x - dest.D.x * g_pGamePersistent->Environment().source_offset,
+			g_pGamePersistent->Environment().source_offset + view.y,
+			z + view.z - dest.D.z * g_pGamePersistent->Environment().source_offset);
+
+		dest.fSpeed = ::Random.randF(g_pGamePersistent->Environment().CurrentEnv->rain_speed_min,
+			g_pGamePersistent->Environment().CurrentEnv->rain_speed_max);
+	}
+	else if (rainType.equal(st_spherical))
+	{
+		float theta = ::Random.randF(0.f, PI_MUL_2);
+		float phi = ::Random.randF(0.f, PI_DIV_2);
+		float r = ::Random.randF() * radius;
+
+		float x = r * sinf(phi) * cosf(theta);
+		float y = r * cosf(phi);
+		float z = r * sinf(phi) * sinf(theta);
+
+		computeDirection(15.f, dest);
+
+		dest.P.set(x + view.x, y + view.y, z + view.z);
+		dest.fSpeed = ::Random.randF(g_pGamePersistent->Environment().CurrentEnv->rain_speed_min,
+			g_pGamePersistent->Environment().CurrentEnv->rain_speed_max);
+	}
+	else//default
+	{
+		float angle = ::Random.randF(0.f, PI_MUL_2);
+		float dist = _sqrt(::Random.randF()) * radius;
+		float x = dist * _cos(angle);
+		float z = dist * _sin(angle);
+
+		computeDirection(10.f, dest);
+
+		dest.P.set(x + view.x - dest.D.x * g_pGamePersistent->Environment().source_offset,
+			g_pGamePersistent->Environment().source_offset + view.y,
+			z + view.z - dest.D.z * g_pGamePersistent->Environment().source_offset);
+
+		dest.fSpeed = ::Random.randF(g_pGamePersistent->Environment().CurrentEnv->rain_speed_min,
+			g_pGamePersistent->Environment().CurrentEnv->rain_speed_max);
+	}
+
+	float height = 
+		g_pGamePersistent->Environment().max_distance + g_pGamePersistent->Environment().add_const_dist_coefficient;
+
+	RenewItem(dest, height, RayPick(dest.P, dest.D, height, collide::rqtBoth));
 }
 
 BOOL CEffect_Rain::RayPick(const Fvector& s, const Fvector& d, float& range, collide::rq_target tgt)
 {
 	BOOL bRes 			= TRUE;
 	if (Device.IsEditorMode())
+		return EditorScene->RayPick(s, d, range);
+	else
 	{
-#ifndef MASTER_GOLD
-		EditorScene->RayPick(s, d, range);
-			return true;
-#endif
+		if (!g_pGameLevel || !g_pGameLevel->bReady)
+			return false;
 	}
 	collide::rq_result	RQ;
 	CObject* E 			= g_pGameLevel->CurrentViewEntity();
@@ -110,31 +159,34 @@ void CEffect_Rain::RenewItem(Item& dest, float height, BOOL bHit)
 	}
 }
 
-void	CEffect_Rain::OnFrame	()
+void CEffect_Rain::OnFrame()
 {
 	PROF_EVENT("CEffect_Rain::OnFrame");
 #ifndef _EDITOR
-	if (!g_pGameLevel&&!Device.IsEditorMode())			return;
+    if (!g_pGameLevel && !Device.IsEditorMode())
+        return;
 #endif
 
-	if (g_dedicated_server) {
-		return;
-	}
+    if (g_dedicated_server)
+    {
+        return;
+    }
 
-	// Parse states
-	float	factor				= g_pGamePersistent->Environment().CurrentEnv->rain_density;
-	static float hemi_factor	= 0.f;
+    // Parse states
+    float factor = g_pGamePersistent->Environment().CurrentEnv->rain_density;
+    static float hemi_factor = 0.f;
+
 #ifndef _EDITOR
-	CObject* E 					= g_pGameLevel ? g_pGameLevel->CurrentViewEntity() : nullptr;
-	if (E&&E->renderable_ROS())
-	{
+    CObject *E = g_pGameLevel ? g_pGameLevel->CurrentViewEntity() : nullptr;
+    if (E && E->renderable_ROS())
+    {
 //		hemi_factor				= 1.f-2.0f*(0.3f-_min(_min(1.f,E->renderable_ROS()->get_luminocity_hemi()),0.3f));
 		float* hemi_cube		= E->renderable_ROS()->get_luminocity_hemi_cube();
 		float hemi_val			= _max(hemi_cube[0],hemi_cube[1]);
 		hemi_val				= _max(hemi_val, hemi_cube[2]);
 		hemi_val				= _max(hemi_val, hemi_cube[3]);
 		hemi_val				= _max(hemi_val, hemi_cube[5]);
-		
+
 //		float f					= 0.9f*hemi_factor + 0.1f*hemi_val;
 		float f					= hemi_val;
 		float t					= Device.fTimeDelta;
@@ -154,7 +206,7 @@ void	CEffect_Rain::OnFrame	()
 		state					= stWorking;
 		snd_Ambient.play		(0,sm_Looped);
 		snd_Ambient.set_position(Fvector().set(0,0,0));
-		snd_Ambient.set_range	(source_offset,source_offset*2.f);
+		snd_Ambient.set_range	(g_pGamePersistent->Environment().source_offset, g_pGamePersistent->Environment().source_offset*2.f);
 	break;
 	case stWorking:
 		if (factor<EPS_L){
@@ -170,40 +222,143 @@ void	CEffect_Rain::OnFrame	()
 	{
 		snd_Ambient.set_volume(_max(0.1f, factor) * hemi_factor);
 	}
+
+	if (Device.IsEditorMode())
+		UpdateItems();
 }
 
-//#include "xr_input.h"
-void	CEffect_Rain::Render	()
+void CEffect_Rain::UpdateItems()
 {
-#ifndef _EDITOR
-	if (!g_pGameLevel&&!Device.IsEditorMode())			return;
-#endif
+	PROF_EVENT("CEffect_Rain::UpdateItems");
+	xrCriticalSectionGuard guard(&rainCS);
 
-	m_pRender->Render(*this);
+	float	factor = g_pGamePersistent->Environment().CurrentEnv->rain_density;
+	if (factor < EPS_L)			return;
+
+	u32 desired_items = iFloor(0.5f * (1.f + factor) * float(g_pGamePersistent->Environment().max_desired_items));
+
+	// born _new_ if needed
+	// owner.items.reserve		(desired_items);
+	while (items.size() < desired_items)
+	{
+		Born(items.emplace_back(), g_pGamePersistent->Environment().source_rain_radius_render +
+			g_pGamePersistent->Environment().add_const_dist_coefficient_render, g_pGamePersistent->Environment().CurrentEnv->rain_type);
+	}
+
+	// build source plane
+	float b_radius_wrap_sqr = _sqr(((g_pGamePersistent->Environment().source_rain_radius_render +
+		g_pGamePersistent->Environment().add_const_dist_coefficient_render) + 0.5f));
+
+	const Fvector& vEye = Device.vCameraPosition_saved;
+
+	Fplane src_plane;
+	Fvector norm = { 0.f,-1.f,0.f };
+	Fvector upper; 	upper.set(vEye.x, vEye.y + g_pGamePersistent->Environment().source_offset, vEye.z);
+	src_plane.build(upper, norm);
+
+	// perform update
+
+	for (CEffect_Rain::Item& one : items)
+	{
+		if (one.dwTime_Hit < Device.dwTimeGlobal)
+			Hit(one.Phit);
+
+		if (one.dwTime_Life < Device.dwTimeGlobal)
+			Born(one, g_pGamePersistent->Environment().source_rain_radius_render +
+				g_pGamePersistent->Environment().add_const_dist_coefficient_render, g_pGamePersistent->Environment().CurrentEnv->rain_type);
+
+		float dt = Device.fTimeDelta;
+		one.P.mad(one.D, one.fSpeed * dt);
+
+		Fvector	wdir;	wdir.set(one.P.x - vEye.x, 0, one.P.z - vEye.z);
+		float	wlen = wdir.square_magnitude();
+		if (wlen > b_radius_wrap_sqr)
+		{
+			wlen = _sqrt(wlen);
+			if ((one.P.y - vEye.y) < g_pGamePersistent->Environment().sink_offset)
+			{
+				// need born
+				one.invalidate();
+			}
+			else
+			{
+				Fvector		inv_dir, src_p;
+				inv_dir.invert(one.D);
+				wdir.div(wlen);
+
+				one.P.mad(one.P, wdir, -(wlen + g_pGamePersistent->Environment().source_rain_radius_render +
+					g_pGamePersistent->Environment().add_const_dist_coefficient_render));
+
+				if (src_plane.intersectRayPoint(one.P, inv_dir, src_p))
+				{
+					float dist_sqr = one.P.distance_to_sqr(src_p);
+					float height = g_pGamePersistent->Environment().max_distance;
+					if (RayPick(src_p, one.D, height, collide::rqtBoth))
+					{
+						if (_sqr(height) <= dist_sqr)
+						{
+							one.invalidate();								// need born
+							//							Log("1");
+						}
+						else
+						{
+							RenewItem(one, height - _sqrt(dist_sqr), TRUE);		// fly to point
+							//							Log("2",height-dist);
+						}
+					}
+					else
+					{
+						RenewItem(one, g_pGamePersistent->Environment().max_distance - _sqrt(dist_sqr), FALSE);		// fly ...
+						//						Log("3",1.5f*b_height-dist);
+					}
+				}
+				else
+				{
+					// need born
+					one.invalidate();
+					//					Log("4");
+				}
+			}
+		}
+	}
+}
+
+
+void CEffect_Rain::Render()
+{
+	PROF_EVENT("CEffect_Rain::Render")
+#ifndef _EDITOR
+    if (!g_pGameLevel && !Device.IsEditorMode())
+        return;
+#endif
+	xrCriticalSectionGuard guard(&rainCS);
+    m_pRender->Render(*this);
 }
 
 // startup _new_ particle system
-void	CEffect_Rain::Hit		(Fvector& pos)
+void CEffect_Rain::Hit(Fvector& pos)
 {
-	if (0!=::Random.randI(2))	return;
-	Particle*	P	= p_allocate();
-	if (0==P)	return;
+	if (0!=::Random.randI(2))
+		return;
+
+	Particle* P = p_allocate();
+	if (0==P)
+		return;
 
 	const Fsphere &bv_sphere = m_pRender->GetDropBounds();
 
-	P->time						= particles_time;
+	P->time						= g_pGamePersistent->Environment().particles_time;
 	P->mXForm.rotateY			(::Random.randF(PI_MUL_2));
 	P->mXForm.translate_over	(pos);
 	P->mXForm.transform_tiny	(P->bounds.P, bv_sphere.P);
 	P->bounds.R					= bv_sphere.R;
-
 }
 
 // initialize particles pool
-void CEffect_Rain::p_create		()
+void CEffect_Rain::p_create()
 {
 	// pool
-	particle_pool.resize	(max_particles);
+	particle_pool.resize(g_pGamePersistent->Environment().max_particles);
 	for (u32 it=0; it<particle_pool.size(); it++)
 	{
 		Particle&	P	= particle_pool[it];
@@ -217,18 +372,18 @@ void CEffect_Rain::p_create		()
 }
 
 // destroy particles pool
-void CEffect_Rain::p_destroy	()
+void CEffect_Rain::p_destroy()
 {
 	// active and idle lists
 	particle_active	= 0;
 	particle_idle	= 0;
 	
 	// pool
-	particle_pool.clear	();
+	particle_pool.clear();
 }
 
 // _delete_ node from _list_
-void CEffect_Rain::p_remove	(Particle* P, Particle* &LST)
+void CEffect_Rain::p_remove(Particle* P, Particle* &LST)
 {
 	VERIFY		(P);
 	Particle*	prev		= P->prev;	P->prev = nullptr;
@@ -239,7 +394,7 @@ void CEffect_Rain::p_remove	(Particle* P, Particle* &LST)
 }
 
 // insert node at the top of the head
-void CEffect_Rain::p_insert	(Particle* P, Particle* &LST)
+void CEffect_Rain::p_insert(Particle* P, Particle* &LST)
 {
 	VERIFY		(P);
 	P->prev					= 0;
@@ -249,7 +404,7 @@ void CEffect_Rain::p_insert	(Particle* P, Particle* &LST)
 }
 
 // determine size of _list_
-int CEffect_Rain::p_size	(Particle* P)
+int CEffect_Rain::p_size(Particle* P)
 {
 	if (0==P)	return 0;
 	int cnt = 0;
@@ -261,7 +416,7 @@ int CEffect_Rain::p_size	(Particle* P)
 }
 
 // alloc node
-CEffect_Rain::Particle*	CEffect_Rain::p_allocate	()
+CEffect_Rain::Particle*	CEffect_Rain::p_allocate()
 {
 	Particle*	P			= particle_idle;
 	if (0==P)				return nullptr;
@@ -271,7 +426,7 @@ CEffect_Rain::Particle*	CEffect_Rain::p_allocate	()
 }
 
 // xr_free node
-void	CEffect_Rain::p_free(Particle* P)
+void CEffect_Rain::p_free(Particle* P)
 {
 	p_remove	(P,particle_active);
 	p_insert	(P,particle_idle);

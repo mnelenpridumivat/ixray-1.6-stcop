@@ -134,7 +134,7 @@ IC	bool is_sound_type(int s, const ESoundTypes &t)
 void CSoundMemoryManager::feel_sound_new(CObject *object, int sound_type, CSound_UserDataPtr user_data, const Fvector &position, float sound_power)
 {
 #ifndef MASTER_GOLD
-	if (object && smart_cast<CActor*>(object) && psAI_Flags.test(aiIgnoreActor))
+	if (object && object->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
@@ -185,7 +185,7 @@ void CSoundMemoryManager::feel_sound_new(CObject *object, int sound_type, CSound
 	if (sound_power >= m_sound_threshold) {
 		if (is_sound_type(sound_type,SOUND_TYPE_WEAPON_SHOOTING)) {
 			// this is fake!
-			CEntityAlive	*_entity_alive = smart_cast<CEntityAlive*>(object);
+			CEntityAlive	*_entity_alive = object ? object->cast_entity_alive() : NULL;
 			if (_entity_alive && (self->ID() != _entity_alive->ID()) && (_entity_alive->g_Team() != entity_alive->g_Team()))
 				m_object->memory().hit().add(_entity_alive);
 		}
@@ -225,8 +225,9 @@ void CSoundMemoryManager::add			(const CSoundObject &sound_object, bool check_fo
 		m_sounds->push_back	(sound_object);
 }
 
-void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fvector &position, float sound_power)
+void CSoundMemoryManager::add			(const CObject *O, int sound_type, const Fvector &position, float sound_power)
 {
+	CObject* object = const_cast<CObject*>(O);
 	PROF_EVENT("SoundMemory::add");
 #ifndef SAVE_OWN_SOUNDS
 	// we do not want to save our own sounds
@@ -242,16 +243,16 @@ void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fv
 
 #ifndef SAVE_NON_ALIVE_OBJECT_SOUNDS
 	// we do not want to save sounds from the non-alive objects (?!)
-	if (object && !m_object->memory().enemy().selected() && !smart_cast<const CEntityAlive*>(object))
+	if (object && !m_object->memory().enemy().selected() && !object->cast_entity_alive())
 		return;
 #endif
 
 	// we do not want to save sounds from the teammates and neutrals items
 	CEntityAlive *me_entity_alive = m_object;
-	if (object && object->H_Parent() && smart_cast<const CEntityAlive*>(object->H_Parent()) && (me_entity_alive->tfGetRelationType(smart_cast<const CEntityAlive*>(object->H_Parent())) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(smart_cast<const CEntityAlive*>(object->H_Parent())) == ALife::eRelationTypeNeutral))
+	if (object && object->H_Parent() && object->H_Parent()->cast_entity_alive() && (me_entity_alive->tfGetRelationType(object->H_Parent()->cast_entity_alive()) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(object->H_Parent()->cast_entity_alive()) == ALife::eRelationTypeNeutral))
 		return;
 
-	const CEntityAlive *who_entity_alive = smart_cast<const CEntityAlive*>(object);
+	const CEntityAlive *who_entity_alive = object ? object->cast_entity_alive() : NULL;
 	// we do not want to save sounds from the teammates and neutrals
 	if (who_entity_alive && me_entity_alive && (me_entity_alive->tfGetRelationType(who_entity_alive) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(who_entity_alive) == ALife::eRelationTypeNeutral))
 		return;
@@ -259,7 +260,7 @@ void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fv
 	if(who_entity_alive && !m_object->memory().enemy().is_useful(who_entity_alive))
 		return;
 
-	const CGameObject		*game_object = smart_cast<const CGameObject*>(object);
+	const CGameObject		*game_object = object ? object->cast_game_object() : NULL;
 	if (!game_object && object)
 		return;
 
@@ -270,7 +271,7 @@ void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fv
 
 	if(heavy_sound && sound_power >= 4.f)
 	{
-		if(CAI_Stalker	*stalker = smart_cast<CAI_Stalker*>(m_object))
+		if(CAI_Stalker	*stalker = m_object ? m_object->cast_stalker() : NULL)
 		{
 			if(who_entity_alive && who_entity_alive->g_Alive() && !m_object->memory().visual().visible_now(who_entity_alive))
 			{
@@ -395,6 +396,25 @@ void CSoundMemoryManager::remove_links	(CObject *object)
 #endif
 }
 
+struct CRemoveSoundObjectPredicate {
+	const MemorySpace::CSoundObject* m_object;
+
+	CRemoveSoundObjectPredicate(const MemorySpace::CSoundObject* object) : m_object(object)
+	{
+	}
+	bool operator() (const MemorySpace::CSoundObject& object) const
+	{
+		return (m_object == &object);
+	}
+};
+
+void CSoundMemoryManager::remove(const MemorySpace::CSoundObject* sound_object)
+{
+	SOUNDS::iterator I = std::find_if(m_sounds->begin(), m_sounds->end(), CRemoveSoundObjectPredicate(sound_object));
+	if (I != m_sounds->end())
+		m_sounds->erase(I);
+}
+
 void CSoundMemoryManager::save	(NET_Packet &packet) const
 {
 	if (!m_object->g_Alive())
@@ -452,7 +472,10 @@ void CSoundMemoryManager::load	(IReader &packet)
 
 		CSoundObject				&object = delayed_object.m_sound_object;
 		if (delayed_object.m_object_id != ALife::_OBJECT_ID(-1))
-			object.m_object			= smart_cast<CGameObject*>(Level().Objects.net_Find(delayed_object.m_object_id));
+		{
+			CObject* O = Level().Objects.net_Find(delayed_object.m_object_id);
+			object.m_object = O ? O->cast_game_object() : NULL;
+		}
 		else
 			object.m_object			= 0;
 
@@ -767,7 +790,7 @@ void CSoundMemoryManager::on_requested_spawn	(CObject *object)
 			continue;
 		
 		if (m_object->g_Alive()) {
-			(*I).m_sound_object.m_object= smart_cast<CGameObject*>(object);
+			(*I).m_sound_object.m_object= object ? object->cast_game_object() : NULL;
 			VERIFY						((*I).m_sound_object.m_object);
 			add							((*I).m_sound_object,true);
 		}

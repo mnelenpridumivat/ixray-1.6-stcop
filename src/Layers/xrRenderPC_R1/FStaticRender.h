@@ -87,7 +87,6 @@ public:
 	bool														m_bFirstFrameAfterReset;	// Determines weather the frame is the first after resetting device.
 
 	xr_list<light*>												v_all_lights_dque;
-	xr_list<light*>												v_all_lights;
 private:
 	// Loading / Unloading
 	void								LoadBuffers				(CStreamReader	*fs);
@@ -98,7 +97,7 @@ private:
 
 	BOOL								add_Dynamic				(dxRender_Visual	*pVisual, u32 planes);		// normal processing
 	void								add_Static				(dxRender_Visual	*pVisual, u32 planes);
-	void								add_leafs_Dynamic		(dxRender_Visual	*pVisual, bool ignore = false); // if detected node's full visibility
+	void								add_leafs_Dynamic		(dxRender_Visual	*pVisual); // if detected node's full visibility
 	void								add_leafs_Static		(dxRender_Visual	*pVisual);						// if detected node's full visibility
 
 public:
@@ -160,13 +159,13 @@ public:
 	virtual void					flush					();
 	virtual void					set_Object				(IRenderable*		O	);
 	virtual	void					add_Occluder			(Fbox2&	bb_screenspace	);			// mask screen region as oclluded
-	virtual void					add_Visual				(IRenderVisual*	V, bool ignore_opt = false);			// add visual leaf (no culling performed at all)
+	virtual void					add_Visual				(IRenderVisual*	V);			// add visual leaf (no culling performed at all)
 	virtual void					add_Geometry			(IRenderVisual*	V	);			// add visual(s)	(all culling performed)
 
 	// wallmarks
-	virtual void					add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
-	virtual void					add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
-	virtual void					add_StaticWallmark			(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
+	virtual void					add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection = false);
+	virtual void					add_StaticWallmark		(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection = false) override;
+	virtual void					add_StaticWallmark		(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
 	virtual void					clear_static_wallmarks	();
 	virtual void					add_SkeletonWallmark	(intrusive_ptr<CSkeletonWallmark> wm);
 	virtual void					add_SkeletonWallmark	(const Fmatrix* xf, CKinematics* obj, ref_shader& sh, const Fvector& start, const Fvector& dir, float size);

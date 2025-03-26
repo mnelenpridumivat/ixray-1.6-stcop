@@ -102,18 +102,15 @@ void CWeaponRG6::FireTrace(const Fvector& P, const Fvector& D)
 	p1.set(P); 
 	d.set(D);
 
-	CEntity* E = smart_cast<CEntity*>(H_Parent());
-	if (E){
-		CInventoryOwner* io		= smart_cast<CInventoryOwner*>(H_Parent());
-		if(nullptr == io->inventory().ActiveItem())
-		{
-			Msg("current_state %d", GetState());
-			Msg("next_state %d", GetNextState());
-			Msg("item_sect %s", cNameSect().c_str());
-			Msg("H_Parent %s", H_Parent()->cNameSect().c_str());
-		}
-		E->g_fireParams (this, p1,d);
-	}
+	if (!H_Parent()) return;
+	CGameObject* GO = H_Parent()->cast_game_object();
+	if (!GO || GO->getDestroy()) return;
+	CEntity* entity = GO->cast_entity();
+	if (!entity) return;
+	CInventoryOwner* inventory_owner = entity->cast_inventory_owner();
+	if (!inventory_owner || !inventory_owner->m_inventory) return;
+
+	entity->g_fireParams (this, p1,d);
 
 	Fmatrix launch_matrix;
 	launch_matrix.identity();
@@ -122,7 +119,7 @@ void CWeaponRG6::FireTrace(const Fvector& P, const Fvector& D)
 										launch_matrix.j, launch_matrix.i);
 	launch_matrix.c.set(p1);
 
-	if (IsGameTypeSingle() && IsZoomed() && smart_cast<CActor*>(H_Parent()))
+	if (IsGameTypeSingle() && IsZoomed() && GO->cast_actor())
 	{
 		H_Parent()->setEnabled(FALSE);
 		setEnabled(FALSE);
@@ -151,9 +148,11 @@ void CWeaponRG6::FireTrace(const Fvector& P, const Fvector& D)
 	VERIFY2(_valid(launch_matrix),"CWeaponRG6::FireStart. Invalid launch_matrix");
 	CRocketLauncher::LaunchRocket(launch_matrix, d, zero_vel);
 
-	CExplosiveRocket* pGrenade = smart_cast<CExplosiveRocket*>(getCurrentRocket());
-	VERIFY(pGrenade);
-	pGrenade->SetInitiator(H_Parent()->ID());
+	if (CExplosiveRocket* pGrenade = smart_cast<CExplosiveRocket*>(getCurrentRocket()))
+	{
+		VERIFY(pGrenade);
+		pGrenade->SetInitiator(H_Parent()->ID());
+	}
 
 	if (OnServer())
 	{
@@ -162,7 +161,18 @@ void CWeaponRG6::FireTrace(const Fvector& P, const Fvector& D)
 		P.w_u16(u16(getCurrentRocket()->ID()));
 		u_EventSend(P);
 	}
-	dropCurrentRocket();
+	
+	if (IsGameTypeSingle())
+	{
+		dropCurrentRocket();
+	}
+
+
+	if (infinite_fire())
+	{
+		shared_str fake_grenade_name = pSettings->r_string(m_ammoTypes[m_ammoType].c_str(), "fake_grenade_name");
+		inheritedRL::SpawnRocket(*fake_grenade_name, this);
+	}
 }
 
 void CWeaponRG6::UnloadMagazine(bool spawn_ammo)

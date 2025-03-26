@@ -57,7 +57,11 @@ void CUIActorMenu::InitDeadBodySearchMode()
 	m_PartnerBottomInfo->Show		(true);
 	m_PartnerWeight->Show			(true);
 	m_takeall_button->Show			(true);
-	m_putall_button->Show			(true);
+
+	if (m_putall_button != nullptr)
+	{
+		m_putall_button->Show(true);
+	}
 
 	if ( m_pPartnerInvOwner )
 	{
@@ -73,7 +77,7 @@ void CUIActorMenu::InitDeadBodySearchMode()
 	TIItemContainer					items_list;
 	if ( m_pPartnerInvOwner )
 	{
-		m_pPartnerInvOwner->inventory().AddAvailableItems( items_list, false ); //true
+		m_pPartnerInvOwner->inventory().AddAvailableItems( items_list, false, mmDeadBodySearch ); //true
 		UpdatePartnerBag();
 	}
 	else
@@ -126,7 +130,11 @@ void CUIActorMenu::DeInitDeadBodySearchMode()
 	m_PartnerBottomInfo->Show		(false);
 	m_PartnerWeight->Show			(false);
 	m_takeall_button->Show			(false);
-	m_putall_button->Show			(false);
+
+	if (m_putall_button != nullptr)
+	{
+		m_putall_button->Show(false);
+	}
 
 	if ( m_pInvBox )
 	{

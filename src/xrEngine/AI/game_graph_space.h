@@ -88,8 +88,7 @@ namespace GameGraph
 		u32							tLevelID:8;
 		u32							tNodeID:24;
 		u8							tVertexTypes[LOCATION_TYPE_COUNT];
-		u32							dwEdgeOffset;
-		u32							dwPointOffset;
+		u32							tVertexID;
 		u8							tNeighbourCount;
 		u8							tDeathPointCount;
 	public:
@@ -99,9 +98,7 @@ namespace GameGraph
 		IC	u32						level_vertex_id		() const;
 		IC	const u8				*vertex_type		() const;
 		IC	const u8				&edge_count			() const;
-		IC	const u32				&edge_offset		() const;
 		IC	const u8				&death_point_count	() const;
-		IC	const u32				&death_point_offset	() const;
 		friend class CGameGraph;
 	};
 

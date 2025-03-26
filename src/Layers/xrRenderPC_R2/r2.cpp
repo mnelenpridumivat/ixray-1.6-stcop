@@ -246,30 +246,25 @@ void CRender::create()
 
 	//rmNormal					();
 	marker						= 0;
-	//R_CHK						(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[0]));
-	//R_CHK						(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[1]));
-	ZeroMemory(q_sync_point, sizeof(q_sync_point));
-	for (u32 i=0; i<Caps.iGPUNum; ++i)
-		R_CHK						(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[i]));
 
 	xrRender_apply_tf			();
 	::PortalTraverser.initialize();
+
+	Device.ModelDefferClear = xr_make_delegate(Models, &CModelPool::DeleteQueuedDeffer);
 }
 
-void					CRender::destroy				()
+void CRender::destroy()
 {
 	m_bMakeAsyncSS				= false;
 	::PortalTraverser.destroy	();
-	//_RELEASE					(q_sync_point[1]);
-	//_RELEASE					(q_sync_point[0]);
-	for (u32 i=0; i<Caps.iGPUNum; ++i)
-		_RELEASE(q_sync_point[i]);
+
 	HWOCC.occq_destroy			();
 	xr_delete					(Models);
 	xr_delete					(Target);
 	PSLibrary.OnDestroy			();
 	Device.seqFrame.Remove		(this);
-	r_dsgraph_destroy			();
+	r_dsgraph_destroy();
+	Device.ModelDefferClear = nullptr;
 }
 
 void CRender::reset_begin()
@@ -298,18 +293,10 @@ void CRender::reset_begin()
 
 	xr_delete					(Target);
 	HWOCC.occq_destroy			();
-	//_RELEASE					(q_sync_point[1]);
-	//_RELEASE					(q_sync_point[0]);
-	for (u32 i=0; i<Caps.iGPUNum; ++i)
-		_RELEASE(q_sync_point[i]);
 }
 
 void CRender::reset_end()
 {
-	//R_CHK						(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[0]));
-	//R_CHK						(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[1]));
-	for (u32 i=0; i<Caps.iGPUNum; ++i)
-		R_CHK					(RDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[i]));
 	HWOCC.occq_create			(occq_size);
 
 	if (b_loaded)
@@ -326,19 +313,10 @@ void CRender::reset_end()
 	// that some data is not ready in the first frame (for example device camera position)
 	m_bFirstFrameAfterReset = true;
 }
-/*
-void CRender::OnFrame()
-{
-	Models->DeleteQueue			();
-	if (ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
-		Device.seqParallel.insert	(Device.seqParallel.begin(),
-			fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
-	}
-}*/
+
 void CRender::OnFrame()
 {
 	Models->DeleteQueue();
-
 	{
 		//Lights Delete queue
 		for (light*L:v_all_lights_dque)
@@ -428,20 +406,21 @@ BOOL					CRender::occ_visible			(vis_data& P)		{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(sPoly& P)			{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(Fbox& P)			{ return HOM.visible(P);								}
 
-void					CRender::add_Visual				(IRenderVisual*		V, bool ignore_opt)	{ add_leafs_Dynamic((dxRender_Visual*)V, ignore_opt);								}
+void					CRender::add_Visual				(IRenderVisual*		V)	{ add_leafs_Dynamic((dxRender_Visual*)V);								}
 void					CRender::add_Geometry			(IRenderVisual*		V )	{ add_Static((dxRender_Visual*)V,View->getMask());					}
-void					CRender::add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts)
+
+void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts, bool UseCameraDirection)
 {
 	if (T->suppress_wm)	return;
-	VERIFY2							(_valid(P) && _valid(s) && T && verts && (s>EPS_L), "Invalid static wallmark params");
-	Wallmarks->AddStaticWallmark	(T,verts,P,&*S,s);
+	VERIFY2(_valid(P) && _valid(s) && T && verts && (s > EPS_L), "Invalid static wallmark params");
+	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s, UseCameraDirection);
 }
 
-void CRender::add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
+void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection)
 {
-	dxWallMarkArray *pWMA = (dxWallMarkArray *)pArray;
-	ref_shader *pShader = pWMA->dxGenerateWallmark();
-	if (pShader) add_StaticWallmark		(*pShader, P, s, T, V);
+	dxWallMarkArray* pWMA = (dxWallMarkArray*)pArray;
+	ref_shader* pShader = pWMA->dxGenerateWallmark();
+	if (pShader) add_StaticWallmark(*pShader, P, s, T, V, UseCameraDirection);
 }
 
 void CRender::add_StaticWallmark			(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V)

@@ -228,14 +228,19 @@ void CActorCondition::UpdateCondition()
 	
 	float base_weight			= object().MaxCarryWeight();
 	float cur_weight			= object().inventory().TotalWeight();
+	float max_weight			= object().MaxWalkWeight();
 
 	if (m_object->Holder() == nullptr)
 	{
 		if ((object().mstate_real & mcAnyMove))
 		{
-			ConditionWalk(cur_weight / base_weight,
+			ConditionWalk(
+				cur_weight, 
+				base_weight, 
+				max_weight, 
 				isActorAccelerated(object().mstate_real, object().IsZoomAimingMode()),
-				(object().mstate_real & mcSprint) != 0);
+				(object().mstate_real & mcSprint) != 0
+			);
 		}
 		else
 		{
@@ -452,7 +457,7 @@ void CActorCondition::UpdateRadiation()
 
 void CActorCondition::UpdateSatiety()
 {
-	if (!IsGameTypeSingle())
+	if (!IsGameTypeSingleCompatible())
 	{
 		m_fDeltaPower += Satiety.PowerBoost * m_fDeltaTime;
 		return;
@@ -531,12 +536,22 @@ void CActorCondition::ConditionJump(float weight)
 	m_fPower			-=	HitPowerEffect(power);
 }
 
-void CActorCondition::ConditionWalk(float weight, bool accel, bool sprint)
-{	
-	float power			=	m_fWalkPower;
-	power				+=	m_fWalkWeightPower*weight*(weight>1.f?m_fOverweightWalkK:1.f);
-	power				*=	m_fDeltaTime*(accel?(sprint?m_fSprintK:m_fAccelK):1.f);
-	m_fPower			-=	HitPowerEffect(power);
+void CActorCondition::ConditionWalk(float current_weight, float max_normal_weight, float max_weight, bool accel, bool sprint)
+{
+	float power = m_fWalkPower;
+	auto normal_weight_alpha = current_weight / max_normal_weight;
+	if (current_weight < max_normal_weight) {
+		power += m_fWalkWeightPower * normal_weight_alpha;
+	}
+	else {
+		auto diff = current_weight - max_normal_weight;
+		auto overwight_diff = max_weight - max_normal_weight;
+		auto alpha = diff / overwight_diff;
+		auto overweight_additional_alpha = alpha * m_fOverweightWalkK;
+		power += m_fWalkWeightPower * (normal_weight_alpha + overweight_additional_alpha);
+	}
+	power *= m_fDeltaTime * (accel ? (sprint ? m_fSprintK : m_fAccelK) : 1.f);
+	m_fPower -= HitPowerEffect(power);
 }
 
 void CActorCondition::ConditionStand(float weight)
@@ -696,36 +711,31 @@ float CActorCondition::GetBoosterValueByType(EBoostParams type) const
 
 void CActorCondition::BoostParameters(const SBooster& B)
 {
-	if(OnServer())
+	switch (B.m_type)
 	{
-		switch(B.m_type)
-		{
-			case eBoostHpRestore: BoostHpRestore(B.fBoostValue); break;
-			case eBoostPowerRestore: BoostPowerRestore(B.fBoostValue); break;
-			case eBoostRadiationRestore: BoostRadiationRestore(B.fBoostValue); break;
-			case eBoostBleedingRestore: BoostBleedingRestore(B.fBoostValue); break;
-			case eBoostMaxWeight: BoostMaxWeight(B.fBoostValue); break;
-			case eBoostBurnImmunity: BoostBurnImmunity(B.fBoostValue); break;
-			case eBoostShockImmunity: BoostShockImmunity(B.fBoostValue); break;
-			case eBoostRadiationImmunity: BoostRadiationImmunity(B.fBoostValue); break;
-			case eBoostTelepaticImmunity: BoostTelepaticImmunity(B.fBoostValue); break;
-			case eBoostChemicalBurnImmunity: BoostChemicalBurnImmunity(B.fBoostValue); break;
-			case eBoostExplImmunity: BoostExplImmunity(B.fBoostValue); break;
-			case eBoostStrikeImmunity: BoostStrikeImmunity(B.fBoostValue); break;
-			case eBoostFireWoundImmunity: BoostFireWoundImmunity(B.fBoostValue); break;
-			case eBoostWoundImmunity: BoostWoundImmunity(B.fBoostValue); break;
-			case eBoostRadiationProtection: BoostRadiationProtection(B.fBoostValue); break;
-			case eBoostTelepaticProtection: BoostTelepaticProtection(B.fBoostValue); break;
-			case eBoostChemicalBurnProtection: BoostChemicalBurnProtection(B.fBoostValue); break;
-			default: NODEFAULT;	
-		}
+	case eBoostHpRestore: BoostHpRestore(B.fBoostValue); break;
+	case eBoostPowerRestore: BoostPowerRestore(B.fBoostValue); break;
+	case eBoostRadiationRestore: BoostRadiationRestore(B.fBoostValue); break;
+	case eBoostBleedingRestore: BoostBleedingRestore(B.fBoostValue); break;
+	case eBoostMaxWeight: BoostMaxWeight(B.fBoostValue); break;
+	case eBoostBurnImmunity: BoostBurnImmunity(B.fBoostValue); break;
+	case eBoostShockImmunity: BoostShockImmunity(B.fBoostValue); break;
+	case eBoostRadiationImmunity: BoostRadiationImmunity(B.fBoostValue); break;
+	case eBoostTelepaticImmunity: BoostTelepaticImmunity(B.fBoostValue); break;
+	case eBoostChemicalBurnImmunity: BoostChemicalBurnImmunity(B.fBoostValue); break;
+	case eBoostExplImmunity: BoostExplImmunity(B.fBoostValue); break;
+	case eBoostStrikeImmunity: BoostStrikeImmunity(B.fBoostValue); break;
+	case eBoostFireWoundImmunity: BoostFireWoundImmunity(B.fBoostValue); break;
+	case eBoostWoundImmunity: BoostWoundImmunity(B.fBoostValue); break;
+	case eBoostRadiationProtection: BoostRadiationProtection(B.fBoostValue); break;
+	case eBoostTelepaticProtection: BoostTelepaticProtection(B.fBoostValue); break;
+	case eBoostChemicalBurnProtection: BoostChemicalBurnProtection(B.fBoostValue); break;
+	default: NODEFAULT;
 	}
 }
+
 void CActorCondition::DisableBoostParameters(const SBooster& B)
 {
-	if(!OnServer())
-		return;
-
 	switch(B.m_type)
 	{
 		case eBoostHpRestore: BoostHpRestore(-B.fBoostValue); break;

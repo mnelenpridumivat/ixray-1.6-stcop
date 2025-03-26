@@ -32,6 +32,7 @@ protected:
 	
 public:
 	bool				m_bUseColor;
+	bool				m_bUseGradient;
 	bool				m_bUseMidColor;
 	Fcolor				m_minColor;
 	Fcolor				m_middleColor;

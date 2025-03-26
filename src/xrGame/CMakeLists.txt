@@ -86,6 +86,8 @@ file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
+file(GLOB_RECURSE XGM_SOURCE_IMGUI_INGAME_FILES "ImUtils/*.*")
+
 # Source groups
 source_group("core" FILES ${XGM_SOURCE_ALL_FILES})
 source_group("ui" FILES ${XGM_SOURCE_UI_FILES})
@@ -125,6 +127,8 @@ source_group("ikan" FILES ${XGM_SOURCE_IKAN_FILES})
 source_group("inventory" FILES ${XGM_SOURCE_INV_FILES})
 source_group("Legacy" FILES ${XGM_SOURCE_LEGACY_FILES})
 
+source_group("imgui/utils" FILES ${XGM_SOURCE_IMGUI_INGAME_FILES})
+
 # Apply list
 list(APPEND XGM_SRC_FILES ${XGM_SOURCE_ALL_FILES})
 
@@ -134,7 +138,7 @@ list(FILTER XGM_SRC_FILES EXCLUDE REGEX "WeaponMounted.*")
 list(FILTER XGM_SRC_FILES EXCLUDE REGEX "LevelFogOfWar.*")
 list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ai/monsters/rats/ai_rat_fsm.*")
 list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ui/IUWpnParams.*")
-list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ui/UIRankFaction.*")
+#list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ui/UIRankFaction.*")
 list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ui/UIRankFraction.*")
 list(FILTER XGM_SRC_FILES EXCLUDE REGEX "ui/UIStalkersRankingWnd.*")
 

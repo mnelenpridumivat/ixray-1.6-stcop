@@ -56,7 +56,9 @@ public:
 CALifeUpdateManager::CALifeUpdateManager	(xrServer *server, LPCSTR section) :
 	CALifeSwitchManager		(server,section),
 	CALifeSurgeManager		(server,section),
-	CALifeStorageManager	(server,section) {
+	CALifeStorageManager	(server,section),
+	CALifeSimulatorBase		(server,section)
+{
 	shedule.t_min			= pSettings->r_s32	(section,"schedule_min");
 	shedule.t_max			= pSettings->r_s32	(section,"schedule_max");
 	shedule_register		();
@@ -253,7 +255,7 @@ bool CALifeUpdateManager::change_level	(NET_Packet &net_packet)
 #include "../xrEngine/IGame_Persistent.h"
 void CALifeUpdateManager::new_game			(LPCSTR save_name)
 {
-//	g_pGamePersistent->LoadTitle		("st_creating_new_game");
+	g_pGamePersistent->SetLoadStageTitle("st_creating_new_game");
 	g_pGamePersistent->LoadTitle		();
 	Msg									("* Creating new game...");
 
@@ -283,7 +285,7 @@ void CALifeUpdateManager::new_game			(LPCSTR save_name)
 
 void CALifeUpdateManager::load			(LPCSTR game_name, bool no_assert, bool new_only)
 {
-//	g_pGamePersistent->LoadTitle		("st_loading_alife_simulator");
+	g_pGamePersistent->SetLoadStageTitle("st_loading_alife_simulator");
 	g_pGamePersistent->LoadTitle		();
 
 #ifdef DEBUG
@@ -304,7 +306,7 @@ void CALifeUpdateManager::load			(LPCSTR game_name, bool no_assert, bool new_onl
 #ifdef DEBUG
 	Msg									("* Loading alife simulator is successfully completed (%7.3f Mb)",float(Memory.mem_usage() - memory_usage)/1048576.0);
 #endif
-//	g_pGamePersistent->LoadTitle		("st_server_connecting");
+	g_pGamePersistent->SetLoadStageTitle("st_server_connecting");
 	g_pGamePersistent->LoadTitle		(true, g_pGameLevel->name());
 }
 
@@ -319,11 +321,12 @@ bool CALifeUpdateManager::load_game		(LPCSTR game_name, bool no_assert)
 {
 	{
 		string_path				temp,file_name;
-		xr_strconcat(temp,game_name,SAVE_EXTENSION);
+		xr_strconcat(temp,game_name, IXRAY_DEF_SAVE_EXTENSION);
 		FS.update_path			(file_name,"$game_saves$",temp);
-		if (!FS.exist(file_name)) {
-			R_ASSERT3			(no_assert,"There is no saved game ",file_name);
-			return				(false);
+		if (!FS.exist(file_name)) 
+		{
+			R_ASSERT3(no_assert, "There is no saved game ", file_name);
+			return (false);
 		}
 	}
 	string512					S,S1;

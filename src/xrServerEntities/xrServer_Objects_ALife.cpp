@@ -18,12 +18,11 @@
 #	include "character_info.h"
 #endif // AI_COMPILER
 
+#	include "../xrEngine/bone.h"
 #ifndef XRGAME_EXPORTS
-#	include "bone.h"
 #	include "../xrEngine/defines.h"
 	LPCSTR GAME_CONFIG = "game.ltx";
 #else // XRGAME_EXPORTS
-#	include "../xrEngine/bone.h"
 #	include "../xrEngine/render.h"
 #endif // XRGAME_EXPORTS
 
@@ -114,30 +113,30 @@ SFillPropData::~SFillPropData	()
 };
 
 void	SFillPropData::load			()
-    {
-      // create ini
+	{
+	  // create ini
 #ifdef XRGAME_EXPORTS
-    CInifile				*Ini = 	pGameIni;
+	CInifile				*Ini = 	pGameIni;
 #else // XRGAME_EXPORTS
-    CInifile				*Ini = 0;
-    string_path				gm_name;
-    FS.update_path			(gm_name,"$game_config$",GAME_CONFIG);
-    R_ASSERT3				(FS.exist(gm_name),"Couldn't find file",gm_name);
-    Ini						= new CInifile(gm_name);
+	CInifile				*Ini = 0;
+	string_path				gm_name;
+	FS.update_path			(gm_name,"$game_config$",GAME_CONFIG);
+	R_ASSERT3				(FS.exist(gm_name),"Couldn't find file",gm_name);
+	Ini						= new CInifile(gm_name);
 #endif // XRGAME_EXPORTS
 
-    // location type
-    LPCSTR					N,V;
-    u32 					k;
+	// location type
+	LPCSTR					N,V;
+	u32 					k;
 	for (int i=0; i<GameGraph::LOCATION_TYPE_COUNT; ++i){
-        VERIFY				(locations[i].empty());
-        string256			caSection, T;
+		VERIFY				(locations[i].empty());
+		string256			caSection, T;
 		xr_strconcat(caSection,SECTION_HEADER,_itoa(i,T,10));
-        R_ASSERT			(Ini->section_exist(caSection));
-        for (k = 0; Ini->r_line(caSection,k,&N,&V); ++k)
-            locations[i].push_back	(xr_rtoken(V,atoi(N)));
-    }
-    for (k = 0; Ini->r_line("graph_points_draw_color_palette",k,&N,&V); ++k)
+		R_ASSERT			(Ini->section_exist(caSection));
+		for (k = 0; Ini->r_line(caSection,k,&N,&V); ++k)
+			locations[i].push_back	(xr_rtoken(V,atoi(N)));
+	}
+	for (k = 0; Ini->r_line("graph_points_draw_color_palette",k,&N,&V); ++k)
 	{
 		u32 color;
 		if(1==sscanf(V,"%x", &color))
@@ -146,13 +145,13 @@ void	SFillPropData::load			()
 		}else
 			Msg("! invalid record format in [graph_points_draw_color_palette] %s=%s",N,V);
 	}
-    
+	
 	// level names/ids
-    VERIFY					(level_ids.empty());
-    for (k = 0; Ini->r_line("levels",k,&N,&V); ++k)
-        level_ids.push_back	(Ini->r_string_wb(N,"caption"));
+	VERIFY					(level_ids.empty());
+	for (k = 0; Ini->r_line("levels",k,&N,&V); ++k)
+		level_ids.push_back	(Ini->r_string_wb(N,"caption"));
 
-    // story names
+	// story names
 	{
 		VERIFY					(story_names.empty());
 		LPCSTR section 			= "story_ids";
@@ -164,7 +163,7 @@ void	SFillPropData::load			()
 		story_names.insert		(story_names.begin(),xr_rtoken("NO STORY ID",ALife::_STORY_ID(-1)));
 	}
 
-    // spawn story names
+	// spawn story names
 	{
 		VERIFY					(spawn_story_names.empty());
 		LPCSTR section 			= "spawn_story_ids";
@@ -187,7 +186,7 @@ void	SFillPropData::load			()
 	std::sort(character_profiles.begin(), character_profiles.end(), SortStringsByAlphabetPred);
 #endif // AI_COMPILER
 	
-    // destroy ini
+	// destroy ini
 #ifndef XRGAME_EXPORTS
 	xr_delete				(Ini);
 #endif // XRGAME_EXPORTS
@@ -204,32 +203,32 @@ void	SFillPropData::load			()
 
 void	SFillPropData::unload			()
 {
-    for (int i=0; i<GameGraph::LOCATION_TYPE_COUNT; ++i)
-        locations[i].clear	();
-    level_ids.clear			();
-    story_names.clear		();
-    spawn_story_names.clear	();
+	for (int i=0; i<GameGraph::LOCATION_TYPE_COUNT; ++i)
+		locations[i].clear	();
+	level_ids.clear			();
+	story_names.clear		();
+	spawn_story_names.clear	();
 	character_profiles.clear();
 	smart_covers.clear		();
 };
 
 void	SFillPropData::dec				()
 {
-    VERIFY					(counter > 0);
-    --counter;
+	VERIFY					(counter > 0);
+	--counter;
 
-    if (!counter)
-        unload				();
+	if (!counter)
+		unload				();
 };
 
 void	SFillPropData::inc				()
 {
-    VERIFY					(counter < 0xffffffff);
+	VERIFY					(counter < 0xffffffff);
 
-    if (!counter)
-        load				();
+	if (!counter)
+		load				();
 
-    ++counter;
+	++counter;
 }
 SFillPropData			fp_data;
 #endif // #ifdef XRSE_FACTORY_EXPORTS
@@ -269,7 +268,7 @@ CSE_ALifeGraphPoint::CSE_ALifeGraphPoint	(LPCSTR caSection) : CSE_Abstract(caSec
 CSE_ALifeGraphPoint::~CSE_ALifeGraphPoint	()
 {
 #ifdef XRSE_FACTORY_EXPORTS
-    fp_data.dec					();
+	fp_data.dec					();
 #endif // XRSE_FACTORY_EXPORTS
 }
 
@@ -380,6 +379,14 @@ void CSE_ALifeGraphPoint::FillProps			(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\3"), &m_tLocations[2], &*fp_data.locations[2].begin(), (u32)fp_data.locations[2].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
 	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\4"), &m_tLocations[3], &*fp_data.locations[3].begin(), (u32)fp_data.locations[3].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
 
+	
+	std::sort(fp_data.level_ids.begin(), fp_data.level_ids.end(), [](shared_str ItemA, shared_str ItemB)
+	{
+		xr_string NameA = ItemA.c_str();
+		xr_string NameB = ItemB.c_str();
+
+		return NameA < NameB;
+	});
 
 	PHelper().CreateRList	 	(items,	PrepareKey(pref,*s_name,"Connection\\Level name"),	&m_caConnectionLevelName,	&*fp_data.level_ids.begin(),	(u32)fp_data.level_ids.size());
 	PHelper().CreateRText	 	(items,	PrepareKey(pref,*s_name,"Connection\\Point name"),	&m_caConnectionPointName);
@@ -455,7 +462,7 @@ CSE_ALifeObject::CSE_ALifeObject			(LPCSTR caSection) : CSE_Abstract(caSection)
 	m_alife_simulator			= 0;
 #endif
 #ifdef XRSE_FACTORY_EXPORTS
-    fp_data.inc					();
+	fp_data.inc					();
 #endif // XRSE_FACTORY_EXPORTS
 	m_flags.set					(flOfflineNoMove,FALSE);
 	seed						(u32(CPU::QPC() & 0xffffffff));
@@ -477,7 +484,7 @@ Fvector CSE_ALifeObject::draw_level_position	() const
 CSE_ALifeObject::~CSE_ALifeObject			()
 {
 #ifdef XRSE_FACTORY_EXPORTS
-    fp_data.dec					();
+	fp_data.dec					();
 #endif // XRSE_FACTORY_EXPORTS
 }
 
@@ -1385,7 +1392,7 @@ CSE_ALifeLevelChanger::CSE_ALifeLevelChanger(LPCSTR caSection) : CSE_ALifeSpaceR
 	m_tNextPosition.set			(0.f,0.f,0.f);
 	m_tAngles.set				(0.f,0.f,0.f);
 #ifdef XRSE_FACTORY_EXPORTS
-    fp_data.inc					();
+	fp_data.inc					();
 #endif // XRSE_FACTORY_EXPORTS
 	m_bSilentMode				= FALSE;
 }
@@ -1393,7 +1400,7 @@ CSE_ALifeLevelChanger::CSE_ALifeLevelChanger(LPCSTR caSection) : CSE_ALifeSpaceR
 CSE_ALifeLevelChanger::~CSE_ALifeLevelChanger()\
 {
 #ifdef XRSE_FACTORY_EXPORTS
-    fp_data.dec					();
+	fp_data.dec					();
 #endif // XRSE_FACTORY_EXPORTS
 }
 
@@ -1554,7 +1561,7 @@ CSE_ALifeObjectPhysic::CSE_ALifeObjectPhysic(LPCSTR caSection) : CSE_ALifeDynami
 
 	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection,"visual"))
 	{
-    	set_visual				(pSettings->r_string(caSection,"visual"));
+		set_visual				(pSettings->r_string(caSection,"visual"));
 		
 		if(pSettings->line_exist(caSection,"startup_animation"))
 			startup_animation		= pSettings->r_string(caSection,"startup_animation");
@@ -1599,7 +1606,7 @@ void CSE_ALifeObjectPhysic::STATE_Read		(NET_Packet	&tNetPacket, u16 size)
 		
 	tNetPacket.r_u32			(type);
 	tNetPacket.r_float			(mass);
-    
+	
 	if (m_wVersion > 9)
 		tNetPacket.r_stringZ	(fixed_bones);
 
@@ -1631,7 +1638,7 @@ void CSE_ALifeObjectPhysic::STATE_Write		(NET_Packet	&tNetPacket)
 
 }
 
-static inline bool check (const u8 &mask, const u8 &test)
+static inline bool check (const u8 mask, const u8 test)
 {
 	return							(!!(mask & test));
 }
@@ -2128,9 +2135,9 @@ void CSE_ALifeObjectPhysic::FillProps		(LPCSTR pref, PropItemVec& values)
 
 	PHelper().CreateToken32		(values, PrepareKey(pref,*s_name,"Type"), &type,	po_types);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Mass"), &mass, 0.1f, 10000.f);
-    PHelper().CreateFlag8		(values, PrepareKey(pref,*s_name,"Active"), &_flags, flActive);
+	PHelper().CreateFlag8		(values, PrepareKey(pref,*s_name,"Active"), &_flags, flActive);
 
-    // motions & bones
+	// motions & bones
 	PHelper().CreateChoose		(values, 	PrepareKey(pref,*s_name,"Model\\Fixed bones"),	&fixed_bones,		smSkeletonBones,0,(void*)visual()->get_visual(),8);
 }
 #endif // #ifndef XRGAME_EXPORTS
@@ -2154,16 +2161,16 @@ CSE_ALifeObjectHangingLamp::CSE_ALifeObjectHangingLamp(LPCSTR caSection) : CSE_A
 
 	range						= 10.f;
 	color						= 0xffffffff;
-    brightness					= 1.f;
+	brightness					= 1.f;
 	m_health					= 100.f;
 	m_flags.set					(flUseSwitches,FALSE);
 	m_flags.set					(flSwitchOffline,FALSE);
 
 	m_virtual_size				= 0.1f;
 	m_ambient_radius			= 10.f;
-    m_ambient_power				= 0.1f;
-    spot_cone_angle				= deg2rad(120.f);
-    glow_radius					= 0.7f;
+	m_ambient_power				= 0.1f;
+	spot_cone_angle				= deg2rad(120.f);
+	glow_radius					= 0.7f;
 	m_volumetric_quality		= 1.0f;
 	m_volumetric_intensity		= 1.0f;
 	m_volumetric_distance		= 1.0f;
@@ -2221,7 +2228,7 @@ void CSE_ALifeObjectHangingLamp::STATE_Read	(NET_Packet	&tNetPacket, u16 size)
 		tNetPacket.r_float			(brightness);
 		tNetPacket.r_stringZ		(color_animator);
 		tNetPacket.r_float			(range);
-    	tNetPacket.r_u16			(flags.flags);
+		tNetPacket.r_u16			(flags.flags);
 		tNetPacket.r_stringZ		(startup_animation);
 		set_editor_flag				(flVisualAnimationChange);
 		tNetPacket.r_stringZ		(fixed_bones);
@@ -2229,14 +2236,14 @@ void CSE_ALifeObjectHangingLamp::STATE_Read	(NET_Packet	&tNetPacket, u16 size)
 	}
 	if (m_wVersion > 55){
 		tNetPacket.r_float			(m_virtual_size);
-	    tNetPacket.r_float			(m_ambient_radius);
-    	tNetPacket.r_float			(m_ambient_power);
-	    tNetPacket.r_stringZ		(m_ambient_texture);
-        tNetPacket.r_stringZ		(light_texture);
-        tNetPacket.r_stringZ		(light_main_bone);
-        tNetPacket.r_float			(spot_cone_angle);
-        tNetPacket.r_stringZ		(glow_texture);
-        tNetPacket.r_float			(glow_radius);
+		tNetPacket.r_float			(m_ambient_radius);
+		tNetPacket.r_float			(m_ambient_power);
+		tNetPacket.r_stringZ		(m_ambient_texture);
+		tNetPacket.r_stringZ		(light_texture);
+		tNetPacket.r_stringZ		(light_main_bone);
+		tNetPacket.r_float			(spot_cone_angle);
+		tNetPacket.r_stringZ		(glow_texture);
+		tNetPacket.r_float			(glow_radius);
 	}
 	if (m_wVersion > 96){
 		tNetPacket.r_stringZ		(light_ambient_bone);
@@ -2262,21 +2269,21 @@ void CSE_ALifeObjectHangingLamp::STATE_Write(NET_Packet	&tNetPacket)
 	tNetPacket.w_float			(brightness);
 	tNetPacket.w_stringZ		(color_animator);
 	tNetPacket.w_float			(range);
-   	tNetPacket.w_u16			(flags.flags);
+	tNetPacket.w_u16			(flags.flags);
 	tNetPacket.w_stringZ		(startup_animation);
-    tNetPacket.w_stringZ		(fixed_bones);
+	tNetPacket.w_stringZ		(fixed_bones);
 	tNetPacket.w_float			(m_health);
 	tNetPacket.w_float			(m_virtual_size);
-    tNetPacket.w_float			(m_ambient_radius);
-    tNetPacket.w_float			(m_ambient_power);
-    tNetPacket.w_stringZ		(m_ambient_texture);
+	tNetPacket.w_float			(m_ambient_radius);
+	tNetPacket.w_float			(m_ambient_power);
+	tNetPacket.w_stringZ		(m_ambient_texture);
 
-    tNetPacket.w_stringZ		(light_texture);
-    tNetPacket.w_stringZ		(light_main_bone);
-    tNetPacket.w_float			(spot_cone_angle);
-    tNetPacket.w_stringZ		(glow_texture);
-    tNetPacket.w_float			(glow_radius);
-    
+	tNetPacket.w_stringZ		(light_texture);
+	tNetPacket.w_stringZ		(light_main_bone);
+	tNetPacket.w_float			(spot_cone_angle);
+	tNetPacket.w_stringZ		(glow_texture);
+	tNetPacket.w_float			(glow_radius);
+	
 	tNetPacket.w_stringZ		(light_ambient_bone);
 
 	tNetPacket.w_float			(m_volumetric_quality);
@@ -2452,18 +2459,18 @@ void CSE_ALifeObjectHangingLamp::FillProps	(LPCSTR pref, PropItemVec& values)
 	inherited1::FillProps		(pref,values);
 	inherited2::FillProps		(pref,values);
 
-    PropValue* P				= 0;
+	PropValue* P				= 0;
 	PHelper().CreateFlag16		(values, PrepareKey(pref,*s_name,"Flags\\Physic"),		&flags,			flPhysic);
 	PHelper().CreateFlag16		(values, PrepareKey(pref,*s_name,"Flags\\Cast Shadow"),	&flags,			flCastShadow);
 	PHelper().CreateFlag16		(values, PrepareKey(pref,*s_name,"Flags\\Allow R1"),	&flags,			flR1);
 	PHelper().CreateFlag16		(values, PrepareKey(pref,*s_name,"Flags\\Allow R2"),	&flags,			flR2);
 	P=PHelper().CreateFlag16	(values, PrepareKey(pref,*s_name,"Flags\\Allow Ambient"),&flags,			flPointAmbient);
-    P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
+	P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
 	// 
 	P=PHelper().CreateFlag16	(values, PrepareKey(pref,*s_name,"Light\\Is Spot Light"),		&flags,				flTypeSpot, "Point", "Spot");
-    P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
+	P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
 	PHelper().CreateColor		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color"),			&color);
-    PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Brightness"),	&brightness,		0.1f, 5.f);
+	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Brightness"),	&brightness,		0.1f, 5.f);
 	PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color Animator"),&color_animator, 	smLAnim);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Range"),			&range,				0.1f, 1000.f);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Virtual Size"),	&m_virtual_size,	0.f, 100.f);
@@ -2492,8 +2499,8 @@ void CSE_ALifeObjectHangingLamp::FillProps	(LPCSTR pref, PropItemVec& values)
 	}
 
 	// fixed bones
-    PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Model\\Fixed bones"),	&fixed_bones,		smSkeletonBones,0,(void*)visual()->get_visual(),8);
-    // glow
+	PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Model\\Fixed bones"),	&fixed_bones,		smSkeletonBones,0,(void*)visual()->get_visual(),8);
+	// glow
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Glow\\Radius"),	    &glow_radius,		0.01f, 100.f);
 	PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Glow\\Texture"),	    &glow_texture, 		smTexture,	"glow");
 	// game
@@ -2735,10 +2742,10 @@ CSE_Motion* CSE_ALifeHelicopter::motion		()
 void CSE_ALifeHelicopter::STATE_Read		(NET_Packet	&tNetPacket, u16 size)
 {
 	inherited1::STATE_Read		(tNetPacket,size);
-    CSE_Motion::motion_read		(tNetPacket);
+	CSE_Motion::motion_read		(tNetPacket);
 	if(m_wVersion>=69)
 		inherited3::STATE_Read		(tNetPacket,size);
-    tNetPacket.r_stringZ		(startup_animation);
+	tNetPacket.r_stringZ		(startup_animation);
 	tNetPacket.r_stringZ		(engine_sound);
 
 	set_editor_flag				(flVisualAnimationChange | flMotionChange);
@@ -2747,16 +2754,21 @@ void CSE_ALifeHelicopter::STATE_Read		(NET_Packet	&tNetPacket, u16 size)
 void CSE_ALifeHelicopter::STATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited1::STATE_Write		(tNetPacket);
-    CSE_Motion::motion_write	(tNetPacket);
+	CSE_Motion::motion_write	(tNetPacket);
 	inherited3::STATE_Write		(tNetPacket);
-    tNetPacket.w_stringZ			(startup_animation);
-    tNetPacket.w_stringZ			(engine_sound);
+	tNetPacket.w_stringZ			(startup_animation);
+	tNetPacket.w_stringZ			(engine_sound);
 }
 
-void CSE_ALifeHelicopter::UPDATE_Read		(NET_Packet	&tNetPacket)
+BOOL CSE_ALifeHelicopter::Net_Relevant()
 {
-	inherited1::UPDATE_Read		(tNetPacket);
-	inherited3::UPDATE_Read		(tNetPacket);
+	return !IsGameTypeSingle();
+}
+
+void CSE_ALifeHelicopter::UPDATE_Read(NET_Packet& tNetPacket)
+{
+	inherited1::UPDATE_Read(tNetPacket);
+	inherited3::UPDATE_Read(tNetPacket);
 }
 
 void CSE_ALifeHelicopter::UPDATE_Write		(NET_Packet	&tNetPacket)
@@ -2831,14 +2843,25 @@ void CSE_ALifeHelicopter::UPDATE_Serialize(ISaveObject& Object)
 	Object.EndChunk();
 }
 
+void CSE_ALifeHelicopter::SyncRead(NET_Packet& Packet)
+{
+	PointPos = Packet.r_vec3();
+}
+
+void CSE_ALifeHelicopter::SyncWrite(NET_Packet& Packet)
+{
+	Packet.w_vec3(PointPos);
+}
+
 void CSE_ALifeHelicopter::load		(NET_Packet &tNetPacket)
 {
 	inherited1::load(tNetPacket);
 	inherited3::load(tNetPacket);
 }
+
 bool CSE_ALifeHelicopter::can_save() const
 {
-	return						CSE_PHSkeleton::need_save();
+	return CSE_PHSkeleton::need_save();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2848,7 +2871,7 @@ void CSE_ALifeHelicopter::FillProps(LPCSTR pref, PropItemVec& values)
 	inherited2::FillProps		(pref,	values);
 	inherited3::FillProps		(pref,	values);
 
-    PHelper().CreateChoose		(values,	PrepareKey(pref,*s_name,"Engine Sound"), &engine_sound, smSoundSource);
+	PHelper().CreateChoose		(values,	PrepareKey(pref,*s_name,"Engine Sound"), &engine_sound, smSoundSource);
 }
 #endif // #ifndef XRGAME_EXPORTS
 
@@ -2864,7 +2887,7 @@ CSE_ALifeCar::CSE_ALifeCar				(LPCSTR caSection) : CSE_ALifeDynamicObjectVisual(
 {
 
 	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection,"visual"))
-    	set_visual				(pSettings->r_string(caSection,"visual"));
+		set_visual				(pSettings->r_string(caSection,"visual"));
 	m_flags.set					(flUseSwitches,FALSE);
 	m_flags.set					(flSwitchOffline,FALSE);
 	health						=1.0f;
@@ -3226,7 +3249,7 @@ void CSE_ALifeCar::SWheelState::write(CSaveObjectSave* Object) const
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeCar::FillProps				(LPCSTR pref, PropItemVec& values)
 {
-  	inherited1::FillProps			(pref,values);
+	inherited1::FillProps			(pref,values);
 	inherited2::FillProps			(pref,values);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Health"),			&health,			0.f, 1.0f);
 }
@@ -3325,7 +3348,7 @@ void CSE_ALifeObjectBreakable::UPDATE_Serialize(ISaveObject& Object)
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeObjectBreakable::FillProps		(LPCSTR pref, PropItemVec& values)
 {
-  	inherited::FillProps			(pref,values);
+	inherited::FillProps			(pref,values);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Health"),			&m_health,			0.f, 100.f);
 }
 #endif // #ifndef XRGAME_EXPORTS

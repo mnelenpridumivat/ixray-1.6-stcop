@@ -63,11 +63,9 @@ void CUITalkWnd::InitTalkDialog()
 	m_pOthersDialogManager = smart_cast<CPhraseDialogManager*>(m_pOthersInvOwner);
 
 	//имена собеседников
-	UITalkDialogWnd->UICharacterInfoLeft.InitCharacter		(m_pOurInvOwner->object_id());
-	UITalkDialogWnd->UICharacterInfoRight.InitCharacter		(m_pOthersInvOwner->object_id());
+	UITalkDialogWnd->UICharacterInfoLeft.InitCharacter(m_pOurInvOwner);
+	UITalkDialogWnd->UICharacterInfoRight.InitCharacter(m_pOthersInvOwner);
 
-//.	UITalkDialogWnd->UIDialogFrame.UITitleText.SetText		(m_pOthersInvOwner->Name());
-//.	UITalkDialogWnd->UIOurPhrasesFrame.UITitleText.SetText	(m_pOurInvOwner->Name());
 	
 	//очистить лог сообщений
 	UITalkDialogWnd->ClearAll();
@@ -173,6 +171,7 @@ void CUITalkWnd::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 //////////////////////////////////////////////////////////////////////////
 void UpdateCameraDirection(CGameObject* pTo)
 {
+	if (!pTo) return;
 	CCameraBase* cam = Actor()->cam_Active();
 
 	Fvector des_dir; 
@@ -329,31 +328,34 @@ void CUITalkWnd::SwitchToTrade()
 {
 	if ( m_pOurInvOwner->IsTradeEnabled() && m_pOthersInvOwner->IsTradeEnabled() )
 	{
-		CUIGameSP* pGameSP = smart_cast<CUIGameSP*>( CurrentGameUI() );
-		if ( pGameSP )
+ 		if (CurrentGameUI())
 		{
-/*			if ( pGameSP->MainInputReceiver() )
-			{
-				pGameSP->MainInputReceiver()->HideDialog();
-			}*/
-			pGameSP->StartTrade	(m_pOurInvOwner, m_pOthersInvOwner);
+			CurrentGameUI()->StartTrade	(m_pOurInvOwner, m_pOthersInvOwner);
+		}
+	}
+}
+
+void CUITalkWnd::SwitchToBarter()
+{
+	if (m_pOurInvOwner->IsTradeEnabled() && m_pOthersInvOwner->IsTradeEnabled())
+	{
+		CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+		if (pGameSP)
+		{
+			/*			if ( pGameSP->MainInputReceiver() )
+						{
+							pGameSP->MainInputReceiver()->HideDialog();
+						}*/
+			pGameSP->StartBarter(m_pOurInvOwner, m_pOthersInvOwner);
 		} // pGameSP
 	}
 }
 
 void CUITalkWnd::SwitchToUpgrade()
 {
-	//if ( m_pOurInvOwner->IsInvUpgradeEnabled() && m_pOthersInvOwner->IsInvUpgradeEnabled() )
+  	if (CurrentGameUI())
 	{
-		CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-		if ( pGameSP )
-		{
-/*			if ( pGameSP->MainInputReceiver() )
-			{
-				pGameSP->MainInputReceiver()->HideDialog();
-			}*/
-			pGameSP->StartUpgrade(m_pOurInvOwner, m_pOthersInvOwner);
-		}
+		CurrentGameUI()->StartUpgrade(m_pOurInvOwner, m_pOthersInvOwner);
 	}
 }
 
@@ -372,6 +374,9 @@ bool CUITalkWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 		}
 		else if(is_binded(kSPRINT_TOGGLE, dik))
 		{
+			if (m_pOthersInvOwner && m_pOthersInvOwner->NeedOsoznanieMode())
+				return true;
+
 			if(UITalkDialogWnd->mechanic_mode)
 				SwitchToUpgrade();
 			else

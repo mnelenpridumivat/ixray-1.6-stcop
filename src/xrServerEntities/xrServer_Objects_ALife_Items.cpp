@@ -14,10 +14,8 @@
 #include "Save/SaveObject.h"
 #include "shared_string.h"
 
-#ifndef XRGAME_EXPORTS
-#	include "bone.h"
-#else
 #	include "../xrEngine/bone.h"
+#ifdef XRGAME_EXPORTS
 #	ifdef DEBUG
 #		define PHPH_DEBUG
 #	endif

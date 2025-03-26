@@ -8,17 +8,19 @@
 #	include "light_smapvis.h"
 #endif //(RENDER==R_R2) || (RENDER==R_R4)
 
-class	light		:	public IRender_Light, public ISpatial
+class light :	
+	public IRender_Light
 {
 public:
-	struct {
-		u32			type	:	4;
-		u32			bStatic	:	1;
-		u32			bActive	:	1;
-		u32			bShadow	:	1;
-		u32			bVolumetric:1;
-		u32			bHudMode:	1;
-		u32			bOccq:		1;
+	struct
+	{
+		u32 type	:	4;
+		u32 bStatic	:	1;
+		u32 bActive	:	1;
+		u32 bShadow	:	1;
+		u32 bVolumetric:1;
+		u32 bHudMode:	1;
+		u32 bOccq:		1;
 	} flags;
 
 	Fvector			position	;
@@ -31,14 +33,15 @@ public:
 	CObject			*ignore_object, *decor_object[6];
 	vis_data		hom			;
 	u32				frame_render;
-
+	
 #if RENDER!=R_R1
 	xr_vector<IRender_Sector*> m_sectors;
 #endif	//	RENDER!=R_R1
+
 	float			m_volumetric_quality;
 	float			m_volumetric_intensity;
 	float			m_volumetric_distance;
-	bool			b_spatial_move;
+
 #if (RENDER==R_R2) || (RENDER==R_R4) || defined(_EDITOR)
 	float			falloff;			// precalc to make light equal to zero at light range
 	float	        attenuation0;		// Constant attenuation		
@@ -57,7 +60,8 @@ public:
 	u32				m_xform_frame;
 	Fmatrix			m_xform;
 
-	struct _vis		{
+	struct _vis		
+	{
 		u32			frame2test;		// frame the test is sheduled to
 		u32			query_id;		// ID of occlusion query
 		u32			query_order;	// order of occlusion query
@@ -66,34 +70,45 @@ public:
 		u16			smap_ID;
 	}				vis;
 
-	union			_xform	{
-		struct		_D		{
-			Fmatrix						combine	;
-			s32							minX,maxX	;
-			s32							minY,maxY	;
-			BOOL						transluent	;
+	union _xform
+	{
+		struct _D
+		{
+			Fmatrix						combine = {};
+			s32							minX, maxX;
+			s32							minY, maxY;
+			BOOL						transluent;
 		}	D;
-		struct		_P		{
-			Fmatrix						world		;
-			Fmatrix						view		;
-			Fmatrix						project		;
-			Fmatrix						combine		;
+
+		struct _P
+		{
+			Fmatrix						world = {};
+			Fmatrix						view = {};
+			Fmatrix						project = {};
+			Fmatrix						combine = {};
 		}	P;
-		struct		_S		{
-			Fmatrix						view		;
-			Fmatrix						project		;
-			Fmatrix						combine		;
-			u32							size		;
-			u32							posX		;
-			u32							posY		;
-			BOOL						transluent	;
+
+		struct _S
+		{
+			Fmatrix						view = {};
+			Fmatrix						project = {};
+			Fmatrix						combine = {};
+			u32							size;
+			u32							posX;
+			u32							posY;
+			BOOL						transluent;
 		}	S;
-	}	X;
+
+	};
+
+	_xform X = {};
 #endif	//	(RENDER==R_R2) || (RENDER==R_R4)
 
 public:
 #if RENDER!=R_R1
 	void get_sectors();
+	bool has_light_visible_from_sectors();
+	xrCriticalSection sectors_lc;
 #endif	//	RENDER!=R_R1
 	virtual void	set_type				(LT type)						{ flags.type = type;		}
 	virtual void	set_active				(bool b);

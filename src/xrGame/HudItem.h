@@ -10,6 +10,7 @@ class CMotionDef;
 #include "inventory_space.h"
 #include "HudSound.h"
 #include "InertionData.h"
+#include "../xrScripts/script_export_space.h"
 
 struct attachable_hud_item;
 class motion_marks;
@@ -47,10 +48,11 @@ public:
 
 class CHudItem :public CHUDState
 {
-protected:
+public:
 							CHudItem			();
 	virtual					~CHudItem			();
 	virtual DLL_Pure*		_construct			();
+protected:
 	
 	Flags16					m_huditem_flags;
 	enum{
@@ -145,10 +147,13 @@ public:
 	virtual float GetHudFov();
 	virtual bool AllowBore() { return !m_bDisableBore; }
 
+	void PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allowOverlap = false);
+
 protected:
 
 	IC		void				SetPending			(BOOL H)			{ m_huditem_flags.set(fl_pending, H);}
 	shared_str					hud_sect;
+	shared_str					hud_sect_cache;
 
 	//кадры момента пересчета XFORM и FirePos
 	u32							dwFP_Frame;
@@ -172,6 +177,9 @@ protected:
 
 	bool						m_bDisableBore;
 
+	virtual void				SetModelBoneStatus(const char* bone, BOOL show);
+	virtual void				SetMultipleBonesStatus(const char* section, const char* line, BOOL show);
+
 private:
 	CPhysicItem					*m_object;
 	CInventoryItem				*m_item;
@@ -187,5 +195,7 @@ public:
 	virtual void				debug_draw_firedeps		() {};
 
 	virtual CHudItem*			cast_hud_item			()				{ return this; }
+protected:
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 

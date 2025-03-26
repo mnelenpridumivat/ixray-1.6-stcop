@@ -48,6 +48,8 @@ CHudItem::~CHudItem()
 void CHudItem::Load(LPCSTR section)
 {
 	hud_sect				= pSettings->r_string		(section,"hud");
+	hud_sect_cache = hud_sect;
+
 	m_animation_slot		= pSettings->r_u32			(section,"animation_slot");
 
 	m_nearwall_dist_min = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_min", .2f);
@@ -91,12 +93,11 @@ void CHudItem::renderable_Render()
 			on_renderable_Render		();
 			debug_draw_firedeps			();
 		}else
-		if (object().H_Parent()) 
+		if (m_object&&object().H_Parent())
 		{
-			CInventoryOwner	*owner = smart_cast<CInventoryOwner*>(object().H_Parent());
-			VERIFY			(owner);
-			CInventoryItem	*self = smart_cast<CInventoryItem*>(this);
-			if (owner->attached(self) ||
+			if ((m_object->H_Parent()->cast_inventory_owner() && 
+				m_object->H_Parent()->cast_inventory_owner()->attached(m_object->cast_inventory_item())) 
+				||
 				(item().BaseSlot() == INV_SLOT_3 /*|| item().BaseSlot() == INV_SLOT_2*/))
 				on_renderable_Render();
 		}
@@ -159,7 +160,7 @@ void CHudItem::OnStateSwitch(u32 S)
 
 void CHudItem::OnAnimationEnd(u32 state)
 {
-	if (CActor* pActor = smart_cast<CActor*>(object().H_Parent()))
+	if (CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL)
 	{
 		pActor->callback(GameObject::eActorHudAnimationEnd)(smart_cast<CGameObject*>(this)->lua_game_object(), hud_sect.c_str(), m_current_motion.c_str(), state, animation_slot());
 	}
@@ -220,7 +221,7 @@ void CHudItem::UpdateHudAdditonal(Fmatrix& trans)
 	if (!isInertion)
 		return;
 
-	CActor* pActor = smart_cast<CActor*>(object().H_Parent());
+	CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL;
 	if (!pActor)
 		return;
 
@@ -561,7 +562,7 @@ u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 
 {
 	if (HudItemData() && !HudAnimationExist(M.c_str()))
 	{
-		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M);
+		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M.c_str());
 		return 0;
 	}
 
@@ -614,9 +615,9 @@ void CHudItem::StopCurrentAnimWithoutCallback()
 
 BOOL CHudItem::GetHUDmode()
 {
-	if (object().H_Parent())
+	if (m_object && m_object->H_Parent())
 	{
-		CActor* A = smart_cast<CActor*>(object().H_Parent());
+		CActor* A = m_object->H_Parent()->cast_actor();
 		return (A && A->HUDview() && HudItemData());
 	}
 	else
@@ -634,7 +635,7 @@ bool CHudItem::TryPlayAnimIdle()
 {
 	if(MovingAnimAllowedNow())
 	{
-		CActor* pActor = smart_cast<CActor*>(object().H_Parent());
+		CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL;
 		if (pActor)
 		{
 			u32 state = pActor->GetMovementState(eReal);
@@ -724,6 +725,54 @@ float CHudItem::GetHudFov()
 	}
 
 	return m_nearwall_last_hud_fov;
+}
+
+void CHudItem::PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allowOverlap)
+{
+	HUD_SOUND_ITEM* SndIter = m_sounds.FindSoundItem(alias, false);
+	if (SndIter != nullptr)
+	{
+		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap);
+	}
+}
+
+void CHudItem::SetModelBoneStatus(const char* bone, BOOL show)
+{
+	if (HudItemData())
+	{
+		HudItemData()->set_bone_visible(bone, show, TRUE);
+	}
+
+	if (IKinematics* pWeaponVisual = m_object ? m_object->Visual()->dcast_PKinematics() : NULL)
+	{
+		if (auto BoneID = pWeaponVisual->LL_BoneID(bone); BoneID != BI_NONE)
+		{
+			pWeaponVisual->LL_SetBoneVisible(BoneID, show, FALSE);
+		}
+	}
+}
+
+void CHudItem::SetMultipleBonesStatus(const char* section, const char* line, BOOL show)
+{
+	if (!pSettings->section_exist(section))
+	{
+		return;
+	}
+
+	if (!!pSettings->line_exist(section, line))
+	{
+		LPCSTR	S = pSettings->r_string(section, line);
+		if (S && S[0])
+		{
+			string128 _Item = {};
+			int count = _GetItemCount(S);
+			for (int it = 0; it < count; ++it)
+			{
+				_GetItem(S, it, _Item);
+				SetModelBoneStatus(_Item, show);
+			}
+		}
+	}
 }
 
 void CHUDState::SetState(u32 v) {

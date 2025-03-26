@@ -83,13 +83,8 @@ void CGameObject::init			()
 
 void CGameObject::Load(LPCSTR section)
 {
-	inherited::Load			(section);
-	ISpatial*		self				= smart_cast<ISpatial*> (this);
-	if (self)	{
-		// #pragma todo("to Dima: All objects are visible for AI ???")
-		// self->spatial.type	|=	STYPE_VISIBLEFORAI;	
-		self->spatial.type	&= ~STYPE_REACTTOSOUND;
-	}
+	inherited::Load(section);
+	SpatialComponent->spatial.type &= ~STYPE_REACTTOSOUND;
 }
 
 void CGameObject::reinit()
@@ -121,8 +116,8 @@ void CGameObject::net_Destroy	()
 	xr_delete				(m_ini_file);
 
 	m_script_clsid			= -1;
-	if (Visual() && smart_cast<IKinematics*>(Visual()))
-		smart_cast<IKinematics*>(Visual())->Callback	(0,0);
+	if (Visual() && Visual()->dcast_PKinematics())
+		Visual()->dcast_PKinematics()->Callback(0,0);
 
 	inherited::net_Destroy						();
 	setReady									(FALSE);
@@ -263,9 +258,9 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	const CSE_Visual				*visual	= smart_cast<const CSE_Visual*>(E);
 	if (visual) {
 		cNameVisual_set				(visual_name(E));
-		if (visual->flags.test(CSE_Visual::flObstacle)) {
-			ISpatial				*self = smart_cast<ISpatial*>(this);
-			self->spatial.type		|=	STYPE_OBSTACLE;
+		if (visual->flags.test(CSE_Visual::flObstacle))
+		{
+			SpatialComponent->spatial.type |= STYPE_OBSTACLE;
 		}
 	}
 
@@ -284,11 +279,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		R_ASSERT(Level().Objects.net_Find(E->ID) == nullptr);
 	}
 
-
 	setID							(E->ID);
-//	if (!IsGameTypeSingle())
-//		Msg ("CGameObject::net_Spawn -- object %s[%x] setID [%d]", *(E->s_name), this, E->ID);
-	
+
 	// XForm
 	XFORM().setXYZ					(E->o_Angle);
 	Position().set					(E->o_Position);
@@ -327,13 +319,15 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	if (!demo_spectator)
 		g_pGameLevel->Objects.net_Register	(this);
 
-	m_server_flags.one				();
-	if (O) {
-		m_server_flags					= O->m_flags;
+	m_server_flags.one();
+
+	if (O) 
+	{
+		m_server_flags = O->m_flags;
 		if (O->m_flags.is(CSE_ALifeObject::flVisibleForAI))
-			spatial.type				|= STYPE_VISIBLEFORAI;
+			SpatialComponent->spatial.type |= STYPE_VISIBLEFORAI;
 		else
-			spatial.type				= (spatial.type | STYPE_VISIBLEFORAI) ^ STYPE_VISIBLEFORAI;
+			SpatialComponent->spatial.type = (SpatialComponent->spatial.type | STYPE_VISIBLEFORAI) ^ STYPE_VISIBLEFORAI;
 	}
 
 	reload(*cNameSect());
@@ -839,6 +833,11 @@ void VisualCallback	(IKinematics *tpKinematics)
 	CGameObject						*game_object = static_cast<CGameObject*>(static_cast<CObject*>(tpKinematics->GetUpdateCallbackParam()));
 	VERIFY							(game_object);
 	
+	if (game_object == nullptr)
+	{
+		return;
+	}
+
 	CGameObject::CALLBACK_VECTOR_IT	I = game_object->visual_callbacks().begin();
 	CGameObject::CALLBACK_VECTOR_IT	E = game_object->visual_callbacks().end();
 	for ( ; I != E; ++I)
@@ -1176,6 +1175,9 @@ void render_box						(IRenderVisual *visual, const Fmatrix &xform, const Fvector
 void CGameObject::OnRender			()
 {
 	if (!ai().get_level_graph())
+		return;
+
+	if (Visual()->getVisData().hom_frame != Device.dwFrame)
 		return;
 
 	CDebugRenderer					&renderer = Level().debug_renderer();

@@ -25,11 +25,8 @@ void CPhantom::Load( LPCSTR section )
 {
 	inherited::Load		(section);
 	//////////////////////////////////////////////////////////////////////////
-	ISpatial* self		= smart_cast<ISpatial*> (this);
-	if (self) {
-		self->spatial.type &=~STYPE_VISIBLEFORAI;
-		self->spatial.type &=~STYPE_REACTTOSOUND;
-	}
+	SpatialComponent->spatial.type &=~STYPE_VISIBLEFORAI;
+	SpatialComponent->spatial.type &=~STYPE_REACTTOSOUND;
 	//////////////////////////////////////////////////////////////////////////
 	fSpeed							= pSettings->r_float(section,"speed");
 	fASpeed							= pSettings->r_float(section,"angular_speed");
@@ -71,6 +68,8 @@ BOOL CPhantom::net_Spawn(CSE_Abstract* DC)
 	}
 
 	SwitchToState		(stBirth);			// initial state (changed on load method in inherited::)
+
+	OBJ->set_killer_id(u16(-1)); // Alundaio: Hack to prevent strange crash with dynamic phantoms
 
 	// inherited
 	if (!inherited::net_Spawn(DC)) return FALSE;
@@ -131,6 +130,9 @@ void CPhantom::animation_end_callback(CBlend* B)
 //---------------------------------------------------------------------
 void CPhantom::SwitchToState_internal(EState new_state)
 {
+	if (!m_enemy)
+		m_enemy = Level().CurrentEntity();
+
 	if (new_state!=m_CurState){
 		IKinematicsAnimated *K	= smart_cast<IKinematicsAnimated*>(Visual());
 		Fmatrix	xform			= XFORM_center	();
@@ -222,6 +224,9 @@ void CPhantom::OnDeadState()
 }
 void CPhantom::UpdateFlyMedia()
 {
+	if (!m_enemy)
+		m_enemy = Level().CurrentEntity();
+
 	UpdatePosition	(m_enemy->Position());
 	Fmatrix	xform			= XFORM_center();
 	// update particles
@@ -238,7 +243,7 @@ void CPhantom::UpdateFlyMedia()
 
 void CPhantom::shedule_Update(u32 DT)
 {
-	spatial.type &=~STYPE_VISIBLEFORAI;
+	SpatialComponent->spatial.type &=~STYPE_VISIBLEFORAI;
 
 	inherited::shedule_Update(DT);
 

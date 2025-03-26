@@ -45,6 +45,7 @@ public:
 	virtual CPhysicsShellHolder*		cast_physics_shell_holder	()					{return this;}
 	virtual CParticlesPlayer*			cast_particles_player	()						{return this;}
 	virtual CScriptEntity*				cast_script_entity		()						{return this;}
+	virtual CAI_Trader*					cast_trader				()						{ return this; }
 
 	virtual DLL_Pure	*_construct		();
 	virtual void		Load			( LPCSTR section );
@@ -131,6 +132,7 @@ public:
 		return				(*m_sound_player);
 	}
 	virtual bool			unlimited_ammo			()	{return false;};
+	virtual bool			infinite_fire() override { return false; }
 	virtual bool			natural_weapon			() const {return false;}
 	virtual bool			natural_detector		() const {return false;}
 	virtual bool			AllowItemToTrade 		(CInventoryItem const * item, const SInvItemPlace& place) const;

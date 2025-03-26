@@ -25,8 +25,8 @@ public:
 
 	IC int			GetHelmetNV_Type() const { return m_NightVisionType; }
 
-	virtual void			OnMoveToSlot			(const SInvItemPlace& previous_place);
-	virtual void			OnMoveToRuck			(const SInvItemPlace& previous_place);
+	virtual void			OnMoveToSlot			(const SInvItemPlace previous_place) override;
+	virtual void			OnMoveToRuck			(const SInvItemPlace previous_place) override;
 	virtual BOOL			net_Spawn				(CSE_Abstract* DC);
 	virtual void			net_Export				(NET_Packet& P);
 	virtual void			net_Import				(NET_Packet& P);

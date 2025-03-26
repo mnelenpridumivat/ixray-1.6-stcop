@@ -19,6 +19,7 @@
 #ifdef XRSE_FACTORY_EXPORTS
 
 #else
+#	include "FreeMP/ScriptEvents.h"
 #	include "PHSimpleCalls.h"
 #	include "eatable_item.h"
 #	include "RadioactiveZone.h"
@@ -28,6 +29,7 @@
 #	include "../../xrUI/Widgets/UIListBox.h"
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
+#	include	"ActorCondition.h"
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
 #	include "xrServer_Objects_ALife.h"
 #	include <EmiZone.h>
@@ -260,7 +262,7 @@ void export_classes	(lua_State *L)
 	CSpaceRestrictor::script_register(L);
 	CStalkerOutfit::script_register(L);
 	CTorch::script_register(L);
-	//FactionState::script_register(L);
+	FactionState::script_register(L);
 	FractionState::script_register(L);
 	CWeaponAK74::script_register(L);
 	CWeaponBinoculars::script_register(L);
@@ -281,7 +283,7 @@ void export_classes	(lua_State *L)
 	CWeaponVal::script_register(L);
 	CWeaponVintorez::script_register(L);
 	CWeaponWalther::script_register(L);
-	//CZoneCampfire::script_register(L);
+	CZoneCampfire::script_register(L);
 
 	CArtefact::script_register(L);
 	CAI_Crow::script_register(L);
@@ -313,6 +315,20 @@ void export_classes	(lua_State *L)
 	CALifeHumanBrain::script_register(L);
 	CGameGraph::script_register(L);
 	CUIActorMenu::script_register(L);
+	ScriptEvent::script_register(L);
+	CInventoryBox::script_register(L);
+	CActorCondition::script_register(L);
+	CAntirad::script_register(L);
+	CBottleItem::script_register(L);
+	CCustomOutfit::script_register(L);
+	CCustomZone::script_register(L);
+	CFoodItem::script_register(L);
+	CHudItem::script_register(L);
+	CInventoryItem::script_register(L);
+	CInventoryOwner::script_register(L);
+	CMedkit::script_register(L);
+	CPhysicsShellHolder::script_register(L);
+	CWeaponAmmo::script_register(L);
 
 	CAnomalPseudoGigant::script_register(L);
 	CEmiZone::script_register(L);

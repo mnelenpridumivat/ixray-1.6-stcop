@@ -9,10 +9,7 @@
 #include "../xrCore/FTimer.h"
 #include "Stats.h"
 
-#define VIEWPORT_NEAR  0.2f
-#define HUD_VIEWPORT_NEAR  0.01f
-
-#define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
+constexpr auto DEVICE_RESET_PRECACHE_FRAME_COUNT = 10;
 
 #include "../Include/xrRender/FactoryPtr.h"
 #include "../Include/xrRender/RenderDeviceRender.h"
@@ -77,6 +74,12 @@ public:
 	BOOL									b_is_Ready;
 	BOOL									b_is_Active;
 public:
+	struct {
+		float renderZoomFactor = 1.0f;
+		float renderZoomRotateFactor = 0.0f;
+		bool isRenderActive{};
+		bool isRenderProcess{};
+	} hudViewportData;
 
 	// Engine flow-control
 	u32										dwFrame;
@@ -117,6 +120,8 @@ public:
 
 	float									fFOV;
 	float									fASPECT;
+	float									fViewportNear = 0.2f;
+	float									fHUDViewportNear = 0.01f;
 protected:
 
 	u32										Timer_MM_Delta;
@@ -214,8 +219,10 @@ public:
 	CRegistrator	<pureDeviceReset	>			seqDeviceReset;
 	xr_vector		<xr_delegate<void()>>	seqParallel;
 	xr_vector		<xr_delegate<void()>>	seqParallelRender;
+	xr_vector		<xr_delegate<void()>>	seqParallelBeforRender;
 
 	std::function<void()> ParticleWorkerCallback;
+	xr_delegate<void()> ModelDefferClear;
 
 	std::unordered_multimap<u32,std::function<void()>> m_time_callbacks;
 	void callback(const u32& cb_time, const std::function<void()> &func);
@@ -266,9 +273,7 @@ public:
 	}
 
 	// Multi-threading
-	xrCriticalSection	mt_csEnter;
-	xrCriticalSection	mt_csLeave;
-	volatile BOOL		mt_bMustExit;
+	xr_task_group secondary_tasks, details_task;
 
 	ICF		void			remove_from_seq_parallel	(const xr_delegate<void()> &delegate)
 	{

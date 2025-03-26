@@ -2,6 +2,7 @@
 #define _RENDER_H_
 
 #include "../xrCDB/Frustum.h"
+#include "../xrCDB/ISpatial.h"
 #include "vis_common.h"
 //#include "IRenderDetailModel.h"
 
@@ -26,7 +27,10 @@ const	float		fLightSmoothFactor = 4.f;
 #endif
 //////////////////////////////////////////////////////////////////////////
 // definition (Dynamic Light)
-class	ENGINE_API	IRender_Light	: public xr_resource									{
+class ENGINE_API IRender_Light: 
+	public xr_resource,
+	public ISpatialOwner
+{
 public:
 	enum LT
 	{
@@ -244,12 +248,12 @@ public:
 	virtual void					flush					()											{};	
 	virtual void					set_Object				(IRenderable*		O	)					{};
 	virtual	void					add_Occluder			(Fbox2&	bb_screenspace	)					{};	// mask screen region as oclluded (-1..1, -1..1)
-	virtual void					add_Visual				(IRenderVisual*	V, bool ignore_opt = false)	{};	// add visual leaf	(no culling performed at all)
+	virtual void					add_Visual				(IRenderVisual*	V)						{};	// add visual leaf	(no culling performed at all)
 	virtual void					add_Geometry			(IRenderVisual*	V	)					{};	// add visual(s)	(all culling performed)
 	virtual void					add_StaticWallmark		(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V) {};
 
 	//	Prefer this function when possible
-	virtual void					add_StaticWallmark		(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V) {};
+	virtual void					add_StaticWallmark		(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection = false) {};
 	virtual void					clear_static_wallmarks	() {};
 
 	//	Prefer this function when possible

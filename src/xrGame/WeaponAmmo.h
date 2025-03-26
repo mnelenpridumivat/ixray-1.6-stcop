@@ -3,6 +3,7 @@
 #include "anticheat_dumpable_object.h"
 #include "CartrigeParam.h"
 #include "RepackerInterface.h"
+#include "../xrScripts/script_export_space.h"
 
 class CCartridge : public IAnticheatDumpable
 {
@@ -22,11 +23,14 @@ public:
 	SCartridgeParam param_s;
 
 	u8		m_LocalAmmoType;
+	bool 	m_4to1_tracer;
 
 	u16		bullet_material_idx;
 	Flags8	m_flags;
 
 	shared_str	m_InvShortName;
+
+	LPCSTR GetInventoryName() { return m_InvShortName.c_str(); };
 	virtual void				DumpActiveParams		(shared_str const & section_name, CInifile & dst_ini) const;
 	virtual shared_str const 	GetAnticheatSectionName	() const { return m_ammoSect; };
 };
@@ -64,7 +68,9 @@ public:
 	u16			m_boxSize;
 	u16			m_boxCurr;
 	bool		m_tracer;
+	bool 		m_4to1_tracer;
 
 public:
 	virtual CInventoryItem *can_make_killing	(const CInventory *inventory) const;
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

@@ -94,7 +94,7 @@ void CHitMemoryManager::reload				(LPCSTR section)
 void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const CObject *who, s16 element)
 {
 #ifndef MASTER_GOLD
-	if (who && smart_cast<CActor const*>(who) && psAI_Flags.test(aiIgnoreActor))
+	if (who && const_cast<CObject*>(who)->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
@@ -116,14 +116,14 @@ void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const C
 		m_object->lua_game_object(), 
 		amount,
 		vLocalDir,
-		smart_cast<const CGameObject*>(who)->lua_game_object(),
+		who&&const_cast<CObject*>(who)->cast_game_object() ? const_cast<CObject*>(who)->cast_game_object()->lua_game_object() : NULL,
 		element
 	);
 
 	Fvector						direction;
 	m_object->XFORM().transform_dir	(direction,vLocalDir);
 
-	const CEntityAlive			*entity_alive = smart_cast<const CEntityAlive*>(who);
+	const CEntityAlive			*entity_alive = const_cast<CObject*>(who)->cast_entity_alive();
 	if (!entity_alive || (m_object->tfGetRelationType(entity_alive) == ALife::eRelationTypeFriend))
 		return;
 
@@ -158,7 +158,7 @@ void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const C
 void CHitMemoryManager::add					(const CHitObject &_hit_object)
 {
 #ifndef MASTER_GOLD
-	if (_hit_object.m_object && smart_cast<CActor const*>(_hit_object.m_object) && psAI_Flags.test(aiIgnoreActor))
+	if (_hit_object.m_object && const_cast<CEntityAlive*>(_hit_object.m_object)->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
@@ -260,6 +260,24 @@ void CHitMemoryManager::remove_links	(CObject *object)
 	xr_delete					(m_selected_hit);
 #endif
 }
+struct CRemoveHitObjectPredicate {
+	const MemorySpace::CHitObject* m_object;
+
+	CRemoveHitObjectPredicate(const MemorySpace::CHitObject* object) : m_object(object)
+	{
+	}
+	bool operator() (const MemorySpace::CHitObject& object) const
+	{
+		return (m_object == &object);
+	}
+};
+
+void CHitMemoryManager::remove(const MemorySpace::CHitObject* hit_object)
+{
+	HITS::iterator I = std::find_if(m_hits->begin(), m_hits->end(), CRemoveHitObjectPredicate(hit_object));
+	if (I != m_hits->end())
+		m_hits->erase(I);
+}
 
 void CHitMemoryManager::save	(NET_Packet &packet) const
 {
@@ -319,7 +337,8 @@ void CHitMemoryManager::load	(IReader &packet)
 		delayed_object.m_object_id	= packet.r_u16();
 
 		CHitObject					&object = delayed_object.m_hit_object;
-		object.m_object				= smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+		CObject* O = Level().Objects.net_Find(delayed_object.m_object_id);
+		object.m_object				= O ? O->cast_entity_alive() : NULL;
 		// object params
 		object.m_object_params.m_level_vertex_id	= packet.r_u32();
 		packet.r_fvector3			(object.m_object_params.m_position);
@@ -364,8 +383,12 @@ void CHitMemoryManager::load	(IReader &packet)
 
 		const CClientSpawnManager::CSpawnCallback	*spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id,m_object->ID());
 		if (!spawn_callback || !spawn_callback->m_object_callback)
+		{
 			if(!g_dedicated_server)
+			{
 				Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
+			}
+		}
 #ifdef DEBUG
 		else {
 			if (spawn_callback && spawn_callback->m_object_callback) {
@@ -695,7 +718,7 @@ void CHitMemoryManager::on_requested_spawn	(CObject *object)
 			continue;
 		
 		if (m_object->g_Alive()) {
-			(*I).m_hit_object.m_object= smart_cast<CEntityAlive*>(object);
+			(*I).m_hit_object.m_object= object ? object->cast_entity_alive() : NULL;
 			VERIFY						((*I).m_hit_object.m_object);
 			add							((*I).m_hit_object);
 		}

@@ -12,13 +12,15 @@ enum ETaskState{
 enum ETaskType{
 	eTaskTypeStoryline		= 0,
 	eTaskTypeAdditional,
-//	eTaskTypeInsignificant,
-//	eTaskTypeCount,
+	eTaskTypeInsignificant,
+	eTaskTypeCount,
 	eTaskTypeDummy	= u16(-1)
 };
 
 
-extern shared_str	g_active_task_id;
+constexpr pcstr g_active_task_no_task___internal = "__xr_no_task_-_nullptr__";
+
+extern shared_str g_active_task_id[eTaskTypeCount];
 class CGameTask;
 
 struct SGameTaskKey : public IPureSerializeObject<IReader,IWriter>,public IPureDestroyableObject 
@@ -47,12 +49,45 @@ struct CGameTaskRegistry : public CALifeAbstractRegistry<u16, vGameTasks>
 	virtual void save(IWriter &stream)
 	{
 		CALifeAbstractRegistry<u16, vGameTasks>::save(stream);
-		save_data		(g_active_task_id,		stream);
+		for (auto& taskId : g_active_task_id)
+		{
+			// valid taskId should contain task name
+			// or at least g_active_task_no_task___internal
+			if (!taskId.size())
+				taskId = g_active_task_no_task___internal;
+
+			save_data(taskId, stream);
+		}
 	};
 	virtual void load(IReader &stream)
 	{
 		CALifeAbstractRegistry<u16, vGameTasks>::load(stream);
-		load_data		(g_active_task_id,		stream);
+
+		auto prevPos = stream.tell();
+
+		for (auto& taskId : g_active_task_id)
+		{
+			// valid taskId should contain task name
+			// or at least g_active_task_no_task___internal
+
+			load_data(taskId, stream);
+
+			// if it doesn't fit terms above, then it's not valid
+			// probably save file is old. We can try to
+			// preserve compatibility with just stream rollback.
+			// additionally, if we loaded eTaskTypeAdditional
+			// eTaskTypeInsignificant can be empty and it's normal
+			if (taskId.size() || taskId == g_active_task_id[eTaskTypeInsignificant])
+			{
+				prevPos = stream.tell(); // it's valid, remember new pos
+			}
+			else 
+			{
+				taskId = g_active_task_no_task___internal;
+				stream.seek(prevPos); // rollback
+				break; // there's no point to continue
+			}
+		}
 	};
 	/*virtual void save(CSaveObjectSave* Object) const
 	{

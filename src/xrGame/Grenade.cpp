@@ -142,11 +142,19 @@ void CGrenade::State(u32 state)
 	switch (state)
 	{
 	case eThrowStart:
+	{
+		if (H_Parent())
 		{
-			Fvector						C;
-			Center						(C);
-			PlaySound					("sndCheckout", C);
-		}break;
+			Fvector SndPos;
+
+			if (H_Parent()->Local())
+				Center(SndPos);
+			else
+				SndPos.set(H_Parent()->Position());
+
+			PlaySound("sndCheckout", SndPos);
+		}
+	}break;
 	case eThrowEnd:
 		{
 			if(m_thrown)
@@ -158,9 +166,6 @@ void CGrenade::State(u32 state)
 				PutNextToSlot			();
 				if (Local())
 				{
-#ifndef MASTER_GOLD
-					Msg( "Destroying local grenade[%d][%d]", ID(), Device.dwFrame );
-#endif // #ifndef MASTER_GOLD
 					DestroyObject();
 				}
 				

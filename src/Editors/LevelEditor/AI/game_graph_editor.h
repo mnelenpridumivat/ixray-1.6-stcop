@@ -20,9 +20,9 @@ public:
 	void clear();
 	bool empty()const;
 	void set_cross_table(IGameLevelCrossTable*cross_table);
-	IC const CVertex* vertex(u32 vertex_id) const	{ return m_nodes + vertex_id; }
-	IC		 CVertex* vertex(u32 vertex_id)			{ return m_nodes + vertex_id; };
-	IC		 CEdge* edge(u32 vertex_id) { return (CEdge*)m_edges + vertex_id; };
+	IC const CVertex* vertex(u32 vertex_id) const { VERIFY(vertex_id < m_nodes.size()); return &m_nodes[vertex_id].vertex; }
+	IC		 CVertex* vertex(u32 vertex_id)			{ VERIFY(vertex_id < m_nodes.size()); return &m_nodes[vertex_id].vertex; };
+	IC		 CEdge* edge(u32 vertex_id) { VERIFY(vertex_id < m_nodes.size()); VERIFY(m_nodes[vertex_id].edges.size()); return &*m_nodes[vertex_id].edges.begin(); };
 	virtual		void					save(IWriter& stream);
 
 };

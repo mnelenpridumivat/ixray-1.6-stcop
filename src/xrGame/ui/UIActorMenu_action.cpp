@@ -146,8 +146,8 @@ bool CUIActorMenu::OnItemDrop(CUICellItem* itm)
 
 	OnItemDropped				(CurrentIItem(), new_owner, old_owner);
 
-	UpdateItemsPlace			();
 	UpdateConditionProgressBars	();
+	UpdateItemsPlace			();
 
 	return true;
 }
@@ -160,6 +160,7 @@ bool CUIActorMenu::OnItemStartDrag(CUICellItem* itm)
 
 bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 {
+	SetCurrentItem(itm);
 	InfoCurItem( nullptr );
 	CUIDragDropListEx*	old_owner		= itm->OwnerList();
 	EDDListType t_old					= GetListType(old_owner);
@@ -176,7 +177,7 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 		}
 	case iActorBag:
 		{
-			if ( m_currMenuMode == mmTrade )
+			if ( m_currMenuMode == mmTrade || m_currMenuMode == mmBarter )
 			{
 				ToActorTrade( itm, false );
 				break;
@@ -236,18 +237,45 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 
 	}; //switch 
 
-	UpdateItemsPlace();
 	UpdateConditionProgressBars();
+	UpdateItemsPlace();
 
 	return true;
 }
 
 bool CUIActorMenu::OnItemSelected(CUICellItem* itm)
 {
+	if(CurrentItem() != itm && itm->ChildsCount())
+	{
+		ActivateStackList(itm);
+	}
 	SetCurrentItem		(itm);
 	InfoCurItem			(nullptr);
 	m_item_info_view	= false;
 	return				false;
+}
+
+bool CUIActorMenu::OnItemDeselected(CUICellItem* itm)
+{
+	m_ActorStateInfo->Show(true);
+	m_pInventoryStackList->ClearAll(true);
+	m_pInventoryStackList->Show(false);
+	return				false;
+}
+
+void CUIActorMenu::ActivateStackList(CUICellItem* cell_item)
+{
+	m_ActorStateInfo->Show(false);
+	m_pInventoryStackList->Show(true);
+	
+	CUICellItem* itm = create_cell_item( (CInventoryItem*)(cell_item->m_pData) );
+	m_pInventoryStackList->SetItem(itm);
+
+	for(u32 i = 0; i < cell_item->ChildsCount(); ++i)
+	{
+		itm = create_cell_item( (CInventoryItem*)(cell_item->Child(i)->m_pData) );
+		m_pInventoryStackList->SetItem(itm);
+	}
 }
 
 bool CUIActorMenu::OnItemRButtonClick(CUICellItem* itm)
@@ -301,7 +329,7 @@ bool CUIActorMenu::OnItemFocusedUpdate(CUICellItem* itm)
 		return true;
 	}	
 
-	InfoCurItem( itm );
+	InfoCurItem( itm);
 	return true;
 }
 
@@ -388,6 +416,9 @@ void CUIActorMenu::OnPressUserKey()
 	case mmTrade:			
 //		OnBtnPerformTrade( this, 0 );
 		break;
+	case mmBarter:
+		//		OnBtnPerformTrade( this, 0 );
+		break;
 	case mmUpgrade:			
 		TrySetCurUpgrade();
 		break;
@@ -415,6 +446,8 @@ void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
 	case mmInventory:
 		break;
 	case mmTrade:
+		break;
+	case mmBarter:
 		break;
 	case mmUpgrade:
 		if ( m_repair_mode )
@@ -445,6 +478,8 @@ void CUIActorMenu::OnMesBoxNo(CUIWindow*, void*)
 	case mmInventory:
 		break;
 	case mmTrade:
+		break;
+	case mmBarter:
 		break;
 	case mmUpgrade:
 		m_repair_mode = false;

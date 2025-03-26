@@ -24,7 +24,7 @@ class CWeaponMagazined;
 class CParticlesObject;
 class CUIWindow;
 class CBinocularsVision;
-class CNightVisionEffector;
+class CWeaponNightVision;
 
 class CWeapon : public CHudItemObject,
 				public CShootingObject
@@ -32,7 +32,11 @@ class CWeapon : public CHudItemObject,
 private:
 	typedef CHudItemObject inherited;
 
+	bool IsQuickUnloading = false;
+
 public:
+	void SetIsQuickUnloading(bool Unloading) {IsQuickUnloading = Unloading;};
+	
 							CWeapon				();
 	virtual					~CWeapon			();
 
@@ -99,6 +103,10 @@ public:
 
 	const CameraRecoil& getCameraRecoil(void) const;
 	const CameraRecoil& getCameraZoomRecoil(void) const;
+	bool IsUIForceHiding() const;
+	bool IsCollimatorInstalled() const;
+	bool IsHudModelForceUnhide() const;
+	bool IsUIForceUnhiding() const;
 protected:
 	//время удаления оружия
 	ALife::_TIME_ID			m_dwWeaponRemoveTime;
@@ -158,22 +166,16 @@ public:
 	virtual bool UseScopeTexture() {return true;};
 
 	//обновление видимости для косточек аддонов
-			void UpdateAddonsVisibility();
-			void UpdateHUDAddonsVisibility();
+	void UpdateAddonsVisibility();
+	void UpdateHUDAddonsVisibility();
+	void ProcessScope();
 	//инициализация свойств присоединенных аддонов
 	virtual void InitAddons();
 
 	//для отоброажения иконок апгрейдов в интерфейсе
 
-	int	GetScopeX()
-	{ 
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_x") * (1 + isHQIcons);
-	}
-
-	int	GetScopeY()
-	{
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_y") * (1 + isHQIcons);
-	}
+	int	GetScopeX();
+	int	GetScopeY();
 
 	int	GetSilencerX() {return m_iSilencerX;}
 	int	GetSilencerY() {return m_iSilencerY;}
@@ -183,7 +185,13 @@ public:
 	int	GetGrenadeLauncherY() {return m_iGrenadeLauncherY;}
 
 	const shared_str& GetGrenadeLauncherName	() const{return m_sGrenadeLauncherName;}
-	const shared_str GetScopeName				() const{return pSettings->r_string(m_scopes[m_cur_scope], "scope_name");}
+	const shared_str GetScopeName() const;
+	void UpdateAltScope();
+	shared_str GetNameWithAttachmentScope();
+	bool bReloadSectionScope(LPCSTR section);
+	bool bLoadAltScopesParams(LPCSTR section);
+	void LoadOriginalScopesParams(LPCSTR section);
+	void LoadCurrentScopeParams(LPCSTR section);
 	const shared_str& GetSilencerName			() const{return m_sSilencerName;}
 
 	IC void	ForceUpdateAmmo						()		{ m_BriefInfo_CalcFrame = 0; }
@@ -191,12 +199,19 @@ public:
 	u8		GetAddonsState						()		const		{return m_flagsAddOnState;};
 	void	SetAddonsState						(u8 st)	{m_flagsAddOnState=st;}//dont use!!! for buy menu only!!!
 
-	bool	NeedBlockSprint						() const; 
+	bool	NeedBlockSprint						() const;
 
+	bool bUpdateHUDBonesVisibility = false;
 	bool bReloadKeyPressed;
 	bool bAmmotypeKeyPressed;
 	bool bStopReloadSignal;
+	bool m_bUseSilHud = false;
+	bool m_bUseScopeHud = false;
+	bool m_bUseGLHud = false;
 
+	shared_str hud_silencer;
+	shared_str hud_scope;
+	shared_str hud_gl;
 protected:
 	//состояние подключенных аддонов
 	u8 m_flagsAddOnState;
@@ -239,7 +254,7 @@ protected:
 		shared_str		m_sUseZoomPostprocess;
 		shared_str		m_sUseBinocularVision;
 		CBinocularsVision*		m_pVision;
-		CNightVisionEffector*	m_pNight_vision;
+		CWeaponNightVision*		m_pNight_vision;
 
 	} m_zoom_params;
 	
@@ -248,7 +263,21 @@ protected:
 
 	InertionData	m_base_inertion;
 	InertionData	m_zoom_inertion;
+	bool m_bIAmWeaponRPG7;
+	shared_str GetCurrentScopeSection() const { return m_scopes[m_cur_scope]; }
+	shared_str GetScopeSection(int idx) const { return m_scopes[idx]; }
+
+private:
+
+	RStringVec m_bDefHideBones {}, m_bDefShowBones {}, m_bHideBonesOverride {}, m_bDefHideBonesGLAttached {},
+		m_bHideBonesGLAttached {}, m_bHideBonesSilAttached {}, m_bHideBonesScopeAttached {},
+		m_bHideBonesUpgrade {}, m_bScopeShowBones{}, m_bScopeHideBones{}, m_bShowBonesUpgToHide{}, m_bShowBonesUpgToShow{};
+
+	void HideOneUpgradeLevel(const char* section);
+	void LoadUpgradeBonesToHide(const char* section, const char* line);
+
 public:
+	virtual bool IsGrenadeMode() const { return false; }
 
 	virtual IC bool					IsZoomEnabled		()	const		{return m_zoom_params.m_bZoomEnabled;}
 	virtual	void			ZoomInc				();
@@ -258,8 +287,10 @@ public:
 	IC		bool			IsZoomed			()	const		{return m_zoom_params.m_bIsZoomModeNow;};
 	CUIWindow*				ZoomTexture			();	
 
-	bool ZoomHideCrosshair() {
-		CActor* pA = smart_cast<CActor*>(H_Parent());
+	CWeaponNightVision*		GetNightVision()	{ return m_zoom_params.m_pNight_vision; }
+
+	IC bool ZoomHideCrosshair() {
+		CActor* pA = H_Parent() ? H_Parent()->cast_actor() : NULL;
 		if (pA && pA->active_cam() == eacLookAt && !ZoomTexture())
 			return false;
 		return m_zoom_params.m_bHideCrosshairInZoom || ZoomTexture();
@@ -344,6 +375,7 @@ protected:
 
 	//трассирование полета пули
 	virtual	void			FireTrace			(const Fvector& P, const Fvector& D);
+	virtual	void			FireTraceChamber			(const Fvector& P, const Fvector& D);
 	virtual float			GetWeaponDeterioration	();
 
 	virtual void			FireStart			() {CShootingObject::FireStart();}
@@ -441,8 +473,10 @@ protected:
 	int						GetAmmoCount		(u8 ammo_type) const;
 
 public:
-	IC int					GetAmmoElapsed		()	const		{	return /*int(m_magazine.size())*/iAmmoElapsed;}
-	IC int					GetAmmoMagSize		()	const		{	return iMagazineSize;						}
+	IC int					GetAmmoElapsed		()	const		{ return iAmmoElapsed; }
+	int						GetAmmoChamberElapsed()	const		{ return iAmmoChamberElapsed; }
+	IC int					GetAmmoMagSize		()	const		{ return iMagazineSize; }
+	bool					IsChamber			()  const		{ return m_bAmmoInChamber ;}
 	void SetAmmoMagSize(int size);
 	int						GetSuitableAmmoTotal(bool use_item_to_spawn = false) const;
 
@@ -467,9 +501,17 @@ public:
 	virtual	float			GetCrosshairInertion()	const	{ return m_crosshair_inertion; };
 	void setCrosshairInertion(float value);
 			float			GetFirstBulletDisp	()	const	{ return m_first_bullet_controller.get_fire_dispertion(); };
+
+	virtual void			UnloadChamber(bool spawn_ammo = true);
+
 protected:
 	int						iAmmoElapsed;		// ammo in magazine, currently
 	int						iMagazineSize;		// size (in bullets) of magazine
+
+	int						iAmmoChamberElapsed;
+	int						iChamberSize;
+
+	bool					m_bAmmoInChamber;
 
 	//для подсчета в GetSuitableAmmoTotal
 	mutable int				m_iAmmoCurrentTotal;
@@ -477,6 +519,9 @@ protected:
 	bool					m_bAmmoWasSpawned;
 
 	virtual bool			IsNecessaryItem	    (const shared_str& item_sect);
+
+	virtual void			GiveAmmoFromMagToChamber();
+	virtual void			DeleteAmmoInChamber();
 
 public:
 	const xr_vector<shared_str>& getAmmoTypes(void) const { return m_ammoTypes; }
@@ -504,16 +549,20 @@ public:
 
 	CWeaponAmmo*			m_pCurrentAmmo;
 	u8						m_ammoType;
+	u8						m_ChamberAmmoType;
 //-	shared_str				m_ammoName; <== deleted
 	bool					m_bHasTracers;
 	u8						m_u8TracerColorID;
 	u8						m_set_next_ammoType_on_reload;
 	// Multitype ammo support
 	xr_vector<CCartridge>	m_magazine;
+	xr_vector<CCartridge>	m_chamber;
 	CCartridge				m_DefaultCartridge;
+	CCartridge				m_DefaultCartridgeInChamber;
 	float					m_fCurrentCartirdgeDisp;
 
 		bool				unlimited_ammo				();
+		bool				infinite_fire();
 	IC	bool				can_be_strapped				() const {return m_can_be_strapped;};
 
 	float GetMagazineWeight(const decltype(m_magazine)& mag) const;
@@ -525,6 +574,11 @@ protected:
 public:
 	virtual u32				ef_main_weapon_type	() const;
 	virtual u32				ef_weapon_type		() const;
+	
+	virtual void			set_ef_main_weapon_type(u32 type){ m_ef_main_weapon_type = type; };
+	virtual void			set_ef_weapon_type(u32 type){ m_ef_weapon_type = type; };
+	virtual void			SetAmmoType(u8 type) { m_ammoType = type; };
+	u8						GetAmmoType() { return m_ammoType; };
 
 protected:
 	// This is because when scope is attached we can't ask scope for these params
@@ -545,6 +599,13 @@ private:
 			bool			install_upgrade_disp		( LPCSTR section, bool test );
 			bool			install_upgrade_hit			( LPCSTR section, bool test );
 			bool			install_upgrade_addon		( LPCSTR section, bool test );
+			
+			bool			install_upgrade_hud_sect(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_silencer(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_scope(LPCSTR section, bool test);
+			bool			install_upgrade_hud_sect_gl(LPCSTR section, bool test);
+
+			bool			install_upgrade_bones		( LPCSTR section, bool test );
 protected:
 	virtual bool			install_upgrade_impl		( LPCSTR section, bool test );
 
@@ -559,12 +620,15 @@ private:
 	bool					m_activation_speed_is_overriden;
 	virtual bool			ActivationSpeedOverriden	(Fvector& dest, bool clear_override);
 
-	bool					m_bRememberActorNVisnStatus;
 public:
 	virtual void			SetActivationSpeedOverride	(Fvector const& speed);
-			bool			GetRememberActorNVisnStatus	() {return m_bRememberActorNVisnStatus;};
-	virtual void			EnableActorNVisnAfterZoom	();
 	
 	virtual void				DumpActiveParams			(shared_str const & section_name, CInifile & dst_ini) const;
 	virtual shared_str const	GetAnticheatSectionName		() const { return cNameSect(); };
+
+public:
+	bool bUseAltScope{};
+	bool bScopeIsHasTexture{};
+
+	float GetAimFactor() const { return m_zoom_params.m_fZoomRotationFactor; }
 };

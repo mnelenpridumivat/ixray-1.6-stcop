@@ -79,7 +79,7 @@ void CEntity::Die(CObject* who)
 	VERIFY(m_registered_member);
 	m_registered_member = false;
 
-	if (IsGameTypeSingle())
+	if (OnServer())
 		Level().seniority_holder().team(g_Team()).squad(g_Squad()).group(g_Group()).unregister_member(this);
 }
 
@@ -243,18 +243,27 @@ void CEntity::net_Destroy()
 	set_ready_to_save		();
 }
 
-void CEntity::KillEntity(u16 whoID)
-{
-	if (ID() == Actor()->ID())
-	{
-		if (GodMode())
-		{
-			return;
-		}
+extern bool isGodMode();
 
-		Actor()->detach_Vehicle();
-		Actor()->use_MountedWeapon(nullptr);
+void CEntity::KillEntity(u16 whoID, bool bypass_actor_check /*AVO: added for actor_before_death callback*/)
+{
+	if (IsGameTypeSingle() && (this->ID() == Actor()->ID()) && (bypass_actor_check != true))
+	{
+#ifndef MASTER_GOLD
+		if (isGodMode())
+		{
+			luabind::functor<void> functor;
+			if (ai().script_engine().functor("xr_effects.enable_ui", functor))
+			{
+				functor(Actor(), NULL);
+				return;
+			}
+		}
+#endif // MASTER_GOLD
+
+		Actor()->use_HolderEx(nullptr, true);
 		Actor()->callback(GameObject::eActorBeforeDeath)(whoID);
+		return;
 	}
 
 	if (whoID != ID()) {
@@ -272,11 +281,13 @@ void CEntity::KillEntity(u16 whoID)
 		}
 #endif
 	}
-	else {
+	
+	else 
+	{
 		if (m_killer_id != ALife::_OBJECT_ID(-1))
 			return;
 	}
-
+	
 	m_killer_id			= whoID;
 
 	set_death_time		();

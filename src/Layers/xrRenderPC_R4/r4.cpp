@@ -45,6 +45,11 @@ ShaderElement*			CRender::rimp_select_sh_dynamic	(dxRender_Visual	*pVisual, floa
 	{
 		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R)<r_dtex_range)?SE_R2_NORMAL_HQ:SE_R2_NORMAL_LQ;
 	}
+	else if(CRender::PHASE_REFLECT == RImplementation.phase) {
+		Msg("! This is no implemented");
+		id = SE_R2_NORMAL_LQ;
+		//id = SE_R2_REFLECTIONS;
+	}
 	return pVisual->shader->E[id]._get();
 }
 //////////////////////////////////////////////////////////////////////////
@@ -54,6 +59,9 @@ ShaderElement*			CRender::rimp_select_sh_static	(dxRender_Visual	*pVisual, float
 	if	(CRender::PHASE_NORMAL == RImplementation.phase)
 	{
 		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R)<r_dtex_range)?SE_R2_NORMAL_HQ:SE_R2_NORMAL_LQ;
+	}
+	else if(CRender::PHASE_REFLECT == RImplementation.phase) {
+		id = SE_R2_REFLECTIONS;
 	}
 	return pVisual->shader->E[id]._get();
 }
@@ -191,6 +199,14 @@ void CRender::create()
 	o.distortion = o.distortion_enabled;
 	o.disasm = Core.ParamsData.test(ECoreParams::disasm);
 
+	if(!EngineExternal().ShadersOptions.contains(xr_string("USE_LEGACY_LIGHT"))) {
+		o.deffered_reflecitons = !!ps_r2_ls_flags_ext.test(R4FLAG_SSLR_ON_WORLD);
+		o.offscreen_reflecitons = !!ps_r2_ls_flags_ext.test(R4FLAG_OFFSCREEN_REFLECTIONS);
+	}
+	else {
+		o.deffered_reflecitons = o.offscreen_reflecitons = false;
+	}
+
 	o.dx11_enable_tessellation = RFeatureLevel >= D3D_FEATURE_LEVEL_11_0 && ps_r2_ls_flags_ext.test(R2FLAGEXT_ENABLE_TESSELLATION);
 
 	// constants
@@ -218,33 +234,20 @@ void CRender::create()
 	rmNormal();
 	marker = 0;
 
-	D3D_QUERY_DESC qdesc{};
-	qdesc.MiscFlags = 0;
-	qdesc.Query = D3D_QUERY_EVENT;
-
-	ZeroMemory(q_sync_point, sizeof(q_sync_point));
-
-	for(u32 i = 0; i < 2; ++i) {
-		R_CHK(RDevice->CreateQuery(&qdesc, &q_sync_point[i]));
-	}
-
-	RContext->End(q_sync_point[0]);
-
 	xrRender_apply_tf();
 	::PortalTraverser.initialize();
 
 	FluidManager.Initialize(70, 70, 70);
 	FluidManager.SetScreenSize((u32)RCache.get_width(), (u32)RCache.get_height());
+
+	Device.ModelDefferClear = xr_make_delegate(Models, &CModelPool::DeleteQueuedDeffer);
 }
 
-void CRender::destroy() {
+void CRender::destroy() 
+{
 	m_bMakeAsyncSS = false;
 	FluidManager.Destroy();
 	::PortalTraverser.destroy();
-
-	for(u32 i = 0; i < 2; ++i) {
-		_RELEASE(q_sync_point[i]);
-	}
 
 	HWOCC.occq_destroy();
 	xr_delete(Models);
@@ -252,6 +255,7 @@ void CRender::destroy() {
 	PSLibrary.OnDestroy();
 	Device.seqFrame.Remove(this);
 	r_dsgraph_destroy();
+	Device.ModelDefferClear = nullptr;
 }
 
 void CRender::reset_begin() {
@@ -279,21 +283,13 @@ void CRender::reset_begin() {
 	xr_delete(Target);
 	HWOCC.occq_destroy();
 
-	for(u32 i = 0; i < 2; ++i) {
-		_RELEASE(q_sync_point[i]);
+	if(!EngineExternal().ShadersOptions.contains(xr_string("USE_LEGACY_LIGHT"))) {
+		o.deffered_reflecitons = !!ps_r2_ls_flags_ext.test(R4FLAG_SSLR_ON_WORLD);
 	}
 }
 
 void CRender::reset_end() {
-	D3D_QUERY_DESC			qdesc{};
-	qdesc.MiscFlags = 0;
-	qdesc.Query = D3D_QUERY_EVENT;
-
-	for(u32 i = 0; i < 2; ++i) {
-		R_CHK(RDevice->CreateQuery(&qdesc, &q_sync_point[i]));
-	}
 	//	Prevent error on first get data
-	RContext->End(q_sync_point[0]);
 
 	HWOCC.occq_create(occq_size);
 
@@ -312,16 +308,14 @@ void CRender::reset_end() {
 	m_bFirstFrameAfterReset = true;
 }
 
-void CRender::OnFrame() 
+void CRender::OnFrame()
 {
 	Models->DeleteQueue();
 
-	{
-		//Lights Delete queue
-		for (light*L:v_all_lights_dque)
-			xr_delete(L);
-		v_all_lights_dque.clear();
-	}
+	//Lights Delete queue
+	for (light* L : v_all_lights_dque)
+		xr_delete(L);
+	v_all_lights_dque.clear();
 }
 
 // Implementation
@@ -482,26 +476,27 @@ BOOL CRender::occ_visible(Fbox& P) {
 	return HOM.visible(P);
 }
 
-void CRender::add_Visual(IRenderVisual* V, bool ignore_opt) {
-	add_leafs_Dynamic((dxRender_Visual*)V, ignore_opt);
+void CRender::add_Visual(IRenderVisual* V) {
+	add_leafs_Dynamic((dxRender_Visual*)V);
 }
 void CRender::add_Geometry(IRenderVisual* V) {
 	add_Static((dxRender_Visual*)V, View->getMask());
 }
 
-void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts) {
+void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts, bool UseCameraDirection) 
+{
 	if(T->suppress_wm) {
 		return;
 	}
 	VERIFY2(_valid(P) && _valid(s) && T && verts && (s > EPS_L), "Invalid static wallmark params");
-	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s);
+	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s, UseCameraDirection);
 }
 
-void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V) {
+void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection) {
 	dxWallMarkArray* pWMA = (dxWallMarkArray*)pArray;
 	ref_shader* pShader = pWMA->dxGenerateWallmark();
 	if(pShader) {
-		add_StaticWallmark(*pShader, P, s, T, V);
+		add_StaticWallmark(*pShader, P, s, T, V, UseCameraDirection);
 	}
 }
 
@@ -564,8 +559,8 @@ CRender::SurfaceParams CRender::getSurface(const char* nameTexture)
 	auto texture = DEV->_CreateTexture(nameTexture);
 	SurfaceParams surface = {};
 	surface.Surface = texture->get_SRView();
-	surface.w = texture->get_Width();
-	surface.h = texture->get_Height();
+	surface.w = (float)texture->get_Width();
+	surface.h = (float)texture->get_Height();
 
 	return surface;
 }
@@ -828,20 +823,28 @@ HRESULT	CRender::shader_compile(
 
 	char c_smapsize[32];
 	char c_sun_shafts[32];
-	char c_ssao[32];
 	char c_sun_quality[32];
 
 	char sh_name[MAX_PATH] = "";
 
-	for(auto& [Name, Value] : m_ShaderOptions) {
+	for(auto& [Name, Value] : EngineExternal().ShadersOptions) {
 		defines[def_it++] = {
 			Name.c_str(),
 			Value.c_str()
 		};
 	}
 
+	// options
 	u32 len = xr_strlen(sh_name);
-
+	
+	for(auto& [Name, Value] : m_ShaderOptions) 
+	{
+		defines[def_it++] = {
+			Name.c_str(),
+			Value.c_str()
+		};
+	}
+	
 	// options
 	const int m_skinning = Engine.External.GetSkinningMode();
 	{
@@ -920,6 +923,28 @@ HRESULT	CRender::shader_compile(
 	//	Igor: need restart options
 	if(ps_r2_ls_flags.test(R2FLAG_SOFT_WATER)) {
 		defines[def_it].Name = "USE_SOFT_WATER";
+		defines[def_it].Definition = "1";
+
+		def_it++;
+		sh_name[len] = '1'; ++len;
+	}
+	else {
+		sh_name[len] = '0';	++len;
+	}
+
+	if(!!o.offscreen_reflecitons) {
+		defines[def_it].Name = "USE_OFFSCREEN_REFLECTIONS";
+		defines[def_it].Definition = "1";
+
+		def_it++;
+		sh_name[len] = '1'; ++len;
+	}
+	else {
+		sh_name[len] = '0';	++len;
+	}
+
+	if(!!o.deffered_reflecitons) {
+		defines[def_it].Name = "USE_SSLR_REFLECTIONS";
 		defines[def_it].Definition = "1";
 
 		def_it++;
