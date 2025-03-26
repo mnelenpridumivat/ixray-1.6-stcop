@@ -62,7 +62,7 @@ BOOL CHolderEntityObject::net_Spawn(CSE_Abstract* DC)
 	IKinematics* K = smart_cast<IKinematics*>(Visual());
 	U16Vec fixed_bones;
 	fixed_bones.push_back(K->LL_GetBoneRoot());
-	PPhysicsShell()	= P_build_Shell(this,false,fixed_bones);
+	SetPPhysicsShell(P_build_Shell(this,false,fixed_bones));
 
 	processing_activate();
 	setVisible(TRUE);

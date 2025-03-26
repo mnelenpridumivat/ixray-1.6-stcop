@@ -5,6 +5,7 @@ struct _sphere {
 	_vector3<T>	P;
 	T			R = 0;
 public:
+	
 	IC void		set(const _vector3<T> &_P, T _R)	{ P.set(_P); R = _R; }
 	IC void		set(const _sphere<T> &S)			{ P.set(S.P); R=S.R; }
 	IC void		identity()							{ P.set(0,0,0); R=1; }

@@ -842,7 +842,7 @@ void CWeapon::Serialize(ISaveObject& Object)
 	Object.BeginChunk("CWeapon");
 	{
 		inherited::Serialize(Object);
-		Object << iAmmoElapsed << m_cur_scope << m_flagsAddOnState << m_ammoType << m_zoom_params.m_bIsZoomModeNow << m_bRememberActorNVisnStatus;
+		Object << iAmmoElapsed << m_cur_scope << m_flagsAddOnState << m_ammoType << m_zoom_params.m_bIsZoomModeNow;
 
 		if (!Object.IsSave()) {
 			UpdateAddonsVisibility();

@@ -9,7 +9,7 @@ struct XRCORE_API CShapeData
     };
 	union shape_data
 	{
-		Fsphere		sphere;
+		Fsphere		sphere = {};
 		Fmatrix		box;
 	};
 	struct shape_def

@@ -24,6 +24,7 @@
 #include "../alife_registry_wrappers.h"
 #include "../actor.h"
 #include "object_broker.h"
+#include "../xrUI/Widgets/UITabControl.h"
 
 #define				ENCYCLOPEDIA_DIALOG_XML		"pda_encyclopedia.xml"
 #define				ENCYCLOPEDIA_DIALOG_ITEM_XML		"pda_encyclopedia_item.xml"

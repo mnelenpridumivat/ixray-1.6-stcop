@@ -114,7 +114,7 @@ void CEatableItem::Serialize(ISaveObject& Object)
 	Object.BeginChunk("CEatableItem");
 	{
 		inherited::Serialize(Object);
-		Object << m_iPortionsMarker;
+		//Object << m_iPortionsMarker;
 	}
 	Object.EndChunk();
 }

@@ -107,7 +107,7 @@ public:
 		iRoot = bone_id;
 	}
 
-	BOOL LL_GetBoneVisible(u16 bone_id) { VERIFY(bone_id < LL_BoneCount()); return visimask.is(bone_id); }
+	BOOL LL_GetBoneVisible(u16 bone_id) { VERIFY(bone_id < LL_BoneCount()); return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id)); }
 	virtual void LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive);
 	VisMask LL_GetBonesVisible() { return visimask; }
 	void LL_SetBonesVisible(VisMask mask);

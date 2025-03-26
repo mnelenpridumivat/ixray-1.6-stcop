@@ -564,10 +564,10 @@ void CScriptGameObject::set_visual_name(LPCSTR visual, bool bForce)
 		stalker->ChangeVisual(visual);
 
 		CPhysicsShell* tmp_shell = stalker->PPhysicsShell();
-		stalker->PPhysicsShell() = NULL;
+		stalker->SetPPhysicsShell(nullptr);
 		stalker->OnChangeVisual();
-		stalker->PPhysicsShell() = tmp_shell;
-		tmp_shell = NULL;
+		stalker->SetPPhysicsShell(tmp_shell);
+		tmp_shell = nullptr;
 
 		IKinematicsAnimated* V = smart_cast<IKinematicsAnimated*>(stalker->Visual());
 		if (V){
