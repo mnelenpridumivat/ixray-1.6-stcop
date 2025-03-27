@@ -212,7 +212,7 @@ CSE_ALifeDynamicObject* CALifeObjectRegistry::get_object(ISaveObject& Object)
 		// create entity
 		CSE_Abstract* tpSE_Abstract = F_entity_Create(s_name.c_str());
 		R_ASSERT2(tpSE_Abstract, "Can't create entity.");
-		CSE_ALifeDynamicObject* tpALifeDynamicObject = smart_cast<CSE_ALifeDynamicObject*>(tpSE_Abstract);
+		tpALifeDynamicObject = smart_cast<CSE_ALifeDynamicObject*>(tpSE_Abstract);
 		R_ASSERT2(tpALifeDynamicObject, "Non-ALife object in the saved game!");
 		tpALifeDynamicObject->Spawn_Serialize(Object, true);
 		tpALifeDynamicObject->UPDATE_Serialize(Object);
@@ -342,13 +342,14 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object)
 			BEGIN_CHUNK(Object,"CALifeObjectRegistry::objects")
 			{
 				Object.BeginArray();
-				CSE_ALifeDynamicObject** objects = (CSE_ALifeDynamicObject**)_alloca(m_serializable_object_count * sizeof(CSE_ALifeDynamicObject*));
+				xr_vector<CSE_ALifeDynamicObject*> objects(m_serializable_object_count);
+				//CSE_ALifeDynamicObject** objects = (CSE_ALifeDynamicObject**)_alloca(m_serializable_object_count * sizeof(CSE_ALifeDynamicObject*));
 
-				CSE_ALifeDynamicObject** I = objects;
-				CSE_ALifeDynamicObject** E = objects + m_serializable_object_count;
-				for (; I != E; ++I) {
-					*I = get_object(Object);
-					add(*I);
+				//CSE_ALifeDynamicObject** I = objects;
+				//CSE_ALifeDynamicObject** E = objects + m_serializable_object_count;
+				for (u64 i = 0; i < m_serializable_object_count; ++i) {
+					objects[i] = get_object(Object);
+					add(objects[i]);
 				}
 				Object.EndArray();
 			}

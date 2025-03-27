@@ -945,10 +945,11 @@ void CVisualMemoryManager::SerializeSingle(ISaveObject& Object, CVisibleObject& 
 	BEGIN_CHUNK(Object,"CHitObject")
 	{
 		Value.Serialize(Object);
+		Object << Value.m_visible.flags;
 		if (Object.IsSave()) {
 			VERIFY(m_object);
-			u16 Value = m_object->ID();
-			Object << Value;
+			u16 IDValue = m_object->ID();
+			Object << IDValue;
 		}
 		else {
 
@@ -982,7 +983,6 @@ void CVisualMemoryManager::SerializeSingle(ISaveObject& Object, CVisibleObject& 
 #endif // DEBUG
 				}
 			}
-			Object << Value.m_visible.flags;
 		}
 	}
 }
