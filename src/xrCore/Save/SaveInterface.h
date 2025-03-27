@@ -16,6 +16,7 @@ public:
 	virtual bool IsSave() = 0;
 
 	virtual u64 ExtractCurrentChunk() = 0;
+	virtual u64 GetChunkStackDepth() = 0;
 
 	virtual ISaveObject& operator<<(float& Value) = 0;
 	virtual ISaveObject& operator<<(double& Value) = 0;

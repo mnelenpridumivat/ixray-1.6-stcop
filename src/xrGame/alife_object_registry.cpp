@@ -100,6 +100,7 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject
 	if (!Object.IsSave()) {
 		return;
 	}
+	auto ChunkDepht = Object.GetChunkStackDepth();
 	Object.BeginChunk("CALifeObjectRegistry::single_object");
 	{
 		auto temp = (LPSTR)object->name();
@@ -111,6 +112,7 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject
 		object->UPDATE_Serialize(Object);
 	}
 	Object.EndChunk();
+	R_ASSERT3(ChunkDepht == Object.GetChunkStackDepth(), "Saving object %s result invalid chunk opening and closing tags!", object->name());
 
 	ALife::OBJECT_VECTOR::const_iterator	I = object->children.begin();
 	ALife::OBJECT_VECTOR::const_iterator	E = object->children.end();

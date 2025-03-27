@@ -27,6 +27,7 @@ public:
 
 	//void MarkDirty();
 	virtual u64 ExtractCurrentChunk() override;
+	virtual u64 GetChunkStackDepth() override {return _chunkStack.size();}
 
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
