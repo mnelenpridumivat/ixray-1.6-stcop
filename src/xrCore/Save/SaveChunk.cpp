@@ -13,6 +13,17 @@ CSaveChunk::~CSaveChunk()
 	}
 }
 
+bool CSaveChunk::ContainsSubchunk(shared_str subchunkName)
+{
+	if (_currentArrayStack.empty()) {
+		auto Chunk = _subchunks.find(subchunkName);
+		return Chunk != _subchunks.end();
+	}
+	R_ASSERT(_currentArrayStack.empty(),
+		"Different save chunks are not designed to be in single array, so searching a chunk by name in array is pointless or you have a mistake in your code!");
+	return false;
+}
+
 void CSaveChunk::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write((u8)ESaveVariableType::t_chunkStart);

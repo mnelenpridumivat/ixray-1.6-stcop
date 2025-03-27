@@ -40,6 +40,12 @@ void CSaveObject::EndArray()
 	GetCurrentChunk()->EndArray();
 }
 
+bool CSaveObject::HasChunk(shared_str ChunkName)
+{
+	VERIFY(!_chunkStack.empty());
+	return _chunkStack.top()->ContainsSubchunk(ChunkName);
+}
+
 /*void CSaveObject::MarkDirty() {
 	_dirty = true;
 	if (!_handles.size()) {

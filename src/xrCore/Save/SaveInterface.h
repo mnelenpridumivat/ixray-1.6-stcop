@@ -11,6 +11,8 @@ public:
 	virtual void BeginArray() = 0;
 	virtual void EndArray() = 0;
 
+	virtual bool HasChunk(shared_str ChunkName) = 0;
+
 	virtual bool IsSave() = 0;
 
 	virtual u64 ExtractCurrentChunk() = 0;

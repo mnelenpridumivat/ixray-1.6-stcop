@@ -23,6 +23,7 @@ public:
 	~CSaveObject();
 	void EndChunk() override;
 	void EndArray() override;
+	bool HasChunk(shared_str ChunkName) override;
 
 	//void MarkDirty();
 	virtual u64 ExtractCurrentChunk() override;

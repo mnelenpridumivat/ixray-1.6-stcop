@@ -26,6 +26,8 @@ public:
 	virtual void AddVariable(ISaveable* data) override {};
 	virtual u64 GetSize() override { return 0; };
 
+	bool ContainsSubchunk(shared_str subchunkName);
+
 	void Write(CMemoryBuffer& Buffer);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
