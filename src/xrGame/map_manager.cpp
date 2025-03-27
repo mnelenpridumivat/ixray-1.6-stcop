@@ -106,7 +106,7 @@ void SLocationKey::load(CSaveObjectLoad* Object)
 }*/
 ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data) {
 
-	Object.BeginChunk("SLocationKey");
+	BEGIN_CHUNK(Object,"SLocationKey")
 	{
 		Object << Data.object_id << Data.spot_type;
 		if (Object.IsSave()) {
@@ -128,7 +128,6 @@ ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data) {
 		}
 		Data.location->serialize(Object);
 	}
-	Object.EndChunk();
 	return Object;
 }
 

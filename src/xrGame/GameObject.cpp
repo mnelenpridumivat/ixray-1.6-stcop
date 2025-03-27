@@ -489,29 +489,9 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
-/*void CGameObject::net_Save(ISaveObject* Object)
-{
-	Object->BeginChunk("CGameObject::net_Save");
-	{
-		Save(Object);
-		m_ScriptBinderComponent->Save(Object);
-	}
-	Object->EndChunk();
-}
-
-void CGameObject::net_Load(ISaveObject* Object)
-{
-	Object->BeginChunk("CGameObject::net_Save");
-	{
-		Load(Object);
-		m_ScriptBinderComponent->Load(Object);
-	}
-	Object->EndChunk();
-}*/
-
 void CGameObject::net_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CGameObject::net_Serialize");
+	BEGIN_CHUNK(Object,"CGameObject::net_Serialize")
 	{
 		auto ChunkDepth = Object.GetChunkStackDepth();
 		Serialize(Object);
@@ -519,34 +499,14 @@ void CGameObject::net_Serialize(ISaveObject& Object)
 		m_ScriptBinderComponent->Serialize(Object);
 		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (script binder)", Name());
 	}
-	Object.EndChunk();
 }
-
-/*void CGameObject::Save(ISaveObject* Object) const
-{
-	Object->BeginChunk("CGameObject");
-	{
-		//m_ScriptBinderComponent->Save(Object);
-	}
-	Object->EndChunk();
-}
-
-void CGameObject::Load(ISaveObject* Object)
-{
-	Object->BeginChunk("CGameObject");
-	{
-		//m_ScriptBinderComponent->Load(Object);
-	}
-	Object->EndChunk();
-}*/
 
 void CGameObject::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CGameObject");
+	BEGIN_CHUNK(Object,"CGameObject")
 	{
 
 	}
-	Object.EndChunk();
 }
 
 void CGameObject::spawn_supplies()

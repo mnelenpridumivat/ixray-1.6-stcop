@@ -21,6 +21,8 @@ public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
 	~CSaveChunk();
 
+	LPCSTR GetChunkName() const { return _chunkName.c_str(); }
+
 	virtual ISaveable* GetCurrentElement() override { return nullptr; };
 	virtual void Next() override {};
 	virtual void AddVariable(ISaveable* data) override {};

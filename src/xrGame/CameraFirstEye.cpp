@@ -55,11 +55,10 @@ void CCameraFirstEye::Load(CSaveObject* Object)
 
 void CCameraFirstEye::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CCameraFirstEye");
+	BEGIN_CHUNK(Object,"CCameraFirstEye")
 	{
 		Object << pitch;
 	}
-	Object.EndChunk();
 }
 
 void CCameraFirstEye::UpdateLookat()

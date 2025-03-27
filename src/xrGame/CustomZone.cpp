@@ -1521,35 +1521,12 @@ void CCustomZone::load							(IReader &input_packet)
 		m_eZoneState = eZoneStateIdle;
 }
 
-/*void CCustomZone::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CCustomZone");
-	{
-		inherited::Save(Object);
-		Object->GetCurrentChunk()->w_u8((u8)m_eZoneState);
-	}
-	Object->EndChunk();
-}
-
-void CCustomZone::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CCustomZone");
-	{
-		inherited::Load(Object);
-		u8 Value;
-		Object->GetCurrentChunk()->r_u8(Value);
-		m_eZoneState = (EZoneState)Value;
-	}
-	Object->EndChunk();
-}*/
-
 void CCustomZone::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CCustomZone");
+	BEGIN_CHUNK(Object,"CCustomZone")
 	{
 		inherited::Serialize(Object);
 		u8* Value = (u8*)&m_eZoneState;
 		Object << *Value;
 	}
-	Object.EndChunk();
 }

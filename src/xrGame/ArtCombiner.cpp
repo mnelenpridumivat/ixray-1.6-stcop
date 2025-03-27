@@ -24,34 +24,13 @@ void CArtCombiner::load(IReader& input_packet)
 	CArtContainer::load(input_packet);
 }
 
-/*void CArtCombiner::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CArtCombiner");
-	{
-		CArtefact::Save(Object);
-		CArtContainer::Save(Object);
-	}
-	Object->EndChunk();
-}
-
-void CArtCombiner::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CArtCombiner");
-	{
-		CArtefact::Load(Object);
-		CArtContainer::Load(Object);
-	}
-	Object->EndChunk();
-}*/
-
 void CArtCombiner::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CArtCombiner");
+	BEGIN_CHUNK(Object,"CArtCombiner")
 	{
 		CArtefact::Serialize(Object);
 		CArtContainer::Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 u32 CArtCombiner::Cost() const

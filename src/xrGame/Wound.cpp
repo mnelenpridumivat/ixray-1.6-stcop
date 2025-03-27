@@ -47,35 +47,9 @@ void  CWound::load	(IReader &input_packet)
 	}
 }
 
-/*void CWound::Save(CSaveObjectSave* Object)
-{
-	Object->BeginChunk("CWound");
-	{
-		Object->GetCurrentChunk()->w_u16(m_iBoneNum);
-		for (int i = 0; i < ALife::eHitTypeMax; i++) {
-			Object->GetCurrentChunk()->w_float(m_Wounds[i]);
-		}
-
-	}
-	Object->EndChunk();
-}
-
-void CWound::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CWound");
-	{
-		Object->GetCurrentChunk()->r_u16(m_iBoneNum);
-		for (int i = 0; i < ALife::eHitTypeMax; i++) {
-			Object->GetCurrentChunk()->r_float(m_Wounds[i]);
-			VERIFY(m_Wounds[i] >= 0.0f && m_Wounds[i] <= WOUND_MAX);
-		}
-	}
-	Object->EndChunk();
-}*/
-
 void CWound::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CWound");
+	BEGIN_CHUNK(Object,"CWound")
 	{
 		Object << m_iBoneNum << m_Wounds;
 		if (!Object.IsSave()) {
@@ -84,7 +58,6 @@ void CWound::Serialize(ISaveObject& Object)
 			}
 		}
 	}
-	Object.EndChunk();
 }
 
 
@@ -140,14 +113,9 @@ void CWound::Incarnation	(float percent, float min_wound_size)
 
 ISaveObject& operator<<(ISaveObject& Object, CWound& Value)
 {
-	Object.BeginChunk("CWound");
+	BEGIN_CHUNK(Object,"CWound")
 	{
 		Object << Value.m_iBoneNum << Value.m_Wounds;
-		/*for (int i = 0; i < ALife::eHitTypeMax; i++) {
-			Object->GetCurrentChunk()->r_float(m_Wounds[i]);
-			VERIFY(m_Wounds[i] >= 0.0f && m_Wounds[i] <= WOUND_MAX);
-		}*/
 	}
-	Object.EndChunk();
 	return Object;
 }

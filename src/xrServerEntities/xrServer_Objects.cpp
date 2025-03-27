@@ -138,32 +138,10 @@ void CSE_Shape::cform_write(CSaveObjectSave* Object) const
 
 void CSE_Shape::cform_serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Shape::cform_read");
+	BEGIN_CHUNK(Object,"CSE_Shape::cform_read")
 	{
 		Object << shapes;
-		/*u64 ArraySize;
-		Object->GetCurrentChunk()->ReadArray(ArraySize);
-		{
-			for (u64 i = 0; i < ArraySize; ++i) {
-				shape_def				S;
-				Object->GetCurrentChunk()->r_u8(S.type);
-				switch (S.type) {
-				case 0:
-				{
-					Object->GetCurrentChunk()->r_vec3(S.data.sphere.P);
-					Object->GetCurrentChunk()->r_float(S.data.sphere.R);
-					break;
-				}
-				case 1:
-					Object->GetCurrentChunk()->r_matrix(S.data.box);
-					break;
-				}
-				shapes.push_back(S);
-			}
-		}
-		Object->GetCurrentChunk()->EndArray();*/
 	}
-	Object.EndChunk();
 }
 
 void CSE_Shape::assign_shapes	(CShapeData::shape_def* _shapes, u32 _cnt)
@@ -205,46 +183,16 @@ void CSE_Spectator::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
 }
 
-/*void CSE_Spectator::STATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_Spectator::STATE");
-	{}
-	Object->EndChunk();
-}
-
-void CSE_Spectator::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_Spectator::STATE");
-	{}
-	Object->EndChunk();
-}*/
-
 void CSE_Spectator::STATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Spectator::STATE");
+	BEGIN_CHUNK(Object,"CSE_Spectator::STATE")
 	{}
-	Object.EndChunk();
 }
-
-/*void CSE_Spectator::UPDATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_Spectator::UPDATE");
-	{}
-	Object->EndChunk();
-}
-
-void CSE_Spectator::UPDATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_Spectator::UPDATE");
-	{}
-	Object->EndChunk();
-}*/
 
 void CSE_Spectator::UPDATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Spectator::UPDATE");
+	BEGIN_CHUNK(Object,"CSE_Spectator::UPDATE")
 	{}
-	Object.EndChunk();
 }
 
 #if !defined(XRGAME_EXPORTS)
@@ -284,52 +232,18 @@ void CSE_Temporary::UPDATE_Write			(NET_Packet	&tNetPacket)
 {
 }
 
-/*void CSE_Temporary::STATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_Temporary::STATE");
-	{
-		Object->GetCurrentChunk()->r_u32(m_tNodeID);
-	}
-	Object->EndChunk();
-}
-
-void CSE_Temporary::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_Temporary::STATE");
-	{
-		Object->GetCurrentChunk()->w_u32(m_tNodeID);
-	}
-	Object->EndChunk();
-}*/
-
 void CSE_Temporary::STATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Temporary::STATE");
+	BEGIN_CHUNK(Object,"CSE_Temporary::STATE")
 	{
 		Object << m_tNodeID;
 	}
-	Object.EndChunk();
 }
-
-/*oid CSE_Temporary::UPDATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_Temporary::UPDATE");
-	{}
-	Object->EndChunk();
-}
-
-void CSE_Temporary::UPDATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_Temporary::UPDATE");
-	{}
-	Object->EndChunk();
-}*/
 
 void CSE_Temporary::UPDATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Temporary::UPDATE");
+	BEGIN_CHUNK(Object,"CSE_Temporary::UPDATE")
 	{}
-	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -337,61 +251,6 @@ void CSE_Temporary::FillProps				(LPCSTR pref, PropItemVec& values)
 {
 };
 #endif // #ifndef XRGAME_EXPORTS
-
-/**
-////////////////////////////////////////////////////////////////////////////
-// CSE_SpawnGroup
-////////////////////////////////////////////////////////////////////////////
-
-CSE_SpawnGroup::CSE_SpawnGroup				(LPCSTR caSection) : CSE_Abstract(caSection)
-{
-}
-
-CSE_SpawnGroup::~CSE_SpawnGroup				()
-{
-}
-
-void CSE_SpawnGroup::STATE_Read				(NET_Packet	&tNetPacket, u16 size)
-{
-	if (m_wVersion < 84)
-		tNetPacket.r_float		(m_spawn_probability);
-
-	if (m_wVersion > 80) {
-		if (m_wVersion < 84) {
-			tNetPacket.r_float	();
-			tNetPacket.r_float	();
-			m_spawn_flags.assign(tNetPacket.r_u32());
-			tNetPacket.r_stringZ(m_spawn_control);
-		}
-		else {
-			if (m_wVersion < 85) {
-				tNetPacket.r_u64		(m_min_spawn_interval);
-				tNetPacket.r_u64		(m_max_spawn_interval);
-			}
-		}
-	}
-}
-
-void CSE_SpawnGroup::STATE_Write			(NET_Packet	&tNetPacket)
-{
-}
-
-void CSE_SpawnGroup::UPDATE_Read			(NET_Packet	&tNetPacket)
-{
-}
-
-void CSE_SpawnGroup::UPDATE_Write			(NET_Packet	&tNetPacket)
-{
-}
-
-#ifndef XRGAME_EXPORTS
-void CSE_SpawnGroup::FillProps				(LPCSTR pref, PropItemVec& values)
-{
-	inherited::FillProps		(pref,values);
-	PHelper().CreateFlag32		(values,PrepareKey(pref,*s_name,"Spawn\\spawn single item only"),	&m_spawn_flags,	flSpawnSingleItemOnly);
-}
-#endif // #ifndef XRGAME_EXPORTS
-/**/
 
 ////////////////////////////////////////////////////////////////////////////
 // CSE_PHSkeleton
@@ -464,76 +323,20 @@ void CSE_PHSkeleton::UPDATE_Read(NET_Packet &tNetPacket)
 
 }
 
-/*void CSE_PHSkeleton::STATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_PHSkeleton::STATE");
-	{
-		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
-		R_ASSERT(visual);
-		Object->GetCurrentChunk()->r_stringZ(visual->startup_animation);
-		Object->GetCurrentChunk()->r_u8(_flags.flags);
-		Object->GetCurrentChunk()->r_u16(source_id);
-		//if (_flags.test(flSavedData)) {
-		//	data_load(Object);
-		//}
-	}
-	Object->EndChunk();
-}
-
-void CSE_PHSkeleton::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_PHSkeleton::STATE");
-	{
-		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
-		R_ASSERT(visual);
-		Object->GetCurrentChunk()->w_stringZ(visual->startup_animation);
-		Object->GetCurrentChunk()->w_u8(_flags.flags);
-		Object->GetCurrentChunk()->w_u16(source_id);
-		////////////////////////saving///////////////////////////////////////
-		//if (_flags.test(flSavedData))
-		//{
-		//	data_save(Object);
-		//}
-	}
-	Object->EndChunk();
-}*/
-
 void CSE_PHSkeleton::STATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_PHSkeleton::STATE");
+	BEGIN_CHUNK(Object,"CSE_PHSkeleton::STATE")
 	{
 		CSE_Visual* visual = smart_cast<CSE_Visual*>(this);
 		R_ASSERT(visual);
 		Object << visual->startup_animation << _flags.flags << source_id;
-		//Object->GetCurrentChunk()->r_stringZ(visual->startup_animation);
-		//Object->GetCurrentChunk()->r_u8(_flags.flags);
-		//Object->GetCurrentChunk()->r_u16(source_id);
-		//if (_flags.test(flSavedData)) {
-		//	data_load(Object);
-		//}
 	}
-	Object.EndChunk();
 }
-
-/*void CSE_PHSkeleton::UPDATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_PHSkeleton::UPDATE");
-	{}
-	Object->EndChunk();
-}
-
-void CSE_PHSkeleton::UPDATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_PHSkeleton::UPDATE");
-	{}
-	Object->EndChunk();
-}*/
 
 void CSE_PHSkeleton::UPDATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_PHSkeleton::UPDATE");
+	BEGIN_CHUNK(Object,"CSE_PHSkeleton::UPDATE")
 	{}
-	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS
@@ -578,55 +381,19 @@ void CSE_AbstractVisual::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 }
 
-/*void CSE_AbstractVisual::STATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_AbstractVisual::STATE");
-	{
-		visual_read(Object);
-		Object->GetCurrentChunk()->r_stringZ(startup_animation);
-	}
-	Object->EndChunk();
-}
-
-void CSE_AbstractVisual::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_AbstractVisual::STATE");
-	{
-		visual_write(Object);
-		Object->GetCurrentChunk()->w_stringZ(startup_animation);
-	}
-	Object->EndChunk();
-}*/
-
 void CSE_AbstractVisual::STATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_AbstractVisual::STATE");
+	BEGIN_CHUNK(Object,"CSE_AbstractVisual::STATE")
 	{
 		visual_serialize(Object);
 		Object << startup_animation;
 	}
-	Object.EndChunk();
 }
-
-/*void CSE_AbstractVisual::UPDATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_AbstractVisual::UPDATE");
-	{}
-	Object->EndChunk();
-}
-
-void CSE_AbstractVisual::UPDATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_AbstractVisual::UPDATE");
-	{}
-	Object->EndChunk();
-}*/
 
 void CSE_AbstractVisual::UPDATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_AbstractVisual::UPDATE");
+	BEGIN_CHUNK(Object,"CSE_AbstractVisual::UPDATE")
 	{}
-	Object.EndChunk();
 }
 
 LPCSTR	CSE_AbstractVisual::getStartupAnimation		()
@@ -639,30 +406,10 @@ CSE_Visual* CSE_AbstractVisual::visual					()
 	return this;
 }
 
-/*void CSE_PHSkeleton::data_load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_PHSkeleton::data");
-	{
-		saved_bones.net_Load(Object);
-		_flags.set(flSavedData, TRUE);
-	}
-	Object->EndChunk();
-}
-
-void CSE_PHSkeleton::data_save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_PHSkeleton::data");
-	{
-		saved_bones.net_Save(Object);
-	}
-	Object->EndChunk();
-}*/
-
 void CSE_PHSkeleton::data_serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_PHSkeleton::data");
+	BEGIN_CHUNK(Object,"CSE_PHSkeleton::data")
 	{
 		saved_bones.net_Serialize(Object);
 	}
-	Object.EndChunk();
 }

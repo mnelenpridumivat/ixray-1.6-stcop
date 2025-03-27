@@ -111,12 +111,10 @@ void CEatableItem::Load(CSaveObjectLoad* Object)
 
 void CEatableItem::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CEatableItem");
+	BEGIN_CHUNK(Object,"CEatableItem")
 	{
 		inherited::Serialize(Object);
-		//Object << m_iPortionsMarker;
 	}
-	Object.EndChunk();
 }
 
 BOOL CEatableItem::net_Spawn(CSE_Abstract* DC)

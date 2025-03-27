@@ -163,12 +163,11 @@ void CInventoryItemObject::Load(CSaveObjectLoad* Object)
 
 void CInventoryItemObject::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CInventoryItemObject");
+	BEGIN_CHUNK(Object,"CInventoryItemObject")
 	{
 		CPhysicItem::Serialize(Object);
 		CInventoryItem::Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 void CInventoryItemObject::renderable_Render()

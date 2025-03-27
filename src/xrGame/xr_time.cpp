@@ -148,7 +148,7 @@ void xrTime::Load(CSaveObjectLoad* Object)
 
 void xrTime::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("xrTime");
+	BEGIN_CHUNK(Object,"xrTime")
 	{
 		if (!Object.IsSave()) {
 			TimePacked Tm = {};
@@ -179,7 +179,6 @@ void xrTime::Serialize(ISaveObject& Object)
 			Object << Tm.TimeTotal;
 		}
 	}
-	Object.EndChunk();
 }
 
 float	xrTime::diffSec(const xrTime& other)

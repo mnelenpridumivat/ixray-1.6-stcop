@@ -29,10 +29,13 @@ CSaveChunk* CSaveObject::GetCurrentChunk()
 	return _chunkStack.top();
 }
 
-void CSaveObject::EndChunk()
+void CSaveObject::EndChunk(ISaveObjectStackHandler handler)
 {
+	VERIFY(handler.GetDepth() != u64(-1));
 	VERIFY(!_chunkStack.empty());
+	xr_string chunk = _chunkStack.top()->GetChunkName();
 	_chunkStack.pop();
+	R_ASSERT3(handler.GetDepth() == _chunkStack.size(), "Chunk has invalid closing tags!", chunk.c_str());
 }
 
 void CSaveObject::EndArray()
@@ -84,10 +87,11 @@ CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
 	//_chunkStack.push(_rootChunk);
 }
 
-void CSaveObjectSave::BeginChunk(shared_str ChunkName)
+ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
+	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }
 
 void CSaveObjectSave::BeginArray()
@@ -185,10 +189,11 @@ CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
 	_chunkStack.push(_rootChunk);
 }
 
-void CSaveObjectLoad::BeginChunk(shared_str ChunkName)
+ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));
+	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }
 
 void CSaveObjectLoad::BeginArray()

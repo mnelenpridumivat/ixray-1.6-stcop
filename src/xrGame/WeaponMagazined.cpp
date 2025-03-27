@@ -1585,13 +1585,12 @@ void CWeaponMagazined::Load(CSaveObjectLoad* Object)
 
 void CWeaponMagazined::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CWeaponMagazined");
+	BEGIN_CHUNK(Object,"CWeaponMagazined")
 	{
 		inherited::Serialize(Object);
 		Object << m_iQueueSize << m_iShotNum << m_iCurFireMode;
 		SetQueueSize(m_iQueueSize);
 	}
-	Object.EndChunk();
 }
 
 void CWeaponMagazined::net_Export	(NET_Packet& P)

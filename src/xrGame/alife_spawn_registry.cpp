@@ -106,7 +106,7 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, LPCSTR game_name)
 
 void CALifeSpawnRegistry::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CALifeSpawnRegistry");
+	BEGIN_CHUNK(Object,"CALifeSpawnRegistry")
 	if(Object.IsSave())
 	{
 		Msg("* Saving spawns...");
@@ -139,12 +139,7 @@ void CALifeSpawnRegistry::Serialize(ISaveObject& Object)
 		load(*m_file, &guid);
 
 		serialize_updates(Object);
-
-		//VERIFY(!m_file);
-		//m_file = FS.r_open(file_name);
-		//load(*m_file, &guid);
 	}
-	Object.EndChunk();
 }
 
 void CALifeSpawnRegistry::load				(LPCSTR spawn_name)
@@ -270,60 +265,9 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, xrGUID *save_guid)
 	Msg							("* %d spawn points are successfully loaded",m_spawns.vertex_count());
 }
 
-/*void CALifeSpawnRegistry::save_updates(CSaveObjectSave* Object)
-{
-	Object->BeginChunk("CALifeSpawnRegistry::m_spawns");
-	{
-		Object->GetCurrentChunk()->WriteArray(m_spawns.vertices().size());
-		{
-			SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
-			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
-			for (; I != E; ++I) {
-				//stream.open_chunk((*I).second->vertex_id());
-				Object->BeginChunk("CALifeSpawnRegistry::m_spawns::vertex");
-				{
-					Object->GetCurrentChunk()->w_u32((*I).second->vertex_id());
-					(*I).second->data()->save_update(Object);
-				}
-				Object->EndChunk();
-				//stream.close_chunk();
-			}
-		}
-		Object->GetCurrentChunk()->EndArray();
-	}
-	Object->EndChunk();
-}
-
-void CALifeSpawnRegistry::load_updates(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CALifeSpawnRegistry::m_spawns");
-	{
-		u64 ArraySize;
-		Object->GetCurrentChunk()->ReadArray(ArraySize);
-		{
-			u32	vertex_id;
-			SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
-			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
-			for (; I != E; ++I) {
-				Object->BeginChunk("CALifeSpawnRegistry::m_spawns::vertex");
-				{
-					Object->GetCurrentChunk()->r_u32(vertex_id);
-					VERIFY(u32(ALife::_SPAWN_ID(-1)) > vertex_id);
-					const SPAWN_GRAPH::CVertex* vertex = m_spawns.vertex(ALife::_SPAWN_ID(vertex_id));
-					VERIFY(vertex);
-					(*I).second->data()->load_update(Object);
-				}
-				Object->EndChunk();
-			}
-		}
-		Object->GetCurrentChunk()->EndArray();
-	}
-	Object->EndChunk();
-}*/
-
 void CALifeSpawnRegistry::serialize_updates(ISaveObject& Object)
 {
-	Object.BeginChunk("CALifeSpawnRegistry::m_spawns");
+	BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns")
 	{
 		if (Object.IsSave()) {
 			auto Value = m_spawns.vertices().size();
@@ -332,13 +276,12 @@ void CALifeSpawnRegistry::serialize_updates(ISaveObject& Object)
 			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
 			Object.BeginArray();
 			for (; I != E; ++I) {
-				Object.BeginChunk("CALifeSpawnRegistry::m_spawns::vertex");
+				BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns::vertex")
 				{
 					u16 VertexId = (*I).second->vertex_id();
 					Object << VertexId;
 					(*I).second->data()->serialize_update(Object);
 				}
-				Object.EndChunk();
 			}
 			Object.EndArray();
 		}
@@ -350,7 +293,7 @@ void CALifeSpawnRegistry::serialize_updates(ISaveObject& Object)
 			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
 			Object.BeginArray();
 			for (; I != E; ++I) {
-				Object.BeginChunk("CALifeSpawnRegistry::m_spawns::vertex");
+				BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns::vertex")
 				{
 					Object << vertex_id;
 					VERIFY(u32(ALife::_SPAWN_ID(-1)) > vertex_id);
@@ -358,12 +301,10 @@ void CALifeSpawnRegistry::serialize_updates(ISaveObject& Object)
 					VERIFY(vertex);
 					(*I).second->data()->serialize_update(Object);
 				}
-				Object.EndChunk();
 			}
 			Object.EndArray();
 		}
 	}
-	Object.EndChunk();
 }
 
 void CALifeSpawnRegistry::save_updates		(IWriter &stream)

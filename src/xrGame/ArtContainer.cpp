@@ -59,49 +59,9 @@ void CArtContainer::load(IReader& packet)
     }
 }
 
-/*void CArtContainer::Save(CSaveObjectSave* Object) const
-{
-    Object->BeginChunk("CArtContainer");
-    {
-        Object->GetCurrentChunk()->WriteArray(m_sArtefactsInside.size());
-        {
-            for (const auto& artefact : m_sArtefactsInside)
-            {
-                shared_str section = artefact->cNameSect();
-                Object->GetCurrentChunk()->w_stringZ(section);
-                artefact->Save(Object);
-            }
-        }
-        Object->GetCurrentChunk()->EndArray();
-    }
-    Object->EndChunk();
-}
-
-void CArtContainer::Load(CSaveObjectLoad* Object)
-{
-    Object->BeginChunk("CArtContainer");
-    {
-        u64 ArraySize;
-        Object->GetCurrentChunk()->ReadArray(ArraySize);
-        {
-            for (u64 i = 0; i < ArraySize; ++i)
-            {
-                shared_str section;
-                Object->GetCurrentChunk()->r_stringZ(section);
-                CArtefact* artefact = new CArtefact();
-                artefact->Load(section.c_str());
-                artefact->Load(Object);
-                m_sArtefactsInside.push_back(artefact);
-            }
-        }
-        Object->GetCurrentChunk()->EndArray();
-    }
-    Object->EndChunk();
-}*/
-
 void CArtContainer::Serialize(ISaveObject& Object)
 {
-    Object.BeginChunk("CArtContainer");
+    BEGIN_CHUNK(Object,"CArtContainer")
     {
         // TODO: Reimplement this, storing arts like object in regulat inventory box
         /*u64 ArraySize;
@@ -119,7 +79,6 @@ void CArtContainer::Serialize(ISaveObject& Object)
         }
         Object->GetCurrentChunk()->EndArray();*/
     }
-    Object.EndChunk();
 }
 
 bool CArtContainer::CanStoreArt(CArtefact* art)

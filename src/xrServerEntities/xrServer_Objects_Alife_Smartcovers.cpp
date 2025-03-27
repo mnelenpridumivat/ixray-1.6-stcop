@@ -178,80 +178,22 @@ void CSE_SmartCover::UPDATE_Write(NET_Packet &tNetPacket)
 	inherited1::UPDATE_Write	(tNetPacket);
 }
 
-/*void CSE_SmartCover::STATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_SmartCover::STATE");
-	{
-		inherited1::STATE_ReadSave(Object);
-		cform_read(Object);
-		Object->GetCurrentChunk()->r_stringZ(m_description);
-		Object->GetCurrentChunk()->r_float(m_hold_position_time);
-		Object->GetCurrentChunk()->r_float(m_enter_min_enemy_distance);
-		Object->GetCurrentChunk()->r_float(m_exit_min_enemy_distance);
-		Object->GetCurrentChunk()->r_bool(m_is_combat_cover);
-		Object->GetCurrentChunk()->r_bool(m_can_fire);
-	}
-	Object->EndChunk();
-}
-
-void CSE_SmartCover::STATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_SmartCover::STATE");
-	{
-		inherited1::STATE_WriteSave(Object);
-		cform_write(Object);
-		Object->GetCurrentChunk()->w_stringZ(m_description);
-		Object->GetCurrentChunk()->w_float(m_hold_position_time);
-		Object->GetCurrentChunk()->w_float(m_enter_min_enemy_distance);
-		Object->GetCurrentChunk()->w_float(m_exit_min_enemy_distance);
-		Object->GetCurrentChunk()->w_bool(m_is_combat_cover);
-		Object->GetCurrentChunk()->w_bool(m_can_fire);
-	}
-	Object->EndChunk();
-}*/
-
 void CSE_SmartCover::STATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_SmartCover::STATE");
+	BEGIN_CHUNK(Object,"CSE_SmartCover::STATE")
 	{
 		inherited1::STATE_Serialize(Object);
 		cform_serialize(Object);
 		Object << m_description << m_hold_position_time << m_enter_min_enemy_distance << m_exit_min_enemy_distance << m_is_combat_cover << m_can_fire;
-		/*Object->GetCurrentChunk()->r_stringZ(m_description);
-		Object->GetCurrentChunk()->r_float(m_hold_position_time);
-		Object->GetCurrentChunk()->r_float(m_enter_min_enemy_distance);
-		Object->GetCurrentChunk()->r_float(m_exit_min_enemy_distance);
-		Object->GetCurrentChunk()->r_bool(m_is_combat_cover);
-		Object->GetCurrentChunk()->r_bool(m_can_fire);*/
 	}
-	Object.EndChunk();
 }
-
-/*void CSE_SmartCover::UPDATE_ReadSave(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CSE_SmartCover::UPDATE");
-	{
-		inherited1::UPDATE_ReadSave(Object);
-	}
-	Object->EndChunk();
-}
-
-void CSE_SmartCover::UPDATE_WriteSave(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CSE_SmartCover::UPDATE");
-	{
-		inherited1::UPDATE_WriteSave(Object);
-	}
-	Object->EndChunk();
-}*/
 
 void CSE_SmartCover::UPDATE_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_SmartCover::UPDATE");
+	BEGIN_CHUNK(Object,"CSE_SmartCover::UPDATE")
 	{
 		inherited1::UPDATE_Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 #ifndef XRGAME_EXPORTS

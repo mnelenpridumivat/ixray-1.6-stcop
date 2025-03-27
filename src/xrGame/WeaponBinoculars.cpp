@@ -193,12 +193,11 @@ void CWeaponBinoculars::Load(CSaveObjectLoad* Object)
 
 void CWeaponBinoculars::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CWeaponBinoculars");
+	BEGIN_CHUNK(Object,"CWeaponBinoculars")
 	{
 		inherited::Serialize(Object);
 		Object << m_fRTZoomFactor;
 	}
-	Object.EndChunk();
 }
 
 bool CWeaponBinoculars::GetBriefInfo( II_BriefInfo& info )

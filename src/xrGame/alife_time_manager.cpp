@@ -79,7 +79,7 @@ void CALifeTimeManager::Load(CSaveObjectLoad* Object)
 
 void CALifeTimeManager::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CALifeTimeManager");
+	BEGIN_CHUNK(Object,"CALifeTimeManager")
 	{
 		if (Object.IsSave()) {
 			m_game_time = game_time();
@@ -90,5 +90,4 @@ void CALifeTimeManager::Serialize(ISaveObject& Object)
 			m_start_time = Device.dwTimeGlobal;
 		}
 	}
-	Object.EndChunk();
 }

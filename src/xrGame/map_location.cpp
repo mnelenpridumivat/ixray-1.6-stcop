@@ -709,7 +709,7 @@ void CMapLocation::load(CSaveObjectLoad* Object)
 
 void CMapLocation::serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CMapLocation");
+	BEGIN_CHUNK(Object,"CMapLocation")
 	{
 		if (Object.IsSave()) {
 			Object << m_hint;
@@ -729,7 +729,6 @@ void CMapLocation::serialize(ISaveObject& Object)
 			}
 		}
 	}
-	Object.EndChunk();
 }
 
 void CMapLocation::SetHint(const shared_str& hint)		

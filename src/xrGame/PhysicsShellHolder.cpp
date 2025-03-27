@@ -399,7 +399,7 @@ void CPhysicsShellHolder::Load(CSaveObjectLoad* Object)
 
 void CPhysicsShellHolder::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CPhysicsShellHolder");
+	BEGIN_CHUNK(Object,"CPhysicsShellHolder")
 	{
 		inherited::Serialize(Object);
 		if (Object.IsSave()) {
@@ -414,7 +414,6 @@ void CPhysicsShellHolder::Serialize(ISaveObject& Object)
 			Object << st_enable_state;
 		}
 	}
-	Object.EndChunk();
 }
 
 void CPhysicsShellHolder::PHSaveState(NET_Packet &P)
@@ -626,10 +625,8 @@ void CPhysicsShellHolder::PHLoadState(CSaveObjectLoad* Object)
 
 void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 {
-	Object.BeginChunk("CEatableItem");
+	BEGIN_CHUNK(Object,"CEatableItem")
 	{
-		//u64 _low = 0;
-		//u64 _high = 0;
 		VisMask _vm;
 
 		IKinematics* K = smart_cast<IKinematics*>(Visual());
@@ -673,12 +670,6 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 		Object << min << max << bones_number;
 		VERIFY(!min.similar(max));
 
-		//Object->GetCurrentChunk()->r_u16(bones_number);
-		//if (bones_number > 64) {
-		//	Msg("!![CPhysicsShellHolder::PHLoadState] bones_number is [%u]!", bones_number);
-		//	Object->GetCurrentChunk()->r_u64(_high);
-		//}
-
 		K->LL_SetBonesVisible(_vm);
 
 		for (u16 i = 0; i < bones_number; i++)
@@ -689,7 +680,6 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 			PHGetSyncItem(i)->set_State(state);
 		}
 	}
-	Object.EndChunk();
 }
 
 bool CPhysicsShellHolder::register_schedule	() const
@@ -701,10 +691,6 @@ void CPhysicsShellHolder::on_physics_disable()
 {
 	if (IsGameTypeSingle())
 		return;
-
-	/*NET_Packet			net_packet;
-	u_EventGen			(net_packet,GE_FREEZE_OBJECT,ID());
-	Level().Send		(net_packet,net_flags(TRUE,TRUE));*/
 }
 
 

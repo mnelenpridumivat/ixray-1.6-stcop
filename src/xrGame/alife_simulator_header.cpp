@@ -48,12 +48,11 @@ void CALifeSimulatorHeader::Load(CSaveObjectLoad* Object)
 
 void CALifeSimulatorHeader::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CALifeSimulatorHeader");
+	BEGIN_CHUNK(Object,"CALifeSimulatorHeader")
 	{
 		Object << m_version;
 		R_ASSERT2(m_version >= ALIFE_VERSION, "ALife version mismatch! (Delete saved game and try again)");
 	}
-	Object.EndChunk();
 }
 
 

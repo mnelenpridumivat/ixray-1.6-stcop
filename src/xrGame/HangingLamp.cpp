@@ -227,12 +227,11 @@ void CHangingLamp::Load(CSaveObjectLoad* Object)
 
 void CHangingLamp::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CHangingLamp");
+	BEGIN_CHUNK(Object,"CHangingLamp")
 	{
 		inherited::Serialize(Object);
 		Object << m_bState;
 	}
-	Object.EndChunk();
 }
 
 void CHangingLamp::shedule_Update	(u32 dt)

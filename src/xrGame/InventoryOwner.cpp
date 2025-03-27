@@ -250,7 +250,7 @@ void CInventoryOwner::Load(CSaveObject* Object)
 
 void CInventoryOwner::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CInventoryOwner");
+	BEGIN_CHUNK(Object,"CInventoryOwner")
 	{
 		u8 active_slot = inventory().GetActiveSlot();
 		Object << active_slot;
@@ -262,7 +262,6 @@ void CInventoryOwner::Serialize(ISaveObject& Object)
 		CharacterInfo().Serialize(Object);
 		Object << m_game_name << m_money;
 	}
-	Object.EndChunk();
 }
 
 

@@ -87,11 +87,10 @@ void CSE_Visual::visual_write(CSaveObjectSave* Object) const
 
 void CSE_Visual::visual_serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Visual::visual");
+	BEGIN_CHUNK(Object,"CSE_Visual::visual")
 	{
 		Object << visual_name << flags.flags;
 	}
-	Object.EndChunk();
 }
 
 void CSE_Visual::OnChangeVisual	(PropValue* sender)
@@ -165,11 +164,10 @@ void CSE_Motion::motion_write(CSaveObjectSave* Object) const
 
 void CSE_Motion::motion_serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CSE_Motion::motion");
+	BEGIN_CHUNK(Object,"CSE_Motion::motion")
 	{
 		Object << motion_name;
 	}
-	Object.EndChunk();
 }
 
 void CSE_Motion::OnChangeMotion	(PropValue* sender)

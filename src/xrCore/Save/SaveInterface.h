@@ -4,10 +4,18 @@
 
 class shared_str;
 
+class XRCORE_API ISaveObjectStackHandler
+{
+	u64 depth = u64(-1);
+public:
+	ISaveObjectStackHandler(u64 depth) : depth(depth){}
+	u64 GetDepth()const { return depth; }
+};
+
 class XRCORE_API ISaveObject {
 public:
-	virtual void BeginChunk(shared_str ChunkName) = 0;
-	virtual void EndChunk() = 0;
+	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) = 0;
+	virtual void EndChunk(ISaveObjectStackHandler handler) = 0;
 	virtual void BeginArray() = 0;
 	virtual void EndArray() = 0;
 
@@ -31,3 +39,15 @@ public:
 	virtual ISaveObject& operator<<(bool& Value) = 0;
 	virtual ISaveObject& operator<<(shared_str& S) = 0;
 };
+
+class XRCORE_API ISaveObjectStackGuard
+{
+	ISaveObjectStackHandler handler;
+	ISaveObject* saveObject = nullptr;
+public:
+	ISaveObjectStackGuard(ISaveObject* saveObject, ISaveObjectStackHandler handler) : handler(handler),
+		saveObject(saveObject) {}
+	~ISaveObjectStackGuard(){ saveObject->EndChunk(handler); }
+};
+
+#define BEGIN_CHUNK(Obj, Name) if(ISaveObjectStackGuard guard(&(Obj), (Obj).BeginChunk(Name)); true)

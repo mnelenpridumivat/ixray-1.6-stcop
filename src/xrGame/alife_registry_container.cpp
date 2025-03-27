@@ -132,48 +132,46 @@ void CALifeRegistryContainer::Save(CSaveObjectSave* Object) const
 
 void CALifeRegistryContainer::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CALifeRegistryContainer");
+	BEGIN_CHUNK(Object,"CALifeRegistryContainer")
 	{
-		Object.BeginChunk("CInfoPortionRegistry");
+		BEGIN_CHUNK(Object,"CInfoPortionRegistry")
 		{
 			CInfoPortionRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CRelationRegistry");
+
+		BEGIN_CHUNK(Object,"CRelationRegistry")
 		{
 			CRelationRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CEncyclopediaRegistry");
+
+		BEGIN_CHUNK(Object,"CEncyclopediaRegistry")
 		{
 			CEncyclopediaRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CGameNewsRegistry");
+
+		BEGIN_CHUNK(Object,"CGameNewsRegistry")
 		{
 			CGameNewsRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CSpecificCharacterRegistry");
+
+		BEGIN_CHUNK(Object,"CSpecificCharacterRegistry")
 		{
 			CSpecificCharacterRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CMapLocationRegistry");
+
+		BEGIN_CHUNK(Object,"CMapLocationRegistry")
 		{
 			CMapLocationRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CGameTaskRegistry");
+
+		BEGIN_CHUNK(Object,"CGameTaskRegistry")
 		{
 			CGameTaskRegistry::serialize(Object);
 		}
-		Object.EndChunk();
-		Object.BeginChunk("CActorStatisticRegistry");
+
+		BEGIN_CHUNK(Object,"CActorStatisticRegistry")
 		{
 			CActorStatisticRegistry::serialize(Object);
 		}
-		Object.EndChunk();
 	}
-	Object.EndChunk();
 }

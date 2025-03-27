@@ -62,11 +62,10 @@ void CCameraLook::Load(CSaveObject* Object)
 
 void CCameraLook::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CCameraLook");
+	BEGIN_CHUNK(Object,"CCameraLook")
 	{
 		Object << pitch;
 	}
-	Object.EndChunk();
 }
 
 void CCameraLook::Update(Fvector& point, Fvector& /**noise_dangle/**/)

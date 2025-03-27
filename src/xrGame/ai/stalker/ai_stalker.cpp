@@ -1250,13 +1250,12 @@ void CAI_Stalker::Load(CSaveObjectLoad* Object)
 
 void CAI_Stalker::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CAI_Stalker");
+	BEGIN_CHUNK(Object,"CAI_Stalker")
 	{
 		inherited::Serialize(Object);
 		CInventoryOwner::Serialize(Object);
 		brain().Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 void CAI_Stalker::load_critical_wound_bones()

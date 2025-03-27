@@ -1072,14 +1072,13 @@ void CCustomMonster::Load(CSaveObjectLoad* Object)
 
 void CCustomMonster::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CCustomMonster");
+	BEGIN_CHUNK(Object,"CCustomMonster")
 	{
 		inherited::Serialize(Object);
 		if (g_Alive()) {
 			memory().Serialize(Object);
 		}
 	}
-	Object.EndChunk();
 }
 
 

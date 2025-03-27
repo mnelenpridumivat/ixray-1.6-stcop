@@ -234,12 +234,11 @@ void CLevelChanger::Load(CSaveObjectLoad* Object)
 
 void CLevelChanger::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CLevelChanger");
+	BEGIN_CHUNK(Object,"CLevelChanger")
 	{
 		inherited::Serialize(Object);
 		Object << m_invite_str << m_b_enabled;
 	}
-	Object.EndChunk();
 }
 
 BOOL CLevelChanger::net_SaveRelevant()

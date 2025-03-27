@@ -185,31 +185,12 @@ void CCharacterInfo::save	(NET_Packet& stream)
 	stream.w_stringZ	(m_StartDialog);
 }
 
-/*void CCharacterInfo::Save(CSaveObject* Object)
-{
-	Object->BeginChunk("CInventoryOwner");
-	{
-		Object->GetCurrentChunk()->w_stringZ(m_StartDialog);
-	}
-	Object->EndChunk();
-}
-
-void CCharacterInfo::Load(CSaveObject* Object)
-{
-	Object->BeginChunk("CInventoryOwner");
-	{
-		Object->GetCurrentChunk()->r_stringZ(m_StartDialog);
-	}
-	Object->EndChunk();
-}*/
-
 void CCharacterInfo::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CInventoryOwner");
+	BEGIN_CHUNK(Object,"CInventoryOwner")
 	{
 		Object << m_StartDialog;
 	}
-	Object.EndChunk();
 }
 
 #endif

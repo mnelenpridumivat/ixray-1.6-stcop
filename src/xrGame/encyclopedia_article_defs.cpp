@@ -3,7 +3,7 @@
 
 ISaveObject& operator<<(ISaveObject& Object, ARTICLE_DATA& Data)
 {
-	Object.BeginChunk("ARTICLE_DATA");
+	BEGIN_CHUNK(Object,"ARTICLE_DATA")
 	{
 		Object << Data.receive_time << Data.article_id << Data.readed;
 		{
@@ -11,6 +11,5 @@ ISaveObject& operator<<(ISaveObject& Object, ARTICLE_DATA& Data)
 			Object << *type;
 		}
 	}
-	Object.EndChunk();
 	return Object;
 }

@@ -813,7 +813,7 @@ void CInventoryItem::Load(CSaveObjectLoad* Object)
 
 void CInventoryItem::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CInventoryItem");
+	BEGIN_CHUNK(Object,"CInventoryItem")
 	{
 		Object << m_ItemCurrPlace.value << m_fCondition;
 
@@ -827,7 +827,6 @@ void CInventoryItem::Serialize(ISaveObject& Object)
 			{
 				u8 Value = 0;
 				Object << Value;
-				Object.EndChunk();
 				return;
 			}
 		}
@@ -838,7 +837,6 @@ void CInventoryItem::Serialize(ISaveObject& Object)
 		Object << num_items;
 
 		if (!num_items) {
-			Object.EndChunk();
 			return;
 		}
 
@@ -852,7 +850,6 @@ void CInventoryItem::Serialize(ISaveObject& Object)
 			object().PPhysicsShell()->Disable();
 		}
 	}
-	Object.EndChunk();
 }
 
 ///////////////////////////////////////////////

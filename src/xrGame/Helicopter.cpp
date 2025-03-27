@@ -551,7 +551,7 @@ void CHelicopter::Load(CSaveObjectLoad* Object)
 
 void CHelicopter::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CHelicopter");
+	BEGIN_CHUNK(Object,"CHelicopter")
 	{
 		inherited::Serialize(Object);
 		m_movement.Serialize(Object);
@@ -560,19 +560,8 @@ void CHelicopter::Serialize(ISaveObject& Object)
 		Object << renderable.xform << m_barrel_dir_tolerance << m_use_rocket_on_attack << m_use_mgun_on_attack
 			<< m_min_rocket_dist << m_max_rocket_dist << m_min_mgun_dist << m_max_mgun_dist
 			<< m_time_between_rocket_attack << m_syncronize_rocket;
-		/*Object->GetCurrentChunk()->r_vec3(XFORM().c);
-		Object->GetCurrentChunk()->r_float(m_barrel_dir_tolerance);
-		Object->GetCurrentChunk()->r_bool(m_use_rocket_on_attack);
-		Object->GetCurrentChunk()->r_bool(m_use_mgun_on_attack);
-		Object->GetCurrentChunk()->r_float(m_min_rocket_dist);
-		Object->GetCurrentChunk()->r_float(m_max_rocket_dist);
-		Object->GetCurrentChunk()->r_float(m_min_mgun_dist);
-		Object->GetCurrentChunk()->r_float(m_max_mgun_dist);
-		Object->GetCurrentChunk()->r_u32(m_time_between_rocket_attack);
-		Object->GetCurrentChunk()->r_bool(m_syncronize_rocket);*/
 		UseFireTrail(m_enemy.bUseFireTrail);//force reloar disp params
 	}
-	Object.EndChunk();
 }
 
 void CHelicopter::net_Relcase(CObject* O )

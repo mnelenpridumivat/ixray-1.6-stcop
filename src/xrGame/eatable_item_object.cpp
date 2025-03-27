@@ -155,12 +155,11 @@ void CEatableItemObject::Load(CSaveObjectLoad* Object)
 
 void CEatableItemObject::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CEatableItemObject");
+	BEGIN_CHUNK(Object,"CEatableItemObject")
 	{
 		CPhysicItem::Serialize(Object);
 		CEatableItem::Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 void CEatableItemObject::renderable_Render()

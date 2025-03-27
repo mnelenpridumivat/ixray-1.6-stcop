@@ -392,14 +392,13 @@ void CMemoryManager::Load(CSaveObjectLoad* Object)
 
 void CMemoryManager::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CMemoryManager");
+	BEGIN_CHUNK(Object,"CMemoryManager")
 	{
 		visual().Serialize(Object);
 		sound().Serialize(Object);
 		hit().Serialize(Object);
 		danger().Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 // we do this due to the limitation of client spawn manager

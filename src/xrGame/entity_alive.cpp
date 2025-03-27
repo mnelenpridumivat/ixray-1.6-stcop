@@ -641,12 +641,11 @@ void CEntityAlive::Load(CSaveObjectLoad* Object)
 
 void CEntityAlive::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CEntityAlive");
+	BEGIN_CHUNK(Object,"CEntityAlive")
 	{
 		inherited::Serialize(Object);
 		conditions().Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 BOOL	CEntityAlive::net_SaveRelevant		()

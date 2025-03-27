@@ -1520,13 +1520,13 @@ void CActor::Load(CSaveObjectLoad* Object)
 
 void CActor::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CActor");
+	BEGIN_CHUNK(Object,"CActor")
 	{
 		inherited::Serialize(Object);
 		CInventoryOwner::Serialize(Object);
 		Object << m_bOutBorder;
 
-		Object.BeginChunk("CActor::PDA");
+		BEGIN_CHUNK(Object,"CActor::PDA")
 		{
 			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
 			bool Value;
@@ -1552,9 +1552,8 @@ void CActor::Serialize(ISaveObject& Object)
 				task_wnd->PrimaryObjectsEnabled(Value);
 			}
 		}
-		Object.EndChunk();
 
-		Object.BeginChunk("CActor::Camera");
+		BEGIN_CHUNK(Object,"CActor::Camera")
 		{
 			cam_Active()->Serialize(Object);
 			u8* Value = (u8*)&cam_active;
@@ -1563,22 +1562,13 @@ void CActor::Serialize(ISaveObject& Object)
 				cam_Set(EActorCameras(*Value));
 			}
 		}
-		Object.EndChunk();
-
-		//need_quick_slot_reload = true;
 
 
-		Object.BeginChunk("CActor::Quickslots");
+		BEGIN_CHUNK(Object,"CActor::Quickslots")
 		{
 			Object << g_quick_use_slots;
-			/*Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[0]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[1]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[2]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[3]);*/
 		}
-		Object.EndChunk();
 	}
-	Object.EndChunk();
 }
 
 #ifdef DEBUG

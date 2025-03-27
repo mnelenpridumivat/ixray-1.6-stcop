@@ -97,9 +97,9 @@ namespace CSaveChunk_script {
 
 namespace CSaveObject_script {
 
-void BeginChunk(ISaveObject* Obj, LPCSTR Name){
+ISaveObjectStackHandler BeginChunk(ISaveObject* Obj, LPCSTR Name){
 	VERIFY(Obj);
-	Obj->BeginChunk(Name);
+	return Obj->BeginChunk(Name);
 }
 
 bool HasChunk(ISaveObject* Obj, LPCSTR Name){
@@ -107,9 +107,10 @@ bool HasChunk(ISaveObject* Obj, LPCSTR Name){
 	return Obj->HasChunk(Name);
 }
 
-void EndChunk(ISaveObject* Obj){
+void EndChunk(ISaveObject* Obj, ISaveObjectStackHandler handler){
+	VERIFY(handler.GetDepth() != u64(-1));
 	VERIFY(Obj);
-	Obj->EndChunk();
+	Obj->EndChunk(handler);
 }
 
 void BeginArray(ISaveObject* Obj){
@@ -215,6 +216,7 @@ void SaveSystemScript::script_register(lua_State* L)
 {
 	module(L)
 		[
+			class_<ISaveObjectStackHandler>("SaveObjectStackHandler"),
 			class_<ISaveObject>("SaveObject")
 				.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("HasChunk", &CSaveObject_script::HasChunk)

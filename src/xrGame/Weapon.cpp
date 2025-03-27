@@ -839,7 +839,7 @@ void CWeapon::Load(CSaveObjectLoad* Object)
 
 void CWeapon::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CWeapon");
+	BEGIN_CHUNK(Object,"CWeapon")
 	{
 		inherited::Serialize(Object);
 		Object << iAmmoElapsed << m_cur_scope << m_flagsAddOnState << m_ammoType << m_zoom_params.m_bIsZoomModeNow;
@@ -855,7 +855,6 @@ void CWeapon::Serialize(ISaveObject& Object)
 		}
 
 	}
-	Object.EndChunk();
 }
 
 

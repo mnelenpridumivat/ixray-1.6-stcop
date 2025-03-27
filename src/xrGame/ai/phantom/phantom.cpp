@@ -352,7 +352,7 @@ void CPhantom::Load(CSaveObjectLoad* Object)
 }*/
 void CPhantom::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CPhantom");
+	BEGIN_CHUNK(Object,"CPhantom")
 	{
 		u32* Value = (u32*)&m_CurState;
 		Object << *Value;
@@ -360,7 +360,6 @@ void CPhantom::Serialize(ISaveObject& Object)
 			SwitchToState(EState(*Value));
 		}
 	}
-	Object.EndChunk();
 }
 void CPhantom::net_Export	(NET_Packet& P)					// export to server
 {

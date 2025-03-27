@@ -357,12 +357,11 @@ void CAI_Trader::Load(CSaveObjectLoad* Object)
 
 void CAI_Trader::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CAI_Trader");
+	BEGIN_CHUNK(Object,"CAI_Trader")
 	{
 		inherited::Serialize(Object);
 		CInventoryOwner::Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 

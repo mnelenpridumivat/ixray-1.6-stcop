@@ -234,12 +234,11 @@ void CPda::Load(CSaveObjectLoad* Object)
 
 void CPda::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CPda");
+	BEGIN_CHUNK(Object,"CPda")
 	{
 		inherited::Serialize(Object);
 		Object << m_sFullName;
 	}
-	Object.EndChunk();
 }
 
 CObject* CPda::GetOwnerObject()

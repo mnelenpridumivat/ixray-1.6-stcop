@@ -321,22 +321,20 @@ void SPHNetState::net_Load(IReader &P,const Fvector& min,const Fvector& max)
 
 void SPHNetState::net_Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("SPHNetState");
+	BEGIN_CHUNK(Object,"SPHNetState")
 	{
 		Object << linear_vel << position << quaternion << enabled;
 	}
-	Object.EndChunk();
 }
 
 void SPHNetState::net_Serialize(ISaveObject& Object, const Fvector& min, const Fvector& max)
 {
-	Object.BeginChunk("SPHNetState");
+	BEGIN_CHUNK(Object,"SPHNetState")
 	{
 		s_vec_q8(Object, position, min, max);
 		s_qt_q8(Object, quaternion);
 		Object << enabled;
 	}
-	Object.EndChunk();
 }
 
 /*CSaveObject& SPHNetState::operator<<(CSaveObject& Object)
@@ -526,8 +524,7 @@ void SPHBonesData::net_Load(CSaveObjectLoad* Object)
 
 void SPHBonesData::net_Serialize(ISaveObject& Object)
 {
-	//auto PerElemAction = [&](SPHNetState& Elem) {Elem.net_Serialize(Object, get_min(), get_max()); };
-	Object.BeginChunk("SPHBonesData");
+	BEGIN_CHUNK(Object,"SPHBonesData")
 	{
 		bones.clear();
 		Object << bones_mask << root_bone;
@@ -535,13 +532,6 @@ void SPHBonesData::net_Serialize(ISaveObject& Object)
 			Fvector _mn = get_min(), _mx = get_max();
 			Object << _mn << _mx;/*<void, SPHBonesData, SPHBonesData, CSaveObject&, SPHNetState&>*/ 
 			((CSaveObject&)Object).Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
-
-			/*Object->GetCurrentChunk()->WriteArray(bones.size());
-			{
-				for (const auto& bone : bones) {
-					bone.net_Serialize(Object, get_min(), get_max());
-				}
-			}*/
 		}
 		else {
 			Fvector _mn, _mx;
@@ -549,29 +539,8 @@ void SPHBonesData::net_Serialize(ISaveObject& Object)
 			Object << _mn << _mx << bones_number;
 			set_min_max(_mn, _mx);
 			((CSaveObject&)Object).Serialize(bones, fastdelegate::MakeDelegate(this, &SPHBonesData::PerElemAction));
-
-			/*for (int i = 0; i < bones_number; i++) {
-				SPHNetState	S;
-				S.net_Serialize(Object, get_min(), get_max());
-				bones.push_back(S);
-			}*/
 		}
-
-		//u16 bones_number;
-		//Object->GetCurrentChunk()->r_u16(bones_number);
-		//if (bones_number > 64) {
-		//	Msg("!![SPHBonesData::net_Load] bones_number is [%u]!", bones_number);
-		//	Object->GetCurrentChunk()->r_u64(_high);
-		//}
-		//bones_mask.set(_low, _high);
-
-		/*for (int i = 0; i < bones_number; i++) {
-			SPHNetState	S;
-			S.net_Load(Object, get_min(), get_max());
-			bones.push_back(S);
-		}*/
 	}
-	Object.EndChunk();
 }
 
 void SPHBonesData::set_min_max(const Fvector& _min, const Fvector& _max)

@@ -350,11 +350,10 @@ void CBaseMonster::Load(CSaveObjectLoad* Object)
 
 void CBaseMonster::Serialize(ISaveObject& Object)
 {
-	Object.BeginChunk("CBaseMonster");
+	BEGIN_CHUNK(Object,"CBaseMonster")
 	{
 		inherited::Serialize(Object);
 	}
-	Object.EndChunk();
 }
 
 void CBaseMonster::UpdateCL()

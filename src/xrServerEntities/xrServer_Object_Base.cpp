@@ -607,24 +607,10 @@ void CSE_Abstract::Spawn_Write(CSaveObjectSave* Object, bool bLocal) const
 
 bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal) 
 {
-	Object.BeginChunk("CSE_Abstract");
+	BEGIN_CHUNK(Object,"CSE_Abstract")
 	{
-		//if (!s_name_replace.size()) {
-		//	static auto TempStr = "";
-		//	s_name_replace = (char*)TempStr;
-		//}
 		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
-		// generic
-		//Object->GetCurrentChunk()->w_stringZ(s_name);
-		//Object->GetCurrentChunk()->w_stringZ(s_name_replace ? s_name_replace : "");
-		//Object->GetCurrentChunk()->w_u8(0);
-		//Object->GetCurrentChunk()->w_u8(s_RP);
-		//Object->GetCurrentChunk()->w_vec3(o_Position);
-		//Object->GetCurrentChunk()->w_vec3(o_Angle);
-		//Object->GetCurrentChunk()->w_u16(RespawnTime);
-		//Object->GetCurrentChunk()->w_u16(ID);
-		//Object->GetCurrentChunk()->w_u16(ID_Parent);
-		//Object->GetCurrentChunk()->w_u16(ID_Phantom);
+
 		{
 			u16 FlagsTemp;
 			u16 SpawnVersion;
@@ -654,11 +640,8 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				m_script_version = SpawnVer;
 			}
 		}
-		//Object->GetCurrentChunk()->w_u16(SPAWN_VERSION);
-		//Object->GetCurrentChunk()->w_u16(m_gameType.m_GameType.get());
-		//Object->GetCurrentChunk()->w_u16(script_server_object_version());
 
-		Object.BeginChunk("CSE_Abstract::ClientObject");
+		BEGIN_CHUNK(Object,"CSE_Abstract::ClientObject")
 		{
 			bool HasClientData;
 #ifndef XRGAME_EXPORTS
@@ -687,7 +670,6 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 			}
 #endif
 		}
-		Object.EndChunk();
 
 		Object << m_tSpawnID;
 
@@ -700,9 +682,6 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 			STATE_Serialize(Object);
 			R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "STATE_Serialize", name());
 		}
-		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
-		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}
-	Object.EndChunk();
 	return true;
 }
