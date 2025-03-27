@@ -695,7 +695,11 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 		assign();
 #endif
 
-		STATE_Serialize(Object);
+		{
+			auto ChunkDepth = Object.GetChunkStackDepth();
+			STATE_Serialize(Object);
+			R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "STATE_Serialize", name());
+		}
 		//R_ASSERT3((m_tClassID == CLSID_SPECTATOR),
 		//	"object isn't successfully saved, get your backup :(", name_replace());
 	}

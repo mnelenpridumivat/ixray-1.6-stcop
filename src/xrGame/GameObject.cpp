@@ -513,8 +513,11 @@ void CGameObject::net_Serialize(ISaveObject& Object)
 {
 	Object.BeginChunk("CGameObject::net_Serialize");
 	{
+		auto ChunkDepth = Object.GetChunkStackDepth();
 		Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (client object)", Name());
 		m_ScriptBinderComponent->Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (script binder)", Name());
 	}
 	Object.EndChunk();
 }
