@@ -679,7 +679,7 @@ namespace luabind { namespace detail
 			
 			object_rep* obj = static_cast<object_rep*>(lua_touserdata(L, index));
 			if (!obj) {
-				luabind::DebugPrintStack(L);
+				OutputDebugStringA(luabind::DebugPrintStack(L).c_str());
 			}
 			assert((obj != nullptr) && "internal error, please report"); // internal error
 			const class_rep* crep = obj->crep();
