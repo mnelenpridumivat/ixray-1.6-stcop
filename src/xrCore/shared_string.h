@@ -12,6 +12,9 @@ struct XRCORE_API str_value
 	u32 dwCRC;
 
 	str_value* next;
+#ifdef DEBUG
+	str_c value_ptr;
+#endif
 	char value[];
 };
 
