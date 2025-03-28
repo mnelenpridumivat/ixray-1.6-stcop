@@ -145,7 +145,6 @@ public:
 			//virtual void Save(CSaveObjectSave* Object);
 			//virtual void Load(CSaveObjectLoad* Object);
 			virtual void Serialize(ISaveObject& Object);
-			virtual void SerializeSingle(ISaveObject& Object, CVisibleObject& Value);
 			void					on_requested_spawn			(CObject *object);
 
 private:
