@@ -150,7 +150,9 @@ str_value* str_container::dock(str_c value)
 		result->dwLength = sv->dwLength;
 		result->dwCRC = sv->dwCRC;
 		CopyMemory(result->value, value, s_len_with_zero);
+#ifdef DEBUG
 		result->value_ptr = result->value;
+#endif
 
 		impl->insert(result);
 	}
