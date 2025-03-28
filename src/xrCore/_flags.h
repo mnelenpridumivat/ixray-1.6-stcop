@@ -294,7 +294,6 @@ template<size_t T> ISaveObject& operator<<(ISaveObject& Object, _flags_big<T>& V
 		else {
 			Flags64 temp;
 			Object << temp;
-			Value.zero();
 			Value.bor(temp.flags, i);
 		}
 	}
