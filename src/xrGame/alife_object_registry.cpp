@@ -342,14 +342,8 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object)
 			BEGIN_CHUNK(Object,"CALifeObjectRegistry::objects")
 			{
 				Object.BeginArray();
-				xr_vector<CSE_ALifeDynamicObject*> objects(m_serializable_object_count);
-				//CSE_ALifeDynamicObject** objects = (CSE_ALifeDynamicObject**)_alloca(m_serializable_object_count * sizeof(CSE_ALifeDynamicObject*));
-
-				//CSE_ALifeDynamicObject** I = objects;
-				//CSE_ALifeDynamicObject** E = objects + m_serializable_object_count;
 				for (u64 i = 0; i < m_serializable_object_count; ++i) {
-					objects[i] = get_object(Object);
-					add(objects[i]);
+					add(get_object(Object));
 				}
 				Object.EndArray();
 			}
