@@ -104,7 +104,7 @@ CSaveChunk* CSaveChunk::FindChunk(shared_str ChunkName)
 {
 	if (_currentArrayStack.empty()) {
 		auto Chunk = _subchunks.find(ChunkName);
-		R_ASSERT4(Chunk != _subchunks.end(), "Unable to find chunk 1 in chunk 2", _chunkName.c_str(), ChunkName.c_str());
+		R_ASSERT4(Chunk != _subchunks.end(), "Unable to find subchunk in chunk", _chunkName.c_str(), ChunkName.c_str());
 		return Chunk->second;
 	}
 	else {
