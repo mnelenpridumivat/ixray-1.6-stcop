@@ -641,35 +641,30 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 			}
 		}
 
+#ifdef XRGAME_EXPORTS
 		BEGIN_CHUNK(Object,"CSE_Abstract::ClientObject")
 		{
-			bool HasClientData;
-#ifndef XRGAME_EXPORTS
-			HasClientData = false;
-			//Object->GetCurrentChunk()->w_bool(false);
-#else
-			HasClientData = true;
-#endif
-			Object << HasClientData;
-#ifdef XRGAME_EXPORTS
-			if (HasClientData) {
-				if (Object.IsSave()) {
-					auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-					if (Obj) {
-						Obj->net_Serialize(Object);
-					}
+			bool has_data = false;
+			if (Object.IsSave()) {
+				auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+				if (Obj)
+				{
+					has_data = true;
 				}
-				else {
-					client_data_new = Object.ExtractCurrentChunk();
-					// TODO: Implement spawn of client object here
-					/*auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-					if (Obj) {
-						Obj->Load(Object);
-					}*/
+				Object << has_data;
+				if (Obj) {
+					Obj->net_Serialize(Object);
 				}
 			}
-#endif
+			else {
+				Object << has_data;
+				if(has_data)
+				{
+					client_data_new = Object.ExtractCurrentChunk();
+				}
+			}
 		}
+#endif
 
 		Object << m_tSpawnID;
 
