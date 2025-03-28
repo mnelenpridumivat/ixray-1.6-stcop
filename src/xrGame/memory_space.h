@@ -59,9 +59,13 @@ namespace MemorySpace {
 		virtual void Serialize(ISaveObject& Object) {
 			Object << m_level_vertex_id << m_position;
 #ifdef USE_ORIENTATION
-			Object.BeginChunk("SObjectParams::Orientation");
-			Object << m_orientation;
-			Object.EndChunk();
+			//if(Object.IsSave() || Object.HasChunk("SObjectParams::Orientation"))
+			//{
+				BEGIN_CHUNK(Object,"SObjectParams::Orientation")
+				{
+					Object << m_orientation;
+				}
+			//}
 #endif
 		}
 	};
@@ -129,46 +133,67 @@ namespace MemorySpace {
 
 		virtual void Serialize(ISaveObject& Object) {
 #ifdef USE_GAME_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::game_time")
-			{
-				Object << m_game_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::game_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::game_time")
+				{
+					Object << m_game_time;
+				}
+			//}
 #endif
 #ifdef USE_LEVEL_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::level_time")
-			{
-				Object << m_level_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::level_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::level_time")
+				{
+					Object << m_level_time;
+				}
+			//}
 #endif
 #ifdef USE_LAST_GAME_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::last_game_time")
-			{
-				Object << m_last_game_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::last_game_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::last_game_time")
+				{
+					Object << m_last_game_time;
+				}
+			//}
 #endif
 #ifdef USE_LAST_LEVEL_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::last_level_time")
-			{
-				Object << m_last_level_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::last_level_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::last_level_time")
+				{
+					Object << m_last_level_time;
+				}
+			//}
 #endif
 #ifdef USE_FIRST_GAME_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::first_game_time")
-			{
-				Object << m_first_game_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::first_game_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::first_game_time")
+				{
+					Object << m_first_game_time;
+				}
+			//}
 #endif
 #ifdef USE_FIRST_LEVEL_TIME
-			BEGIN_CHUNK(Object,"SMemoryObject::first_level_time")
-			{
-				Object << m_first_level_time;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::first_level_time"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::first_level_time")
+				{
+					Object << m_first_level_time;
+				}
+			//}
 #endif
 #ifdef USE_UPDATE_COUNT
-			BEGIN_CHUNK(Object,"SMemoryObject::update_count")
-			{
-				Object << m_update_count;
-			}
+			//if (Object.IsSave() || Object.HasChunk("SMemoryObject::update_count"))
+			//{
+				BEGIN_CHUNK(Object,"SMemoryObject::update_count")
+				{
+					Object << m_update_count;
+				}
+			//}
 #endif
 		}
 	};

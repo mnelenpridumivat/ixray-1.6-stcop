@@ -163,14 +163,14 @@ void CSaveVariableString::Write(CMemoryBuffer& Buffer)
 	CSaveManager::GetInstance().ConditionalWriteString(_value, Buffer);
 }
 
-CSaveVariableArrayUnspec::~CSaveVariableArrayUnspec()
+ISaveVariableArray::~ISaveVariableArray()
 {
 	for (size_t i = 0; i < _array.size(); ++i) {
 		xr_delete(_array[i]);
 	}
 }
 
-void CSaveVariableArrayUnspec::Write(CMemoryBuffer& Buffer)
+void ISaveVariableArray::Write(CMemoryBuffer& Buffer)
 {
 	Buffer.Write(ESaveVariableType::t_arrayUnspec);
 	for (const auto& elem : _array) {

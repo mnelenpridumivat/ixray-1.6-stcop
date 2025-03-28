@@ -78,29 +78,30 @@ public:
 	virtual u64 GetSize() override { return 0; };
 };
 
-class XRCORE_API ISaveVariableArray:
+/*class XRCORE_API ISaveVariableArray:
 	public ISaveable
 {
 public:
-	/*virtual ISaveable* GetCurrentElement() = 0;
+	virtual ISaveable* GetCurrentElement() = 0;
 	virtual void Next() = 0;
 	virtual void AddVariable(ISaveable* data) = 0;
-	virtual u64 GetSize() = 0;*/
-};
+	virtual u64 GetSize() = 0;
+};*/
 
-class XRCORE_API CSaveVariableArrayUnspec :
-	public ISaveVariableArray//,
+class XRCORE_API ISaveVariableArray :
+	public ISaveable//,
 	//public CSaveVariableBase
 {
+	using array_type = xr_vector<ISaveable*>;
 	u64 _currentReadPos = 0;
-	xr_vector<ISaveable*> _array;
+	array_type _array;
 
 protected:
 	void* GetValue() override { return nullptr; };
 
 public:
-	CSaveVariableArrayUnspec() {}
-	~CSaveVariableArrayUnspec();
+	ISaveVariableArray() {}
+	~ISaveVariableArray();
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_arrayUnspec; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
@@ -110,6 +111,20 @@ public:
 	virtual void Next() override { ++_currentReadPos; }
 
 	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
+
+	array_type::iterator begin() { return _array.begin(); }
+	array_type::iterator end() { return _array.end(); }
+	array_type::const_iterator begin() const { return _array.begin(); }
+	array_type::const_iterator end() const { return _array.end(); }
+	array_type::const_iterator cbegin() const { return _array.cbegin(); }
+	array_type::const_iterator cend() const { return _array.cend(); }
+	array_type::reverse_iterator rbegin() { return _array.rbegin(); }
+	array_type::reverse_iterator rend() { return _array.rend(); }
+	array_type::const_reverse_iterator rbegin() const { return _array.rbegin(); }
+	array_type::const_reverse_iterator rend() const { return _array.rend(); }
+	array_type::const_reverse_iterator crbegin() const { return _array.crbegin(); }
+	array_type::const_reverse_iterator crend() const { return _array.crend(); }
+	
 };
 
 /*class XRCORE_API CSaveVariableArray :

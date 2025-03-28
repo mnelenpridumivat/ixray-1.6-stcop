@@ -50,4 +50,4 @@ public:
 	~ISaveObjectStackGuard(){ saveObject->EndChunk(handler); }
 };
 
-#define BEGIN_CHUNK(Obj, Name) if(ISaveObjectStackGuard guard(&(Obj), (Obj).BeginChunk(Name)); true)
+#define BEGIN_CHUNK(Obj, Name) if((Obj).IsSave() || (Obj).HasChunk(Name)) if(ISaveObjectStackGuard guard(&(Obj), (Obj).BeginChunk(Name)); true)

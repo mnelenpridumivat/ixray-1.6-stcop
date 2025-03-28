@@ -944,17 +944,18 @@ void CVisualMemoryManager::SerializeSingle(ISaveObject& Object, CVisibleObject& 
 {
 	BEGIN_CHUNK(Object,"CHitObject")
 	{
-		Value.Serialize(Object);
 		Object << Value.m_visible.flags;
 		if (Object.IsSave()) {
 			VERIFY(m_object);
 			u16 IDValue = m_object->ID();
 			Object << IDValue;
+			Value.Serialize(Object);
 		}
 		else {
 
 			CDelayedVisibleObject			delayed_object;
 			Object << delayed_object.m_object_id;
+			delayed_object.m_visible_object.Serialize(Object);
 
 			CVisibleObject& object = delayed_object.m_visible_object;
 			object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));

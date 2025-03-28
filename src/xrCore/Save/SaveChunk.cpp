@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "SaveChunk.h"
+
+#include <magic_enum/magic_enum.hpp>
+
 #include "MemoryBuffer.h"
 #include "SaveManager.h"
 
@@ -19,8 +22,25 @@ bool CSaveChunk::ContainsSubchunk(shared_str subchunkName)
 		auto Chunk = _subchunks.find(subchunkName);
 		return Chunk != _subchunks.end();
 	}
-	R_ASSERT(_currentArrayStack.empty(),
-		"Different save chunks are not designed to be in single array, so searching a chunk by name in array is pointless or you have a mistake in your code!");
+	for (auto& TopArray = *_currentArrayStack.top();
+		const auto& elem : TopArray)
+	{
+		if (elem->GetVariableType() != ESaveVariableType::t_chunk)
+		{
+			xr_string Message = "Chunk: ";
+			Message+=_chunkName.c_str();
+			Message+=", Subchunk: ";
+			Message+=subchunkName.c_str();
+			R_ASSERT4(elem->GetVariableType() != ESaveVariableType::t_chunk,
+				"Attempt to find chunk in array, but it contains something else!", Message.c_str(), std::string(magic_enum::enum_name(elem->GetVariableType())).c_str());
+		}
+		if (((CSaveChunk*)elem)->GetChunkName() == subchunkName)
+		{
+			return true;
+		}
+		R_ASSERT4(_currentArrayStack.empty(),
+			"Different save chunks are not designed to be in same array!", _chunkName.c_str(), subchunkName.c_str());
+	}
 	return false;
 }
 
@@ -55,7 +75,7 @@ void CSaveChunk::ReadArray(u64& Size)
 
 void CSaveChunk::WriteArray()
 {
-	_variables.emplace_back(new CSaveVariableArrayUnspec());
+	_variables.emplace_back(new ISaveVariableArray());
 	auto ArrayPtr = (ISaveVariableArray*)_variables.back();
 	_currentArrayStack.push(ArrayPtr);
 
@@ -687,7 +707,7 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			break;
 		}*/
 		case ESaveVariableType::t_arrayUnspec: {
-			auto Var = new CSaveVariableArrayUnspec();
+			auto Var = new ISaveVariableArray();
 			if (_currentArrayStack.empty()) {
 				_variables.emplace_back(Var);
 			}
