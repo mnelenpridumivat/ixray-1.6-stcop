@@ -76,6 +76,7 @@ public:
 	struct SGameInfoFast {
 		u64			m_game_time;
 		shared_str	m_level_name;
+		u16			m_level_id;
 		float		m_actor_health;
 	};
 

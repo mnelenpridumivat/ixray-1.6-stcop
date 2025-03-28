@@ -100,7 +100,7 @@ CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 	}
 	m_game_time = data.m_game_time;
 	m_actor_health = data.m_actor_health;
-	m_level_id = _LEVEL_ID(-1);
+	m_level_id = data.m_level_id;
 	m_level_name = data.m_level_name;
 	return;
 

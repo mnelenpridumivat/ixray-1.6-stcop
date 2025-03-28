@@ -166,6 +166,7 @@ bool CSaveManager::GetGameInfoFast(IReader* stream, SGameInfoFast& data)
 	}
 	data.m_actor_health = stream->r_float();
 	data.m_game_time = stream->r_u64();
+	data.m_level_id = stream->r_u16();
 	data.m_level_name = ReadStringInternal(stream);
 	return true;
 }
@@ -186,6 +187,7 @@ void CSaveManager::WriteHeader()
 	Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
 	Buffers.BufferHeader->Write(GameInfo.m_actor_health);
 	Buffers.BufferHeader->Write(GameInfo.m_game_time);
+	Buffers.BufferHeader->Write(GameInfo.m_level_id);
 	Buffers.BufferHeader->Write(GameInfo.m_level_name);
 	Buffers.BufferHeader->Write(ControlFlagsDefault.flags);
 	Buffers.BufferHeader->Write(SaveWriter);

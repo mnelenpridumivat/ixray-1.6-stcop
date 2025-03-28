@@ -78,6 +78,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
 		info.m_game_time = ai().alife().time_manager().game_time();
 		auto map_name = Level().name();
 		info.m_level_name = map_name.size() ? map_name : "Start";
+		info.m_level_id = map_name.size() ? ai().level_graph().level_id() : u16(-1);
 		CSaveManager::GetInstance().WriteGameInfo(info);
 		header().Serialize(*SaveObj);
 		time_manager().Serialize(*SaveObj);
