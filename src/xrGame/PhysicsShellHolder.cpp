@@ -631,7 +631,7 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 
 		IKinematics* K = smart_cast<IKinematics*>(Visual());
 		if (K)
-		{
+		BEGIN_CHUNK(Object, "IKinematics"){
 			_vm = K->LL_GetBonesVisible();
 			Object << _vm;
 			u16 Value = K->LL_GetBoneRoot();
@@ -641,12 +641,13 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 
 		Fvector min;
 		Fvector max;
+		u16 bones_number;
 		if (Object.IsSave()) {
 			min.set(flt_max, flt_max, flt_max);
 			max.set(-flt_max, -flt_max, -flt_max);
 			/////////////////////////////////////
 
-			u16 bones_number = PHGetSyncItemsNumber();
+			bones_number = PHGetSyncItemsNumber();
 			for (u16 i = 0; i < bones_number; i++)
 			{
 				SPHNetState state;
@@ -666,19 +667,23 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 
 			VERIFY(!min.similar(max));
 		}
-		u16 bones_number;
 		Object << min << max << bones_number;
 		VERIFY(!min.similar(max));
 
 		K->LL_SetBonesVisible(_vm);
 
+		Object.BeginArray();
 		for (u16 i = 0; i < bones_number; i++)
 		{
-			SPHNetState state;
-			PHGetSyncItem(i)->get_State(state);
-			state.net_Serialize(Object, min, max);
-			PHGetSyncItem(i)->set_State(state);
+			BEGIN_CHUNK(Object, "SPHNetState")
+			{
+				SPHNetState state;
+				PHGetSyncItem(i)->get_State(state);
+				state.net_Serialize(Object, min, max);
+				PHGetSyncItem(i)->set_State(state);
+			}
 		}
+		Object.EndArray();
 	}
 }
 
