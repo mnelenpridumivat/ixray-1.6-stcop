@@ -44,6 +44,7 @@ void CDialogNode::Draw()
 
 	RenderItemString("Action:", Action, 164);
 	RenderItemString("Give Info:", GiveInfo, 146);
+	ImGui::Checkbox((xr_string("Is Final##") + NodeName).c_str(), &IsFinal);
 
 	DrawEnd();
 }

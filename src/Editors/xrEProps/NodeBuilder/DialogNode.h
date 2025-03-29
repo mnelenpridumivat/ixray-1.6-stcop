@@ -16,4 +16,5 @@ public:
 	shared_str Action;
 	shared_str Precondition;
 	shared_str Text;
+	bool IsFinal = false;
 };

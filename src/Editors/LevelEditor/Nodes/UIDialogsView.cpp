@@ -6,6 +6,7 @@
 CUIDialogView::CUIDialogView()
 {
 	NodeSelectCallback = xr_make_delegate(this, &CUIDialogView::SelectNodeEvent);
+	bOpen = false;
 }
 
 CUIDialogView::~CUIDialogView()
@@ -18,10 +19,10 @@ CUIDialogView::~CUIDialogView()
 
 void CUIDialogView::Draw()
 {
-	if (!IsOpen)
+	if (!bOpen)
 		return;
 
-	if (ImGui::Begin("Dialogs Editor", &IsOpen))
+	if (ImGui::Begin("Dialogs Editor", &bOpen))
 	{
 		if (ImGui::BeginChild("Dialogs in file", { (IsOpenList ? 300.f : 20.f), 0}))
 		{
@@ -99,7 +100,7 @@ void CUIDialogView::Draw()
 
 void CUIDialogView::Show(bool State)
 {
-	IsOpen = State;
+	bOpen = State;
 }
 
 void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
@@ -115,11 +116,50 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 	xr_map<CDialogNode*, xr_vector<shared_str>> NodeGraph;
 
+	auto MakeListStringFromNode = [](shared_str& Value, shared_str Text)
+	{
+		if (Value.size() > 0)
+		{
+			Value = make_string<shared_str>("%s, %s", *Value, *Text);
+		}
+		else
+		{
+			Value = Text;
+		}
+	};
+
 	while (PhraseNode != nullptr)
 	{
+		xr_string UpperNodeName = PhraseNode->Value();
+
+		if (UpperNodeName == "has_info")
+		{
+			shared_str NodeText = PhraseNode->ToElement()->GetText();
+			MakeListStringFromNode(HasInfo, NodeText);
+			PhraseNode = PhraseNode->NextSibling();
+			continue;
+		}
+		else if (UpperNodeName == "dont_has_info")
+		{
+			shared_str NodeText = PhraseNode->ToElement()->GetText();
+			MakeListStringFromNode(DontHasInfo, NodeText);
+			PhraseNode = PhraseNode->NextSibling();
+			continue;
+		}
+		else if (UpperNodeName == "precondition")
+		{
+			shared_str NodeText = PhraseNode->ToElement()->GetText();
+			Precondition = NodeText;
+			PhraseNode = PhraseNode->NextSibling();
+			continue;
+		}
+
 		shared_str NodeID = PhraseNode->ToElement()->Attribute("id");
 		if (NodeID.size() == 0)
+		{
+			PhraseNode = PhraseNode->NextSibling();
 			continue;
+		}
 
 		CDialogNode* MacroNode = (CDialogNode*)Nodes.emplace_back(new CDialogNode(*NodeID));
 		XML_NODE* ChildNode = PhraseNode->FirstChildElement();
@@ -129,21 +169,28 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			xr_string NodeName = ChildNode->Value();
 			shared_str NodeText = ChildNode->ToElement()->GetText();
 
+			if (NodeText.size() == 0)
+				continue;
+
 			if (NodeName == "text")
 			{
 				MacroNode->Text = NodeText;
 			}
-			else if (NodeName == "give_info")
+			else if (NodeName == "dont_has_info")
 			{
-				MacroNode->GiveInfo = NodeText;
+				MakeListStringFromNode(MacroNode->DontHasInfo, NodeText);
 			}
 			else if (NodeName == "has_info")
 			{
-				MacroNode->HasInfo = NodeText;
+				MakeListStringFromNode(MacroNode->HasInfo, NodeText);
+			}
+			else if (NodeName == "is_final")
+			{
+				MacroNode->IsFinal = NodeText == "1";
 			}
 			else if (NodeName == "give_info")
 			{
-				MacroNode->GiveInfo = NodeText;
+				MakeListStringFromNode(MacroNode->GiveInfo, NodeText);
 			}
 			else if (NodeName == "precondition")
 			{
@@ -194,7 +241,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 					int NextID = TryNode->GetContactLink();
 					Node->CreateContactLink(ContackID, NextID);
-					NodeOffsetYIterator += 200;
+					NodeOffsetYIterator += 230;
 				}
 			}
 		}
@@ -202,21 +249,26 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		NodeOffsetXIterator += 300;
 	}
 
-	IterateChild({ 350, 0 });
-}
-
-float CUIDialogView::IterateChild(Fvector2 Offset)
-{
-	return 0;
+	SelectNodeEvent(nullptr);
 }
 
 void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 {
-	CDialogNode* DialogNode = (CDialogNode*)Node;
+	PropItemVec items;
 	UIPropertiesForm* Properties = LTools->GetProperties();
 	Properties->ClearProperties();
 
-	PropItemVec items;
+	if (Node == nullptr)
+	{
+		PHelper().CreateRText(items, "Preconditions\\Has Info", &HasInfo);
+		PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DontHasInfo);
+		PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &Precondition);
+		Properties->AssignItems(items);
+		return;
+	}
+
+	CDialogNode* DialogNode = (CDialogNode*)Node;
+
 	PHelper().CreateRText(items, "Preconditions\\Has Info", &DialogNode->HasInfo);
 	PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DialogNode->DontHasInfo);
 	PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &DialogNode->Precondition);
@@ -243,8 +295,11 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 	if (Node == nullptr)
 		return;
 
-	Viewer.Show(true);
-	UI->Push(&Viewer, false);
+	if (!Viewer.bOpen)
+	{
+		Viewer.Show(true);
+		UI->Push(&Viewer, false);
+	}
 
 	XML_NODE* ChildNode = Node->FirstChildElement();
 
