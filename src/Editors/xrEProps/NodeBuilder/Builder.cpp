@@ -35,6 +35,11 @@ int CNodeViewport::GetHoveredMode() const
 		}
 	}
 
+	if (HoveredNodeID == -1 && NodeSelectCallback)
+	{
+		NodeSelectCallback(nullptr);
+	}
+
 	return HoveredNodeID;
 }
 

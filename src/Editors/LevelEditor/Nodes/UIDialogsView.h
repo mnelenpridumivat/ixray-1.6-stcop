@@ -15,14 +15,16 @@ private:
 	void Show(bool State);
 	void OpenDialog(const shared_str& Str, XML_NODE* Node);
 
-	float IterateChild(Fvector2 Offset);
 	void SelectNodeEvent(INodeUnknown* Node);
 public:
 	static void OpenFile(const xr_path& Path);
 
 private:
-	bool IsOpen = false;
 	bool IsOpenList = true;
-	xr_map<shared_str, XML_NODE*> Dialogs;
+	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
 	CXml File;
+
+	shared_str HasInfo;
+	shared_str DontHasInfo;
+	shared_str Precondition;
 };

@@ -24,7 +24,7 @@ struct str_container_impl
 	static const u32 buffer_size = 1024 * 256;
 	str_value* buffer[buffer_size];
 	int              num_docs;
-
+	xrSRWLock rwlock;
 	str_container_impl()
 	{
 		num_docs = 0;
@@ -33,6 +33,7 @@ struct str_container_impl
 
 	str_value* find(str_value* value, const char* str)
 	{
+		xrSRWLockGuard guard(&rwlock, true);
 		str_value* candidate = buffer[value->dwCRC % buffer_size];
 		while (candidate)
 		{
@@ -51,6 +52,7 @@ struct str_container_impl
 
 	void insert(str_value* value)
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		str_value** element = &buffer[value->dwCRC % buffer_size];
 		value->next = *element;
 		*element = value;
@@ -58,6 +60,7 @@ struct str_container_impl
 
 	void clean()
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		for (u32 i = 0; i < buffer_size; ++i)
 		{
 			str_value** current = &buffer[i];
@@ -80,6 +83,7 @@ struct str_container_impl
 
 	int stat_economy()
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		int				counter = 0;
 		for (u32 i = 0; i < buffer_size; ++i)
 		{
@@ -104,8 +108,6 @@ str_container::str_container()
 str_value* str_container::dock(str_c value)
 {
 	if (0 == value)				return 0;
-
-	cs.Enter();
 
 	str_value* result = 0;
 
@@ -156,25 +158,20 @@ str_value* str_container::dock(str_c value)
 
 		impl->insert(result);
 	}
-	cs.Leave();
 
 	return	result;
 }
 
 void str_container::clean()
 {
-	cs.Enter();
 	impl->clean();
-	cs.Leave();
 }
 
 u32 str_container::stat_economy()
 {
-	cs.Enter();
 	int				counter = 0;
 	counter -= sizeof(*this);
 	counter += impl->stat_economy();
-	cs.Leave();
 	return			u32(counter);
 }
 
