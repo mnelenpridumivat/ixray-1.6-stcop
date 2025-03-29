@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../xrCDB/xrCDB.h"
+#include "../../xrCore/Collision/xrCDB.h"
 #include "../../xrEngine/xrLevel.h"
 #include "AIMapExport.h"
 #include "Shader_xrLC.h"
@@ -146,8 +146,6 @@ extern xr_vector<b_rc_face>			g_rc_faces		;
 
 // phases
 void	xrLoad			(LPCSTR name, bool draft_mode);
-//void	xrBuildNodes	();
-void	xrSmoothNodes	();
 void	xrLight			();
 void	xrCover			(bool pure_covers);
 void	xrMerge			();

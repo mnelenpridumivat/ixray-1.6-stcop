@@ -104,7 +104,6 @@ target_compile_definitions(xrAbstractions PRIVATE ENGINE_BUILD)
 
 # Linker list
 target_link_libraries(xrAbstractions PUBLIC xrCore)
-target_link_libraries(xrAbstractions PUBLIC xrCDB)
 target_link_libraries(xrAbstractions PUBLIC xrSound)
 target_link_libraries(xrAbstractions PUBLIC luabind)
 target_link_libraries(xrAbstractions PUBLIC xrNetServer)

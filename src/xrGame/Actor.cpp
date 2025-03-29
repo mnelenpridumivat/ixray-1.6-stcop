@@ -46,7 +46,7 @@
 #include "xrMessages.h"
 #include "../xrEngine/string_table.h"
 #include "UsableScriptObject.h"
-#include "../xrEngine/cl_intersect.h"
+#include "../xrCore/Collision/cl_intersect.h"
 //#include "ExtendedGeom.h"
 #include "alife_registry_wrappers.h"
 #include "../Include/xrRender/Kinematics.h"
@@ -1369,7 +1369,7 @@ void CActor::UpdatePlayerView()
 
 	setVisible(has_visible, has_shadow_only);
 
-	if (IsFocused())
+	/*if (IsFocused())
 	{
 		BOOL bHudView = HUDview();
 		if (bHudView)
@@ -1412,7 +1412,7 @@ void CActor::UpdatePlayerView()
 		{
 			g_player_hud->detach_all_items();
 		}
-	}
+	}*/
 
 	float dt = Device.fTimeDelta;
 

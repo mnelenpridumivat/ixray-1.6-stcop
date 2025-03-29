@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include "../../../xrCDB/Frustum.h"
+#include "../../../xrCore/Collision/Frustum.h"
 #include "../../../xrEngine/vis_common.h"
 #include "../../../xrEngine/Render.h"
 
@@ -286,7 +286,6 @@ public:
 	virtual void					glow_destroy(IRender_Glow* p_);
 
 	// Models
-	virtual void					model_Logging(BOOL bEnable);
 	virtual void					models_Prefetch();
 	virtual void					models_Clear(BOOL b_complete);
 

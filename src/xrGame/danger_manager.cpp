@@ -297,7 +297,7 @@ void CDangerManager::add			(const CSoundObject &object)
 	}
 }
 
-void CDangerManager::add			(const CHitObject &object)
+void CDangerManager::add(const CHitObject &object)
 {
 	if (!object.m_object || !object.m_enabled || object.m_object->getDestroy())
 		return;
@@ -310,8 +310,8 @@ void CDangerManager::add			(const CHitObject &object)
 
 	PROF_EVENT("DangerManager::add_HitObject");
 
-	CEntityAlive		*obj = const_cast<CEntityAlive*>(object.m_object);
-	add						(CDangerObject(obj,obj->Position(),object.m_level_time,CDangerObject::eDangerTypeAttacked,CDangerObject::eDangerPerceiveTypeHit));
+	CEntityAlive* obj = const_cast<CGameObject*>(object.m_object)->cast_entity_alive();
+	add(CDangerObject(obj,obj->Position(),object.m_level_time,CDangerObject::eDangerTypeAttacked,CDangerObject::eDangerPerceiveTypeHit));
 }
 
 void CDangerManager::add			(const CDangerObject &object)

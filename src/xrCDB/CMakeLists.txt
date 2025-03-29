@@ -29,10 +29,3 @@ target_include_directories(xrCDB PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 # Project defines
 target_compile_definitions(xrCDB PRIVATE XRCDB_EXPORTS)
 target_compile_definitions(xrCDB PRIVATE _USRDLL)
-
-# Linker list
-target_link_libraries(xrCDB PUBLIC xrCore)
-target_link_libraries(xrCDB PUBLIC opcode-prosectors)
-
-# Move precompiled header
-target_validate_pch(xrCDB ${CMAKE_CURRENT_SOURCE_DIR})

@@ -145,22 +145,31 @@ void CHudItem::OnStateSwitch(u32 S)
 	switch (S)
 	{
 	case eBore:
-		SetPending		(FALSE);
+	{
+		SetPending(FALSE);
 
-		PlayAnimBore	();
-		if(HudItemData())
+		PlayAnimBore();
+		if (HudItemData())
 		{
-			Fvector P		= HudItemData()->m_item_transform.c;
+			Fvector P = HudItemData()->m_item_transform.c;
 			m_sounds.PlaySound("sndBore", P, object().H_Root(), !!GetHUDmode(), false, m_started_rnd_anim_idx);
 		}
-
 		break;
+	}
+	case eShowing:
+	{
+		if (Level().CurrentControlEntity() == object().H_Parent())
+		{
+			g_player_hud->attach_item(this);
+		}
+		break;
+	}
 	}
 }
 
 void CHudItem::OnAnimationEnd(u32 state)
 {
-	if (CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL)
+	if (CActor* pActor = m_object && m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : nullptr)
 	{
 		pActor->callback(GameObject::eActorHudAnimationEnd)(smart_cast<CGameObject*>(this)->lua_game_object(), hud_sect.c_str(), m_current_motion.c_str(), state, animation_slot());
 	}
@@ -168,15 +177,25 @@ void CHudItem::OnAnimationEnd(u32 state)
 	switch(state)
 	{
 	case eBore:
+	{
+		SwitchState(eIdle);
+		break;
+	}
+	case eHiding:
+	{
+		if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
 		{
-			SwitchState	(eIdle);
-		} break;
+			g_player_hud->detach_item(this);
+		}
+		SwitchState(eHidden);
+		break;
+	}
 	}
 }
 
 void CHudItem::PlayAnimBore()
 {
-	PlayHUDMotion	("anm_bore", TRUE, this, GetState());
+	PlayHUDMotion("anm_bore", TRUE, nullptr, GetState());
 }
 
 bool CHudItem::ActivateItem() 
@@ -187,11 +206,16 @@ bool CHudItem::ActivateItem()
 
 void CHudItem::DeactivateItem() 
 {
-	OnHiddenItem	();
+	OnHiddenItem();
 }
+
 void CHudItem::OnMoveToRuck(const SInvItemPlace& prev)
 {
 	SwitchState(eHidden);
+	if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
+	{
+		g_player_hud->detach_item(this);
+	}
 }
 
 bool CHudItem::SendDeactivateItem()
@@ -484,30 +508,19 @@ void CHudItem::OnH_B_Chield		()
 	StopCurrentAnimWithoutCallback();
 }
 
-void CHudItem::OnH_B_Independent	(bool just_before_destroy)
+void CHudItem::OnH_B_Independent(bool just_before_destroy)
 {
 	m_sounds.StopAllSounds	();
 	UpdateXForm				();
-	
-	// next code was commented 
-	/*
-	if(HudItemData() && !just_before_destroy)
-	{
-		object().XFORM().set( HudItemData()->m_item_transform );
-	}
-	
+}
+
+void CHudItem::OnH_A_Independent()
+{
 	if (HudItemData())
 	{
 		g_player_hud->detach_item(this);
-		Msg("---Detaching hud item [%s][%d]", this->HudSection().c_str(), this->object().ID());
-	}*/
-	//SetHudItemData			(nullptr);
-}
+	}
 
-void CHudItem::OnH_A_Independent	()
-{
-	if(HudItemData())
-		g_player_hud->detach_item(this);
 	StopCurrentAnimWithoutCallback();
 }
 
@@ -626,16 +639,19 @@ BOOL CHudItem::GetHUDmode()
 
 void CHudItem::PlayAnimIdle()
 {
-	if (TryPlayAnimIdle()) return;
+	if (TryPlayAnimIdle())
+	{
+		return;
+	}
 
 	PlayHUDMotion("anm_idle", TRUE, nullptr, GetState());
 }
 
 bool CHudItem::TryPlayAnimIdle()
 {
-	if(MovingAnimAllowedNow())
+	if (MovingAnimAllowedNow())
 	{
-		CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL;
+		CActor* pActor = smart_cast<CActor*>(object().H_Parent());
 		if (pActor)
 		{
 			u32 state = pActor->GetMovementState(eReal);
@@ -644,10 +660,26 @@ bool CHudItem::TryPlayAnimIdle()
 				PlayAnimIdleSprint();
 				return true;
 			}
-			else if(!(state & ACTOR_DEFS::EMoveCommand::mcCrouch) && pActor->AnyMove())
+			else if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
 			{
-				PlayAnimIdleMoving();
-				return true;
+				if (state & ACTOR_DEFS::EMoveCommand::mcCrouch && (HudAnimationExist("anm_idle_moving_crouch_slow") || HudAnimationExist("anm_idle_moving_crouch")))
+				{
+					if (state & ACTOR_DEFS::EMoveCommand::mcAccel && HudAnimationExist("anm_idle_moving_crouch_slow"))
+						PlayAnimIdleMovingCrouchSlow();
+					else
+						PlayAnimIdleMovingCrouch();
+
+					return true;
+				}
+				else
+				{
+					if (state & ACTOR_DEFS::EMoveCommand::mcAccel && HudAnimationExist("anm_idle_moving_slow"))
+						PlayAnimIdleMovingSlow();
+					else
+						PlayAnimIdleMoving();
+
+					return true;
+				}
 			}
 		}
 	}
@@ -665,20 +697,32 @@ void CHudItem::PlayAnimIdleMoving()
 	PlayHUDMotion("anm_idle_moving", TRUE, nullptr, GetState());
 }
 
+void CHudItem::PlayAnimIdleMovingSlow()
+{
+	PlayHUDMotion("anm_idle_moving_slow", TRUE, nullptr, GetState());
+}
+
+void CHudItem::PlayAnimIdleMovingCrouch()
+{
+	PlayHUDMotion("anm_idle_moving_crouch", TRUE, nullptr, GetState());
+}
+
+void CHudItem::PlayAnimIdleMovingCrouchSlow()
+{
+	PlayHUDMotion("anm_idle_moving_crouch_slow", TRUE, nullptr, GetState());
+}
+
 void CHudItem::PlayAnimIdleSprint()
 {
-	PlayHUDMotion("anm_idle_sprint", TRUE, nullptr,GetState());
+	PlayHUDMotion("anm_idle_sprint", TRUE, nullptr, GetState());
 }
 
 void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 {
-	if(GetState()==eIdle && !m_bStopAtEndAnimIsRunning)
+	if (GetState() == eIdle && !m_bStopAtEndAnimIsRunning)
 	{
-		if( (cmd == ACTOR_DEFS::mcSprint) || (cmd == ACTOR_DEFS::mcAnyMove)  )
-		{
-			PlayAnimIdle						();
-			ResetSubStateTime					();
-		}
+		PlayAnimIdle();
+		ResetSubStateTime();
 	}
 }
 

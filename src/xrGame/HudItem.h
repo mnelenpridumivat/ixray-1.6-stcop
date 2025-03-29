@@ -115,8 +115,11 @@ public:
 	virtual bool				MovingAnimAllowedNow ()				{return true;}
 	virtual bool				NeedBlendAnm();
 
-	virtual void				PlayAnimIdleMoving	();
-	virtual void				PlayAnimIdleSprint	();
+	virtual void				PlayAnimIdleMoving();
+	virtual void				PlayAnimIdleMovingSlow();
+	virtual void				PlayAnimIdleMovingCrouch();
+	virtual void				PlayAnimIdleMovingCrouchSlow();
+	virtual void				PlayAnimIdleSprint();
 
 	virtual void				UpdateCL			();
 	virtual void				renderable_Render	();

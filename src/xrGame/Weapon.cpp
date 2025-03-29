@@ -1019,7 +1019,7 @@ extern u32 hud_adj_mode;
 void CWeapon::UpdateCL		()
 {
 	bool need_update_hud = false;
-	bool isHudItemData = HudItemData() != nullptr;
+	bool isHudItemData = HudItemData() != nullptr && GetHUDmode();
 
 	if (isHudItemData && bUseAltScope) {
 		need_update_hud = true;
@@ -2974,9 +2974,7 @@ void CWeapon::UpdateAltScope()
 	if (m_eScopeStatus != ALife::eAddonAttachable || !bUseAltScope)
 		return;
 
-	shared_str sectionNeedLoad;
-
-	sectionNeedLoad = IsScopeAttached() ? GetNameWithAttachmentScope() : m_section_id;
+	shared_str sectionNeedLoad = IsScopeAttached() ? GetNameWithAttachmentScope() : m_section_id;
 
 	if (!pSettings->section_exist(sectionNeedLoad))
 		return;
@@ -2995,6 +2993,12 @@ void CWeapon::UpdateAltScope()
 	}
 
 	hud_sect_cache = hud_sect;
+
+	if (HudItemData() != nullptr)
+	{
+		g_player_hud->detach_item(this);
+		g_player_hud->attach_item(this);
+	}
 }
 
 shared_str CWeapon::GetNameWithAttachmentScope()
@@ -3218,4 +3222,12 @@ void CWeapon::UnloadChamber(bool spawn_ammo)
 
 	if (GetState() == eIdle)
 		SwitchState(eIdle);
+}
+
+bool CWeapon::GetScopeBack()
+{
+	if (bUseAltScope && m_eScopeStatus != ALife::eAddonPermanent && IsScopeAttached())
+		return !!READ_IF_EXISTS(pSettings, r_bool, GetNameWithAttachmentScope(), "scope_back", false);
+
+	return !!READ_IF_EXISTS(pSettings, r_bool, GetCurrentScopeSection(), "scope_back", false);
 }
