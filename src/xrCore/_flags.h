@@ -67,7 +67,7 @@ private:
 public:
 
 	IC static constexpr size_t GetChunkNumber(size_t BitPos) {
-		return BitPos / (sizeof(size_t) * 8) + (BitPos % (sizeof(size_t) * 8) > 0);
+		return BitPos / (sizeof(size_t) * 8);
 	}
 
 	IC static constexpr u64 GetBitNumber(size_t BitPos) {
