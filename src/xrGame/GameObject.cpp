@@ -349,13 +349,9 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		net_Serialize(*PartialObj);
 		xr_delete(PartialObj);
 		CSaveManager::GetInstance().UnregisterHandle(E->client_data_new);
-//		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
-		/*IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
-		net_Load		(ireader);*/
 	}
 	else {
 		E->client_data_new = u64(-1);
-//		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());
 	}
 
 	// if we have a parent
