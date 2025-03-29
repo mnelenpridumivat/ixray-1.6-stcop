@@ -102,6 +102,7 @@ CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 	m_actor_health = data.m_actor_health;
 	m_level_id = data.m_level_id;
 	m_level_name = data.m_level_name;
+	FS.r_close(stream);
 	return;
 
 	/*u32							source_count = stream->r_u32();
