@@ -612,7 +612,7 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	if(m_bOutBorder)character_physics_support()->movement()->setOutBorder();
 	r_torso_tgt_roll		= 0;
 
-	r_model_yaw				= E->o_torso.yaw;
+	r_model_yaw				= E->o_model;
 	r_torso.yaw				= E->o_torso.yaw;
 	r_torso.pitch			= E->o_torso.pitch;
 	r_torso.roll			= 0.0f;//E->o_Angle.z;
@@ -621,7 +621,7 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	unaffected_r_torso.pitch= r_torso.pitch;
 	unaffected_r_torso.roll	= r_torso.roll;
 
-	cam_Active()->Set(-E->o_torso.yaw,
+	cam_Active()->Set(-E->o_model,
 		(cam_active != eacFirstEye) ? E->o_torso.pitch : cameras[eacFirstEye]->pitch,
 		0); // E->o_Angle.z);
 
@@ -1347,50 +1347,6 @@ void CActor::make_Interpolation	()
 	};
 #endif
 };
-/*
-void		CActor::UpdatePosStack	( u32 Time0, u32 Time1 )
-{
-		//******** Storing Last Position in stack ********
-	CPHSynchronize* pSyncObj = nullptr;
-	pSyncObj = PHGetSyncItem(0);
-	if (!pSyncObj) return;
-
-	SPHNetState		State;
-	pSyncObj->get_State(State);
-
-	if (!SMemoryPosStack.empty() && SMemoryPosStack.back().u64WorldStep >= ph_world->m_steps_num)
-	{
-		xr_deque<SMemoryPos>::iterator B = SMemoryPosStack.begin();
-		xr_deque<SMemoryPos>::iterator E = SMemoryPosStack.end();
-		xr_deque<SMemoryPos>::iterator I = std::lower_bound(B,E,u64(ph_world->m_steps_num-1));
-		if (I != E) 
-		{
-			I->SState = State;
-			I->u64WorldStep = ph_world->m_steps_num;
-		};
-	}
-	else		
-	{
-		SMemoryPosStack.push_back(SMemoryPos(Time0, Time1, ph_world->m_steps_num, State));
-		if (SMemoryPosStack.front().dwTime0 < (Level().timeServer() - 2000)) SMemoryPosStack.pop_front();
-	};
-};
-
-ACTOR_DEFS::SMemoryPos*				CActor::FindMemoryPos (u32 Time)
-{
-	if (SMemoryPosStack.empty()) return nullptr;
-
-	if (Time > SMemoryPosStack.back().dwTime1) return nullptr;
-	
-	xr_deque<SMemoryPos>::iterator B = SMemoryPosStack.begin();
-	xr_deque<SMemoryPos>::iterator E = SMemoryPosStack.end();
-	xr_deque<SMemoryPos>::iterator I = std::lower_bound(B,E,Time);
-
-	if (I==E) return nullptr;
-
-	return &(*I);
-};
-*/
 
 void CActor::save(NET_Packet &output_packet)
 {
@@ -1433,90 +1389,6 @@ void CActor::load(IReader &input_packet)
 	input_packet.r_stringZ(g_quick_use_slots[2], sizeof(g_quick_use_slots[2]));
 	input_packet.r_stringZ(g_quick_use_slots[3], sizeof(g_quick_use_slots[3]));
 }
-
-/*void CActor::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CActor");
-	{
-		inherited::Save(Object);
-		CInventoryOwner::Save(Object);
-		Object->GetCurrentChunk()->w_bool(m_bOutBorder);
-
-		Object->BeginChunk("CActor::PDA");
-		{
-			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
-			Object->GetCurrentChunk()->w_bool(task_wnd->IsTreasuresEnabled());
-			Object->GetCurrentChunk()->w_bool(task_wnd->IsQuestNpcsEnabled());
-			Object->GetCurrentChunk()->w_bool(task_wnd->IsSecondaryTasksEnabled());
-			Object->GetCurrentChunk()->w_bool(task_wnd->IsPrimaryObjectsEnabled());
-		}
-		Object->EndChunk();
-
-		Object->BeginChunk("CActor::Camera");
-		{
-			cam_Active()->Save(Object);
-			Object->GetCurrentChunk()->w_u8(cam_active);
-		}
-		Object->EndChunk();
-
-		Object->BeginChunk("CActor::Quickslots");
-		{
-			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[0]);
-			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[1]);
-			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[2]);
-			Object->GetCurrentChunk()->w_stringZ(g_quick_use_slots[3]);
-		}
-		Object->EndChunk();
-	}
-	Object->EndChunk();
-}
-
-void CActor::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CActor");
-	{
-		inherited::Load(Object);
-		CInventoryOwner::Load(Object);
-		Object->GetCurrentChunk()->r_bool(m_bOutBorder);
-
-		Object->BeginChunk("CActor::PDA");
-		{
-			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
-			bool Value;
-			Object->GetCurrentChunk()->r_bool(Value);
-			task_wnd->TreasuresEnabled(Value);
-			Object->GetCurrentChunk()->r_bool(Value);
-			task_wnd->QuestNpcsEnabled(Value);
-			Object->GetCurrentChunk()->r_bool(Value);
-			task_wnd->SecondaryTasksEnabled(Value);
-			Object->GetCurrentChunk()->r_bool(Value);
-			task_wnd->PrimaryObjectsEnabled(Value);
-		}
-		Object->EndChunk();
-
-		Object->BeginChunk("CActor::Camera");
-		{
-			cam_Active()->Load(Object);
-			u8 Value;
-			Object->GetCurrentChunk()->r_u8(Value);
-			cam_Set(EActorCameras(Value));
-		}
-		Object->EndChunk();
-
-		//need_quick_slot_reload = true;
-
-
-		Object->BeginChunk("CActor::Quickslots");
-		{
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[0]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[1]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[2]);
-			Object->GetCurrentChunk()->r_stringZ_s(g_quick_use_slots[3]);
-		}
-		Object->EndChunk();
-	}
-	Object->EndChunk();
-}*/
 
 void CActor::Serialize(ISaveObject& Object)
 {
