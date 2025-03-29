@@ -343,10 +343,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 #endif
 	//load custom user data from server
-	if(E->client_data_new != u64(-1))
+	if(const auto Handle = CSaveManager::GetInstance().GetHandle(E->client_data_new); Handle)
 	{	
-		auto Handle = CSaveManager::GetInstance().GetHandle(E->client_data_new);
-		VERIFY(Handle);
 		auto* PartialObj = new CSaveObjectLoad(Handle);
 		net_Serialize(*PartialObj);
 		xr_delete(PartialObj);
@@ -356,6 +354,7 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		net_Load		(ireader);*/
 	}
 	else {
+		E->client_data_new = u64(-1);
 //		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());
 	}
 
