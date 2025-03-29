@@ -464,7 +464,7 @@ void PS::CParticleGroup::SItem::DelayDeleteChilds()
 		else
 		{
 			Iter = std::find(_children_related.begin(), _children_related.end(), Vis);
-			if (Iter != _children_related.end());
+			if (Iter != _children_related.end())
 			{
 				_children_related.erase(Iter);
 			}
