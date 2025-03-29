@@ -170,7 +170,10 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			shared_str NodeText = ChildNode->ToElement()->GetText();
 
 			if (NodeText.size() == 0)
+			{
+				ChildNode = ChildNode->NextSibling();
 				continue;
+			}
 
 			if (NodeName == "text")
 			{
@@ -219,7 +222,6 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	using GraphData = std::pair<CDialogNode*, xr_vector<shared_str>>;
 	xr_vector<GraphData> vec(NodeGraph.begin(), NodeGraph.end());
 
-	// Сортировка по убыванию NodeName
 	std::sort(vec.begin(), vec.end(), [](GraphData L, GraphData R)
 	{
 		return L.first->NodeName < R.first->NodeName;
@@ -279,8 +281,12 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 	PHelper().CreateRText(items, "Text\\String ID", &DialogNode->Text);
 
 	static shared_str TranslateStr;
-	TranslateStr = Platform::ANSI_TO_UTF8(*g_pStringTable->translate(*DialogNode->Text)).c_str();
-	PHelper().CreateCaption(items, "Text\\Translated", TranslateStr);
+
+	if (DialogNode->Text.size() > 0)
+	{
+		TranslateStr = Platform::ANSI_TO_UTF8(*g_pStringTable->translate(*DialogNode->Text)).c_str();
+		PHelper().CreateCaption(items, "Text\\Translated", TranslateStr);
+	}
 
 	Properties->AssignItems(items);
 }
@@ -288,6 +294,7 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 void CUIDialogView::OpenFile(const xr_path& Path)
 {
 	static CUIDialogView Viewer;
+	Viewer.Dialogs.clear();
 
 	Viewer.File.Load(CONFIG_PATH, "gameplay", Path.xstring().c_str());
 
@@ -315,7 +322,15 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 		if (NodeID.size() == 0)
 			continue;
 
-		Viewer.Dialogs[NodeID] = ChildNode;
+		Viewer.Dialogs.emplace_back(NodeID, ChildNode);
 		ChildNode = ChildNode->NextSibling();
 	}
+	
+	std::sort(Viewer.Dialogs.begin(), Viewer.Dialogs.end(), [](std::pair<shared_str, XML_NODE*>& L, std::pair<shared_str, XML_NODE*>& R)
+	{
+		xr_string NameA = *L.first;
+		xr_string NameB = *R.first;
+
+		return NameA < NameB;
+	});
 }

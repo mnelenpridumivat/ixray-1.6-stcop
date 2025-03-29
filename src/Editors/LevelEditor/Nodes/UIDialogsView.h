@@ -21,7 +21,7 @@ public:
 
 private:
 	bool IsOpenList = true;
-	xr_map<shared_str, XML_NODE*> Dialogs;
+	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
 	CXml File;
 
 	shared_str HasInfo;
