@@ -12,14 +12,9 @@ public:
 	virtual void	Load							(LPCSTR section);
 
 protected:
-	virtual void	PlayAnimShoot					();
 	virtual void	PlayAnimReload					();
 	virtual void	PlayReloadSound					();
-	virtual void	PlayAnimIdle					();
-	virtual void	PlayAnimIdleMoving				();
-	virtual void	PlayAnimIdleSprint				();
-	virtual void	PlayAnimShow					();
-	virtual void	PlayAnimHide					();
-	virtual void	PlayAnimBore					();
+	virtual shared_str SetCurrentStateAnimation(const shared_str& first_name);
+	virtual shared_str SetCurrentShootAnimation();
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
