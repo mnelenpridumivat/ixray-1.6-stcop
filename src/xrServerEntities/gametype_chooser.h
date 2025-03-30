@@ -32,4 +32,16 @@ struct GameTypeChooser
 	void 	SaveLTX			(CInifile& ini, LPCSTR sect_name);
 	void	SetDefaults		()				{m_GameType.one();}
 	bool	MatchType		(const u16 t) const		{return (t==eGameIDNoGame) || !!m_GameType.test(t);};
+	
+
+	friend void to_json(nlohmann::json& file, GameTypeChooser value)
+	{
+		file = value.m_GameType.get();
+	}
+	
+	friend void from_json(const nlohmann::json& file, GameTypeChooser& value)
+	{
+		value.m_GameType.zero();
+		value.m_GameType.set(file.get<u16>(), true);
+	}
 };

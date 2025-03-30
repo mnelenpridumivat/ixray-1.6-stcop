@@ -20,10 +20,29 @@ bool ESceneShapeTool::LoadLTX(CInifile& ini)
 	return true;
 }
 
+bool ESceneShapeTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=SHAPE_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+	return true;
+}
+
 void ESceneShapeTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX(ini, id);
 	ini.w_u32		("main", "version",SHAPE_TOOLS_VERSION);
+}
+
+void ESceneShapeTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON(file, id);
+	file["main"]["version"] = SHAPE_TOOLS_VERSION;
 }
 
 bool ESceneShapeTool::LoadStream(IReader& F)

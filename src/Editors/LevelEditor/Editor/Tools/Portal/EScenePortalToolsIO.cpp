@@ -23,11 +23,35 @@ bool EScenePortalTool::LoadLTX(CInifile& ini)
 
 	return true;
 }
+
+bool EScenePortalTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=PORTAL_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+
+	m_Flags = file["main"]["flags"];
+
+	return true;
+}
+
 void EScenePortalTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
 	ini.w_u32		("main", "version", PORTAL_TOOLS_VERSION);
     ini.w_u32		("main", "flags", m_Flags.get());
+}
+
+void EScenePortalTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+	file["main"]["version"] = PORTAL_TOOLS_VERSION;
+	file["main"]["flags"] = m_Flags.get();
 }
 
 bool EScenePortalTool::LoadStream(IReader& F)

@@ -115,6 +115,52 @@ bool CLight::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	return true;
 }
 
+bool CLight::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+
+	if(version!=LIGHT_VERSION)
+	{
+		ELog.DlgMsg( mtError, "CLight: Unsupported version.");
+		return false;
+	}
+
+	CCustomObject::LoadJSON	(file, sect_name);
+
+	m_Type			= (ELight::EType)(file[sect_name]["type"]);
+	file[sect_name]["color"].get_to(m_Color);
+	m_Brightness	= file[sect_name]["brightness"];
+	m_Range			= file[sect_name]["range"];
+	m_Attenuation0	= file[sect_name]["attenuation0"];
+	m_Attenuation1	= file[sect_name]["attenuation1"];
+	m_Attenuation2	= file[sect_name]["attenuation2"];
+	m_Cone			= file[sect_name]["cone"];
+	m_VirtualSize	= file[sect_name]["virtual_size"];
+
+	m_UseInD3D		= file[sect_name]["use_in_d3d"];
+	m_Flags = file[sect_name]["light_flags"];
+	m_LControl		= file[sect_name]["light_control"];
+
+	xr_string anm		= file[sect_name]["anim_ref_name"].get<std::string>().c_str();
+	if(!anm.empty())
+	{
+		m_pAnimRef	= LALib.FindItem(anm.c_str());
+		if (!m_pAnimRef)
+			ELog.Msg(mtError, "Can't find light animation: %s",anm);
+	}
+
+	m_FalloffTex	= file[sect_name]["fallof_texture"].get<std::string>().c_str();
+
+	if (m_Flags.is(ELight::flPointFuzzy))
+	{
+		m_FuzzyData	= new SFuzzyData();
+		file[sect_name]["fuzzy_data"] = *m_FuzzyData;
+	}
+
+	UpdateTransform	();
+	return true;
+}
+
 void CLight::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX(ini, sect_name);
@@ -144,6 +190,33 @@ void CLight::SaveLTX(CInifile& ini, LPCSTR sect_name)
         VERIFY		(m_FuzzyData);
         m_FuzzyData->SaveLTX(ini, sect_name);
     }
+}
+
+void CLight::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = LIGHT_VERSION;
+	file[sect_name]["type"] = m_Type;
+	file[sect_name]["color"] = m_Color;
+	file[sect_name]["brightness"] = m_Brightness;
+	file[sect_name]["range"] = m_Range;
+	file[sect_name]["attenuation0"] = m_Attenuation0;
+	file[sect_name]["attenuation1"] = m_Attenuation1;
+	file[sect_name]["attenuation2"] = m_Attenuation2;
+	file[sect_name]["cone"] = m_Cone;
+	file[sect_name]["virtual_size"] = m_VirtualSize;
+	file[sect_name]["use_in_d3d"] = m_UseInD3D;
+	file[sect_name]["light_flags"] = m_Flags.get();
+	file[sect_name]["light_control"] = m_LControl;
+	file[sect_name]["anim_ref_name"] = (m_pAnimRef)?m_pAnimRef->cName.c_str():"";
+	file[sect_name]["fallof_texture"] = m_FalloffTex.c_str();
+
+	if (m_Flags.is(ELight::flPointFuzzy))
+	{
+		VERIFY		(m_FuzzyData);
+		*m_FuzzyData = file[sect_name]["fuzzy_data"];
+	}
 }
 
 bool CLight::LoadStream(IReader& F)

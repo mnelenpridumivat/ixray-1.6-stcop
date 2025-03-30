@@ -125,15 +125,40 @@ bool  CCustomObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     if (m_CO_Flags.is(flMotion))
     {
     	m_CO_Flags.set(flMotion, FALSE);
-//    	R_ASSERT		(0);
-/*
-    	VERIFY			(m_Motion);
-		F.open_chunk	(CUSTOMOBJECT_CHUNK_MOTION);
-		m_Motion->Save	(F);
-		F.close_chunk	();
-  */
-//        m_MotionParams->t_current = ini.r_float		(sect_name, "motion_params_t");
     }
+	return true;
+}
+
+bool CCustomObject::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 flags = file[sect_name]["co_flags"];
+	m_CO_Flags.assign(flags);
+
+	if (file[sect_name].contains("rt_flags"))
+	{
+		flags = file[sect_name]["rt_flags"];
+		m_RT_Flags.assign(flags);
+	}
+
+	FName				= file[sect_name]["name"].get<std::string>().c_str();
+	FPosition.x			= file[sect_name]["position"]["x"];
+	FPosition.y			= file[sect_name]["position"]["y"];
+	FPosition.z			= file[sect_name]["position"]["z"];
+	VERIFY2				(_valid(FPosition), sect_name);
+	FRotation.x			= file[sect_name]["rotation"]["x"];
+	FRotation.y			= file[sect_name]["rotation"]["y"];
+	FRotation.z			= file[sect_name]["rotation"]["z"];
+	VERIFY2				(_valid(FRotation), sect_name);
+	FScale.x			= file[sect_name]["scale"]["x"];
+	FScale.y			= file[sect_name]["scale"]["y"];
+	FScale.z			= file[sect_name]["scale"]["z"];
+	VERIFY2				(_valid(FScale), sect_name);
+
+	// object motion
+	if (m_CO_Flags.is(flMotion))
+	{
+		m_CO_Flags.set(flMotion, FALSE);
+	}
 	return true;
 }
 
@@ -189,20 +214,24 @@ void CCustomObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
     ini.w_fvector3 	(sect_name, "rotation", FRotation);
     ini.w_fvector3 	(sect_name, "scale", FScale);
 
-/*
-    // object motion
-    if (m_CO_Flags.is(flMotion))
-    {
-    	R_ASSERT		(0);
+}
 
-    	VERIFY			(m_Motion);
-		F.open_chunk	(CUSTOMOBJECT_CHUNK_MOTION);
-		m_Motion->Save	(F);
-		F.close_chunk	();
+void CCustomObject::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	file[sect_name]["co_flags"] = m_CO_Flags.get();
+	file[sect_name]["rt_flags"] = m_RT_Flags.get();
 
-        ini.w_float		(sect_name, "motion_params_t", m_MotionParams->t_current);
-    }
-*/
+	file[sect_name]["name"] = FName.c_str();
+
+	file[sect_name]["position"]["x"] = FPosition.x;
+	file[sect_name]["position"]["y"] = FPosition.y;
+	file[sect_name]["position"]["z"] = FPosition.z;
+	file[sect_name]["rotation"]["x"] = FRotation.x;
+	file[sect_name]["rotation"]["y"] = FRotation.y;
+	file[sect_name]["rotation"]["z"] = FRotation.z;
+	file[sect_name]["scale"]["x"] = FScale.x;
+	file[sect_name]["scale"]["y"] = FScale.y;
+	file[sect_name]["scale"]["z"] = FScale.z;
 }
 
 void CCustomObject::SaveStream(IWriter& F)

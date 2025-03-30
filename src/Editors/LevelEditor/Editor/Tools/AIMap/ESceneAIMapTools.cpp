@@ -113,6 +113,66 @@ void SAINode::SaveLTX(CInifile& ini, LPCSTR sect_name, ESceneAIMapTool* tools)
     ini.w_u8		(sect_name, "flags", flags.get());
 }
 
+void SAINode::LoadJSON(nlohmann::json& file, LPCSTR sect_name, ESceneAIMapTool* tools)
+{
+	u32 id;
+	u16 pl;
+	SNodePositionOld np;
+	s16 x;
+	u16 y;
+	s16 z;
+
+	id = file[sect_name]["n1"]; 
+	n1 = (SAINode*)tools->UnpackLink(id);
+	id = file[sect_name]["n2"]; 
+	n2 = (SAINode*)tools->UnpackLink(id);
+	id = file[sect_name]["n3"]; 
+	n3 = (SAINode*)tools->UnpackLink(id);
+	id = file[sect_name]["n4"]; 
+	n4 = (SAINode*)tools->UnpackLink(id);
+
+	pl = file[sect_name]["plane"]; 		
+	pvDecompress(Plane.n, pl);
+
+	sscanf(file[sect_name]["np"].get<std::string>().c_str(), "%hi,%hu,%hi", &x, &y, &z);
+	np.x = x;
+	np.y = y;
+	np.z = z;
+	tools->UnpackPosition(Pos, np, tools->m_AIBBox, tools->m_Params);
+	Plane.build(Pos, Plane.n);
+
+	flags = file[sect_name]["flags"];
+}
+
+void SAINode::SaveJSON(nlohmann::json& file, LPCSTR sect_name, ESceneAIMapTool* tools)
+{
+	u32 id;
+	u16 pl;
+	SNodePositionOld np;
+
+	id = n1?(u32)n1->idx:InvalidNode;
+	file[sect_name]["n1"] = id;
+
+	id = n2?(u32)n2->idx:InvalidNode;
+	file[sect_name]["n2"] = id;
+
+	id = n3?(u32)n3->idx:InvalidNode;
+	file[sect_name]["n3"] = id;
+
+	id = n4?(u32)n4->idx:InvalidNode;
+	file[sect_name]["n4"] = id;
+
+	pl = pvCompress (Plane.n);
+	file[sect_name]["plane"] = pl;
+
+	tools->PackPosition(np,Pos,tools->m_AIBBox,tools->m_Params);
+
+	string256 buff;
+	sprintf			(buff,"%hi,%hu,%hi",np.x,np.y,np.z);
+	file[sect_name]["np"] = buff;
+	file[sect_name]["flags"] = flags.get();
+}
+
 void SAINode::LoadStream(IReader& F, ESceneAIMapTool* tools)
 {
 	u32 			id;
@@ -334,6 +394,75 @@ bool ESceneAIMapTool::LoadLTX(CInifile& ini)
     IsLoaded = true;
     return true;
 }
+bool ESceneAIMapTool::LoadJSON(nlohmann::json& file)
+{
+	IsLoaded = false;
+    inherited::LoadJSON(file);
+
+    u32 version = file["main"]["version"].get<u32>();
+
+    if (version != AIMAP_VERSION)
+    {
+        ELog.DlgMsg(mtError, "AI-Map: Unsupported version.");
+        return false;
+    }
+
+    m_Flags.assign(file["main"]["flags"].get<u32>());
+
+    m_AIBBox.min.x = file["main"]["bbox_min"]["x"].get<float>();
+    m_AIBBox.min.y = file["main"]["bbox_min"]["y"].get<float>();
+    m_AIBBox.min.z = file["main"]["bbox_min"]["z"].get<float>();
+    m_AIBBox.max.x = file["main"]["bbox_max"]["x"].get<float>();
+    m_AIBBox.max.y = file["main"]["bbox_max"]["y"].get<float>();
+    m_AIBBox.max.z = file["main"]["bbox_max"]["z"].get<float>();
+
+    m_Params.fPatchSize = file["params"]["patch_size"].get<float>();
+    m_Params.fTestHeight = file["params"]["test_height"].get<float>();
+    m_Params.fCanUP = file["params"]["can_up"].get<float>();
+    m_Params.fCanDOWN = file["params"]["can_down"].get<float>();
+    
+    m_Nodes.clear();
+
+    u32 cnt_ai_nodes = file["main"]["ai_nodes"]["count"].get<u32>();
+
+    for (u32 i = 0; i < cnt_ai_nodes; i++)
+    {
+        string128 sect_name;
+        SAINode* ai_node = new SAINode();
+        sprintf(sect_name, "ai_node_%d", i);
+        ai_node->LoadJSON(file["main"]["ai_nodes"], sect_name, this);
+        m_Nodes.push_back(ai_node);
+    }
+
+    DenumerateNodes();
+
+    m_VisRadius = file["main"]["vis_radius"].get<float>();
+    m_BrushSize = file["main"]["brush_size"].get<float>();
+
+	m_SmoothHeight = file["main"]["smooth_height"].get<float>();
+
+	xr_vector<std::string> temp_vec = file["main"]["snap_objects"];
+	m_SnapObjects.clear();
+	for(const auto& elem : temp_vec)
+	{
+		CCustomObject* O = Scene->FindObjectByName(elem.c_str(), OBJCLASS_SCENEOBJECT);
+		if (!O) ELog.Msg(mtError, "AI-Map: Can't find snap object '%s'.", elem.c_str());
+		else m_SnapObjects.push_back(O);
+	}
+
+	temp_vec.clear();
+	temp_vec = file["main"]["ignored_materials"];
+	for(const auto elem : temp_vec)
+	{
+		SGameMtl* mtl = GameMaterialLibraryEditors->GetMaterial(elem.c_str());
+		if (mtl) m_ignored_materials.push_back(mtl->GetID());
+	}
+    
+    hash_FillFromNodes();
+
+    IsLoaded = true;
+    return true;
+}
 
 void ESceneAIMapTool::SaveLTX(CInifile& ini, int id)
 {
@@ -401,6 +530,67 @@ void ESceneAIMapTool::SaveLTX(CInifile& ini, int id)
 
 		((UIAIMapTool*)(pForm))->UpdateIgnoreMaterial();
 	}    
+}
+
+void ESceneAIMapTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON(file, id);
+
+	file["main"]["version"] = AIMAP_VERSION;
+	file["main"]["flags"] = m_Flags.get();
+
+	file["main"]["bbox_min"]["x"] = m_AIBBox.min.x;
+	file["main"]["bbox_min"]["y"] = m_AIBBox.min.y;
+	file["main"]["bbox_min"]["z"] = m_AIBBox.min.z;
+	file["main"]["bbox_max"]["x"] = m_AIBBox.max.x;
+	file["main"]["bbox_max"]["y"] = m_AIBBox.max.y;
+	file["main"]["bbox_max"]["z"] = m_AIBBox.max.z;
+
+	file["params"]["patch_size"] = m_Params.fPatchSize;
+	file["params"]["test_height"] = m_Params.fTestHeight;
+	file["params"]["can_up"] = m_Params.fCanUP;
+	file["params"]["can_down"] = m_Params.fCanDOWN;
+
+	EnumerateNodes();
+
+	file["main"]["ai_nodes_count"] = m_Nodes.size();
+
+	if (m_Nodes.size())
+	{
+		u32 i = 0;
+		for (AINodeIt it = m_Nodes.begin(); it != m_Nodes.end(); it++, i++)
+		{
+			string128 buff;
+			sprintf(buff, "ai_node_%d", i);
+			(*it)->SaveJSON(file, buff, this);
+		}
+	}
+
+	file["main"]["vis_radius"] = m_VisRadius;
+	file["main"]["brush_size"] = m_BrushSize;
+	file["main"]["smooth_height"] = m_SmoothHeight;
+
+	xr_vector<std::string> temp_vec;
+	temp_vec.reserve(m_SnapObjects.size());
+	for(const auto& elem : m_SnapObjects)
+	{
+		temp_vec.push_back(elem->GetName());
+	}
+	file["main"]["snap_objects"] = temp_vec;
+
+	temp_vec.clear();
+	temp_vec.reserve(m_ignored_materials.size());
+	for(const auto elem : m_ignored_materials)
+	{
+		SGameMtl* mtl = GameMaterialLibraryEditors->GetMaterialByID(elem);
+		R_ASSERT(mtl);
+		temp_vec.push_back(mtl->m_Name.c_str());
+	}
+	file["main"]["ignored_materials"] = temp_vec;
+	if(!m_ignored_materials.empty())
+	{
+		((UIAIMapTool*)(pForm))->UpdateIgnoreMaterial();
+	}
 }
 
 bool ESceneAIMapTool::LoadStream(IReader& F)

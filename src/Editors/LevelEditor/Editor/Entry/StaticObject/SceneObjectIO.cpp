@@ -113,6 +113,98 @@ bool CSceneObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return bRes;
 }
 
+bool CSceneObject::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+    bool bRes = true;
+	do
+    {
+        u32 version = file[sect_name]["version"];
+
+		CCustomObject::LoadJSON						(file, sect_name);
+
+        xr_string ref_name  = file[sect_name]["reference_name"];
+
+        if (!SetReference(ref_name.c_str()))
+        {
+            ELog.Msg            ( mtError, "CSceneObject: '%s' not found in library", ref_name.c_str() );
+            bRes                = false;
+            int mr              = mrNone;
+
+            xr_string       _new_name;
+            bool b_found    = Scene->GetSubstObjectName(ref_name.c_str(), _new_name);
+            if(b_found)
+            {
+                xr_string _message;
+                _message = "Object ["+ref_name+"] not found. Relace it with ["+_new_name+"] or select other from library?";
+                mr = ELog.DlgMsg(mtConfirmation,mbYes |mbNo, _message.c_str());
+                if(mrYes==mr)
+                {
+                    bRes = SetReference(_new_name.c_str());
+                }
+            }
+
+            if(!bRes && !Scene->isSkipCantFindDialog())
+            {
+                if (ELog.DlgMsg(mtSkip, "CSceneObject: '%s' not found in library", ref_name.data()) == mrSkip)
+                {
+                    Scene->setSkipCantFindDialog(true);
+                }
+            }
+            else 
+            {
+                Msg("! CSceneObject: '%s' not found in library", ref_name.data());
+            }
+
+            Scene->Modified();
+        }
+
+      	m_Flags = file[sect_name]["flags"];
+        if (m_Flags.test(flUseSurface))
+        {
+            if (file[sect_name].contains("surface"))
+            {
+                u32 Size = file[sect_name]["surface"].size();
+                for (u32 i = 0; i < Size; i++)
+                {
+                    auto& SConf = file[sect_name]["surface"].at(i);
+                    xr_string Name = SConf["name"];
+                    CSurface* Surf = nullptr;
+                    for (SurfaceIt sf_it = m_Surfaces.begin(); sf_it != m_Surfaces.end(); ++sf_it)
+                    {
+                        if ((*sf_it)->m_Name == Name.c_str())
+                        {
+                            Surf = *sf_it;
+                            break;
+                        }
+                    }
+
+                    if (Surf)
+                    {
+                        if (!Surf->IsVoid())
+                        {
+                            Surf->OnDeviceDestroy();
+                        }
+                        
+                        Surf->SetShader(SConf["shader"].get<std::string>().c_str());
+                        Surf->SetShaderXRLC(SConf["shaderLC"].get<std::string>().c_str());
+                        Surf->SetGameMtl(SConf["mtl"].get<std::string>().c_str());
+                        Surf->SetTexture(SConf["texture"].get<std::string>().c_str());
+                        Surf->SetVMap(SConf["VMap"].get<std::string>().c_str());
+                        Surf->OnDeviceCreate();
+                    }
+                }
+            }
+        }
+
+
+        if (!bRes) break;
+    }while(0);
+
+    IsLoaded = true;
+
+    return bRes;
+}
+
 void CSceneObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX		(ini, sect_name);
@@ -142,6 +234,32 @@ void CSceneObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
         }
     }
 
+}
+
+void CSceneObject::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+    CCustomObject::SaveJSON		(file, sect_name);
+
+    file[sect_name]["version"] = SCENEOBJ_CURRENT_VERSION;
+
+    // reference object version
+    R_ASSERT					(m_pReference);
+    file[sect_name]["reference_name"] = m_ReferenceName.c_str();
+    file[sect_name]["flags"] = m_Flags;
+    if (m_Flags.test(flUseSurface))
+    {
+        for (SurfaceIt sf_it = m_Surfaces.begin(); sf_it != m_Surfaces.end(); ++sf_it)
+        {
+            file[sect_name]["surface"].push_back({});
+            auto& SConf = file[sect_name]["surface"].back();
+            SConf["name"] = (*sf_it)->_Name();
+            SConf["shader"] = (*sf_it)->_ShaderName();
+            SConf["shaderLC"] = (*sf_it)->_ShaderXRLCName();
+            SConf["mtl"] = (*sf_it)->_GameMtlName();
+            SConf["texture"] = (*sf_it)->_Texture();
+            SConf["VMap"] = (*sf_it)->_VMap();
+        }
+    }
 }
 
 

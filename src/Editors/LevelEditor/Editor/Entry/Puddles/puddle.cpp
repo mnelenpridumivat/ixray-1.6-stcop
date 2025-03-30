@@ -36,9 +36,22 @@ bool CPuddle::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	return Result;
 }
 
+bool CPuddle::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	bool Result = CEditShape::LoadJSON(file, sect_name);
+
+	OnUpdateTransform();
+	return Result;
+}
+
 void CPuddle::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CEditShape::SaveLTX(ini, sect_name);
+}
+
+void CPuddle::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CEditShape::SaveJSON(file, sect_name);
 }
 
 void CPuddle::OnUpdateTransform()

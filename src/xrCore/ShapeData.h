@@ -16,6 +16,42 @@ struct XRCORE_API CShapeData
 	{
 		u8			type;
 		shape_data	data;
+
+		friend void to_json(nlohmann::json& file, const shape_def& value)
+		{
+			file["type"] = (u64)value.type;
+			switch (value.type)
+			{
+				case cfSphere:
+					{
+						file["data"] = value.data.sphere;
+						break;
+					}
+				case cfBox:
+					{
+						file["data"] = value.data.box;
+						break;
+					}
+			}
+		}
+	
+		friend void from_json(const nlohmann::json& file, shape_def& value)
+		{
+			value.type = file["type"];
+			switch (value.type)
+			{
+			case cfSphere:
+				{
+					value.data.sphere = file["data"];
+					break;
+				}
+			case cfBox:
+				{
+					value.data.box = file["data"];
+					break;
+				}
+			}
+		}
 	};
 
 	using ShapeVec = xr_vector<shape_def>;

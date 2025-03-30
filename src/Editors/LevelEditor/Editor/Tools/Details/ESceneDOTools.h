@@ -127,8 +127,10 @@ public:
     virtual bool   		IsNeedSave				()				{return Valid();}
     virtual bool		LoadStream         		(IReader&);
     virtual bool		LoadLTX            		(CInifile&);
+    virtual bool		LoadJSON            	(nlohmann::json&);
     virtual void		SaveStream         		(IWriter&);
     virtual void		SaveLTX            		(CInifile&, int id);
+    virtual void		SaveJSON            	(nlohmann::json&, int id);
     virtual bool		can_use_inifile			()				{return false;}
 
 

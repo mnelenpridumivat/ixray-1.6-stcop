@@ -156,14 +156,18 @@ public:
 
 	bool 			ReadObjectStream(IReader& F, CCustomObject*& O);
 	bool 			ReadObjectLTX(CInifile& ini, LPCSTR sect_name, CCustomObject*& O);
+	bool 			ReadObjectJSON(nlohmann::json& file, LPCSTR sect_name, CCustomObject*& O);
 	bool 			ReadObjectsStream(IReader& F, u32 chunk_id, TAppendObject on_append, SPBItem* pb);
 	bool 			ReadObjectsLTX(CInifile& ini, LPCSTR sect_name_parent, LPCSTR sect_name_prefix, TAppendObject on_append, SPBItem* pb);
+	bool 			ReadObjectsJSON(nlohmann::json& file, LPCSTR sect_name_parent, LPCSTR sect_name_prefix, TAppendObject on_append, SPBItem* pb);
 
 
 	void 			SaveObjectStream(CCustomObject* O, IWriter& F);
 	void 			SaveObjectLTX(CCustomObject* O, LPCSTR sect_name, CInifile& ini);
+	void 			SaveObjectJSON(CCustomObject* O, LPCSTR sect_name, nlohmann::json& file);
 	void 			SaveObjectsStream(ObjectList& lst, u32 chunk_id, IWriter& F);
 	void 			SaveObjectsLTX(ObjectList& lst, LPCSTR sect_name_parent, LPCSTR sect_name_prefix, CInifile& ini);
+	void 			SaveObjectsJSON(ObjectList& lst, LPCSTR sect_name_parent, LPCSTR sect_name_prefix, nlohmann::json& file);
 
 	xr_string		LevelPartPath(LPCSTR map_name);
 	xr_string		LevelPartName(LPCSTR map_name, ObjClassID cls);
@@ -171,6 +175,7 @@ public:
 	BOOL			LoadLevelPart(ESceneToolBase* M, LPCSTR map_name);
 	BOOL			LoadLevelPartStream(ESceneToolBase* M, LPCSTR map_name);
 	BOOL			LoadLevelPartLTX(ESceneToolBase* M, LPCSTR map_name);
+	BOOL			LoadLevelPartJSON(ESceneToolBase* M, LPCSTR map_name);
 
 	BOOL			LoadLevelPart(LPCSTR map_name, ObjClassID cls);
 	BOOL		 	UnloadLevelPart(ESceneToolBase* M);

@@ -77,7 +77,9 @@ public:
         bool		    LoadStream		(IReader&);
         void		    SaveStream		(IWriter&);
         bool		    LoadLTX			(CInifile& ini, LPCSTR sect_name);
-        void		    SaveLTX			(CInifile& ini, LPCSTR sect_name);
+		void		    SaveLTX			(CInifile& ini, LPCSTR sect_name);
+		bool		    LoadJSON		(json& file);
+		void		    SaveJSON		(json& file);
 
 		bool 			ExportGame		(SExportStreams* F, CSpawnPoint* owner);
         void            ExportSpawn     (xr_vector<NET_Packet>& Ps, CSpawnPoint* owner);
@@ -157,8 +159,10 @@ public:
 
 	virtual bool 	LoadStream		(IReader&);
 	virtual bool 	LoadLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual bool 	LoadJSON		(nlohmann::json& file, LPCSTR sect_name);
 	virtual void 	SaveStream		 (IWriter&);
 	virtual void 	SaveLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual void 	SaveJSON		(nlohmann::json& file, LPCSTR sect_name);
 
     virtual bool	ExportGame		(SExportStreams* data);
 

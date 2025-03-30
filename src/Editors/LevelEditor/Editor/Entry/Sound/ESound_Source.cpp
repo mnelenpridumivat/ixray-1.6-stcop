@@ -146,6 +146,53 @@ bool ESoundSource::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return true;
 }
 
+bool ESoundSource::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version =  file[sect_name]["version"];
+
+	if(version!=SOUND_SOURCE_VERSION)
+	{
+		ELog.Msg( mtError, "ESoundSource: Unsupported version.");
+		return false;
+	}
+
+	inherited::LoadJSON	(file, sect_name);
+
+	m_Type				= ESoundType(file[sect_name]["snd_type"]);
+
+	m_WAVName			= file[sect_name]["snd_name"].get<std::string>().c_str();
+
+	m_Flags = file[sect_name]["flags"];
+
+	m_Params.position.x	= file[sect_name]["snd_position"]["x"];
+	m_Params.position.y	= file[sect_name]["snd_position"]["y"];
+	m_Params.position.z	= file[sect_name]["snd_position"]["z"];
+	m_Params.volume		= file[sect_name]["volume"];
+	m_Params.freq		= file[sect_name]["freq"];
+	m_Params.min_distance=file[sect_name]["min_dist"];
+	m_Params.max_distance= file[sect_name]["max_dist"];
+	m_Params.max_ai_distance=file[sect_name]["max_ai_dist"];
+
+	m_RandomPause.x		= file[sect_name]["random_pause"]["x"];
+	m_RandomPause.y		= file[sect_name]["random_pause"]["y"];
+	m_ActiveTime.x		= file[sect_name]["active_time"]["x"];
+	m_ActiveTime.y		= file[sect_name]["active_time"]["y"];
+	m_PlayTime.x			= file[sect_name]["play_time"]["x"];
+	m_PlayTime.y			= file[sect_name]["play_time"]["y"];
+
+	ResetSource		();
+
+	switch (m_Type)
+	{
+	case stStaticSource:
+		if (m_Flags.is(flPlaying)) 		Play();
+		//.    	if (m_Flags.is(flSimulating)) 	Simulate();
+		break;
+	default: THROW;
+	}
+	return true;
+}
+
 void ESoundSource::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	inherited::SaveLTX	(ini, sect_name);
@@ -168,6 +215,30 @@ void ESoundSource::SaveLTX(CInifile& ini, LPCSTR sect_name)
     ini.w_fvector2		(sect_name, "random_pause", m_RandomPause);
     ini.w_fvector2		(sect_name, "active_time", m_ActiveTime);
     ini.w_fvector2		(sect_name, "play_time", m_PlayTime);
+}
+
+void ESoundSource::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	inherited::SaveJSON	(file, sect_name);
+
+	file[sect_name]["version"] = SOUND_SOURCE_VERSION;
+	file[sect_name]["snd_type"] = m_Type;
+	file[sect_name]["snd_name"] = m_WAVName.c_str();
+	file[sect_name]["flags"] = m_Flags.get();
+	file[sect_name]["snd_position"]["x"] = m_Params.position.x;
+	file[sect_name]["snd_position"]["y"] = m_Params.position.y;
+	file[sect_name]["snd_position"]["z"] = m_Params.position.z;
+	file[sect_name]["volume"] = m_Params.volume;
+	file[sect_name]["freq"] = m_Params.freq;
+	file[sect_name]["min_dist"] = m_Params.min_distance;
+	file[sect_name]["max_dist"] = m_Params.max_distance;
+	file[sect_name]["max_ai_dist"] = m_Params.max_ai_distance;
+	file[sect_name]["random_pause"]["x"] = m_RandomPause.x;
+	file[sect_name]["random_pause"]["y"] = m_RandomPause.y;
+	file[sect_name]["active_time"]["x"] = m_ActiveTime.x;
+	file[sect_name]["active_time"]["y"] = m_ActiveTime.y;
+	file[sect_name]["play_time"]["x"] = m_PlayTime.x;
+	file[sect_name]["play_time"]["y"] = m_PlayTime.y;
 }
 
 bool ESoundSource::LoadStream(IReader& F)

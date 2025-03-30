@@ -50,7 +50,9 @@ struct SAINode					// definition of "patch" or "node"
     void   		LoadStream			(IReader&, ESceneAIMapTool*);
     void   		SaveStream			(IWriter&, ESceneAIMapTool*);
     void   		LoadLTX				(CInifile& ini, LPCSTR sect_name, ESceneAIMapTool*);
-    void   		SaveLTX				(CInifile& ini, LPCSTR sect_name, ESceneAIMapTool*);
+	void   		SaveLTX				(CInifile& ini, LPCSTR sect_name, ESceneAIMapTool*);
+	void   		LoadJSON			(nlohmann::json& file, LPCSTR sect_name, ESceneAIMapTool*);
+	void   		SaveJSON			(nlohmann::json& file, LPCSTR sect_name, ESceneAIMapTool*);
 
 	//void*		operator 	new		(std::size_t size);
 	//void*		operator 	new		(std::size_t size, SAINode*);
@@ -173,8 +175,10 @@ public:
     // IO
     virtual bool   		LoadStream         		(IReader&);
     virtual bool   		LoadLTX            		(CInifile&);
+    virtual bool   		LoadJSON            		(nlohmann::json&);
     virtual void   		SaveStream         		(IWriter&);
     virtual void   		SaveLTX            		(CInifile&, int id);
+    virtual void   		SaveJSON            		(nlohmann::json&, int id);
     virtual bool 		can_use_inifile			(){return false;}
 
     virtual bool		LoadSelection      		(IReader&);

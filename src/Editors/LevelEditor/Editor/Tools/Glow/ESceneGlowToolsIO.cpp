@@ -27,6 +27,24 @@ bool ESceneGlowTool::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool ESceneGlowTool::LoadJSON(nlohmann::json& file)
+{
+	u16 version 	= file["main"]["glow_tool_version"];
+
+	if( version!=GLOW_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	if (!inherited::LoadJSON(file))
+		return false;
+
+	m_Flags = file["main"]["flags"];
+
+	return true;
+}
+
 void ESceneGlowTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
@@ -34,6 +52,14 @@ void ESceneGlowTool::SaveLTX(CInifile& ini, int id)
 	ini.w_u32			("main","glow_tool_version",GLOW_TOOLS_VERSION);
 
     ini.w_u32			("main","flags",m_Flags.get());
+}
+
+void ESceneGlowTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+
+	file["main"]["glow_tool_version"] = GLOW_TOOLS_VERSION;
+	file["main"]["flags"] = m_Flags.get();
 }
 
 bool ESceneGlowTool::LoadStream(IReader& F)

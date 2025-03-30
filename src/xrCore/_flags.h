@@ -40,6 +40,16 @@ public:
 	IC 	SelfRef	band		(const Self& f, const T mask) 				{ flags=f.flags&mask;	return *this;	}
 	IC 	BOOL	equal	(const Self& f) 			  		const	{ return flags==f.flags;}
 	IC 	BOOL	equal	(const Self& f, const T mask) 		const	{ return (flags&mask)==(f.flags&mask);}
+
+	friend void to_json(nlohmann::json& file, const _flags& value)
+    {
+    	file["flags"] = value.flags;
+    }
+	
+	friend void from_json(const nlohmann::json& file, _flags& value)
+    {
+    	value.flags = file["flags"];
+    }
 };
 
 typedef _flags<u8>	Flags8;		typedef _flags<u8>	flags8;		

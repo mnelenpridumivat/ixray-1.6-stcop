@@ -252,6 +252,13 @@ bool ESceneWallmarkTool::LoadLTX(CInifile& ini)
 	R_ASSERT(0);
 	return true;
 }
+
+bool ESceneWallmarkTool::LoadJSON(nlohmann::json& basic_jsons)
+{
+	R_ASSERT(0);
+	return true;
+}
+
 void ESceneWallmarkTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
@@ -311,6 +318,11 @@ void ESceneWallmarkTool::SaveLTX(CInifile& ini, int id)
 //.            F.w				(&*W->verts.begin(),sizeof(FVF::LIT)*W->verts.size());
         }
     }
+}
+
+void ESceneWallmarkTool::SaveJSON(nlohmann::json& basic_jsons, int id)
+{
+	R_ASSERT2		(0, "not_implemented");
 }
 
 bool ESceneWallmarkTool::LoadStream(IReader& F)

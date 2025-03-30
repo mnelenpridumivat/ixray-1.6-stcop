@@ -15,7 +15,7 @@ protected:
 	xr_stack<CSaveChunk*> _chunkStack;
 	bool _isPartial = false;
 
-	CSaveChunk* GetCurrentChunk();
+	CSaveChunk* GetCurrentChunk() const;
 
 public:
 	CSaveObject();
@@ -419,6 +419,9 @@ public:
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
 	void Write(CMemoryBuffer* buffer);
+	
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveObjectLoad: public CSaveObject {
@@ -446,54 +449,17 @@ public:
 
 	void Parse(IReader* stream);
 
-	/*void r_bool(bool& Value) {
-		*this << Value;
-	}
-
-	void r_vec3(Fvector& Value) {
-		*this << Value;
-	}
-
-	void r_float(float& Value) {
-		*this << Value;
-	}
-
-	void r_u64(u64& Value) {
-		*this << Value;
-	}
-
-	void r_s64(s64& Value) {
-		*this << Value;
-	}
-
-	void r_u32(u32& Value) {
-		*this << Value;
-	}
-
-	void r_s32(s32& Value) {
-		*this << Value;
-	}
-
-	void r_u16(u16& Value) {
-		*this << Value;
-	}
-
-	void r_s16(s16& Value) {
-		*this << Value;
-	}
-
-	void r_u8(u8& Value) {
-		*this << Value;
-	}
-
-	void r_s8(s8& Value) {
-		*this << Value;
-	}
-
-	void r_string(LPCSTR& Value) {
-		shared_str temp;
-		*this << temp;
-		Value = temp.c_str();
-	}*/
-
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
+
+
+inline void to_json(nlohmann::json& file, const ISaveObject& Obj)
+{
+	Obj.SaveJSON(file);
+}
+
+inline void from_json(const nlohmann::json& file, ISaveObject& Obj)
+{
+	Obj.LoadJSON(file);
+}

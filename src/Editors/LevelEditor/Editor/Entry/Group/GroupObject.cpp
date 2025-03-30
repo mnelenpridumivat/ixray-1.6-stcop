@@ -144,22 +144,8 @@ bool CGroupObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     {    //old opened group save format
         ELog.DlgMsg( mtError, "old opened group save format");
         return false;
-/*      
-        u32 cnt 	= ini.r_u32			(sect_name, "objects_in_group_count");
-        shared_str 		tmp;
-    	string128		buff;
-
-        for (u32 k=0; k<cnt; ++k)
-        {
-			m_ObjectsInGroup.resize				(m_ObjectsInGroup.size()+1);
-        	sprintf								(buff,"objects_in_group_%d",k);
-        	m_ObjectsInGroup.back().ObjectName	= ini.r_string(sect_name, buff);
-        }
-*/        
-    }else
-    {
-	    Scene->ReadObjectsLTX			(ini, sect_name, "ingroup", EScene::TAppendObject(this, &CGroupObject::AppendObjectLoadCB), 0);
     }
+	Scene->ReadObjectsLTX			(ini, sect_name, "ingroup", EScene::TAppendObject(this, &CGroupObject::AppendObjectLoadCB), 0);
     VERIFY(m_ObjectsInGroup.size());
 
    	SetRefName(ini.r_string	(sect_name, "ref_name")) ;
@@ -180,6 +166,47 @@ bool CGroupObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return 			true;
 }
 
+bool CGroupObject::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+	if (version<0x0011)
+	{
+		ELog.DlgMsg( mtError, "CGroupObject: unsupported file version. Object can't load.");
+		return false;
+	}
+	CCustomObject::LoadJSON(file, sect_name);
+
+	Flags32 tmp_flags;tmp_flags.zero();
+	if(version<0x0012)
+		tmp_flags = file[sect_name]["flags"];
+
+	// objects
+	if(tmp_flags.test((1<<0)))
+	{    //old opened group save format
+		ELog.DlgMsg( mtError, "old opened group save format");
+		return false;
+	}
+	Scene->ReadObjectsJSON			(file, sect_name, "ingroup", EScene::TAppendObject(this, &CGroupObject::AppendObjectLoadCB), 0);
+	VERIFY(m_ObjectsInGroup.size());
+
+	SetRefName(file[sect_name]["ref_name"].get<std::string>().c_str()) ;
+	if (!m_ReferenceName_.size())
+		ELog.Msg			(mtError,"ERROR: group '%s' - has empty reference. Corrupted file?", GetName());
+    
+
+	if(version<0x0012)
+	{
+		for (ObjectsInGroup::iterator it=m_ObjectsInGroup.begin(); it!=m_ObjectsInGroup.end(); ++it)
+			if(it->pObject)
+			{
+				it->pObject->m_CO_Flags.set(flObjectInGroup, TRUE);
+				it->pObject->m_CO_Flags.set(flObjectInGroupUnique, TRUE);
+			}
+	}
+
+	return 			true;
+}
+
 void CGroupObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX(ini, sect_name);
@@ -198,6 +225,26 @@ void CGroupObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
         (*it)->m_CO_Flags.set(CCustomObject::flObjectInGroup, TRUE);
 
     ini.w_string		(sect_name, "ref_name", m_ReferenceName_.c_str());
+}
+
+void CGroupObject::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = GROUPOBJ_CURRENT_VERSION;
+
+	ObjectList		grp_lst;
+	GetObjects		(grp_lst);
+	ObjectList::iterator it;
+	for(it=grp_lst.begin(); it!=grp_lst.end(); ++it)
+		(*it)->m_CO_Flags.set(CCustomObject::flObjectInGroup, FALSE);
+        
+	Scene->SaveObjectsJSON(grp_lst, sect_name, "ingroup", file);
+
+	for(it=grp_lst.begin(); it!=grp_lst.end(); ++it)
+		(*it)->m_CO_Flags.set(CCustomObject::flObjectInGroup, TRUE);
+
+	file[sect_name]["ref_name"] = m_ReferenceName_.c_str();
 }
 
 bool CGroupObject::LoadStream(IReader& F)

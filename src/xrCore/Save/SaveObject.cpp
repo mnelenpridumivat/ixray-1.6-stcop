@@ -23,7 +23,7 @@ CSaveObject::~CSaveObject()
 	}
 }
 
-CSaveChunk* CSaveObject::GetCurrentChunk()
+CSaveChunk* CSaveObject::GetCurrentChunk() const
 {
 	VERIFY(!_chunkStack.empty());
 	return _chunkStack.top();
@@ -176,6 +176,16 @@ void CSaveObjectSave::Write(CMemoryBuffer* buffer)
 	_rootChunk->Write(*buffer);
 }
 
+void CSaveObjectSave::SaveJSON(nlohmann::json& file) const
+{
+	GetCurrentChunk()->SaveJSON(file);
+}
+
+void CSaveObjectSave::LoadJSON(const nlohmann::json& file)
+{
+	NODEFAULT;
+}
+
 CSaveObjectLoad::CSaveObjectLoad()
 {
 	_rootChunk = new CSaveChunk("Root");
@@ -290,6 +300,16 @@ void CSaveObjectLoad::Parse(IReader* stream)
 	CSaveManager::GetInstance().ConditionalReadString(stream, chunkName);
 	VERIFY(chunkName == "Root");
 	GetCurrentChunk()->Parse(stream);
+}
+
+void CSaveObjectLoad::SaveJSON(nlohmann::json& file) const
+{
+	NODEFAULT;
+}
+
+void CSaveObjectLoad::LoadJSON(const nlohmann::json& file)
+{
+	GetCurrentChunk()->LoadJSON(file);
 }
 
 ISaveObject& operator<<(ISaveObject& Object, char& Value) {

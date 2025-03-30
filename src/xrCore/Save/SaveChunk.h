@@ -32,7 +32,7 @@ public:
 
 	void Write(CMemoryBuffer& Buffer);
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_chunk; }
 
 	void ReadArray(u64& Size);
 	void WriteArray();
@@ -71,5 +71,98 @@ public:
 
 	void Parse(IReader* stream);
 
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
+
+/*inline void to_json(nlohmann::json& file, ISaveable* data)
+{
+	data->SaveJSON(file);
+}
+
+inline void from_json(const nlohmann::json& file, ISaveable*& data)
+{
+	VERIFY(!data);
+	auto type = magic_enum::enum_cast<ESaveVariableType>(file["type"].get<std::string>());
+	R_ASSERT(type.has_value());
+	switch (type.value())
+	{
+	case ESaveVariableType::t_bool:
+		{
+			data = new CSaveVariableBool();
+			break;
+		}
+	case ESaveVariableType::t_float:
+		{
+			data = new CSaveVariableFloat();
+			break;
+		}
+	case ESaveVariableType::t_double:
+		{
+			data = new CSaveVariableDouble();
+			break;
+		}
+	case ESaveVariableType::t_u64:
+		{
+			data = new CSaveVariableU64();
+			break;
+		}
+	case ESaveVariableType::t_s64:
+		{
+			data = new CSaveVariableS64();
+			break;
+		}
+	case ESaveVariableType::t_u32:
+		{
+			data = new CSaveVariableU32();
+			break;
+		}
+	case ESaveVariableType::t_s32:
+		{
+			data = new CSaveVariableS32();
+			break;
+		}
+	case ESaveVariableType::t_u16:
+		{
+			data = new CSaveVariableU16();
+			break;
+		}
+	case ESaveVariableType::t_s16:
+		{
+			data = new CSaveVariableS16();
+			break;
+		}
+	case ESaveVariableType::t_u8:
+		{
+			data = new CSaveVariableU8();
+			break;
+		}
+	case ESaveVariableType::t_s8:
+		{
+			data = new CSaveVariableS8();
+			break;
+		}
+	case ESaveVariableType::t_string:
+		{
+			data = new CSaveVariableString();
+			break;
+		}
+	case ESaveVariableType::t_arrayUnspec:
+		{
+			data = new ISaveVariableArray();
+			break;
+		}
+	case ESaveVariableType::t_chunk:
+		{
+			data = new CSaveChunk(file["name"]);
+			break;
+		}
+	default:
+		{
+			NODEFAULT;
+		}
+	}
+	data->LoadJSON(file);
+}*/

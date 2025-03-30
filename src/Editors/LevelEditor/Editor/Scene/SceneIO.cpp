@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <fstream>
+#include <json/json.hpp>
+using json = nlohmann::json;
 
 // file: SceneChunks.h
 #define CURRENT_FILE_VERSION    	0x00000005
@@ -239,6 +241,58 @@ BOOL EScene::LoadLevelPartLTX(ESceneToolBase* M, LPCSTR mn)
 		}
 		// read data
 		M->LoadLTX			(ini);
+
+		++fnidx;
+		sprintf(map_name, "%s%d", mn, fnidx);
+	}
+
+	return 					TRUE;
+}
+
+BOOL EScene::LoadLevelPartJSON(ESceneToolBase* M, LPCSTR mn)
+{
+	string_path map_name;
+	strcpy(map_name, mn);
+	
+	//if(!M->can_use_inifile())
+	//	return LoadLevelPartStream(M, map_name);
+
+	int fnidx=0;
+	
+	while(  FS.TryLoad(map_name))
+	{
+		IReader* R		= FS.r_open	(map_name);
+		VERIFY			(R);
+		char 			ch;
+		R->r			(&ch,sizeof(ch));
+		bool b_is_inifile = (ch=='{');
+		FS.r_close		(R);
+
+		if(!b_is_inifile)
+			return LoadLevelPartStream(M, map_name);
+
+		M->m_EditFlags.set(ESceneToolBase::flReadonly,FALSE);
+
+
+		json file;
+		if (std::filesystem::exists(xr_path(map_name)))
+		{
+			std::ifstream f(map_name);
+			f >> file;
+		}
+
+		// check level part GUID
+		xrGUID				guid;
+		guid.g[0] = file["guid"]["guid_g0"].get<u64>();
+		guid.g[0] = file["guid"]["guid_g0"].get<u64>();
+
+		if (guid!=m_GUID)
+		{
+			ELog.DlgMsg		(mtError,"Skipping invalid version of level part: '%s\\%s.part'",EFS.ExtractFileName(map_name).c_str(),M->ClassName());
+			return 			FALSE;
+		}
+		// read data
+		M->LoadJSON(file["data"]);
 
 		++fnidx;
 		sprintf(map_name, "%s%d", mn, fnidx);
@@ -551,6 +605,12 @@ void EScene::SaveObjectLTX(CCustomObject* O, LPCSTR sect_name, CInifile& ini)
 	O->SaveLTX	(ini, sect_name);
 }
 
+void EScene::SaveObjectJSON(CCustomObject* O, LPCSTR sect_name, nlohmann::json& file)
+{
+	file[sect_name]["clsid"] = O->FClassID;
+	O->SaveJSON	(file, sect_name);
+}
+
 void EScene::SaveObjectStream( CCustomObject* O, IWriter& F )
 {
 	F.open_chunk	(CHUNK_OBJECT_CLASS);
@@ -573,6 +633,19 @@ void EScene::SaveObjectsLTX(ObjectList& lst, LPCSTR sect_name_parent, LPCSTR sec
 	}
 	sprintf					(buff,"%s_count",sect_name_prefix);
 	ini.w_u32				(sect_name_parent, buff, lst.size());
+}
+
+void EScene::SaveObjectsJSON(ObjectList& lst, LPCSTR sect_name_parent, LPCSTR sect_name_prefix, nlohmann::json& file)
+{
+	u32 i 				= 0;
+	string256			buff;
+	for(ObjectIt _F = lst.begin(); _F!=lst.end(); ++_F, ++i)
+	{
+		sprintf				(buff,"%s_%s_%d",sect_name_parent,sect_name_prefix,i);
+		SaveObjectJSON		(*_F,buff,file);
+	}
+	sprintf					(buff,"%s_count",sect_name_prefix);
+	file[sect_name_parent][buff] = lst.size();
 }
 
 void EScene::SaveObjectsStream( ObjectList& lst, u32 chunk_id, IWriter& F )
@@ -624,6 +697,23 @@ bool EScene::ReadObjectLTX(CInifile& ini, LPCSTR sect_name, CCustomObject*& O)
 	return bRes;
 }
 
+bool EScene::ReadObjectJSON(nlohmann::json& file, LPCSTR sect_name, CCustomObject*& O)
+{
+	if (!file.contains(sect_name))
+		return false;
+
+	ObjClassID clsid		= OBJCLASS_DUMMY;
+	clsid 					= ObjClassID(file[sect_name]["clsid"]);
+	O 						= GetOTool(clsid)->CreateObject(0,0);
+
+	bool bRes 				= O->LoadJSON(file, sect_name);
+
+	if (!bRes)
+		xr_delete			(O);
+
+	return bRes;
+}
+
 bool EScene::ReadObjectsLTX(CInifile& ini,  LPCSTR sect_name_parent, LPCSTR sect_name_prefix, TAppendObject on_append, SPBItem* pb)
 {
 	string128			buff;
@@ -643,40 +733,44 @@ bool EScene::ReadObjectsLTX(CInifile& ini,  LPCSTR sect_name_parent, LPCSTR sect
 			CCustomObject* existing = FindObjectByName(obj_name, obj->FClassID);
 			if (existing)
 			{
+				string256 				buf;
+				GenObjectName(obj->FClassID, buf, obj->GetName());
+				obj->SetName(buf);
+			}
+			if (obj && !on_append(obj))
+				xr_delete(obj);
 
-				/*if(g_frmConflictLoadObject->m_result!=2 && g_frmConflictLoadObject->m_result!=4 && g_frmConflictLoadObject->m_result!=6)
-				{
-					g_frmConflictLoadObject->m_existing_object 	= existing;
-					g_frmConflictLoadObject->m_new_object 		= obj;
-					g_frmConflictLoadObject->Prepare			();
-					g_frmConflictLoadObject->ShowModal			();
-				}*/
-				/*     switch(g_frmConflictLoadObject->m_result)
-					 {
-						 case 1: //Overwrite
-						 case 2: //Overwrite All
-						 {
-							bool res = RemoveObject		(existing, true, true);
-							 if(!res)
-								 Msg("! RemoveObject [%s] failed", existing->GetName());
-							  else
-								 xr_delete(existing);
-						 }break;
-						 case 3: //Insert new
-						 case 4: //Insert new All
-						 {
-							 string256 				buf;
-							 GenObjectName			(obj->FClassID, buf, obj->GetName());
-							 obj->SetName(buf);
-						 }break;
-						 case 0: //Cancel
-						 case 5: //Skip
-						 case 6: //Skip All
-						 {
-							 xr_delete(obj);
-						 }break;
-					 } //switch
-				 } //if exist*/
+		}
+		
+		else
+			bRes = false;
+
+		if (pb)
+			pb->Inc();
+	}
+	return bRes;
+}
+
+bool EScene::ReadObjectsJSON(nlohmann::json& file, LPCSTR sect_name_parent, LPCSTR sect_name_prefix,
+	TAppendObject on_append, SPBItem* pb)
+{
+	string128			buff;
+	R_ASSERT			(on_append);
+	sprintf				(buff, "%s_count", sect_name_prefix);
+	u32 count			= file[sect_name_parent][buff];
+	bool bRes 			= true;
+
+	for(u32 i=0; i<count; ++i)
+	{
+		sprintf				(buff, "%s_%s_%d", sect_name_parent, sect_name_prefix, i);
+		CCustomObject* obj	= NULL;
+
+		if (ReadObjectJSON(file, buff, obj))
+		{
+			LPCSTR obj_name = obj->GetName();
+			CCustomObject* existing = FindObjectByName(obj_name, obj->FClassID);
+			if (existing)
+			{
 				string256 				buf;
 				GenObjectName(obj->FClassID, buf, obj->GetName());
 				obj->SetName(buf);
@@ -794,6 +888,11 @@ bool EScene::LoadLTX(LPCSTR map_name, bool bUndo)
 		// lock main level
 		CInifile ini(full_name.c_str());
 		version = ini.r_u32("version","value");
+		bool AlternativeSave = false;
+		if(ini.line_exist("version", "alternative_save"))
+		{
+			AlternativeSave = ini.r_bool("version", "alternative_save");
+		}
 
 		if (version!=CURRENT_FILE_VERSION)
 		{
@@ -827,7 +926,13 @@ bool EScene::LoadLTX(LPCSTR map_name, bool bUndo)
 					if (!bUndo && _I->second->IsEnabled() && (_I->first!=OBJCLASS_DUMMY))
 					{
 						xr_string fn 		 = LevelPartName(map_name, _I->first).c_str();
-						LoadLevelPartLTX	(_I->second, fn.c_str());
+						if(AlternativeSave)
+						{
+							LoadLevelPartJSON(_I->second, fn.c_str());
+						} else
+						{
+							LoadLevelPartLTX(_I->second, fn.c_str());
+						}
 					}
 				}
 			}

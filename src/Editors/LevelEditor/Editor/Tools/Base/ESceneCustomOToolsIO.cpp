@@ -97,6 +97,43 @@ bool ESceneCustomOTool::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool ESceneCustomOTool::LoadJSON(nlohmann::json& file)
+{
+	IsLoaded = false;
+
+	inherited::LoadJSON	(file);
+
+	u32 count			= file["main"]["objects_count"];
+
+	string256 Data = {};
+	sprintf(Data, "Loading %s(ltx)...", ClassDesc());
+
+	SPBItem* pb = UI->ProgressStart(count, Data);
+
+	u32 i				= 0;
+	string128			buff;
+
+	for(i=0; i<count; ++i)
+	{
+      	
+        
+		CCustomObject* obj	= NULL;
+		sprintf				(buff, "object_%d", i);
+		if( Scene->ReadObjectJSON(file, buff, obj) )
+		{
+			if (!OnLoadAppendObject(obj))
+				xr_delete(obj);
+		}
+		pb->Inc();
+	}
+
+	UI->ProgressEnd		(pb);
+
+	IsLoaded = true;
+
+	return true;
+}
+
 bool ESceneCustomOTool::LoadStream(IReader& F)
 {
 	inherited::LoadStream		(F);
@@ -136,6 +173,29 @@ void ESceneCustomOTool::SaveLTX(CInifile& ini, int id)
 	}
 
 	ini.w_u32			("main", "objects_count", count);
+}
+
+void ESceneCustomOTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+
+	u32 count			= 0;
+	for(ObjectIt it=m_Objects.begin(); it!=m_Objects.end(); ++it)
+	{
+		CCustomObject* O = (*it);
+		if(O->save_id!=id)
+			continue;
+            
+		if (O->IsDeleted() || O->m_CO_Flags.test(CCustomObject::flObjectInGroup) )
+			continue;
+            
+		string128				buff;
+		sprintf					(buff,"object_%d",count);
+		Scene->SaveObjectJSON	(*it,  buff, file);
+		count++;
+	}
+
+	file["main"]["objects_count"] = count;
 }
 
 void ESceneCustomOTool::SaveStream(IWriter& F)

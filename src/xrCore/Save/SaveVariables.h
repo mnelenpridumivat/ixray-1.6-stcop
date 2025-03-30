@@ -1,5 +1,7 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "../xrCore/_types.h"
 #include "../xrCore/_vector4.h"
 
@@ -10,8 +12,6 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_bool,
 	t_float,
 	t_double,
-	//t_vec3,
-	//t_vec4,
 	t_u64,
 	t_u64_op32,
 	t_u64_op16,
@@ -32,15 +32,7 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_s16_op8,
 	t_u8,
 	t_s8,
-	/*t_float_q16,
-	t_float_q8,
-	t_angle16,
-	t_angle8,
-	t_dir,
-	t_sdir,*/
 	t_string,
-	//t_matrix,
-	//t_clientID,
 	t_chunkStart,
 	t_chunkEnd,
 	t_array,
@@ -54,7 +46,7 @@ class XRCORE_API ISaveable{
 protected:
 	virtual void* GetValue() = 0;
 public:
-	virtual ESaveVariableType GetVariableType() = 0;
+	virtual ESaveVariableType GetVariableType() const = 0;
 	//virtual bool IsArray() = 0;
 	virtual void Write(CMemoryBuffer& Buffer) = 0;
 
@@ -62,6 +54,9 @@ public:
 	virtual void Next() = 0;
 	virtual void AddVariable(ISaveable* data) = 0;
 	virtual u64 GetSize() = 0;
+
+	virtual void SaveJSON(nlohmann::json& file) const;
+	virtual void LoadJSON(const nlohmann::json& file) = 0;
 };
 
 class XRCORE_API CSaveVariableBase:
@@ -69,8 +64,7 @@ class XRCORE_API CSaveVariableBase:
 {
 
 public:
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_invalid; }
-	//virtual bool IsArray() override { return false; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_invalid; }
 
 	virtual ISaveable* GetCurrentElement() override { return nullptr; };
 	virtual void Next() override {};
@@ -78,19 +72,8 @@ public:
 	virtual u64 GetSize() override { return 0; };
 };
 
-/*class XRCORE_API ISaveVariableArray:
-	public ISaveable
-{
-public:
-	virtual ISaveable* GetCurrentElement() = 0;
-	virtual void Next() = 0;
-	virtual void AddVariable(ISaveable* data) = 0;
-	virtual u64 GetSize() = 0;
-};*/
-
 class XRCORE_API ISaveVariableArray :
-	public ISaveable//,
-	//public CSaveVariableBase
+	public ISaveable
 {
 	using array_type = xr_vector<ISaveable*>;
 	u64 _currentReadPos = 0;
@@ -103,7 +86,7 @@ public:
 	ISaveVariableArray() {}
 	~ISaveVariableArray();
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_arrayUnspec; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_arrayUnspec; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
 
 	virtual u64 GetSize() override { return _array.size(); }
@@ -124,33 +107,10 @@ public:
 	array_type::const_reverse_iterator rend() const { return _array.rend(); }
 	array_type::const_reverse_iterator crbegin() const { return _array.crbegin(); }
 	array_type::const_reverse_iterator crend() const { return _array.crend(); }
-	
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
-
-/*class XRCORE_API CSaveVariableArray :
-	public ISaveVariableArray//,
-	//public CSaveVariableBase
-{
-	u64 _size;
-	u64 _currentReadPos = 0;
-	xr_vector<ISaveable*> _array;
-
-protected:
-	void* GetValue() override { return nullptr; };
-
-public:
-	CSaveVariableArray(u64 Size) : _size(Size) {}
-	~CSaveVariableArray();
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_array; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-
-	virtual u64 GetSize() override { return _size; }
-	virtual ISaveable* GetCurrentElement() override { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
-	virtual void Next() override { ++_currentReadPos; }
-
-	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
-};*/
 
 class XRCORE_API CSaveVariableBool:
 	public CSaveVariableBase 
@@ -162,10 +122,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableBool() : _value(false) {}
 	CSaveVariableBool(bool Value): _value(Value){}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_bool; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_bool; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableFloat :
@@ -178,10 +142,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableFloat() : _value(0.0f) {}
 	CSaveVariableFloat(float Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_float; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableDouble :
@@ -194,10 +162,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableDouble() : _value(0.0) {}
 	CSaveVariableDouble(double Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_double; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_double; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableU64 :
@@ -210,10 +182,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableU64() : _value(0) {}
 	CSaveVariableU64(u64 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u64; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_u64; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableS64 :
@@ -226,10 +202,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableS64() : _value(0) {}
 	CSaveVariableS64(s64 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s64; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_s64; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableU32 :
@@ -242,10 +222,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableU32() : _value(0) {}
 	CSaveVariableU32(u32 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u32; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_u32; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableS32 :
@@ -258,10 +242,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableS32() : _value(0) {}
 	CSaveVariableS32(s32 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s32; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_s32; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableU16 :
@@ -274,10 +262,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableU16() : _value(0) {}
 	CSaveVariableU16(u16 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u16; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_u16; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableS16 :
@@ -290,10 +282,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableS16() : _value(0) {}
 	CSaveVariableS16(s16 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s16; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_s16; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableU8 :
@@ -306,10 +302,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableU8() : _value(0) {}
 	CSaveVariableU8(u8 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u8; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_u8; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableS8 :
@@ -322,10 +322,14 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableS8() : _value(0) {}
 	CSaveVariableS8(s8 Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s8; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_s8; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
 
 class XRCORE_API CSaveVariableString :
@@ -338,47 +342,25 @@ protected:
 	virtual void* GetValue() override { return &_value; }
 
 public:
+	CSaveVariableString() : _value("") {}
 	CSaveVariableString(const xr_string& Value) : _value(Value.c_str()) {}
 	CSaveVariableString(const shared_str& Value) : _value(Value.c_str()) {}
 	CSaveVariableString(LPCSTR Value) : _value(Value) {}
 
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_string; }
+	virtual ESaveVariableType GetVariableType() const override { return ESaveVariableType::t_string; }
 	virtual void Write(CMemoryBuffer& Buffer) override;
+
+	virtual void SaveJSON(nlohmann::json& file) const override;
+	virtual void LoadJSON(const nlohmann::json& file) override;
 };
-
-/*class XRCORE_API CSaveVariableMatrix :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fmatrix _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableMatrix(const Fmatrix& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_matrix; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};
-
-class XRCORE_API CSaveVariableClientID :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	ClientID _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableClientID(ClientID Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_clientID; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};*/
 
 struct SSaveVariableGetter {
 	template<typename TType, typename TVarClass>
 	static TType GetValue(ISaveable* Var) { return *((TType*)((TVarClass*)Var)->GetValue()); }
 };
+
+extern ISaveable* CreateSaveable(ESaveVariableType type, LPCSTR chunk_name);
+
+//void to_json(nlohmann::json& file, ISaveable* data);
+//void from_json(const nlohmann::json& file, ISaveable*& data);
+

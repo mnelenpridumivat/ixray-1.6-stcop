@@ -628,6 +628,59 @@ bool CWayObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return true;
 }
 
+bool CWayObject::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	Clear();
+
+	u32 version 	= file[sect_name]["version"];
+
+	if(version!=WAYOBJECT_VERSION)
+	{
+		ELog.DlgMsg	( mtError, "CWayPoint: Unsupported version.");
+		return 		false;
+	}
+
+	CCustomObject::LoadJSON(file, sect_name);
+
+	if(!GetName())
+	{
+		return false;
+	}
+
+	u32 cnt = file[sect_name]["wps"].size();
+	m_WayPoints.reserve(cnt);
+	for(u32 i = 0; i < cnt; i++)
+	{
+		auto& WConf = file[sect_name]["wps"].at(i);
+		m_WayPoints.push_back(new CWayPoint(""));
+		auto& W 	= m_WayPoints.back();
+		W->m_vPosition = WConf["position"];
+		W->m_Flags = WConf["flags"];
+		W->m_bSelected = WConf["selected"];
+		W->m_Name = WConf["name"];
+	}
+	for(u32 i = 0; i < cnt; i++)
+	{
+		auto& WConf = file[sect_name]["wps"].at(i);
+		auto& W 	= m_WayPoints[i];
+		u32 LinksNum = WConf["links"].size();
+		W->m_Links.reserve(LinksNum);
+		for(u32 j = 0; j < LinksNum; j++)
+		{
+			auto& LConf = WConf["links"].at(j);
+			u32 to_index = LConf["to"];
+			float prob = LConf["prob"];
+			W->CreateLink(m_WayPoints[to_index], prob);
+		}
+	}
+
+	m_Type = EWayType(file[sect_name]["type"].get<u32>());
+
+	IsLoaded = true;
+
+	return true;
+}
+
 void CWayObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX	(ini, sect_name);
@@ -669,6 +722,30 @@ void CWayObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
         }
     }
     ini.w_u32				(sect_name, "type", m_Type);
+}
+
+void CWayObject::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON	(file, sect_name);
+	file[sect_name]["version"] = WAYOBJECT_VERSION;
+	
+	for(const auto& W : m_WayPoints)
+	{
+		file[sect_name]["wps"].push_back({});
+		auto& WConf = file[sect_name]["wps"].back();
+		WConf["position"] = W->m_vPosition;
+		WConf["flags"] = W->m_Flags;
+		WConf["selected"] = W->m_bSelected;
+		WConf["name"] = W->m_Name;
+		for(const auto& L : W->m_Links)
+		{
+			WConf["links"].push_back({});
+			auto& LConf = WConf["links"].back();
+			LConf["prob"] = L->probability;
+			LConf["to"] = std::find(m_WayPoints.begin(),m_WayPoints.end(),L->way_point)-m_WayPoints.begin();
+		}
+	}
+	file[sect_name]["type"] = m_Type;
 }
 
 bool CWayObject::LoadStream(IReader& F)

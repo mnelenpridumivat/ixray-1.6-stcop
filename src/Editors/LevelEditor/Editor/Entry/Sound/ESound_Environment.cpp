@@ -58,6 +58,24 @@ bool ESoundEnvironment::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	return 			true;
 }
 
+bool ESoundEnvironment::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version 	= file[sect_name]["version"];
+
+	if(version!=SOUND_ENV_VERSION)
+	{
+		ELog.DlgMsg	(mtError, "ESoundSource: Unsupported version.");
+		return 		false;
+	}
+	inherited::LoadJSON			(file, sect_name);
+
+	m_EnvInner = file[sect_name]["env_inner"];
+	m_EnvOuter = file[sect_name]["env_outer"];
+
+	UpdateTransform();
+	return 			true;
+}
+
 void ESoundEnvironment::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	inherited::SaveLTX	(ini, sect_name);
@@ -66,6 +84,15 @@ void ESoundEnvironment::SaveLTX(CInifile& ini, LPCSTR sect_name)
 
 	ini.w_string	(sect_name, "env_inner", m_EnvInner.c_str());
 	ini.w_string	(sect_name, "env_outer", m_EnvOuter.c_str());
+}
+
+void ESoundEnvironment::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	inherited::SaveJSON	(file, sect_name);
+
+	file[sect_name]["version"] = SOUND_ENV_VERSION;
+	file[sect_name]["env_inner"] = m_EnvInner.c_str();
+	file[sect_name]["env_outer"] = m_EnvOuter.c_str();
 }
 
 bool ESoundEnvironment::LoadStream(IReader& F)

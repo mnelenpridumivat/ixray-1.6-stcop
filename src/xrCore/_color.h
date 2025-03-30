@@ -1,4 +1,5 @@
 #pragma once
+#include <json/json.hpp>
 
 // maps unsigned 8 bits/channel to D3DCOLOR
 constexpr u32 color_argb(u32 a, u32 r, u32 g, u32 b) {
@@ -335,6 +336,8 @@ public:
     inline bool similar_rgb(const _color& v, float E = EPS_L) const {
         return _abs(r - v.r) < E && _abs(g - v.g) < E && _abs(b - v.b) < E;
     };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(_color, r, g, b, a)
 };
 
 using Fcolor = _color;

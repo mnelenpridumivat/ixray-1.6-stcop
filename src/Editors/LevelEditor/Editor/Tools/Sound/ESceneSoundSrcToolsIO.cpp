@@ -19,11 +19,32 @@ bool ESceneSoundSrcTool::LoadLTX(CInifile& ini)
 	inherited::LoadLTX(ini);
 	return true;
 }
+
+bool ESceneSoundSrcTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=SOUND_SRC_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+	return true;
+}
+
 void ESceneSoundSrcTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX(ini, id);
 
 	ini.w_u32		("main","version",SOUND_SRC_TOOLS_VERSION);
+}
+
+void ESceneSoundSrcTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON(file, id);
+
+	file["main"]["version"] = SOUND_SRC_TOOLS_VERSION;
 }
 
 bool ESceneSoundSrcTool::LoadStream(IReader& F)

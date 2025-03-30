@@ -434,6 +434,56 @@ bool CPortal::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	return true;
 }
 
+bool CPortal::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+
+	if (version != PORTAL_VERSION)
+	{
+		ELog.Msg(mtError, "CPortal: Unsupported version.");
+		IsLoaded = true;
+		return false;
+	}
+
+	CCustomObject::LoadJSON(file, sect_name);
+	xr_string str = file[sect_name]["sector_front"].get<std::string>().c_str();
+	m_SectorFront = (CSector*)Scene->FindObjectByName(str.c_str(), OBJCLASS_SECTOR);
+
+	str = file[sect_name]["sector_back"];
+	m_SectorBack = (CSector*)Scene->FindObjectByName(str.c_str(), OBJCLASS_SECTOR);
+
+	if (!m_SectorBack || !m_SectorFront)
+	{
+		ELog.Msg(mtError, "Portal: Can't find required sectors.\nObject '%s' can't load.", GetName());
+		IsLoaded = true;
+		return false;
+	}
+
+	u32 cnt = file[sect_name]["vert_count"];
+	m_Vertices.resize(cnt);
+	string512 buff;
+
+	for (u32 i = 0; i < cnt; ++i)
+	{
+		sprintf(buff, "vertex_%.4d", i);
+		m_Vertices[i].x = file[sect_name][buff]["x"];
+		m_Vertices[i].y = file[sect_name][buff]["y"];
+		m_Vertices[i].z = file[sect_name][buff]["z"];
+	}
+
+	if (cnt < 3)
+	{
+		IsLoaded = true;
+		ELog.Msg(mtError, "Portal: '%s' can't create.\nInvalid portal. (m_Vertices.size()<3)", GetName());
+		return false;
+	}
+
+	Update(true);
+
+	IsLoaded = true;
+	return true;
+}
+
 void CPortal::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX	(ini, sect_name);
@@ -449,6 +499,26 @@ void CPortal::SaveLTX(CInifile& ini, LPCSTR sect_name)
 	{
 		sprintf				(buff,"vertex_%.4d",i);
 		ini.w_fvector3		(sect_name, buff, m_Vertices[i]);
+	}
+}
+
+void CPortal::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON	(file, sect_name);
+
+	file[sect_name]["version"] = PORTAL_VERSION;
+
+	file[sect_name]["sector_front"] = m_SectorFront?m_SectorFront->GetName():"";
+	file[sect_name]["sector_back"] = m_SectorBack?m_SectorBack->GetName() :"";
+
+	file[sect_name]["vert_count"] = m_Vertices.size();
+	string512			buff;
+	for(u32 i=0; i<m_Vertices.size(); ++i)
+	{
+		sprintf				(buff,"vertex_%.4d",i);
+		file[sect_name][buff]["x"] = m_Vertices[i].x;
+		file[sect_name][buff]["y"] = m_Vertices[i].y;
+		file[sect_name][buff]["z"] = m_Vertices[i].z;
 	}
 }
 

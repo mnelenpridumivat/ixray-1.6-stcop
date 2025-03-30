@@ -40,6 +40,32 @@ bool ESceneLightTool::LoadLTX(CInifile& ini)
 	return true;
 }
 
+bool ESceneLightTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=LIGHT_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+
+	m_Flags = file["main"]["flags"];
+
+	m_SunShadowDir.x		= file["main"]["sun_shadow_dir"]["x"];
+	m_SunShadowDir.y		= file["main"]["sun_shadow_dir"]["y"];
+	lcontrol_last_idx	= file["main"]["lcontrol_last_idx"];
+
+	for(auto it = file["lcontrols"].begin(); it!=file["lcontrols"].end(); ++it)
+	{
+		u32 idx = it.value().get<u32>();
+		AppendLightControl(it.key().c_str(),&idx);
+	}
+	
+	return true;
+}
+
 void ESceneLightTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
@@ -58,6 +84,24 @@ void ESceneLightTool::SaveLTX(CInifile& ini, int id)
     {
         ini.w_u32	("lcontrols", _I->name.c_str(), _I->id);
     }
+}
+
+void ESceneLightTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+
+	file["main"]["version"] = LIGHT_TOOLS_VERSION;
+	file["main"]["flags"] = m_Flags.get();
+	file["main"]["sun_shadow_dir"]["x"] = m_SunShadowDir.x;
+	file["main"]["sun_shadow_dir"]["y"] = m_SunShadowDir.y;
+	file["main"]["lcontrol_last_idx"] = lcontrol_last_idx;
+
+	RTokenVecIt		_I 	= lcontrols.begin();
+	RTokenVecIt		_E 	= lcontrols.end();
+	for (;_I!=_E; ++_I)
+	{
+		file["lcontrols"][_I->name.c_str()] = _I->id;
+	}
 }
 
 bool ESceneLightTool::LoadStream(IReader& F)

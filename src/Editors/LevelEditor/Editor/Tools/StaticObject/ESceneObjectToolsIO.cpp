@@ -39,6 +39,43 @@ bool ESceneObjectTool::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool ESceneObjectTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"].get<u32>();
+	if( version!=OBJECT_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON		(file);
+
+	m_Flags.assign			(file["main"]["flags"].get<u32>());
+
+	m_AppendRandomMinScale.x = file["AppendRandom"]["AppendRandomMinScale"]["x"].get<float>();
+	m_AppendRandomMinScale.y = file["AppendRandom"]["AppendRandomMinScale"]["y"].get<float>();
+	m_AppendRandomMinScale.z = file["AppendRandom"]["AppendRandomMinScale"]["z"].get<float>();
+	m_AppendRandomMaxScale.x = file["AppendRandom"]["AppendRandomMaxScale"]["x"].get<float>();
+	m_AppendRandomMaxScale.y = file["AppendRandom"]["AppendRandomMaxScale"]["y"].get<float>();
+	m_AppendRandomMaxScale.z = file["AppendRandom"]["AppendRandomMaxScale"]["z"].get<float>();
+	m_AppendRandomMinRotation.x = file["AppendRandom"]["AppendRandomMinRotation"]["x"].get<float>();
+	m_AppendRandomMinRotation.y = file["AppendRandom"]["AppendRandomMinRotation"]["y"].get<float>();
+	m_AppendRandomMinRotation.z = file["AppendRandom"]["AppendRandomMinRotation"]["z"].get<float>();
+	m_AppendRandomMaxRotation.x = file["AppendRandom"]["AppendRandomMaxRotation"]["x"].get<float>();
+	m_AppendRandomMaxRotation.y = file["AppendRandom"]["AppendRandomMaxRotation"]["y"].get<float>();
+	m_AppendRandomMaxRotation.z = file["AppendRandom"]["AppendRandomMaxRotation"]["z"].get<float>();
+	xr_vector<std::string> temp_vec = file["AppendRandom"]["Objects"];
+	m_AppendRandomObjects.clear();
+	for(const auto& obj : temp_vec)
+	{
+		m_AppendRandomObjects.emplace_back(obj.c_str());
+	}
+
+	m_Flags.set(flAppendRandom,FALSE);
+
+	return true;
+}
+
 void ESceneObjectTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX(ini, id);
@@ -63,6 +100,34 @@ void ESceneObjectTool::SaveLTX(CInifile& ini, int id)
             ini.w_string		("AppendRandom", buff, (*it).c_str());
         }
     }
+}
+
+void ESceneObjectTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON(file, id);
+
+	file["main"]["version"] = OBJECT_TOOLS_VERSION;
+	file["main"]["flags"] = m_Flags.get();
+
+	file["AppendRandom"]["AppendRandomMinScale"]["x"] = m_AppendRandomMinScale.x;
+	file["AppendRandom"]["AppendRandomMinScale"]["y"] = m_AppendRandomMinScale.y;
+	file["AppendRandom"]["AppendRandomMinScale"]["z"] = m_AppendRandomMinScale.z;
+	file["AppendRandom"]["AppendRandomMaxScale"]["x"] = m_AppendRandomMaxScale.x;
+	file["AppendRandom"]["AppendRandomMaxScale"]["y"] = m_AppendRandomMaxScale.y;
+	file["AppendRandom"]["AppendRandomMaxScale"]["z"] = m_AppendRandomMaxScale.z;
+	file["AppendRandom"]["AppendRandomMinRotation"]["x"] = m_AppendRandomMinRotation.x;
+	file["AppendRandom"]["AppendRandomMinRotation"]["y"] = m_AppendRandomMinRotation.y;
+	file["AppendRandom"]["AppendRandomMinRotation"]["z"] = m_AppendRandomMinRotation.z;
+	file["AppendRandom"]["AppendRandomMaxRotation"]["x"] = m_AppendRandomMaxRotation.x;
+	file["AppendRandom"]["AppendRandomMaxRotation"]["y"] = m_AppendRandomMaxRotation.y;
+	file["AppendRandom"]["AppendRandomMaxRotation"]["z"] = m_AppendRandomMaxRotation.z;
+	xr_vector<std::string> temp_vec(0);
+	temp_vec.reserve(m_AppendRandomObjects.size());
+	for(const auto& elem : m_AppendRandomObjects)
+	{
+		temp_vec.emplace_back(elem.c_str());
+	}
+	file["AppendRandom"]["Objects"] = temp_vec;
 }
 
 bool ESceneObjectTool::LoadStream(IReader& F)

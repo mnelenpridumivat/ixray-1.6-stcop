@@ -119,10 +119,12 @@ public:
     virtual int			SaveFileCount		() const {return 1;}
     virtual bool   		IsNeedSave				()=0;
 
-    virtual bool		LoadStream            	(IReader&)=0;
-    virtual bool   		LoadLTX            		(CInifile&)=0;
-    virtual void		SaveStream         		(IWriter&)=0;
-    virtual void   		SaveLTX            		(CInifile&, int id)=0;
+    virtual bool		LoadStream            	(IReader&);
+    virtual bool   		LoadLTX            		(CInifile&);
+    virtual bool   		LoadJSON            	(nlohmann::json&);
+    virtual void		SaveStream         		(IWriter&);
+    virtual void   		SaveLTX            		(CInifile&, int id);
+    virtual void   		SaveJSON            	(nlohmann::json&, int id);
     virtual bool		can_use_inifile			()				{return true;}
 
     virtual bool		LoadSelection      		(IReader&)=0;

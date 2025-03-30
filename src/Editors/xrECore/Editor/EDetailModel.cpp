@@ -297,6 +297,52 @@ void EDetail::SaveLTX(CInifile& ini, LPCSTR sect_name)
 	ini.w_u32(sect_name, "flags", m_Flags.get());
 }
 
+bool EDetail::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	// check version
+	u32 version = file[sect_name]["version"];
+
+	if (version != DETOBJ_VERSION) {
+		ELog.Msg(mtError, "EDetail: unsupported version.");
+		return false;
+	}
+
+	// scale
+	m_fMinScale = file[sect_name]["scale_min"]; 
+	if (fis_zero(m_fMinScale))	m_fMinScale = 0.1f;
+	m_fMaxScale = file[sect_name]["scale_max"]; 
+	if (m_fMaxScale < m_fMinScale)	m_fMaxScale = m_fMinScale;
+
+	// density factor
+	m_fDensityFactor = file[sect_name]["density_factor"];
+
+	// flags
+	m_Flags = file[sect_name]["flags"];
+
+	// update object
+	// references
+	return Update(file[sect_name]["reference"].get<std::string>().c_str());
+}
+
+void EDetail::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	// version
+	file[sect_name]["version"] = DETOBJ_VERSION;
+
+	// reference
+	file[sect_name]["reference"] = m_sRefs.c_str();
+
+	// scale
+	file[sect_name]["scale_min"] = m_fMinScale;
+	file[sect_name]["scale_max"] = m_fMaxScale;
+
+	// density factor
+	file[sect_name]["density_factor"] = m_fDensityFactor;
+
+	// flags
+	file[sect_name]["flags"] = m_Flags.get();
+}
+
 void EDetail::Export(IWriter& F, LPCSTR tex_name, const Fvector2& offs, const Fvector2& scale, bool rot)
 {
 	R_ASSERT			(m_pRefs);

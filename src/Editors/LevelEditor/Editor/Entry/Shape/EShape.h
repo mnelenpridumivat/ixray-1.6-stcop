@@ -47,10 +47,12 @@ public:
 //	virtual void 	Scale		(Fvector& amount){;}
 
     // file system function
-  	virtual bool 		LoadStream			(IReader&);
-  	virtual bool 		LoadLTX				(CInifile& ini, LPCSTR sect_name);
-	virtual void 		SaveStream			(IWriter&);
-  	virtual void 		SaveLTX				(CInifile& ini, LPCSTR sect_name);
+  	virtual bool 	LoadStream		(IReader&);
+  	virtual bool 	LoadLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual bool 	LoadJSON		(nlohmann::json& file, LPCSTR sect_name);
+	virtual void 	SaveStream		(IWriter&);
+  	virtual void 	SaveLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual void 	SaveJSON		(nlohmann::json& file, LPCSTR sect_name);
 
     // render utility function
 	virtual void 	Render		(int priority, bool strictB2F);

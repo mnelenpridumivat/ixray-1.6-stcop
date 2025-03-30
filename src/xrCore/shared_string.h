@@ -112,6 +112,17 @@ public:
 	void				swap		(shared_str& rhs) { str_value* tmp = p_; p_ = rhs.p_; rhs.p_ = tmp; }
 	bool				equal		(const shared_str& rhs) const { return (p_ == rhs.p_); }
 	shared_str& 		printf		(const char* format, ...);
+
+	friend void to_json(nlohmann::json& file, const shared_str& value)
+	{
+		file = value.c_str();
+	}
+	
+	friend void from_json(const nlohmann::json& file, shared_str& value)
+	{
+		value = file.get<std::string>().c_str();
+	}
+
 };
 
 

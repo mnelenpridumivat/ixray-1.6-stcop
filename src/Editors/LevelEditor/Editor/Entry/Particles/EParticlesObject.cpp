@@ -175,6 +175,29 @@ bool EParticlesObject::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return true;
 }
 
+bool EParticlesObject::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+
+	inherited::LoadJSON(file, sect_name);
+
+	if (version >= 0x0012)
+		m_GameType = file[sect_name]["gameType"];
+
+	m_RefName = file[sect_name]["ref_name"];
+
+	xr_string Copy = *m_RefName;
+	if (!Compile(*m_RefName))
+	{
+		ELog.DlgMsg(mtError, "EParticlesObject: '%s' not found in library", Copy.c_str());
+		IsLoaded = true;
+		return false;
+	}
+ 
+	IsLoaded = true;
+	return true;
+}
+
 void EParticlesObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX(ini, sect_name);
@@ -183,6 +206,15 @@ void EParticlesObject::SaveLTX(CInifile& ini, LPCSTR sect_name)
 
     ini.w_string		(sect_name, "ref_name", m_RefName.c_str());
 	m_GameType.SaveLTX	(ini, sect_name);
+}
+
+void EParticlesObject::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = CPSOBJECT_VERSION;
+	file[sect_name]["ref_name"] = m_RefName.c_str();
+	file[sect_name]["gameType"] = m_GameType;
 }
 
 bool EParticlesObject::LoadStream(IReader& F)

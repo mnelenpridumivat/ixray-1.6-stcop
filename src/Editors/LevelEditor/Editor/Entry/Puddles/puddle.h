@@ -18,9 +18,11 @@ public:
 	//virtual void 	Move				( Fvector& amount ); // need for Shift Level
   	virtual bool 	LoadStream			(IReader&);
   	virtual bool 	LoadLTX				(CInifile& ini, LPCSTR sect_name);
+	virtual bool 	LoadJSON			(nlohmann::json& file, LPCSTR sect_name);
 	virtual void 	SaveStream			(IWriter&);
 	virtual void	OnFrame				() override;
   	virtual void 	SaveLTX				(CInifile& ini, LPCSTR sect_name);
+	virtual void 	SaveJSON			(nlohmann::json& file, LPCSTR sect_name);
 
 	virtual void 	OnUpdateTransform() override;
 };

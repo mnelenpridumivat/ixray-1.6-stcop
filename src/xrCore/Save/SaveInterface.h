@@ -38,6 +38,9 @@ public:
 	virtual ISaveObject& operator<<(s8& Value) = 0;
 	virtual ISaveObject& operator<<(bool& Value) = 0;
 	virtual ISaveObject& operator<<(shared_str& S) = 0;
+
+	virtual void SaveJSON(nlohmann::json& file) const = 0;
+	virtual void LoadJSON(const nlohmann::json& file) = 0;
 };
 
 class XRCORE_API ISaveObjectStackGuard

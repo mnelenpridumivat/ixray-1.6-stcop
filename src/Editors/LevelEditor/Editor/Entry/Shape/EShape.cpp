@@ -335,12 +335,24 @@ bool CEditShape::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return true;
 }
 
+bool CEditShape::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	inherited::LoadJSON	(file, sect_name);
+
+	shapes = file[sect_name]["shapes"];
+
+	ComputeBounds();
+	
+	IsLoaded = true;
+
+	return true;
+}
+
 void CEditShape::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	inherited::SaveLTX	(ini, sect_name);
 
 	ini.w_u32			(sect_name, "version", SHAPE_CURRENT_VERSION);
-
     ini.w_u32			(sect_name, "shapes_count", shapes.size());
     ini.w_u8			(sect_name, "shape_type", m_shape_type);
 
@@ -369,6 +381,14 @@ void CEditShape::SaveLTX(CInifile& ini, LPCSTR sect_name)
             ini.w_fvector3	(sect_name, buff, shapes[i].data.box.c);
        }
     }
+}
+
+void CEditShape::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	inherited::SaveJSON	(file, sect_name);
+
+	file[sect_name]["version"] = SHAPE_CURRENT_VERSION;
+	file[sect_name]["shapes"] = shapes;
 }
 
 bool CEditShape::LoadStream(IReader& F)

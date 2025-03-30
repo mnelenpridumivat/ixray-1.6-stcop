@@ -457,6 +457,50 @@ void CSector::LoadSectorDefLTX( CInifile& ini, LPCSTR sect_name, u32 item_idx )
     sector_items.push_back(sitem);
 }
 
+void CSector::LoadSectorDefJSON(nlohmann::json& file, LPCSTR sect_name, u32 item_idx)
+{
+	xr_string 		o_name = "";
+	xr_string 		m_name = "";
+
+	CSectorItem 	sitem;
+	string512 		buff;
+
+	sprintf			(buff,"item_object_name_%.4d",item_idx);
+	file[sect_name][buff].get_to(o_name);
+
+	// sector item
+	if(o_name.empty())
+		ELog.Msg		(mtError,"Sector Item contains not nnamed object - can't load");
+    
+	sitem.object=(CSceneObject*)Scene->FindObjectByName(o_name.c_str(),OBJCLASS_SCENEOBJECT);
+	if (sitem.object==NULL)
+	{
+		ELog.Msg		(mtError,"Sector Item contains object '%s' - can't load.\nObject not found.",o_name);
+		m_bHasLoadError = true;
+		return;
+	}
+
+	if (!(sitem.object->IsStatic()||sitem.object->IsMUStatic()))
+	{
+		ELog.Msg(mtError,"Sector Item contains object '%s' - can't load.\nObject is dynamic.",o_name);
+		m_bHasLoadError = true;
+		return;
+	}
+
+	sprintf			(buff,"item_mesh_name_%.4d",item_idx);
+	file[sect_name][buff].get_to(m_name);
+
+	sitem.mesh=sitem.object->GetReference()->FindMeshByName(m_name.c_str());
+	if (sitem.mesh==0)
+	{
+		ELog.Msg(mtError,"Sector Item contains object '%s' mesh '%s' - can't load.\nMesh not found.",o_name,m_name);
+		m_bHasLoadError = true;
+		return;
+	}
+
+	sector_items.push_back(sitem);
+}
+
 bool CSector::LoadLTX(CInifile& ini, LPCSTR sect_name)
 {
 	u32 version = ini.r_u32		(sect_name, "version");
@@ -489,14 +533,44 @@ bool CSector::LoadLTX(CInifile& ini, LPCSTR sect_name)
     return true;
 }
 
+bool CSector::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+	if( version<0x0011)
+	{
+		ELog.Msg( mtError, "CSector: Unsupported version.");
+		return false;
+	}
+
+	CCustomObject::LoadJSON		(file, sect_name);
+
+	sector_color = file[sect_name]["sector_color"].get<Fcolor>();
+
+	m_bDefault 					= file[sect_name]["default"];
+
+	u32 obj_cnt 				= file[sect_name]["items_count"];
+	for(u32 i=0; i<obj_cnt; ++i)
+	{
+		LoadSectorDefJSON(file, sect_name, i);
+	}
+
+	if(version>=0x0012)
+		m_map_idx 				= file[sect_name]["change_map_to_idx"];
+        
+	if (sector_items.empty()) return false;
+
+	m_Flags.set(flNeedUpdateVolume,TRUE);
+	IsLoaded = true;
+
+	return true;
+}
+
 void CSector::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX(ini, sect_name);
 
 	ini.w_u32			(sect_name, "version", SECTOR_VERSION);
-
 	ini.w_color			(sect_name, "sector_color", sector_color.get());
-
 	ini.w_bool			(sect_name, "default", m_bDefault);
 
     int count=0;
@@ -512,6 +586,28 @@ void CSector::SaveLTX(CInifile& ini, LPCSTR sect_name)
     }
    	ini.w_u8(sect_name, "change_map_to_idx", m_map_idx);
     
+}
+
+void CSector::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = SECTOR_VERSION;
+	file[sect_name]["sector_color"] = sector_color.get();
+	file[sect_name]["default"] = m_bDefault;
+
+	int count=0;
+	file[sect_name]["items_count"] = sector_items.size();
+	string512			buff;
+	for(SItemIt it=sector_items.begin(); it!=sector_items.end(); ++it)
+	{
+		sprintf			(buff,"item_object_name_%.4d",count);
+		file[sect_name][buff] = it->object->GetName();
+		sprintf			(buff,"item_mesh_name_%.4d",count);
+		file[sect_name][buff] = it->mesh->Name().c_str();
+		++count;
+	}
+	file[sect_name]["change_map_to_idx"] = m_map_idx;
 }
 
 bool CSector::LoadStream(IReader& F)

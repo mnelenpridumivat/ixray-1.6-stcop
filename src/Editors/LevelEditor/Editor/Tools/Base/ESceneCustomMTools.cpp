@@ -56,6 +56,19 @@ void ESceneToolBase::SaveLTX(CInifile& ini, int id)
     ini.w_u32		("modif", "time", m_ModifTime);
 }
 
+bool ESceneToolBase::LoadJSON(nlohmann::json& file)
+{
+    m_ModifName 	= file["modif"]["name"].get<std::string>().c_str();
+    m_ModifTime 	= file["modif"]["time"].get<time_t>();
+    return 			true;
+}
+
+void ESceneToolBase::SaveJSON(nlohmann::json& file, int id)
+{
+    file["modif"]["name"] = m_ModifName.c_str();
+    file["modif"]["time"] = m_ModifTime;
+}
+
 bool ESceneToolBase::LoadStream(IReader& F)
 {
 	if (F.find_chunk(CHUNK_TOOLS_TAG))

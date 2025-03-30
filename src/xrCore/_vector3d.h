@@ -4,7 +4,7 @@
 #ifndef IC
 #define IC __forceinline
 #endif
-
+#include <json/json.hpp>
 #include "Save/SaveInterface.h"
 
 template <class T>
@@ -538,6 +538,8 @@ public:
 			up.z		= -dir.y * right.x ;
 		}
 	}
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(_vector3, x, y, z)
 };
 typedef _vector3<float>		Fvector;
 typedef _vector3<float>		Fvector3;
@@ -629,7 +631,15 @@ template<typename T> ISaveObject& operator<<(ISaveObject& Object, _vector3<T>& V
 	return Object << Value.x << Value.y << Value.z;
 }
 
-/*template<> CSaveObject& operator<<(CSaveObject& Object, Fvector& Value);
-template<> CSaveObject& operator<<(CSaveObject& Object, Dvector& Value);
-template<> CSaveObject& operator<<(CSaveObject& Object, Ivector& Value);*/
+template<typename T>
+void to_json(nlohmann::json& j, const _vector3<T>& p) {
+	j = nlohmann::json{{"x", p.x}, {"y", p.y}, {"z", p.z}};
+}
+
+template<typename T>
+void from_json(const nlohmann::json& j, _vector3<T>& p) {
+	j.at("x").get_to(p.x);
+	j.at("y").get_to(p.y);
+	j.at("z").get_to(p.z);
+}
 

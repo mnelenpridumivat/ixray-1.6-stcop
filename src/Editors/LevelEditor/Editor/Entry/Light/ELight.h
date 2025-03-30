@@ -1,5 +1,5 @@
 #pragma once
-
+#include <json/json.hpp>
 
 #define LCONTROL_HEMI			"$hemi"				// hemisphere
 #define LCONTROL_SUN			"$sun"				// sun
@@ -94,8 +94,10 @@ public:
         }
         void		SaveStream(IWriter& F);
         void		LoadStream(IReader& F);
-        void		SaveLTX(CInifile& ini, LPCSTR sect_name);
-        void		LoadLTX(CInifile& ini, LPCSTR sect_name);
+    	void		SaveLTX(CInifile& ini, LPCSTR sect_name);
+    	void		LoadLTX(CInifile& ini, LPCSTR sect_name);
+    	
+    	NLOHMANN_DEFINE_TYPE_INTRUSIVE(SFuzzyData, m_ShapeType, m_SphereRadius, m_BoxDimension, m_PointCount, m_Positions);
     };
     SFuzzyData*		m_FuzzyData;
 
@@ -137,8 +139,10 @@ public:
     // file system function
 	virtual bool 	LoadStream		(IReader&);
 	virtual bool 	LoadLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual bool 	LoadJSON		(nlohmann::json& file, LPCSTR sect_name);
 	virtual void 	SaveStream			(IWriter&);
 	virtual void 	SaveLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual void 	SaveJSON		(nlohmann::json& file, LPCSTR sect_name);
 
     
 	virtual void	FillProp		(LPCSTR pref, PropItemVec& items);
@@ -159,4 +163,4 @@ public:
     
     // events
     virtual void    OnShowHint  	(AStringVec& dest);
-};                                                     
+};

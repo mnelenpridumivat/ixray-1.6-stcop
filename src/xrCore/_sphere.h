@@ -148,6 +148,8 @@ public:
 	{
 		return T( PI_MUL_4 / 3 ) * (R*R*R);
 	}
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(_sphere, P, R)
 };
 
 typedef _sphere<float>	Fsphere;

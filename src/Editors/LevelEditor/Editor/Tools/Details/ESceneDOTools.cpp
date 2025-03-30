@@ -437,6 +437,179 @@ bool EDetailManager::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool EDetailManager::LoadJSON(nlohmann::json& file)
+{
+    inherited::LoadJSON(file);
+
+    // version
+    u32 version = file["main"]["version"];
+
+    if (version != DETMGR_VERSION) {
+        ELog.Msg(mtError, "EDetailManager: unsupported version.");
+        return false;
+    }
+
+    // flags
+    m_Flags = file["main"]["flags"];
+
+    // header
+    dtH.version = file["detail_header"]["version"];
+    dtH.object_count = file["detail_header"]["object_count"];
+    dtH.offs_x = file["detail_header"]["offset_x"];
+    dtH.offs_z = file["detail_header"]["offset_z"];
+    dtH.size_x = file["detail_header"]["size_x"];
+    dtH.size_z = file["detail_header"]["size_z"];
+
+    // slots
+    u32 cnt_detail_slots = file["main"]["detail_slots_count"];
+    if (cnt_detail_slots)dtSlots = xr_alloc<DetailSlot>(cnt_detail_slots);
+    m_Selected.resize(cnt_detail_slots);
+
+    if (cnt_detail_slots)
+    {
+        for (u32 i = 0; i < cnt_detail_slots; i++)
+        {
+            string128 sect_name;
+            sprintf(sect_name, "detail_slot_%d", i);
+            dtSlots[i].y_base = file["main"][sect_name]["y_base"];
+            dtSlots[i].y_height = file["main"][sect_name]["y_height"];
+            dtSlots[i].id0 = file["main"][sect_name]["id0"];
+            dtSlots[i].id1 = file["main"][sect_name]["id1"];
+            dtSlots[i].id2 = file["main"][sect_name]["id2"];
+            dtSlots[i].id3 = file["main"][sect_name]["id3"];
+            dtSlots[i].c_dir = file["main"][sect_name]["c_dir"];
+            dtSlots[i].c_hemi = file["main"][sect_name]["c_hemi"];
+            dtSlots[i].c_r = file["main"][sect_name]["c_r"];
+            dtSlots[i].c_g = file["main"][sect_name]["c_g"];
+            dtSlots[i].c_b = file["main"][sect_name]["c_b"];
+
+            dtSlots[i].palette[0].a0 = file["main"][sect_name]["palette_0"]["a0"];
+            dtSlots[i].palette[0].a1 = file["main"][sect_name]["palette_0"]["a1"];
+            dtSlots[i].palette[0].a2 = file["main"][sect_name]["palette_0"]["a2"];
+            dtSlots[i].palette[0].a3 = file["main"][sect_name]["palette_0"]["a3"];
+
+            dtSlots[i].palette[1].a0 = file["main"][sect_name]["palette_1"]["a0"];
+            dtSlots[i].palette[1].a1 = file["main"][sect_name]["palette_1"]["a1"];
+            dtSlots[i].palette[1].a2 = file["main"][sect_name]["palette_1"]["a2"];
+            dtSlots[i].palette[1].a3 = file["main"][sect_name]["palette_1"]["a3"];
+
+            dtSlots[i].palette[2].a0 = file["main"][sect_name]["palette_2"]["a0"];
+            dtSlots[i].palette[2].a1 = file["main"][sect_name]["palette_2"]["a1"];
+            dtSlots[i].palette[2].a2 = file["main"][sect_name]["palette_2"]["a2"];
+            dtSlots[i].palette[2].a3 = file["main"][sect_name]["palette_2"]["a3"];
+
+            dtSlots[i].palette[3].a0 = file["main"][sect_name]["palette_3"]["a0"];
+            dtSlots[i].palette[3].a1 = file["main"][sect_name]["palette_3"]["a1"];
+            dtSlots[i].palette[3].a2 = file["main"][sect_name]["palette_3"]["a2"];
+            dtSlots[i].palette[3].a3 = file["main"][sect_name]["palette_3"]["a3"];
+        }
+    }
+
+    // objects
+
+    VERIFY(objects.empty());
+    VERIFY(m_ColorIndices.empty());
+
+    bool bRes = true;
+
+    u32 cnt_detail_objects = file["main"]["detail_objects_count"];
+
+    for (u32 i = 0; i < cnt_detail_objects; i++)
+    {
+        EDetail* DO = new EDetail();
+        string128 sect_name;
+        sprintf(sect_name, "detail_object_%d", i);
+        if (DO->LoadJSON(file["main"], sect_name)) objects.push_back(DO);
+        else bRes = false;
+    }
+
+    // color index map
+    u32 cnt_color_indices = file["main"]["color_indices_count"];
+    for (u32 i = 0; i < cnt_color_indices; i++)
+    {
+        string128 sect_name;
+        sprintf(sect_name, "color_index_%d", i);
+        u32 index = file["main"][sect_name]["index"];
+        u32 ref_cnt = file["main"][sect_name]["reference_count"];
+        for (u32 j = 0; j < ref_cnt; j++)
+        {
+            string128 key;
+            sprintf(key, "reference_%d", j);
+            EDetail* DO = FindDOByName(file["main"][sect_name][key].get<std::string>().c_str());
+            if (DO) m_ColorIndices[index].push_back(DO);
+            else bRes = false;
+        }
+    }
+
+    InvalidateCache();
+
+    if (!objects.empty())
+        hw_Load();
+
+    if (!bRes)
+    {
+        ELog.DlgMsg(mtError, "EDetailManager: Some objects removed. Reinitialize objects.");
+        InvalidateSlots();
+    }
+
+    // internal
+    // bbox
+    m_BBox.min.x = file["main"]["bbox_min"]["x"];
+    m_BBox.min.y = file["main"]["bbox_min"]["y"];
+    m_BBox.min.z = file["main"]["bbox_min"]["z"];
+    m_BBox.max.x = file["main"]["bbox_max"]["x"];
+    m_BBox.max.y = file["main"]["bbox_max"]["y"];
+    m_BBox.max.z = file["main"]["bbox_max"]["z"];
+
+    // snap objects
+    u32 cnt_snap_objects = file["main"]["snap_objects_count"];
+
+    for (u32 i = 0; i < cnt_snap_objects; i++)
+    {
+        string128 sect_name;
+        sprintf(sect_name, "snap_object_%d", i);
+        shared_str s = file["main"][sect_name]["name"].get<std::string>().c_str();
+        CCustomObject* O = Scene->FindObjectByName(s.c_str(), OBJCLASS_SCENEOBJECT);
+        if (!O) ELog.Msg(mtError, "EDetailManager: Can't find snap object '%s'.", s.c_str());
+        else m_SnapObjects.push_back(O);
+    }
+
+    // detail density
+    ps_r__Detail_density = file["main"]["detail_density"];
+
+    // base texture
+    shared_str s = file["main"]["base_texture"].get<std::string>().c_str();
+    if (s.size())
+    {
+        string256 image_name;
+        sprintf(image_name, "%s", s.c_str());
+
+        if (m_Base.LoadImage(image_name))
+        {
+            m_Base.CreateShader();
+            m_RTFlags.set(flRTGenerateBaseMesh, TRUE);
+        }
+        else
+        {
+            ELog.Msg(mtError, "EDetailManager: Can't find base texture '%s'.", image_name);
+            ClearSlots();
+            ClearBase();
+        }
+    }
+    else
+    {
+        ELog.Msg(mtError, "EDetailManager: Can't find base texture.");
+        ClearSlots();
+        ClearBase();
+    }
+
+    InvalidateCache();
+
+    IsLoaded = true;
+
+    return true;
+}
+
 void EDetailManager::SaveLTX(CInifile& ini, int id)
 {
     inherited::SaveLTX(ini, id);
@@ -543,6 +716,132 @@ void EDetailManager::SaveLTX(CInifile& ini, int id)
             string128 sect_name;
             sprintf(sect_name, "snap_object_%d", i);
             ini.w_string(sect_name, "name", (*o_it)->GetName());
+        }
+    }
+}
+
+void EDetailManager::SaveJSON(nlohmann::json& file, int id)
+{
+    inherited::SaveJSON(file, id);
+
+    // version
+    file["main"]["version"] = DETMGR_VERSION;
+
+    // flags
+    file["main"]["flags"] = m_Flags.get();
+
+    // header
+    file["detail_header"]["version"] = dtH.version;
+    file["detail_header"]["object_count"] = dtH.object_count;
+    file["detail_header"]["offset_x"] = dtH.offs_x;
+    file["detail_header"]["offset_z"] = dtH.offs_z;
+    file["detail_header"]["size_x"] = dtH.size_x;
+    file["detail_header"]["size_z"] = dtH.size_z;
+
+    // objects
+    u32 cnt_detail_objects = objects.size();
+    file["main"]["detail_objects_count"] = cnt_detail_objects;
+    if (cnt_detail_objects)
+    {
+        u32 i = 0;
+        for (DetailIt it = objects.begin(); it != objects.end(); it++, i++)
+        {
+            string128 sect_name;
+            sprintf(sect_name, "detail_object_%d", i);
+            ((EDetail*)(*it))->SaveJSON(file, sect_name);
+        }
+    }
+
+    // color index map
+    u32 cnt_color_indices = m_ColorIndices.size();
+    file["main"]["color_indices_count"] = cnt_color_indices;
+    if (cnt_color_indices)
+    {
+        u32 i = 0;
+        for (ColorIndexPairIt i_it = m_ColorIndices.begin(); i_it != m_ColorIndices.end(); i_it++, i++)
+        {
+            string128 sect_name;
+            sprintf(sect_name, "color_index_%d", i);
+            file["main"][sect_name]["index"] = i_it->first;
+            file["main"][sect_name]["reference_count"] = static_cast<u8>(i_it->second.size());
+
+            u32 j = 0;
+            for (const auto& item : i_it->second)
+            {
+                string128 key;
+                sprintf(key, "reference_%d", j);
+                file["main"][sect_name][key] = item->GetName();
+                j++;
+            }
+        }
+    }
+
+    // slots
+    u32 cnt_detail_slots = dtH.size_x * dtH.size_z;
+    file["main"]["detail_slots_count"] = cnt_detail_slots;
+    if (cnt_detail_slots)
+    {
+        for (u32 i = 0; i < cnt_detail_slots; i++)
+        {
+            string128 sect_name;
+            sprintf(sect_name, "detail_slot_%d", i);
+            file["main"][sect_name]["y_base"] = (u64)dtSlots[i].y_base;
+            file["main"][sect_name]["y_height"] = (u64)dtSlots[i].y_height;
+            file["main"][sect_name]["id0"] = (u64)dtSlots[i].id0;
+            file["main"][sect_name]["id1"] = (u64)dtSlots[i].id1;
+            file["main"][sect_name]["id2"] = (u64)dtSlots[i].id2;
+            file["main"][sect_name]["id3"] = (u64)dtSlots[i].id3;
+            file["main"][sect_name]["c_dir"] = (u64)dtSlots[i].c_dir;
+            file["main"][sect_name]["c_hemi"] = (u64)dtSlots[i].c_hemi;
+            file["main"][sect_name]["c_r"] = (u64)dtSlots[i].c_r;
+            file["main"][sect_name]["c_g"] = (u64)dtSlots[i].c_g;
+            file["main"][sect_name]["c_b"] = (u64)dtSlots[i].c_b;
+
+            file["main"][sect_name]["palette_0"]["a0"] = (u64)dtSlots[i].palette[0].a0;
+            file["main"][sect_name]["palette_0"]["a1"] = (u64)dtSlots[i].palette[0].a1;
+            file["main"][sect_name]["palette_0"]["a2"] = (u64)dtSlots[i].palette[0].a2;
+            file["main"][sect_name]["palette_0"]["a3"] = (u64)dtSlots[i].palette[0].a3;
+            file["main"][sect_name]["palette_1"]["a0"] = (u64)dtSlots[i].palette[0].a0;
+            file["main"][sect_name]["palette_1"]["a1"] = (u64)dtSlots[i].palette[0].a1;
+            file["main"][sect_name]["palette_1"]["a2"] = (u64)dtSlots[i].palette[0].a2;
+            file["main"][sect_name]["palette_1"]["a3"] = (u64)dtSlots[i].palette[0].a3;
+            file["main"][sect_name]["palette_2"]["a0"] = (u64)dtSlots[i].palette[0].a0;
+            file["main"][sect_name]["palette_2"]["a1"] = (u64)dtSlots[i].palette[0].a1;
+            file["main"][sect_name]["palette_2"]["a2"] = (u64)dtSlots[i].palette[0].a2;
+            file["main"][sect_name]["palette_2"]["a3"] = (u64)dtSlots[i].palette[0].a3;
+            file["main"][sect_name]["palette_3"]["a0"] = (u64)dtSlots[i].palette[0].a0;
+            file["main"][sect_name]["palette_3"]["a1"] = (u64)dtSlots[i].palette[0].a1;
+            file["main"][sect_name]["palette_3"]["a2"] = (u64)dtSlots[i].palette[0].a2;
+            file["main"][sect_name]["palette_3"]["a3"] = (u64)dtSlots[i].palette[0].a3;
+        }
+    }
+
+    // internal
+    // bbox
+    file["main"]["bbox_min"]["x"] = m_BBox.min.x;
+    file["main"]["bbox_min"]["y"] = m_BBox.min.y;
+    file["main"]["bbox_min"]["z"] = m_BBox.min.z;
+    file["main"]["bbox_max"]["x"] = m_BBox.max.x;
+    file["main"]["bbox_max"]["y"] = m_BBox.max.y;
+    file["main"]["bbox_max"]["z"] = m_BBox.max.z;
+
+    // base texture
+    file["main"]["base_texture"] = m_Base.Valid() ? m_Base.GetName() : NULL;
+
+    // detail density
+    file["main"]["detail_density"] = ps_r__Detail_density;
+
+    u32 cnt_snap_objects = m_SnapObjects.size();
+    file["main"]["snap_objects_count"] = cnt_snap_objects;
+
+    if (cnt_snap_objects)
+    {
+        u32 i = 0;
+        for (ObjectIt o_it = m_SnapObjects.begin(); o_it != m_SnapObjects.end(); o_it++, i++)
+        {
+            string128 sect_name;
+            sprintf(sect_name, "snap_object_%d", i);
+            file["main"][sect_name]["name"] = (*o_it)->GetName();
         }
     }
 }

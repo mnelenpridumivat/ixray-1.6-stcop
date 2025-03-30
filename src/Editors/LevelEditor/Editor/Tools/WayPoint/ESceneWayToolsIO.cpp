@@ -20,11 +20,31 @@ bool ESceneWayTool::LoadLTX(CInifile& ini)
 	return true;
 }
 
+bool ESceneWayTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=WAY_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+	return true;
+}
+
 void ESceneWayTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
 
 	ini.w_u32			("main", "version",WAY_TOOLS_VERSION);
+}
+
+void ESceneWayTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+
+	file["main"]["version"] = WAY_TOOLS_VERSION;
 }
 
 bool ESceneWayTool::LoadStream(IReader& F)

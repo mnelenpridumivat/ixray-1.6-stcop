@@ -423,6 +423,52 @@ void CSaveChunk::Parse(IReader* stream)
 	}
 }
 
+void CSaveChunk::SaveJSON(nlohmann::json& file) const
+{
+	ISaveable::SaveJSON(file);
+	file["name"] = _chunkName;
+	{
+		for(const auto& elem : _subchunks)
+		{
+			file["subchunks"][elem.first.c_str()] = nlohmann::json();
+			elem.second->SaveJSON(file["subchunks"][elem.first.c_str()]);
+		}
+	}
+	{
+		for(const auto& elem : _variables)
+		{
+			file["variables"].push_back(nlohmann::json());
+			elem->SaveJSON(file["variables"].back());
+		}
+	}
+}
+
+void CSaveChunk::LoadJSON(const nlohmann::json& file)
+{
+	VERIFY(_variables.empty());
+	VERIFY(_subchunks.empty());
+	for(const auto& elem : file["subchunks"])
+	{
+		auto subchunk = new CSaveChunk(elem["name"]);
+		subchunk->LoadJSON(elem);
+		_subchunks[elem["name"]] = subchunk;
+	}
+	for (const auto& elem : file["variables"])
+	{
+		auto type = magic_enum::enum_cast<ESaveVariableType>(elem["type"].get<std::string>());
+		VERIFY(type.has_value());
+		xr_string subchunk_name;
+		LPCSTR ptr = nullptr;
+		if(type.value() == ESaveVariableType::t_chunk)
+		{
+			subchunk_name = elem["name"].get<xr_string>();
+			ptr = subchunk_name.c_str();
+		}
+		_variables.emplace_back(CreateSaveable(type.value(), ptr));
+		_variables.back()->LoadJSON(elem);
+	}
+}
+
 void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 {
 	ESaveVariableType type = type_key;

@@ -87,6 +87,16 @@ public:
 
 	using xrStringVector = xr_vector<xr_string>;
 	static xr_string Join(xrStringVector::iterator beginIter, xrStringVector::iterator endIter, const char delimeter = '\0');
+
+	friend void to_json(nlohmann::json& file, const xr_string& value)
+	{
+		file = value.c_str();
+	}
+	
+	friend void from_json(const nlohmann::json& file, xr_string& value)
+	{
+		value = file.get<std::string>().c_str();
+	}
 };
 
 using SStringVec = xr_vector<xr_string>;

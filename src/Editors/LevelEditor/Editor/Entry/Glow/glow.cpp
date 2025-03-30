@@ -138,14 +138,31 @@ bool CGlow::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	CCustomObject::LoadLTX(ini, sect_name);
 
    	m_ShaderName		= ini.r_string (sect_name, "shader_name");
-
 	m_TexName			= ini.r_string	(sect_name, "texture_name");
-
 	m_fRadius  			= ini.r_float	(sect_name, "radius");
-
     m_Flags.assign		(ini.r_u32(sect_name, "flags"));
 
     return true;
+}
+
+bool CGlow::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version = file[sect_name]["version"];
+
+	if(version!=GLOW_VERSION)
+	{
+		ELog.DlgMsg( mtError, "CGlow: Unsupported version.");
+		return false;
+	}
+
+	CCustomObject::LoadJSON(file, sect_name);
+
+	m_ShaderName		= file[sect_name]["shader_name"];
+	m_TexName			= file[sect_name]["texture_name"];
+	m_fRadius  			= file[sect_name]["radius"];
+	m_Flags = file[sect_name]["flags"];
+
+	return true;
 }
 
 void CGlow::SaveLTX(CInifile& ini, LPCSTR sect_name)
@@ -153,14 +170,21 @@ void CGlow::SaveLTX(CInifile& ini, LPCSTR sect_name)
 	CCustomObject::SaveLTX(ini, sect_name);
 
 	ini.w_u16		(sect_name, "version", GLOW_VERSION);
-
 	ini.w_float   	(sect_name, "radius", m_fRadius);
-
     ini.w_string 	(sect_name, "shader_name", m_ShaderName.c_str());
-
 	ini.w_string	(sect_name, "texture_name", m_TexName.c_str());
-
 	ini.w_u16		(sect_name, "flags", m_Flags.get());
+}
+
+void CGlow::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = GLOW_VERSION;
+	file[sect_name]["radius"] = m_fRadius;
+	file[sect_name]["shader_name"] = m_ShaderName.c_str();
+	file[sect_name]["texture_name"] = m_TexName.c_str();
+	file[sect_name]["flags"] = m_Flags.get();
 }
 
 bool CGlow::LoadStream(IReader& F)

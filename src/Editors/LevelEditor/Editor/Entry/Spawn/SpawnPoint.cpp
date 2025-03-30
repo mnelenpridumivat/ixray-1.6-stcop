@@ -3,6 +3,7 @@
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects.h"
+#include "Save/SaveManager.h"
 
 #define SPAWNPOINT_CHUNK_VERSION		0xE411
 #define SPAWNPOINT_CHUNK_POSITION		0xE412
@@ -322,6 +323,45 @@ void CSpawnPoint::SSpawnData::SaveLTX	(CInifile& ini, LPCSTR sect_name)
 	Packet.inistream 		= &ini_stream;
 	
 	m_Data->Spawn_Write	(Packet,TRUE);
+}
+
+bool CSpawnPoint::SSpawnData::LoadJSON(json& file)
+{
+	xr_string temp 		= file["name"].get<std::string>().c_str();
+	Create				(temp.c_str());
+
+	if(file.contains("fl"))
+	{
+		m_flags.assign		(file["fl"].get<u8>());
+	}
+
+	auto save_obj = new CSaveObjectLoad();
+	*save_obj = file["spawn_data"];
+	
+	if (Valid())
+	{
+		if (!m_Data->Spawn_Serialize(*save_obj, true))
+		{
+			Destroy();
+		}
+	}
+
+	xr_delete	(save_obj);
+
+	return Valid();
+}
+
+void CSpawnPoint::SSpawnData::SaveJSON(json& file)
+{
+	file["name"] = m_Data->name();
+	file["fl"] = m_flags.get();
+	
+	auto save_obj = new CSaveObjectSave();
+
+	m_Data->Spawn_Serialize(*save_obj, true);
+	
+	file["spawn_data"] = *save_obj;
+	xr_delete	(save_obj);
 }
 
 void CSpawnPoint::SSpawnData::SaveStream(IWriter& F)
@@ -1185,6 +1225,84 @@ bool CSpawnPoint::LoadLTX(CInifile& ini, LPCSTR sect_name)
 	return true;
 }
 
+bool CSpawnPoint::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	xrCriticalSectionGuard guard(mLuaEnter);
+
+	u32 version = file[sect_name]["version"];
+
+	if(version<0x0014)
+	{
+		ELog.Msg( mtError, "SPAWNPOINT: Unsupported version.");
+		return false;
+	}
+
+	CCustomObject::LoadJSON(file, sect_name);
+	m_Type 			= (EPointType)file[sect_name]["type"];
+
+	if (m_Type>=ptMaxType)
+	{
+		ELog.Msg( mtError, "SPAWNPOINT: Unsupported spawn version.");
+		return false;
+	}
+	switch (m_Type)
+	{
+	case ptSpawnPoint:
+		{
+			if (!m_SpawnData.LoadJSON(file))
+			{
+				ELog.Msg( mtError, "SPAWNPOINT: Can't load Spawn Data.");
+				return false;
+			}
+			SetValid		(true);
+		}break;
+	case ptRPoint:
+		{
+			if(version>=0x0017)
+				m_rpProfile				= file[sect_name]["rp_profile"];
+				
+			m_RP_TeamID					= file[sect_name]["team_id"];
+			m_RP_Type					= file[sect_name]["rp_type"];
+			m_GameType = file[sect_name]["game_type"];
+		}
+		break;
+	case ptEnvMod:
+		{
+			m_EM_Radius			= file[sect_name]["em_radius"];
+			m_EM_Power			= file[sect_name]["em_power"];
+			m_EM_ViewDist		= file[sect_name]["view_dist"];
+			m_EM_FogColor		= file[sect_name]["fog_color"];
+			m_EM_FogDensity		= file[sect_name]["fog_density"];
+			m_EM_AmbientColor	= file[sect_name]["ambient_color"];
+			m_EM_SkyColor		= file[sect_name]["sky_color"];
+			m_EM_HemiColor		= file[sect_name]["hemi_color"];
+			if(version>=0x0016)
+				m_EM_Flags = file[sect_name]["em_flags"];
+			if(version>=0x0018)
+				m_EM_ShapeType		= file[sect_name]["shape_type"];
+		}
+		break;
+	default: THROW;
+	}
+
+	// objects
+	if(file[sect_name].contains("attached_count"))
+	{
+		Scene->ReadObjectsJSON(file, sect_name, "attached", EScene::TAppendObject(this, &CSpawnPoint::OnAppendObject),0);
+	}
+
+	UpdateTransform	();
+
+	// BUG fix
+	CEditShape* shape	= smart_cast<CEditShape*>(m_AttachedObject);
+	if (shape)
+		SetScale 	( shape->GetScale());
+	
+	IsLoaded = true;
+
+	return true;
+}
+
 void CSpawnPoint::SaveLTX(CInifile& ini, LPCSTR sect_name)
 {
 	CCustomObject::SaveLTX(ini, sect_name);
@@ -1228,6 +1346,54 @@ void CSpawnPoint::SaveLTX(CInifile& ini, LPCSTR sect_name)
 		ini.w_u16		(sect_name, "em_flags", m_EM_Flags.get());
 		ini.w_u8		(sect_name, "shape_type", m_EM_ShapeType);
 	}break;
+
+	default: THROW;
+	}
+}
+
+void CSpawnPoint::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	CCustomObject::SaveJSON(file, sect_name);
+
+	file[sect_name]["version"] = SPAWNPOINT_VERSION;
+
+	// save attachment
+	if (m_AttachedObject)
+	{
+		ObjectList 					lst;
+		lst.push_back				(m_AttachedObject);
+		Scene->SaveObjectsJSON		(lst, sect_name, "attached", file);
+	}
+
+	file[sect_name]["type"] = m_Type;
+	
+	switch (m_Type)
+	{
+	case ptSpawnPoint:
+		{
+			string128	buff;
+			m_SpawnData.SaveJSON(file);
+		}break;
+	case ptRPoint:
+		{
+			file[sect_name]["team_id"] = m_RP_TeamID;
+			file[sect_name]["rp_profile"] = m_rpProfile.c_str();
+			file[sect_name]["rp_type"] = m_RP_Type;
+			file[sect_name]["game_type"] = m_GameType;
+		}break;
+	case ptEnvMod:
+		{
+			file[sect_name]["em_radius"] = m_EM_Radius;
+			file[sect_name]["em_power"] = m_EM_Power;
+			file[sect_name]["view_dist"] = m_EM_ViewDist;
+			file[sect_name]["fog_color"] = m_EM_FogColor;
+			file[sect_name]["fog_density"] = m_EM_FogDensity;
+			file[sect_name]["ambient_color"] = m_EM_AmbientColor;
+			file[sect_name]["sky_color"] = m_EM_SkyColor;
+			file[sect_name]["hemi_color"] = m_EM_HemiColor;
+			file[sect_name]["em_flags"] = m_EM_Flags.get();
+			file[sect_name]["shape_type"] = m_EM_ShapeType;
+		}break;
 
 	default: THROW;
 	}

@@ -95,10 +95,30 @@ bool ESceneFogVolumeTool::LoadLTX(CInifile& ini)
 	return true;
 }
 
+bool ESceneFogVolumeTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=FOG_VOL_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+
+	return true;
+}
+
 void ESceneFogVolumeTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
 	ini.w_u32		("main", "version", FOG_VOL_TOOLS_VERSION);
+}
+
+void ESceneFogVolumeTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+	file["main"]["version"] = FOG_VOL_TOOLS_VERSION;
 }
 
 void ESceneFogVolumeTool::GroupSelected()
@@ -193,7 +213,29 @@ bool EFogVolume::LoadLTX(CInifile& ini, LPCSTR sect_name)
     if(version>1 && m_volumeType==fvEmitter)
     	m_volume_profile		= ini.r_string(sect_name,"profile");
         
-	OnChangeEnvs				(NULL);
+	OnChangeEnvs				(nullptr);
+
+	return 						true;
+}
+
+bool EFogVolume::LoadJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	u32 version 				= file[sect_name]["version"];
+
+	inherited::LoadJSON			(file, sect_name);
+
+	if(version>0)
+	{
+		m_volumeType			= file[sect_name]["volume_type"];
+		m_group_id				= file[sect_name]["group_id"];
+	}
+	
+	if(version>1 && m_volumeType==fvEmitter)
+	{
+		m_volume_profile		= file[sect_name]["profile"];
+	}
+        
+	OnChangeEnvs				(nullptr);
 
 	return 						true;
 }
@@ -208,6 +250,20 @@ void EFogVolume::SaveLTX(CInifile& ini, LPCSTR sect_name)
 
     if(m_volumeType==fvEmitter)
     	ini.w_string	(sect_name, "profile", m_volume_profile.c_str());
+}
+
+void EFogVolume::SaveJSON(nlohmann::json& file, LPCSTR sect_name)
+{
+	inherited::SaveJSON	(file, sect_name);
+
+	file[sect_name]["version"] = FOG_VOL_VERSION;
+	file[sect_name]["volume_type"] = m_volumeType;
+	file[sect_name]["group_id"] = m_group_id;
+
+	if(m_volumeType==fvEmitter)
+	{
+		file[sect_name]["profile"] = m_volume_profile.c_str();
+	}
 }
 
 bool EFogVolume::LoadStream(IReader& F)

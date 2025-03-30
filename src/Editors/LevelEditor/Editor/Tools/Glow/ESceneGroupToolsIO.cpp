@@ -38,12 +38,35 @@ bool ESceneGroupTool::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool ESceneGroupTool::LoadJSON(nlohmann::json& file)
+{
+	LPCSTR section = "main";
+	u16 version 	= file[section]["version"];
+
+	if( version!=GROUP_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+	if (!inherited::LoadJSON(file)) return false;
+
+	return true;
+}
+
 void ESceneGroupTool::SaveLTX(CInifile& ini, int id)
 {
 	LPCSTR section	= "main";
 	ini.w_u16(section, "version", GROUP_TOOLS_VERSION);
 
 	inherited::SaveLTX	(ini, id);
+}
+
+void ESceneGroupTool::SaveJSON(nlohmann::json& file, int id)
+{
+	LPCSTR section	= "main";
+	file[section]["version"] = GROUP_TOOLS_VERSION;
+
+	inherited::SaveJSON	(file, id);
 }
 
 void ESceneGroupTool::SaveStream(IWriter& F)

@@ -738,6 +738,20 @@ public:
 	    m[3][3] = 1.0f;
 	    return *this;
 	}
+
+	/*
+	Tvector i;	T	_14_;
+	Tvector j;	T	_24_;
+	Tvector k;	T	_34_;
+	Tvector c;	T	_44_;
+	*/
+	
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(_matrix,
+		i, _14_,
+		j, _24_,
+		k, _34_,
+		c, _44_
+	)
 };
 
 typedef		_matrix<float>	Fmatrix;

@@ -27,8 +27,10 @@ public:
     virtual bool   		IsNeedSave				(){return inherited::IsNeedSave();}
     virtual bool   		LoadStream            	(IReader&);
 	virtual bool   		LoadLTX            		(CInifile&);
+	virtual bool   		LoadJSON            	(nlohmann::json&);
     virtual void   		SaveStream            	(IWriter&);
     virtual void   		SaveLTX            		(CInifile&, int id);
+    virtual void   		SaveJSON            	(nlohmann::json&, int id);
     virtual bool		LoadSelection      		(IReader&);
     virtual void		SaveSelection      		(IWriter&);
 
@@ -57,8 +59,10 @@ public:
 
   	virtual bool 		LoadStream		(IReader&);
   	virtual bool 		LoadLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual bool 		LoadJSON		(nlohmann::json& file, LPCSTR sect_name);
 	virtual void 		SaveStream		(IWriter&);
   	virtual void 		SaveLTX			(CInifile& ini, LPCSTR sect_name);
+	virtual void 		SaveJSON		(nlohmann::json& file, LPCSTR sect_name);
 
 	virtual void		FillPropObjects		(LPCSTR pref, PropItemVec& values);
 	virtual bool 		GetSummaryInfo	(SSceneSummary* inf);

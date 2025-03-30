@@ -25,6 +25,22 @@ bool ESceneSpawnTool::LoadLTX(CInifile& ini)
     return true;
 }
 
+bool ESceneSpawnTool::LoadJSON(nlohmann::json& file)
+{
+	u32 version 	= file["main"]["version"];
+	if( version!=SPAWN_TOOLS_VERSION )
+	{
+		ELog.DlgMsg( mtError, "%s tools: Unsupported version.",ClassDesc());
+		return false;
+	}
+
+	inherited::LoadJSON(file);
+
+	m_Flags = file["main"]["flags"];
+
+	return true;
+}
+
 void ESceneSpawnTool::SaveLTX(CInifile& ini, int id)
 {
 	inherited::SaveLTX	(ini, id);
@@ -32,6 +48,15 @@ void ESceneSpawnTool::SaveLTX(CInifile& ini, int id)
 	ini.w_u32		("main", "version", SPAWN_TOOLS_VERSION);
 
     ini.w_u32		("main", "flags", m_Flags.get());
+}
+
+void ESceneSpawnTool::SaveJSON(nlohmann::json& file, int id)
+{
+	inherited::SaveJSON	(file, id);
+
+	file["main"]["version"] = SPAWN_TOOLS_VERSION;
+
+	file["main"]["flags"] = m_Flags.get();
 }
 
 bool ESceneSpawnTool::LoadStream(IReader& F)
