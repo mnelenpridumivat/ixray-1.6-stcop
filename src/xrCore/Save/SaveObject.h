@@ -35,18 +35,21 @@ public:
 			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
-				if constexpr (std::is_pointer<Key>::value) {
-					(*this) << *(elem.first);
-				}
-				else {
-					Key Value = elem.first;
-					(*this) << Value;
-				}
-				if constexpr (std::is_pointer<Mapped>::value) {
-					(*this) << *(elem.second);
-				}
-				else {
-					(*this) << elem.second;
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					if constexpr (std::is_pointer<Key>::value) {
+						(*this) << *(elem.first);
+					}
+					else {
+						Key Value = elem.first;
+						(*this) << Value;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						(*this) << *(elem.second);
+					}
+					else {
+						(*this) << elem.second;
+					}
 				}
 			}
 		}
@@ -54,20 +57,23 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				std::pair<Key, Mapped> Elem;
-				if constexpr (std::is_pointer<Key>::value) {
-					(*this) << *(Elem.first);
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					std::pair<Key, Mapped> Elem;
+					if constexpr (std::is_pointer<Key>::value) {
+						(*this) << *(Elem.first);
+					}
+					else {
+						(*this) << Elem.first;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						(*this) << *(Elem.second);
+					}
+					else {
+						(*this) << Elem.second;
+					}
+					Value.insert(Elem);
 				}
-				else {
-					(*this) << Elem.first;
-				}
-				if constexpr (std::is_pointer<Mapped>::value) {
-					(*this) << *(Elem.second);
-				}
-				else {
-					(*this) << Elem.second;
-				}
-				Value.insert(Elem);
 			}
 		}
 		GetCurrentChunk()->EndArray();
@@ -135,17 +141,20 @@ public:
 			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray(-1);
 			for (auto& elem : Value) {
-				if constexpr (std::is_pointer<Key>::value) {
-					(*this) << *(elem.first);
-				}
-				else {
-					(*this) << elem.first;
-				}
-				if constexpr (std::is_pointer<Mapped>::value) {
-					(*this) << *(elem.second);
-				}
-				else {
-					(*this) << elem.second;
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					if constexpr (std::is_pointer<Key>::value) {
+						(*this) << *(elem.first);
+					}
+					else {
+						(*this) << elem.first;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						(*this) << *(elem.second);
+					}
+					else {
+						(*this) << elem.second;
+					}
 				}
 			}
 		}
@@ -153,24 +162,27 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				std::pair<Key, Mapped> Elem;
-				if constexpr (std::is_pointer<Key>::value) {
-					Elem.first = new std::remove_pointer<Key>::type();
-					(*this) << *(Elem.first);
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					std::pair<Key, Mapped> Elem;
+					if constexpr (std::is_pointer<Key>::value) {
+						Elem.first = new std::remove_pointer<Key>::type();
+						(*this) << *(Elem.first);
+					}
+					else {
+						Elem.first = Key();
+						(*this) << Elem.first;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						Elem.second = new std::remove_pointer<Mapped>::type();
+						(*this) << *(Elem.second);
+					}
+					else {
+						Elem.second = Mapped();
+						(*this) << Elem.second;
+					}
+					Value.insert(Elem);
 				}
-				else {
-					Elem.first = Key();
-					(*this) << Elem.first;
-				}
-				if constexpr (std::is_pointer<Mapped>::value) {
-					Elem.second = new std::remove_pointer<Mapped>::type();
-					(*this) << *(Elem.second);
-				}
-				else {
-					Elem.second = Mapped();
-					(*this) << Elem.second;
-				}
-				Value.insert(Elem);
 			}
 		}
 		GetCurrentChunk()->EndArray();
