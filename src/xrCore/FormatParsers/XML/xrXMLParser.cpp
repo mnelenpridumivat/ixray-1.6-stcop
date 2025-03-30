@@ -119,6 +119,11 @@ bool CXml::Load(LPCSTR path_alias, LPCSTR path, LPCSTR _xml_filename)
 	return Load				(path_alias, str);
 }
 
+void CXml::Save()
+{
+	m_Doc.SaveFile(m_xml_file_name);
+}
+
 //инициализация и загрузка XML файла
 bool CXml::Load(LPCSTR path, LPCSTR xml_filename)
 {

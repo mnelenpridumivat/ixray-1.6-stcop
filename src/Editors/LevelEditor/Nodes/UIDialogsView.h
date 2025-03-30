@@ -13,6 +13,7 @@ private:
 
 	virtual void Draw() override;
 	void Show(bool State);
+	void SaveDialog();
 	void OpenDialog(const shared_str& Str, XML_NODE* Node);
 
 	void SelectNodeEvent(INodeUnknown* Node);
@@ -27,4 +28,6 @@ private:
 	shared_str HasInfo;
 	shared_str DontHasInfo;
 	shared_str Precondition;
+
+	shared_str LastOpenDialog;
 };

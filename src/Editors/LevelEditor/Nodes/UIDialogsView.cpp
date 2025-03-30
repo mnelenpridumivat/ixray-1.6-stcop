@@ -38,13 +38,18 @@ void CUIDialogView::Draw()
 						{
 							OpenDialog(ID, Node);
 							IsOpenList = false;
+							LastOpenDialog = ID;
 						}
 					}
 					ImGui::Separator();
 					ImGui::EndListBox();
 				}
 
-				ImGui::Button("Save");
+				if (ImGui::Button("Save"))
+				{
+					SaveDialog();
+				}
+
 				ImGui::SameLine();
 
 				ImGui::SetCursorPosX(282);
@@ -103,6 +108,11 @@ void CUIDialogView::Show(bool State)
 	bOpen = State;
 }
 
+void CUIDialogView::SaveDialog()
+{
+	File.Save();
+}
+
 void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 {
 	for (auto Node : Nodes)
@@ -112,6 +122,11 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	Nodes.clear();
 
 	XML_NODE* RootNode = File.NavigateToNode(Node, "phrase_list");
+	if (RootNode == nullptr)
+		return;
+
+	LastOpenDialog = Str;
+
 	XML_NODE* PhraseNode = RootNode->FirstChildElement();
 
 	xr_map<CDialogNode*, xr_vector<shared_str>> NodeGraph;
@@ -162,6 +177,8 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		}
 
 		CDialogNode* MacroNode = (CDialogNode*)Nodes.emplace_back(new CDialogNode(*NodeID));
+		MacroNode->ParentNode = PhraseNode;
+
 		XML_NODE* ChildNode = PhraseNode->FirstChildElement();
 
 		while (ChildNode != nullptr)
@@ -178,14 +195,17 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			if (NodeName == "text")
 			{
 				MacroNode->Text = NodeText;
+				MacroNode->TextNode = ChildNode;
 			}
 			else if (NodeName == "dont_has_info")
 			{
 				MakeListStringFromNode(MacroNode->DontHasInfo, NodeText);
+				MacroNode->DontHasInfoNode = ChildNode;
 			}
 			else if (NodeName == "has_info")
 			{
 				MakeListStringFromNode(MacroNode->HasInfo, NodeText);
+				MacroNode->HasInfoNode = ChildNode;
 			}
 			else if (NodeName == "is_final")
 			{
@@ -194,14 +214,17 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			else if (NodeName == "give_info")
 			{
 				MakeListStringFromNode(MacroNode->GiveInfo, NodeText);
+				MacroNode->GiveInfoNode = ChildNode;
 			}
 			else if (NodeName == "precondition")
 			{
 				MacroNode->Precondition = NodeText;
+				MacroNode->PreconditionNode = ChildNode;
 			}
 			else if (NodeName == "action")
 			{
 				MacroNode->Action = NodeText;
+				MacroNode->ActionNode = ChildNode;
 			}
 			else if (NodeName == "next")
 			{
