@@ -71,7 +71,7 @@ void CUIDialogView::Draw()
 
 	if (ImGui::Begin("Dialogs Editor", &bOpen))
 	{
-		if (ImGui::BeginChild("Dialogs in file", { (IsOpenList ? 300.f : 20.f), 0}))
+		if (ImGui::BeginChild("Dialogs in file", { (IsOpenList ? 300.f : 20.f), 0 }))
 		{
 			if (IsOpenList)
 			{
@@ -132,7 +132,7 @@ void CUIDialogView::Draw()
 
 				if (!Phrases.empty())
 				{
-					int NodeID = atoi(*Phrases.back()) + 1;
+					int NodeID = atoi(*Phrases.back().first) + 1;
 					std::memcpy(detail::input_buffer, xr_string::ToString(NodeID).c_str(), sizeof(detail::input_buffer));
 				}
 			}
@@ -149,9 +149,9 @@ void CUIDialogView::Draw()
 			detail::HasResult = false;
 
 			auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
-			{
-				return LastOpenDialog == Pair.first;
-			});
+				{
+					return LastOpenDialog == Pair.first;
+				});
 
 			if (Iter != Dialogs.end())
 			{
@@ -205,16 +205,16 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	xr_map<CDialogNode*, xr_vector<shared_str>> NodeGraph;
 
 	auto MakeListStringFromNode = [](shared_str& Value, shared_str Text)
-	{
-		if (Value.size() > 0)
 		{
-			Value = make_string<shared_str>("%s, %s", *Value, *Text);
-		}
-		else
-		{
-			Value = Text;
-		}
-	};
+			if (Value.size() > 0)
+			{
+				Value = make_string<shared_str>("%s, %s", *Value, *Text);
+			}
+			else
+			{
+				Value = Text;
+			}
+		};
 
 	while (PhraseNode != nullptr)
 	{
@@ -224,7 +224,6 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			PhraseNode = PhraseNode->NextSibling();
 			continue;
 		}
-		Phrases.push_back(NodeID);
 
 		CDialogNode* MacroNode = (CDialogNode*)Nodes.emplace_back(new CDialogNode(*NodeID));
 		MacroNode->ParentNode = PhraseNode;
@@ -281,6 +280,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 				NodeGraph[MacroNode].push_back(NodeText);
 			}
 
+			Phrases.emplace_back(NodeID, MacroNode->Text);
 			ChildNode = ChildNode->NextSibling();
 		}
 		PhraseNode = PhraseNode->NextSibling();
@@ -326,9 +326,9 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	xr_vector<GraphData> vec(NodeGraph.begin(), NodeGraph.end());
 
 	std::sort(vec.begin(), vec.end(), [](GraphData L, GraphData R)
-	{
-		return L.first->NodeName < R.first->NodeName;
-	});
+		{
+			return L.first->NodeName < R.first->NodeName;
+		});
 
 	for (auto& [Node, ContactsList] : vec)
 	{
@@ -353,14 +353,14 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 		NodeOffsetXIterator += 300;
 	}
-	
-	std::sort(Phrases.begin(), Phrases.end(), [](auto L, auto R)
-	{
-		xr_string NameA = *L;
-		xr_string NameB = *R;
 
-		return NameA < NameB;
-	});
+	std::sort(Phrases.begin(), Phrases.end(), [](auto L, auto R)
+		{
+			xr_string NameA = *L.first;
+			xr_string NameB = *R.first;
+
+			return NameA < NameB;
+		});
 
 
 	SelectNodeEvent(nullptr);
@@ -378,10 +378,10 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 		PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DontHasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeDontHasInfo);
 		PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &Precondition)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangePrecondition);
 
-		for (const shared_str& String : Phrases)
+		for (const auto& [ID, String] : Phrases)
 		{
 			xr_string Name = "Phrases\\";
-			Name += *String;
+			Name += *ID;
 
 			PHelper().CreateCaption(items, Name.c_str(), *String);
 		}
@@ -453,14 +453,14 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 		Viewer.Dialogs.emplace_back(NodeID, ChildNode);
 		ChildNode = ChildNode->NextSibling();
 	}
-	
-	std::sort(Viewer.Dialogs.begin(), Viewer.Dialogs.end(), [](std::pair<shared_str, XML_NODE*>& L, std::pair<shared_str, XML_NODE*>& R)
-	{
-		xr_string NameA = *L.first;
-		xr_string NameB = *R.first;
 
-		return NameA < NameB;
-	});
+	std::sort(Viewer.Dialogs.begin(), Viewer.Dialogs.end(), [](std::pair<shared_str, XML_NODE*>& L, std::pair<shared_str, XML_NODE*>& R)
+		{
+			xr_string NameA = *L.first;
+			xr_string NameB = *R.first;
+
+			return NameA < NameB;
+		});
 }
 
 void CUIDialogView::ChangeHasInfo(PropValue*)
@@ -468,9 +468,9 @@ void CUIDialogView::ChangeHasInfo(PropValue*)
 	if (NodeHasInfo == nullptr)
 	{
 		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
-		{
-			return LastOpenDialog == Pair.first;
-		});
+			{
+				return LastOpenDialog == Pair.first;
+			});
 
 		if (Iter != Dialogs.end())
 		{
@@ -486,9 +486,9 @@ void CUIDialogView::ChangeDontHasInfo(PropValue*)
 	if (NodeDontHasInfo == nullptr)
 	{
 		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
-		{
-			return LastOpenDialog == Pair.first;
-		});
+			{
+				return LastOpenDialog == Pair.first;
+			});
 
 		if (Iter != Dialogs.end())
 		{
@@ -504,9 +504,9 @@ void CUIDialogView::ChangePrecondition(PropValue*)
 	if (NodePrecondition == nullptr)
 	{
 		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
-		{
-			return LastOpenDialog == Pair.first;
-		});
+			{
+				return LastOpenDialog == Pair.first;
+			});
 
 		if (Iter != Dialogs.end())
 		{

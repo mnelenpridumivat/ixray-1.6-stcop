@@ -24,10 +24,11 @@ private:
 	void ChangeHasInfo(PropValue*);
 	void ChangeDontHasInfo(PropValue*);
 	void ChangePrecondition(PropValue*);
+
 private:
 	bool IsOpenList = true;
 	bool IsAutoHide = true;
-	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
+
 	CXml File;
 
 	shared_str HasInfo;
@@ -40,5 +41,6 @@ private:
 
 	shared_str LastOpenDialog;
 
-	xr_vector<shared_str> Phrases;
+	xr_vector<std::pair<shared_str, shared_str>> Phrases;
+	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
 };
