@@ -24,7 +24,10 @@ public:
 	IC	SelfRef	assign	(const Self& f)								{ flags =	f.flags;	return *this;	}
 	IC	SelfRef	assign	(const T mask)								{ flags	=	mask;		return *this;	}
 	IC	SelfRef	set		(const T mask,	BOOL value)					{ if (value) flags|=mask; else flags&=~mask; return *this; }
-	IC 	BOOL	is		(const T mask)						const	{ return mask==(flags&mask);			}
+	IC 	BOOL	is		(const T mask)						const
+    {
+	    return mask==(flags&mask);
+    }
 #if defined(IXR_WINDOWS) && !defined(_M_X64)
 	IC  bool    bitTest(const int bitNum)					const { u32 tempFlag = flags; return _bittest((long*)&tempFlag, bitNum); }
 #else
