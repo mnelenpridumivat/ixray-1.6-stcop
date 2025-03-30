@@ -128,19 +128,14 @@ void CUIDialogView::Draw()
 			if (ImGui::MenuItem("Create Node"))
 			{
 				detail::show_modal_input_box = true;
+				std::memset(detail::input_buffer, 0, sizeof(detail::input_buffer));
+
+				if (!Phrases.empty())
+				{
+					int NodeID = atoi(*Phrases.back()) + 1;
+					std::memcpy(detail::input_buffer, xr_string::ToString(NodeID).c_str(), sizeof(detail::input_buffer));
+				}
 			}
-
-			//if (HoveredNodeID != -1 && ImGui::MenuItem("Remove"))
-			//{
-			//	Nodes.erase
-			//	(
-			//		std::find_if(Nodes.begin(), Nodes.end(), [HoveredNodeID](INodeUnknown* Val)
-			//		{
-			//			return Val->NodeID == HoveredNodeID;
-			//		})
-			//	);
-			//}
-
 			ImGui::EndPopup();
 		}
 
@@ -197,6 +192,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		xr_delete(Node);
 	}
 	Nodes.clear();
+	Phrases.clear();
 
 	XML_NODE* RootNode = File.NavigateToNode(Node, "phrase_list");
 	if (RootNode == nullptr)
@@ -228,6 +224,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			PhraseNode = PhraseNode->NextSibling();
 			continue;
 		}
+		Phrases.push_back(NodeID);
 
 		CDialogNode* MacroNode = (CDialogNode*)Nodes.emplace_back(new CDialogNode(*NodeID));
 		MacroNode->ParentNode = PhraseNode;
@@ -356,6 +353,15 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 		NodeOffsetXIterator += 300;
 	}
+	
+	std::sort(Phrases.begin(), Phrases.end(), [](auto L, auto R)
+	{
+		xr_string NameA = *L;
+		xr_string NameB = *R;
+
+		return NameA < NameB;
+	});
+
 
 	SelectNodeEvent(nullptr);
 }
@@ -371,6 +377,15 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 		PHelper().CreateRText(items, "Preconditions\\Has Info", &HasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeHasInfo);
 		PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DontHasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeDontHasInfo);
 		PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &Precondition)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangePrecondition);
+
+		for (const shared_str& String : Phrases)
+		{
+			xr_string Name = "Phrases\\";
+			Name += *String;
+
+			PHelper().CreateCaption(items, Name.c_str(), *String);
+		}
+
 		Properties->AssignItems(items);
 		return;
 	}

@@ -39,4 +39,6 @@ private:
 	XML_NODE* NodePrecondition;
 
 	shared_str LastOpenDialog;
+
+	xr_vector<shared_str> Phrases;
 };
