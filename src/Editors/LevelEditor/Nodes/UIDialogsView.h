@@ -21,6 +21,10 @@ public:
 	static void OpenFile(const xr_path& Path);
 
 private:
+	void ChangeHasInfo(PropValue*);
+	void ChangeDontHasInfo(PropValue*);
+	void ChangePrecondition(PropValue*);
+private:
 	bool IsOpenList = true;
 	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
 	CXml File;
@@ -28,6 +32,10 @@ private:
 	shared_str HasInfo;
 	shared_str DontHasInfo;
 	shared_str Precondition;
+
+	XML_NODE* NodeHasInfo;
+	XML_NODE* NodeDontHasInfo;
+	XML_NODE* NodePrecondition;
 
 	shared_str LastOpenDialog;
 };

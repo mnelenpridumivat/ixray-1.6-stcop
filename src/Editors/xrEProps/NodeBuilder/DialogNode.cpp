@@ -55,3 +55,20 @@ void CDialogNode::Draw()
 
 	DrawEnd();
 }
+
+void CDialogNode::AddContactLink(const xr_string& Name, bool IsOut)
+{
+	INodeUnknown::AddContactLink(Name, IsOut);
+}
+
+void CDialogNode::MakeOutNode(INodeUnknown* Node)
+{
+	INodeUnknown::MakeOutNode(Node);
+	CDialogNode* TryNode = (CDialogNode*)Node;
+
+	if (ParentNode != nullptr)
+	{
+		XML_NODE* NewNextNode = ParentNode->ToElement()->InsertNewChildElement("next");
+		NewNextNode->ToElement()->SetText(TryNode->NodeName.c_str());
+	}
+}

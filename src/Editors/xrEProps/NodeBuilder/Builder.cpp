@@ -120,7 +120,7 @@ void CNodeViewport::Draw()
 
 			if (Left != nullptr && Right != nullptr)
 			{
-				Right->OutNodes.push_back(Left);
+				Right->MakeOutNode(Left);
 			}
 
 			Links.emplace_back(start_attr, end_attr);

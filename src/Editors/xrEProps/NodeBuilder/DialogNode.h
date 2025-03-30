@@ -3,12 +3,15 @@
 
 #include "../../xrCore/FormatParsers/XML/xrXMLParser.h"
 
-class XREPROPS_API CDialogNode :
+class XREPROPS_API CDialogNode final:
 	public INodeUnknown
 {
 public:
 	CDialogNode(const xr_string Name);
-	void Draw() override;
+
+	virtual void Draw() override;
+	virtual void AddContactLink(const xr_string& Name, bool IsOut = false) override;
+	virtual void MakeOutNode(INodeUnknown* Node) override;
 
 public:
 	shared_str HasInfo;

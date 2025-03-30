@@ -3,6 +3,53 @@
 #include "../Editor/UI_LevelTools.h"
 #include "../../../xrEngine/string_table.h"
 
+namespace detail
+{
+	bool show_modal_input_box = false;
+	char input_buffer[256] = "";
+	bool HasResult = false;
+
+	void ShowModalInputBox()
+	{
+		if (show_modal_input_box)
+		{
+			HasResult = false;
+
+			// Always center this window when appearing
+			ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+			ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+			if (ImGui::BeginPopupModal("InputBox", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				// Input text field
+				ImGui::Text("Enter something:");
+				ImGui::InputText("##input", input_buffer, IM_ARRAYSIZE(input_buffer));
+
+				// Buttons
+				if (ImGui::Button("OK", ImVec2(120, 0)))
+				{
+					// Clear the input and close the modal
+					show_modal_input_box = false;
+					ImGui::CloseCurrentPopup();
+					HasResult = true;
+				}
+
+				ImGui::SetItemDefaultFocus();
+				ImGui::SameLine();
+
+				if (ImGui::Button("Cancel", ImVec2(120, 0)))
+				{
+					input_buffer[0] = '\0';
+					show_modal_input_box = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
+			}
+		}
+	}
+}
+
 CUIDialogView::CUIDialogView()
 {
 	NodeSelectCallback = xr_make_delegate(this, &CUIDialogView::SelectNodeEvent);
@@ -71,29 +118,57 @@ void CUIDialogView::Draw()
 
 		if (ImGui::IsMouseReleased(1))
 		{
-			ImGui::OpenPopup("##nodesviewportcontextmenumacro");
+			ImGui::OpenPopup("##nodesdialogscontextmenumacro");
 		}
 
-		if (ImGui::BeginPopup("##nodesviewportcontextmenumacro"))
+		if (ImGui::BeginPopup("##nodesdialogscontextmenumacro"))
 		{
-			if (ImGui::BeginMenu("Create Node"))
+			if (ImGui::MenuItem("Create Node"))
 			{
-
-				ImGui::EndMenu();
+				detail::show_modal_input_box = true;
 			}
 
-			if (HoveredNodeID != -1 && ImGui::MenuItem("Remove"))
-			{
-				Nodes.erase
-				(
-					std::find_if(Nodes.begin(), Nodes.end(), [HoveredNodeID](INodeUnknown* Val)
-					{
-						return Val->NodeID == HoveredNodeID;
-					})
-				);
-			}
+			//if (HoveredNodeID != -1 && ImGui::MenuItem("Remove"))
+			//{
+			//	Nodes.erase
+			//	(
+			//		std::find_if(Nodes.begin(), Nodes.end(), [HoveredNodeID](INodeUnknown* Val)
+			//		{
+			//			return Val->NodeID == HoveredNodeID;
+			//		})
+			//	);
+			//}
 
 			ImGui::EndPopup();
+		}
+
+		if (detail::show_modal_input_box)
+		{
+			ImGui::OpenPopup("InputBox");
+			detail::ShowModalInputBox();
+		}
+		else if (detail::HasResult)
+		{
+			detail::HasResult = false;
+
+			auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
+			{
+				return LastOpenDialog == Pair.first;
+			});
+
+			if (Iter != Dialogs.end())
+			{
+				if (XML_NODE* RootNode = File.NavigateToNode(Iter->second, "phrase_list"))
+				{
+					XML_NODE* NewNode = RootNode->ToElement()->InsertNewChildElement("phrase");
+					NewNode->ToElement()->SetAttribute("id", detail::input_buffer);
+
+					CDialogNode* MacroNode = (CDialogNode*)Nodes.emplace_back(new CDialogNode(detail::input_buffer));
+					MacroNode->ParentNode = NewNode;
+					const ImVec2 click_pos = ImGui::GetMousePosOnOpeningCurrentPopup();
+					MacroNode->SetStartPos(click_pos.x, click_pos.y);
+				}
+			}
 		}
 		CNodeViewport::Draw();
 	}
@@ -151,6 +226,8 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		{
 			shared_str NodeText = PhraseNode->ToElement()->GetText();
 			MakeListStringFromNode(HasInfo, NodeText);
+			NodeHasInfo = PhraseNode;
+
 			PhraseNode = PhraseNode->NextSibling();
 			continue;
 		}
@@ -158,6 +235,8 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		{
 			shared_str NodeText = PhraseNode->ToElement()->GetText();
 			MakeListStringFromNode(DontHasInfo, NodeText);
+			NodeDontHasInfo = PhraseNode;
+
 			PhraseNode = PhraseNode->NextSibling();
 			continue;
 		}
@@ -165,6 +244,8 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		{
 			shared_str NodeText = PhraseNode->ToElement()->GetText();
 			Precondition = NodeText;
+			NodePrecondition = PhraseNode;
+
 			PhraseNode = PhraseNode->NextSibling();
 			continue;
 		}
@@ -285,9 +366,9 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 
 	if (Node == nullptr)
 	{
-		PHelper().CreateRText(items, "Preconditions\\Has Info", &HasInfo);
-		PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DontHasInfo);
-		PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &Precondition);
+		PHelper().CreateRText(items, "Preconditions\\Has Info", &HasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeHasInfo);
+		PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DontHasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeDontHasInfo);
+		PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &Precondition)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangePrecondition);
 		Properties->AssignItems(items);
 		return;
 	}
@@ -356,4 +437,58 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 
 		return NameA < NameB;
 	});
+}
+
+void CUIDialogView::ChangeHasInfo(PropValue*)
+{
+	if (NodeHasInfo == nullptr)
+	{
+		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
+		{
+			return LastOpenDialog == Pair.first;
+		});
+
+		if (Iter != Dialogs.end())
+		{
+			NodeHasInfo = Iter->second->ToElement()->InsertNewChildElement("has_info");
+		}
+	}
+
+	NodeHasInfo->ToElement()->SetText(*HasInfo);
+}
+
+void CUIDialogView::ChangeDontHasInfo(PropValue*)
+{
+	if (NodeDontHasInfo == nullptr)
+	{
+		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
+		{
+			return LastOpenDialog == Pair.first;
+		});
+
+		if (Iter != Dialogs.end())
+		{
+			NodeDontHasInfo = Iter->second->ToElement()->InsertNewChildElement("dont_has_info");
+		}
+	}
+
+	NodeDontHasInfo->ToElement()->SetText(*DontHasInfo);
+}
+
+void CUIDialogView::ChangePrecondition(PropValue*)
+{
+	if (NodePrecondition == nullptr)
+	{
+		auto Iter = std::find_if(Dialogs.begin(), Dialogs.end(), [this](auto& Pair)
+		{
+			return LastOpenDialog == Pair.first;
+		});
+
+		if (Iter != Dialogs.end())
+		{
+			NodePrecondition = Iter->second->ToElement()->InsertNewChildElement("precondition");
+		}
+	}
+
+	NodePrecondition->ToElement()->SetText(*Precondition);
 }

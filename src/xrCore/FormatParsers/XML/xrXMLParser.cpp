@@ -121,7 +121,9 @@ bool CXml::Load(LPCSTR path_alias, LPCSTR path, LPCSTR _xml_filename)
 
 void CXml::Save()
 {
-	m_Doc.SaveFile(m_xml_file_name);
+	string_path Path = {};
+	FS.update_path(Path, "$game_config$", m_xml_file_name);
+	m_Doc.SaveFile(Path);
 }
 
 //инициализация и загрузка XML файла
