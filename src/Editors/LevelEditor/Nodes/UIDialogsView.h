@@ -26,6 +26,7 @@ private:
 	void ChangePrecondition(PropValue*);
 private:
 	bool IsOpenList = true;
+	bool IsAutoHide = true;
 	xr_vector<std::pair<shared_str, XML_NODE*>> Dialogs;
 	CXml File;
 

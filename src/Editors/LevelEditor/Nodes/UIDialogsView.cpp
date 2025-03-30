@@ -84,7 +84,7 @@ void CUIDialogView::Draw()
 						if (ImGui::Selectable(ID.c_str(), &bSelect))
 						{
 							OpenDialog(ID, Node);
-							IsOpenList = false;
+							IsOpenList = !IsAutoHide;
 							LastOpenDialog = ID;
 						}
 					}
@@ -96,6 +96,8 @@ void CUIDialogView::Draw()
 				{
 					SaveDialog();
 				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Auto Hide", &IsAutoHide);
 
 				ImGui::SameLine();
 
@@ -220,36 +222,6 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 	while (PhraseNode != nullptr)
 	{
-		xr_string UpperNodeName = PhraseNode->Value();
-
-		if (UpperNodeName == "has_info")
-		{
-			shared_str NodeText = PhraseNode->ToElement()->GetText();
-			MakeListStringFromNode(HasInfo, NodeText);
-			NodeHasInfo = PhraseNode;
-
-			PhraseNode = PhraseNode->NextSibling();
-			continue;
-		}
-		else if (UpperNodeName == "dont_has_info")
-		{
-			shared_str NodeText = PhraseNode->ToElement()->GetText();
-			MakeListStringFromNode(DontHasInfo, NodeText);
-			NodeDontHasInfo = PhraseNode;
-
-			PhraseNode = PhraseNode->NextSibling();
-			continue;
-		}
-		else if (UpperNodeName == "precondition")
-		{
-			shared_str NodeText = PhraseNode->ToElement()->GetText();
-			Precondition = NodeText;
-			NodePrecondition = PhraseNode;
-
-			PhraseNode = PhraseNode->NextSibling();
-			continue;
-		}
-
 		shared_str NodeID = PhraseNode->ToElement()->Attribute("id");
 		if (NodeID.size() == 0)
 		{
@@ -265,7 +237,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 		while (ChildNode != nullptr)
 		{
 			xr_string NodeName = ChildNode->Value();
-			shared_str NodeText = ChildNode->ToElement()->GetText();
+			shared_str NodeText = ChildNode->ToElement() ? ChildNode->ToElement()->GetText() : nullptr;
 
 			if (NodeText.size() == 0)
 			{
@@ -315,6 +287,36 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			ChildNode = ChildNode->NextSibling();
 		}
 		PhraseNode = PhraseNode->NextSibling();
+	}
+
+	RootNode = RootNode->Parent()->FirstChildElement();
+	while (RootNode != nullptr)
+	{
+		if (RootNode->ToElement() != nullptr)
+		{
+			xr_string UpperNodeName = RootNode->Value();
+
+			if (UpperNodeName == "has_info")
+			{
+				shared_str NodeText = RootNode->ToElement()->GetText();
+				MakeListStringFromNode(HasInfo, NodeText);
+				NodeHasInfo = RootNode;
+			}
+			else if (UpperNodeName == "dont_has_info")
+			{
+				shared_str NodeText = RootNode->ToElement()->GetText();
+				MakeListStringFromNode(DontHasInfo, NodeText);
+				NodeDontHasInfo = RootNode;
+			}
+			else if (UpperNodeName == "precondition")
+			{
+				shared_str NodeText = RootNode->ToElement()->GetText();
+				Precondition = NodeText;
+				NodePrecondition = RootNode;
+			}
+		}
+
+		RootNode = RootNode->NextSiblingElement();
 	}
 
 	if (NodeGraph.empty())
@@ -399,6 +401,13 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 {
 	static CUIDialogView Viewer;
 	Viewer.Dialogs.clear();
+
+	for (auto Node : Viewer.Nodes)
+	{
+		xr_delete(Node);
+	}
+	Viewer.Nodes.clear();
+	Viewer.IsOpenList = true;
 
 	Viewer.File.Load(CONFIG_PATH, "gameplay", Path.xstring().c_str());
 
