@@ -38,6 +38,7 @@ int CNodeViewport::GetHoveredMode() const
 	if (HoveredNodeID == -1 && NodeSelectCallback)
 	{
 		NodeSelectCallback(nullptr);
+		LastSelectedNodeID = -1;
 	}
 
 	return HoveredNodeID;
