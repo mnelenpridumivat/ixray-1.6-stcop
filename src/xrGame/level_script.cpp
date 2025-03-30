@@ -1059,7 +1059,11 @@ void RefreshNamesNPC()
 			continue;
 		}
 
-		auto obj = g_pGameLevel->Objects.net_Find(id);
+		const auto obj = g_pGameLevel->Objects.net_Find(id);
+		if (obj != nullptr)
+		{
+			continue;;
+		}
 		CInventoryOwner* owner = obj->cast_inventory_owner();
 		if (owner)
 		{
