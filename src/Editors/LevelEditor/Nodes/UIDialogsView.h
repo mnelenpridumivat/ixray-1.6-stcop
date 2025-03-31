@@ -25,6 +25,10 @@ private:
 	void ChangeDontHasInfo(PropValue*);
 	void ChangePrecondition(PropValue*);
 
+	void ChangeNodeHasInfo(PropValue*);
+	void ChangeNodeDontHasInfo(PropValue*);
+	void ChangeNodeGiveInfo(PropValue*);
+
 private:
 	bool IsOpenList = true;
 	bool IsAutoHide = true;
@@ -38,6 +42,8 @@ private:
 	XML_NODE* NodeHasInfo;
 	XML_NODE* NodeDontHasInfo;
 	XML_NODE* NodePrecondition;
+
+	CDialogNode* LastClickedDialogNode = nullptr;
 
 	shared_str LastOpenDialog;
 

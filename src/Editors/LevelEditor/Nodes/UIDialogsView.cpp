@@ -193,6 +193,7 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	}
 	Nodes.clear();
 	Phrases.clear();
+	LastClickedDialogNode = nullptr;
 
 	XML_NODE* RootNode = File.NavigateToNode(Node, "phrase_list");
 	if (RootNode == nullptr)
@@ -249,21 +250,22 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 			else if (NodeName == "dont_has_info")
 			{
 				MakeListStringFromNode(MacroNode->DontHasInfo, NodeText);
-				MacroNode->DontHasInfoNode = ChildNode;
+				MacroNode->DontHasInfoNode.push_back(ChildNode);
 			}
 			else if (NodeName == "has_info")
 			{
 				MakeListStringFromNode(MacroNode->HasInfo, NodeText);
-				MacroNode->HasInfoNode = ChildNode;
+				MacroNode->HasInfoNode.push_back(ChildNode);
 			}
 			else if (NodeName == "is_final")
 			{
 				MacroNode->IsFinal = NodeText == "1";
+				MacroNode->IsFinalNode = ChildNode;
 			}
 			else if (NodeName == "give_info")
 			{
 				MakeListStringFromNode(MacroNode->GiveInfo, NodeText);
-				MacroNode->GiveInfoNode = ChildNode;
+				MacroNode->GiveInfoNode.push_back(ChildNode);
 			}
 			else if (NodeName == "precondition")
 			{
@@ -355,13 +357,12 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	}
 
 	std::sort(Phrases.begin(), Phrases.end(), [](auto L, auto R)
-		{
-			xr_string NameA = *L.first;
-			xr_string NameB = *R.first;
+	{
+		xr_string NameA = *L.first;
+		xr_string NameB = *R.first;
 
-			return NameA < NameB;
-		});
-
+		return NameA < NameB;
+	});
 
 	SelectNodeEvent(nullptr);
 }
@@ -387,25 +388,26 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 		}
 
 		Properties->AssignItems(items);
+		LastClickedDialogNode = nullptr;
 		return;
 	}
 
-	CDialogNode* DialogNode = (CDialogNode*)Node;
+	LastClickedDialogNode = (CDialogNode*)Node;
 
-	PHelper().CreateRText(items, "Preconditions\\Has Info", &DialogNode->HasInfo);
-	PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &DialogNode->DontHasInfo);
-	PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &DialogNode->Precondition);
+	PHelper().CreateRText(items, "Preconditions\\Has Info", &LastClickedDialogNode->HasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeNodeHasInfo);
+	PHelper().CreateRText(items, "Preconditions\\Don't Has Info", &LastClickedDialogNode->DontHasInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeNodeDontHasInfo);
+	PHelper().CreateRText(items, "Preconditions\\Lua Precondition", &LastClickedDialogNode->Precondition);
 
-	PHelper().CreateRText(items, "Actions\\Give Info", &DialogNode->GiveInfo);
-	PHelper().CreateRText(items, "Actions\\Lua Action", &DialogNode->Action);
+	PHelper().CreateRText(items, "Actions\\Give Info", &LastClickedDialogNode->GiveInfo)->OnChangeEvent = xr_make_delegate(this, &CUIDialogView::ChangeNodeGiveInfo);
+	PHelper().CreateRText(items, "Actions\\Lua Action", &LastClickedDialogNode->Action);
 
-	PHelper().CreateRText(items, "Text\\String ID", &DialogNode->Text);
+	PHelper().CreateRText(items, "Text\\String ID", &LastClickedDialogNode->Text);
 
 	static shared_str TranslateStr;
 
-	if (DialogNode->Text.size() > 0)
+	if (LastClickedDialogNode->Text.size() > 0)
 	{
-		TranslateStr = Platform::ANSI_TO_UTF8(*g_pStringTable->translate(*DialogNode->Text)).c_str();
+		TranslateStr = Platform::ANSI_TO_UTF8(*g_pStringTable->translate(*LastClickedDialogNode->Text)).c_str();
 		PHelper().CreateCaption(items, "Text\\Translated", TranslateStr);
 	}
 
@@ -455,12 +457,12 @@ void CUIDialogView::OpenFile(const xr_path& Path)
 	}
 
 	std::sort(Viewer.Dialogs.begin(), Viewer.Dialogs.end(), [](std::pair<shared_str, XML_NODE*>& L, std::pair<shared_str, XML_NODE*>& R)
-		{
-			xr_string NameA = *L.first;
-			xr_string NameB = *R.first;
+	{
+		xr_string NameA = *L.first;
+		xr_string NameB = *R.first;
 
-			return NameA < NameB;
-		});
+		return NameA < NameB;
+	});
 }
 
 void CUIDialogView::ChangeHasInfo(PropValue*)
@@ -515,4 +517,28 @@ void CUIDialogView::ChangePrecondition(PropValue*)
 	}
 
 	NodePrecondition->ToElement()->SetText(*Precondition);
+}
+
+void CUIDialogView::ChangeNodeHasInfo(PropValue*)
+{
+	if (LastClickedDialogNode == nullptr)
+		return;
+
+	LastClickedDialogNode->ValidateNodes(LastClickedDialogNode->HasInfo, "has_info");
+}
+
+void CUIDialogView::ChangeNodeDontHasInfo(PropValue*)
+{
+	if (LastClickedDialogNode == nullptr)
+		return;
+
+	LastClickedDialogNode->ValidateNodes(LastClickedDialogNode->DontHasInfo, "dont_has_info");
+}
+
+void CUIDialogView::ChangeNodeGiveInfo(PropValue*)
+{
+	if (LastClickedDialogNode == nullptr)
+		return;
+
+	LastClickedDialogNode->ValidateNodes(LastClickedDialogNode->GiveInfo, "give_info");
 }

@@ -13,6 +13,8 @@ public:
 	virtual void AddContactLink(const xr_string& Name, bool IsOut = false) override;
 	virtual void MakeOutNode(INodeUnknown* Node) override;
 
+	void ValidateNodes(shared_str& Data, const char* RawName);
+
 public:
 	shared_str HasInfo;
 	shared_str DontHasInfo;
@@ -21,14 +23,20 @@ public:
 	shared_str Precondition;
 	shared_str Text;
 
-	XML_NODE* HasInfoNode = nullptr;
-	XML_NODE* DontHasInfoNode = nullptr;
-	XML_NODE* GiveInfoNode = nullptr;
+	bool IsFinal = false;
+
+	XML_NODE* IsFinalNode = nullptr;
+	xr_vector<XML_NODE*> HasInfoNode;
+	xr_vector<XML_NODE*> DontHasInfoNode;
+	xr_vector<XML_NODE*> GiveInfoNode;
+
 	XML_NODE* ActionNode = nullptr;
 	XML_NODE* PreconditionNode = nullptr;
 	XML_NODE* TextNode = nullptr;
 
 	XML_NODE* ParentNode = nullptr;
 
-	bool IsFinal = false;
+private:
+	void RenderItemString(const char* RawName, const char* Name, shared_str& Data, XML_NODE*& Node, size_t Size);
+	void RenderItemString(const char* RawName, const char* Name, shared_str& Data, xr_vector<XML_NODE*>& Node, size_t Size);
 };
