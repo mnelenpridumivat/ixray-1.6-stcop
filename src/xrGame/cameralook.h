@@ -34,6 +34,8 @@ class CCameraLook2	: public CCameraLook
 public:
 	static Fvector	m_cam_offset_r;
 	static Fvector	m_cam_offset_l;
+	static Fvector	m_cam_offset_zoomed_r;
+	static Fvector	m_cam_offset_zoomed_l;
 
 	CCameraLook2(CObject* p, u32 flags = 0) : CCameraLook(p, flags) {};
 

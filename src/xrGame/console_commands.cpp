@@ -2621,6 +2621,8 @@ void CCC_RegisterCommands()
 #ifndef MASTER_GOLD
 	CMD4(CCC_Vector3, "psp_cam_offset_r", &CCameraLook2::m_cam_offset_r, Fvector().set(-1000, -1000, -1000), Fvector().set(1000, 1000, 1000));
 	CMD4(CCC_Vector3, "psp_cam_offset_l", &CCameraLook2::m_cam_offset_l, Fvector().set(-1000, -1000, -1000), Fvector().set(1000, 1000, 1000));
+	CMD4(CCC_Vector3, "psp_cam_offset_zoomed_r", &CCameraLook2::m_cam_offset_zoomed_r, Fvector().set(-1000, -1000, -1000), Fvector().set(1000, 1000, 1000));
+	CMD4(CCC_Vector3, "psp_cam_offset_zoomed_l", &CCameraLook2::m_cam_offset_zoomed_l, Fvector().set(-1000, -1000, -1000), Fvector().set(1000, 1000, 1000));
 #endif // MASTER_GOLD
 
 #ifdef DEBUG

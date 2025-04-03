@@ -160,6 +160,8 @@ int cam_dik = SDL_SCANCODE_LSHIFT;
 
 Fvector CCameraLook2::m_cam_offset_r;
 Fvector CCameraLook2::m_cam_offset_l;
+Fvector CCameraLook2::m_cam_offset_zoomed_r;
+Fvector CCameraLook2::m_cam_offset_zoomed_l;
 Fvector m_cam_offset_curr = {0.f, 0.f, 0.f};
 
 void CCameraLook2::OnActivate( CCameraBase* old_cam )
@@ -222,9 +224,13 @@ void CCameraLook2::Update(Fvector& point, Fvector& noise_dangle)
 		if(pWeap && pWeap->render_item_ui_query())
 		{
 			if(!vPosition.similar(point))
+			{
 				vPosition.inertion(point, 1.f-Device.fTimeDelta*15.f);
+			}
 			else
+			{
 				vPosition.set(point);
+			}
 		}
 		else
 		{
@@ -232,16 +238,30 @@ void CCameraLook2::Update(Fvector& point, Fvector& noise_dangle)
 			a_xform.setXYZ					(0, -yaw, 0);
 			a_xform.translate_over			(point);
 
-
-			if (psActorFlags.test(AF_RIGHT_SHOULDER))
+			if (pWeap && pWeap->IsZoomed())
 			{
-				if(!m_cam_offset_curr.similar(m_cam_offset_r))
-					m_cam_offset_curr.inertion(m_cam_offset_r, 1.f-Device.fTimeDelta*15.f);
-			}
-			else
+				if (psActorFlags.test(AF_RIGHT_SHOULDER))
+				{
+					if(!m_cam_offset_curr.similar(m_cam_offset_zoomed_r))
+						m_cam_offset_curr.inertion(m_cam_offset_zoomed_r, 1.f-Device.fTimeDelta*15.f);
+				}
+				else
+				{
+					if(!m_cam_offset_curr.similar(m_cam_offset_zoomed_l))
+						m_cam_offset_curr.inertion(m_cam_offset_zoomed_l, 1.f-Device.fTimeDelta*15.f);
+				}
+			} else
 			{
-				if(!m_cam_offset_curr.similar(m_cam_offset_l))
-					m_cam_offset_curr.inertion(m_cam_offset_l, 1.f-Device.fTimeDelta*15.f);
+				if (psActorFlags.test(AF_RIGHT_SHOULDER))
+				{
+					if(!m_cam_offset_curr.similar(m_cam_offset_r))
+						m_cam_offset_curr.inertion(m_cam_offset_r, 1.f-Device.fTimeDelta*15.f);
+				}
+				else
+				{
+					if(!m_cam_offset_curr.similar(m_cam_offset_l))
+						m_cam_offset_curr.inertion(m_cam_offset_l, 1.f-Device.fTimeDelta*15.f);
+				}
 			}
 			Fvector P;
 			a_xform.transform_tiny			(P, m_cam_offset_curr);
@@ -262,6 +282,8 @@ void CCameraLook2::Load(LPCSTR section)
 
 	m_cam_offset_r = READ_IF_EXISTS(pSettings, r_fvector3, section, "offset_right", defaultOffsetRight);
 	m_cam_offset_l = READ_IF_EXISTS(pSettings, r_fvector3, section, "offset_left", defaultOffsetLeft);
+	m_cam_offset_zoomed_r = READ_IF_EXISTS(pSettings, r_fvector3, section, "offset_zoomed_right", defaultOffsetRight);
+	m_cam_offset_zoomed_l = READ_IF_EXISTS(pSettings, r_fvector3, section, "offset_zoomed_left", defaultOffsetLeft);
 
 	dist = 1.4f;
 	prev_d = 0.0f;
