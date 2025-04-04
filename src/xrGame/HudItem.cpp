@@ -49,6 +49,7 @@ void CHudItem::Load(LPCSTR section)
 {
 	hud_sect				= pSettings->r_string		(section,"hud");
 	m_animation_slot		= pSettings->r_u32			(section,"animation_slot");
+	m_actor_animation_slot  = READ_IF_EXISTS(pSettings, r_u32, section, "actor_animation_slot", m_animation_slot);
 
 	m_nearwall_dist_min = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_min", .2f);
 	m_nearwall_dist_max = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_max", 1.f);

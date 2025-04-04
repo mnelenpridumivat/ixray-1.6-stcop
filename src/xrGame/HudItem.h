@@ -154,6 +154,7 @@ protected:
 	u32							dwXF_Frame;
 
 	u32							m_animation_slot;
+	u32							m_actor_animation_slot;
 
 	HUD_SOUND_COLLECTION		m_sounds;
 	InertionData				m_current_inertion;
@@ -180,6 +181,7 @@ public:
 	IC CPhysicItem&				object					() const		{ VERIFY(m_object); return(*m_object);}
 	IC CInventoryItem&			item					() const		{ VERIFY(m_item); return(*m_item);}
 	IC		u32					animation_slot			()				{ return m_animation_slot;}
+	IC		u32					actor_animation_slot	()				{ return m_actor_animation_slot; }
 	InertionData&				CurrentInertionData		()				{ return m_current_inertion;}
 
 	virtual void				on_renderable_Render	() = 0;
