@@ -3,7 +3,10 @@
 #include "GameObject.h"
 #include "../xrEngine/feel_touch.h"
 
-class CTeamCaptureZone : public CGameObject, public Feel::Touch {
+class CTeamCaptureZone : 
+	public CGameObject, 
+	public Feel::Touch 
+{
 protected:
 	u8		m_Team;
 	float	m_Capture;
@@ -11,6 +14,7 @@ protected:
 	u8		m_CapturingTeam;
 	bool	m_Conflict;
 	xr_vector<CObject*> v_actor;
+
 public:
 	typedef	CGameObject	inherited;
 
@@ -31,7 +35,4 @@ public:
 	virtual BOOL	feel_touch_contact(CObject* O);
 
 	virtual u8		GetZoneTeam() { return m_Team; };
-#ifdef DEBUG
-	virtual	void	OnRender();
-#endif
 };

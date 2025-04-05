@@ -43,7 +43,7 @@ BOOL CTeamCaptureZone::net_Spawn(CSE_Abstract* DC)
 {
 	CCF_Shape* l_pShape = new CCF_Shape (this);
 	collidable.model = l_pShape;
-
+#if 0
 	CSE_Abstract* l_tpAbstract = (CSE_Abstract*)(DC);
 	CSE_ALifeTeamCaptureZone* l_tpALifeScriptZone = smart_cast<CSE_ALifeTeamCaptureZone*>(l_tpAbstract);
 	R_ASSERT(l_tpALifeScriptZone);
@@ -82,7 +82,11 @@ BOOL CTeamCaptureZone::net_Spawn(CSE_Abstract* DC)
 
 	};
 
-	return						(bOk);
+	return (bOk);
+#else
+#	pragma todo(FX to Vodka: NET Online code)
+	return false;
+#endif
 }
 
 void CTeamCaptureZone::net_Destroy()
