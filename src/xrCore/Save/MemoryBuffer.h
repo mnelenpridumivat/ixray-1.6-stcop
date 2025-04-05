@@ -59,7 +59,7 @@ public:
 
 };
 
-class CMemoryBuffer 
+class XRCORE_API CMemoryBuffer 
 {
 	xr_vector<CMemoryChunk*> Chunks;
 
