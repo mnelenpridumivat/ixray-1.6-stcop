@@ -3,6 +3,8 @@
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects.h"
+#include "Save/MemoryBuffer.h"
+#include "Save/SaveManager.h"
 
 #define SPAWNPOINT_CHUNK_VERSION		0xE411
 #define SPAWNPOINT_CHUNK_POSITION		0xE412
@@ -335,10 +337,16 @@ void CSpawnPoint::SSpawnData::SaveStream(IWriter& F)
 	F.close_chunk		();
 
 	F.open_chunk		(SPAWNPOINT_CHUNK_SPAWNDATA);
-	NET_Packet 			Packet;
-	m_Data->Spawn_Write	(Packet,TRUE);
-	F.w_u32				(Packet.B.count);
-	F.w					(Packet.B.data,Packet.B.count);
+
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
+	CSaveObjectSave SaveData = CSaveObjectSave();
+	m_Data->Spawn_Serialize(SaveData, true);
+	CMemoryBuffer Buffer;
+	Buffer.Write(ESaveVariableType::t_chunk);
+	SaveData.Write(&Buffer);
+	Buffer.Write(&F);
+	
 	F.close_chunk		();
 }
 
@@ -351,14 +359,19 @@ bool CSpawnPoint::SSpawnData::LoadStream(IReader& F)
 	if(F.find_chunk(SPAWNPOINT_CHUNK_FLAGS))
 		m_flags.assign	(F.r_u8());
 
-	NET_Packet 			Packet;
 	R_ASSERT(F.find_chunk(SPAWNPOINT_CHUNK_SPAWNDATA));
-	Packet.B.count 		= F.r_u32();
-	F.r					(Packet.B.data,Packet.B.count);
+
+	auto Chunk = F.open_chunk(SPAWNPOINT_CHUNK_SPAWNDATA);
+	
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
+	CSaveObjectLoad LoadData = CSaveObjectLoad();
+	LoadData.Parse(Chunk);
 	Create				(temp);
 	if (Valid())
-		if (!m_Data->Spawn_Read(Packet))
+		if(!m_Data->Spawn_Serialize(LoadData, true))
 			Destroy		();
+	Chunk->close();
 
 	return Valid();
 }

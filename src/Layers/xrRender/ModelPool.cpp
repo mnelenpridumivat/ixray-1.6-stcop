@@ -78,12 +78,14 @@ dxRender_Visual*	CModelPool::Instance_Duplicate	(dxRender_Visual* V)
 	N->Copy			(V);
 	N->Spawn		();
     // inc ref counter
-	for (xr_vector<ModelDef>::iterator I=Models.begin(); I!=Models.end(); I++) 
-		if (I->model==V)
-		{ 
-			I->refs++; 
+	for(size_t i = 0; i < Models.size(); i++)
+	{
+		if(Models[i].model == V)
+		{
+			Models[i].refs++;
 			break;
 		}
+	}
 	return N;
 }
 
