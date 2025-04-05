@@ -65,14 +65,6 @@ void CPureServerObject::save				(NET_Packet	&tNetPacket)
 {
 }
 
-/*void CPureServerObject::Load(CSaveObjectLoad* Object)
-{
-}
-
-void CPureServerObject::Save(CSaveObjectSave* Object) const
-{
-}*/
-
 void CPureServerObject::Serialize(ISaveObject& Object)
 {
 }
@@ -163,6 +155,18 @@ CSE_Abstract::~CSE_Abstract					()
 {
 	xr_free						(s_name_replace);
 	xr_delete					(m_ini_file);
+}
+
+void CSE_Abstract::SetTicking(bool b)
+{
+	bIsTicking = b;
+#ifdef XRGAME_EXPORTS
+	const auto Obj = Level().Objects.net_Find(ID);
+	if(Obj)
+	{
+		Obj->SetTicking(b);
+	}
+#endif 
 }
 
 CSE_Visual* CSE_Abstract::visual			()
@@ -451,6 +455,7 @@ void CSE_Abstract::FillProps(LPCSTR pref, PropItemVec& items)
 #ifdef XRSE_FACTORY_EXPORTS
     m_gameType.FillProp(pref, items);
 #endif // #ifdef XRSE_FACTORY_EXPORTS
+	PHelper().CreateBool(items,	PrepareKey(pref,"Is Ticking"), &bIsTicking);
 /*
 #ifdef XRGAME_EXPORTS
 #	ifdef DEBUG
@@ -479,6 +484,11 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 	{
 		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
 
+		BEGIN_CHUNK(Object,"CSE_Abstract::Ticking")
+		{
+			Object << bIsTicking;
+		}
+		
 		{
 			u16 FlagsTemp;
 			u16 SpawnVersion;

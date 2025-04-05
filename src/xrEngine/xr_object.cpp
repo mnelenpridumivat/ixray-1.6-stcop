@@ -18,6 +18,8 @@
 #pragma warning(push)
 #pragma warning(disable:4995)
 #include <intrin.h>
+
+#include "../xrServerEntities/xrServer_Object_Base.h"
 #pragma warning(pop)
 
 #pragma intrinsic(_InterlockedCompareExchange)
@@ -233,7 +235,7 @@ BOOL CObject::net_Spawn			(CSE_Abstract* data)
 
 	spatial_register			();
 
-	if (register_schedule())
+	if (register_schedule() && data->IsTicking())
 		shedule_register		();
 
 	// reinitialize flags
@@ -407,6 +409,15 @@ float CObject::shedule_Scale()
 		return SheduleScaleDedicated;
 
 	return Device.vCameraPosition.distance_to(Position()) / 200.f;
+}
+
+void CObject::SetTicking(bool b)
+{
+	bIsTicking = b;
+	if(b && !Engine.Sheduler.Registered(this))
+	{
+		Engine.Sheduler.Register(this);
+	}
 }
 
 CObject* CObject::H_SetParent	(CObject* new_parent, bool just_before_destroy)

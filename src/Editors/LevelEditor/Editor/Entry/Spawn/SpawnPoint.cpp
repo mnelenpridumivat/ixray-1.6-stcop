@@ -397,12 +397,17 @@ bool CSpawnPoint::SSpawnData::ExportGame(SExportStreams* F, CSpawnPoint* owner)
 	}
 	// end
 
-	NET_Packet					Packet;
-	m_Data->Spawn_Write			(Packet,TRUE);
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
+	CSaveObjectSave SaveData = CSaveObjectSave();
+	CMemoryBuffer Buffer;
+	m_Data->Spawn_Serialize(SaveData, true);
+	Buffer.Write(ESaveVariableType::t_chunk);
+	SaveData.Write(&Buffer);
 
 	SExportStreamItem& tgt 		= (m_flags.test(eSDTypeRespawn))? F->spawn_rs : F->spawn;
 	tgt.stream.open_chunk		(tgt.chunk++);
-	tgt.stream.w				(Packet.B.data,Packet.B.count);
+	Buffer.Write(&tgt.stream);
 	tgt.stream.close_chunk		();
 
 	return true;

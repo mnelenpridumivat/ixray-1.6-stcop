@@ -89,23 +89,18 @@ void CLevelSpawnConstructor::init								()
 
 CSE_Abstract *CLevelSpawnConstructor::create_object						(IReader *chunk)
 {
-	NET_Packet				net_packet;
-	net_packet.B.count		= chunk->length();
-	chunk->r				(net_packet.B.data,net_packet.B.count);
-//	we do not need to close chunk since we iterate on them
-//	chunk->close			();
-	u16						ID;
-	net_packet.r_begin		(ID);
-	R_ASSERT2				(M_SPAWN==ID,"ID doesn't match to the spawn-point ID!");
-	string64				section_name;
-	net_packet.r_stringZ	(section_name);
-	CSE_Abstract			*abstract = F_entity_Create(section_name);
+	CSaveObjectLoad SaveObj;
+	SaveObj.Parse(chunk);
+	shared_str s_name;
+	SaveObj << s_name;
+	
+	CSE_Abstract			*abstract = F_entity_Create(s_name.c_str());
 	if (!abstract) {
 		string256			temp;
-		xr_sprintf				(temp,"Can't create entity '%s' !\n",section_name);
+		xr_sprintf				(temp,"Can't create entity '%s' !\n",s_name.c_str());
 		R_ASSERT2			(abstract,temp);
 	}
-	abstract->Spawn_Read	(net_packet);
+	abstract->Spawn_Serialize(SaveObj, true);
 	return					(abstract);
 }
 

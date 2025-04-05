@@ -65,8 +65,14 @@ public:
 private:
 	LPSTR							s_name_replace = nullptr;
 
+	bool bIsTicking = false;
+
 public:
-	BOOL							net_Ready;
+
+	bool IsTicking(){return bIsTicking;}
+	void SetTicking(bool b);
+
+BOOL							net_Ready;
 	BOOL							net_Processed;	// Internal flag for connectivity-graph
 	
 	u16								m_wVersion;

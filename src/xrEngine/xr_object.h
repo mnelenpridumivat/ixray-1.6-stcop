@@ -70,6 +70,7 @@ private:
 	shared_str							NameObject;
 	shared_str							NameSection;
 	shared_str							NameVisual;
+	bool bIsTicking = true;
 protected:
 	// Parentness
 	CObject*							Parent;
@@ -105,7 +106,9 @@ public:
 	BOOL								GetTmpPreDestroy		()		const	{ return Props.bPreDestroy;	}
 	void								SetTmpPreDestroy	(BOOL b)			{ Props.bPreDestroy = b;}
 	virtual float						shedule_Scale();
-	virtual bool						shedule_Needed		()					{return processing_enabled();};
+	virtual bool						shedule_Needed		()					{return processing_enabled() && bIsTicking;};
+	bool IsTicking() const {return bIsTicking;}
+	void SetTicking(bool b);
 
 	// Parentness
 	IC CObject*							H_Parent			()					{ return Parent;						}

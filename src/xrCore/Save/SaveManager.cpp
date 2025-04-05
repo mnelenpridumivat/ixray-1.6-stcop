@@ -93,6 +93,22 @@ void CSaveManager::WriteSavedDataImpl()
 	bNeedSave = false;
 }
 
+CSaveObjectSave* CSaveManager::EditorBeginSave()
+{
+	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, false);
+	SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	return new CSaveObjectSave();
+}
+
+CSaveObjectLoad* CSaveManager::EditorBeginLoad(IReader* stream)
+{
+	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, false);
+	SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	auto Obj = new CSaveObjectLoad();
+	Obj->Parse(stream);
+	return Obj;
+}
+
 void CSaveManager::ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer)
 {
 	if (TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization)) {

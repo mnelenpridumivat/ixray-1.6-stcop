@@ -15,6 +15,7 @@
 #include "server_entity_wrapper.h"
 #include "graph_engine_editor.h"
 #include "patrol_path_storage.h"
+#include "Save/MemoryBuffer.h"
 
 extern LPCSTR GAME_CONFIG;
 extern LPCSTR generate_temp_file_name			(LPCSTR header0, LPCSTR header1, string_path& buffer);
@@ -197,6 +198,60 @@ bool CGameSpawnConstructor::save_spawn				(LPCSTR name, LPCSTR output)
 	stream.close_chunk				();
 	
 	stream.open_chunk				(1);
+	{
+		auto& graph = spawn_graph();
+		
+		stream.open_chunk			(0);
+		stream.w_u32				((u32)graph.vertices().size());
+		stream.close_chunk			();
+	
+		stream.open_chunk			(1);
+		auto I = graph.vertices().begin();
+		auto E = graph.vertices().end();
+		for (int i=0; I != E; ++I, ++i) {
+			stream.open_chunk		(i);
+			{
+				stream.open_chunk	(0);
+				save_data			((*I).second->vertex_id(),stream);
+				stream.close_chunk	();
+
+				stream.open_chunk	(1);
+				{
+					auto& obj = (*I).second->data()->object();
+					CSaveObjectSave Obj;
+					obj.Spawn_Serialize(Obj, true);
+					obj.UPDATE_Serialize(Obj);
+					CMemoryBuffer buff;
+					Obj.Write(&buff);
+					buff.Write(&stream);
+				}
+				stream.close_chunk	();
+			}
+			stream.close_chunk		();
+		}
+		stream.close_chunk			();
+
+		stream.open_chunk			(2);
+		{
+			auto I_ = graph.vertices().begin();
+			auto E_ = graph.vertices().end();
+			for ( ; I_ != E_; ++I_) {
+				if ((*I_).second->edges().empty())
+					continue;
+
+				save_data			((*I_).second->vertex_id(),stream);
+
+				stream.w_u32		((u32)(*I_).second->edges().size());
+				auto i = (*I_).second->edges().begin();
+				auto e = (*I_).second->edges().end();
+				for ( ; i != e; ++i) {
+					save_data		((*i).vertex_id(),stream);
+					save_data		((*i).weight(),stream);
+				}
+			}
+		}
+		stream.close_chunk			();
+	}
 	save_data						(spawn_graph(),stream);
 	stream.close_chunk				();
 

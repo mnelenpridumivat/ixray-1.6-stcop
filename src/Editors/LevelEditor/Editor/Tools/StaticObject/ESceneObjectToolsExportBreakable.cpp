@@ -3,6 +3,8 @@
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Objects.h"
+#include "Save/MemoryBuffer.h"
+#include "Save/SaveManager.h"
 static bool s_draw_dbg = false;
 
 IC bool build_mesh(const Fmatrix& parent, CEditableMesh* mesh, CGeomPartExtractor* extractor, u32 game_mtl_mask, BOOL ignore_shader)
@@ -132,13 +134,18 @@ bool ESceneObjectTool::ExportBreakableObjects(SExportStreams* F)
                         MX.transform_dir		(DR);
                         Tools->m_DebugDraw.AppendLine(P->m_RefOffset,Fvector().mad(P->m_RefOffset,MX.k,1.f),0xFF0000FF,false,false);
                     }
+                	
+                	F->spawn.stream.open_chunk	(F->spawn.chunk++);
+	                {
+                    	auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+                    	m_Data->Spawn_Serialize(*Obj, true);
+                    	CMemoryBuffer buff;
+                    	Obj->Write(&buff);
+                    	buff.Write(&F->spawn.stream);
+                    	xr_delete(Obj);
+	                }
+                	F->spawn.stream.close_chunk	();
 
-                    NET_Packet					Packet;
-                    m_Data->Spawn_Write			(Packet,TRUE);
-
-                    F->spawn.stream.open_chunk	(F->spawn.chunk++);
-                    F->spawn.stream.w			(Packet.B.data,Packet.B.count);
-                    F->spawn.stream.close_chunk	();
                     g_SEFactoryManager->destroy_entity				(m_Data);
                 }
             }else{
@@ -269,11 +276,16 @@ bool ESceneObjectTool::ExportClimableObjects(SExportStreams* F)
                         m_Data->angle().set			(P->m_RefRotate);
 
                         m_Data->set_additional_info((void*)mat_name);
-                        NET_Packet					Packet;
-                        m_Data->Spawn_Write			(Packet,TRUE);
 
-                        F->spawn.stream.open_chunk	(F->spawn.chunk++);
-                        F->spawn.stream.w			(Packet.B.data,Packet.B.count);
+                    	F->spawn.stream.open_chunk	(F->spawn.chunk++);
+                        {
+                        	auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+                        	m_Data->Spawn_Serialize(*Obj, true);
+                        	CMemoryBuffer buff;
+                        	Obj->Write(&buff);
+                        	buff.Write(&F->spawn.stream);
+                        	xr_delete(Obj);
+                        }
                         F->spawn.stream.close_chunk	();
 
 						if (s_draw_dbg)

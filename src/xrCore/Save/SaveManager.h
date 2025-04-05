@@ -133,6 +133,9 @@ public:
 	bool NeedSave(){return bNeedSave;}
 	void WriteSavedDataImpl();
 
+	CSaveObjectSave* EditorBeginSave();
+	CSaveObjectLoad* EditorBeginLoad(IReader* stream);
+
 	void ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer);
 	void ConditionalWriteBool(bool Value, CMemoryBuffer& buffer);
 	void ConditionalReadString(IReader* stream, shared_str& Value);
