@@ -243,6 +243,9 @@ public:
 	_DECLARE_FUNCTION10	(GetScriptControlName,			LPCSTR	);
 	_DECLARE_FUNCTION10	(GetEnemyStrength, int);
 	_DECLARE_FUNCTION10	(can_script_capture, bool);
+
+	_DECLARE_FUNCTION10 (IsTicking, bool);
+	_DECLARE_FUNCTION11 (SetTicking, void, bool);
 	
 
 			CScriptEntityAction	*GetCurrentAction	() const;

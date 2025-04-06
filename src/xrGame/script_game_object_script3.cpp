@@ -489,5 +489,8 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 		.def("iterate_installed_upgrades",	&CScriptGameObject::IterateInstalledUpgrades)
         .def("set_health_ex",				&CScriptGameObject::SetHealthEx)
 
+		.def("is_ticking",					&CScriptGameObject::IsTicking)
+		.def("set_ticking",					&CScriptGameObject::SetTicking)
+
 	;
 }

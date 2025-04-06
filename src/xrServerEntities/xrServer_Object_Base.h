@@ -64,8 +64,12 @@ public:
 
 private:
 	LPSTR							s_name_replace = nullptr;
+	bool bIsTicking = true;
 
 public:
+	bool IsTicking() const {return bIsTicking;}
+	void SetTicking(bool b, bool recurse = false);
+
 	BOOL							net_Ready;
 	BOOL							net_Processed;	// Internal flag for connectivity-graph
 	

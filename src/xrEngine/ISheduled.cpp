@@ -51,3 +51,12 @@ void	ISheduled::shedule_Update			(u32 dt)
 	dbg_update_shedule	= dbg_startframe;
 #endif
 }
+
+void ISheduled::SetTicking(bool b, bool recurse)
+{
+	bIsTicking = b;
+	if(b)
+	{
+		Engine.Sheduler.Register(this);
+	}
+}

@@ -2,6 +2,7 @@
 
 class ENGINE_API ISheduled
 {
+	bool bIsTicking = true;
 public:
 	struct {
 		u32		t_min		:	14;		// minimal bound of update time (sample: 20ms)
@@ -26,4 +27,6 @@ public:
 	virtual	shared_str					shedule_Name		() const	{ return shared_str("unknown"); };
 	virtual bool						shedule_Needed		()			= 0;
 
+	bool IsTicking() const				{ return bIsTicking; }
+	virtual void SetTicking(bool b, bool recurse = false);
 };

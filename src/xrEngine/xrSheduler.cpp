@@ -280,7 +280,7 @@ void CSheduler::ProcessStep			()
 		u32		Elapsed				= dwTime-T.dwTimeOfLastExecute;
 		bool	condition;
 		
-		condition					= (nullptr==T.Object || !T.Object->shedule_Needed());
+		condition					= (nullptr==T.Object || !T.Object->shedule_Needed() || !T.Object->IsTicking());
 		if (condition) 
 		{
 			// Erase element

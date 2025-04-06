@@ -73,6 +73,17 @@ CGameObject::~CGameObject		()
 	xr_delete					(m_ai_obstacle);
 }
 
+void CGameObject::SetTicking(bool b, bool recurse)
+{
+	inherited::SetTicking(b);
+	if(!recurse)
+	{
+		auto so = ai().get_alife()->objects().object(ID(),true);
+		VERIFY( so );
+		so->SetTicking(b, true);
+	}
+}
+
 void CGameObject::init			()
 {
 	m_lua_game_object			= 0;
@@ -252,6 +263,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	m_spawn_time					= Device.dwFrame;
 	m_ai_obstacle					= new ai_obstacle(this);
 
+	SetTicking(DC->IsTicking());
+	
 	CSE_Abstract					*E = (CSE_Abstract*)DC;
 	VERIFY							(E);
 
@@ -488,6 +501,19 @@ void CGameObject::net_Serialize(ISaveObject& Object)
 {
 	BEGIN_CHUNK(Object,"CGameObject::net_Serialize")
 	{
+		BEGIN_CHUNK(Object,"CGameObject::net_Serialize::Ticking")
+		{
+			bool ticking;
+			if(Object.IsSave())
+			{
+				ticking = IsTicking();
+				Object << ticking;
+			} else
+			{
+				Object << ticking;
+				SetTicking(ticking);
+			}
+		}
 		auto ChunkDepth = Object.GetChunkStackDepth();
 		Serialize(Object);
 		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (client object)", Name());

@@ -25,6 +25,11 @@ CScriptIniFile *get_spawn_ini(CSE_Abstract *abstract)
 	return	((CScriptIniFile*)&abstract->spawn_ini());
 }
 
+void SetIsTicking(CSE_Abstract *abstract, bool b)
+{
+	abstract->SetTicking(b);
+}
+
 namespace xrServerObjectsScript
 {
 	LPCSTR get_name(const CSE_Abstract* abstract)
@@ -123,6 +128,8 @@ void CSE_Abstract::script_register(lua_State *L)
 			.def			("STATE_Write",		&BaseType::STATE_Write, &WrapType::STATE_Write_static)
 			.def			("UPDATE_Read",		&BaseType::UPDATE_Read, &WrapType::UPDATE_Read_static)
 			.def			("UPDATE_Write",	&BaseType::UPDATE_Write, &WrapType::UPDATE_Write_static)
+			.def("SetTicking", &SetIsTicking)
+			.def("IsTicking", &IsTicking)
 //			.def(		constructor<LPCSTR>())
 	];
 }

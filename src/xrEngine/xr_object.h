@@ -77,6 +77,7 @@ protected:
 	// Geometric (transformation)
 	svector<SavedPosition,4>			PositionStack;
 public:
+	
 #ifdef DEBUG
 	u32									dbg_update_cl;
 #endif

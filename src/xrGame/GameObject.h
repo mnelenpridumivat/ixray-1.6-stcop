@@ -74,6 +74,9 @@ public:
 	CGameObject();
 	virtual ~CGameObject();
 public:
+
+	virtual void SetTicking(bool b, bool recurse = false) override;
+	
 	CScriptBinder* GetScriptBinderComponent() { return m_ScriptBinderComponent.get(); }
 
 	//functions used for avoiding most of the smart_cast

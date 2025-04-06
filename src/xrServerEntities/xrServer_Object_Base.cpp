@@ -165,6 +165,21 @@ CSE_Abstract::~CSE_Abstract					()
 	xr_delete					(m_ini_file);
 }
 
+void CSE_Abstract::SetTicking(bool b, bool recurse)
+{
+	bIsTicking = b;
+#ifdef XRGAME_EXPORTS
+	if(!recurse)
+	{
+		auto Obj = Level().Objects.net_Find(ID);
+		if(Obj)
+		{
+			Obj->SetTicking(b);
+		}
+	}
+#endif
+}
+
 CSE_Visual* CSE_Abstract::visual			()
 {
 	return						(0);
@@ -479,6 +494,11 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 	{
 		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
 
+		BEGIN_CHUNK(Object, "CSE_Abstract::Ticking")
+		{
+			Object << bIsTicking;
+		}
+		
 		{
 			u16 FlagsTemp;
 			u16 SpawnVersion;
