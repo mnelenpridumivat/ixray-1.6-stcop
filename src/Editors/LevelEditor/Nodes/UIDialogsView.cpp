@@ -143,6 +143,24 @@ void CUIDialogView::Draw()
 					std::memcpy(detail::input_buffer, xr_string::ToString(NodeID).c_str(), sizeof(detail::input_buffer));
 				}
 			}
+
+			if (HoveredNodeID != -1 && ImGui::MenuItem("Delete Node"))
+			{
+				auto SelectedNode = std::find_if(Nodes.begin(), Nodes.end(), [HoveredNodeID](INodeUnknown* TestingNode)
+				{
+					return TestingNode->NodeID == HoveredNodeID;
+				});
+
+				if (SelectedNode != Nodes.end())
+				{
+					CDialogNode* DialogNode = (CDialogNode*)*SelectedNode;
+					DialogNode->ParentNode->Parent()->DeleteChild(DialogNode->ParentNode);
+					Nodes.erase(SelectedNode);
+					DialogNode->DestroyContacts();
+					xr_delete(DialogNode);
+				}
+			}
+
 			ImGui::EndPopup();
 		}
 
@@ -244,16 +262,16 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 	xr_map<CDialogNode*, xr_vector<shared_str>> NodeGraph;
 
 	auto MakeListStringFromNode = [](shared_str& Value, shared_str Text)
+	{
+		if (Value.size() > 0)
 		{
-			if (Value.size() > 0)
-			{
-				Value = make_string<shared_str>("%s, %s", *Value, *Text);
-			}
-			else
-			{
-				Value = Text;
-			}
-		};
+			Value = make_string<shared_str>("%s, %s", *Value, *Text);
+		}
+		else
+		{
+			Value = Text;
+		}
+	};
 
 	while (PhraseNode != nullptr)
 	{
@@ -386,6 +404,9 @@ void CUIDialogView::OpenDialog(const shared_str& Str, XML_NODE* Node)
 
 					int NextID = TryNode->GetContactLink();
 					Node->CreateContactLink(ContackID, NextID);
+					Node->MakeOutNode(TryNode, true);
+					TryNode->MakeInNode(Node);
+
 					NodeOffsetYIterator += 230;
 				}
 			}
