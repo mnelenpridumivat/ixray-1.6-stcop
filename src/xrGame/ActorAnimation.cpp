@@ -706,7 +706,23 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 			{
 				if (D && !D->IsHidden())
 				{
-					M_torso = ST->m_torso_device[0].moving[moving_idx];
+					switch (D->GetState())
+					{
+					case CHudItem::eIdle:
+						{
+							M_torso = ST->m_torso_device[0].moving[moving_idx];
+							break;
+						}
+					case CHudItem::eShowing:
+						{
+							M_torso = ST->m_torso_device[0].draw_device;
+						}break;
+					case CHudItem::eHiding:
+						{
+							M_torso = ST->m_torso_device[0].holster_device;
+						}break;
+						//case CHudItem::eHidden: break;
+					}
 				} else
 				{
 					M_torso = TW->moving[moving_idx];
