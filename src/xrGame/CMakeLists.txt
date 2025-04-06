@@ -25,6 +25,9 @@ file(GLOB_RECURSE XGM_SOURCE_UI_FILES
 	"ui*.*"
 	"UI*.*"
 )
+file(GLOB_RECURSE XGM_SOURCE_LOGIC_FILES
+	"Logic/*.*"
+)
 file(GLOB_RECURSE XGM_SOURCE_IKAN_FILES
 	"ik/*.*"
 	"ik_*.*"
@@ -126,6 +129,7 @@ source_group("level" FILES ${XGM_SOURCE_LEVEL_FILES})
 source_group("ikan" FILES ${XGM_SOURCE_IKAN_FILES})
 source_group("inventory" FILES ${XGM_SOURCE_INV_FILES})
 source_group("Legacy" FILES ${XGM_SOURCE_LEGACY_FILES})
+source_group("Logic" FILES ${XGM_SOURCE_LOGIC_FILES})
 
 source_group("imgui/utils" FILES ${XGM_SOURCE_IMGUI_INGAME_FILES})
 
