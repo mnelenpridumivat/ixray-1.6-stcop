@@ -649,6 +649,10 @@ protected:
 #endif
 		Fvector							m_AutoPickUp_AABB;
 		Fvector							m_AutoPickUp_AABB_Offset;
+		bool m_PickingUp = false;
+		ALife::_OBJECT_ID m_PickingUp_Object = ALife::_OBJECT_ID(-1);
+
+		void OnPickedUp();
 
 		void							Check_for_AutoPickUp			();
 		void							SelectBestWeapon				(CObject* O);

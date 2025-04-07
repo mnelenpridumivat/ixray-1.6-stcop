@@ -31,6 +31,8 @@ struct STorsoWpn{
 	MotionID	all_attack_0;
 	MotionID	all_attack_1;
 	MotionID	all_attack_2;
+	
+	MotionID	take;
 
 	//�������� ��� ����������
 	MotionID	holster_device;

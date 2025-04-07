@@ -180,10 +180,57 @@ void	CActor::PickupModeUpdate_COD	()
 		if(pUsableObject && (!m_pUsableObject))
 			pUsableObject->use(this);
 
+		m_PickingUp = true;
 		//подбирание объекта
 		Game().SendPickUpEvent(ID(), pNearestItem->object().ID());
 	}
 };
+
+void CActor::OnPickedUp()
+{
+	CObject* Obj			= Level().Objects.net_Find	(m_PickingUp_Object);
+
+	//			R_ASSERT2( Obj, make_string<const char*>("GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", id).c_str() );
+	VERIFY2  ( Obj, make_string<const char*>("GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", m_PickingUp_Object) );
+	if ( !Obj ) {
+		Msg                 ( "! GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", m_PickingUp_Object );
+		//m_PickingUp = false;
+		return;
+	}
+		
+	CGameObject* _GO		= smart_cast<CGameObject*>(Obj);
+	if (!IsGameTypeSingle() && !g_Alive())
+	{
+		Msg("! WARNING: dead player [%d][%s] can't take items [%d][%s]",
+			ID(), Name(), _GO->ID(), _GO->cNameSect().c_str());
+		//m_PickingUp = false;
+		return;
+	}
+			
+	if( inventory().CanTakeItem(smart_cast<CInventoryItem*>(_GO)) )
+	{
+		Obj->H_SetParent		(smart_cast<CObject*>(this));
+				
+		inventory().Take	(_GO, false, true);
+			
+		SelectBestWeapon(Obj);
+		//m_PickingUp = false;
+	}
+	else
+	{
+		if (IsGameTypeSingle())
+		{
+			NET_Packet		P_;
+			u_EventGen		(P_,GE_OWNERSHIP_REJECT,ID());
+			P_.w_u16			(u16(Obj->ID()));
+			u_EventSend		(P_);
+			//m_PickingUp = false;
+		} else
+		{
+			Msg("! ERROR: Actor [%d][%s]  tries to drop on take [%d][%s]", ID(), Name(), _GO->ID(), _GO->cNameSect().c_str());
+		}
+	}
+}
 
 void	CActor::Check_for_AutoPickUp()
 {

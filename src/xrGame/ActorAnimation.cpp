@@ -11,6 +11,8 @@
 #include "PHDebug.h"
 #include "../../xrUI/ui_base.h"
 #endif
+#include <ranges>
+
 #include "Hit.h"
 #include "PHDestroyable.h"
 #include "Car.h"
@@ -138,6 +140,8 @@ void STorsoWpn::Create(IKinematicsAnimated* K, LPCSTR base0, LPCSTR base1)
 	all_attack_0	= K->ID_Cycle_Safe(xr_strconcat(buf,base0,"_all",base1,"_attack_0"));
 	all_attack_1	= K->ID_Cycle_Safe(xr_strconcat(buf,base0,"_all",base1,"_attack_1"));
 	all_attack_2	= K->ID_Cycle_Safe(xr_strconcat(buf,base0,"_all",base1,"_attack_2"));
+
+	take = K->ID_Cycle_Safe(xr_strconcat(buf,base0,"_torso",base1,"_gest_pickup_1"));
 
 	holster_device = K->ID_Cycle_Safe(xr_strconcat(buf, base0, "_torso", base1, "_holsterdevice_0"));
 	draw_device = K->ID_Cycle_Safe(xr_strconcat(buf, base0, "_torso", base1, "_drawdevice_0"));
@@ -347,8 +351,6 @@ const char* mov_state[] ={
 };
 void CActor::g_SetAnimation( u32 mstate_rl )
 {
-
-
 	if (!g_Alive()) {
 		if (m_current_legs||m_current_torso){
 			SActorState*				ST = 0;
@@ -447,10 +449,10 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 		{
 			g_player_hud->OnMovementChanged(mcSprint);
 		}else
-		if ((mstate_rl&mcAnyMove) != (mstate_old&mcAnyMove))
-		{
-			g_player_hud->OnMovementChanged(mcAnyMove);
-		}
+			if ((mstate_rl&mcAnyMove) != (mstate_old&mcAnyMove))
+			{
+				g_player_hud->OnMovementChanged(mcAnyMove);
+			}
 	};
 
 	//-----------------------------------------------------------------------
@@ -469,8 +471,18 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 	}
 
 	CHudItem* H = smart_cast<CHudItem*>(_i);
-
-	if (!M_torso) {
+	if(m_PickingUp)
+	{
+		//if(H)
+		//{
+		//	M_torso = ST->m_torso[H->animation_slot() - 1].take;
+		//} else
+		//{
+			M_torso = ST->m_torso[13].take;
+		//}
+		m_bAnimTorsoPlayed = true;
+	} else {
+		if (!M_torso) {
 		CWeapon* W = smart_cast<CWeapon*>(_i);
 		CMissile* M = smart_cast<CMissile*>(_i);
 		CArtefact* A = smart_cast<CArtefact*>(_i);
@@ -729,6 +741,7 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 				}
 			}
 		}
+	}
 	}
 	MotionID mid = smart_cast<IKinematicsAnimated*>(Visual())->ID_Cycle("norm_idle_0");
 

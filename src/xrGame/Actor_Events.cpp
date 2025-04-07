@@ -34,12 +34,18 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
 	case GE_OWNERSHIP_TAKE:
 		{
 			P.r_u16					(id);
+			if(m_PickingUp)
+			{
+				m_PickingUp_Object = id;
+				break;
+			}
 			CObject* Obj			= Level().Objects.net_Find	(id);
 
 //			R_ASSERT2( Obj, make_string<const char*>("GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", id).c_str() );
 			VERIFY2  ( Obj, make_string<const char*>("GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", id) );
 			if ( !Obj ) {
 				Msg                 ( "! GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", id );
+				//m_PickingUp = false;
 				break;
 			}
 		
@@ -48,6 +54,7 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
 			{
 				Msg("! WARNING: dead player [%d][%s] can't take items [%d][%s]",
 					ID(), Name(), _GO->ID(), _GO->cNameSect().c_str());
+				//m_PickingUp = false;
 				break;
 			}
 			
@@ -64,6 +71,7 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
 				inventory().Take	(_GO, false, true);
 			
 				SelectBestWeapon(Obj);
+				//m_PickingUp = false;
 			}
 			else
 			{
@@ -73,6 +81,7 @@ void CActor::OnEvent(NET_Packet& P, u16 type)
 					u_EventGen		(P_,GE_OWNERSHIP_REJECT,ID());
 					P_.w_u16			(u16(Obj->ID()));
 					u_EventSend		(P_);
+					//m_PickingUp = false;
 				} else
 				{
 					Msg("! ERROR: Actor [%d][%s]  tries to drop on take [%d][%s]", ID(), Name(), _GO->ID(), _GO->cNameSect().c_str());

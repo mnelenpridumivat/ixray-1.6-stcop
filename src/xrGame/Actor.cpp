@@ -1969,6 +1969,11 @@ void CActor::AnimTorsoPlayCallBack(CBlend* B)
 {
 	CActor* actor		= (CActor*)B->CallbackParam;
 	actor->m_bAnimTorsoPlayed = FALSE;
+	if(actor->m_PickingUp)
+	{
+		actor->OnPickedUp();
+		actor->m_PickingUp = false;
+	}
 }
 
 
