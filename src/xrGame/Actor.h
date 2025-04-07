@@ -652,6 +652,8 @@ protected:
 		bool m_PickingUp = false;
 		ALife::_OBJECT_ID m_PickingUp_Object = ALife::_OBJECT_ID(-1);
 
+		bool m_block_input = false;
+
 		void OnPickedUp();
 
 		void							Check_for_AutoPickUp			();

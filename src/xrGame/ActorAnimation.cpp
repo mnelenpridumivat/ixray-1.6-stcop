@@ -484,6 +484,7 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 		if(M_torso.valid())
 		{
 			m_bAnimTorsoPlayed = true;
+			m_block_input = true;
 		} else
 		{
 			OnPickedUp();

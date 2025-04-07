@@ -188,6 +188,7 @@ void	CActor::PickupModeUpdate_COD	()
 
 void CActor::OnPickedUp()
 {
+	m_block_input = false;
 	CObject* Obj			= Level().Objects.net_Find	(m_PickingUp_Object);
 
 	//			R_ASSERT2( Obj, make_string<const char*>("GE_OWNERSHIP_TAKE: Object not found. object_id = [%d]", id).c_str() );

@@ -41,6 +41,10 @@ void CActor::IR_OnKeyboardPress(int cmd)
 {
 	if(hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))	return;
 
+	if(m_block_input)
+	{
+		return;
+	}
 	if (Remote())		return;
 	if (IsTalking())	return;
 	if (m_input_external_handler && !m_input_external_handler->authorized(cmd))	return;
@@ -213,6 +217,11 @@ void CActor::IR_OnMouseWheel(int direction)
 		return;
 	}
 
+	if(m_block_input)
+	{
+		return;
+	}
+	
 	if(inventory().Action( (direction>0)? (u16)kWPN_ZOOM_DEC:(u16)kWPN_ZOOM_INC , CMD_START)) return;
 
 
@@ -226,6 +235,10 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 {
 	if(hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))	return;
 
+	if(m_block_input)
+	{
+		return;
+	}
 	if (Remote())	return;
 
 	if (m_input_external_handler && !m_input_external_handler->authorized(cmd))	return;
@@ -255,6 +268,10 @@ void CActor::IR_OnKeyboardHold(int cmd)
 {
 	if(hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))	return;
 
+	if(m_block_input)
+	{
+		return;
+	}
 	if (Remote() || !g_Alive())					return;
 	if (m_input_external_handler && !m_input_external_handler->authorized(cmd))	return;
 	if (IsTalking())							return;
@@ -349,6 +366,10 @@ void CActor::IR_OnMouseMove(int dx, int dy)
 
 void CActor::IR_GamepadUpdateStick(int id, Fvector2 value)
 {
+	if(m_block_input)
+	{
+		return;
+	}
 	// Left stick
 	if (id == 0)
 	{
@@ -426,6 +447,10 @@ void CActor::IR_GamepadUpdateStick(int id, Fvector2 value)
 
 void CActor::IR_GamepadKeyPress(int id)
 {
+	if(m_block_input)
+	{
+		return;
+	}
 	if (id == SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)
 	{
 		IR_OnKeyboardPress(kPREV_SLOT);
