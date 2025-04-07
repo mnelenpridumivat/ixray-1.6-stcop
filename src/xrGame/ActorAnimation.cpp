@@ -473,14 +473,22 @@ void CActor::g_SetAnimation( u32 mstate_rl )
 	CHudItem* H = smart_cast<CHudItem*>(_i);
 	if(m_PickingUp)
 	{
-		//if(H)
-		//{
-		//	M_torso = ST->m_torso[H->animation_slot() - 1].take;
-		//} else
-		//{
+		CWeapon* W = smart_cast<CWeapon*>(_i);
+		if(W && W->ID() != m_PickingUp_Object)
+		{
+			M_torso = ST->m_torso[H->animation_slot() - 1].take;
+		} else
+		{
 			M_torso = ST->m_torso[13].take;
-		//}
-		m_bAnimTorsoPlayed = true;
+		}
+		if(M_torso.valid())
+		{
+			m_bAnimTorsoPlayed = true;
+		} else
+		{
+			OnPickedUp();
+			m_PickingUp = false;
+		}
 	} else {
 		if (!M_torso) {
 		CWeapon* W = smart_cast<CWeapon*>(_i);
