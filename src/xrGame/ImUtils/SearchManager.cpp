@@ -638,13 +638,20 @@ void InitImGuiHudAdjustInGame()
 		{
 			fread(&imgui_hud_adjust_manager.settings.history_command_max_count, sizeof(imgui_hud_adjust_manager.settings.history_command_max_count), 1, imgui_hud_adjust_manager.settings.p_file);
 
-			static_assert(sizeof(CHudAdjustManager::Settings::last_position) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+			static_assert(sizeof(CHudAdjustManager::Settings::hud_position) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+			static_assert(sizeof(CHudAdjustManager::Settings::hud_rotation) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+			static_assert(sizeof(CHudAdjustManager::Settings::item_position) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+			static_assert(sizeof(CHudAdjustManager::Settings::item_rotation) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
 
-			static_assert(sizeof(CHudAdjustManager::Settings::last_rotation) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
 
-			fread(&imgui_hud_adjust_manager.settings.last_position.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
 
-			fread(&imgui_hud_adjust_manager.settings.last_rotation.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+			fread(&imgui_hud_adjust_manager.settings.hud_position.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+
+			fread(&imgui_hud_adjust_manager.settings.hud_rotation.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+
+			fread(&imgui_hud_adjust_manager.settings.item_position.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+
+			fread(&imgui_hud_adjust_manager.settings.item_rotation.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
 
 			fread(&imgui_hud_adjust_manager.settings.data_of_save[0], sizeof(char), 32, imgui_hud_adjust_manager.settings.p_file);
 		}
@@ -668,13 +675,29 @@ void InitImGuiHudAdjustInGame()
 
 		imgui_hud_adjust_manager.settings.history_command_max_count = 100;
 
-		imgui_hud_adjust_manager.settings.last_position.x = 0.0;
-		imgui_hud_adjust_manager.settings.last_position.y = 0.0;
-		imgui_hud_adjust_manager.settings.last_position.z = 0.0;
+		imgui_hud_adjust_manager.settings.hud_position.x = 0.0f;
+		imgui_hud_adjust_manager.settings.hud_position.y = 0.0f;
+		imgui_hud_adjust_manager.settings.hud_position.z = 0.0f;
 
-		imgui_hud_adjust_manager.settings.last_rotation.x = 0.0;
-		imgui_hud_adjust_manager.settings.last_rotation.y = 0.0;
-		imgui_hud_adjust_manager.settings.last_rotation.z = 0.0;
+		imgui_hud_adjust_manager.settings.hud_rotation.x = 0.0f;
+		imgui_hud_adjust_manager.settings.hud_rotation.y = 0.0f;
+		imgui_hud_adjust_manager.settings.hud_rotation.z = 0.0f;
+
+		imgui_hud_adjust_manager.settings.item_position.x = 0.0f;
+		imgui_hud_adjust_manager.settings.item_position.y = 0.0f;
+		imgui_hud_adjust_manager.settings.item_position.z = 0.0f;
+
+		imgui_hud_adjust_manager.settings.item_rotation.x = 0.0f;
+		imgui_hud_adjust_manager.settings.item_rotation.y = 0.0f;
+		imgui_hud_adjust_manager.settings.item_rotation.z = 0.0f;
+
+
+		imgui_hud_adjust_manager.settings.hud_position_default = imgui_hud_adjust_manager.settings.hud_position;
+		imgui_hud_adjust_manager.settings.hud_rotation_default = imgui_hud_adjust_manager.settings.hud_rotation;
+
+		imgui_hud_adjust_manager.settings.item_position_default = imgui_hud_adjust_manager.settings.item_position;
+
+		imgui_hud_adjust_manager.settings.item_rotation_default = imgui_hud_adjust_manager.settings.item_rotation;
 	}
 
 	imgui_hud_adjust_manager.history.storage.reserve(imgui_hud_adjust_manager.settings.history_command_max_count);

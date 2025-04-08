@@ -295,8 +295,15 @@ struct CHudAdjustManager
 		u32 history_command_max_count;
 
 		FILE* p_file = nullptr;
-		Fvector3 last_position;
-		Fvector3 last_rotation;
+		Fvector3 hud_position;
+		Fvector3 hud_rotation;
+		Fvector3 item_position;
+		Fvector3 item_rotation;
+
+		Fvector3 hud_position_default;
+		Fvector3 hud_rotation_default;
+		Fvector3 item_position_default;
+		Fvector3 item_rotation_default;
 		char data_of_save[32];
 	};
 	

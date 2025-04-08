@@ -37,19 +37,57 @@ void RenderHUDAdjustManager()
 			{
 				if (ImGui::CollapsingHeader("Hud"))
 				{
-					ImGui::SeparatorText("Position");
+
+
+					ImGui::SeparatorText("Position##HUD");
+
+					if (ImGui::Button("Reset##HPosition"))
+					{
+						// todo: implement
+					}
+
+					ImGui::SliderFloat("X##HUDP", &imgui_hud_adjust_manager.settings.hud_position.x, -1.0f, 1.0f);
+
+					ImGui::SliderFloat("Y##HUDP", &imgui_hud_adjust_manager.settings.hud_position.y, -1.0f, 1.0f);
+
+					ImGui::SliderFloat("Z##HUDP", &imgui_hud_adjust_manager.settings.hud_position.z, -1.0f, 1.0f);
 
 
 
-					ImGui::SeparatorText("Rotation");
+
+
+					ImGui::SeparatorText("Rotation##HUD");
+
+					if (ImGui::Button("Reset##HRotation"))
+					{
+						// todo: implement
+					}
+
+					ImGui::SliderFloat("X##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.x, -1.0f, 1.0f);
+
+					ImGui::SliderFloat("Y##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.y, -1.0f, 1.0f);
+
+					ImGui::SliderFloat("Z##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.z, -1.0f, 1.0f);
 				}
 
 				if (ImGui::CollapsingHeader("Item"))
 				{
-					ImGui::SeparatorText("Position");
+					ImGui::SeparatorText("Position##Item");
 
-					ImGui::SeparatorText("Rotation");
+					if (ImGui::Button("Item##IPosition"))
+					{
+						// todo: implement
+					}
+
+					ImGui::SeparatorText("Rotation##Item");
+
+					if (ImGui::Button("Item##IRotation"))
+					{
+						// todo: implement
+					}
 				}
+
+				ImGui::EndTabItem();
 			}
 
 
@@ -57,15 +95,19 @@ void RenderHUDAdjustManager()
 			{
 				int casted = imgui_hud_adjust_manager.settings.history_command_max_count;
 
+				if (ImGui::Button("Save"))
+				{
+					// todo: implement
+				}
+
+				ImGui::SeparatorText("Params");
+
 				if (ImGui::SliderInt("max history command count", &casted, 0, 1000))
 				{
 					imgui_hud_adjust_manager.settings.history_command_max_count = static_cast<decltype(imgui_hud_adjust_manager.settings.history_command_max_count)>(casted);
 				}
 
-				if (ImGui::Button("Save"))
-				{
-					// todo: implement
-				}
+				ImGui::EndTabItem();
 			}
 
 			ImGui::EndTabBar();
@@ -73,4 +115,6 @@ void RenderHUDAdjustManager()
 
 		ImGui::End();
 	}
+
+	ImGui::PopStyleColor(1);
 }
