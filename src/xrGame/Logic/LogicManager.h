@@ -24,30 +24,18 @@ struct EBinderNames
 
 class CLogicManager
 {
-    struct SLogicBindRecord;
+    struct SBinderObjectRecord;
     
-    struct SLogicCondition
-    {
-        SLogicBindRecord* bindRecord = nullptr;
-        bool IsSatisfied = false;
-    };
-    
-    struct SLogicBindRecord
-    {
-        xr_vector<SLogicCondition> conditions;
-        shared_str BinderName;
-        
-    };
-
     struct SBinderConditionBase
     {
         struct MessageBase
-        {
+        {;
             ALife::_OBJECT_ID id = ALife::_OBJECT_ID(-1);
         };
         virtual ~SBinderConditionBase() = default;
         bool Satisfied = false;
-        virtual void Execute(MessageBase* data) = 0;
+        SBinderObjectRecord* Record = nullptr;
+        virtual void Execute(MessageBase* data);
     };
 
     struct SBinderConditionInfo : SBinderConditionBase
@@ -135,20 +123,54 @@ class CLogicManager
         void Execute(MessageBase* data) override;
     };
 
-    struct SBindersRow
+    struct SBinderObjectRecord
     {
-        xr_hash_map<ALife::_OBJECT_ID, xr_vector<SBinderConditionBase*>> Binders;
+        ALife::_OBJECT_ID id;
+        shared_str Callback;
+        shared_str NextSection;
+        xr_vector<SBinderConditionBase*> Conditions;
+
+        void VerifyConditions();
     };
 
-    struct SPendingRemoveBinder
+    struct SEventInfo{
+        shared_str Info;
+    };
+    
+    struct SEventNPC
     {
-        ALife::_OBJECT_ID objectID;
-        shared_str BinderType;
+        ALife::_OBJECT_ID id;
+        shared_str Argument;
+    };
+
+    struct SBindersRow
+    {
+        xr_hash_map<ALife::_OBJECT_ID, xr_vector<SBinderConditionBase*>> CondsPerObj;
     };
 
     xr_hash_map<shared_str,SBindersRow> Binders;
-    xr_vector<SLogicBindRecord> Records;
-    xr_vector<SPendingRemoveBinder> ToRemove;
+    xr_hash_set<SBinderObjectRecord*> Records;
+
+    xrCriticalSection ProcessLock;
+    xr_hash_set<SBinderObjectRecord*> ToProcess;
+    
+    xrCriticalSection RemoveLock;
+    xr_hash_set<SBinderObjectRecord*> ToRemove;
+
+    xrCriticalSection AquireInfoLock;
+    xr_vector<SEventInfo> AquiredInfos;
+    
+    xrCriticalSection ReleasedInfoLock;
+    xr_vector<SEventInfo> ReleasedInfos;
+
+    xrCriticalSection SignalLock;
+    xr_vector<SEventNPC> HappenedSignals;
+
+    xrCriticalSection NPCInZoneLock;
+    xr_vector<SEventNPC> NPCsInZone;
+
+    xrCriticalSection NPCOutZoneLock;
+    xr_vector<SEventNPC> NPCsOutZone;
     
     CLogicManager();
 public:
@@ -168,5 +190,6 @@ public:
     void OnNPCInZone(ALife::_OBJECT_ID id, shared_str ZoneName);
     void OnNPCOutZone(ALife::_OBJECT_ID id, shared_str ZoneName);
 
-    void Update();
+    void Update(); // For main game thread
+    void Update2(); // Not for main game thread
 };
