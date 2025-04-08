@@ -139,7 +139,7 @@ public:
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
 		if (IsSave()) {
 			//GetCurrentChunk()->WriteArray(Value.size());
-			GetCurrentChunk()->WriteArray(-1);
+			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
 				{
@@ -358,6 +358,43 @@ public:
 		GetCurrentChunk()->EndArray();
 		return *this;
 	}
+	
+
+	template<typename T>
+	ISaveObject& Serialize(xr_hash_set<T>& Value)
+	{
+		if (IsSave()) {
+			//GetCurrentChunk()->WriteArray(Value.size());
+			GetCurrentChunk()->WriteArray();
+			for (auto& elem : Value) {
+				if constexpr (std::is_pointer<T>::value) {
+					(*this) << *elem;
+				}
+				else {
+					(*this) << elem;
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					//CreateElem(Value);
+					T Elem = new std::remove_pointer<T>::type();
+					(*this) << *Elem;
+					Value.emplace_back(Elem);
+				}
+				else {
+					T&& Elem = T();
+					(*this) << Elem;
+					Value.emplace_back(Elem);
+				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
 
 };
 
@@ -369,6 +406,11 @@ ISaveObject& operator<<(ISaveObject& Object, T* Value) {
 
 template<typename T>
 ISaveObject& operator<<(ISaveObject& Object, xr_vector<T>& Value) {
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename T>
+ISaveObject& operator<<(ISaveObject& Object, xr_hash_set<T>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 

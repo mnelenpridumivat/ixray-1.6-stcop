@@ -63,22 +63,22 @@ class CLogicManager
         float distance;
     };
 
-    struct SBinderConditionCloseEnough : SBinderConditionDistance
-    {
-        void Execute(MessageBase* data) override;
-    };
-
-    struct SBinderConditionFarEnough : SBinderConditionDistance
-    {
-        void Execute(MessageBase* data) override;
-    };
-
     struct SBinderConditionCloseEnoughNVis : SBinderConditionDistance
     {
         void Execute(MessageBase* data) override;
     };
 
     struct SBinderConditionFarEnoughNVis : SBinderConditionDistance
+    {
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionCloseEnough : SBinderConditionDistance
+    {
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionFarEnough : SBinderConditionDistance
     {
         void Execute(MessageBase* data) override;
     };
@@ -111,6 +111,7 @@ class CLogicManager
             shared_str Zone;
         };
         shared_str Zone;
+        ALife::_OBJECT_ID npc_id;
     };
 
     struct SBinderConditionNPCInZone: SBinderConditionNPCZone
@@ -137,19 +138,28 @@ class CLogicManager
         shared_str Info;
     };
     
+    struct SEventSignal
+    {
+        ALife::_OBJECT_ID id;
+        shared_str Signal;
+    };
+    
     struct SEventNPC
     {
         ALife::_OBJECT_ID id;
-        shared_str Argument;
+        ALife::_OBJECT_ID npc_id;
+        shared_str Zone;
     };
 
     struct SBindersRow
     {
+        xrCriticalSection lock;
         xr_hash_map<ALife::_OBJECT_ID, xr_vector<SBinderConditionBase*>> CondsPerObj;
     };
 
     xr_hash_map<shared_str,SBindersRow> Binders;
     xr_hash_set<SBinderObjectRecord*> Records;
+    SBinderObjectRecord* ConstructingRecord = nullptr;
 
     xrCriticalSection ProcessLock;
     xr_hash_set<SBinderObjectRecord*> ToProcess;
@@ -164,14 +174,14 @@ class CLogicManager
     xr_vector<SEventInfo> ReleasedInfos;
 
     xrCriticalSection SignalLock;
-    xr_vector<SEventNPC> HappenedSignals;
+    xr_vector<SEventSignal> HappenedSignals;
 
     xrCriticalSection NPCInZoneLock;
     xr_vector<SEventNPC> NPCsInZone;
 
     xrCriticalSection NPCOutZoneLock;
     xr_vector<SEventNPC> NPCsOutZone;
-    
+
     CLogicManager();
 public:
     static CLogicManager& GetInstance();
@@ -187,9 +197,30 @@ public:
     void OnReleaseInfo(shared_str Info);
 
     void OnSignal(ALife::_OBJECT_ID id, shared_str Signal);
-    void OnNPCInZone(ALife::_OBJECT_ID id, shared_str ZoneName);
-    void OnNPCOutZone(ALife::_OBJECT_ID id, shared_str ZoneName);
+    void OnNPCInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, shared_str ZoneName);
+    void OnNPCOutZone(ALife::_OBJECT_ID , ALife::_OBJECT_ID npc_id, shared_str ZoneName);
 
     void Update(); // For main game thread
     void Update2(); // Not for main game thread
+
+    bool CanHandle(LPCSTR Cond);
+    void BeginConstruction(ALife::_OBJECT_ID id, LPCSTR Callback, LPCSTR NextSection);
+    void EndConstruction();
+    void BindOnActorDistLe(ALife::_OBJECT_ID id, float distance);
+    void BindOnActorDistLeNVis(ALife::_OBJECT_ID id, float distance);
+    void BindOnActorDistGe(ALife::_OBJECT_ID id, float distance);
+    void BindOnActorDistGeNVis(ALife::_OBJECT_ID id, float distance);
+    void BindOnSignal(ALife::_OBJECT_ID id, LPCSTR signal);
+    void BindOnTimer(ALife::_OBJECT_ID id, float time);
+    void BindOnGameTimer(ALife::_OBJECT_ID id, float time);
+    void BindOnActorInZone(ALife::_OBJECT_ID id, LPCSTR zone);
+    void BindOnActorNotInZone(ALife::_OBJECT_ID id, LPCSTR zone);
+    void BindOnNpcInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, LPCSTR zone);
+    void BindOnNpcNotInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, LPCSTR zone);
+    void BindOnActorInside(ALife::_OBJECT_ID id);
+    void BindOnActorOutside(ALife::_OBJECT_ID id);
+    void BindOnInfoAquired(ALife::_OBJECT_ID id, LPCSTR Info);
+    void BindOnInfoLost(ALife::_OBJECT_ID id, LPCSTR Info);
+
+    DECLARE_SCRIPT_REGISTER_FUNCTION
 };

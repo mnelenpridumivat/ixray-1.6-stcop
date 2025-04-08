@@ -6,6 +6,8 @@
 #include "alife_time_manager.h"
 #include "visual_memory_manager.h"
 
+using namespace luabind;
+
 const char EBinderNames::on_actor_dist_le[] = "on_actor_dist_le";
 const char EBinderNames::on_actor_dist_le_nvis[] = "on_actor_dist_le_nvis";
 const char EBinderNames::on_actor_dist_ge[] = "on_actor_dist_ge";
@@ -48,7 +50,7 @@ void CLogicManager::SBinderConditionDontHasInfo::Execute(MessageBase* data)
     }
 }
 
-void CLogicManager::SBinderConditionCloseEnough::Execute(MessageBase* data)
+void CLogicManager::SBinderConditionCloseEnoughNVis::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Obj = Level().Objects.net_Find(data->id);
@@ -56,7 +58,7 @@ void CLogicManager::SBinderConditionCloseEnough::Execute(MessageBase* data)
     Satisfied = Obj->Position().distance_to_sqr(Actor()->Position()) <= distance*distance;
 }
 
-void CLogicManager::SBinderConditionFarEnoughNVis::Execute(MessageBase* data)
+void CLogicManager::SBinderConditionFarEnough::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Obj = Level().Objects.net_Find(data->id);
@@ -68,7 +70,7 @@ void CLogicManager::SBinderConditionFarEnoughNVis::Execute(MessageBase* data)
     Satisfied = Casted->g_Alive() && actor->memory().visual().visible_now(Casted) && Obj->Position().distance_to_sqr(Actor()->Position()) > distance*distance;
 }
 
-void CLogicManager::SBinderConditionCloseEnoughNVis::Execute(MessageBase* data)
+void CLogicManager::SBinderConditionCloseEnough::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Obj = Level().Objects.net_Find(data->id);
@@ -80,7 +82,7 @@ void CLogicManager::SBinderConditionCloseEnoughNVis::Execute(MessageBase* data)
     Satisfied = Casted->g_Alive() && actor->memory().visual().visible_now(Casted) && Obj->Position().distance_to_sqr(Actor()->Position()) <= distance*distance;
 }
 
-void CLogicManager::SBinderConditionFarEnough::Execute(MessageBase* data)
+void CLogicManager::SBinderConditionFarEnoughNVis::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Obj = Level().Objects.net_Find(data->id);
@@ -100,14 +102,14 @@ void CLogicManager::SBinderConditionNPCInZone::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Message = (NPCZoneMessage*)data;
-    Satisfied = Message->Zone == Zone ? Message->Inside : Satisfied;
+    Satisfied = Message->Zone == Zone && Message->id == npc_id ? Message->Inside : Satisfied;
 }
 
 void CLogicManager::SBinderConditionNPCOutZone::Execute(MessageBase* data)
 {
     VERIFY(data);
     auto Message = (NPCZoneMessage*)data;
-    Satisfied = Message->Zone == Zone ? !Message->Inside : Satisfied;
+    Satisfied = Message->Zone == Zone && Message->id == npc_id ? !Message->Inside : Satisfied;
 }
 
 void CLogicManager::SBinderObjectRecord::VerifyConditions()
@@ -167,6 +169,28 @@ CLogicManager& CLogicManager::GetInstance()
     return instance;
 }
 
+void CLogicManager::Serialize(ISaveObject& Object)
+{
+    /*BEGIN_CHUNK(Object, "CLogicManager")
+    {
+        xrCriticalSectionGuard g1(ProcessLock);
+        xrCriticalSectionGuard g2(AquireInfoLock);
+        xrCriticalSectionGuard g3(ReleasedInfoLock);
+        xrCriticalSectionGuard g4(SignalLock);
+        xrCriticalSectionGuard g5(NPCInZoneLock);
+        xrCriticalSectionGuard g6(NPCOutZoneLock);
+        xr_vector<xrCriticalSectionGuard> gs;
+        for(auto& elem : Binders)
+        {
+            gs.emplace_back(elem.second.lock);
+        }
+        BEGIN_CHUNK(Object, "CLogicManager::Records")
+        {
+            Object << Records;
+        }
+    }*/
+}
+
 void CLogicManager::OnAquireInfo(shared_str Info)
 {
     xrCriticalSectionGuard guard(AquireInfoLock);
@@ -185,16 +209,16 @@ void CLogicManager::OnSignal(ALife::_OBJECT_ID id, shared_str Signal)
     HappenedSignals.push_back({ id, Signal });
 }
 
-void CLogicManager::OnNPCInZone(ALife::_OBJECT_ID id, shared_str ZoneName)
+void CLogicManager::OnNPCInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, shared_str ZoneName)
 {
     xrCriticalSectionGuard guard(NPCInZoneLock);
-    NPCsInZone.push_back({ id, ZoneName });
+    NPCsInZone.push_back({ id, npc_id, ZoneName });
 }
 
-void CLogicManager::OnNPCOutZone(ALife::_OBJECT_ID id, shared_str ZoneName)
+void CLogicManager::OnNPCOutZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, shared_str ZoneName)
 {
     xrCriticalSectionGuard guard(NPCOutZoneLock);
-    NPCsOutZone.push_back({ id, ZoneName });
+    NPCsOutZone.push_back({ id, npc_id, ZoneName });
 }
 
 void CLogicManager::Update()
@@ -221,7 +245,8 @@ void CLogicManager::Update2()
 {
     {
         auto& Conds = Binders[EBinderNames::on_actor_dist_le];
-        SBinderConditionCloseEnough::MessageBase Message;
+        xrCriticalSectionGuard guard(Conds.lock);
+        SBinderConditionCloseEnoughNVis::MessageBase Message;
         for(auto& elem : Conds.CondsPerObj)
         {
             Message.id = elem.first;
@@ -233,7 +258,8 @@ void CLogicManager::Update2()
     }
     {
         auto& Conds = Binders[EBinderNames::on_actor_dist_le_nvis];
-        SBinderConditionCloseEnough::MessageBase Message;
+        xrCriticalSectionGuard guard(Conds.lock);
+        SBinderConditionCloseEnoughNVis::MessageBase Message;
         for(auto& elem : Conds.CondsPerObj)
         {
             Message.id = elem.first;
@@ -245,7 +271,8 @@ void CLogicManager::Update2()
     }
     {
         auto& Conds = Binders[EBinderNames::on_actor_dist_ge_nvis];
-        SBinderConditionCloseEnough::MessageBase Message;
+        xrCriticalSectionGuard guard(Conds.lock);
+        SBinderConditionCloseEnoughNVis::MessageBase Message;
         for(auto& elem : Conds.CondsPerObj)
         {
             Message.id = elem.first;
@@ -256,12 +283,12 @@ void CLogicManager::Update2()
         }
     }
     {
+        auto& Conds = Binders[EBinderNames::on_timer];
+        xrCriticalSectionGuard guard(Conds.lock);
         using namespace std::chrono;
         static steady_clock::time_point t1 = steady_clock::now();
         steady_clock::time_point t2 = steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        
-        auto& Conds = Binders[EBinderNames::on_timer];
         SBinderConditionTimer::TimerMessage Message;
         Message.timeDelta = elapsed;
         for(auto& elem : Conds.CondsPerObj)
@@ -275,10 +302,11 @@ void CLogicManager::Update2()
         t1 = t2;
     }
     {
+        auto& Conds = Binders[EBinderNames::on_game_timer];
+        xrCriticalSectionGuard guard(Conds.lock);
         static auto t1 = ai().alife().time_manager().game_time();
         auto t2 = ai().alife().time_manager().game_time();
         auto elapsed = t2 - t1;
-        auto& Conds = Binders[EBinderNames::on_game_timer];
         SBinderConditionTimer::TimerMessage Message;
         Message.timeDelta = elapsed;
         for(auto& elem : Conds.CondsPerObj)
@@ -294,15 +322,17 @@ void CLogicManager::Update2()
     {
         xrCriticalSectionGuard guard1(AquireInfoLock);
         auto& HaveInfoConds = Binders[EBinderNames::on_info_aquired];
+        xrCriticalSectionGuard guard2(HaveInfoConds.lock);
         auto& DontHaveInfoConds = Binders[EBinderNames::on_info_lost];
+        xrCriticalSectionGuard guard3(DontHaveInfoConds.lock);
+        SBinderConditionInfo::GetInfoMessage Message;
+        Message.IsGet = true;
         for(auto& Info : AquiredInfos)
         {
+            Message.InfoName = Info.Info;
             for(auto& elem : HaveInfoConds.CondsPerObj)
             {
-                SBinderConditionInfo::GetInfoMessage Message;
                 Message.id = elem.first;
-                Message.InfoName = Info.Info;
-                Message.IsGet = true;
                 for(auto& cond : elem.second)
                 {
                     cond->Execute(&Message);
@@ -310,10 +340,7 @@ void CLogicManager::Update2()
             }
             for(auto& elem : DontHaveInfoConds.CondsPerObj)
             {
-                SBinderConditionInfo::GetInfoMessage Message;
                 Message.id = elem.first;
-                Message.InfoName = Info.Info;
-                Message.IsGet = true;
                 for(auto& cond : elem.second)
                 {
                     cond->Execute(&Message);
@@ -322,74 +349,67 @@ void CLogicManager::Update2()
         }
     }
     {
+        xrCriticalSectionGuard guard1(ReleasedInfoLock);
         auto& HaveInfoConds = Binders[EBinderNames::on_info_aquired];
+        xrCriticalSectionGuard guard2(HaveInfoConds.lock);
         auto& DontHaveInfoConds = Binders[EBinderNames::on_info_lost];
+        xrCriticalSectionGuard guard3(DontHaveInfoConds.lock);
         SBinderConditionInfo::GetInfoMessage Message;
-        Message.InfoName = Info;
         Message.IsGet = false;
-        for(auto& elem : HaveInfoConds.CondsPerObj)
+        for(auto& Info : ReleasedInfos)
         {
-            for(auto& cond : elem.second)
+            Message.InfoName = Info.Info;
+            for(auto& elem : HaveInfoConds.CondsPerObj)
             {
-                cond->Execute(&Message);
+                Message.id = elem.first;
+                for(auto& cond : elem.second)
+                {
+                    cond->Execute(&Message);
+                }
             }
-        }
-        for(auto& elem : DontHaveInfoConds.CondsPerObj)
-        {
-            for(auto& cond : elem.second)
+            for(auto& elem : DontHaveInfoConds.CondsPerObj)
             {
-                cond->Execute(&Message);
+                Message.id = elem.first;
+                for(auto& cond : elem.second)
+                {
+                    cond->Execute(&Message);
+                }
             }
         }
     }
     {
+        xrCriticalSectionGuard guard1(SignalLock);
         auto& Conds = Binders[EBinderNames::on_signal];
-        auto CondRow = Conds.CondsPerObj.find(id);
-        if(CondRow != Conds.CondsPerObj.end())
+        xrCriticalSectionGuard guard2(Conds.lock);
+        SBinderConditionSignal::SignalMessage Message;
+        for(auto& signal : HappenedSignals)
         {
-            SBinderConditionSignal::SignalMessage Message;
-            Message.id = id;
-            Message.Signal = Signal;
-            for(auto& elem : CondRow->second)
+            auto CondRow = Conds.CondsPerObj.find(signal.id);
+            if(CondRow != Conds.CondsPerObj.end())
             {
-                elem->Execute(&Message);
+                Message.id = signal.id;
+                Message.Signal = signal.Signal;
+                for(auto& elem : CondRow->second)
+                {
+                    elem->Execute(&Message);
+                }
             }
         }
     }
     {
+        xrCriticalSectionGuard guard1(NPCInZoneLock);
         SBinderConditionNPCZone::NPCZoneMessage Message;
-        Message.id = id;
-        Message.Zone = ZoneName;
         Message.Inside = true;
-        {
-            auto& Conds = Binders[EBinderNames::on_npc_in_zone];
-            auto CondRow = Conds.CondsPerObj.find(id);
-            if(CondRow != Conds.CondsPerObj.end())
-            {
-                for(auto& elem : CondRow->second)
-                {
-                    elem->Execute(&Message);
-                }
-            }
-        }
-        {
-            auto& Conds = Binders[EBinderNames::on_npc_not_in_zone];
-            auto CondRow = Conds.CondsPerObj.find(id);
-            if(CondRow != Conds.CondsPerObj.end())
-            {
-                for(auto& elem : CondRow->second)
-                {
-                    elem->Execute(&Message);
-                }
-            }
-        }
-        if(id == Actor()->ID())
+        for(auto& event : NPCsInZone)
         {
             {
-                auto& Conds = Binders[EBinderNames::on_actor_in_zone];
-                auto CondRow = Conds.CondsPerObj.find(id);
+                auto& Conds = Binders[EBinderNames::on_npc_in_zone];
+                xrCriticalSectionGuard guard2(Conds.lock);
+                auto CondRow = Conds.CondsPerObj.find(event.id);
                 if(CondRow != Conds.CondsPerObj.end())
                 {
+                    Message.id = event.npc_id;
+                    Message.Zone = event.Zone;
                     for(auto& elem : CondRow->second)
                     {
                         elem->Execute(&Message);
@@ -397,42 +417,115 @@ void CLogicManager::Update2()
                 }
             }
             {
-                auto& Conds = Binders[EBinderNames::on_actor_not_in_zone];
-                auto CondRow = Conds.CondsPerObj.find(id);
+                auto& Conds = Binders[EBinderNames::on_npc_not_in_zone];
+                xrCriticalSectionGuard guard2(Conds.lock);
+                auto CondRow = Conds.CondsPerObj.find(event.id);
                 if(CondRow != Conds.CondsPerObj.end())
                 {
+                    Message.id = event.npc_id;
+                    Message.Zone = event.Zone;
                     for(auto& elem : CondRow->second)
                     {
                         elem->Execute(&Message);
+                    }
+                }
+            }
+            if(event.id == Actor()->ID())
+            {
+                {
+                    auto& Conds = Binders[EBinderNames::on_actor_in_zone];
+                    xrCriticalSectionGuard guard2(Conds.lock);
+                    auto CondRow = Conds.CondsPerObj.find(event.id);
+                    if(CondRow != Conds.CondsPerObj.end())
+                    {
+                        Message.id = event.npc_id;
+                        Message.Zone = event.Zone;
+                        for(auto& elem : CondRow->second)
+                        {
+                            elem->Execute(&Message);
+                        }
+                    }
+                }
+                {
+                    auto& Conds = Binders[EBinderNames::on_actor_not_in_zone];
+                    xrCriticalSectionGuard guard2(Conds.lock);
+                    auto CondRow = Conds.CondsPerObj.find(event.id);
+                    if(CondRow != Conds.CondsPerObj.end())
+                    {
+                        Message.id = event.npc_id;
+                        Message.Zone = event.Zone;
+                        for(auto& elem : CondRow->second)
+                        {
+                            elem->Execute(&Message);
+                        }
                     }
                 }
             }
         }
     }
     {
+        xrCriticalSectionGuard guard1(NPCOutZoneLock);
         SBinderConditionNPCZone::NPCZoneMessage Message;
-        Message.id = id;
-        Message.Zone = ZoneName;
         Message.Inside = false;
+        for(auto& event : NPCsOutZone)
         {
-            auto& Conds = Binders[EBinderNames::on_npc_in_zone];
-            auto CondRow = Conds.CondsPerObj.find(id);
-            if(CondRow != Conds.CondsPerObj.end())
             {
-                for(auto& elem : CondRow->second)
+                auto& Conds = Binders[EBinderNames::on_npc_in_zone];
+                xrCriticalSectionGuard guard2(Conds.lock);
+                auto CondRow = Conds.CondsPerObj.find(event.id);
+                if(CondRow != Conds.CondsPerObj.end())
                 {
-                    elem->Execute(&Message);
+                    Message.id = event.npc_id;
+                    Message.Zone = event.Zone;
+                    for(auto& elem : CondRow->second)
+                    {
+                        elem->Execute(&Message);
+                    }
                 }
             }
-        }
-        {
-            auto& Conds = Binders[EBinderNames::on_npc_not_in_zone];
-            auto CondRow = Conds.CondsPerObj.find(id);
-            if(CondRow != Conds.CondsPerObj.end())
             {
-                for(auto& elem : CondRow->second)
+                auto& Conds = Binders[EBinderNames::on_npc_not_in_zone];
+                xrCriticalSectionGuard guard2(Conds.lock);
+                auto CondRow = Conds.CondsPerObj.find(event.id);
+                if(CondRow != Conds.CondsPerObj.end())
                 {
-                    elem->Execute(&Message);
+                    Message.id = event.npc_id;
+                    Message.Zone = event.Zone;
+                    for(auto& elem : CondRow->second)
+                    {
+                        elem->Execute(&Message);
+                    }
+                }
+            }
+            if(event.id == Actor()->ID())
+            {
+                {
+                    auto& Conds = Binders[EBinderNames::on_actor_in_zone];
+                    xrCriticalSectionGuard guard2(Conds.lock);
+                    auto CondRow = Conds.CondsPerObj.find(event.id);
+                    if(CondRow != Conds.CondsPerObj.end())
+                    {
+                        Message.id = event.npc_id;
+                        Message.Zone = event.Zone;
+                        for(auto& elem : CondRow->second)
+                        {
+                            elem->Execute(&Message);
+                        }
+                    }
+                }
+                {
+                    auto& Conds = Binders[EBinderNames::on_actor_not_in_zone];
+                    xrCriticalSectionGuard guard2(Conds.lock);
+                    auto CondRow = Conds.CondsPerObj.find(event.id);
+                    if(CondRow != Conds.CondsPerObj.end())
+                    {
+                        Message.id = event.npc_id;
+                        Message.Zone = event.Zone;
+                        for(auto& elem : CondRow->second)
+                        {
+                            elem->Execute(&Message);
+                        }
+                    }
                 }
             }
         }
@@ -445,4 +538,318 @@ void CLogicManager::Update2()
         }
         ToRemove.clear();
     }
+}
+
+bool CLogicManager::CanHandle(LPCSTR Cond)
+{
+    return Binders.contains(Cond);
+}
+
+void CLogicManager::BeginConstruction(ALife::_OBJECT_ID id, LPCSTR Callback, LPCSTR NextSection)
+{
+    R_ASSERT4(ConstructingRecord == nullptr, "There is already a record to construct", Callback, NextSection);
+    ConstructingRecord = new SBinderObjectRecord(id, Callback, NextSection);
+}
+
+void CLogicManager::EndConstruction()
+{
+    Records.emplace(ConstructingRecord);
+    ConstructingRecord = nullptr;
+}
+
+void CLogicManager::BindOnActorDistLe(ALife::_OBJECT_ID id, float distance)
+{
+    auto NewCond = new SBinderConditionCloseEnough();
+    NewCond->distance = distance;
+    {
+        auto& Cond = Binders[EBinderNames::on_actor_dist_le];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorDistLeNVis(ALife::_OBJECT_ID id, float distance)
+{
+    auto NewCond = new SBinderConditionCloseEnoughNVis();
+    NewCond->distance = distance;
+    {
+        auto& Cond = Binders[EBinderNames::on_actor_dist_le_nvis];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorDistGe(ALife::_OBJECT_ID id, float distance)
+{
+    auto NewCond = new SBinderConditionFarEnough();
+    NewCond->distance = distance;
+    {
+        auto& Cond = Binders[EBinderNames::on_actor_dist_ge];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorDistGeNVis(ALife::_OBJECT_ID id, float distance)
+{
+    auto NewCond = new SBinderConditionFarEnoughNVis();
+    NewCond->distance = distance;
+    {
+        auto& Cond = Binders[EBinderNames::on_actor_dist_ge_nvis];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnSignal(ALife::_OBJECT_ID id, LPCSTR Signal)
+{
+    auto NewCond = new SBinderConditionSignal();
+    NewCond->Signal = Signal;
+    {
+        auto& Cond = Binders[EBinderNames::on_signal];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnTimer(ALife::_OBJECT_ID id, float time)
+{
+    auto NewCond = new SBinderConditionTimer();
+    NewCond->timeLeft = time;
+    {
+        auto& Cond = Binders[EBinderNames::on_timer];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnGameTimer(ALife::_OBJECT_ID id, float time)
+{
+    auto NewCond = new SBinderConditionTimer();
+    NewCond->timeLeft = time;
+    {
+        auto& Cond = Binders[EBinderNames::on_game_timer];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorInZone(ALife::_OBJECT_ID id, LPCSTR zone)
+{
+    auto NewCond = new SBinderConditionNPCInZone();
+    NewCond->npc_id = Actor()->ID();
+    NewCond->Zone = zone;
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorNotInZone(ALife::_OBJECT_ID id, LPCSTR zone)
+{
+    auto NewCond = new SBinderConditionNPCOutZone();
+    NewCond->npc_id = Actor()->ID();
+    NewCond->Zone = zone;
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_not_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnNpcInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, LPCSTR zone)
+{
+    auto NewCond = new SBinderConditionNPCInZone();
+    NewCond->npc_id = npc_id;
+    NewCond->Zone = zone;
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnNpcNotInZone(ALife::_OBJECT_ID id, ALife::_OBJECT_ID npc_id, LPCSTR zone)
+{
+    auto NewCond = new SBinderConditionNPCOutZone();
+    NewCond->npc_id = npc_id;
+    NewCond->Zone = zone;
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_not_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorInside(ALife::_OBJECT_ID id)
+{
+    auto NewCond = new SBinderConditionNPCInZone();
+    NewCond->npc_id = Actor()->ID();
+    auto Obj = Level().Objects.net_Find(id);
+    VERIFY(Obj);
+    NewCond->Zone = Obj->cName();
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnActorOutside(ALife::_OBJECT_ID id)
+{
+    auto NewCond = new SBinderConditionNPCOutZone();
+    NewCond->npc_id = Actor()->ID();
+    auto Obj = Level().Objects.net_Find(id);
+    VERIFY(Obj);
+    NewCond->Zone = Obj->cName();
+    {
+        auto& Cond = Binders[EBinderNames::on_npc_not_in_zone];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnInfoAquired(ALife::_OBJECT_ID id, LPCSTR Info)
+{
+    auto NewCond = new SBinderConditionHasInfo();
+    NewCond->InfoName = Info;
+    {
+        auto& Cond = Binders[EBinderNames::on_info_aquired];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+void CLogicManager::BindOnInfoLost(ALife::_OBJECT_ID id, LPCSTR Info)
+{
+    auto NewCond = new SBinderConditionDontHasInfo();
+    NewCond->InfoName = Info;
+    {
+        auto& Cond = Binders[EBinderNames::on_info_lost];
+        xrCriticalSectionGuard guard(Cond.lock);
+        if(!Cond.CondsPerObj.contains(id))
+        {
+            Cond.CondsPerObj[id] = {};
+        }
+        Cond.CondsPerObj[id].push_back(NewCond);
+    }
+    ConstructingRecord->Conditions.push_back(NewCond);
+    NewCond->Record = ConstructingRecord;
+}
+
+CLogicManager* getCLogicManager()
+{
+    return &CLogicManager::GetInstance();
+}
+
+void CLogicManager::script_register(lua_State* L)
+{
+    module(L)[
+        class_<CLogicManager>("CLogicManager")
+        .def("can_handle", &CLogicManager::CanHandle)
+        .def("begin_construction", &CLogicManager::BeginConstruction)
+        .def("end_construction", &CLogicManager::EndConstruction)
+        .def("bind_on_actor_dist_le", &CLogicManager::BindOnActorDistLe)
+        .def("bind_on_actor_dist_le_nvis", &CLogicManager::BindOnActorDistLeNVis)
+        .def("bind_on_actor_dist_ge", &CLogicManager::BindOnActorDistGe)
+        .def("bind_on_actor_dist_ge_nvis", &CLogicManager::BindOnActorDistGeNVis)
+        .def("bind_on_signal", &CLogicManager::BindOnSignal)
+        .def("bind_on_timer", &CLogicManager::BindOnTimer)
+        .def("bind_on_game_timer", &CLogicManager::BindOnGameTimer)
+        .def("bind_on_actor_in_zone", &CLogicManager::BindOnActorInZone)
+        .def("bind_on_actor_not_in_zone", &CLogicManager::BindOnActorNotInZone)
+        .def("bind_on_npc_in_zone", &CLogicManager::BindOnNpcInZone)
+        .def("bind_on_npc_not_in_zone", &CLogicManager::BindOnNpcNotInZone)
+        .def("bind_on_actor_inside", &CLogicManager::BindOnActorInside)
+        .def("bind_on_actor_outside", &CLogicManager::BindOnActorOutside)
+        .def("bind_on_info_aquired", &CLogicManager::BindOnInfoAquired)
+        .def("bind_on_info_lost", &CLogicManager::BindOnInfoLost)
+        ,
+        def("logic_manager", &getCLogicManager)
+    ];
 }
