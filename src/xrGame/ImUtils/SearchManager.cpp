@@ -348,7 +348,7 @@ void RenderSearchManagerWindow()
 										{
 											filter_by_cname = false;
 										}
-										
+
 										if (pAbstract->s_name.c_str())
 										{
 											std::string_view s_name = pAbstract->s_name.c_str();
@@ -364,10 +364,10 @@ void RenderSearchManagerWindow()
 										{
 											filter_by_s_name = false;
 										}
-										
+
 										passed_filter = filter_by_cname || filter_by_s_name;
 									}
-									
+
 									char button_name[128];
 									sprintf_s(button_name, "%s [%s]", pServerObject->name_replace() ? pServerObject->name_replace() : "", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pAbstract->s_name).c_str()).c_str());
 
@@ -606,4 +606,78 @@ void InitImGuiCLSIDInGame()
 void InitImGuiSearchInGame()
 {
 	imgui_search_manager.init();
+}
+
+void InitImGuiHudAdjustInGame()
+{
+	string_path path_to_user_settings;
+	FS.update_path(path_to_user_settings, "$app_data_root$", kImGuiHudAdjustInGame_SettingsFileName);
+
+	xr_path path(path_to_user_settings);
+
+	if (path.is_absolute())
+	{
+		// do nothing
+	}
+	else
+	{
+		path = reinterpret_cast<const char*>(std::filesystem::current_path().u8string().c_str());
+		path /= path_to_user_settings;
+	}
+
+
+	bool need_to_init_defaults = false;
+	if (std::filesystem::exists(path))
+	{
+		// loading user settings
+		imgui_hud_adjust_manager.settings.p_file = fopen(path_to_user_settings, "rb+");
+
+		assert(imgui_hud_adjust_manager.settings.p_file && "failed to open file are you sure that system can read and write files on specified path?");
+
+		if (imgui_hud_adjust_manager.settings.p_file)
+		{
+			fread(&imgui_hud_adjust_manager.settings.history_command_max_count, sizeof(imgui_hud_adjust_manager.settings.history_command_max_count), 1, imgui_hud_adjust_manager.settings.p_file);
+
+			static_assert(sizeof(CHudAdjustManager::Settings::last_position) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+
+			static_assert(sizeof(CHudAdjustManager::Settings::last_rotation) == sizeof(float) * 3, "expected like this otherwise will fail to initialize data of last_position field");
+
+			fread(&imgui_hud_adjust_manager.settings.last_position.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+
+			fread(&imgui_hud_adjust_manager.settings.last_rotation.x, sizeof(float), 3, imgui_hud_adjust_manager.settings.p_file);
+
+			fread(&imgui_hud_adjust_manager.settings.data_of_save[0], sizeof(char), 32, imgui_hud_adjust_manager.settings.p_file);
+		}
+		else
+		{
+			need_to_init_defaults = true;
+		}
+	}
+	else
+	{
+		imgui_hud_adjust_manager.settings.p_file = fopen(path.operator xr_string().c_str(), "wb+");
+
+		assert(imgui_hud_adjust_manager.settings.p_file && "failed to open file are you sure that system can read and write files on specified path?");
+
+		need_to_init_defaults = true;
+	}
+
+	if (need_to_init_defaults)
+	{
+		// user defaults here...
+
+		imgui_hud_adjust_manager.settings.history_command_max_count = 100;
+
+		imgui_hud_adjust_manager.settings.last_position.x = 0.0;
+		imgui_hud_adjust_manager.settings.last_position.y = 0.0;
+		imgui_hud_adjust_manager.settings.last_position.z = 0.0;
+
+		imgui_hud_adjust_manager.settings.last_rotation.x = 0.0;
+		imgui_hud_adjust_manager.settings.last_rotation.y = 0.0;
+		imgui_hud_adjust_manager.settings.last_rotation.z = 0.0;
+	}
+
+	imgui_hud_adjust_manager.history.storage.reserve(imgui_hud_adjust_manager.settings.history_command_max_count);
+
+	imgui_hud_adjust_manager.is_initialized = true;
 }

@@ -275,17 +275,55 @@ private:
 	const char* getTranslatedString(eSelectedType type);
 };
 
+struct CHudAdjustManager
+{
+	struct CommandState
+	{
+		u32 encoded_position=0;
+		u32 encoded_rotation=0;
+	};
+
+	struct History
+	{
+		u32 current_cursor;
+		xr_vector<CommandState> storage;
+	};
+
+	struct Settings
+	{
+		/// @brief \~english specifies amount of commands that will be store for undo/redo operations
+		u32 history_command_max_count;
+
+		FILE* p_file = nullptr;
+		Fvector3 last_position;
+		Fvector3 last_rotation;
+		char data_of_save[32];
+	};
+	
+
+
+
+
+
+
+
+	bool is_initialized;
+	Settings settings;
+	History history;
+};
+
 constexpr float kGeneralAlphaLevelForImGuiWindows = 0.5f;
 
 void InitSections();
 void InitImGuiCLSIDInGame();
 void InitImGuiSearchInGame();
+void InitImGuiHudAdjustInGame();
 
 void RenderTimeManagerWindow();
 void RenderSpawnManagerWindow();
 void RenderWeaponManagerWindow();
 void RenderSearchManagerWindow();
-
+void RenderHUDAdjustManager();
 void RenderToolsOMFEditorWindow();
 
 void DestroySpawnManagerWindow();
@@ -293,5 +331,8 @@ void DestroySpawnManagerWindow();
 void RegisterImGuiInGame();
 void execute_console_command_deferred(CConsole* c, LPCSTR string_to_execute);
 
+constexpr const char* kImGuiHudAdjustInGame_SettingsFileName = "iha.bin";
+
 extern clsid_manager* g_pClsidManager;
 extern CImGuiGameSearchManager imgui_search_manager;
+extern CHudAdjustManager imgui_hud_adjust_manager;
