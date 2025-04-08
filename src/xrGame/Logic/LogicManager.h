@@ -16,8 +16,8 @@ struct EBinderNames
     static const char on_actor_not_in_zone[];
     static const char on_npc_in_zone[];
     static const char on_npc_not_in_zone[];
-    static const char on_actor_inside[];
-    static const char on_actor_outside[];
+    static const char on_actor_inside[]; // same as on_actor_in_zone
+    static const char on_actor_outside[]; // same as on_actor_not_in_zone
     static const char on_info_aquired[];
     static const char on_info_lost[];
 };
@@ -70,15 +70,68 @@ class CLogicManager
         void Execute(MessageBase* data) override;
     };
 
-    struct SBinderConditionCloseEnough : SBinderConditionBase
+    struct SBinderConditionDistance : SBinderConditionBase
     {
         float distance;
+    };
+
+    struct SBinderConditionCloseEnough : SBinderConditionDistance
+    {
         void Execute(MessageBase* data) override;
     };
 
-    struct SBinderConditionFarEnough : SBinderConditionBase
+    struct SBinderConditionFarEnough : SBinderConditionDistance
     {
-        float distance;
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionCloseEnoughNVis : SBinderConditionDistance
+    {
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionFarEnoughNVis : SBinderConditionDistance
+    {
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionTimer : SBinderConditionBase
+    {
+        struct TimerMessage : MessageBase
+        {
+            float timeDelta;
+        };
+        float timeLeft;
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionSignal: SBinderConditionBase
+    {
+        struct SignalMessage : MessageBase
+        {
+            shared_str Signal;
+        };
+        shared_str Signal;
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionNPCZone: SBinderConditionBase
+    {
+        struct NPCZoneMessage : MessageBase
+        {
+            bool Inside;
+            shared_str Zone;
+        };
+        shared_str Zone;
+    };
+
+    struct SBinderConditionNPCInZone: SBinderConditionNPCZone
+    {
+        void Execute(MessageBase* data) override;
+    };
+
+    struct SBinderConditionNPCOutZone: SBinderConditionNPCZone
+    {
         void Execute(MessageBase* data) override;
     };
 
@@ -110,6 +163,10 @@ public:
 
     void OnAquireInfo(shared_str Info);
     void OnReleaseInfo(shared_str Info);
+
+    void OnSignal(ALife::_OBJECT_ID id, shared_str Signal);
+    void OnNPCInZone(ALife::_OBJECT_ID id, shared_str ZoneName);
+    void OnNPCOutZone(ALife::_OBJECT_ID id, shared_str ZoneName);
 
     void Update();
 };
