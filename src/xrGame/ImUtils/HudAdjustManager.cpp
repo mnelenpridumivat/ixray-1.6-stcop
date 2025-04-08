@@ -15,7 +15,7 @@
 
 void RenderHUDAdjustManager()
 {
-	if (!Engine.External.EditorStates[static_cast<u8>(EditorUI::Game_SearchManager)])
+	if (!Engine.External.EditorStates[static_cast<u8>(EditorUI::Game_HudAdjustManager)])
 		return;
 
 	if (!g_pGameLevel)
@@ -70,5 +70,7 @@ void RenderHUDAdjustManager()
 
 			ImGui::EndTabBar();
 		}
+
+		ImGui::End();
 	}
 }
