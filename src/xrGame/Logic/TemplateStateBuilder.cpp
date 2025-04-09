@@ -23,7 +23,7 @@ void CTemplateStateBuilder::PreprocessFile(CInifile* Ltx)
 	}
 }
 
-CState* CTemplateStateBuilder::CreateState(CInifile* Ltx, LPCSTR StateName, xr_vector<shared_str>& NextStates)
+xr_unique_ptr<CState>&& CTemplateStateBuilder::CreateState(CInifile* Ltx, shared_str StateName, xr_deque<shared_str>& NextStates)
 {
 	return nullptr;
 }

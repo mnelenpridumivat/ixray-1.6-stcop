@@ -6,6 +6,6 @@ class CActualStateBuilder :
 public:
 
 	virtual void PreprocessFile(CInifile* Ltx) override;
-	virtual CState* CreateState(CInifile* Ltx, LPCSTR StateName, xr_vector<shared_str>& NextStates) override;
+	virtual xr_unique_ptr<CState>&& CreateState(CInifile* Ltx, shared_str StateName, xr_deque<shared_str>& NextStates) override;
 };
 

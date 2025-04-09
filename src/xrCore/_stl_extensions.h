@@ -1,4 +1,6 @@
 #pragma once
+#include <span>
+#include <variant>
 #include <vector>
 
 using std::swap;
@@ -81,6 +83,12 @@ void clear_and_reserve(xr_vector<T> &vector_object) {
         vector_object.reserve(old);
     }
 }
+
+template <typename T, size_t N = std::dynamic_extent>
+using xr_span = std::span<T, N>;
+
+template <typename ...Args>
+using xr_variant = std::variant<Args...>;
 
 // deque
 template <typename T, typename allocator = xalloc<T>>

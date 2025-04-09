@@ -3,6 +3,11 @@
 #include "TemplateStateBuilder.h"
 #include "ActualStateBuilder.h"
 
+CStateBuilder* CStateMachineBuilder::GetStateBuilderBySectionName(shared_str SectionName)
+{
+    return CTemplateStateBuilder::IsTemplateSection(SectionName.c_str()) ? (CStateBuilder*)(TemplateStateBuilder.get()) : ActualStateBuilder.get();
+}
+
 CStateMachineBuilder::CStateMachineBuilder()
 {
     TemplateStateBuilder = xr_make_unique<CTemplateStateBuilder>();
@@ -17,7 +22,14 @@ void CStateMachineBuilder::PreprocessFile(CInifile* Ltx)
 
 CStateMachine* CStateMachineBuilder::CreateStateMachine(CInifile* Ltx, LPCSTR StartState)
 {
-    VERIFY4(Ltx->section_exist(StartState), "There is not required state in file", StartState, Ltx->fname());
+    R_ASSERT(Ltx);
 
-    return nullptr;
+    StatesToCreate.push_back(StartState);
+    while (!StatesToCreate.empty())
+    {
+        auto State = StatesToCreate.front();
+        StatesToCreate.pop_front();
+        auto Builder = GetStateBuilderBySectionName(State);
+        ConstructedStates[State] = Builder->CreateState(Ltx, State, StatesToCreate);
+    }
 }
