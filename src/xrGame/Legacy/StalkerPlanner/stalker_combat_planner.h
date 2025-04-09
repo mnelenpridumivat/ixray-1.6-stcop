@@ -9,6 +9,7 @@
 #pragma once
 
 #include "action_planner_action_script.h"
+#include "Save/SaveObject.h"
 
 class CAI_Stalker;
 
@@ -43,4 +44,6 @@ public:
 	virtual void		finalize					();
 	virtual	void		save						(NET_Packet &packet);
 	virtual	void		load						(IReader &packet);
+	virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;
 };

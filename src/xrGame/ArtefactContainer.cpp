@@ -48,6 +48,15 @@ void CArtefactContainer::load(IReader& packet)
     CArtContainer::load(packet);
 }
 
+void CArtefactContainer::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CArtefactContainer")
+    {
+        inherited::Serialize(Object);
+        CArtContainer::Serialize(Object);
+    }
+}
+
 u32 CArtefactContainer::Cost() const
 {
     u32 res = CInventoryItem::Cost();

@@ -19,6 +19,7 @@ list(APPEND ETL_SRC_FILES ${ETL_SOURCE_ALL_FILES})
 # ETools project
 add_library(ETools SHARED ${ETL_SRC_FILES})
 target_include_directories(ETools PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(ETools PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 target_precompile_headers(ETools PRIVATE "stdafx.h")
 
 # Project defines
@@ -27,13 +28,12 @@ target_compile_definitions(ETools PRIVATE _USRDLL)
 
 # Linker list
 target_link_libraries(ETools PUBLIC xrCore)
-target_link_libraries(ETools PUBLIC xrCDB)
 target_link_libraries(ETools PUBLIC xrSound)
-target_link_libraries(ETools PUBLIC QSlim)
 target_link_libraries(ETools PUBLIC imgui)
 
 # DirectX SDK
 target_link_libraries(ETools PUBLIC ${CMAKE_BINARY_DIR}/packages/Microsoft.DXSDK.D3DX.9.29.952.8/build/native/release/lib/${NUGET_PACKAGE_PLATFORM}/d3dx9.lib)
+target_link_libraries(ETools PUBLIC ${CMAKE_BINARY_DIR}/packages/directxmesh_desktop_2019.2024.6.5.1/native/lib/x64/Release/DirectXMesh.lib)
 target_include_directories(ETools PUBLIC "${CMAKE_BINARY_DIR}/packages/Microsoft.DXSDK.D3DX.9.29.952.8/build/native/include/")
 target_include_directories(ETools PUBLIC "${CMAKE_BINARY_DIR}/packages/directxmesh_desktop_2019.2024.6.5.1/include/")
 

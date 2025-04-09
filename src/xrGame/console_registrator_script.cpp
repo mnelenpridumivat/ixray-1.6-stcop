@@ -42,7 +42,7 @@ void console_registrator::script_register(lua_State *L)
 		def("get_console",					&console),
 
 		class_<CConsole>("CConsole")
-			.def("execute",					&CConsole::Execute)
+			.def("execute",					&execute_console_command_deferred)
 			.def("execute_script",			&CConsole::ExecuteScript)
 			.def("show",					&CConsole::Show)
 			.def("hide",					&CConsole::Hide)
@@ -52,7 +52,6 @@ void console_registrator::script_register(lua_State *L)
 			.def("get_bool",				&get_console_bool)
 			.def("get_float",				&get_console_float)
 			.def("get_token",				&CConsole::GetToken)
-			.def("execute_deferred",		&execute_console_command_deferred)
 	];
 }
 

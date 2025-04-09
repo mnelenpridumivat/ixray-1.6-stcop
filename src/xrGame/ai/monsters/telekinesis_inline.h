@@ -38,10 +38,10 @@ void CTelekinesis<_Object>::Activate()
 	for (u32 i = 0; i < m_nearest.size(); i++) {
 		
 		CGameObject *obj = smart_cast<CGameObject *>(m_nearest[i]);
-		if (!obj || !obj->m_pPhysicsShell) continue;
+		if (!obj || !obj->GetEntityAlife()->PPhysicsShell()) continue;
 		
 		// отключить гравитацию
-		obj->m_pPhysicsShell->set_ApplyByGravity(FALSE);
+		obj->GetEntityAlife()->PPhysicsShell()->set_ApplyByGravity(FALSE);
 		
 		CTelekineticObject tele_object;
 
@@ -134,7 +134,7 @@ void  CTelekinesis<_Object>::PhTune(dReal step)
 	for (u32 i = 0; i < objects.size(); i++) {
 		switch (objects[i].get_state()) {
 		case TS_Raise:	
-		case TS_Keep:	objects[i].get_object()->m_pPhysicsShell->Enable();
+		case TS_Keep:	objects[i].get_object()->GetEntityAlife()->PPhysicsShell()->Enable();
 		case TS_None:	break;
 		}
 	}

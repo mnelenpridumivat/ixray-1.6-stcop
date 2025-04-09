@@ -5,7 +5,7 @@
 #include "IGame_Persistent.h"
 #include "XR_IOConsole.h"
 #include "std_classes.h"
-#include "../xrCDB/ISpatial.h"
+#include "../xrCore/Collision/ISpatial.h"
 #include "ILoadingScreen.h"
 
 //---------------------------------------------------------------------
@@ -21,8 +21,6 @@ struct _SoundProcessor : public pureFrame
 		Device.Statistic->Sound.End();
 	}
 }	SoundProcessor;
-
-ENGINE_API int ps_rs_loading_stages = 0;
 
 CApplication::CApplication()
 {
@@ -232,10 +230,17 @@ void CApplication::LoadForceFinish() {
 		loadingScreen->ForceFinish();
 }
 
+void CApplication::SetLoadStageTitle(pcstr _ls_title)
+{
+	const static bool isLoadingStagesEnabled = EngineExternal()[EEngineExternalUI::ShowLoadingStages];
+	if (loadingScreen && isLoadingStagesEnabled)
+		loadingScreen->SetStageTitle(_ls_title);
+	Log(_ls_title);
+}
+
 void CApplication::LoadTitleInt(LPCSTR str1, LPCSTR str2, LPCSTR str3)
 {
-	const static bool disableLoadScreenTips = EngineExternal()[EEngineExternalRender::DisableLoadScreenTips];
-	if (loadingScreen && !disableLoadScreenTips)
+	if (loadingScreen)
 	{
 		loadingScreen->SetStageTip(str1, str2, str3);
 	}
@@ -244,8 +249,8 @@ void CApplication::LoadTitleInt(LPCSTR str1, LPCSTR str2, LPCSTR str3)
 void CApplication::LoadStage()
 {
 	VERIFY(ll_dwReference);
-	Msg("* phase time: %d ms", phase_timer.GetElapsed_ms());	phase_timer.Start();
-	Msg("* phase cmem: %d K", Memory.mem_usage() / 1024);
+	//Msg("* phase time: %d ms", phase_timer.GetElapsed_ms());	phase_timer.Start();
+	//Msg("* phase cmem: %d K", Memory.mem_usage() / 1024);
 
 	if (g_pGamePersistent->GameType() == 1 && !xr_strcmp(g_pGamePersistent->m_game_params.m_alife, "alife"))
 		max_load_stage = 17;
@@ -309,19 +314,18 @@ void CApplication::Level_Scan()
 
 void gen_logo_name(string_path& dest, LPCSTR level_name, int num)
 {
-	xr_strconcat(dest, "intro\\intro_", level_name);
+	xr_strconcat	(dest, "intro\\intro_", level_name);
 
 	u32 len = xr_strlen(dest);
-	if (dest[len - 1] == '\\')
-		dest[len - 1] = 0;
+	if(dest[len-1]=='\\')
+		dest[len-1] = 0;
 
 	string16 buff;
 	xr_strcat(dest, sizeof(dest), "_");
 	xr_strcat(dest, sizeof(dest), _itoa(num + 1, buff, 10));
 }
 
-void CApplication::Level_Set(u32 L)
-{
+void CApplication::Level_Set(u32 L) {
 	if (L >= Levels.size())	return;
 	FS.get_path("$level$")->_set(Levels[L].folder);
 
@@ -336,12 +340,22 @@ void CApplication::Level_Set(u32 L)
 		int count = 0;
 		while (true)
 		{
-			string_path			temp2;
+			string_path temp2;
 			gen_logo_name(path, Levels[L].folder, count);
-			if (FS.exist(temp2, "$game_textures$", path, ".dds") || FS.exist(temp2, "$level$", path, ".dds"))
+
+			if (FS.exist(temp2, "$game_textures$", path, ".dds") || FS.exist(temp2, "$level$", path, ".dds")) {
 				count++;
-			else
+			} else {
+				string_path temp3;
+				xr_strconcat(path, "intro\\intro_", Levels[L].folder);
+				path[xr_strlen(path) - 1] = 0;
+
+				string_path nm;
+				xr_strconcat(nm, path, ".dds");
+				FS.update_path(temp3, "$game_textures$", nm);
+
 				break;
+			}
 		}
 
 		if (count)
@@ -351,10 +365,9 @@ void CApplication::Level_Set(u32 L)
 		}
 	}
 
-	if (path[0] && loadingScreen)
+	if (path[0])
 		loadingScreen->SetLevelLogo(path);
 }
-
 int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 {
 	int result = -1;

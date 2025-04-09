@@ -2,7 +2,7 @@
 
 #include "../xrScripts/script_export_space.h"
 
-UI_API struct UIRegistrator
+struct UI_API UIRegistrator
 {
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

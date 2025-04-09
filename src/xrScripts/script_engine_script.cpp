@@ -22,9 +22,7 @@ void LuaLog(LPCSTR caMessage)
 void ErrorLog(LPCSTR caMessage)
 {
 	g_pScriptEngine->error_log("%s",caMessage);
-#ifdef PRINT_CALL_STACK
 	g_pScriptEngine->print_stack();
-#endif // #ifdef PRINT_CALL_STACK
 	
 	R_ASSERT2(0, caMessage);
 }
@@ -172,8 +170,9 @@ bool IsEditorMode()
 	return Device.IsEditorMode();
 }
 
-void SemiLog(const char* Msg) {
-	Log(Msg);
+void SemiLog(const char* message)
+{
+	Msg(message);
 }
 
 namespace ixray::save
@@ -188,6 +187,19 @@ namespace ixray::save
 	{
 		CurrentSaveStage = Name;
 	}
+}
+
+void TryLoadFile(const char* FileName)
+{
+	FS.TryLoad(FileName);
+}
+
+void lua_debug_print(LPCSTR str)
+{
+	if (!xr_strlen(str))
+		return;
+
+	Msg("$ DBG:[%lu] %s", Device.dwTimeGlobal, str);
 }
 
 #pragma optimize("s",on)
@@ -213,10 +225,11 @@ void CScriptEngine::script_register(lua_State *L)
 		def("user_name",						&user_name),
 		def("time_global",						&script_time_global),
 		def("SemiLog",							&SemiLog),
+		def("debug_print",						&lua_debug_print),
 		def("time_global_async",				&script_time_global_async),
 		def("IsSupportMP",						&CheckMP),
-		def("IsEditor",							&IsEditorMode)
-
+		def("IsEditor",							&IsEditorMode),
+		def("try_load_file",					&TryLoadFile)
 #ifdef XRGAME_EXPORTS
 		,def("device",							&get_device),
 		def("TinyLog",							&MyLog)

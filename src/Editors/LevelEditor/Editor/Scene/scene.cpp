@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "LEPhysics.h"
 #include "../xrEngine/xr_input.h"
+#include "../xrEngine/xr_object.h"
+#include "../xrEngine/IGame_Actor.h"
+#include "../xrEngine/CameraBase.h"
+#include "../xrServerEntities/clsid_game.h"
+#include "../xrECore/Editor/UILogForm.h"
 
 EScene* Scene;
 
@@ -125,10 +130,10 @@ void EScene::AppendObject( CCustomObject* object, bool bUndo )
 	object->SetLoadedState();
 }
 
-bool EScene::RemoveObject( CCustomObject* object, bool bUndo, bool bDeleting )
+bool EScene::RemoveObject(CCustomObject* object, bool bUndo, bool bDeleting)
 {
-	VERIFY				(object);
-	VERIFY				(m_Valid);
+	VERIFY(object);
+	VERIFY(m_Valid);
 
 	switch (object->FClassID)
 	{
@@ -147,27 +152,31 @@ bool EScene::RemoveObject( CCustomObject* object, bool bUndo, bool bDeleting )
 		break;
 	}
 
-	ESceneCustomOTool* mt 	= GetOTool(object->FClassID);
-	if (mt&&mt->IsEditable())
+	ESceneCustomOTool* mt = GetOTool(object->FClassID);
+	if (mt && mt->IsEditable())
 	{
+		xrSRWLockGuard lock(PickUpLock);
 		mt->_RemoveObject(object);
 		// signal everyone "I'm deleting"
 //        if (object->ClassID==OBJCLASS_SCENEOBJECT)
 		{
-			m_ESO_SnapObjects.remove			(object);
+			m_ESO_SnapObjects.remove(object);
 
 			SceneToolsMapPairIt _I = m_SceneTools.begin();
 			SceneToolsMapPairIt _E = m_SceneTools.end();
-			for (; _I!=_E; _I++){
+			for (; _I != _E; _I++) {
 				ESceneToolBase* mt = _I->second;
 				if (mt)
 					mt->OnObjectRemove(object, bDeleting);
 			}
-			UpdateSnapList						();
+			UpdateSnapList();
 		}
-		UI->UpdateScene	();
+		UI->UpdateScene();
 	}
-	if (bUndo)		   	UndoSave();
+
+	if (bUndo)
+		UndoSave();
+
 	return true;
 }
 
@@ -289,11 +298,15 @@ void EScene::Clear(BOOL bEditableToolsOnly)
 	SceneToolsMapPairIt t_it = m_SceneTools.begin();
 	SceneToolsMapPairIt t_end = m_SceneTools.end();
 	for (; t_it != t_end; t_it++)
-		if (t_it->second && t_it->first != OBJCLASS_DUMMY) {
-			if (!bEditableToolsOnly || (bEditableToolsOnly && t_it->second->IsEditable())) {
+	{
+		if (t_it->second && t_it->first != OBJCLASS_DUMMY)
+		{
+			if (!bEditableToolsOnly || (bEditableToolsOnly && t_it->second->IsEditable()))
+			{
 				t_it->second->Clear();
 			}
 		}
+	}
 
 	Tools->ClearDebugDraw();
 
@@ -715,6 +728,17 @@ void EScene::Play()
 	if (IsPlayInEditor())
 		return;
 
+	if (UILogForm::ClearInPIE())
+	{
+		UILogForm::Clear();
+	}
+
+	if (MainForm->GetTopBarForm()->UseCameraPosForActor)
+	{
+		ActorNewPos = UI->CurrentView().m_Camera.GetPosition();
+		ActorNewDir = UI->CurrentView().m_Camera.GetHPB();
+	}
+
 	if (!BuildSpawn())
 		return;
 
@@ -734,6 +758,9 @@ void EScene::Play()
 	g_pGameLevel->LoadEditor(m_LevelOp.m_FNLevelPath);
 	g_pGameLevel->IR_Capture();
 	GetTool(OBJCLASS_SPAWNPOINT)->m_EditFlags.set(ESceneToolBase::flVisible, false);
+
+	Device.seqFrameMT.Add(this);
+
 	ShowCursor(FALSE);
 }
 
@@ -757,6 +784,8 @@ void EScene::Stop()
 	m_RTFlags.set(flIsStopPlayInEditor, TRUE);
 
 	g_pGamePersistent->Environment().Invalidate();
+	Device.seqFrameMT.Remove(this);
+	IsAppliedPos = false;
 }
 
 void EScene::LoadCForm(CObjectSpace* Space, CDB::build_callback cb)
@@ -889,4 +918,26 @@ bool EScene::GetSubstObjectName(const xr_string& _from, xr_string& _to) const
 	}
 
 	return (It!=It_e);
+}
+
+void EScene::OnFrame()
+{
+	if (!IsAppliedPos)
+	{
+		if (MainForm->GetTopBarForm()->UseCameraPosForActor)
+		{
+			CLASS_ID CLS = TEXT2CLSID("S_ACTOR");
+			IGame_Actor* GameActor = (IGame_Actor*)g_pGameLevel->Objects.FindObjectByCLS_ID(CLS);
+
+			if (GameActor == nullptr)
+				return;
+
+			string128 Command = {};
+			xr_sprintf(Command, "set_actor_position %.3f, %.3f, %.3f", ActorNewPos.x, ActorNewPos.y, ActorNewPos.z);
+			Console->Execute(Command);
+			g_pIGameActor->cam_Active()->Set(-ActorNewDir.x, 0, 0);
+
+			IsAppliedPos = true;
+		}
+	}
 }

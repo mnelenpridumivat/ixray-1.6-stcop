@@ -24,14 +24,8 @@ list(FILTER CDB_SRC_FILES EXCLUDE REGEX "cl_raypick.cpp$")
 # xrCDB project
 add_library(xrCDB SHARED ${CDB_SRC_FILES})
 target_include_directories(xrCDB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(xrCDB PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 
 # Project defines
 target_compile_definitions(xrCDB PRIVATE XRCDB_EXPORTS)
 target_compile_definitions(xrCDB PRIVATE _USRDLL)
-
-# Linker list
-target_link_libraries(xrCDB PUBLIC xrCore)
-target_link_libraries(xrCDB PUBLIC opcode-prosectors)
-
-# Move precompiled header
-target_validate_pch(xrCDB ${CMAKE_CURRENT_SOURCE_DIR})

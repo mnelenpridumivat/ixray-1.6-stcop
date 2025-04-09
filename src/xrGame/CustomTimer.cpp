@@ -111,10 +111,27 @@ void CCustomTimerBase::load(IReader& packet)
     load_data(m_bIsActive, packet);
 }
 
+void CCustomTimerBase::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CCustomTimerBase")
+    {
+        Object << m_iTimerStartValue << m_iTimerCurValue << m_iTimerMode << m_iStartTime << m_bIsActive;
+    }
+}
+
 void CCustomTimer::load(IReader& packet)
 {
     load_data(m_sTimerName, packet);
     CCustomTimerBase::load(packet);
+}
+
+void CCustomTimer::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CCustomTimer")
+    {
+        CCustomTimerBase::Serialize(Object);
+        Object << m_sTimerName;
+    }
 }
 
 void CBinder::load(IReader& input_packet)
@@ -124,6 +141,19 @@ void CBinder::load(IReader& input_packet)
     load_data(m_expired, input_packet);
     m_params.load(input_packet);
     m_bIsActive = true;
+}
+
+void CBinder::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinder")
+    {
+        CCustomTimerBase::Serialize(Object);
+        Object << m_sFuncName << m_expired;
+        m_params.Serialize(Object);
+        if (!Object.IsSave()) {
+            m_bIsActive = true;
+        }
+    }
 }
 
 void CCustomTimerBase::Update()
@@ -188,7 +218,7 @@ CTimerManager& CTimerManager::GetInstance()
     return manager;
 }
 
-void CTimerManager::CreateTimer(std::string name, int value, int mode)
+void CTimerManager::CreateTimer(shared_str name, int value, int mode)
 {
     for (auto& timer : Timers)
     {
@@ -208,7 +238,7 @@ void CTimerManager::CreateTimer(std::string name, int value, int mode)
     Timers.push_back(std::make_shared<CCustomTimer>(name, value, mode));
 }
 
-bool CTimerManager::DeleteTimer(std::string name)
+bool CTimerManager::DeleteTimer(shared_str name)
 {
     for (auto it = Timers.begin(); it != Timers.end(); ++it)
     {
@@ -226,7 +256,7 @@ bool CTimerManager::DeleteTimer(std::string name)
     return false;
 }
 
-bool CTimerManager::ResetTimer(std::string name)
+bool CTimerManager::ResetTimer(shared_str name)
 {
     for (auto& timer : Timers)
     {
@@ -239,13 +269,13 @@ bool CTimerManager::ResetTimer(std::string name)
     return false;
 }
 
-bool CTimerManager::StartTimer(std::string name, int start_time, int mode)
+bool CTimerManager::StartTimer(shared_str name, int start_time, int mode)
 {
     for (auto& timer : Timers)
     {
         if ((*timer).getName() == name)
         {
-            (*timer).SetOnTimerStopCallback([this, name = (*timer).getName()](std::string stopped_name)
+            (*timer).SetOnTimerStopCallback([this, name = (*timer).getName()](shared_str stopped_name)
             {
                 OnTimerStop(stopped_name);
             });
@@ -267,7 +297,7 @@ bool CTimerManager::StartTimer(std::string name, int start_time, int mode)
     return false;
 }
 
-bool CTimerManager::StopTimer(std::string name)
+bool CTimerManager::StopTimer(shared_str name)
 {
     for (auto& timer : Timers)
     {
@@ -300,13 +330,21 @@ void CTimerManager::load(IReader& packet)
 
     for (u32 i = 0; i < timer_count; ++i)
     {
-        auto timer = std::make_shared<CCustomTimer>();
+        auto timer = xr_make_shared<CCustomTimer>();
         timer->load(packet);
         Timers.push_back(timer);
     }
 }
 
-int CTimerManager::GetTimerValue(std::string name) const
+void CTimerManager::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinderManager")
+    {
+        Object << Timers;
+    }
+}
+
+int CTimerManager::GetTimerValue(shared_str name) const
 {
     for (const auto& timer : Timers)
     {
@@ -333,9 +371,9 @@ CBinderManager& CBinderManager::GetInstance()
     return manager;
 }
 
-void CBinderManager::CreateBinder(std::string name, const CBinderParams& params, int value, int mode)
+void CBinderManager::CreateBinder(shared_str name, const CBinderParams& params, int value, int mode)
 {
-    Binders.push_back(std::make_unique<CBinder>(name, params, value, mode));
+    Binders.push_back(xr_make_unique<CBinder>(name, params, value, mode));
 }
 
 void CBinderManager::save(IWriter& packet)
@@ -358,8 +396,16 @@ void CBinderManager::load(IReader& packet)
 
     for (u32 i = 0; i < timer_count; ++i)
     {
-        Binders.push_back(std::make_unique<CBinder>());
+        Binders.push_back(xr_make_unique<CBinder>());
         Binders.back()->load(packet);
+    }
+}
+
+void CBinderManager::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinderManager")
+    {
+        Object << Binders;
     }
 }
 
@@ -555,10 +601,6 @@ void CBinderParam::save(IWriter& output_packet) const
         output_packet.w_s64(std::get<s64>(value));
         break;
     }
-    /*case eBinderParamDouble: {
-        output_packet.w_double(std::get<double>(value));
-        break;
-    }*/
     }
 }
 
@@ -582,10 +624,35 @@ void CBinderParam::load(IReader& input_packet)
         value = input_packet.r_s64();
         break;
     }
-    /*case eBinderParamDouble: {
-        value = input_packet.r_double();
-        break;
-    }*/
+    }
+}
+
+void CBinderParam::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinderParam")
+    {
+        u8* ValueType = (u8*)&type;
+        Object << *ValueType;
+        switch (type) {
+        case eBinderParamString: {
+            xr_string new_value = std::get<xr_string>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        case eBinderParamU64: {
+            u64 new_value = std::get<u64>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        case eBinderParamS64: {
+            s64 new_value = std::get<s64>(value);
+            Object << new_value;
+            value = new_value;
+            break;
+        }
+        }
     }
 }
 
@@ -658,4 +725,36 @@ void CBinderParams::load(IReader& input_packet)
     for (auto i = 0; i < size; ++i) {
         params[i].load(input_packet);
     }
+}
+
+void CBinderParams::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinderParams")
+    {
+        Object << params;
+    }
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CCustomTimer& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinder& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParam& Value)
+{
+    Value.Serialize(Object);
+    return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CBinderParams& Value)
+{
+    Value.Serialize(Object);
+    return Object;
 }

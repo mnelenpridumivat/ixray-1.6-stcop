@@ -13,6 +13,7 @@
 #include "../../xrParticles/particle_param_handle.h"
 #include "../xrCore/xr_smart_pointers.h"
 #endif
+#include "Save/SaveObject.h"
 
 class CBulletManager;
 
@@ -228,6 +229,7 @@ namespace FlamethrowerTrace
 	class CManager :
 		public Feel::Touch
 	{
+		friend ISaveObject& operator<<(ISaveObject& Object, CManager& Data);
 	
 	#ifdef DEBUG
 		friend CBulletManager;
@@ -275,6 +277,9 @@ namespace FlamethrowerTrace
 
 		void save(NET_Packet& output_packet);
 		void load(IReader& input_packet);
+
+		//virtual void Save(CSaveObjectSave* Object) const;
+		//virtual void Load(CSaveObjectLoad* Object);
 	
 		void UpdateOverlaps(float DeltaTime);
 		void UpdatePoints(float DeltaTime);
@@ -296,5 +301,7 @@ namespace FlamethrowerTrace
 		//void ExpandCollisions(CCollision* First, CCollision* Second);
 		const shared_str& GetSection() { return CollisionSection; }
 	};
+
+	ISaveObject& operator<<(ISaveObject& Object, CManager& Data);
 
 }

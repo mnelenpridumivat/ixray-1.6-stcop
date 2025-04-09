@@ -31,6 +31,7 @@ endif()
 # SDL3
 set(CORE_SDL3_PLATFORM win-${NUGET_PACKAGE_PLATFORM})
 set(CORE_SDL3 ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.Sdl.Runtimes.${CORE_SDL3_PLATFORM}.2024.3.16-open/)
+set(CORE_SDL3_LIBRARY SDL3.lib)
 
 # Optick
 set(CORE_OPT ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.Optick.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.1.4.0.1/)
@@ -62,9 +63,6 @@ set(STEAM_SOCKETS_PATH ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.GameNetwor
 # RedImage
 set(REDIMAGE_PATH ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.RedImageTool.Runtimes.win-x64.0.1.0)
 
-# LuaJIT 
-set(LUAJIT ${CMAKE_BINARY_DIR}/packages/IXRay.Packages.LuaJIT.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.2017.8.11-open/)
-
 set(LUAJIT_NAME lua51.dll)
 set(LUAJIT_LIB ${LUAJIT}runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/lua51.lib)
 set(LUAJIT_BIN ${LUAJIT}runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/${LUAJIT_NAME})
@@ -79,6 +77,7 @@ set(NVTT ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.Nvtt.Runtimes.win-x64.20
 set(IXR_TBB_SDK ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.OneTbb.Runtimes.win7-${NUGET_PACKAGE_PLATFORM}.2021.11.0/)
 set(IXR_TBB_INC ${IXR_TBB_SDK}build/native/include/)
 set(IXR_TBB_BIN ${IXR_TBB_SDK}runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/${IXR_TBB_NAME})
+set(IXR_TBB_LIB ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/tbb12.lib)
 
 # AMD FidelityFX FSR2
 set(AMD_FSR2 ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.FidelityFX.FSR2.DirectX11.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.2.2.1.1)
@@ -97,3 +96,11 @@ endif()
 
 # LZO
 set(LZO ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.Lzo.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.2.10.0)
+set(LZO_LIB ${LZO}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/lzo2.lib)
+
+# YAML
+set(YAML_CORE ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.YamlCpp.Runtimes.win-x64.0.8.0)
+set(YAML_INCL ${YAML_CORE}/build/native/include)
+set(YAML_LIB  ${YAML_CORE}/runtimes/win-x64/native/Release/yaml-cpp.lib)
+set(YAML_BIN  ${YAML_CORE}/runtimes/win-x64/native/Release/yaml-cpp.dll)
+set(YAML_LIB_NAME yaml-cpp.dll)

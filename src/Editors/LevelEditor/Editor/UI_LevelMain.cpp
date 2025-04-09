@@ -196,7 +196,7 @@ CCommandVar CommandLoad(CCommandVar p1, CCommandVar p2)
 		if (!p1.IsString())
 		{
 			xr_string temp_fn = LTools->m_LastFileName.c_str();
-			if (EFS.GetOpenName(_maps_, temp_fn))
+			if (EFS.GetOpenName(_maps_, temp_fn, false, 0, -1, "*.level;*.tmp"))
 				return 			ExecCommand(COMMAND_LOAD, temp_fn);
 		}
 		else
@@ -323,8 +323,12 @@ CCommandVar CommandClear(CCommandVar p1, CCommandVar p2)
 {
 	LoaderEvent.wait();
 
-	if( !Scene->locked() ){
-		if (!Scene->IfModified()) return TRUE;
+	if( !Scene->locked() )
+	{
+		Scene->Stop();
+		
+		if (!Scene->IfModified()) 
+			return TRUE;
 		UI->CurrentView().m_Camera.Reset	();
 		Scene->Reset			();
 		Scene->m_LevelOp.Reset	();

@@ -128,9 +128,11 @@ void CLevelChanger::feel_touch_new	(CObject *tpObject)
 	}
 	Fvector			p,r;
 	bool			b = get_reject_pos(p,r);
-	CUIGameSP		*pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-	if (pGameSP)
-        pGameSP->ChangeLevel	(m_game_vertex_id, m_level_vertex_id, m_position, m_angles, p, r, b, m_invite_str, m_b_enabled);
+	 
+	if (CurrentGameUI() == nullptr)
+		return;
+
+	CurrentGameUI()->ChangeLevel(m_game_vertex_id, m_level_vertex_id, m_position, m_angles, p, r, b, m_invite_str, m_b_enabled);
 
 	m_entrance_time	= Device.fTimeGlobal;
 }
@@ -183,12 +185,11 @@ void CLevelChanger::update_actor_invitation()
 			continue;
 
 		if(m_entrance_time+5.0f < Device.fTimeGlobal){
-			CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-			Fvector p,r;
+ 			Fvector p,r;
 			bool b = get_reject_pos(p,r);
 			
-			if(pGameSP)
-				pGameSP->ChangeLevel(m_game_vertex_id,m_level_vertex_id,m_position,m_angles,p,r,b, m_invite_str, m_b_enabled);
+			if(CurrentGameUI())
+				CurrentGameUI()->ChangeLevel(m_game_vertex_id, m_level_vertex_id, m_position, m_angles, p, r, b, m_invite_str, m_b_enabled);
 
 			m_entrance_time		= Device.fTimeGlobal;
 		}
@@ -207,6 +208,37 @@ void CLevelChanger::load(IReader &input_packet)
 	inherited::load			(input_packet);
 	input_packet.r_stringZ	(m_invite_str);
 	m_b_enabled				= !!input_packet.r_u8();
+}
+
+/*void CLevelChanger::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CLevelChanger");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_stringZ(m_invite_str);
+		Object->GetCurrentChunk()->w_bool(m_b_enabled);
+	}
+	Object->EndChunk();
+}
+
+void CLevelChanger::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CLevelChanger");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_stringZ(m_invite_str);
+		Object->GetCurrentChunk()->r_bool(m_b_enabled);
+	}
+	Object->EndChunk();
+}*/
+
+void CLevelChanger::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CLevelChanger")
+	{
+		inherited::Serialize(Object);
+		Object << m_invite_str << m_b_enabled;
+	}
 }
 
 BOOL CLevelChanger::net_SaveRelevant()

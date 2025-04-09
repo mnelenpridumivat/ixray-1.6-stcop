@@ -113,15 +113,11 @@ public:
 	light_Package												LP_normal;
 	light_Package												LP_pending;
 
-	xr_vector<Fbox3,render_alloc<Fbox3> >						main_coarse_structure;
-
 	shared_str													c_sbase			;
 	shared_str													c_lmaterial		;
 	float														o_hemi			;
 	float														o_hemi_cube[CROS_impl::NUM_FACES]	;
 	float														o_sun			;
-	IDirect3DQuery9*											q_sync_point[CHWCaps::MAX_GPUS];
-	u32															q_sync_count	;
 
 	bool														m_bMakeAsyncSS;
 	bool														m_bFirstFrameAfterReset;	// Determines weather the frame is the first after resetting device.
@@ -129,7 +125,6 @@ public:
 	xr_vector<sun::cascade>										m_sun_cascades;
 
 	xr_list<light*>												v_all_lights_dque;
-	xr_list<light*>												v_all_lights;
 
 private:
 	// Loading / Unloading
@@ -142,7 +137,7 @@ private:
 
 	BOOL							add_Dynamic					(dxRender_Visual*pVisual, u32 planes, bool Force = false);		// normal processing
 	void							add_Static					(dxRender_Visual*pVisual, u32 planes);
-	void							add_leafs_Dynamic			(dxRender_Visual*pVisual, bool ignore = false, bool Force = false); // if detected node's full visibility
+	void							add_leafs_Dynamic			(dxRender_Visual*pVisual, bool Force = false); // if detected node's full visibility
 	void							add_leafs_Static			(dxRender_Visual*pVisual);						// if detected node's full visibility
 
 public:
@@ -248,12 +243,12 @@ public:
 	virtual void					flush						();
 	virtual void					set_Object					(IRenderable*		O	);
 	virtual	void					add_Occluder				(Fbox2&	bb_screenspace	);			// mask screen region as oclluded
-	virtual void					add_Visual					(IRenderVisual*	V, bool ignore_opt = false, bool Force = false);			// add visual leaf	(no culling performed at all)
+	virtual void					add_Visual					(IRenderVisual*	V, bool Force = false);			// add visual leaf	(no culling performed at all)
 	virtual void					add_Geometry				(IRenderVisual*	V	);			// add visual(s)	(all culling performed)
 
 	// wallmarks
-	virtual void					add_StaticWallmark			(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
-	virtual void					add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
+	virtual void					add_StaticWallmark			(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection = false);
+	virtual void					add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection = false) override;
 	virtual void					add_StaticWallmark			(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V);
 	virtual void					clear_static_wallmarks		();
 	virtual void					add_SkeletonWallmark		(intrusive_ptr<CSkeletonWallmark> wm);
@@ -281,7 +276,6 @@ public:
 	virtual void					model_Delete				(IRenderVisual* &	V, BOOL bDiscard);
 	virtual void					model_Delete_Deffered		(IRenderVisual* &	V);
 	virtual void 					model_Delete				(IRender_DetailModel* & F);
-	virtual void					model_Logging				(BOOL bEnable)				{ Models->Logging(bEnable);	}
 	virtual void					models_Prefetch				();
 	virtual void					models_Clear				(BOOL b_complete);
 

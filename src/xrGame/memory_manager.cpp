@@ -24,12 +24,13 @@
 #include "level_graph.h"
 #include "agent_enemy_manager.h"
 #include "script_game_object.h"
+#include "Save/SaveObject.h"
 
 CMemoryManager::CMemoryManager		(CEntityAlive *entity_alive, CSound_UserDataVisitor *visitor)
 {
 	VERIFY				(entity_alive);
-	m_object			= smart_cast<CCustomMonster*>(entity_alive);
-	m_stalker			= smart_cast<CAI_Stalker*>(m_object);
+	m_object			= entity_alive ? entity_alive->cast_custom_monster() : NULL;
+	m_stalker			= m_object ? m_object->cast_stalker() : NULL;
 
 	if (m_stalker)
 		m_visual		= new CVisualMemoryManager(m_stalker);
@@ -99,8 +100,8 @@ void CMemoryManager::update_enemies	(const bool &registered_in_combat)
 			(
 				!enemy().selected() || 
 				(
-					smart_cast<const CAI_Stalker*>(enemy().selected()) && 
-					smart_cast<const CAI_Stalker*>(enemy().selected())->wounded()
+					const_cast<CEntityAlive*>(enemy().selected())->cast_stalker() &&
+					const_cast<CEntityAlive*>(enemy().selected())->cast_stalker()->wounded()
 				)
 			) &&
 			registered_in_combat
@@ -159,82 +160,84 @@ template <typename T>
 void CMemoryManager::update			(const xr_vector<T> &objects, bool add_enemies)
 {
 	PROF_EVENT("CMemoryManager::update");
-	squad_mask_type					mask = m_stalker ? m_stalker->agent_manager().member().mask(m_stalker) : 0;
-	typename xr_vector<T>::const_iterator	I = objects.begin();
-	typename xr_vector<T>::const_iterator	E = objects.end();
-	for ( ; I != E; ++I) {
-		if (!(*I).m_enabled)
+	u64 mask = m_stalker ? m_stalker->agent_manager().member().mask(m_stalker) : 0;
+
+	for (auto& member : objects)
+	{
+		if (!member.m_enabled)
 			continue;
 		
-		if (m_stalker && !(*I).m_squad_mask.test(mask))
+		if (m_stalker && !member.m_squad_mask.test(mask))
 			continue;
 
-		if (!(*I).m_object) {
+		if (!member.m_object)
 			continue;
-		}
 
-		if ((*I).m_object->getDestroy()) {
+		if (member.m_object->getDestroy())
 			continue;
-		}
-		danger().add				(*I);
+
+		danger().add(member);
 		
-		if (add_enemies) {
-			const CEntityAlive *entity_alive = smart_cast<const CEntityAlive*>((*I).m_object);
-			if (entity_alive && enemy().add(entity_alive))
+		if (CEntityAlive* entity_alive = const_cast<CGameObject*>(member.m_object)->cast_entity_alive())
+		{
+			if (add_enemies)
+			{
+				if (enemy().add(entity_alive))
+					continue;
+			}
+
+			const CAI_Stalker* stalker = entity_alive->cast_stalker();
+			if (m_stalker && stalker)
 				continue;
 		}
 
-		const CAI_Stalker			*stalker = smart_cast<const CAI_Stalker*>((*I).m_object);
-		if (m_stalker && stalker)
-			continue;
-
-		item().add				((*I).m_object);
+		item().add(member.m_object);
 	}
 }
 
-CMemoryInfo CMemoryManager::memory(const CObject *object) const
+CMemoryInfo CMemoryManager::memory(const CObject* object) const
 {
-	CMemoryInfo						result;
+	CMemoryInfo result;
 	if (!this->object().g_Alive())
-		return						(result);
+		return (result);
 
-	u32								level_time = 0;
-	const CGameObject				*game_object = smart_cast<const CGameObject*>(object);
-	VERIFY							(game_object);
-	squad_mask_type					mask = m_stalker ? m_stalker->agent_manager().member().mask(m_stalker) : squad_mask_type(-1);
+	u32 level_time = 0;
+	const CGameObject* game_object = object ? const_cast<CObject*>(object)->cast_game_object() : nullptr;
+	VERIFY(game_object);
+	u64 mask = m_stalker ? m_stalker->agent_manager().member().mask(m_stalker) : u64(-1);
 
 	{
-		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(),visual().objects().end(),object_id(object));
+		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(), visual().objects().end(), CMemoryObject::object_id(object));
 		if (visual().objects().end() != I) {
-			(CMemoryObject<CGameObject>&)result	= (CMemoryObject<CGameObject>&)(*I);
-			result.visible						((*I).visible(mask));
-			result.m_visual_info				= true;
-			level_time							= (*I).m_level_time;
-			VERIFY								(result.m_object);
+			(CMemoryObject&)result = (CMemoryObject&)(*I);
+			result.visible((*I).visible(mask));
+			result.m_visual_info = true;
+			level_time = (*I).m_level_time;
+			VERIFY(result.m_object);
 		}
 	}
 
 	{
-		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(),sound().objects().end(),object_id(object));
+		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(), sound().objects().end(), CMemoryObject::object_id(object));
 		if ((sound().objects().end() != I) && (level_time < (*I).m_level_time)) {
-			(CMemoryObject<CGameObject>&)result = (CMemoryObject<CGameObject>&)(*I);
-			result.m_sound_info						= true;
-			level_time								= (*I).m_level_time;
-			VERIFY									(result.m_object);
-		}
-	}
-	
-	{
-		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(),hit().objects().end(),object_id(object));
-		if ((hit().objects().end() != I) && (level_time < (*I).m_level_time)) {
-			(CMemoryObject<CGameObject>&)result = (CMemoryObject<CGameObject>&)(*I);
-			result.m_object							= game_object;
-			result.m_hit_info						= true;
-			VERIFY									(result.m_object);
+			(CMemoryObject&)result = (CMemoryObject&)(*I);
+			result.m_sound_info = true;
+			level_time = (*I).m_level_time;
+			VERIFY(result.m_object);
 		}
 	}
 
-	return		(result);
+	{
+		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(), hit().objects().end(), CMemoryObject::object_id(object));
+		if ((hit().objects().end() != I) && (level_time < (*I).m_level_time)) {
+			(CMemoryObject&)result = (CMemoryObject&)(*I);
+			result.m_object = game_object;
+			result.m_hit_info = true;
+			VERIFY(result.m_object);
+		}
+	}
+
+	return (result);
 }
 
 u32 CMemoryManager::memory_time(const CObject *object) const
@@ -243,23 +246,23 @@ u32 CMemoryManager::memory_time(const CObject *object) const
 	if (!this->object().g_Alive())
 		return			(0);
 
-	const CGameObject	*game_object = smart_cast<const CGameObject*>(object);
+	const CGameObject	*game_object = object ? const_cast<CObject*>(object)->cast_game_object() : NULL;
 	VERIFY				(game_object);
 
 	{
-		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(),visual().objects().end(),object_id(object));
+		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(),visual().objects().end(), CMemoryObject::object_id(object));
 		if (visual().objects().end() != I)
 			result		= (*I).m_level_time;
 	}
 
 	{
-		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(),sound().objects().end(),object_id(object));
+		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(),sound().objects().end(), CMemoryObject::object_id(object));
 		if ((sound().objects().end() != I) && (result < (*I).m_level_time))
 			result		= (*I).m_level_time;
 	}
 	
 	{
-		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(),hit().objects().end(),object_id(object));
+		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(),hit().objects().end(), CMemoryObject::object_id(object));
 		if ((hit().objects().end() != I) && (result < (*I).m_level_time))
 			result		= (*I).m_level_time;
 	}
@@ -274,11 +277,11 @@ Fvector CMemoryManager::memory_position	(const CObject *object) const
 	if (!this->object().g_Alive())
 		return			(result);
 
-	const CGameObject	*game_object = smart_cast<const CGameObject*>(object);
+	const CGameObject	*game_object = object ? const_cast<CObject*>(object)->cast_game_object() : NULL;
 	VERIFY				(game_object);
 
 	{
-		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(),visual().objects().end(),object_id(object));
+		xr_vector<CVisibleObject>::const_iterator	I = std::find(visual().objects().begin(),visual().objects().end(), CMemoryObject::object_id(object));
 		if (visual().objects().end() != I) {
 			time		= (*I).m_level_time;
 			result		= (*I).m_object_params.m_position;
@@ -286,7 +289,7 @@ Fvector CMemoryManager::memory_position	(const CObject *object) const
 	}
 
 	{
-		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(),sound().objects().end(),object_id(object));
+		xr_vector<CSoundObject>::const_iterator	I = std::find(sound().objects().begin(),sound().objects().end(), CMemoryObject::object_id(object));
 		if ((sound().objects().end() != I) && (time < (*I).m_level_time)) {
 			time		= (*I).m_level_time;
 			result		= (*I).m_object_params.m_position;
@@ -294,7 +297,7 @@ Fvector CMemoryManager::memory_position	(const CObject *object) const
 	}
 	
 	{
-		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(),hit().objects().end(),object_id(object));
+		xr_vector<CHitObject>::const_iterator	I = std::find(hit().objects().begin(),hit().objects().end(), CMemoryObject::object_id(object));
 		if ((hit().objects().end() != I) && (time < (*I).m_level_time)) {
 			time		= (*I).m_level_time;
 			result		= (*I).m_object_params.m_position;
@@ -329,7 +332,7 @@ void CMemoryManager::on_restrictions_change	()
 
 void CMemoryManager::make_object_visible_somewhen	(const CEntityAlive *enemy)
 {
-	squad_mask_type				mask = stalker().agent_manager().member().mask(&stalker());
+	u64				mask = stalker().agent_manager().member().mask(&stalker());
 	MemorySpace::CVisibleObject	*obj = visual().visible_object(enemy);
 
 	bool						prev = obj ? obj->visible(mask) : false;
@@ -355,6 +358,41 @@ void CMemoryManager::load							(IReader &packet)
 	sound().load				(packet);
 	hit().load					(packet);
 	danger().load				(packet);
+}
+
+/*void CMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CMemoryManager");
+	{
+		visual().Save(Object);
+		sound().Save(Object);
+		hit().Save(Object);
+		danger().Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CMemoryManager");
+	{
+		visual().Load(Object);
+		sound().Load(Object);
+		hit().Load(Object);
+		danger().Load(Object);
+	}
+	Object->EndChunk();
+}*/
+
+void CMemoryManager::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CMemoryManager")
+	{
+		visual().Serialize(Object);
+		sound().Serialize(Object);
+		hit().Serialize(Object);
+		danger().Serialize(Object);
+	}
 }
 
 // we do this due to the limitation of client spawn manager

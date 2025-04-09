@@ -20,6 +20,8 @@ protected:
 	virtual void		OnMotionMark				(u32 state, const motion_marks&);
 	virtual void		OnStateSwitch				(u32 S);
 
+	virtual void		UpdateCL					();
+
 	void				state_Attacking				(float dt);
 
 	virtual void		KnifeStrike					(const Fvector& pos, const Fvector& dir);
@@ -43,6 +45,8 @@ protected:
 	float				fCurrentHit;
 
 	float				fHitImpulse_cur;
+
+	u32					dwUpdateSounds_Frame;
 
 protected:
 	virtual void		LoadFireParams					(LPCSTR section);
@@ -124,7 +128,7 @@ private:
 	u16								m_except_id;
 	CObject*						m_last_picked_obj;
 
-	typedef xr_vector<ISpatial*>				spartial_base_t;
+	typedef xr_vector<ISpatialShared>			spartial_base_t;
 	typedef buffer_vector<CEntityAlive*>		victims_list_t;
 	struct	victim_bone_data
 	{

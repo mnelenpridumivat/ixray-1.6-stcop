@@ -256,26 +256,26 @@ CRender::~CRender()
 	xr_delete(Target);
 }
 
-void					CRender::Initialize()
+void CRender::Initialize()
 {
 	PSLibrary.OnCreate();
 }
-void					CRender::ShutDown()
+void CRender::ShutDown()
 {
 	PSLibrary.OnDestroy();
 }
 
-void					CRender::OnDeviceCreate()
+void CRender::OnDeviceCreate()
 {
 	Models = new CModelPool();
-	Models->Logging(FALSE);
 }
-void					CRender::OnDeviceDestroy()
+
+void CRender::OnDeviceDestroy()
 {
 	xr_delete(Models);
 }
 
-ref_shader	CRender::getShader(int id) { return 0; }//VERIFY(id<int(Shaders.size()));	return Shaders[id];	}
+ref_shader	CRender::getShader(int id) { return 0; }
 
 BOOL CRender::occ_visible(Fbox& B)
 {
@@ -308,8 +308,6 @@ void CRender::Calculate()
 	Target->reset_light_marker();
 	{
 		//Lights Delete queue
-		for (light* L : v_all_lights)
-			L->spatial_move();
 		for (light*L:v_all_lights_dque)
 			xr_delete(L);
 		v_all_lights_dque.clear();
@@ -348,18 +346,22 @@ void CRender::Calculate()
 				if (R)		R->update(O);
 			}
 		}*/
-		for (ISpatial* pSpatial : lstRenderables)
+		for (ISpatialShared& pSpatial : lstRenderables)
 		{
-			if(pSpatial->spatial.type & STYPE_LIGHTSOURCE) {
-				if(light* L = (light*)pSpatial->dcast_Light()) {
+			if(pSpatial->spatial.type & STYPE_LIGHTSOURCE)
+			{
+				if(light* L = (light*)pSpatial->dcast_Light())
+				{
 					if(Device.dwFrame == L->frame_render) continue;
 					L->frame_render = Device.dwFrame;
 					L->flags.bShadow = FALSE;
 					L->flags.bOccq = FALSE;
-					if(L->flags.type == IRender_Light::SPOT) {
+					if(L->flags.type == IRender_Light::SPOT)
+					{
 						m_spotlights.push_back(L);
 					}
-					else {
+					else 
+					{
 						m_pointlights.push_back(L);
 					}
 				}
@@ -369,7 +371,8 @@ void CRender::Calculate()
 			if (!renderable)
 				continue;
 
-			if(!!(pSpatial->spatial.type & STYPE_RENDERABLE) || !!(pSpatial->spatial.type & STYPE_PARTICLE)) {
+			if(!!(pSpatial->spatial.type & STYPE_RENDERABLE) || !!(pSpatial->spatial.type & STYPE_PARTICLE)) 
+			{
 				set_Object(renderable);
 				renderable->renderable_Render();
 				set_Object(nullptr);
@@ -469,7 +472,8 @@ void 	CRender::set_Transform(Fmatrix* M)
 	current_matrix.set(*M);
 }
 
-void CRender::add_Visual(IRenderVisual* visual, bool, bool Force) {
+void CRender::add_Visual(IRenderVisual* visual, bool Force)
+{
 	if(val_bInvisible) {
 		return;
 	}
@@ -676,7 +680,6 @@ public:
 
 IRender_Glow* CRender::glow_create() { return new RGlow(); }
 void CRender::glow_destroy(IRender_Glow* p_) {  }
-void CRender::model_Logging(BOOL bEnable) {}
 void CRender::models_Prefetch() {}
 void CRender::models_Clear(BOOL b_complete) {}
 void CRender::Screenshot(ScreenshotMode mode, LPCSTR name) {}

@@ -111,7 +111,7 @@ void	CWeaponBinoculars::UpdateCL()
 
 	if (AllowBore())
 	{
-		CActor* pActor = smart_cast<CActor*>(H_Parent());
+		CActor* pActor = H_Parent() ? H_Parent()->cast_actor() : NULL;
 		if (pActor && !pActor->AnyMove() && this == pActor->inventory().ActiveItem())
 		{
 			if (hud_adj_mode == 0 && GetState() == eIdle && (Device.dwTimeGlobal - m_dw_curr_substate_time > 20000))
@@ -169,6 +169,35 @@ void CWeaponBinoculars::load(IReader &input_packet)
 {
 	inherited::load(input_packet);
 	load_data		(m_fRTZoomFactor,input_packet);
+}
+
+/*void CWeaponBinoculars::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CWeaponBinoculars");
+	{
+		inherited::Save(Object);
+		Object->GetCurrentChunk()->w_float(m_fRTZoomFactor);
+	}
+	Object->EndChunk();
+}
+
+void CWeaponBinoculars::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CWeaponBinoculars");
+	{
+		inherited::Load(Object);
+		Object->GetCurrentChunk()->r_float(m_fRTZoomFactor);
+	}
+	Object->EndChunk();
+}*/
+
+void CWeaponBinoculars::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CWeaponBinoculars")
+	{
+		inherited::Serialize(Object);
+		Object << m_fRTZoomFactor;
+	}
 }
 
 bool CWeaponBinoculars::GetBriefInfo( II_BriefInfo& info )

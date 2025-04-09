@@ -160,6 +160,11 @@ void CLevel::IR_OnKeyboardPress	(int key)
 				Console->Execute("main_menu");
 			}return;
 		}break;
+	case kALIFE_CMD: {
+		luabind::functor<void>	functor;
+		R_ASSERT2(ai().script_engine().functor("sim_combat.start_attack", functor), "failed to get sim_combat.start_attack functor");
+		functor();
+	}break;
 	};
 
 	if ( !bReady || !b_ui_exist )			return;
@@ -184,7 +189,11 @@ void CLevel::IR_OnKeyboardPress	(int key)
 #ifdef DEBUG
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.get_path					("$game_scripts$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
-		FS.rescan_pathes			();
+		FS.rescan_pathes();
+		FS.IsAddonPhase = true;
+		FS.get_path					("$arch_dir_addons$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
+		FS.rescan_pathes();
+		FS.IsAddonPhase = false;
 #endif // DEBUG
 		string_path					saved_game,command;
 		xr_strconcat(saved_game, Core.UserName, " - ", g_pStringTable->translate("quicksave").c_str());

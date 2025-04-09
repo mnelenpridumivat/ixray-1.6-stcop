@@ -117,11 +117,7 @@ void xrDebug::do_exit	(const std::string &message)
 
 void xrDebug::backend	(const char *expression, const char *description, const char *argument0, const char *argument1, const char *file, int line, const char *function, bool &ignore_always)
 {
-	static xrCriticalSection CS
-#ifdef PROFILE_CRITICAL_SECTIONS
-	(MUTEX_PROFILE_ID(xrDebug::backend))
-#endif // PROFILE_CRITICAL_SECTIONS
-	;
+	static xrCriticalSection CS;
 
 	CS.Enter			();
 
@@ -139,7 +135,7 @@ void xrDebug::backend	(const char *expression, const char *description, const ch
 	buffer				+= xr_sprintf(buffer,sizeof(assertion_info) - u32(buffer - &assertion_info[0]),"Press CONTINUE to continue execution and ignore all the errors of this type%s%s",endline,endline);
 #endif // USE_OWN_ERROR_MESSAGE_WINDOW
 
-	if (g_pEventManager == nullptr || g_pEventManager->IsEventThread())
+	if ( g_pEventManager == nullptr || g_pEventManager->IsEventThread())
 	{
 		show_dialog(assertion_info, ignore_always);
 	}
@@ -175,7 +171,7 @@ void xrDebug::show_dialog(const std::string& message, bool& ignore_always)
 	{
 		{ 0, 0, "Cancel" },
 		{ 0, 1, "Try again" },
-		{ 0, 2, "Continue" },
+		{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Continue" },
 	};
 
 	auto utf8_message = Platform::ANSI_TO_UTF8(Platform::UTF8_to_CP1251(message.c_str()));
@@ -301,7 +297,12 @@ int out_of_memory_handler	(size_t size)
 	else {
 		Memory.mem_compact	();
 
-		u32					process_heap	= mem_usage_impl(nullptr, nullptr);
+#ifdef IXR_WINDOWS
+		u32 process_heap = mem_usage_impl((void*)_get_heap_handle(), 0, 0);
+#else
+		u32 process_heap = mem_usage_impl(0, 0, 0);
+#endif // IXR_WINDOWS
+
 		int					eco_strings		= (int)str_container::GetInstance().stat_economy			();
 		int					eco_smem		= (int)g_pSharedMemoryContainer->stat_economy	();
 		Msg					("* [x-ray]: process heap[%d K]", process_heap / 1024);

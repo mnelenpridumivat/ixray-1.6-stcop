@@ -13,6 +13,7 @@
 #include "../xrScripts/script_export_space.h"
 #include "operator_abstract.h"
 #include "alife_space.h"
+#include "Save/SaveObject.h"
 
 class CScriptGameObject;
 
@@ -78,6 +79,11 @@ public:
 
 	virtual	void				save				(NET_Packet &packet) {}
 	virtual	void				load				(IReader &packet) {}
+
+	virtual void Save(CSaveObjectSave* Object) const {};
+	virtual void Load(CSaveObjectLoad* Object) {};
+
+	virtual void Serialize(ISaveObject& Object) {}
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

@@ -10,6 +10,7 @@
 
 #include "object_interfaces.h"
 #include "alife_space.h"
+#include "Save/SaveObject.h"
 
 class CALifeSimulatorHeader {
 protected:
@@ -20,6 +21,9 @@ public:
 	virtual							~CALifeSimulatorHeader	();
 	virtual void					save					(IWriter &tMemoryStream);
 	virtual void					load					(IReader &tFileStream);
+	//virtual void					Save(CSaveObjectSave* Object);
+	//virtual void					Load(CSaveObjectLoad* Object);
+	virtual void					Serialize(ISaveObject& Object);
 	IC		u32						version					() const;
 			bool					valid					(IReader &file_stream) const;
 };

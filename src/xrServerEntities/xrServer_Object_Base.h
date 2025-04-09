@@ -13,6 +13,7 @@
 #include "script_value_container.h"
 #include "alife_space.h"
 #include "../xrCore/client_id.h"
+#include "Save/SaveObject.h"
 
 class NET_Packet;
 class xrClientData;
@@ -45,6 +46,9 @@ SERVER_ENTITY_DECLARE_BEGIN(CPureServerObject,IPureServerObject)
 	virtual void					save(IWriter	&tMemoryStream);
 	virtual void					load(NET_Packet	&tNetPacket);
 	virtual void					save(NET_Packet	&tNetPacket);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 };
 
 SERVER_ENTITY_DECLARE_BEGIN3(CSE_Abstract,ISE_Abstract,CPureServerObject,CScriptValueContainer)
@@ -59,7 +63,7 @@ public:
 	};
 
 private:
-	LPSTR							s_name_replace;
+	LPSTR							s_name_replace = nullptr;
 
 public:
 	BOOL							net_Ready;
@@ -100,6 +104,7 @@ public:
 
 	//client object custom data serialization
 	xr_vector<u8>					client_data;
+	u64					client_data_new = u64(-1);
 	virtual void					load					(NET_Packet	&tNetPacket);
 
 	//////////////////////////////////////////////////////////////////////////
@@ -121,13 +126,16 @@ public:
 	//
 	virtual void			Spawn_Write				(NET_Packet &tNetPacket, BOOL bLocal);
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket);
+	//virtual void			Spawn_Write(CSaveObjectSave* Object, bool bLocal) const override;
+	//virtual bool			Spawn_Read(CSaveObjectLoad* Object) override;
+	virtual bool			Spawn_Serialize(ISaveObject& Object, bool bLocal) override;
 	virtual LPCSTR			name					() const override;
 	virtual LPCSTR			name_replace			() const override;
 	virtual void			set_name				(LPCSTR s) override
 	{
 		s_name		= s;
 	};
-	virtual void			set_name_replace		(LPCSTR s) override {xr_free(s_name_replace); s_name_replace = xr_strdup(s);};
+	virtual void			set_name_replace		(LPCSTR s) override { xr_free(s_name_replace); s_name_replace = xr_strdup(s); };
 	virtual Fvector&		position				();
 	virtual Fvector&		angle					();
 	virtual Flags16&		flags					();
@@ -169,6 +177,10 @@ public:
 	virtual CSE_ALifeSmartZone			*cast_smart_zone			() {return nullptr;};
 	virtual CSE_ALifeOnlineOfflineGroup	*cast_online_offline_group	() {return nullptr;};
 	virtual CSE_ALifeItemPDA			*cast_item_pda				() {return nullptr;};
+
+	// For new sync system
+	virtual void SyncRead(NET_Packet& Packet)  {};
+	virtual void SyncWrite(NET_Packet& Packet) {};
 };
 
 #pragma warning(pop)

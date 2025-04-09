@@ -16,12 +16,14 @@
 #include "script_game_object.h"
 #include "GameObject.h"
 #include "Level.h"
+#include "Save/SaveObject.h"
 
 // comment next string when commiting
 //#define DBG_DISABLE_SCRIPTS
 
-CScriptBinder::CScriptBinder		()
+CScriptBinder::CScriptBinder		(CGameObject* Owner)
 {
+	m_Owner = Owner;
 	init					();
 }
 
@@ -76,7 +78,7 @@ void CScriptBinder::reload			(LPCSTR section)
 		return;
 	}
 	
-	CGameObject				*game_object = smart_cast<CGameObject*>(this);
+	CGameObject				*game_object = m_Owner;
 
 	try {
 		lua_function		(game_object ? game_object->lua_game_object() : 0);
@@ -133,7 +135,8 @@ void CScriptBinder::net_Destroy		()
 
 void CScriptBinder::set_object		(CScriptBinderObject *object)
 {
-	if (OnServer()) {
+	if (IsGameTypeSingleCompatible())
+	{
 		VERIFY2				(!m_object,"Cannot bind to the object twice!");
 #ifdef _DEBUG
 		Msg					("* Core object %s is binded with the script object",smart_cast<CGameObject*>(this) ? *smart_cast<CGameObject*>(this)->cName() : "");
@@ -183,6 +186,42 @@ void CScriptBinder::load			(IReader &input_packet)
 	}
 }
 
+/*void CScriptBinder::Save(ISaveObject* Object)
+{
+	if (m_object) {
+		try {
+			m_object->Save(Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}
+
+void CScriptBinder::Load(ISaveObject* Object)
+{
+	if (m_object) {
+		try {
+			m_object->Load(Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}*/
+
+void CScriptBinder::Serialize(ISaveObject& Object)
+{
+	if (m_object) {
+		try {
+			m_object->Serialize(&Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}
+
 BOOL CScriptBinder::net_SaveRelevant()
 {
 	if (m_object) {
@@ -199,7 +238,7 @@ BOOL CScriptBinder::net_SaveRelevant()
 void CScriptBinder::net_Relcase		(CObject *object)
 {
 	PROF_EVENT("CScriptBinder::net_Relcase")
-	CGameObject						*game_object = smart_cast<CGameObject*>(object);
+	CGameObject						*game_object = object->cast_game_object();
 	if (m_object && game_object) {
 		try {
 			m_object->net_Relcase	(game_object->lua_game_object());

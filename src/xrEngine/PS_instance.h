@@ -1,27 +1,29 @@
 #ifndef _CPS_Instance_H_
 #define _CPS_Instance_H_
 
-#include "../xrCDB/ISpatial.h"
+#include "../xrCore/Collision/ISpatial.h"
 #include "ISheduled.h"
 #include "IRenderable.h"
 
 class ENGINE_API CPS_Instance	:
-	public ISpatial,
 	public IRenderable
 {
-	friend class			IGame_Persistent;
+	friend class IGame_Persistent;
+	friend class CParticlesAsync;
 
 	template <bool _is_pm, typename T>
 	friend struct xr_special_free;
 
 private:
-	bool					m_destroy_on_game_load;
+	bool m_destroy_on_game_load;
 
 protected:
+	u32						dwLastTime;
 	int						m_iLifeTime			;
 	BOOL					m_bAutoRemove		;
 	BOOL					m_bDead				;
 	volatile bool			m_NeedDestroy = false;
+
 protected:
 	virtual					~CPS_Instance		();
 	virtual void			PSI_internal_delete	();
@@ -37,6 +39,7 @@ public:
 
 	virtual void			Play				(bool bHudMode)	= 0;
 	virtual BOOL			Locked				()				{ return FALSE; }
+	virtual void			Update				(u32 dt) {};
 
 	virtual	shared_str		shedule_Name		() const		{ return shared_str("particle_instance"); };
 

@@ -117,10 +117,10 @@ void UIMainForm::LoadWindowsStates()
 		m_WorldProperties->Close();
 	}
 
-	if (LPrefs->OpenLightAnim)
-	{
-		UIEditLightAnim::Show();
-	}
+	//if (LPrefs->OpenLightAnim)
+	//{
+	//	UIEditLightAnim::Show();
+	//}
 }
 
 UIMainForm::~UIMainForm()
@@ -370,15 +370,26 @@ void UIMainForm::DrawRenderToolBar(ImVec2 Pos, ImVec2 Size)
 						UI->RedrawScene();
 					}
 				}
+                // Погода
 				{
 					if (ImGui::BeginMenu("Environment"))
 					{
+                        {
+                            if (ImGui::Button("Weather properties"))
+                            {
+                                ExecCommand(COMMAND_WEATHER_PROPERTIES);
+                            }
+                            if (ImGui::IsItemHovered())
+                                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                        }
 						bool selected = !psDeviceFlags.test(rsEnvironment);
 						if (ImGui::MenuItem("None", "", &selected))
 						{
 							psDeviceFlags.set(rsEnvironment, false);
 							UI->RedrawScene();
 						}
+                        if (ImGui::IsItemHovered())
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 						ImGui::Separator();
 						for (auto& i : g_pGamePersistent->Environment().WeatherCycles)
 						{
@@ -389,6 +400,8 @@ void UIMainForm::DrawRenderToolBar(ImVec2 Pos, ImVec2 Size)
 								g_pGamePersistent->Environment().SetWeather(i.first.c_str(), true);
 								UI->RedrawScene();
 							}
+                            if (ImGui::IsItemHovered())
+                                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 						}
 						ImGui::EndMenu();
 					}
@@ -631,6 +644,16 @@ void UIMainForm::DrawRenderToolBar(ImVec2 Pos, ImVec2 Size)
 				ImGui::PopStyleColor();
 			}
 		}
+		ImGui::SameLine();
+
+		ImGui::BeginDisabled(Action == etaScale || Action == etaSelect || Action == etaAdd);
+		bool UseLocal = !!imManipulator.MatrixMode;
+		if (ImGui::Checkbox("Local/World", &UseLocal))
+		{
+			imManipulator.MatrixMode = UseLocal;
+		}
+		ImGui::EndDisabled();
+
 		ImGui::EndGroup();
 	}
 	ImGui::SameLine(0, ImGui::GetFontSize() * 1.5);

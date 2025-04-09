@@ -16,6 +16,9 @@ namespace MemorySpace {
 	struct CHitObject;
 };
 
+class CSaveObjectSave;
+class CSaveObjectLoad;
+
 class CDangerManager  {
 public:
 	typedef xr_vector<CDangerObject>		OBJECTS;
@@ -48,6 +51,8 @@ public:
 	virtual	float		evaluate			(const CDangerObject &object) const;
 	virtual	float		do_evaluate			(const CDangerObject &object) const;
 			void		remove_links		(const CObject *object);
+
+			void		remove				(const CDangerObject &object);
 	IC		void		reset				();
 
 public:
@@ -68,6 +73,9 @@ public:
 public:
 			void		save				(NET_Packet &packet) const;
 			void		load				(IReader &packet);
+			//virtual void Save(CSaveObjectSave* Object);
+			//virtual void Load(CSaveObjectLoad* Object);
+			virtual void Serialize(ISaveObject& Object);
 };
 
 #include "danger_manager_inline.h"

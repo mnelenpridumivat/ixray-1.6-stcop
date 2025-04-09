@@ -44,8 +44,10 @@ public:
 		}
 	};
 	params							m_game_params;
+
 public:
 	xr_vector<xr_shared_ptr<CPS_Instance>> ps_active;
+	xr_vector<xr_shared_ptr<CPS_Instance>> ps_active_deffer;
 	xr_vector<xr_shared_ptr<CPS_Instance>> ps_needtoplay;
 
 public:
@@ -107,6 +109,7 @@ public:
 	{}
 #endif
 	virtual	void					LoadTitle			(bool change_tip=false, shared_str map_name=""){}
+	virtual void					SetLoadStageTitle	(pcstr /*ls_title*/) {}
 	virtual bool					CanBePaused			()		{ return true;}
 };
 

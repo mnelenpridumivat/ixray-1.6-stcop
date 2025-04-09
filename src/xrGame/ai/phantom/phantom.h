@@ -70,6 +70,10 @@ public:
 	virtual void		save						(NET_Packet &output_packet);
 	virtual void		load						(IReader &input_packet);
 
+	//virtual void Save(CSaveObjectSave* Object) const override;
+	//virtual void Load(CSaveObjectLoad* Object) override;
+	virtual void Serialize(ISaveObject& Object) override;
+
 	virtual void		shedule_Update				(u32 DT); 
 	virtual void		UpdateCL					();
 
@@ -83,5 +87,7 @@ public:
 	virtual BOOL		UsedAI_Locations			() {return false;}
 
 	virtual CEntity*	cast_entity					() {return this;}
+
+	void				SetEnemy(CObject* enemy) { m_enemy = enemy; } //Alundaio
 };
 

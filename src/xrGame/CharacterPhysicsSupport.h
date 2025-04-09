@@ -61,8 +61,7 @@ private:
 	}									anim_mov_state;
 
 	CEntityAlive						&m_EntityAlife																																		;
-	Fmatrix								&mXFORM																																				;
-	CPhysicsShell						*&m_pPhysicsShell																																	;
+	Fmatrix								&mXFORM																																					;
 	CPhysicsShell						*m_physics_skeleton																																	;
 	CPHMovementControl					*m_PhysicMovementControl																															;
 	CPHSoundPlayer						m_ph_sound_player																																	;
@@ -103,8 +102,11 @@ IC	bool isDead( )
 	}
 IC	bool isAlive( )
 	{
-		return !m_pPhysicsShell;
+		return !GetEntityAlife()->PPhysicsShell();
 	}
+IC CEntityAlive* GetEntityAlife() {
+	return &m_EntityAlife;
+}
 protected:
 virtual void							SpawnInitPhysics				( CSE_Abstract	*D )																									;
 virtual CPhysicsShellHolder*			PPhysicsShellHolder				( )	{ return m_EntityAlife.PhysicsShellHolder( ); }	

@@ -5,8 +5,7 @@
 //	Description : line edit control class
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef LINE_EDIT_CONTROL_H_INCLUDED
-#define LINE_EDIT_CONTROL_H_INCLUDED
+#pragma once
 
 
 namespace text_editor
@@ -167,5 +166,3 @@ private:
 }; // class line_edit_control
 
 } // namespace text_editor
-
-#endif // ##ifndef LINE_EDIT_CONTROL_H_INCLUDED

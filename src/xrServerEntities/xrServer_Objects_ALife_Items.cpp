@@ -11,11 +11,11 @@
 #include "xrServer_Objects_ALife_Items.h"
 #include "clsid_game.h"
 #include "object_broker.h"
+#include "Save/SaveObject.h"
+#include "shared_string.h"
 
-#ifndef XRGAME_EXPORTS
-#	include "bone.h"
-#else
 #	include "../xrEngine/bone.h"
+#ifdef XRGAME_EXPORTS
 #	ifdef DEBUG
 #		define PHPH_DEBUG
 #	endif
@@ -73,7 +73,6 @@ CSE_Abstract *CSE_ALifeInventoryItem::init	()
 {
 	m_self						= smart_cast<CSE_ALifeObject*>(this);
 	R_ASSERT					(m_self);
-//	m_self->m_flags.set			(CSE_ALifeObject::flSwitchOffline,TRUE);
 	return						(base());
 }
 
@@ -155,14 +154,8 @@ void CSE_ALifeInventoryItem::UPDATE_Write	(NET_Packet &tNetPacket)
 	if (State.enabled)									num_items.mask |= inventory_item_state_enabled;
 	if (fis_zero(State.angular_vel.square_magnitude()))	num_items.mask |= inventory_item_angular_null;
 	if (fis_zero(State.linear_vel.square_magnitude()))	num_items.mask |= inventory_item_linear_null;
-	//if (anim_use)										num_items.mask |= animated;
 
 	tNetPacket.w_u8					(num_items.common);
-
-	/*if(check(num_items.mask,animated))
-	{
-		tNetPacket.w_float				(m_blend_timeCurrent);
-	}*/
 
 	{
 		tNetPacket.w_vec3				(State.force);
@@ -207,16 +200,6 @@ void CSE_ALifeInventoryItem::UPDATE_Read	(NET_Packet &tNetPacket)
 		m_u8NumItems < (u8(1) << 5),
 		make_string<const char*>("%d",m_u8NumItems)
 		);
-	
-	/*if (check(num_items.mask,animated))
-	{
-		tNetPacket.r_float(m_blend_timeCurrent);
-		anim_use=true;
-	}
-	else
-	{
-	anim_use=false;
-	}*/
 
 	{
 		tNetPacket.r_vec3				(State.force);
@@ -237,21 +220,18 @@ void CSE_ALifeInventoryItem::UPDATE_Read	(NET_Packet &tNetPacket)
 			tNetPacket.r_float		(State.angular_vel.y);
 			tNetPacket.r_float		(State.angular_vel.z);
 		}
-		else
-			State.angular_vel.set		(0.f,0.f,0.f);
+		else {
+			State.angular_vel.set(0.f, 0.f, 0.f);
+		}
 
 		if (!check1(num_items.mask,inventory_item_linear_null)) {
 			tNetPacket.r_float		(State.linear_vel.x);
 			tNetPacket.r_float		(State.linear_vel.y);
 			tNetPacket.r_float		(State.linear_vel.z);
 		}
-		else
-			State.linear_vel.set		(0.f,0.f,0.f);
-
-		/*if (check(num_items.mask,animated))
-		{
-			anim_use=true;
-		}*/
+		else {
+			State.linear_vel.set(0.f, 0.f, 0.f);
+		}
 	}
 	prev_freezed = freezed;
 	if (tNetPacket.r_eof())		// in case spawn + update 
@@ -273,6 +253,78 @@ void CSE_ALifeInventoryItem::UPDATE_Read	(NET_Packet &tNetPacket)
 		freezed = true;
 	}
 };
+
+void CSE_ALifeInventoryItem::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryItem::STATE")
+	{
+		Object << m_fCondition << m_upgrades;
+		State.position = base()->o_Position;
+	}
+}
+
+void CSE_ALifeInventoryItem::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryItem::UPDATE")
+	{
+		Object << m_u8NumItems;
+		if (!m_u8NumItems) {
+			return;
+		}
+
+		bool EnabledAngularVel = State.angular_vel.square_magnitude();
+		bool EnabledLinearVel = State.linear_vel.square_magnitude();
+		Object << State.enabled << EnabledAngularVel << EnabledLinearVel << State.force << State.torque << State.position;
+
+		base()->o_Position.set(State.position); //this is very important because many functions use this o_Position..
+		Object << State.quaternion;
+
+		BEGIN_CHUNK(Object,"CSE_ALifeInventoryItem::UPDATE::item_angular"){
+			if (EnabledAngularVel) {
+				Object << State.angular_vel;
+			}
+			else {
+				State.angular_vel.set(0.f, 0.f, 0.f);
+			}
+		}
+		
+		BEGIN_CHUNK(Object,"CSE_ALifeInventoryItem::UPDATE::item_linear")
+		{
+			if (EnabledLinearVel) {
+				Object << State.linear_vel;
+			}
+			else {
+				State.linear_vel.set(0.f, 0.f, 0.f);
+			}
+		}
+		{
+			bool Value;
+			if (Object.IsSave()) {
+				Value = true;
+				Object << Value;
+			}
+			else {
+				prev_freezed = freezed;
+				bool Value;
+				Object << Value;
+				if (Value)
+				{
+					freezed = false;
+				}
+				else {
+					if (!freezed) {
+#ifdef XRGAME_EXPORTS
+						m_freeze_time = Device.dwTimeGlobal;
+#else
+						m_freeze_time = 0;
+#endif
+					}
+					freezed = true;
+				}
+			}
+		}
+	}
+}
 
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeInventoryItem::FillProps		(LPCSTR pref, PropItemVec& values)
@@ -375,6 +427,30 @@ void CSE_ALifeItem::UPDATE_Read				(NET_Packet &tNetPacket)
 	m_physics_disabled			= false;
 };
 
+void CSE_ALifeItem::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItem::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItem::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItem::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		if (!Object.IsSave()) {
+			m_physics_disabled = false;
+		}
+		else {
+			m_last_update_time = Device.dwTimeGlobal;
+		}
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItem::FillProps				(LPCSTR pref, PropItemVec& values)
 {
@@ -397,11 +473,6 @@ BOOL CSE_ALifeItem::Net_Relevant			()
 	if (!m_physics_disabled && !fis_zero(State.linear_vel.square_magnitude(),EPS_L))
 		return					(TRUE);
 
-#ifdef XRGAME_EXPORTS
-//	if (Device.dwTimeGlobal < (m_last_update_time + update_rate()))
-//		return					(FALSE);
-#endif // XRGAME_EXPORTS
-
 	return						(FALSE);
 }
 
@@ -412,7 +483,6 @@ void CSE_ALifeItem::OnEvent					(NET_Packet &tNetPacket, u16 type, u32 time, Cli
 	if (type != GE_FREEZE_OBJECT)
 		return;
 
-//	R_ASSERT					(!m_physics_disabled);
 	m_physics_disabled			= true;
 }
 
@@ -421,9 +491,7 @@ void CSE_ALifeItem::OnEvent					(NET_Packet &tNetPacket, u16 type, u32 time, Cli
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemTorch::CSE_ALifeItemTorch		(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
-	m_active					= false;
-	m_nightvision_active		= false;
-	m_attached					= false;
+	m_Stats.zero();
 }
 
 CSE_ALifeItemTorch::~CSE_ALifeItemTorch		()
@@ -432,10 +500,9 @@ CSE_ALifeItemTorch::~CSE_ALifeItemTorch		()
 
 BOOL	CSE_ALifeItemTorch::Net_Relevant			()
 {
-	if (m_attached) return true;
+	if (m_flags.test(eAttached)) return true;
 	return inherited::Net_Relevant();
 }
-
 
 void CSE_ALifeItemTorch::STATE_Read			(NET_Packet	&tNetPacket, u16 size)
 {
@@ -453,21 +520,32 @@ void CSE_ALifeItemTorch::UPDATE_Read		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
 	
-	BYTE F = tNetPacket.r_u8();
-	m_active					= !!(F & eTorchActive);
-	m_nightvision_active		= !!(F & eNightVisionActive);
-	m_attached					= !!(F & eAttached);
+	tNetPacket.r_u8(m_Stats.flags);
 }
 
 void CSE_ALifeItemTorch::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
 
-	BYTE F = 0;
-	F |= (m_active ? eTorchActive : 0);
-	F |= (m_nightvision_active ? eNightVisionActive : 0);
-	F |= (m_attached ? eAttached : 0);
-	tNetPacket.w_u8(F);
+	tNetPacket.w_u8(m_Stats.flags);
+}
+
+void CSE_ALifeItemTorch::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemTorch::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemTorch::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemTorch::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+
+		Object << m_Stats;
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -604,6 +682,35 @@ void CSE_ALifeItemWeapon::STATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_u8				(cur_scope);
 }
 
+void CSE_ALifeItemWeapon::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeapon::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << a_current << a_elapsed << wpn_state << m_addon_flags << ammo_type << misfire << rt_zoom_factor << cur_scope;
+		{
+			u8 Value;
+			if (Object.IsSave()) {
+				Value = a_elapsed_grenades.pack_to_byte();
+				Object << Value;
+			}
+			else {
+				Object << Value;
+				a_elapsed_grenades.unpack_from_byte(Value);
+			}
+		}
+	}
+}
+
+void CSE_ALifeItemWeapon::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeapon::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << m_fCondition << wpn_flags << a_elapsed << m_addon_flags << ammo_type << wpn_state << m_bZoom << misfire << rt_zoom_factor << cur_scope;
+	}
+}
+
 void CSE_ALifeItemWeapon::OnEvent			(NET_Packet	&tNetPacket, u16 type, u32 time, ClientID sender )
 {
 	inherited::OnEvent			(tNetPacket,type,time,sender);
@@ -719,6 +826,24 @@ void CSE_ALifeItemWeaponShotGun::STATE_Write		(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
+void CSE_ALifeItemWeaponShotGun::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponShotGun::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+
+		Object << m_AmmoIDs;
+	}
+}
+
+void CSE_ALifeItemWeaponShotGun::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponShotGun::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemWeaponShotGun::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -752,6 +877,24 @@ void CSE_ALifeItemWeaponAutoShotGun::STATE_Write	(NET_Packet& P)
 {
 	inherited::STATE_Write(P);
 }
+
+void CSE_ALifeItemWeaponAutoShotGun::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponAutoShotGun::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_u8CurFireMode;
+	}
+}
+
+void CSE_ALifeItemWeaponAutoShotGun::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponAutoShotGun::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemWeaponAutoShotGun::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -791,6 +934,23 @@ void CSE_ALifeItemWeaponMagazined::STATE_Write		(NET_Packet& P)
 	inherited::STATE_Write(P);
 }
 
+void CSE_ALifeItemWeaponMagazined::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponMagazined::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_u8CurFireMode;
+	}
+}
+
+void CSE_ALifeItemWeaponMagazined::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponMagazined::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemWeaponMagazined::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -824,6 +984,22 @@ void CSE_ALifeItemFlamethrower::STATE_Read(NET_Packet& P, u16 size)
 void CSE_ALifeItemFlamethrower::STATE_Write(NET_Packet& P)
 {
 	inherited::STATE_Write(P);
+}
+
+void CSE_ALifeItemFlamethrower::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemFlamethrower::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemFlamethrower::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemFlamethrower::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -864,6 +1040,23 @@ void CSE_ALifeItemWeaponMagazinedWGL::STATE_Read		(NET_Packet& P, u16 size)
 void CSE_ALifeItemWeaponMagazinedWGL::STATE_Write		(NET_Packet& P)
 {
 	inherited::STATE_Write(P);
+}
+
+void CSE_ALifeItemWeaponMagazinedWGL::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponMagazinedWGL::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_bGrenadeMode;
+	}
+}
+
+void CSE_ALifeItemWeaponMagazinedWGL::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemWeaponMagazinedWGL::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -911,6 +1104,22 @@ void CSE_ALifeItemAmmo::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 
 	tNetPacket.w_u16			(a_elapsed);
+}
+
+void CSE_ALifeItemAmmo::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemAmmo::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemAmmo::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemAmmo::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -961,6 +1170,22 @@ void CSE_ALifeItemFuel::UPDATE_Read(NET_Packet& tNetPacket)
 void CSE_ALifeItemFuel::UPDATE_Write(NET_Packet& tNetPacket)
 {
 	inherited::UPDATE_Write(tNetPacket);
+}
+
+void CSE_ALifeItemFuel::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemFuel::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemFuel::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemFuel::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1017,6 +1242,22 @@ void CSE_ALifeItemDetector::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeItemDetector::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemDetector::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemDetector::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemDetector::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemDetector::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -1054,6 +1295,22 @@ void CSE_ALifeItemArtefact::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeItemArtefact::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeItemArtefact::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemArtefact::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemArtefact::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemArtefact::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1136,6 +1393,30 @@ void CSE_ALifeItemPDA::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeItemPDA::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemPDA::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_original_owner;
+#ifdef XRGAME_EXPORTS
+		Object << m_specific_character << m_info_portion;
+#else
+		shared_str tmp_1 = nullptr;
+		shared_str tmp_2 = nullptr;
+		Object << tmp_1 << tmp_2;
+#endif
+	}
+}
+
+void CSE_ALifeItemPDA::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemPDA::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemPDA::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -1181,6 +1462,23 @@ void CSE_ALifeItemDocument::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeItemDocument::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeItemDocument::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemDocument::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_wDoc;
+	}
+}
+
+void CSE_ALifeItemDocument::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemDocument::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1230,6 +1528,22 @@ void CSE_ALifeItemGrenade::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeItemGrenade::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemGrenade::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemGrenade::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemGrenade::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemGrenade::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -1266,6 +1580,22 @@ void CSE_ALifeItemExplosive::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeItemExplosive::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeItemExplosive::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemExplosive::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemExplosive::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemExplosive::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1314,6 +1644,22 @@ void CSE_ALifeItemBolt::UPDATE_Read			(NET_Packet &tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
 };
+
+void CSE_ALifeItemBolt::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemBolt::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemBolt::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemBolt::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
 
 bool CSE_ALifeItemBolt::can_save			() const
 {
@@ -1371,6 +1717,22 @@ void CSE_ALifeItemsNotSave::UPDATE_Read(NET_Packet& tNetPacket)
 	inherited::UPDATE_Read(tNetPacket);
 };
 
+void CSE_ALifeItemsNotSave::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemsNotSave::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemsNotSave::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemsNotSave::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 bool CSE_ALifeItemsNotSave::can_save() const
 {
 	return						(false);//!attached());
@@ -1426,6 +1788,23 @@ void CSE_ALifeItemCustomOutfit::UPDATE_Write		(NET_Packet	&tNetPacket)
 	tNetPacket.w_float_q8			(m_fCondition,0.0f,1.0f);
 }
 
+void CSE_ALifeItemCustomOutfit::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemCustomOutfit::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemCustomOutfit::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemCustomOutfit::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << m_fCondition;
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeItemCustomOutfit::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -1469,6 +1848,22 @@ void CSE_ALifeItemHelmet::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write			(tNetPacket);
 	tNetPacket.w_float_q8			(m_fCondition,0.0f,1.0f);
+}
+
+void CSE_ALifeItemHelmet::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemHelmet::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemHelmet::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemHelmet::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS

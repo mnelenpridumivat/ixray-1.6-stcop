@@ -18,6 +18,8 @@ class CCustomMonster;
 class CAI_Stalker;
 class CEntityAlive;
 class CSound_UserDataVisitor;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 namespace MemorySpace {
 	struct CMemoryInfo;
@@ -65,7 +67,7 @@ public:
 
 public:
 	template <typename T, typename _predicate>
-	IC		void				fill_enemies				(const xr_vector<T> &objects, const _predicate &predicate) const;
+	IC		void				fill_enemies				(const xr_vector<T>* objects, const _predicate &predicate) const;
 	template <typename _predicate>
 	IC		void				fill_enemies				(const _predicate &predicate) const;
 
@@ -82,6 +84,9 @@ public:
 public:
 			void				save						(NET_Packet &packet) const;
 			void				load						(IReader &packet);
+			//virtual void Save(CSaveObjectSave* Object);
+			//virtual void Load(CSaveObjectLoad* Object);
+			virtual void Serialize(ISaveObject& Object);
 			void 		on_requested_spawn			(CObject *object);
 };
 

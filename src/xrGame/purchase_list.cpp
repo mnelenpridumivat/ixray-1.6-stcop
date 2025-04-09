@@ -17,25 +17,64 @@ static float min_deficit_factor = .3f;
 
 void CPurchaseList::process	(CInifile &ini_file, LPCSTR section, CInventoryOwner &owner)
 {
-	owner.sell_useless_items();
+	if (!spawned_content.empty()) {
+		owner.sell_useless_items();
+		spawned_content.clear();
+	}
 
 	m_deficits.clear		();
 
 	const CGameObject		&game_object = smart_cast<const CGameObject &>(owner);
 	CInifile::Sect			&S = ini_file.r_section(section);
+	spawned_content.reserve(S.Data.size());
 	CInifile::SectCIt		I = S.Data.begin();
 	CInifile::SectCIt		E = S.Data.end();
 	for ( ; I != E; ++I) {
-		VERIFY3				((*I).second.size(),"PurchaseList : cannot handle lines in section without values",section);
-
+		if (!(*I).second.size())
+		{
+			Msg				("! PurchaseList : cannot handle lines in section without values! Section [%s], file [%s]", (*I).first.c_str(), ini_file.fname());
+			continue;
+		}
+		if (!pSettings->section_exist((*I).first))
+		{
+			Msg				("! Section [%s] doesn't exist! File [%s]", (*I).first.c_str(), ini_file.fname());
+			continue;
+		}
 		string256			temp0, temp1;
-		THROW3				(_GetItemCount(*(*I).second) == 2,"Invalid parameters in section",section);
+
+		LPCSTR count = _GetItem(*(*I).second, 0, temp0);
+		LPCSTR prob = _GetItemCount(*(*I).second) >= 2 ? _GetItem(*(*I).second, 1, temp1) : "1.0f";
+
 		process				(
 			game_object,
 			(*I).first,
-			atoi(_GetItem(*(*I).second,0,temp0)),
-			(float)atof(_GetItem(*(*I).second,1,temp1))
+			atoi(count),
+			(float)atof(prob)
 		);
+	}
+}
+
+void CPurchaseList::CopyList(xr_hash_map<shared_str, u32>& target)
+{
+	target.insert(spawned_content.begin(), spawned_content.end());
+}
+
+void CPurchaseList::AddItemToList(shared_str item)
+{
+	if (auto elem = spawned_content.find(item); elem != spawned_content.end()) {
+		++elem->second;
+	}
+	else {
+		spawned_content[item] = 1;
+	}
+}
+
+void CPurchaseList::RemoveItemFromList(shared_str item)
+{
+	auto elem = spawned_content.find(item);
+	VERIFY(elem != spawned_content.end());
+	if (!(--elem->second)) {
+		spawned_content.erase(item);
 	}
 }
 
@@ -50,8 +89,16 @@ void CPurchaseList::process	(const CGameObject &owner, const shared_str &name, c
 	CRandom					random((u32)(CPU::QPC() & u32(-1)));
 	u32 i = 0, j = 0;
 	for (; i<count; ++i) {
-		if (random.randF() > probability)
+		if (random.randF() > probability) {
 			continue;
+		}
+
+		if (auto existing_item = spawned_content.find(name); existing_item != spawned_content.end()) {
+			++existing_item->second;
+		}
+		else {
+			spawned_content[name] = 1;
+		}
 
 		++j;
 		Level().spawn_item		(*name,position,level_vertex_id,id,false);

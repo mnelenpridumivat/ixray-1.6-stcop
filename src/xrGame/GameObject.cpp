@@ -31,6 +31,7 @@
 #include "magic_box3.h"
 #include "animation_movement_controller.h"
 #include "../xrEngine/xr_collide_form.h"
+#include "Save/SaveObject.h"
 
 extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 
@@ -38,12 +39,16 @@ extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 #	include "debug_renderer.h"
 #	include "PHDebug.h"
 #endif
+#include <Save/SaveObject.h>
+#include <Save/SaveManager.h>
 
 ENGINE_API bool g_dedicated_server;
 
 CGameObject::CGameObject		()
 {
 	m_ai_obstacle				= 0;
+
+	m_ScriptBinderComponent = xr_make_unique<CScriptBinder>(this);
 
 	init						();
 	//-----------------------------------------
@@ -78,13 +83,8 @@ void CGameObject::init			()
 
 void CGameObject::Load(LPCSTR section)
 {
-	inherited::Load			(section);
-	ISpatial*		self				= smart_cast<ISpatial*> (this);
-	if (self)	{
-		// #pragma todo("to Dima: All objects are visible for AI ???")
-		// self->spatial.type	|=	STYPE_VISIBLEFORAI;	
-		self->spatial.type	&= ~STYPE_REACTTOSOUND;
-	}
+	inherited::Load(section);
+	SpatialComponent->spatial.type &= ~STYPE_REACTTOSOUND;
 }
 
 void CGameObject::reinit()
@@ -116,8 +116,8 @@ void CGameObject::net_Destroy	()
 	xr_delete				(m_ini_file);
 
 	m_script_clsid			= -1;
-	if (Visual() && smart_cast<IKinematics*>(Visual()))
-		smart_cast<IKinematics*>(Visual())->Callback	(0,0);
+	if (Visual() && Visual()->dcast_PKinematics())
+		Visual()->dcast_PKinematics()->Callback(0,0);
 
 	inherited::net_Destroy						();
 	setReady									(FALSE);
@@ -143,7 +143,7 @@ void CGameObject::net_Destroy	()
 
 //.	Parent									= 0;
 
-	CScriptBinder::net_Destroy				();
+	m_ScriptBinderComponent->net_Destroy();
 
 	xr_delete								(m_lua_game_object);
 	m_spawned								= false;
@@ -258,9 +258,9 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	const CSE_Visual				*visual	= smart_cast<const CSE_Visual*>(E);
 	if (visual) {
 		cNameVisual_set				(visual_name(E));
-		if (visual->flags.test(CSE_Visual::flObstacle)) {
-			ISpatial				*self = smart_cast<ISpatial*>(this);
-			self->spatial.type		|=	STYPE_OBSTACLE;
+		if (visual->flags.test(CSE_Visual::flObstacle))
+		{
+			SpatialComponent->spatial.type |= STYPE_OBSTACLE;
 		}
 	}
 
@@ -279,11 +279,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		R_ASSERT(Level().Objects.net_Find(E->ID) == nullptr);
 	}
 
-
 	setID							(E->ID);
-//	if (!IsGameTypeSingle())
-//		Msg ("CGameObject::net_Spawn -- object %s[%x] setID [%d]", *(E->s_name), this, E->ID);
-	
+
 	// XForm
 	XFORM().setXYZ					(E->o_Angle);
 	Position().set					(E->o_Position);
@@ -322,20 +319,22 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	if (!demo_spectator)
 		g_pGameLevel->Objects.net_Register	(this);
 
-	m_server_flags.one				();
-	if (O) {
-		m_server_flags					= O->m_flags;
+	m_server_flags.one();
+
+	if (O) 
+	{
+		m_server_flags = O->m_flags;
 		if (O->m_flags.is(CSE_ALifeObject::flVisibleForAI))
-			spatial.type				|= STYPE_VISIBLEFORAI;
+			SpatialComponent->spatial.type |= STYPE_VISIBLEFORAI;
 		else
-			spatial.type				= (spatial.type | STYPE_VISIBLEFORAI) ^ STYPE_VISIBLEFORAI;
+			SpatialComponent->spatial.type = (SpatialComponent->spatial.type | STYPE_VISIBLEFORAI) ^ STYPE_VISIBLEFORAI;
 	}
 
 	reload(*cNameSect());
-	CScriptBinder::reload(*cNameSect());
+	m_ScriptBinderComponent->reload(*cNameSect());
 	
 	reinit();
-	CScriptBinder::reinit();
+	m_ScriptBinderComponent->reinit();
 
 #ifdef DEBUG
 	if(ph_dbg_draw_mask1.test(ph_m1_DbgTrackObject)&&_stricmp(PH_DBG_ObjectTrackName(),*cName())==0)
@@ -344,14 +343,15 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 #endif
 	//load custom user data from server
-	if(!E->client_data.empty())
+	if(const auto Handle = CSaveManager::GetInstance().GetHandle(E->client_data_new); Handle)
 	{	
-//		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
-		IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
-		net_Load		(ireader);
+		auto* PartialObj = new CSaveObjectLoad(Handle);
+		net_Serialize(*PartialObj);
+		xr_delete(PartialObj);
+		CSaveManager::GetInstance().UnregisterHandle(E->client_data_new);
 	}
 	else {
-//		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());
+		E->client_data_new = u64(-1);
 	}
 
 	// if we have a parent
@@ -400,9 +400,9 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	{
 		Msg("CGameObject::net_Spawn obj %s Before CScriptBinder::net_Spawn %f,%f,%f",PH_DBG_ObjectTrackName(),Position().x,Position().y,Position().z);
 	}
-	BOOL ret =CScriptBinder::net_Spawn(DC);
+	BOOL ret = m_ScriptBinderComponent->net_Spawn(DC);
 #else
-	return						(CScriptBinder::net_Spawn(DC));
+	return						(m_ScriptBinderComponent->net_Spawn(DC));
 #endif
 
 #ifdef DEBUG
@@ -429,7 +429,7 @@ void CGameObject::net_Save		(NET_Packet &net_packet)
 
 #endif
 
-	CScriptBinder::save			(net_packet);
+	m_ScriptBinderComponent->save			(net_packet);
 
 #ifdef DEBUG	
 
@@ -456,7 +456,7 @@ void CGameObject::net_Load		(IReader &ireader)
 
 #endif
 
-	CScriptBinder::load		(ireader);
+	m_ScriptBinderComponent->load		(ireader);
 
 
 #ifdef DEBUG	
@@ -482,6 +482,26 @@ void CGameObject::save			(NET_Packet &output_packet)
 
 void CGameObject::load			(IReader &input_packet)
 {
+}
+
+void CGameObject::net_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CGameObject::net_Serialize")
+	{
+		auto ChunkDepth = Object.GetChunkStackDepth();
+		Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (client object)", Name());
+		m_ScriptBinderComponent->Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (script binder)", Name());
+	}
+}
+
+void CGameObject::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CGameObject")
+	{
+
+	}
 }
 
 void CGameObject::spawn_supplies()
@@ -771,6 +791,11 @@ void VisualCallback	(IKinematics *tpKinematics)
 	CGameObject						*game_object = static_cast<CGameObject*>(static_cast<CObject*>(tpKinematics->GetUpdateCallbackParam()));
 	VERIFY							(game_object);
 	
+	if (game_object == nullptr)
+	{
+		return;
+	}
+
 	CGameObject::CALLBACK_VECTOR_IT	I = game_object->visual_callbacks().begin();
 	CGameObject::CALLBACK_VECTOR_IT	E = game_object->visual_callbacks().end();
 	for ( ; I != E; ++I)
@@ -823,12 +848,12 @@ void CGameObject::shedule_Update	(u32 dt)
 	// Msg							("-SUB-:[%x][%s] CGameObject::shedule_Update",smart_cast<void*>(this),*cName());
 	inherited::shedule_Update	(dt);
 	
-	CScriptBinder::shedule_Update(dt);
+	m_ScriptBinderComponent->shedule_Update(dt);
 }
 
 BOOL CGameObject::net_SaveRelevant	()
 {
-	return	(CScriptBinder::net_SaveRelevant());
+	return	(m_ScriptBinderComponent->net_SaveRelevant());
 }
 
 //игровое имя объекта
@@ -885,7 +910,7 @@ u32	CGameObject::ef_detector_type		() const
 void CGameObject::net_Relcase(CObject* O)
 {
 	inherited::net_Relcase(O);
-	CScriptBinder::net_Relcase(O);
+	m_ScriptBinderComponent->net_Relcase(O);
 }
 
 CGameObject::CScriptCallbackExVoid &CGameObject::callback(GameObject::ECallbackType type) const
@@ -1108,6 +1133,9 @@ void render_box						(IRenderVisual *visual, const Fmatrix &xform, const Fvector
 void CGameObject::OnRender			()
 {
 	if (!ai().get_level_graph())
+		return;
+
+	if (Visual()->getVisData().hom_frame != Device.dwFrame)
 		return;
 
 	CDebugRenderer					&renderer = Level().debug_renderer();

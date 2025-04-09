@@ -21,6 +21,7 @@
 #include "game_object_space.h"
 #include "material_manager.h"
 #include "game_base_space.h"
+#include "Save/SaveObject.h"
 
 #define SMALL_ENTITY_RADIUS		0.6f
 #define BLOOD_MARKS_SECT		"bloody_marks"
@@ -203,6 +204,7 @@ void CEntityAlive::reload		(LPCSTR section)
 	m_fFood					= 100*pSettings->r_float	(section,"ph_mass");
 }
 
+BOOL	g_fight_fast_respawn = FALSE;
 void CEntityAlive::shedule_Update(u32 dt)
 {
 	PROF_EVENT("CEntityAlive::shedule_Update")
@@ -211,6 +213,7 @@ void CEntityAlive::shedule_Update(u32 dt)
 	//condition update with the game time pass
 	conditions().UpdateConditionTime	();
 	conditions().UpdateCondition		();
+	
 	//Обновление партиклов огня
 	UpdateFireParticles	();
 	//капли крови
@@ -218,15 +221,18 @@ void CEntityAlive::shedule_Update(u32 dt)
 	//обновить раны
 	conditions().UpdateWounds		();
 
+	if(!g_Alive() && g_fight_fast_respawn && OnServer())
+		DestroyObject();
+
 	//убить сущность
 	if(Local() && !g_Alive() && !AlreadyDie())
 	{
-		if(conditions().GetWhoHitLastTime()) {
-//			Msg			("%6d : KillEntity from CEntityAlive (using who hit last time) for object %s",Device.dwTimeGlobal,*cName());
+		if(conditions().GetWhoHitLastTime())
+		{
 			KillEntity	(conditions().GetWhoHitLastTimeID());
 		}
-		else {
-//			Msg			("%6d : KillEntity from CEntityAlive for object %s",Device.dwTimeGlobal,*cName());
+		else
+		{
 			KillEntity	(ID());
 		}
 	}
@@ -298,7 +304,7 @@ void	CEntityAlive::Hit(SHit* pHDS)
 
 	if (g_Alive()) 
 	{
-		CEntityAlive* EA = smart_cast<CEntityAlive*>(HDS.who);
+		CEntityAlive* EA = HDS.who ? HDS.who->cast_entity_alive() : NULL;
 		if(EA && EA->g_Alive() && EA->ID() != ID())
 		{
 			RELATION_REGISTRY().FightRegister(EA->ID(), ID(), this->tfGetRelationType(EA), HDS.damage());
@@ -307,13 +313,24 @@ void	CEntityAlive::Hit(SHit* pHDS)
 	}
 
 }
-
+#include "ai_object_location.h"
+#include "monster_community.h"
+#include "relation_registry.h"
+#include "alife_registry_wrappers.h"
+ 
 void CEntityAlive::Die	(CObject* who)
 {
-	RELATION_REGISTRY().Action(smart_cast<CEntityAlive*>(who), this, RELATION_REGISTRY::KILL);
+	if (g_fight_fast_respawn && OnServer())
+	{
+  		g_ai_space->get_alife()->spawn_item(cNameSect_str(), Position(), ai_location().level_vertex_id(), ai_location().game_vertex_id(), ALife::_OBJECT_ID(-1));
+ 	}
+	
+	if(who)
+		RELATION_REGISTRY().Action(who->cast_entity_alive(), this, RELATION_REGISTRY::KILL);
+
 	inherited::Die(who);
 	
-	const CGameObject *who_object = smart_cast<const CGameObject*>(who);
+	const CGameObject *who_object = who ? who->cast_game_object() : NULL;
 	callback(GameObject::eDeath)(lua_game_object(), who_object ? who_object->lua_game_object() : 0);
 
 	if (!getDestroy() && (IsGameTypeSingle())) {
@@ -324,8 +341,7 @@ void CEntityAlive::Die	(CObject* who)
 	}
 
 	// disable react to sound
-	ISpatial* self	= smart_cast<ISpatial*> (this);
-	if (self)		self->spatial.type &=~STYPE_REACTTOSOUND;
+	SpatialComponent->spatial.type &=~STYPE_REACTTOSOUND;
 	if(character_physics_support())
 		character_physics_support()->in_Die();
 }
@@ -370,7 +386,7 @@ void CEntityAlive::BloodyWallmarks (float P, const Fvector &dir, s16 element,
 		return;
 
 	//вычислить координаты попадания
-	IKinematics* V = smart_cast<IKinematics*>(Visual());
+	IKinematics* V = PKinematics(Visual());
 		
 	Fvector start_pos = position_in_object_space;
 	if(V)
@@ -453,7 +469,7 @@ void CEntityAlive::StartFireParticles(CWound* pWound)
 			m_ParticleWounds.push_back(pWound);
 		}
 
-		IKinematics* V = smart_cast<IKinematics*>(Visual());
+		IKinematics* V = PKinematics(Visual());
 
 		u16 particle_bone = CParticlesPlayer::GetNearestBone(V, pWound->GetBoneNum());
 		VERIFY(particle_bone  < 64 || BI_NONE == particle_bone);
@@ -601,6 +617,35 @@ void CEntityAlive::load	(IReader &input_packet)
 {
 	inherited::load(input_packet);
 	conditions().load(input_packet);
+}
+
+/*void CEntityAlive::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CEntityAlive");
+	{
+		inherited::Save(Object);
+		conditions().Save(Object);
+	}
+	Object->EndChunk();
+}
+
+void CEntityAlive::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CEntityAlive");
+	{
+		inherited::Load(Object);
+		conditions().Load(Object);
+	}
+	Object->EndChunk();
+}*/
+
+void CEntityAlive::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CEntityAlive")
+	{
+		inherited::Serialize(Object);
+		conditions().Serialize(Object);
+	}
 }
 
 BOOL	CEntityAlive::net_SaveRelevant		()
@@ -805,7 +850,7 @@ void CEntityAlive::fill_hit_bone_surface_areas		( ) const
 	VERIFY								( !m_hit_bone_surface_areas_actual );
 	m_hit_bone_surface_areas_actual		= true;
 
-	IKinematics* const kinematics		= smart_cast<IKinematics*>( Visual() );
+	IKinematics* const kinematics		= PKinematics( Visual() );
 	VERIFY								( kinematics );
 	VERIFY								( kinematics->LL_BoneCount() );
 
@@ -834,6 +879,12 @@ void CEntityAlive::fill_hit_bone_surface_areas		( ) const
 				surface_area			= 2.f * PI * shape.cylinder.m_radius*( shape.cylinder.m_radius + shape.cylinder.m_height );
 				break;
 			}
+			// clear sky - red forest trader (forester) 
+			case 62:
+			{
+				surface_area = 100.0f;
+				break;
+			}
 			default :					NODEFAULT;
 		}
 
@@ -850,7 +901,7 @@ Fvector	CEntityAlive::get_new_local_point_on_mesh	( u16& bone_id ) const
 	if ( g_ai_use_old_vision )
 		return							inherited::get_new_local_point_on_mesh( bone_id );
 
-	IKinematics* const kinematics		= smart_cast<IKinematics*>( Visual() );
+	IKinematics* const kinematics		= PKinematics( Visual() );
 	if ( !kinematics )
 		return							inherited::get_new_local_point_on_mesh( bone_id );
 
@@ -953,6 +1004,12 @@ Fvector	CEntityAlive::get_new_local_point_on_mesh	( u16& bone_id ) const
 			result.add					( shape.cylinder.m_center );
 			break;
 		}
+		// clear sky - red forest trader (forester)
+		case 62:
+		{
+			result.random_dir().mul(5.0f).add(10.0f);
+			break;
+		}
 		default :						NODEFAULT;
 	}
 
@@ -964,7 +1021,7 @@ Fvector CEntityAlive::get_last_local_point_on_mesh	( Fvector const& last_point, 
 	if ( bone_id == u16(-1) )
 		return							inherited::get_last_local_point_on_mesh( last_point, bone_id );
 
-	IKinematics* const kinematics		= smart_cast<IKinematics*>( Visual() );
+	IKinematics* const kinematics		= PKinematics( Visual() );
 	VERIFY								( kinematics );
 
 	Fmatrix transform = kinematics->LL_GetTransform(bone_id);

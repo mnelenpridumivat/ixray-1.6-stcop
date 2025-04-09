@@ -256,7 +256,7 @@ void CDetailManager::UpdateVisibleM()
 				for (auto& SItem : sp.items)
 				{
 					CDetail::SlotItem& Item  = *SItem;
-					float scale = Item.scale*alpha_i;
+					float scale = Item.scale_calculated = Item.scale*alpha_i;
 					float ssa = scale*scale*Rq_drcp;
 
 					if (ssa < r_ssaDISCARD)
@@ -265,13 +265,6 @@ void CDetailManager::UpdateVisibleM()
 					u32 vis_id = 0;
 					if (ssa > r_ssaCHEAP)
 						vis_id = Item.vis_ID;
-
-					Fmatrix& M = Item.mRotY_calculated;
-					M = Item.mRotY;
-					M._11*=scale; M._21*=scale; M._31*=scale;
-					M._12*=scale; M._22*=scale; M._32*=scale;
-					M._13*=scale; M._23*=scale; M._33*=scale;
-
 					D.m_items[vis_id][calc_key].push_back(SItem);
 				}
 			}
@@ -287,7 +280,7 @@ void CDetailManager::Render()
 	if (!psDeviceFlags.is(rsDetails))	return;
 #endif
 
-	MT_CALC.wait();
+	Device.details_task.wait();
 
 	int idx = calc_key;
 	render_key = idx;
@@ -296,9 +289,9 @@ void CDetailManager::Render()
 	static DWORD this_thread_id = 0;
 	this_thread_id = GetCurrentThreadId();
 
-	MT_CALC.run
+	Device.details_task.run
 	(
-		[&]()
+		[this]()
 		{
 #ifndef _EDITOR
 			if (0 == dtFS)						return;

@@ -33,8 +33,8 @@ public:
 	float							m_hold_position_time;
 	float							m_enter_min_enemy_distance;
 	float							m_exit_min_enemy_distance;
-	BOOL							m_is_combat_cover;
-	BOOL							m_can_fire;
+	bool							m_is_combat_cover;
+	bool							m_can_fire;
 	bool							m_need_to_reparse_loopholes;
 #ifndef AI_COMPILER
 	luabind::object					m_available_loopholes;
@@ -46,7 +46,7 @@ private:
 
 	void 					OnChangeDescription				(PropValue* sender);
 	void 					OnChangeLoopholes				(PropValue* sender);
-	void							set_loopholes_table_checker		(BOOLValue *value);
+	void							set_loopholes_table_checker		(BoolValue *value);
 
 private:
 	mutable visuals_collection		m_visuals;

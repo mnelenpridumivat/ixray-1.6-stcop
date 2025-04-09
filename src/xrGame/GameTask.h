@@ -27,9 +27,13 @@ public:
 
 	virtual void			save			(IWriter &stream);
 	virtual void			load			(IReader &stream);
+	//virtual void			save(CSaveObjectSave* Object) const;
+	//virtual void			load(CSaveObjectLoad* Object);
 			
 			void			init_functors	(xr_vector<shared_str>& v_src, task_state_functors& v_dest);
 };
+
+ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value);
 
 class CGameTask
 {
@@ -74,6 +78,9 @@ public:
 
 	void 					save_task		(IWriter &stream);
 	void 					load_task		(IReader &stream);
+	/*void 					save_task(CSaveObjectSave* Object) const;
+	void 					load_task(CSaveObjectLoad* Object);*/
+	void 					serialize_task(ISaveObject& Object);
 
 
 	shared_str				m_ID;
@@ -103,6 +110,7 @@ public:
 	LPCSTR					GetTitle_script			()							{return m_Title.c_str();}
 	void					SetPriority_script		(int _prio)					{m_priority	= _prio;}
 	int						GetPriority_script		()							{return m_priority;}
+    int						GetType_script			()							{return m_task_type;}
 	void					SetType_script			(int t)						{m_task_type = (ETaskType)t;}
 
 	LPCSTR					GetID_script			()							{return m_ID.c_str();}

@@ -10,7 +10,8 @@ public:
 	typedef Self&		SelfRef;
 	typedef const Self&	SelfCRef;
 public:
-	T x,y;
+	T x = 0;
+	T y = 0;
 
 	IC SelfRef set(float _u, float _v)				{ x=T(_u); y=T(_v);				return *this;	}
 	IC SelfRef set(double _u, double _v)			{ x=T(_u); y=T(_v);				return *this;	}
@@ -116,5 +117,11 @@ typedef _vector2<int>		Ivector2;
 
 template <class T>
 BOOL	_valid			(const _vector2<T>& v)	{ return _valid((T)v.x) && _valid((T)v.y);	}
+
+template<typename T>
+ISaveObject& operator<<(ISaveObject& Object, _vector2<T> data) {
+	Object << data.x << data.y;
+	return Object;
+}
 
 #endif

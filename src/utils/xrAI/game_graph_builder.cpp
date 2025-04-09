@@ -124,7 +124,6 @@ void CGameGraphBuilder::load_graph_point	(NET_Packet &net_packet)
 	Memory.mem_copy			(vertex.tVertexTypes,graph_point->m_tLocations,GameGraph::LOCATION_TYPE_COUNT*sizeof(GameGraph::_LOCATION_ID));
 	vertex.tLevelID			= 0;
 	vertex.tDeathPointCount = 0;
-	vertex.dwPointOffset	= 0;
 
 	graph().add_vertex		(vertex,graph().vertices().size());
 
@@ -402,8 +401,11 @@ void CGameGraphBuilder::load_cross_table	(const float &start, const float &amoun
 
 	Msg						("Loading cross table");
 
+	auto reader = FS.r_open(m_cross_table_name);
+	R_ASSERT2(reader, "Can't open cross table!");
 	VERIFY					(!m_cross_table);
-	m_cross_table			= new CGameLevelCrossTable(m_cross_table_name);
+	m_cross_table			= new CGameLevelCrossTable(*reader, true);
+	reader->close();
 
 	Progress				(start + amount);
 }
@@ -704,39 +706,29 @@ void CGameGraphBuilder::save_graph			(const float &start, const float &amount)
 	header.save					(&writer);
 
 	{
-		u32 edge_offset = (u32)graph().vertices().size() * sizeof(CGameGraph::CVertex);
-
 		graph_type::const_vertex_iterator	I = graph().vertices().begin();
 		graph_type::const_vertex_iterator	E = graph().vertices().end();
-		for ( ; I != E; ++I) {
-			CGameGraph::CVertex		&vertex = (*I).second->data();
+		for (; I != E; ++I) {
+			CVertexWithEdges data;
+			data.vertex = (*I).second->data();
+			data.vertex.tVertexID = (*I).first;
+			data.vertex.tNeighbourCount = (u8)(*I).second->edges().size();
 
-			VERIFY					((*I).second->edges().size() < 256);
-			vertex.tNeighbourCount	= (u8)(*I).second->edges().size();
-			vertex.dwEdgeOffset		= edge_offset;
-			edge_offset				+= vertex.tNeighbourCount*sizeof(CGameGraph::CEdge);
-
-			writer.w				(&vertex,sizeof(CGameGraph::CVertex));
-		}
-	}
-	
-	{
-		graph_type::const_vertex_iterator	I = graph().vertices().begin();
-		graph_type::const_vertex_iterator	E = graph().vertices().end();
-		for ( ; I != E; ++I) {
 			graph_type::const_iterator	i = (*I).second->edges().begin();
 			graph_type::const_iterator	e = (*I).second->edges().end();
-			for ( ; i != e; ++i) {
+			for (; i != e; ++i) {
 				GameGraph::CEdge			edge;
-				VERIFY						((*i).vertex_id() < (u32(1) << (8*sizeof(GameGraph::_GRAPH_ID))));
-				edge.m_vertex_id			= (GameGraph::_GRAPH_ID)(*i).vertex_id();
-				edge.m_path_distance		= (*i).weight();
+				VERIFY((*i).vertex_id() < (u32(1) << (8 * sizeof(GameGraph::_GRAPH_ID))));
+				edge.m_vertex_id = (GameGraph::_GRAPH_ID)(*i).vertex_id();
+				edge.m_path_distance = (*i).weight();
 
-				writer.w					(&edge.m_vertex_id,sizeof(edge.m_vertex_id));
-				writer.w_float				(edge.m_path_distance);
+				data.edges.push_back(edge);
 			}
+			data.Serialize(writer);
 		}
 	}
+
+	writer.w_u32(0);
 
 	writer.save_to				(m_graph_name);
 	Msg							("%d bytes saved",int(writer.size()));

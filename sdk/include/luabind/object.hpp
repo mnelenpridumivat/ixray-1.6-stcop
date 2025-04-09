@@ -35,6 +35,8 @@
 
 namespace luabind
 {
+	LUABIND_API string_class DebugPrintStack(lua_State* L);
+
 	class LUABIND_API object
 	{
     	template<typename T>
@@ -713,7 +715,7 @@ private:
 	
 				assert(0 && "the lua function threw an error and exceptions are disabled."
 					"if you want to handle this error use luabind::set_error_callback()");
-				std::terminate();
+				
 #endif
 			}
 			detail::lua_reference ref;
@@ -829,7 +831,7 @@ private:
 
                     assert(0 && "the lua function threw an error and exceptions are disabled."
                         "if you want to handle this error use luabind::set_error_callback()");
-                    std::terminate();
+                    
                 }
 #endif
 			}
@@ -853,7 +855,7 @@ private:
 	
 				assert(0 && "the lua function threw an error and exceptions are disabled."
 					"if you want to handle this error use luabind::set_error_callback()");
-				std::terminate();
+				
 #endif
 			}
 			detail::lua_reference ref;

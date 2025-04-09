@@ -78,7 +78,7 @@ CSE_SmartCover::CSE_SmartCover	(LPCSTR section) : CSE_ALifeDynamicObject(section
 	m_enter_min_enemy_distance	= pSettings->r_float(section, "enter_min_enemy_distance");
 	m_exit_min_enemy_distance	= pSettings->r_float(section, "exit_min_enemy_distance");
 	m_is_combat_cover			= pSettings->r_bool(section,  "is_combat_cover");
-	m_can_fire					= m_is_combat_cover ? true : pSettings->r_bool(section, "can_fire");
+	m_can_fire					= m_is_combat_cover ? true : READ_IF_EXISTS(pSettings, r_bool, section, "can_fire", false);
 	m_need_to_reparse_loopholes = true;
 }
 
@@ -147,6 +147,13 @@ void CSE_SmartCover::STATE_Read	(NET_Packet	&tNetPacket, u16 size)
 
 	if (m_wVersion >= 128)
 		m_can_fire				= tNetPacket.r_u8();
+	else
+	{
+		// I don't know how, but it seems that
+		// m_is_combat_cover can be changed
+		// in scripts. Let's just sync here.
+		m_can_fire = m_is_combat_cover;
+	}
 }
 
 void CSE_SmartCover::STATE_Write(NET_Packet	&tNetPacket)
@@ -170,6 +177,25 @@ void CSE_SmartCover::UPDATE_Write(NET_Packet &tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
 }
+
+void CSE_SmartCover::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_SmartCover::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		cform_serialize(Object);
+		Object << m_description << m_hold_position_time << m_enter_min_enemy_distance << m_exit_min_enemy_distance << m_is_combat_cover << m_can_fire;
+	}
+}
+
+void CSE_SmartCover::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_SmartCover::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_SmartCover::FillProps	(LPCSTR pref, PropItemVec& items)
 {
@@ -182,8 +208,8 @@ void CSE_SmartCover::FillProps	(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateFloat		(items, PrepareKey(pref,*s_name,"exit min enemy distance"),	&m_exit_min_enemy_distance,		0.f, 100.f);
 
 	if (is_combat_cover(m_description)) {
-		PHelper().CreateBOOL	(items, PrepareKey(pref, *s_name, "is combat cover"), &m_is_combat_cover);
-		PHelper().CreateBOOL	(items, PrepareKey(pref, *s_name, "can fire"), &m_can_fire);
+		PHelper().CreateBool	(items, PrepareKey(pref, *s_name, "is combat cover"), &m_is_combat_cover);
+		PHelper().CreateBool	(items, PrepareKey(pref, *s_name, "can fire"), &m_can_fire);
 	}
 #	endif // #ifdef XRSE_FACTORY_EXPORTS
 }
@@ -193,7 +219,7 @@ void CSE_SmartCover::FillProps	(LPCSTR pref, PropItemVec& items)
 #include <script_value_container_impl.h>
 
 #ifdef XRSE_FACTORY_EXPORTS
-void CSE_SmartCover::set_loopholes_table_checker(BOOLValue *value){
+void CSE_SmartCover::set_loopholes_table_checker(BoolValue *value){
 	value->OnChangeEvent.bind	(this,&CSE_SmartCover::OnChangeLoopholes);
 }
 

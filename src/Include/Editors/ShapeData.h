@@ -1,7 +1,7 @@
-#ifndef ShapeDataH
-#define ShapeDataH
+#pragma once
+#include "../xrServerEntities/ShapeData.h"
 
-struct CShapeData
+/*struct CShapeData
 {
 	enum{
     	cfSphere=0,
@@ -22,6 +22,4 @@ struct CShapeData
 	using ShapeIt = ShapeVec::iterator;
 	
 	ShapeVec						shapes;
-};
-
-#endif
+};*/

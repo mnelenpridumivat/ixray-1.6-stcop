@@ -21,6 +21,10 @@ void CLight_DB::Load			(IReader *fs)
 	// Lights itself
 	sun_original		= nullptr;
 	sun_adapted			= nullptr;
+
+	rain_light			= new light;
+	rain_light->set_type(IRender_Light::DIRECT);
+
 	{
 		F				= fs->open_chunk		(fsL_LIGHT_DYNAMIC);
 
@@ -141,7 +145,7 @@ void	CLight_DB::LoadHemi	()
 						L->set_color		(Ldata.diffuse.x, Ldata.diffuse.y, Ldata.diffuse.z);
 						L->set_active		(true				);
 						L->set_attenuation_params(Ldata.attenuation0, Ldata.attenuation1, Ldata.attenuation2, Ldata.falloff);
-						L->spatial.type = STYPE_LIGHTSOURCEHEMI;
+						L->SpatialComponent->spatial.type = STYPE_LIGHTSOURCEHEMI;
 					}
 				}
 
@@ -160,6 +164,9 @@ void			CLight_DB::Unload	()
 	v_hemi.clear			();
 	sun_original.destroy	();
 	sun_adapted.destroy		();
+
+	rain_light->destroy(false);
+	rain_light = nullptr;
 }
 
 light*			CLight_DB::Create	()
@@ -187,8 +194,12 @@ void			CLight_DB::add_light		(light* L)
 	if (Device.dwFrame==L->frame_render)	return;
 	L->frame_render							=	Device.dwFrame		;
 	if (RImplementation.o.noshadows)		L->flags.bShadow		= FALSE;
+
 	if (L->flags.bStatic && !ps_r2_ls_flags.test(R2FLAG_R1LIGHTS))	return;
-	if(Device.vCameraPosition.distance_to_sqr(L->spatial.sphere.P)>_sqr(g_pGamePersistent->Environment().CurrentEnv->fog_distance))	return;
+
+	if(Device.vCameraPosition.distance_to_sqr(L->SpatialComponent->spatial.sphere.P)>_sqr(g_pGamePersistent->Environment().CurrentEnv->fog_distance))	return;
+
+	if (!L->has_light_visible_from_sectors()) return;
 
 	L->export_(package);
 }

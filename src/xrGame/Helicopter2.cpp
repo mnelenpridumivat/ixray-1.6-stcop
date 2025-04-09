@@ -321,6 +321,15 @@ void CHelicopter::DieHelicopter()
 	m_dead							= true;
 }
 
+void SHeliEnemy::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"SHeliEnemy")
+	{
+		s16* Value = (s16*)&type;
+		Object << *Value << destEnemyPos << destEnemyID << fire_trail_length_des << bUseFireTrail;
+	}
+}
+
 void SHeliEnemy::Load(LPCSTR section)
 {
 	fire_trail_length_des	= pSettings->r_float(section, "fire_trail_length");
@@ -356,7 +365,6 @@ void SHeliEnemy::save(NET_Packet &output_packet)
 	output_packet.w_s16		((s16)type);
 	output_packet.w_vec3	(destEnemyPos);
 	output_packet.w_u16		(destEnemyID);
-
 	output_packet.w_float	(fire_trail_length_des);
 	output_packet.w_u8		(bUseFireTrail ? 1 : 0);
 }
@@ -433,6 +441,15 @@ void SHeliBodyState::load(IReader &input_packet)
 	currBodyHPB.x			= input_packet.r_float();
 	currBodyHPB.y			= input_packet.r_float();
 	currBodyHPB.z			= input_packet.r_float();
+}
+
+void SHeliBodyState::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"SHeliBodyState")
+	{
+		s16* Value = (s16*)&type;
+		Object << *Value << b_looking_at_point << currBodyHPB;
+	}
 }
 
 

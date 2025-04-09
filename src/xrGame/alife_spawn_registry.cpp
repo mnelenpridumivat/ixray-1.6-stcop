@@ -52,6 +52,22 @@ void CALifeSpawnRegistry::save				(IWriter &memory_stream)
 	memory_stream.close_chunk	();
 }
 
+/*void CALifeSpawnRegistry::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CALifeSpawnRegistry");
+	{
+		Msg("* Saving spawns...");
+
+		Object->GetCurrentChunk()->w_stringZ(m_spawn_name);
+		Object->GetCurrentChunk()->w_u64(header().guid().g[0]);
+		Object->GetCurrentChunk()->w_u64(header().guid().g[1]);
+
+		save_updates(Object);
+
+	}
+	Object->EndChunk();
+}*/
+
 void CALifeSpawnRegistry::load				(IReader &file_stream, LPCSTR game_name)
 {
 	R_ASSERT					(FS.exist(game_name));
@@ -86,6 +102,44 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, LPCSTR game_name)
 	load						(*m_file,&guid);
 
 	chunk0->close				();
+}
+
+void CALifeSpawnRegistry::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CALifeSpawnRegistry")
+	if(Object.IsSave())
+	{
+		Msg("* Saving spawns...");
+
+		auto GUID = header().guid();
+		Object << m_spawn_name << GUID.g[0] << GUID.g[1];
+
+		serialize_updates(Object);
+
+	}
+	else {
+		xrGUID	guid;
+		Object << m_spawn_name << guid.g[0] << guid.g[1];
+
+		string_path					file_name;
+
+		if (g_pGamePersistent->GameType() == eGameIDSingle)
+		{
+			bool file_exists = !!FS.exist(file_name, "$game_spawn$", *m_spawn_name, ".spawn");
+			R_ASSERT3(file_exists, "Can't find spawn file:", *m_spawn_name);
+		}
+		else
+		{
+			bool file_exists = !!FS.exist(file_name, "$level$", "alife", ".spawn");
+			R_ASSERT3(file_exists, "Can't find spawn file:", "alife.spawn");
+		}
+
+		VERIFY(!m_file);
+		m_file = FS.r_open(file_name);
+		load(*m_file, &guid);
+
+		serialize_updates(Object);
+	}
 }
 
 void CALifeSpawnRegistry::load				(LPCSTR spawn_name)
@@ -209,6 +263,48 @@ void CALifeSpawnRegistry::load				(IReader &file_stream, xrGUID *save_guid)
 	build_root_spawns			();
 
 	Msg							("* %d spawn points are successfully loaded",m_spawns.vertex_count());
+}
+
+void CALifeSpawnRegistry::serialize_updates(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns")
+	{
+		if (Object.IsSave()) {
+			auto Value = m_spawns.vertices().size();
+			Object << Value;
+			SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
+			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
+			Object.BeginArray();
+			for (; I != E; ++I) {
+				BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns::vertex")
+				{
+					u16 VertexId = (*I).second->vertex_id();
+					Object << VertexId;
+					(*I).second->data()->serialize_update(Object);
+				}
+			}
+			Object.EndArray();
+		}
+		else {
+			u64 Value;
+			Object << Value;
+			u16	vertex_id;
+			SPAWN_GRAPH::vertex_iterator			I = m_spawns.vertices().begin();
+			SPAWN_GRAPH::vertex_iterator			E = m_spawns.vertices().end();
+			Object.BeginArray();
+			for (; I != E; ++I) {
+				BEGIN_CHUNK(Object,"CALifeSpawnRegistry::m_spawns::vertex")
+				{
+					Object << vertex_id;
+					VERIFY(u32(ALife::_SPAWN_ID(-1)) > vertex_id);
+					const SPAWN_GRAPH::CVertex* vertex = m_spawns.vertex(ALife::_SPAWN_ID(vertex_id));
+					VERIFY(vertex);
+					(*I).second->data()->serialize_update(Object);
+				}
+			}
+			Object.EndArray();
+		}
+	}
 }
 
 void CALifeSpawnRegistry::save_updates		(IWriter &stream)

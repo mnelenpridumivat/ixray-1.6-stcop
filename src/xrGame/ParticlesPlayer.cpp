@@ -133,7 +133,7 @@ void CParticlesPlayer::AppendBone(u16 bone_id, Fvector offs)
 	if(get_bone_info(bone_id))
 		return;
 
-	bone_mask.set(bone_id, true);
+	bone_mask.set(VisMask::GetBitMask(bone_id), true, VisMask::GetChunkNumber(bone_id));
 	m_Bones.push_back	(SBoneInfo(bone_id,offs));
 }
 
@@ -160,7 +160,7 @@ void	CParticlesPlayer::net_DestroyParticles	()
 CParticlesPlayer::SBoneInfo* CParticlesPlayer::get_nearest_bone_info(IKinematics* K, u16 bone_index)
 {
 	u16 play_bone	= bone_index;
-	while((BI_NONE!=play_bone)&&!bone_mask.is(play_bone))
+	while((BI_NONE!=play_bone)&&!bone_mask.is(VisMask::GetBitMask(play_bone), VisMask::GetChunkNumber(play_bone)))
 	{
 		play_bone	= K->LL_GetData(play_bone).GetParentID();
 	}
@@ -182,7 +182,7 @@ void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone
 	CObject* object					= m_self_object;
 	VERIFY(object);
 
-	SBoneInfo* pBoneInfo			=  get_nearest_bone_info(smart_cast<IKinematics*>(object->Visual()),bone_num);
+	SBoneInfo* pBoneInfo			=  get_nearest_bone_info(PKinematics(object->Visual()),bone_num);
 	if(!pBoneInfo) return;
 
 	SParticlesInfo &particles_info	=*pBoneInfo->AppendParticles(object,particles_name);
@@ -326,7 +326,7 @@ void CParticlesPlayer::UpdateParticles()
 void CParticlesPlayer::GetBonePos	(CObject* pObject, u16 bone_id, const Fvector& offset, Fvector& result)
 {
 	VERIFY(pObject);
-	IKinematics* pKinematics = smart_cast<IKinematics*>(pObject->Visual()); VERIFY(pKinematics);
+	IKinematics* pKinematics = PKinematics(pObject->Visual()); VERIFY(pKinematics);
 	CBoneInstance&		l_tBoneInstance = pKinematics->LL_GetBoneInstance(bone_id);
 
 	result = offset;
@@ -344,7 +344,7 @@ u16 CParticlesPlayer::GetNearestBone	(IKinematics* K, u16 bone_id)
 {
 	u16 play_bone	= bone_id;
 
-	while((BI_NONE!=play_bone)&&!bone_mask.is(play_bone))
+	while((BI_NONE!=play_bone)&&!bone_mask.is(VisMask::GetBitMask(play_bone), VisMask::GetChunkNumber(play_bone)))
 	{
 		play_bone	= K->LL_GetData(play_bone).GetParentID();
 	}

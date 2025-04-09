@@ -40,7 +40,7 @@ void CALifeTimeManager::save			(IWriter	&memory_stream)
 	memory_stream.w_float		(m_time_factor);
 	memory_stream.w_float		(m_normal_time_factor);
 	memory_stream.close_chunk	();
-};
+}
 
 void CALifeTimeManager::load			(IReader	&file_stream)
 {
@@ -49,4 +49,45 @@ void CALifeTimeManager::load			(IReader	&file_stream)
 	m_time_factor				= file_stream.r_float();
 	m_normal_time_factor		= file_stream.r_float();
 	m_start_time				= Device.dwTimeGlobal;
-};
+}
+
+/*void CALifeTimeManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CALifeTimeManager");
+	{
+
+		m_game_time = game_time();
+		m_start_time = Device.dwTimeGlobal;
+		Object->GetCurrentChunk()->w_u64(m_game_time);
+		Object->GetCurrentChunk()->w_float(m_time_factor);
+		Object->GetCurrentChunk()->w_float(m_normal_time_factor);
+	}
+	Object->EndChunk();
+}
+
+void CALifeTimeManager::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CALifeTimeManager");
+	{
+		Object->GetCurrentChunk()->r_u64(m_game_time);
+		Object->GetCurrentChunk()->r_float(m_time_factor);
+		Object->GetCurrentChunk()->r_float(m_normal_time_factor);
+		m_start_time = Device.dwTimeGlobal;
+	}
+	Object->EndChunk();
+}*/
+
+void CALifeTimeManager::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CALifeTimeManager")
+	{
+		if (Object.IsSave()) {
+			m_game_time = game_time();
+			m_start_time = Device.dwTimeGlobal;
+		}
+		Object << m_game_time << m_time_factor << m_normal_time_factor;
+		if (!Object.IsSave()) {
+			m_start_time = Device.dwTimeGlobal;
+		}
+	}
+}

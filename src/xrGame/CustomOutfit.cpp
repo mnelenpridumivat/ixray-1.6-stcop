@@ -128,7 +128,10 @@ void CCustomOutfit::ReloadBonesProtection()
 void CCustomOutfit::Hit(float hit_power, ALife::EHitType hit_type)
 {
 	hit_power *= GetHitImmunity(hit_type);
-	ChangeCondition(-hit_power);
+	if (!psActorFlags.test(AF_INFINITEDURABILITY))
+	{
+		ChangeCondition(-hit_power);
+	}
 }
 
 float CCustomOutfit::GetDefHitTypeProtection(ALife::EHitType hit_type)
@@ -208,7 +211,7 @@ BOOL	CCustomOutfit::BonePassBullet					(int boneID)
 }
 
 #include "Torch.h"
-void	CCustomOutfit::OnMoveToSlot		(const SInvItemPlace& prev)
+void	CCustomOutfit::OnMoveToSlot		(const SInvItemPlace prev)
 {
 	if ( m_pInventory )
 	{
@@ -216,12 +219,6 @@ void	CCustomOutfit::OnMoveToSlot		(const SInvItemPlace& prev)
 		if ( pActor )
 		{
 			ApplySkinModel(pActor, true, false);
-			if (prev.type==eItemPlaceSlot && !bIsHelmetAvaliable)
-			{
-				CTorch* pTorch = smart_cast<CTorch*>(pActor->inventory().ItemFromSlot(TORCH_SLOT));
-				if(pTorch && pTorch->GetNightVisionStatus())
-					pTorch->SwitchNightVision(true, false);
-			}
 			PIItem pHelmet = pActor->inventory().ItemFromSlot(HELMET_SLOT);
 			if(pHelmet && !bIsHelmetAvaliable)
 				pActor->inventory().Ruck(pHelmet, false);
@@ -262,8 +259,11 @@ void CCustomOutfit::ApplySkinModel(CActor* pActor, bool bDress, bool bHUDOnly)
 		}
 
 
-		if (pActor == Level().CurrentViewEntity())	
-			g_player_hud->load(pSettings->r_string(cNameSect(),"player_hud_section"));
+		if (pActor == Level().CurrentViewEntity())
+		{
+			//g_player_hud->load(pSettings->r_string(cNameSect(),"player_hud_section"));
+			g_player_hud->m_need_reload = false;
+		}
 	}else
 	{
 		if (!bHUDOnly && m_ActorVisual.size())
@@ -275,13 +275,16 @@ void CCustomOutfit::ApplySkinModel(CActor* pActor, bool bDress, bool bHUDOnly)
 			};
 		}
 
-		if (pActor == Level().CurrentViewEntity())	
-			g_player_hud->load_default();
+		if (pActor == Level().CurrentViewEntity())
+		{
+			//g_player_hud->load_default();
+			g_player_hud->m_need_reload = false;
+		}
 	}
 
 }
 
-void	CCustomOutfit::OnMoveToRuck		(const SInvItemPlace& prev)
+void	CCustomOutfit::OnMoveToRuck		(const SInvItemPlace prev)
 {
 	if(m_pInventory && prev.type==eItemPlaceSlot)
 	{
@@ -289,9 +292,10 @@ void	CCustomOutfit::OnMoveToRuck		(const SInvItemPlace& prev)
 		if (pActor)
 		{
 			ApplySkinModel(pActor, false, false);
-			CTorch* pTorch = smart_cast<CTorch*>(pActor->inventory().ItemFromSlot(TORCH_SLOT));
-			if(pTorch && !bIsHelmetAvaliable)
-				pTorch->SwitchNightVision(false);
+			if (pActor->GetNightVisionEffector() && !bIsHelmetAvaliable)
+			{
+				pActor->GetNightVisionEffector()->SwitchNightVision(false);
+			}
 		}
 	}
 };
@@ -371,7 +375,4 @@ bool CCustomOutfit::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 		return false;
 	}
 	return true;
-	/*auto outfit = smart_cast<CCustomOutfit*>(other);
-	VERIFY(outfit);
-	return fsimilar(outfit->GetFilterCondition(), GetFilterCondition(), 0.01f);*/
 }

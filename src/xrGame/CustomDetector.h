@@ -36,8 +36,8 @@ public:
 			bool 	IsWorking			();
 	inline	bool	IsActive			() const { return m_bDetectorActive; };
 	virtual bool	need_renderable		();
-	virtual void 	OnMoveToSlot		(const SInvItemPlace& prev);
-	virtual void 	OnMoveToRuck		(const SInvItemPlace& prev);
+	virtual void 	OnMoveToSlot		(const SInvItemPlace prev) override;
+	virtual void 	OnMoveToRuck		(const SInvItemPlace prev) override;
 			void	ShowingCallback		(CBlend*B);
 	virtual void	OnActiveItem		();
 	virtual void	OnHiddenItem		();

@@ -13,6 +13,8 @@
 #include "attachable_item.h"
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Items.h"
+#include "../xrScripts/script_export_space.h"
+#include "Save/SaveObject.h"
 
 enum EHandDependence{
 	hdNone	= 0,
@@ -80,6 +82,7 @@ protected:
 								FInInterpolate		=(1<<10),
 								FIsQuestItem		=(1<<11),
 								FIsHelperItem		=(1<<12),
+								FCanStack			=(1<<13),
 	};
 
 	Flags16						m_flags;
@@ -101,6 +104,7 @@ public:
 	
 	virtual bool				Useful				() const;									// !!! Переопределить. (см. в Inventory.cpp)
 	virtual bool				IsUsingCondition	() const { return m_flags.test(FUsingCondition); }
+	virtual bool				CanStack			() const { return (m_flags.test(FCanStack) > 0); };
 	virtual bool				Attach				(PIItem pIItem, bool b_send_event) {return false;}
 	virtual bool				Detach				(PIItem pIItem) {return false;}
 	//при детаче спаунится новая вещь при заданно названии секции
@@ -122,6 +126,9 @@ public:
 
 	virtual void				save				(NET_Packet &output_packet);
 	virtual void				load				(IReader &input_packet);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL				net_SaveRelevant	()								{return TRUE;}
 
 	virtual void				render_item_ui		()								{}; //when in slot & query return TRUE
@@ -151,6 +158,7 @@ public:
 	shared_str					m_name;
 	shared_str					m_nameShort;
 	shared_str					m_nameComplex;
+	bool						m_highlight_equipped;
 	shared_str					m_custom_text;
 	Fvector2					m_custom_text_offset;
 	CGameFont*					m_custom_text_font;
@@ -166,9 +174,9 @@ public:
 	SInvItemPlace				m_ItemCurrPlace;
 
 
-	virtual void				OnMoveToSlot		(const SInvItemPlace& prev) {};
-	virtual void				OnMoveToBelt		(const SInvItemPlace& prev) {};
-	virtual void				OnMoveToRuck		(const SInvItemPlace& prev) {};
+	virtual void				OnMoveToSlot		(const SInvItemPlace prev) {};
+	virtual void				OnMoveToBelt		(const SInvItemPlace prev) {};
+	virtual void				OnMoveToRuck		(const SInvItemPlace prev) {};
 					
 			Irect				GetInvGridRect		() const;
 			void SetInvGridRect(const Irect& rect);
@@ -194,6 +202,7 @@ public:
 			
 	virtual bool				CanTake				() const					{return !!m_flags.test(FCanTake);}
 			bool				CanTrade			() const;
+			bool				CanBarter() const;
 			void				AllowTrade			()							{ m_flags.set(FCanTrade, m_can_trade); };
 			void				DenyTrade			()							{ m_flags.set(FCanTrade, FALSE); };
 
@@ -304,6 +313,7 @@ public:
 	bool	has_upgrade_group			( const shared_str& upgrade_group_id );
 	void	add_upgrade					( const shared_str& upgrade_id, bool loading );
 	bool	get_upgrades_str			( string2048& res ) const;
+	Upgrades_type get_upgrades() { return m_upgrades; }	//Alundaio
 
 	bool	equal_upgrades				( Upgrades_type const& other_upgrades ) const;
 
@@ -338,6 +348,7 @@ protected:
 public:
 	IC bool	is_helper_item				()				 { return !!m_flags.test(FIsHelperItem); }
 	IC void	set_is_helper				(bool is_helper) { m_flags.set(FIsHelperItem,is_helper); }
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 }; // class CInventoryItem
 
 #include "inventory_item_inline.h"

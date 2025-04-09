@@ -412,8 +412,9 @@ void CMapLocation::UpdateSpot(CUICustomMap* map, CMapSpot* sp )
 		CGameTask* ml_task = Level().GameTaskManager().HasGameTask( this, true );
 		if (ml_task)
 		{
-			CGameTask* active_task = Level().GameTaskManager().ActiveTask();
-			bool border_show = (ml_task == active_task);
+			CGameTask* storyTask = Level().GameTaskManager().ActiveTask(eTaskTypeStoryline);
+			CGameTask* additionalTask = Level().GameTaskManager().ActiveTask(eTaskTypeAdditional);
+			const bool border_show = ml_task == storyTask || ml_task == additionalTask;
 			if (m_minimap_spot)
 			{
 				m_minimap_spot->show_static_border(border_show);
@@ -662,6 +663,71 @@ void CMapLocation::load(IReader &stream)
 
 		m_position_on_map = m_cached.m_Position;
 		m_position_global.set(m_position_on_map.x, 0.f, m_position_on_map.y);
+	}
+}
+
+/*void CMapLocation::save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CMapLocation");
+	{
+		Object->GetCurrentChunk()->w_stringZ(m_hint);
+		Object->GetCurrentChunk()->w_u32(m_flags.flags);
+		Object->GetCurrentChunk()->w_stringZ(m_owner_task_id);
+		if (IsUserDefined())
+		{
+			Object->GetCurrentChunk()->w_stringZ(m_cached.m_LevelName);
+			Object->GetCurrentChunk()->w_float(m_cached.m_Position.x);
+			Object->GetCurrentChunk()->w_float(m_cached.m_Position.y);
+			Object->GetCurrentChunk()->w_u16(m_cached.m_graphID);
+		}
+	}
+	Object->EndChunk();
+}
+
+void CMapLocation::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CMapLocation");
+	{
+		xr_string		str;
+		Object->GetCurrentChunk()->r_stringZ(str);
+		SetHint(str.c_str());
+		Object->GetCurrentChunk()->r_u32(m_flags.flags);
+		Object->GetCurrentChunk()->r_stringZ(str);
+		m_owner_task_id = str.c_str();
+		if (IsUserDefined())
+		{
+			Object->GetCurrentChunk()->r_stringZ(m_cached.m_LevelName);
+			Object->GetCurrentChunk()->r_float(m_cached.m_Position.x);
+			Object->GetCurrentChunk()->r_float(m_cached.m_Position.y);
+			Object->GetCurrentChunk()->r_u16(m_cached.m_graphID);
+			m_position_on_map = m_cached.m_Position;
+			m_position_global.set(m_position_on_map.x, 0.f, m_position_on_map.y);
+		}
+	}
+	Object->EndChunk();
+}*/
+
+void CMapLocation::serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CMapLocation")
+	{
+		if (Object.IsSave()) {
+			Object << m_hint;
+		}
+		else {
+			xr_string		str;
+			Object << str;
+			SetHint(str.c_str());
+		}
+		Object << m_flags.flags << m_owner_task_id;
+		if (IsUserDefined())
+		{
+			Object << m_cached.m_LevelName << m_cached.m_Position << m_cached.m_graphID;
+			if (!Object.IsSave()) {
+				m_position_on_map = m_cached.m_Position;
+				m_position_global.set(m_position_on_map.x, 0.f, m_position_on_map.y);
+			}
+		}
 	}
 }
 

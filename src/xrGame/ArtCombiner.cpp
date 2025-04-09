@@ -24,6 +24,15 @@ void CArtCombiner::load(IReader& input_packet)
 	CArtContainer::load(input_packet);
 }
 
+void CArtCombiner::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CArtCombiner")
+	{
+		CArtefact::Serialize(Object);
+		CArtContainer::Serialize(Object);
+	}
+}
+
 u32 CArtCombiner::Cost() const
 {
 	auto res = CArtefact::Cost();

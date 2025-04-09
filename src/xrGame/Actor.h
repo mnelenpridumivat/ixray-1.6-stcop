@@ -18,6 +18,9 @@
 
 #include "step_manager.h"
 #include "../xrScripts/script_export_space.h"
+#include "Save/SaveObject.h"
+#include "CustomDetector.h"
+#include "EffectorNightVision.h"
 
 using namespace ACTOR_DEFS;
 
@@ -62,6 +65,9 @@ class CActorStatisticMgr;
 
 class CLocationManager;
 class CPickUpManager;
+class CCustomDetector;
+
+class CNightVisionEffector;
 
 class CActor: 
 	public IGame_Actor, 
@@ -79,6 +85,14 @@ class CActor:
 private:
 	typedef CEntityAlive	inherited;
 	CPickUpManager* pPickup = nullptr;
+
+	struct LookAtData
+	{
+		CObject* LookAtObject = nullptr;
+		Fvector PickPos;
+		bool IsNearEnoght = false;
+	} LookAtData;
+	void UpdateLookAt();
 public:
 										CActor				();
 	virtual								~CActor				();
@@ -173,8 +187,8 @@ public:
 
 	virtual void OnItemTake		(CInventoryItem *inventory_item);
 	
-	virtual void OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
-	virtual void OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
+	virtual void OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace previous_place) override;
+	virtual void OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace previous_place) override;
 	
 	virtual void OnItemDrop		(CInventoryItem *inventory_item, bool just_before_destroy);
 	virtual void OnItemDropUpdate ();
@@ -188,6 +202,7 @@ public:
 	virtual void						HitSignal		(float P, Fvector &vLocalDir,	CObject* who, s16 element);
 			void						HitSector		(CObject* who, CObject* weapon);
 			void						HitMark			(float P, Fvector dir,			CObject* who, s16 element, Fvector position_in_bone_space, float impulse,  ALife::EHitType hit_type);
+	virtual void						FootStepCallback(float power, bool b_play, bool b_on_ground, bool b_hud_view);
 
 			void						Feel_Grenade_Update( float rad );
 
@@ -199,11 +214,11 @@ public:
 	virtual	float						missile_throw_force		(); 
 
 	virtual bool						unlimited_ammo			();
-
+	virtual bool						infinite_fire();
 	virtual bool						NeedToDestroyObject()  const;
 	virtual ALife::_TIME_ID				TimePassedAfterDeath() const;
 
-
+	CPickUpManager* GetPickupManager() { return pPickup; }
 public:
 
 	//свойства артефактов
@@ -224,6 +239,8 @@ protected:
 	float					m_hit_slowmo;
 	float					m_hit_probability;
 	s8						m_block_sprint_counter;
+
+	bool IsWaunded = false;
 
 	// media
 	SndShockEffector*		m_sndShockEffector;
@@ -263,7 +280,7 @@ public:
 	void					detach_Vehicle			();
 	void					steer_Vehicle			(float angle);
 	void					attach_Vehicle			(CHolderCustom* vehicle);
-	bool					use_MountedWeapon		(CHolderCustom* object);
+	bool					use_HolderEx			(CHolderCustom* object, bool bForce);
 
 	virtual bool			can_attach				(const CInventoryItem *inventory_item) const;
 protected:
@@ -326,7 +343,7 @@ public:
 	
 public:
 	CActorCameraManager&	Cameras				() 	{VERIFY(m_pActorEffector); return *m_pActorEffector;}
-	IC CCameraBase*			cam_Active			()	{return cameras[cam_active];}
+	virtual CCameraBase*	cam_Active			() const override	{return cameras[cam_active];}
 	IC CCameraBase*			cam_FirstEye		()	{return cameras[eacFirstEye];}
 	IC EActorCameras active_cam() { return cam_active; }
 	virtual void cam_Set(EActorCameras style);
@@ -365,6 +382,7 @@ public:
 	CGameObject*			ObjectWeLookingAt			() {return m_pObjectWeLookingAt;}
 	CInventoryOwner*		PersonWeLookingAt			() {return m_pPersonWeLookingAt;}
 	LPCSTR					GetDefaultActionForObject	() {return *m_sDefaultObjAction;}
+	LPCSTR					GetSecondaryDefaultActionForObject	() {return *m_sSecondaryDefaultObjAction;}
 protected:
 	CUsableScriptObject*	m_pUsableObject;
 	// Person we're looking at
@@ -375,6 +393,7 @@ protected:
 
 	// Tip for action for object we're looking at
 	shared_str				m_sDefaultObjAction;
+	shared_str				m_sSecondaryDefaultObjAction;
 	shared_str				m_sCarTrunk;
 	shared_str				m_sCarUse;
 	shared_str				m_sCharacterUseAction;
@@ -384,6 +403,7 @@ protected:
 	shared_str				m_sCarCharacterUseAction;
 	shared_str				m_sInventoryItemUseAction;
 	shared_str				m_sInventoryBoxUseAction;
+	shared_str				m_sWeaponQuickReloadAction;
 	
 	//расстояние (в метрах) на котором актер чувствует гранату (любую)
 	float					m_fFeelGrenadeRadius;
@@ -514,8 +534,13 @@ protected:
 			void						ConvState			(u32 mstate_rl, string128 *buf);
 public:
 	virtual BOOL						net_Spawn			( CSE_Abstract* DC);
+
 	virtual void						net_Export			( NET_Packet& P);				// export to server
 	virtual void						net_Import			( NET_Packet& P);				// import from server
+
+	virtual void						SyncRead(NET_Packet& Packet);
+	virtual void						SyncWrite(NET_Packet& Packet);
+
 	virtual void						net_Destroy			();
 	virtual BOOL						net_Relevant		();//	{ return getSVU() | getLocal(); };		// relevant for export to server
 	virtual	void						net_Relcase			( CObject* O );					//
@@ -523,6 +548,9 @@ public:
 	//object serialization
 	virtual void						save				(NET_Packet &output_packet);
 	virtual void						load				(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;*/
+	virtual void Serialize(ISaveObject& Object) override;
 	virtual void						net_Save			(NET_Packet& P)																	;
 	virtual	BOOL						net_SaveRelevant	()																				;
 protected:
@@ -670,6 +698,8 @@ public:
 private:
 	CActorCondition				*m_entity_condition;
 
+	CNightVisionEffector*		m_night_vision;
+
 protected:
 	virtual	CEntityConditionSimple	*create_entity_condition	(CEntityConditionSimple* ec);
 
@@ -703,6 +733,10 @@ public:
 	virtual void				OnPrevWeaponSlot				();
 			void				SwitchNightVision				();
 			void				SwitchTorch						();
+	CNightVisionEffector*		GetNightVisionEffector			() { return m_night_vision;}
+
+	CCustomDetector*			GetDetector						(bool in_slot = false);
+
 #ifndef MASTER_GOLD
 			void				NoClipFly						(int cmd);
 #endif //DEBUG
@@ -736,7 +770,7 @@ public:
 	virtual	void				On_B_NotCurrentEntity			();
 
 private:
-	xr_vector<ISpatial*>		ISpatialResult;
+	xr_vector<ISpatialShared>		ISpatialResult;
 
 private:
 	CLocationManager				*m_location_manager;
@@ -755,7 +789,7 @@ public:
 	virtual bool				register_schedule				() const {return false;}
 	virtual	bool				is_ai_obstacle					() const;
 	
-			float				GetRestoreSpeed					(ALife::EConditionRestoreType const& type);
+			float				GetRestoreSpeed					(ALife::EConditionRestoreType const type);
 
 public:
 	virtual void			On_SetEntity();

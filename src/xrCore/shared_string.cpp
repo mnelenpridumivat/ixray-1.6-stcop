@@ -24,7 +24,7 @@ struct str_container_impl
 	static const u32 buffer_size = 1024 * 256;
 	str_value* buffer[buffer_size];
 	int              num_docs;
-
+	xrSRWLock rwlock;
 	str_container_impl()
 	{
 		num_docs = 0;
@@ -33,6 +33,7 @@ struct str_container_impl
 
 	str_value* find(str_value* value, const char* str)
 	{
+		xrSRWLockGuard guard(&rwlock, true);
 		str_value* candidate = buffer[value->dwCRC % buffer_size];
 		while (candidate)
 		{
@@ -51,6 +52,7 @@ struct str_container_impl
 
 	void insert(str_value* value)
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		str_value** element = &buffer[value->dwCRC % buffer_size];
 		value->next = *element;
 		*element = value;
@@ -58,6 +60,7 @@ struct str_container_impl
 
 	void clean()
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		for (u32 i = 0; i < buffer_size; ++i)
 		{
 			str_value** current = &buffer[i];
@@ -78,56 +81,9 @@ struct str_container_impl
 		}
 	}
 
-	void verify()
-	{
-		Msg("strings verify started");
-		for (u32 i = 0; i < buffer_size; ++i)
-		{
-			str_value* value = buffer[i];
-			while (value)
-			{
-				u32			crc = crc32(value->value, value->dwLength);
-				string32	crc_str;
-				_itoa(value->dwCRC, crc_str, 16);
-
-				R_ASSERT3(crc == value->dwCRC, "CorePanic: read-only memory corruption (shared_strings)", crc_str);
-				R_ASSERT3(value->dwLength == xr_strlen(value->value), "CorePanic: read-only memory corruption (shared_strings, internal structures)", value->value);
-				value = value->next;
-			}
-		}
-		Msg("strings verify completed");
-	}
-
-	void dump(FILE* f) const
-	{
-		for (u32 i = 0; i < buffer_size; ++i)
-		{
-			str_value* value = buffer[i];
-			while (value)
-			{
-				fprintf(f, "ref[%4d]-len[%3d]-crc[%8X] : %s\n", value->dwReference, value->dwLength, value->dwCRC, value->value);
-				value = value->next;
-			}
-		}
-	}
-
-	void dump(IWriter* f) const
-	{
-		for (u32 i = 0; i < buffer_size; ++i)
-		{
-			str_value* value = buffer[i];
-			string4096		temp;
-			while (value)
-			{
-				xr_sprintf(temp, sizeof(temp), "ref[%4d]-len[%3d]-crc[%8X] : %s\n", value->dwReference, value->dwLength, value->dwCRC, value->value);
-				f->w_string(temp);
-				value = value->next;
-			}
-		}
-	}
-
 	int stat_economy()
 	{
+		xrSRWLockGuard guard(&rwlock, false);
 		int				counter = 0;
 		for (u32 i = 0; i < buffer_size; ++i)
 		{
@@ -152,8 +108,6 @@ str_container::str_container()
 str_value* str_container::dock(str_c value)
 {
 	if (0 == value)				return 0;
-
-	cs.Enter();
 
 	str_value* result = 0;
 
@@ -198,54 +152,26 @@ str_value* str_container::dock(str_c value)
 		result->dwLength = sv->dwLength;
 		result->dwCRC = sv->dwCRC;
 		CopyMemory(result->value, value, s_len_with_zero);
+#ifdef DEBUG
+		result->value_ptr = result->value;
+#endif
 
 		impl->insert(result);
 	}
-	cs.Leave();
 
 	return	result;
 }
 
 void str_container::clean()
 {
-	cs.Enter();
 	impl->clean();
-	cs.Leave();
-}
-
-void str_container::verify()
-{
-	cs.Enter();
-	impl->verify();
-	cs.Leave();
-}
-
-void str_container::dump()
-{
-	cs.Enter();
-
-	FILE* F;
-	fopen_s(&F, "d:\\$str_dump$.txt", "w");
-
-	impl->dump(F);
-	fclose(F);
-	cs.Leave();
-}
-
-void str_container::dump(IWriter* W)
-{
-	cs.Enter();
-	impl->dump(W);
-	cs.Leave();
 }
 
 u32 str_container::stat_economy()
 {
-	cs.Enter();
 	int				counter = 0;
 	counter -= sizeof(*this);
 	counter += impl->stat_economy();
-	cs.Leave();
 	return			u32(counter);
 }
 
@@ -258,7 +184,6 @@ str_container& str_container::GetInstance()
 str_container::~str_container()
 {
 	clean();
-	//dump ();
 	xr_delete(impl);
 }
 
@@ -279,4 +204,15 @@ str_container* str_container_handle::get_container()
 		pStringContainer = new str_container();
 	}
 	return pStringContainer;
+}*/
+
+/*ISaveObject& operator<<(ISaveObject& Object, shared_str& Value) {
+	if (Object.IsSave()) {
+		return Object << (char*)Value.c_str();
+	}
+	string512 Str;
+	Object << (char*)Str;
+	Value = Str;
+
+	return Object;
 }*/

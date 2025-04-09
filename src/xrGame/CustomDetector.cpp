@@ -95,6 +95,7 @@ bool CCustomDetector::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 
 void CCustomDetector::HideDetector(bool bFastMode)
 {
+
 	const CHUDState::EHudStates CurrentState = (CHUDState::EHudStates) GetState();
 	switch (CurrentState) {
 		case CHUDState::EHudStates::eIdle:
@@ -186,7 +187,6 @@ void CCustomDetector::OnStateSwitch(u32 S)
 	{
 	case eShowing:
 		{
-			g_player_hud->attach_item	(this);
 			m_sounds.PlaySound			("sndShow", Fvector().set(0,0,0), this, true, false);
 			PlayHUDMotion				(m_bFastAnimMode?"anm_show_fast":"anm_show", m_old_state==eHidden?FALSE:TRUE/*TRUE*/, this, S);
 			SetPending					(TRUE);
@@ -219,7 +219,6 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 		{
 			SwitchState					(eHidden);
 			TurnDetectorInternal		(false);
-			g_player_hud->detach_item	(this);
 		} break;
 	}
 }
@@ -411,20 +410,15 @@ void CCustomDetector::OnH_B_Independent(bool just_before_destroy)
 }
 
 
-void CCustomDetector::OnMoveToRuck(const SInvItemPlace& prev)
+void CCustomDetector::OnMoveToRuck(const SInvItemPlace prev)
 {
 	inherited::OnMoveToRuck	(prev);
 	m_bDetectorActive			= false;
-	if(prev.type==eItemPlaceSlot)
-	{
-		SwitchState					(eHidden);
-		g_player_hud->detach_item	(this);
-	}
 	TurnDetectorInternal			(false);
 	StopCurrentAnimWithoutCallback	();
 }
 
-void CCustomDetector::OnMoveToSlot(const SInvItemPlace& prev)
+void CCustomDetector::OnMoveToSlot(const SInvItemPlace prev)
 {
 	inherited::OnMoveToSlot	(prev);
 }

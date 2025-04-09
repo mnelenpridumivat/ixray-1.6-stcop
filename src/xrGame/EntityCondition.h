@@ -5,6 +5,7 @@ class CWound;
 class NET_Packet;
 class CEntityAlive;
 class CLevel;
+class CSaveObject;
 
 #include "hit_immunity.h"
 #include "Hit.h"
@@ -107,8 +108,12 @@ public:
 
 	virtual void			save					(NET_Packet &output_packet);
 	virtual void			load					(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object);
+	virtual void Load(CSaveObjectLoad* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 
 	IC float				GetPower				() const			{return m_fPower;}	
+	IC void					SetPower				(float val)			{ m_fPower = val; clamp(m_fPower, 0.f, m_fPowerMax); }
 	IC float				GetRadiation			() const			{return m_fRadiation;}
 	IC float				GetPsyHealth			() const			{return m_fPsyHealth;}
 
@@ -162,6 +167,8 @@ public:
 	PLAYER_ADDICTION_BASE(Alcohol);
 	PLAYER_ADDICTION_BASE(Thirst);
 	PLAYER_ADDICTION_BASE(Sleepiness);
+	using WOUND_VECTOR = xr_vector<CWound*>;
+	using WOUND_VECTOR_IT = WOUND_VECTOR::iterator;
 
 protected:
 	void					UpdateHealth			();

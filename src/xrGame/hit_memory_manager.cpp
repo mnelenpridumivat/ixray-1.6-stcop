@@ -21,29 +21,31 @@
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
 #include "../xrEngine/IGame_Persistent.h"
+#include "Save/SaveObject.h"
 
 #ifndef MASTER_GOLD
 #	include "actor.h"
 #	include "ai_debug.h"
 #endif // MASTER_GOLD
 
-struct CHitObjectPredicate {
+struct CHitObjectPredicate 
+{
 	const CObject *m_object;
 
-				CHitObjectPredicate			(const CObject *object) :
-					m_object				(object)
+	CHitObjectPredicate(const CObject *object) :
+		m_object(object)
 	{
 	}
 
-	bool		operator()					(const MemorySpace::CHitObject &hit_object) const
+	bool operator()(const MemorySpace::CHitObject &hit_object) const
 	{
 		if (!m_object)
-			return			(!hit_object.m_object);
+			return (!hit_object.m_object);
 
 		if (!hit_object.m_object)
-			return			(false);
+			return (false);
 
-		return				(m_object->ID() == hit_object.m_object->ID());
+		return (m_object->ID() == hit_object.m_object->ID());
 	}
 };
 
@@ -93,7 +95,7 @@ void CHitMemoryManager::reload				(LPCSTR section)
 void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const CObject *who, s16 element)
 {
 #ifndef MASTER_GOLD
-	if (who && smart_cast<CActor const*>(who) && psAI_Flags.test(aiIgnoreActor))
+	if (who && const_cast<CObject*>(who)->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
@@ -115,33 +117,27 @@ void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const C
 		m_object->lua_game_object(), 
 		amount,
 		vLocalDir,
-		smart_cast<const CGameObject*>(who)->lua_game_object(),
+		who&&const_cast<CObject*>(who)->cast_game_object() ? const_cast<CObject*>(who)->cast_game_object()->lua_game_object() : NULL,
 		element
 	);
 
 	Fvector						direction;
 	m_object->XFORM().transform_dir	(direction,vLocalDir);
 
-	const CEntityAlive			*entity_alive = smart_cast<const CEntityAlive*>(who);
+	const CEntityAlive			*entity_alive = const_cast<CObject*>(who)->cast_entity_alive();
 	if (!entity_alive || (m_object->tfGetRelationType(entity_alive) == ALife::eRelationTypeFriend))
 		return;
 
-	HITS::iterator				J = std::find(m_hits->begin(),m_hits->end(),object_id(who));
-	if (m_hits->end() == J) {
-		CHitObject						hit_object;
+	HITS::iterator J = std::find(m_hits->begin(),m_hits->end(), CMemoryObject::object_id(who));
+	if (m_hits->end() == J)
+	{
+		CHitObject hit_object;
 
-		hit_object.fill					(entity_alive,m_object,!m_stalker ? squad_mask_type(-1) : m_stalker->agent_manager().member().mask(m_stalker));
-		
-#ifdef USE_FIRST_GAME_TIME
-		hit_object.m_first_game_time	= Level().GetGameTime();
-#endif
-#ifdef USE_FIRST_LEVEL_TIME
-		hit_object.m_first_level_time	= Device.dwTimeGlobal;
-#endif
+		hit_object.fill(entity_alive,m_object,!m_stalker ? u64(-1) : m_stalker->agent_manager().member().mask(m_stalker));
 		hit_object.m_amount				= amount;
 
 		if (m_max_hit_count <= m_hits->size()) {
-			HITS::iterator		I = std::min_element(m_hits->begin(),m_hits->end(),SLevelTimePredicate<CEntityAlive>());
+			HITS::iterator		I = std::min_element(m_hits->begin(),m_hits->end(),SLevelTimePredicate());
 			VERIFY				(m_hits->end() != I);
 			*I					= hit_object;
 		}
@@ -154,34 +150,37 @@ void CHitMemoryManager::add					(float amount, const Fvector &vLocalDir, const C
 	}
 }
 
-void CHitMemoryManager::add					(const CHitObject &_hit_object)
+void CHitMemoryManager::add(const CHitObject& _hit_object)
 {
 #ifndef MASTER_GOLD
-	if (_hit_object.m_object && smart_cast<CActor const*>(_hit_object.m_object) && psAI_Flags.test(aiIgnoreActor))
+	if (_hit_object.m_object && const_cast<CGameObject*>(_hit_object.m_object)->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
-	VERIFY						(m_hits);
+	VERIFY(m_hits);
 	if (!object().g_Alive())
 		return;
 
-	CHitObject					hit_object = _hit_object;
-	hit_object.m_squad_mask.set(!m_stalker ? squad_mask_type(-1) : m_stalker->agent_manager().member().mask(m_stalker), TRUE);
+	CHitObject hit_object = _hit_object;
+	hit_object.m_squad_mask.set(!m_stalker ? u64(-1) : m_stalker->agent_manager().member().mask(m_stalker), TRUE);
 
-	const CEntityAlive			*entity_alive = hit_object.m_object;
-	HITS::iterator	J = std::find(m_hits->begin(),m_hits->end(),object_id(entity_alive));
-	if (m_hits->end() == J) {
-		if (m_max_hit_count <= m_hits->size()) {
-			HITS::iterator	I = std::min_element(m_hits->begin(),m_hits->end(),SLevelTimePredicate<CEntityAlive>());
-			VERIFY				(m_hits->end() != I);
-			*I					= hit_object;
+	const CGameObject* entity_alive = hit_object.m_object;
+	HITS::iterator J = std::find(m_hits->begin(), m_hits->end(), CMemoryObject::object_id(entity_alive));
+	if (m_hits->end() == J)
+	{
+		if (m_max_hit_count <= m_hits->size())
+		{
+			HITS::iterator	I = std::min_element(m_hits->begin(), m_hits->end(), SLevelTimePredicate());
+			VERIFY(m_hits->end() != I);
+			*I = hit_object;
 		}
 		else
-			m_hits->push_back	(hit_object);
+			m_hits->push_back(hit_object);
 	}
-	else {
-		hit_object.m_squad_mask.assign	(hit_object.m_squad_mask.get() | (*J).m_squad_mask.get());
-		*J						= hit_object;
+	else 
+	{
+		hit_object.m_squad_mask.assign(hit_object.m_squad_mask.get() | (*J).m_squad_mask.get());
+		*J = hit_object;
 	}
 }
 
@@ -227,7 +226,7 @@ void CHitMemoryManager::update()
 
 void CHitMemoryManager::enable			(const CObject *object, bool enable)
 {
-	HITS::iterator				J = std::find(m_hits->begin(),m_hits->end(),object_id(object));
+	HITS::iterator				J = std::find(m_hits->begin(),m_hits->end(), CMemoryObject::object_id(object));
 	if (J == m_hits->end())
 		return;
 
@@ -259,6 +258,24 @@ void CHitMemoryManager::remove_links	(CObject *object)
 	xr_delete					(m_selected_hit);
 #endif
 }
+struct CRemoveHitObjectPredicate {
+	const MemorySpace::CHitObject* m_object;
+
+	CRemoveHitObjectPredicate(const MemorySpace::CHitObject* object) : m_object(object)
+	{
+	}
+	bool operator() (const MemorySpace::CHitObject& object) const
+	{
+		return (m_object == &object);
+	}
+};
+
+void CHitMemoryManager::remove(const MemorySpace::CHitObject* hit_object)
+{
+	HITS::iterator I = std::find_if(m_hits->begin(), m_hits->end(), CRemoveHitObjectPredicate(hit_object));
+	if (I != m_hits->end())
+		m_hits->erase(I);
+}
 
 void CHitMemoryManager::save	(NET_Packet &packet) const
 {
@@ -275,28 +292,13 @@ void CHitMemoryManager::save	(NET_Packet &packet) const
 		// object params
 		packet.w_u32			((*I).m_object_params.m_level_vertex_id);
 		packet.w_vec3			((*I).m_object_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.w_float			((*I).m_object_params.m_orientation.yaw);
-		packet.w_float			((*I).m_object_params.m_orientation.pitch);
-		packet.w_float			((*I).m_object_params.m_orientation.roll);
-#endif // USE_ORIENTATION
 		// self params
 		packet.w_u32			((*I).m_self_params.m_level_vertex_id);
 		packet.w_vec3			((*I).m_self_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.w_float			((*I).m_self_params.m_orientation.yaw);
-		packet.w_float			((*I).m_self_params.m_orientation.pitch);
-		packet.w_float			((*I).m_self_params.m_orientation.roll);
-#endif // USE_ORIENTATION
-#ifdef USE_LEVEL_TIME
+
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_LEVEL_TIME
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_FIRST_LEVEL_TIME
-		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
-#endif // USE_FIRST_LEVEL_TIME
+
 		packet.w_vec3			((*I).m_direction);
 		packet.w_u16			((*I).m_bone_index);
 		packet.w_float			((*I).m_amount);
@@ -318,38 +320,24 @@ void CHitMemoryManager::load	(IReader &packet)
 		delayed_object.m_object_id	= packet.r_u16();
 
 		CHitObject					&object = delayed_object.m_hit_object;
-		object.m_object				= smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+		CObject* O = Level().Objects.net_Find(delayed_object.m_object_id);
+		object.m_object				= O ? O->cast_entity_alive() : NULL;
 		// object params
 		object.m_object_params.m_level_vertex_id	= packet.r_u32();
 		packet.r_fvector3			(object.m_object_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.r_float				(object.m_object_params.m_orientation.yaw);
-		packet.r_float				(object.m_object_params.m_orientation.pitch);
-		packet.r_float				(object.m_object_params.m_orientation.roll);
-#endif
+
 		// self params
 		object.m_self_params.m_level_vertex_id	= packet.r_u32();
 		packet.r_fvector3			(object.m_self_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.r_float				(object.m_self_params.m_orientation.yaw);
-		packet.r_float				(object.m_self_params.m_orientation.pitch);
-		packet.r_float				(object.m_self_params.m_orientation.roll);
-#endif
-#ifdef USE_LEVEL_TIME
+
 		VERIFY						(Device.dwTimeGlobal >= object.m_level_time);
 		object.m_level_time			= packet.r_u32();
 		object.m_level_time			= Device.dwTimeGlobal - object.m_level_time;
-#endif // USE_LEVEL_TIME
-#ifdef USE_LAST_LEVEL_TIME
+
 		VERIFY						(Device.dwTimeGlobal >= object.m_last_level_time);
 		object.m_last_level_time	= packet.r_u32();
 		object.m_last_level_time	= Device.dwTimeGlobal - object.m_last_level_time;
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_FIRST_LEVEL_TIME
-		VERIFY						(Device.dwTimeGlobal >= (*I).m_first_level_time);
-		object.m_first_level_time	= packet.r_u32();
-		object.m_first_level_time	= Device.dwTimeGlobal - object.m_first_level_time;
-#endif // USE_FIRST_LEVEL_TIME
+
 		packet.r_fvector3			(object.m_direction);
 		object.m_bone_index			= packet.r_u16();
 		object.m_amount				= packet.r_float();
@@ -363,8 +351,12 @@ void CHitMemoryManager::load	(IReader &packet)
 
 		const CClientSpawnManager::CSpawnCallback	*spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id,m_object->ID());
 		if (!spawn_callback || !spawn_callback->m_object_callback)
+		{
 			if(!g_dedicated_server)
+			{
 				Level().client_spawn_manager().add	(delayed_object.m_object_id,m_object->ID(),callback);
+			}
+		}
 #ifdef DEBUG
 		else {
 			if (spawn_callback && spawn_callback->m_object_callback) {
@@ -372,6 +364,244 @@ void CHitMemoryManager::load	(IReader &packet)
 			}
 		}
 #endif // DEBUG
+	}
+}
+
+/*void CHitMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CHitMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		HITS::const_iterator		I = objects().begin();
+		HITS::const_iterator		E = objects().end();
+		Object->GetCurrentChunk()->WriteArray(objects().size());
+		{
+			for (; I != E; ++I) {
+				Object->BeginChunk("CHitMemoryManager::object");
+				{
+					VERIFY((*I).m_object);
+					Object->GetCurrentChunk()->w_u16((*I).m_object->ID());
+					// object params
+					Object->GetCurrentChunk()->w_u32((*I).m_object_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->w_vec3((*I).m_object_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->BeginChunk("CHitMemoryManager::object::object_params_orientation");
+					{
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif // USE_ORIENTATION
+					// self params
+					Object->GetCurrentChunk()->w_u32((*I).m_self_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->w_vec3((*I).m_self_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->BeginChunk("CHitMemoryManager::object::self_params_orientation");
+					{
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif // USE_ORIENTATION
+#ifdef USE_LEVEL_TIME
+					Object->BeginChunk("CHitMemoryManager::object::level_time");
+					{
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
+					}
+					Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+					Object->BeginChunk("CHitMemoryManager::object::first_level_time");
+					{
+						Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
+					}
+					Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+					Object->GetCurrentChunk()->w_vec3((*I).m_direction);
+					Object->GetCurrentChunk()->w_u16((*I).m_bone_index);
+					Object->GetCurrentChunk()->w_float((*I).m_amount);
+				}
+				Object->EndChunk();
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CHitMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CHitMemoryManager");
+	{
+		if (!m_object->g_Alive()){
+			Object->EndChunk();
+			return;
+		}
+
+		typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+		CALLBACK_TYPE					callback;
+		callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+
+		u64								count;
+		Object->GetCurrentChunk()->ReadArray(count);
+		{
+			for (u64 i = 0; i < count; ++i) {
+				Object->BeginChunk("CHitMemoryManager::object");
+				{
+					CDelayedHitObject			delayed_object;
+					Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
+
+					CHitObject& object = delayed_object.m_hit_object;
+					object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+					// object params
+					Object->GetCurrentChunk()->r_u32(object.m_object_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->r_vec3(object.m_object_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->FindChunk("CHitMemoryManager::object::object_params_orientation");
+					{
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif
+					// self params
+					Object->GetCurrentChunk()->r_u32(object.m_self_params.m_level_vertex_id);
+					Object->GetCurrentChunk()->r_vec3(object.m_self_params.m_position);
+#ifdef USE_ORIENTATION
+					Object->FindChunk("CHitMemoryManager::object::self_params_orientation");
+					{
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.yaw);
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.pitch);
+						Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.roll);
+					}
+					Object->EndChunk();
+#endif
+#ifdef USE_LEVEL_TIME
+					Object->BeginChunk("CHitMemoryManager::object::level_time");
+					{
+						VERIFY(Device.dwTimeGlobal >= object.m_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_level_time);
+						object.m_level_time = Device.dwTimeGlobal - object.m_level_time;
+						VERIFY(Device.dwTimeGlobal >= object.m_last_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_last_level_time);
+						object.m_last_level_time = Device.dwTimeGlobal - object.m_last_level_time;
+					}
+					Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+					Object->FindChunk("CHitMemoryManager::object::first_level_time");
+					{
+						VERIFY(Device.dwTimeGlobal >= (*I).m_first_level_time);
+						Object->GetCurrentChunk()->r_u32(object.m_first_level_time);
+						object.m_first_level_time = Device.dwTimeGlobal - object.m_first_level_time;
+					}
+					Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+					Object->GetCurrentChunk()->r_vec3(object.m_direction);
+					Object->GetCurrentChunk()->r_u16(object.m_bone_index);
+					Object->GetCurrentChunk()->r_float(object.m_amount);
+
+					if (object.m_object) {
+						add(object);
+						Object->EndChunk();
+						continue;
+					}
+
+					m_delayed_objects.push_back(delayed_object);
+
+					const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+					if (!spawn_callback || !spawn_callback->m_object_callback) {
+						if (!g_dedicated_server) {
+							Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+						}
+#ifdef DEBUG
+						else {
+							if (spawn_callback && spawn_callback->m_object_callback) {
+								VERIFY(spawn_callback->m_object_callback == callback);
+							}
+						}
+					}
+#endif // DEBUG
+				}
+				Object->EndChunk();
+			}
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}*/
+
+void CHitMemoryManager::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CHitMemoryManager")
+	{
+		if (!m_object->g_Alive()) {
+			return;
+		}
+
+		if (!Object.IsSave()) {
+			typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+			CALLBACK_TYPE					callback;
+			callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+		}
+
+		((CSaveObject&)Object).Serialize(*m_hits, fastdelegate::MakeDelegate(this, &CHitMemoryManager::SerializeSingle));
+
+	}
+}
+
+void CHitMemoryManager::SerializeSingle(ISaveObject& Object, CHitObject& Value)
+{
+	BEGIN_CHUNK(Object,"CHitObject")
+	{
+		Value.Serialize(Object);
+		if (Object.IsSave()) {
+			VERIFY(m_object);
+			u16 Value = m_object->ID();
+			Object << Value;
+		}
+		else {
+
+			CDelayedHitObject			delayed_object;
+			Object << delayed_object.m_object_id;
+
+			CHitObject& object = delayed_object.m_hit_object;
+			object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+
+			//////////////////////////////////////////////////////////
+
+			if (object.m_object) {
+				add(object);
+			}
+			else {
+				m_delayed_objects.push_back(delayed_object);
+				const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+				if (!spawn_callback || !spawn_callback->m_object_callback) {
+					typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+					CALLBACK_TYPE					callback;
+					callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+					if (!g_dedicated_server) {
+						Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+					}
+#ifdef DEBUG
+					else {
+						if (spawn_callback && spawn_callback->m_object_callback) {
+							VERIFY(spawn_callback->m_object_callback == callback);
+						}
+					}
+#endif // DEBUG
+				}
+			}
+		}
+		Object << Value.m_direction << Value.m_bone_index << Value.m_amount;
 	}
 }
 
@@ -399,7 +629,7 @@ void CHitMemoryManager::on_requested_spawn	(CObject *object)
 			continue;
 		
 		if (m_object->g_Alive()) {
-			(*I).m_hit_object.m_object= smart_cast<CEntityAlive*>(object);
+			(*I).m_hit_object.m_object= object ? object->cast_entity_alive() : NULL;
 			VERIFY						((*I).m_hit_object.m_object);
 			add							((*I).m_hit_object);
 		}

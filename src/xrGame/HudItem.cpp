@@ -48,6 +48,8 @@ CHudItem::~CHudItem()
 void CHudItem::Load(LPCSTR section)
 {
 	hud_sect				= pSettings->r_string		(section,"hud");
+	hud_sect_cache = hud_sect;
+
 	m_animation_slot		= pSettings->r_u32			(section,"animation_slot");
 
 	m_nearwall_dist_min = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_min", .2f);
@@ -91,12 +93,11 @@ void CHudItem::renderable_Render()
 			on_renderable_Render		();
 			debug_draw_firedeps			();
 		}else
-		if (object().H_Parent()) 
+		if (m_object&&object().H_Parent())
 		{
-			CInventoryOwner	*owner = smart_cast<CInventoryOwner*>(object().H_Parent());
-			VERIFY			(owner);
-			CInventoryItem	*self = smart_cast<CInventoryItem*>(this);
-			if (owner->attached(self) ||
+			if ((m_object->H_Parent()->cast_inventory_owner() && 
+				m_object->H_Parent()->cast_inventory_owner()->attached(m_object->cast_inventory_item())) 
+				||
 				(item().BaseSlot() == INV_SLOT_3 /*|| item().BaseSlot() == INV_SLOT_2*/))
 				on_renderable_Render();
 		}
@@ -144,22 +145,31 @@ void CHudItem::OnStateSwitch(u32 S)
 	switch (S)
 	{
 	case eBore:
-		SetPending		(FALSE);
+	{
+		SetPending(FALSE);
 
-		PlayAnimBore	();
-		if(HudItemData())
+		PlayAnimBore();
+		if (HudItemData())
 		{
-			Fvector P		= HudItemData()->m_item_transform.c;
+			Fvector P = HudItemData()->m_item_transform.c;
 			m_sounds.PlaySound("sndBore", P, object().H_Root(), !!GetHUDmode(), false, m_started_rnd_anim_idx);
 		}
-
 		break;
+	}
+	case eShowing:
+	{
+		if (Level().CurrentControlEntity() == object().H_Parent())
+		{
+			g_player_hud->attach_item(this);
+		}
+		break;
+	}
 	}
 }
 
 void CHudItem::OnAnimationEnd(u32 state)
 {
-	if (CActor* pActor = smart_cast<CActor*>(object().H_Parent()))
+	if (CActor* pActor = m_object && m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : nullptr)
 	{
 		pActor->callback(GameObject::eActorHudAnimationEnd)(smart_cast<CGameObject*>(this)->lua_game_object(), hud_sect.c_str(), m_current_motion.c_str(), state, animation_slot());
 	}
@@ -167,15 +177,25 @@ void CHudItem::OnAnimationEnd(u32 state)
 	switch(state)
 	{
 	case eBore:
+	{
+		SwitchState(eIdle);
+		break;
+	}
+	case eHiding:
+	{
+		if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
 		{
-			SwitchState	(eIdle);
-		} break;
+			g_player_hud->detach_item(this);
+		}
+		SwitchState(eHidden);
+		break;
+	}
 	}
 }
 
 void CHudItem::PlayAnimBore()
 {
-	PlayHUDMotion	("anm_bore", TRUE, this, GetState());
+	PlayHUDMotion("anm_bore", TRUE, nullptr, GetState());
 }
 
 bool CHudItem::ActivateItem() 
@@ -186,11 +206,16 @@ bool CHudItem::ActivateItem()
 
 void CHudItem::DeactivateItem() 
 {
-	OnHiddenItem	();
+	OnHiddenItem();
 }
+
 void CHudItem::OnMoveToRuck(const SInvItemPlace& prev)
 {
 	SwitchState(eHidden);
+	if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
+	{
+		g_player_hud->detach_item(this);
+	}
 }
 
 bool CHudItem::SendDeactivateItem()
@@ -220,7 +245,7 @@ void CHudItem::UpdateHudAdditonal(Fmatrix& trans)
 	if (!isInertion)
 		return;
 
-	CActor* pActor = smart_cast<CActor*>(object().H_Parent());
+	CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL;
 	if (!pActor)
 		return;
 
@@ -483,30 +508,19 @@ void CHudItem::OnH_B_Chield		()
 	StopCurrentAnimWithoutCallback();
 }
 
-void CHudItem::OnH_B_Independent	(bool just_before_destroy)
+void CHudItem::OnH_B_Independent(bool just_before_destroy)
 {
 	m_sounds.StopAllSounds	();
 	UpdateXForm				();
-	
-	// next code was commented 
-	/*
-	if(HudItemData() && !just_before_destroy)
-	{
-		object().XFORM().set( HudItemData()->m_item_transform );
-	}
-	
+}
+
+void CHudItem::OnH_A_Independent()
+{
 	if (HudItemData())
 	{
 		g_player_hud->detach_item(this);
-		Msg("---Detaching hud item [%s][%d]", this->HudSection().c_str(), this->object().ID());
-	}*/
-	//SetHudItemData			(nullptr);
-}
+	}
 
-void CHudItem::OnH_A_Independent	()
-{
-	if(HudItemData())
-		g_player_hud->detach_item(this);
 	StopCurrentAnimWithoutCallback();
 }
 
@@ -561,7 +575,7 @@ u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 
 {
 	if (HudItemData() && !HudAnimationExist(M.c_str()))
 	{
-		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M);
+		Msg("! model [%s] has no motion alias defined [%s]", hud_sect.c_str(), M.c_str());
 		return 0;
 	}
 
@@ -614,9 +628,9 @@ void CHudItem::StopCurrentAnimWithoutCallback()
 
 BOOL CHudItem::GetHUDmode()
 {
-	if (object().H_Parent())
+	if (m_object && m_object->H_Parent())
 	{
-		CActor* A = smart_cast<CActor*>(object().H_Parent());
+		CActor* A = m_object->H_Parent()->cast_actor();
 		return (A && A->HUDview() && HudItemData());
 	}
 	else
@@ -625,14 +639,17 @@ BOOL CHudItem::GetHUDmode()
 
 void CHudItem::PlayAnimIdle()
 {
-	if (TryPlayAnimIdle()) return;
+	if (TryPlayAnimIdle())
+	{
+		return;
+	}
 
 	PlayHUDMotion("anm_idle", TRUE, nullptr, GetState());
 }
 
 bool CHudItem::TryPlayAnimIdle()
 {
-	if(MovingAnimAllowedNow())
+	if (MovingAnimAllowedNow())
 	{
 		CActor* pActor = smart_cast<CActor*>(object().H_Parent());
 		if (pActor)
@@ -643,10 +660,26 @@ bool CHudItem::TryPlayAnimIdle()
 				PlayAnimIdleSprint();
 				return true;
 			}
-			else if(!(state & ACTOR_DEFS::EMoveCommand::mcCrouch) && pActor->AnyMove())
+			else if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
 			{
-				PlayAnimIdleMoving();
-				return true;
+				if (state & ACTOR_DEFS::EMoveCommand::mcCrouch && (HudAnimationExist("anm_idle_moving_crouch_slow") || HudAnimationExist("anm_idle_moving_crouch")))
+				{
+					if (state & ACTOR_DEFS::EMoveCommand::mcAccel && HudAnimationExist("anm_idle_moving_crouch_slow"))
+						PlayAnimIdleMovingCrouchSlow();
+					else
+						PlayAnimIdleMovingCrouch();
+
+					return true;
+				}
+				else
+				{
+					if (state & ACTOR_DEFS::EMoveCommand::mcAccel && HudAnimationExist("anm_idle_moving_slow"))
+						PlayAnimIdleMovingSlow();
+					else
+						PlayAnimIdleMoving();
+
+					return true;
+				}
 			}
 		}
 	}
@@ -664,20 +697,32 @@ void CHudItem::PlayAnimIdleMoving()
 	PlayHUDMotion("anm_idle_moving", TRUE, nullptr, GetState());
 }
 
+void CHudItem::PlayAnimIdleMovingSlow()
+{
+	PlayHUDMotion("anm_idle_moving_slow", TRUE, nullptr, GetState());
+}
+
+void CHudItem::PlayAnimIdleMovingCrouch()
+{
+	PlayHUDMotion("anm_idle_moving_crouch", TRUE, nullptr, GetState());
+}
+
+void CHudItem::PlayAnimIdleMovingCrouchSlow()
+{
+	PlayHUDMotion("anm_idle_moving_crouch_slow", TRUE, nullptr, GetState());
+}
+
 void CHudItem::PlayAnimIdleSprint()
 {
-	PlayHUDMotion("anm_idle_sprint", TRUE, nullptr,GetState());
+	PlayHUDMotion("anm_idle_sprint", TRUE, nullptr, GetState());
 }
 
 void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 {
-	if(GetState()==eIdle && !m_bStopAtEndAnimIsRunning)
+	if (GetState() == eIdle && !m_bStopAtEndAnimIsRunning)
 	{
-		if( (cmd == ACTOR_DEFS::mcSprint) || (cmd == ACTOR_DEFS::mcAnyMove)  )
-		{
-			PlayAnimIdle						();
-			ResetSubStateTime					();
-		}
+		PlayAnimIdle();
+		ResetSubStateTime();
 	}
 }
 
@@ -724,6 +769,54 @@ float CHudItem::GetHudFov()
 	}
 
 	return m_nearwall_last_hud_fov;
+}
+
+void CHudItem::PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allowOverlap)
+{
+	HUD_SOUND_ITEM* SndIter = m_sounds.FindSoundItem(alias, false);
+	if (SndIter != nullptr)
+	{
+		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap);
+	}
+}
+
+void CHudItem::SetModelBoneStatus(const char* bone, BOOL show)
+{
+	if (HudItemData())
+	{
+		HudItemData()->set_bone_visible(bone, show, TRUE);
+	}
+
+	if (IKinematics* pWeaponVisual = m_object ? m_object->Visual()->dcast_PKinematics() : NULL)
+	{
+		if (auto BoneID = pWeaponVisual->LL_BoneID(bone); BoneID != BI_NONE)
+		{
+			pWeaponVisual->LL_SetBoneVisible(BoneID, show, FALSE);
+		}
+	}
+}
+
+void CHudItem::SetMultipleBonesStatus(const char* section, const char* line, BOOL show)
+{
+	if (!pSettings->section_exist(section))
+	{
+		return;
+	}
+
+	if (!!pSettings->line_exist(section, line))
+	{
+		LPCSTR	S = pSettings->r_string(section, line);
+		if (S && S[0])
+		{
+			string128 _Item = {};
+			int count = _GetItemCount(S);
+			for (int it = 0; it < count; ++it)
+			{
+				_GetItem(S, it, _Item);
+				SetModelBoneStatus(_Item, show);
+			}
+		}
+	}
 }
 
 void CHUDState::SetState(u32 v) {

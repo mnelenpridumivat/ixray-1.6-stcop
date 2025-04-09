@@ -5,8 +5,12 @@
 // X-Ray Engine: OGSR Project 2017
 ////////////////////////////////////////////////////////////
 #pragma once
+#include "_flags.h"
 
-struct ENGINE_API VisMask final
+using VisMask = Flags1024;
+constexpr size_t BonesLimit = 1024;
+
+/*struct ENGINE_API VisMask final
 {
 	Flags64 _visimask;
 	Flags64 _visimask_ex;
@@ -102,4 +106,4 @@ struct ENGINE_API VisMask final
 		_visimask.invert();
 		_visimask_ex.invert();
 	}
-};
+};*/

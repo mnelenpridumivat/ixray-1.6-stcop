@@ -1,6 +1,7 @@
 #pragma once
 
 #include "inventory_item_object.h"
+#include "../xrScripts/script_export_space.h"
 
 struct SBoneProtections;
 
@@ -25,8 +26,8 @@ public:
 
 	float					HitThroughArmor		(float hit_power, s16 element, float ap, bool& add_wound, ALife::EHitType hit_type);
 
-	virtual void			OnMoveToSlot		(const SInvItemPlace& prev);
-	virtual void			OnMoveToRuck		(const SInvItemPlace& previous_place);
+	virtual void			OnMoveToSlot		(const SInvItemPlace prev) override;
+	virtual void			OnMoveToRuck		(const SInvItemPlace previous_place) override;
 	virtual void			OnH_A_Chield		();
 
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
@@ -72,4 +73,5 @@ public:
 
 protected:
 	virtual bool			install_upgrade_impl( LPCSTR section, bool test );
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

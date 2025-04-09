@@ -11,6 +11,7 @@
 #include "script_binder.h"
 #include "Hit.h"
 #include "game_object_space.h"
+#include "Save/SaveInterface.h"
 
 class CPhysicsShell;
 class CSE_Abstract;
@@ -41,16 +42,23 @@ class CAttachableItem;
 class animation_movement_controller;
 class CBlend;
 class ai_obstacle;
+class CSaveObjectSave;
+class CSaveObjectLoad;
+class CMissile;
+class CExplosiveRocket;
+class CGrenade;
+class CUsableScriptObject;
+class CBreakableObject;
 
 class IKinematics;
+class CAI_Trader;
 
 template <typename _return_type>
 class CScriptCallbackEx;
 
 class CGameObject : 
 	public CObject, 
-	public CUsableScriptObject,
-	public CScriptBinder
+	public CUsableScriptObject
 {
 	typedef CObject inherited;
 	bool							m_spawned;
@@ -61,18 +69,22 @@ class CGameObject :
 protected:
 	//время удаления объекта
 	bool					m_bObjectRemoved;
+	xr_unique_ptr<CScriptBinder> m_ScriptBinderComponent;
 public:
 	CGameObject();
 	virtual ~CGameObject();
 public:
+	CScriptBinder* GetScriptBinderComponent() { return m_ScriptBinderComponent.get(); }
+
 	//functions used for avoiding most of the smart_cast
-	virtual CAttachmentOwner*			cast_attachment_owner		()						{return NULL;}
-	virtual CInventoryOwner*			cast_inventory_owner		()						{return NULL;}
-	virtual CInventoryItem*				cast_inventory_item			()						{return NULL;}
-	virtual CEntity*					cast_entity					()						{return NULL;}
-	virtual CEntityAlive*				cast_entity_alive			()						{return NULL;}
-	virtual CActor*						cast_actor					()						{return NULL;}
 	virtual CGameObject*				cast_game_object			()						{return this;}
+	virtual CAttachmentOwner*			cast_attachment_owner		()						{return nullptr;}
+	virtual CInventoryOwner*			cast_inventory_owner		()						{return nullptr;}
+	virtual CInventoryItem*				cast_inventory_item			()						{return nullptr;}
+	virtual CEntity*					cast_entity					()						{return nullptr;}
+	virtual CEntityAlive*				cast_entity_alive			()						{return nullptr;}
+	virtual CActor*						cast_actor					()						{return nullptr;}
+	virtual CAI_Trader*					cast_trader					()						{return nullptr;}
 	virtual CCustomZone*				cast_custom_zone			()						{return nullptr;}
 	virtual CPhysicsShellHolder*		cast_physics_shell_holder	()						{return nullptr;}
 	virtual IInputReceiver*				cast_input_receiver			()						{return nullptr;}
@@ -88,7 +100,11 @@ public:
 	virtual CHolderCustom*				cast_holder_custom			()						{return nullptr;}
 	virtual CBaseMonster*				cast_base_monster			()						{return nullptr;}
 	virtual CCar*						cast_car					()						{return nullptr;}
-
+	virtual CMissile					*cast_missile				()						{return nullptr;}
+	virtual CExplosiveRocket			*cast_explosive_rocket		()						{return nullptr;}
+	virtual CGrenade					*cast_grenade				()						{return nullptr;}
+	virtual CUsableScriptObject			*cast_usable_script_object	()						{return nullptr;}
+	virtual CBreakableObject			*cast_breakable_object		()						{return nullptr;}
 public:
 	virtual BOOL						feel_touch_on_contact	(CObject *)					{return TRUE;}
 	virtual bool						use						(CGameObject* who_use)		{return CUsableScriptObject::use(who_use);};
@@ -113,6 +129,13 @@ public:
 	virtual BOOL			net_SaveRelevant	();
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
+	//object serialization new
+	//virtual void			net_Save(ISaveObject* Object);
+	//virtual void			net_Load(ISaveObject* Object);
+	virtual void			net_Serialize(ISaveObject& Object);
+	//virtual void Save(ISaveObject* Object) const;
+	//virtual void Load(ISaveObject* Object);
+	virtual void Serialize(ISaveObject& Object);
 
 	virtual BOOL			net_Relevant		()	{ return getLocal();	}	// send messages only if active and local
 	virtual void			spatial_move		();
@@ -260,7 +283,7 @@ public:
 		return				(m_story_id);
 	}
 	
-	void FootStepCallback(float power, bool b_play, bool b_on_ground, bool b_hud_view);
+	virtual void FootStepCallback(float power, bool b_play, bool b_on_ground, bool b_hud_view);
 
 public:
 	virtual u32				ef_creature_type	() const;

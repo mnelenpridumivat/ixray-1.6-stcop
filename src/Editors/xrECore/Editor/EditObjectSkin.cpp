@@ -14,12 +14,12 @@
 // FX: link sphere symbols 
 #include <freemagic/MgcSphere.h>
 
-const u32 color_bone_sel_color	=0xFFFFFFFF;
-const u32 color_bone_norm_color	=0xFFFFFF00;
-const u32 color_bone_link_color	=0xFFA0A000;
-const u32 color_bone_sel_cm		=0xFFFF0000;
-const u32 color_bone_norm_cm	=0xFF700000;
-const float joint_size			=0.025f;
+constexpr u32 color_bone_sel_color	=0xFFFFFFFF;
+constexpr u32 color_bone_norm_color	=0xFFFFFF00;
+constexpr u32 color_bone_link_color	=0xFFA0A000;
+constexpr u32 color_bone_sel_cm		=0xFFFF0000;
+constexpr u32 color_bone_norm_cm	=0xFF700000;
+constexpr float joint_size			=0.025f;
 
 void CEditableObject::ResetBones()
 {

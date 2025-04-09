@@ -24,9 +24,9 @@ void CF1::script_register	(lua_State *L)
 	module(L)
 	[
 		class_<CF1,CGameObject>("CF1")
-			.def(constructor<>()),
+			.def(constructor<>())
 			//new 14.10.08 peacemaker
-		class_<CWeaponAmmo,CGameObject>("CWeaponAmmo")
+		/*class_<CWeaponAmmo,CGameObject>("CWeaponAmmo")
 			.def(constructor<>()),
 		class_<CFlameCanister, CGameObject>("CFlameCanister")
 			.def(constructor<>()),
@@ -41,7 +41,7 @@ void CF1::script_register	(lua_State *L)
 		class_<CInventoryBox,CGameObject>("CInventoryBox")
 			.def(constructor<>()),
 		class_<CExplosiveItem,CGameObject>("CExplosiveItem")
-			.def(constructor<>())
+			.def(constructor<>())*/
 	];
 }
 

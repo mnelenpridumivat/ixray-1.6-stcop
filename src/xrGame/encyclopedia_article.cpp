@@ -29,6 +29,34 @@ void ARTICLE_DATA::save (IWriter& stream)
 	save_data(article_type, stream);
 }
 
+/*void ARTICLE_DATA::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("ARTICLE_DATA");
+	{
+		Object->GetCurrentChunk()->r_u64(receive_time);
+		Object->GetCurrentChunk()->r_stringZ(article_id);
+		Object->GetCurrentChunk()->r_bool(readed);
+		{
+			u8 type;
+			Object->GetCurrentChunk()->r_u8(type);
+			article_type = (EArticleType)type;
+		}
+	}
+	Object->EndChunk();
+}
+
+void ARTICLE_DATA::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("ARTICLE_DATA");
+	{
+		Object->GetCurrentChunk()->w_u64(receive_time);
+		Object->GetCurrentChunk()->w_stringZ(article_id);
+		Object->GetCurrentChunk()->w_bool(readed);
+		Object->GetCurrentChunk()->w_u8((u8)article_type);
+	}
+	Object->EndChunk();
+}*/
+
 CEncyclopediaArticle::CEncyclopediaArticle()
 {
 }
@@ -75,7 +103,9 @@ void CEncyclopediaArticle::load_shared	(LPCSTR)
 
 	if(ltx)
 	{
-		data()->image.SetShader(InventoryUtilities::GetEquipmentIconsShader());
+		const char* icons_texture = READ_IF_EXISTS(pSettings, r_string, ltx, "icons_texture", nullptr);
+		data()->image.SetShader(InventoryUtilities::GetEquipmentIconsShader(icons_texture));
+
 		Frect				tex_rect;
 		tex_rect.x1			= float(pSettings->r_u32(ltx, "inv_grid_x") * INV_GRID_WIDTH(isHQIcons));
 		tex_rect.y1			= float(pSettings->r_u32(ltx, "inv_grid_y") * INV_GRID_HEIGHT(isHQIcons));

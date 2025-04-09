@@ -8,6 +8,18 @@
 
 #pragma once
 
+namespace SaveSystemDefined {
+
+	//template<typename K, typename V>
+	//void Save(CSaveObjectSave* Obj, K Key, const V& Value);
+
+	//template<typename K, typename V>
+	//void Load(CSaveObjectLoad* Obj, K& Key, V& Value);
+
+	template<typename K, typename V>
+	void Serialize(ISaveObject& Object, xr_map<K, V>& Value);
+}
+
 #define TEMPLATE_SPECIALIZATION template <typename _index_type, typename _data_type>
 #define CSALifeAbstractRegistry CALifeAbstractRegistry<_index_type,_data_type>
 
@@ -32,6 +44,59 @@ TEMPLATE_SPECIALIZATION
 void CSALifeAbstractRegistry ::load					(IReader &file_stream)
 {
 	load_data		(m_objects,file_stream);
+}
+
+/*TEMPLATE_SPECIALIZATION
+void CSALifeAbstractRegistry::save(CSaveObjectSave* Object) const
+{
+	Object->GetCurrentChunk()->WriteArray(m_objects.size());
+	{
+		for (const auto& elem : m_objects) {
+			Object->BeginChunk("CSALifeAbstractRegistry::elem");
+			{
+				SaveSystemDefined::Save<_index_type, _data_type>(Object, elem.first, elem.second);
+			}
+			Object->EndChunk();
+		}
+	}
+	Object->GetCurrentChunk()->EndArray();
+}
+
+TEMPLATE_SPECIALIZATION
+void CSALifeAbstractRegistry::load(CSaveObjectLoad* Object)
+{
+	u64 ArraySize;
+	Object->GetCurrentChunk()->ReadArray(ArraySize);
+	{
+		for (u64 i = 0; i < ArraySize; ++i) {		
+			std::pair< _index_type, _data_type>&& temp = std::pair< _index_type, _data_type>();
+			Object->BeginChunk("CSALifeAbstractRegistry::elem");
+			{
+				SaveSystemDefined::Load<_index_type, _data_type>(Object, temp.first, temp.second);
+			}
+			Object->EndChunk();
+			m_objects.emplace(temp);
+		}
+	}
+	Object->GetCurrentChunk()->EndArray();
+}*/
+
+TEMPLATE_SPECIALIZATION
+void CSALifeAbstractRegistry::serialize(ISaveObject& Object)
+{
+	SaveSystemDefined::Serialize(Object, m_objects);
+	/*Object << m_objects;
+	Object->GetCurrentChunk()->WriteArray(m_objects.size());
+	{
+		for (const auto& elem : m_objects) {
+			Object->BeginChunk("CSALifeAbstractRegistry::elem");
+			{
+				SaveSystemDefined::Save<_index_type, _data_type>(Object, elem.first, elem.second);
+			}
+			Object->EndChunk();
+		}
+	}
+	Object->GetCurrentChunk()->EndArray();*/
 }
 
 TEMPLATE_SPECIALIZATION

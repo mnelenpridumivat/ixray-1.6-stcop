@@ -95,6 +95,7 @@ void CUIWindow::ResetPPMode()
 
 CUIWindow::CUIWindow()
 :m_pParentWnd(nullptr),
+m_pFont(nullptr),
 m_pMouseCapturer(nullptr),
 m_pMessageTarget(nullptr),
 m_pKeyboardCapturer(nullptr),
@@ -153,10 +154,12 @@ CUIWindow::~CUIWindow()
 
 void CUIWindow::Draw()
 {
-	for(WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end() != it; ++it){
-		if(!(*it)->IsShown())		continue;
-		if((*it)->GetCustomDraw())	continue;
-		(*it)->Draw					();
+	for(CUIWindow* W : m_ChildWndList)
+	{
+		if (!W)		continue;
+		if(!W->IsShown())		continue;
+		if(W->GetCustomDraw())	continue;
+		W->Draw();
 	}
 #ifdef DEBUG
 	if(g_show_wnd_rect2){
@@ -339,11 +342,10 @@ bool CUIWindow::OnMouseAction(float x, float y, EUIMessages mouse_action)
 	//Проверка на попадание мыши в окно,
 	//происходит в обратном порядке, чем рисование окон
 	//(последние в списке имеют высший приоритет)
-	WINDOW_LIST::reverse_iterator it = m_ChildWndList.rbegin();
 
-	for(; it!=m_ChildWndList.rend(); ++it)
+	for(s64 i = m_ChildWndList.size()-1; i>=0; i--)
 	{
-		CUIWindow* w	= (*it);
+		auto w = m_ChildWndList[i];
 		Frect wndRect_	= w->GetWndRect();
 		if (wndRect_.in(cursor_pos) )
 		{
@@ -359,7 +361,6 @@ bool CUIWindow::OnMouseAction(float x, float y, EUIMessages mouse_action)
 						   cursor_pos.y -w->GetWndRect().top, mouse_action))return true;
 		}
 	}
-
 
 	return false;
 }
@@ -505,10 +506,12 @@ void CUIWindow::SetKeyboardCapture(CUIWindow* pChildWindow, bool capture_status)
 void CUIWindow::SendMessage(CUIWindow *pWnd, s16 msg, void *pData)
 {
 	//оповестить дочерние окна
-	for(WINDOW_LIST_it it = m_ChildWndList.begin(); m_ChildWndList.end()!=it; ++it)
+	for(const auto& elem : m_ChildWndList)
 	{
-		if((*it)->IsEnabled())
-			(*it)->SendMessage(pWnd,msg,pData);
+		if (elem->IsEnabled())
+		{
+			elem->SendMessage(pWnd, msg, pData);
+		}
 	}
 }
 

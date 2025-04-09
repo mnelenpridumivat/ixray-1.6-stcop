@@ -104,3 +104,74 @@ void CALifeRegistryContainer::save(IWriter &memory_stream)
 	>::process					(this,memory_stream);
 	memory_stream.close_chunk	();
 }
+
+/*void CALifeRegistryContainer::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CALifeRegistryContainer");
+	{
+		CInfoPortionRegistry::load(Object);
+		CRelationRegistry::load(Object);
+		CEncyclopediaRegistry::load(Object);
+		CGameNewsRegistry::load(Object);
+		CSpecificCharacterRegistry::load(Object);
+		CMapLocationRegistry::load(Object);
+		CGameTaskRegistry::load(Object);
+		CActorStatisticRegistry::load(Object);
+	}
+	Object->EndChunk();
+}
+
+void CALifeRegistryContainer::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CALifeRegistryContainer");
+	{
+
+	}
+	Object->EndChunk();
+}*/
+
+void CALifeRegistryContainer::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CALifeRegistryContainer")
+	{
+		BEGIN_CHUNK(Object,"CInfoPortionRegistry")
+		{
+			CInfoPortionRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CRelationRegistry")
+		{
+			CRelationRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CEncyclopediaRegistry")
+		{
+			CEncyclopediaRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CGameNewsRegistry")
+		{
+			CGameNewsRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CSpecificCharacterRegistry")
+		{
+			CSpecificCharacterRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CMapLocationRegistry")
+		{
+			CMapLocationRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CGameTaskRegistry")
+		{
+			CGameTaskRegistry::serialize(Object);
+		}
+
+		BEGIN_CHUNK(Object,"CActorStatisticRegistry")
+		{
+			CActorStatisticRegistry::serialize(Object);
+		}
+	}
+}

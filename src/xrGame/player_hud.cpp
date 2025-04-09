@@ -56,15 +56,16 @@ void player_hud_motion_container::load(IKinematicsAnimated* model, const shared_
 			pm						= &m_anims.back();
 			//base and alias name
 			pm->m_alias_name		= _b->first;
-			
-			if(_GetItemCount(anm.c_str())==1)
+
+			auto items_count = _GetItemCount(anm.c_str());
+			if (items_count == 1)
 			{
 				pm->m_base_name			= anm;
 				pm->m_additional_name	= anm;
 				pm->m_anim_speed = 1.f;
 			}else
 			{
-				R_ASSERT2(_GetItemCount(anm.c_str()) <= 3, anm.c_str());
+				//R_ASSERT2(_GetItemCount(anm.c_str()) <= 3, anm.c_str());
 				string512				str_item;
 				_GetItem(anm.c_str(),0,str_item);
 				pm->m_base_name			= str_item;
@@ -78,6 +79,14 @@ void player_hud_motion_container::load(IKinematicsAnimated* model, const shared_
 				pm->m_anim_speed = strlen(str_item) > 0
 					? atof(str_item)
 					: 1.f;
+
+				if (items_count > 3) {
+					for (u32 j = 3; j < items_count; ++j) {
+						string512	str_item;
+						_GetItem(anm.c_str(), j, str_item);
+						pm->m_bone_parts.push_back(str_item);
+					}
+				}
 			}
 
 			//and load all motions for it
@@ -369,7 +378,7 @@ bool  attachable_hud_item::need_renderable()
 void attachable_hud_item::render()
 {
 	::Render->set_Transform		(&m_item_transform);
-	::Render->add_Visual		(m_model->dcast_RenderVisual(), true);
+	::Render->add_Visual		(m_model->dcast_RenderVisual());
 	debug_draw_firedeps			();
 	m_parent_hud_item->render_hud_mode();
 }
@@ -502,7 +511,7 @@ void attachable_hud_item::load(const shared_str& sect_name)
 
 	// Visual
 	const shared_str& visual_name = pSettings->r_string(sect_name, "item_visual");
-	m_model						 = smart_cast<IKinematics*>(::Render->model_Create(visual_name.c_str()));
+	m_model						 = PKinematics(::Render->model_Create(visual_name.c_str()));
 
 	m_attach_place_idx = READ_IF_EXISTS(pSettings, r_u16, sect_name, "attach_place_idx", 0);
 	m_measures.load				(sect_name, m_model);
@@ -557,7 +566,7 @@ u32 attachable_hud_item::anim_play(const shared_str& anm_name_b, BOOL bMixIn, co
 
 	u32 ret					= g_player_hud->anim_play(m_attach_place_idx, M.mid, bMixIn, md, speed);
 	
-	if(m_model->dcast_PKinematicsAnimated())
+	if(auto ka = m_model->dcast_PKinematicsAnimated())
 	{
 		shared_str item_anm_name;
 		if(anm->m_base_name!=anm->m_additional_name)
@@ -566,6 +575,18 @@ u32 attachable_hud_item::anim_play(const shared_str& anm_name_b, BOOL bMixIn, co
 			item_anm_name = M.name;
 
 		anim_play(item_anm_name, bMixIn, speed);
+
+		for (auto& bpart_anim : anm->m_bone_parts) {
+			MotionID M3 = ka->ID_Cycle_Safe(bpart_anim);
+
+			if (M3.valid()) {
+				CBlend* B = ka->PlayCycle(M3, bMixIn);
+				if (B) 
+				{
+					B->speed *= speed;
+				}
+			}
+		}
 	}
 
 	R_ASSERT2		(m_parent_hud_item, "parent hud item is nullptr");
@@ -628,7 +649,13 @@ player_hud::~player_hud()
 
 void player_hud::load(const shared_str& player_hud_sect)
 {
-	if(player_hud_sect == m_sect_name) {
+	if (player_hud_sect == m_sect_name)
+	{
+		return;
+	}
+
+	if (!m_need_reload)
+	{
 		return;
 	}
 
@@ -746,7 +773,7 @@ void player_hud::render_hud()
 	if(b_r0 || b_r1 || m_bhands_visible) 
 	{
 		::Render->set_Transform(&m_transform);
-		::Render->add_Visual(m_model->dcast_RenderVisual(), true);
+		::Render->add_Visual(m_model->dcast_RenderVisual());
 	}
 
 	if(b_r0) 
@@ -811,7 +838,7 @@ void player_hud::render_hud()
 			::Render->set_HUD(FALSE);
 
 			::Render->set_Transform(&Actor()->XFORM());
-			::Render->add_Visual(m_legs_model->dcast_RenderVisual(), true);
+			::Render->add_Visual(m_legs_model->dcast_RenderVisual());
 
 			::Render->set_HUD(bHud);
 		}
@@ -1031,23 +1058,22 @@ void player_hud::update_inertion(Fmatrix& trans)
 	}
 }
 
-
 attachable_hud_item* player_hud::create_hud_item(const shared_str& sect)
 {
-	xr_vector<attachable_hud_item*>::iterator it = m_pool.begin();
-	xr_vector<attachable_hud_item*>::iterator it_e = m_pool.end();
-	for(;it!=it_e;++it)
+	for (auto& itm : m_pool)
 	{
-		attachable_hud_item* itm = *it;
-		if(itm->m_sect_name==sect)
+		if (itm->m_sect_name == sect)
+		{
 			return itm;
+		}
 	}
-	attachable_hud_item* res	= new attachable_hud_item(this);
-	res->load					(sect);
-	res->m_hand_motions.load	(m_model, sect);
-	m_pool.push_back			(res);
 
-	return	res;
+	attachable_hud_item* res = new attachable_hud_item(this);
+	res->load(sect);
+	res->m_hand_motions.load(m_model, sect);
+	m_pool.push_back(res);
+
+	return res;
 }
 
 void player_hud::RemoveHudItem(const shared_str& sect)
@@ -1091,23 +1117,30 @@ bool player_hud::allow_activation(CHudItem* item)
 
 void player_hud::attach_item(CHudItem* item)
 {
-	attachable_hud_item* pi			= create_hud_item(item->HudSection());
-	int item_idx					= pi->m_attach_place_idx;
+	attachable_hud_item* pi = create_hud_item(item->HudSection());
+	int item_idx = pi->m_attach_place_idx;
 	
-	if (m_attached_items[item_idx] != pi || pi->m_parent_hud_item != item) {
-		if(m_attached_items[item_idx])
+	if (m_attached_items[item_idx] != pi || pi->m_parent_hud_item != item)
+	{
+		if (m_attached_items[item_idx])
+		{
 			m_attached_items[item_idx]->m_parent_hud_item->on_b_hud_detach();
+		}
 
-		m_attached_items[item_idx]						= pi;
-		pi->m_parent_hud_item							= item;
+		m_attached_items[item_idx] = pi;
+		pi->m_parent_hud_item = item;
 
-		if(item_idx==0 && m_attached_items[1])
+		if (item_idx == 0 && m_attached_items[1])
+		{
 			m_attached_items[1]->m_parent_hud_item->CheckCompatibility(item);
+		}
 
 		item->on_a_hud_attach();
 	}
-	pi->m_parent_hud_item							= item;
+
+	pi->m_parent_hud_item = item;
 }
+
 void player_hud::RestoreHandBlends(LPCSTR ignored_part)
 {
 	u16 part_id			= m_model->partitions().part_id(ignored_part);
@@ -1499,4 +1532,11 @@ void player_hud::animator_fx_play(const shared_str& anim_name, u16 place_idx, u1
 			}break;
 		}
 	}
+}
+
+void player_hud::load_default()
+{
+	static auto actorHudDefault = READ_IF_EXISTS(pSettings, r_string, 
+		"actor", "player_hud_default", "actor_hud");
+	load(actorHudDefault);
 }

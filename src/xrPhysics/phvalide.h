@@ -3,7 +3,7 @@
 
 XRPHYSICS_API bool			valid_pos( const Fvector &P );
 XRPHYSICS_API const Fbox	&ph_boundaries();
-#ifdef DEBUG
+#ifndef MASTER_GOLD
 class IPhysicsShellHolder;
 XRPHYSICS_API xr_string dbg_valide_pos_string( const Fvector &pos,const Fbox &bounds, const IPhysicsShellHolder *obj, LPCSTR msg );
 XRPHYSICS_API xr_string dbg_valide_pos_string( const Fvector &pos, const IPhysicsShellHolder *obj, LPCSTR msg );

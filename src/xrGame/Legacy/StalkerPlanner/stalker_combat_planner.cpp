@@ -549,3 +549,21 @@ void CStalkerCombatPlanner::load(IReader &packet)
 {
 	inherited::load			(packet);
 }
+
+void CStalkerCombatPlanner::Save(CSaveObjectSave* Object) const
+{
+	auto handler = Object->BeginChunk("CStalkerCombatPlanner");
+	{
+		inherited::Save(Object);
+	}
+	Object->EndChunk(handler);
+}
+
+void CStalkerCombatPlanner::Load(CSaveObjectLoad* Object)
+{
+	auto handler = Object->BeginChunk("CStalkerCombatPlanner");
+	{
+		inherited::Load(Object);
+	}
+	Object->EndChunk(handler);
+}

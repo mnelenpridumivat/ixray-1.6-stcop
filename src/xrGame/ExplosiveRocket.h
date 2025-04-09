@@ -23,6 +23,7 @@ public:
 	virtual DLL_Pure	*_construct	();
 public:
 	virtual CExplosive					*cast_explosive			()						{return this;}
+	virtual CExplosiveRocket			*cast_explosive_rocket	()						{return this;}
 	virtual CInventoryItem				*cast_inventory_item	()						{return this;}
 	virtual CAttachableItem				*cast_attachable_item	()						{return this;}
 	virtual CWeapon						*cast_weapon			()						{return NULL;}
@@ -53,6 +54,9 @@ public:
 	
 	virtual void			save				(NET_Packet &output_packet) {inherited::save(output_packet);}
 	virtual void			load				(IReader &input_packet)		{inherited::load(input_packet);}
+	//virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); }
+	//virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); }
+	virtual void Serialize(ISaveObject& Object) override { inherited::Serialize(Object); }
 	virtual BOOL			net_SaveRelevant	()							{return inherited::net_SaveRelevant();}
 
 	virtual void			OnH_A_Chield		()				{inherited::OnH_A_Chield();}

@@ -20,8 +20,7 @@ CHelicopter::CHelicopter()
 	m_light_render	= nullptr;
 	m_lanim			= nullptr;
 
-	ISpatial*		self				=	smart_cast<ISpatial*> (this);
-	if (self)		self->spatial.type  |=  STYPE_VISIBLEFORAI;
+	SpatialComponent->spatial.type  |=  STYPE_VISIBLEFORAI;
 
 	m_movement.parent	= this;
 	m_body.parent		= this;
@@ -267,7 +266,7 @@ void CHelicopter::net_Destroy()
 void	CHelicopter::SpawnInitPhysics	(CSE_Abstract	*D)	
 {
 	
-	PPhysicsShell()=P_build_Shell	(this,false);
+	SetPPhysicsShell(P_build_Shell	(this,false));
 	if(g_Alive())
 	{
 		PPhysicsShell()->EnabledCallbacks				(FALSE);
@@ -369,10 +368,8 @@ void CHelicopter::MoveStep()
 	
 	float needBodyB = -ang_diff*sign*m_body.model_bank_k*m_movement.curLinearSpeed;
 	angle_lerp	(m_body.currBodyHPB.z, needBodyB, m_body.model_angSpeedBank, STEP);
-	
 
 	XFORM().setHPB(m_body.currBodyHPB.x,m_body.currBodyHPB.y,m_body.currBodyHPB.z);
-
 	XFORM().translate_over(m_movement.currP);
 }
 
@@ -401,7 +398,9 @@ void CHelicopter::UpdateCL()
 	m_movement.Update();
 
 	m_stepRemains+=Device.fTimeDelta;
-	while(m_stepRemains>STEP){
+
+	while(m_stepRemains>STEP)
+	{
 		MoveStep();
 		m_stepRemains-=STEP;
 	}
@@ -433,20 +432,24 @@ void CHelicopter::UpdateCL()
 
 void CHelicopter::shedule_Update(u32 time_delta)
 {
-	if (!getEnabled())	return;
+	if (!getEnabled() || OnClient())
+		return;
 
-	inherited::shedule_Update	(time_delta);
-	if(CPHDestroyable::Destroyed())CPHDestroyable::SheduleUpdate(time_delta);
-	else	CPHSkeleton::Update(time_delta);
-	
-	if(state() != CHelicopter::eDead){
-		for(u32 i=getRocketCount(); i<4; ++i)
+	inherited::shedule_Update(time_delta);
+	if (CPHDestroyable::Destroyed())
+		CPHDestroyable::SheduleUpdate(time_delta);
+	else
+		CPHSkeleton::Update(time_delta);
+
+	if (state() != CHelicopter::eDead) 
+	{
+		for (u32 i = getRocketCount(); i < 4; ++i)
 			CRocketLauncher::SpawnRocket(*m_sRocketSection, this);
 	}
-	if(m_ready_explode)ExplodeHelicopter();
+
+	if (m_ready_explode)
+		ExplodeHelicopter();
 }
-
-
 
 void CHelicopter::goPatrolByPatrolPath (LPCSTR path_name, int start_idx)
 {
@@ -500,10 +503,101 @@ void CHelicopter::load(IReader &input_packet)
 	load_data		(m_time_between_rocket_attack, input_packet);
 	load_data		(m_syncronize_rocket, input_packet);
 }
+
+/*void CHelicopter::Save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("CHelicopter");
+	{
+		inherited::Save(Object);
+		m_movement.Save(Object);
+		m_body.Save(Object);
+		m_enemy.Save(Object);
+		Object->GetCurrentChunk()->w_vec3(XFORM().c);
+		Object->GetCurrentChunk()->w_float(m_barrel_dir_tolerance);
+		Object->GetCurrentChunk()->w_bool(m_use_rocket_on_attack);
+		Object->GetCurrentChunk()->w_bool(m_use_mgun_on_attack);
+		Object->GetCurrentChunk()->w_float(m_min_rocket_dist);
+		Object->GetCurrentChunk()->w_float(m_max_rocket_dist);
+		Object->GetCurrentChunk()->w_float(m_min_mgun_dist);
+		Object->GetCurrentChunk()->w_float(m_max_mgun_dist);
+		Object->GetCurrentChunk()->w_u32(m_time_between_rocket_attack);
+		Object->GetCurrentChunk()->w_bool(m_syncronize_rocket);
+	}
+	Object->EndChunk();
+}
+
+void CHelicopter::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CHelicopter");
+	{
+		inherited::Load(Object);
+		m_movement.Load(Object);
+		m_body.Load(Object);
+		m_enemy.Load(Object);
+		Object->GetCurrentChunk()->r_vec3(XFORM().c);
+		Object->GetCurrentChunk()->r_float(m_barrel_dir_tolerance);
+		UseFireTrail(m_enemy.bUseFireTrail);//force reloar disp params
+		Object->GetCurrentChunk()->r_bool(m_use_rocket_on_attack);
+		Object->GetCurrentChunk()->r_bool(m_use_mgun_on_attack);
+		Object->GetCurrentChunk()->r_float(m_min_rocket_dist);
+		Object->GetCurrentChunk()->r_float(m_max_rocket_dist);
+		Object->GetCurrentChunk()->r_float(m_min_mgun_dist);
+		Object->GetCurrentChunk()->r_float(m_max_mgun_dist);
+		Object->GetCurrentChunk()->r_u32(m_time_between_rocket_attack);
+		Object->GetCurrentChunk()->r_bool(m_syncronize_rocket);
+	}
+	Object->EndChunk();
+}*/
+
+void CHelicopter::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CHelicopter")
+	{
+		inherited::Serialize(Object);
+		m_movement.Serialize(Object);
+		m_body.Serialize(Object);
+		m_enemy.Serialize(Object);
+		Object << renderable.xform << m_barrel_dir_tolerance << m_use_rocket_on_attack << m_use_mgun_on_attack
+			<< m_min_rocket_dist << m_max_rocket_dist << m_min_mgun_dist << m_max_mgun_dist
+			<< m_time_between_rocket_attack << m_syncronize_rocket;
+		UseFireTrail(m_enemy.bUseFireTrail);//force reloar disp params
+	}
+}
+
 void CHelicopter::net_Relcase(CObject* O )
 {
 	CExplosive::net_Relcase(O);
 	inherited::net_Relcase(O);
+}
+
+void CHelicopter::net_Import(NET_Packet& P)
+{
+	inherited::net_Import(P);
+}
+
+void CHelicopter::net_Export(NET_Packet& P)
+{
+	inherited::net_Export(P);
+}
+
+BOOL CHelicopter::net_Relevant()
+{
+	return !IsGameTypeSingle();
+}
+
+void CHelicopter::SyncRead(NET_Packet& Packet)
+{
+	Fvector Pos = Packet.r_vec3();
+
+	m_movement.SetDestPosition(&Pos);
+	SetMaxVelocity(150);
+
+	m_movement.AlreadyOnPoint();
+}
+
+void CHelicopter::SyncWrite(NET_Packet& Packet)
+{
+	Packet.w_vec3(m_movement.currP);
 }
 void CHelicopter::DropFlares()
 {

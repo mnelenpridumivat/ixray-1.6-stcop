@@ -33,6 +33,7 @@
 #include "HUDManager.h"
 #include "Weapon.h"
 #include "ai/monsters/basemonster/base_monster.h"
+#include "HUDAnimItem.h"
 
 extern u32 hud_adj_mode;
 
@@ -61,6 +62,24 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				u_EventSend(P);
 			}
 		}break;
+	case kWPN_RELOAD:
+		{
+			if(IsGameTypeSingle())
+			{
+				if(!LookAtData.LookAtObject || !LookAtData.IsNearEnoght)
+				{
+					break;
+				}
+				auto Weapon = smart_cast<CWeaponMagazined*>(LookAtData.LookAtObject);
+				if(!Weapon)
+				{
+					break;
+				}
+				Weapon->SetIsQuickUnloading(true);
+				Weapon->UnloadMagazine();
+				Weapon->SetIsQuickUnloading(false);
+			}
+		}
 	default:
 		{
 		}break;
@@ -83,6 +102,13 @@ void CActor::IR_OnKeyboardPress(int cmd)
 		return;
 	}
 #endif //DEBUG
+
+
+	if (IsWaunded)
+	{
+		return;
+	}
+
 	switch(cmd)
 	{
 	case kJUMP:		
@@ -128,25 +154,6 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				return;
 			}
 		}break;
-/*
-	case kFLARE:{
-			PIItem fl_active = inventory().ItemFromSlot(FLARE_SLOT);
-			if(fl_active)
-			{
-				CFlare* fl			= smart_cast<CFlare*>(fl_active);
-				fl->DropFlare		();
-				return				;
-			}
-
-			PIItem fli = inventory().Get(CLSID_DEVICE_FLARE, true);
-			if(!fli)			return;
-
-			CFlare* fl			= smart_cast<CFlare*>(fli);
-			
-			if(inventory().Slot(fl))
-				fl->ActivateFlare	();
-		}break;
-*/
 	case kUSE:
 		ActorUse();
 		break;
@@ -162,36 +169,66 @@ void CActor::IR_OnKeyboardPress(int cmd)
 		{
 			OnPrevWeaponSlot();
 		}break;
-
+	case kUSE_BANDAGE:
+	case kUSE_MEDKIT:
+	{
+		if (IsGameTypeSingle())
+		{
+			PIItem itm = inventory().item((cmd == kUSE_BANDAGE) ? CLSID_IITEM_BANDAGE : CLSID_IITEM_MEDKIT);
+			if (itm)
+			{
+				inventory().Eat(itm);
+				SDrawStaticStruct* _s = CurrentGameUI()->AddCustomStatic("item_used", true);
+				_s->m_endTime = Device.fTimeGlobal + 3.0f;
+				string1024					str;
+				xr_strconcat(str, *CStringTable().translate("st_item_used"), ": ", itm->NameItem());
+				_s->wnd()->TextItemControl()->SetText(str);
+			}
+		}
+	}break;
 	case kQUICK_USE_1:
 	case kQUICK_USE_2:
 	case kQUICK_USE_3:
 	case kQUICK_USE_4:
 		{
+			if (smart_cast<CHUDAnimItem*>(inventory().ActiveItem()) != nullptr || inventory().GetNextActiveSlot() == ANIM_SLOT)
+			{
+				break;
+			}
+
+			if (!CurrentGameUI()->ActorMenu().m_pQuickSlot)
+			{
+				break;
+			}
+			
 			const shared_str& item_name		= g_quick_use_slots[cmd-kQUICK_USE_1];
 			if(item_name.size())
 			{
-				PIItem itm = inventory().GetAny(item_name.c_str());
+				PIItem best_itm = nullptr;
 
-				if(itm)
+				for (auto& it : inventory().m_ruck)
 				{
-					if (IsGameTypeSingle())
+					if (it->m_section_id == item_name && (best_itm == nullptr || it->GetCondition() < best_itm->GetCondition()))
 					{
-						inventory().Eat				(itm);
-					} else
-					{
-						inventory().ClientEat		(itm);
+						best_itm = it;
 					}
+				}
+
+				if (best_itm != nullptr)
+				{
+					IsGameTypeSingle() ? inventory().Eat(best_itm) : inventory().ClientEat(best_itm);
 					
-					SDrawStaticStruct* _s		= CurrentGameUI()->AddCustomStatic("item_used", true);
-					string1024					str;
-					xr_strconcat(str,*g_pStringTable->translate("st_item_used"),": ", itm->NameItem());
+					SDrawStaticStruct* _s = CurrentGameUI()->AddCustomStatic("item_used", true);
+					string1024 str = {};
+
+					xr_strconcat(str,*g_pStringTable->translate("st_item_used"),": ", best_itm->NameItem());
 					_s->wnd()->TextItemControl()->SetText(str);
 					
 					CurrentGameUI()->ActorMenu().m_pQuickSlot->ReloadReferences(this);
 				}
 			}
-		}break;
+		}
+		break;
 	}
 }
 
@@ -216,9 +253,15 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 {
 	if(hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))	return;
 
-	if (Remote())	return;
+	if (Remote())
+		return;
 
 	if (m_input_external_handler && !m_input_external_handler->authorized(cmd))	return;
+
+	if (IsWaunded)
+	{
+		return;
+	}
 
 	if (g_Alive())	
 	{
@@ -263,6 +306,12 @@ void CActor::IR_OnKeyboardHold(int cmd)
 		return;
 	}
 #endif //DEBUG
+
+	if (IsWaunded)
+	{
+		return;
+	}
+
 	float LookFactor = GetLookFactor();
 	switch(cmd)
 	{
@@ -455,8 +504,8 @@ bool CActor::use_Holder				(CHolderCustom* holder)
 		if(smart_cast<CCar*>(holderGO))
 			b = use_Vehicle(0);
 		else
-			if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN)
-				b = use_MountedWeapon(0);
+			if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN || holderGO->CLS_ID==CLSID_OBJECT_HOLDER_ENT)
+				b = use_HolderEx(0,false);
 
 		if(inventory().ActiveItem()){
 			CHudItem* hi = smart_cast<CHudItem*>(inventory().ActiveItem());
@@ -470,8 +519,8 @@ bool CActor::use_Holder				(CHolderCustom* holder)
 		if(smart_cast<CCar*>(holder))
 			b = use_Vehicle(holder);
 
-		if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN)
-			b = use_MountedWeapon(holder);
+		if (holderGO->CLS_ID==CLSID_OBJECT_W_STATMGUN || holderGO->CLS_ID==CLSID_OBJECT_HOLDER_ENT)
+			b = use_HolderEx(holder,false);
 		
 		if(b){//used succesfully
 			// switch off torch...
@@ -532,7 +581,7 @@ void CActor::ActorUse()
 
 			VERIFY(pEntityAliveWeLookingAt);
 
-			if (IsGameTypeSingle())
+			if (IsGameTypeSingleCompatible())
 			{			
 				CBaseMonster* pMonster = smart_cast<CBaseMonster*>(pEntityAliveWeLookingAt);
 				const static bool isMonstersInventory = EngineExternal()[EEngineExternalGame::EnableMonstersInventory];
@@ -546,7 +595,7 @@ void CActor::ActorUse()
 				else
 				{
 					//только если находимся в режиме single
-					CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+					CUIGameCustom* pGameSP = CurrentGameUI();
 					if (pGameSP && TestMonster)
 					{
 						if (!m_pPersonWeLookingAt->deadbody_closed_status())
@@ -710,36 +759,37 @@ void CActor::set_input_external_handler(CActorInputHandler *handler)
 
 void CActor::SwitchNightVision()
 {
+	if (CurrentGameUI() && CurrentGameUI()->TopInputReceiver())
+		return;
+
 	CWeapon* wpn1 = nullptr;
 	CWeapon* wpn2 = nullptr;
+
 	if(inventory().ItemFromSlot(INV_SLOT_2))
 		wpn1 = smart_cast<CWeapon*>(inventory().ItemFromSlot(INV_SLOT_2));
 
 	if(inventory().ItemFromSlot(INV_SLOT_3))
 		wpn2 = smart_cast<CWeapon*>(inventory().ItemFromSlot(INV_SLOT_3));
 
-	xr_vector<CAttachableItem*> const& all = CAttachmentOwner::attached_objects();
-	xr_vector<CAttachableItem*>::const_iterator it = all.begin();
-	xr_vector<CAttachableItem*>::const_iterator it_e = all.end();
-	for ( ; it != it_e; ++it )
+	if (wpn1 && wpn1->IsZoomed())
+		return;
+
+	if (wpn2 && wpn2->IsZoomed())
+		return;
+
+	if (GetNightVisionEffector())
 	{
-		CTorch* torch = smart_cast<CTorch*>(*it);
-		if ( torch )
-		{	
-			if(wpn1 && wpn1->IsZoomed())
-				return;
-
-			if(wpn2 && wpn2->IsZoomed())
-				return;
-
-			torch->SwitchNightVision();
-			return;
-		}
+		GetNightVisionEffector()->SwitchNightVision();
 	}
+
+	return;
 }
 
 void CActor::SwitchTorch()
 { 
+	if (CurrentGameUI() && CurrentGameUI()->TopInputReceiver())
+		return;
+
 	xr_vector<CAttachableItem*> const& all = CAttachmentOwner::attached_objects();
 	xr_vector<CAttachableItem*>::const_iterator it = all.begin();
 	xr_vector<CAttachableItem*>::const_iterator it_e = all.end();

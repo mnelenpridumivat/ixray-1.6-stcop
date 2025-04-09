@@ -21,6 +21,8 @@ namespace MemorySpace {
 class CEntityAlive;
 class CCustomMonster;
 class CAI_Stalker;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 class CHitMemoryManager {
 public:
@@ -56,6 +58,7 @@ public:
 	virtual	void				reload				(LPCSTR section);
 	virtual void				update				();
 			void				remove_links		(CObject *object);
+			void				remove				(const MemorySpace::CHitObject *hit_object);
 
 public:
 			void				add					(const CEntityAlive	*who);
@@ -79,6 +82,10 @@ public:
 public:
 			void				save				(NET_Packet &packet) const;
 			void				load				(IReader &packet);
+			/*virtual void Save(CSaveObjectSave* Object);
+			virtual void Load(CSaveObjectLoad* Object);*/
+			virtual void Serialize(ISaveObject& Object);
+			virtual void SerializeSingle(ISaveObject& Object, CHitObject& Value);
 			void				on_requested_spawn	(CObject *object);
 
 private:

@@ -17,13 +17,14 @@
 #include "alife_simulator.h"
 #include "alife_spawn_registry.h"
 #include "../xrEngine/string_table.h"
+#include <Save/SaveManager.h>
 
 extern LPCSTR alife_section;
 
-LPCSTR CSavedGameWrapper::saved_game_full_name	(LPCSTR saved_game_name, string_path& result)
+LPCSTR CSavedGameWrapper::saved_game_full_name	(LPCSTR saved_game_name, string_path& result, pcstr extension)
 {
 	string_path					temp;
-	xr_strconcat(temp,saved_game_name,SAVE_EXTENSION);
+	xr_strconcat(temp,saved_game_name,extension);
 	FS.update_path				(result,"$game_saves$",temp);
 	return						(result);
 }
@@ -31,19 +32,28 @@ LPCSTR CSavedGameWrapper::saved_game_full_name	(LPCSTR saved_game_name, string_p
 bool CSavedGameWrapper::saved_game_exist		(LPCSTR saved_game_name)
 {
 	string_path					file_name;
-	return						(!!FS.exist(saved_game_full_name(saved_game_name,file_name)));
+	return FS.exist(saved_game_full_name(saved_game_name, file_name, IXRAY_DEF_SAVE_EXTENSION));
 }
 
 bool CSavedGameWrapper::valid_saved_game		(IReader &stream)
 {
-	if (stream.length() < 8)
+	if (stream.length() < 8) {
 		return					(false);
+	}
 
-	if (stream.r_u32() != u32(-1))
-		return					(false);
+	ESaveVariableType type;
+	stream.r(&type, sizeof(ESaveVariableType));
+	if (type != ESaveVariableType::t_chunk) {
+		return false;
+	}
 
-	if (stream.r_u32() < ALIFE_VERSION)
-		return					(false);
+	//if (stream.r_u32() != u32(-1))
+	//	return					(false);
+
+	//if (stream.r_u32() < ALIFE_VERSION)
+	//	return					(false);
+
+	stream.seek(0);
 
 	return						(true);
 }
@@ -51,8 +61,8 @@ bool CSavedGameWrapper::valid_saved_game		(IReader &stream)
 bool CSavedGameWrapper::valid_saved_game		(LPCSTR saved_game_name)
 {
 	string_path					file_name;
-	if (!FS.exist(saved_game_full_name(saved_game_name,file_name)))
-		return					(false);
+	if (!FS.exist(saved_game_full_name(saved_game_name, file_name, IXRAY_DEF_SAVE_EXTENSION)))
+		return false;
 
 	IReader						*stream = FS.r_open(file_name);
 	bool						result = valid_saved_game(*stream);
@@ -63,9 +73,10 @@ bool CSavedGameWrapper::valid_saved_game		(LPCSTR saved_game_name)
 CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 {
 	string_path					file_name;
-	saved_game_full_name		(saved_game_name,file_name);
-	R_ASSERT3					(FS.exist(file_name),"There is no saved game ",file_name);
-	
+    saved_game_full_name(saved_game_name, file_name, IXRAY_DEF_SAVE_EXTENSION);
+
+    R_ASSERT3(FS.exist(file_name), "There is no saved game ", saved_game_name);
+
 	IReader						*stream = FS.r_open(file_name);
 	if (!valid_saved_game(*stream)) {
 		FS.r_close				(stream);
@@ -77,7 +88,24 @@ CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 		return;
 	}
 
-	u32							source_count = stream->r_u32();
+	CSaveManager::SGameInfoFast data;
+	if (!CSaveManager::GetInstance().GetGameInfoFast(stream, data)) {
+		FS.r_close(stream);
+		CALifeTimeManager		time_manager(alife_section);
+		m_game_time = time_manager.game_time();
+		m_actor_health = 1.f;
+		m_level_id = _LEVEL_ID(-1);
+		m_level_name = "";
+		return;
+	}
+	m_game_time = data.m_game_time;
+	m_actor_health = data.m_actor_health;
+	m_level_id = data.m_level_id;
+	m_level_name = data.m_level_name;
+	FS.r_close(stream);
+	return;
+
+	/*u32							source_count = stream->r_u32();
 	void						*source_data = xr_malloc(source_count);
 	rtc_decompress				(source_data,source_count,stream->pointer(),stream->length() - 3*sizeof(u32));
 	FS.r_close					(stream);
@@ -168,5 +196,5 @@ CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 		F_entity_Destroy		(object);
 	}
 
-	xr_free						(source_data);
+	xr_free						(source_data);*/
 }

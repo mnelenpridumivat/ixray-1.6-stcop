@@ -44,6 +44,26 @@ public:
 	virtual void			Update					();
 	virtual void			OnFocusLost				();
 
+	virtual pcstr GetText() { return TextItemControl()->GetText(); }
+	virtual void SetText(pcstr txt) { TextItemControl()->SetText(txt); }
+	virtual void SetTextST(pcstr txt) { TextItemControl()->SetTextST(txt); }
+
+	void SetTextColor_script(int a, int r, int g, int b)
+	{
+		TextItemControl()->SetTextColor(color_argb(a, r, g, b));
+	}
+
+	u32 GetTextAlign_script()
+	{
+		return static_cast<u32>(TextItemControl()->GetTextAlignment());
+	}
+
+	void SetTextAlign_script(u32 align)
+	{
+		TextItemControl()->SetTextAlignment((CGameFont::EAligment)align);
+		TextItemControl()->GetFont()->SetAligment((CGameFont::EAligment)align);
+	}
+
 	virtual void			CreateShader			(LPCSTR tex, LPCSTR sh = "hud\\default");
 	ui_shader&				GetShader				()							{return m_UIStaticItem.GetShader();};
 
@@ -52,8 +72,8 @@ public:
 	virtual void			SetTextureRect			(const Frect& r)			{m_UIStaticItem.SetTextureRect(r);}
 	virtual const Frect&	GetTextureRect			() const					{return m_UIStaticItem.GetTextureRect();}
 	
-	virtual void			InitTexture				(LPCSTR tex_name);
-	virtual void			InitTextureEx			(LPCSTR tex_name, LPCSTR sh_name="hud\\default");
+	virtual bool			InitTexture				(LPCSTR tex_name, bool fatal = true);
+	virtual bool			InitTextureEx			(LPCSTR tex_name, LPCSTR sh_name="hud\\default", bool fatal = true);
 	CUIStaticItem*			GetStaticItem			()							{return &m_UIStaticItem;}
 			void			SetTextureRect_script	(Frect* pr)					{m_UIStaticItem.SetTextureRect(*pr);}
 	const	Frect*			GetTextureRect_script	()							{return &m_UIStaticItem.GetTextureRect();}
@@ -93,7 +113,8 @@ public:
 
 			void			SetStretchTexture		(bool stretch_texture)	{m_bStretchTexture = stretch_texture;}
 			bool			GetStretchTexture		()						{return m_bStretchTexture;}
-			
+			void			SetEllipsis				(int pos, int indent)	{ TextItemControl()->SetEllipsis(pos != 0); }
+
 			void			SetHeading				(float f)				{m_fHeading = f;};
 			float			GetHeading				()						{return m_fHeading;}
 			bool			Heading					()						{return m_bHeading;}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "alife_space.h"
+#include "Save/SaveObject.h"
 
 class xrTime
 {
@@ -49,10 +50,13 @@ public:
 	void	setHMS			(int h, int m, int s);
 	void	setHMSms		(int h, int m, int s, int ms);
 	void	set				(int y, int mo, int d, int h, int mi, int s, int ms);
-	void	get				(u32 &y, u32 &mo, u32 &d, u32 &h, u32 &mi, u32 &s, u32 &ms);
+	void	get(u32& y, u32& mo, u32& d, u32& h, u32& mi, u32& s, u32& ms) const;
 
 	void	Save			(NET_Packet& Packet);
 	void	Load			(NET_Packet& Packet);
+	//virtual void Save(CSaveObjectSave* Object) const;
+	//virtual void Load(CSaveObjectLoad* Object);
+	virtual void Serialize(ISaveObject& Object);
 
 	LPCSTR	dateToString	(int mode);
 	LPCSTR	timeToString	(int mode);
@@ -61,3 +65,4 @@ public:
 
 extern u32 get_time();
 extern xrTime get_time_struct();
+extern void ctime_serialize(xrTime* self, ISaveObject* save);

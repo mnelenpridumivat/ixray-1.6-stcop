@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include "../../../xrCDB/Frustum.h"
+#include "../../../xrCore/Collision/Frustum.h"
 #include "../../../xrEngine/vis_common.h"
 #include "../../../xrEngine/Render.h"
 
@@ -152,7 +152,6 @@ public:
 	CLight_Compute_XFORM_and_VIS LR;
 
 	xr_list<light*> v_all_lights_dque;
-	xr_list<light*> v_all_lights;
 
 public:
 	// Occlusion culling
@@ -175,7 +174,7 @@ public:
 	virtual void					Render();
 
 	virtual void					set_Transform(Fmatrix* M);
-	virtual void					add_Visual(IRenderVisual* visual, bool ignore_opt = false, bool Force = false);
+	virtual void					add_Visual(IRenderVisual* visual, bool Force = false);
 
 	virtual ref_shader		getShader(int id);
 	virtual	CRenderTarget* getTarget() { return Target; }
@@ -287,7 +286,6 @@ public:
 	virtual void					glow_destroy(IRender_Glow* p_);
 
 	// Models
-	virtual void					model_Logging(BOOL bEnable);
 	virtual void					models_Prefetch();
 	virtual void					models_Clear(BOOL b_complete);
 
@@ -337,7 +335,7 @@ protected:
 		void*& result
 	) override;
 	private:
-		xr_vector<ISpatial*> lstRenderables;
+		xr_vector<ISpatialShared> lstRenderables;
 };
 #ifdef REDITOR
 #include "ui_main.h"

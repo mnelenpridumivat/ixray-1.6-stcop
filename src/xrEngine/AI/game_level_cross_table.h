@@ -51,9 +51,10 @@ public:
 
 public:
 	CHeader					m_tCrossTableHeader;
-	CCell					*m_tpaCrossTable;
+	xr_vector<CCell>		m_tpaCrossTable;
 
 public:
+
 							IGameLevelCrossTable	();
 		virtual				~IGameLevelCrossTable();
 

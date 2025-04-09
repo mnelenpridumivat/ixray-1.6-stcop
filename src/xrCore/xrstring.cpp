@@ -116,7 +116,7 @@ xr_string xr_string::RemoveWhitespaces() const
 
 	for (size_t i = 0; i < Size; ++i)
 	{
-		if (*OrigStr != ' ')
+		if (OrigStr[i] != ' ')
 		{
 			Result.push_back(OrigStr[i]);
 		}
@@ -266,4 +266,17 @@ xr_string xr_string::Join(xrStringVector::iterator beginIter, xrStringVector::it
 	}
 
 	return Result;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, xr_string& Value) {
+	if (Object.IsSave()) {
+		shared_str temp = Value.c_str();
+		Object << temp;
+	}
+	else {
+		shared_str temp;
+		Object << temp;
+		Value = temp.c_str();
+	}
+	return Object;
 }

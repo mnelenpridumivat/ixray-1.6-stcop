@@ -9,17 +9,13 @@
 #include "../../xrCore/xrSyncronize.h"
 
 #include "../xrLC_Light/mu_model_light.h"
-xrCriticalSection	task_CS
-#ifdef PROFILE_CRITICAL_SECTIONS
-	(MUTEX_PROFILE_ID(task_C_S))
-#endif // PROFILE_CRITICAL_SECTIONS
-;
+xrCriticalSection task_CS;
 
 #include <random>
 
 static thread_local std::mt19937 rng = std::mt19937(std::random_device()());
 xr_vector<int>		task_pool;
-
+xr_atomic_u32		ProgressData;
 class CLMThread		: public CThread
 {
 private:
@@ -41,16 +37,22 @@ public:
 		{
 			// Get task
 			task_CS.Enter		();
-			thProgress			= 1.f - float(task_pool.size())/float(lc_global_data()->g_deflectors().size());
-			if (task_pool.empty())	
+			Progress(float(ProgressData.load()) / float (lc_global_data()->g_deflectors().size()) );
+
+ 			if (task_pool.empty())	
 			{
 				task_CS.Leave		();
 				return;
 			}
 
-			D					= lc_global_data()->g_deflectors()[task_pool.back()];
+			u32 ID = task_pool.back();
+			D					= lc_global_data()->g_deflectors()[ID];
 			task_pool.pop_back	();
 			task_CS.Leave		();
+
+			ProgressData.fetch_add(1);
+
+			
 
 			// Perform operation
 			try {
@@ -96,48 +98,84 @@ for(u32 dit = 0; dit<lc_global_data()->g_deflectors().size(); dit++)
 
 void	CBuild::LMaps					()
 {
-		//****************************************** Lmaps
-	Phase			("LIGHT: LMaps...");
 	LMapsLocal();
 }
  
-void CBuild::Light()
-{
+#define BUILDING_LIGHING
  
-	//****************************************** Wait for MU
+void CBuild::BuildAdaptiveHT()
+{
+#ifdef BUILDING_LIGHING
+	//****************************************** HEMI-Tesselate
 	FPU::m64r();
-	Phase("LIGHT: Waiting for MU-thread...");
-	mem_Compact();
-	wait_mu_base();
+	Phase("Adaptive HT...");
+ 	xrPhase_AdaptiveHT();
+#endif 
+}
 
+#include "../xrLC_Light/xrFaceDefs.h"
+#include "../xrLC_Light/xrFace.h"
+void CBuild::Light()
+{ 
+	//****************************************** Resolve materials
+ 	Phase("Resolving materials...");
+ 	xrPhase_ResolveMaterials();
+	IsolateVertices(TRUE);
 
-	//****************************************** Implicit
-	{
-		FPU::m64r		();
-		Phase			("LIGHT: Implicit...");
-		mem_Compact		();
-		ImplicitLighting();
-	}
-	
+	//****************************************** UV mapping
+ 	Phase("Build UV mapping...");
+ 	xrPhase_UVmap();
+	IsolateVertices(TRUE);
+	 
+	//****************************************** Subdivide geometry
+	Phase("Subdividing geometry...");
+	xrPhase_Subdivide();
+	lc_global_data()->vertices_isolate_and_pool_reload();
+	IsolateVertices(TRUE);
+
+#ifdef BUILDING_LIGHING
+	//****************************************** GLOBAL-RayCast model
+	Phase("Building rcast-CFORM model...");
+	Light_prepare();
+	BuildRapid(TRUE);
+
+ 	//****************************************** Implicit
+	Phase("LIGHT: Implicit...");
+	EmbreeMain.AttachGeometrys(true);
+ 	ImplicitLighting();
+ 
+	//****************************************** LMAPS
+ 	Phase("LIGHT: LMaps...");
+	EmbreeMain.AttachGeometrys(false);
 	LMaps		();
 
-
-	//****************************************** Vertex
-	FPU::m64r		();
-	Phase			("LIGHT: Vertex...");
-	mem_Compact		();
-
-	LightVertex		();
-
-
+ 	//****************************************** Vertex
+	Phase("LIGHT: Vertex...");
+  	LightVertex		();
+	
 	//****************************************** Merge LMAPS
-	{
-		FPU::m64r		();
-		Phase			("LIGHT: Merging lightmaps...");
-		mem_Compact		();
+	Phase("LIGHT: Merging lightmaps...");
+  	xrPhase_MergeLM();
+	
+	// Save Lmaps
+	Phase("LIGHT: Save lightmaps...");
+	xrPhase_SaveLmaps();
+#endif 	 
+	//****************************************** Merge geometry
+	Phase("Merging geometry...");
+ 	xrPhase_MergeGeometry();
 
-		xrPhase_MergeLM	();
-	}
+	//****************************************** Starting MU
+	Phase("LIGHT: Starting MU...");
+  	Light_prepare();
+ 	EmbreeMain.AttachGeometrys(true);
+	StartMu();
+	 
+	//****************************************** Destroy RCast-model
+ 	Phase("Destroying ray-trace model...");
+ 	lc_global_data()->destroy_rcmodel();
+	if (lc_global_data()->GetIsIntelUse())
+		EmbreeMain.IntelEmbereUNLOAD();
 }
 
 void CBuild::LightVertex	()

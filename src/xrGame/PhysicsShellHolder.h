@@ -5,6 +5,8 @@
 #include "ParticlesPlayer.h"
 #include "../xrEngine/IObjectPhysicsCollision.h"
 #include "../xrPhysics/IPhysicsShellHolder.h"
+#include "../xrScripts/script_export_space.h"
+#include "Save/SaveObject.h"
 
 class CPHDestroyable;
 class CPHCollisionDamageReceiver;
@@ -14,6 +16,8 @@ class CPHSkeleton;
 class CCharacterPhysicsSupport;
 class ICollisionDamageInfo;
 class CIKLimbsController;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 
 
@@ -41,10 +45,12 @@ public:
 
 	virtual bool		ActivationSpeedOverriden (Fvector& dest, bool clear_override) { return false; }
 
-	IC CPhysicsShell	*&PPhysicsShell				()		
+	CPhysicsShell* PPhysicsShell				()		const
 	{
 		return m_pPhysicsShell;
 	}
+
+	void SetPPhysicsShell(CPhysicsShell* pp) { m_pPhysicsShell = pp; }
 
 	IC CPhysicsShellHolder*	PhysicsShellHolder	()
 	{
@@ -75,12 +81,15 @@ public:
 	virtual void			PHSetMaterial		(u16 m);
 			void			PHSaveState			(NET_Packet &P);
 			void			PHLoadState			(IReader &P);
+			//void			PHSaveState(CSaveObjectSave* Object) const;
+			//void			PHLoadState(CSaveObjectLoad* Object);
+			void			PHSerializeState(ISaveObject& Object);
 	virtual f32				GetMass				();
 	virtual	void			PHHit				(SHit &H);
 	virtual	void			Hit					(SHit* pHDS);
 ///////////////////////////////////////////////////////////////////////
-	virtual u16				PHGetSyncItemsNumber();
-	virtual CPHSynchronize*	PHGetSyncItem		(u16 item);
+	virtual u16				PHGetSyncItemsNumber() const;
+	virtual CPHSynchronize*	PHGetSyncItem		(u16 item) const;
 	virtual void			PHUnFreeze			();
 	virtual void			PHFreeze			();
 	virtual float			EffectiveGravity	();
@@ -90,10 +99,15 @@ public:
 	virtual void			setup_physic_shell		();
 	virtual void			deactivate_physics_shell ();
 
+	virtual void Load(LPCSTR Section) override { inherited::Load(Section); }
+
 	virtual void			net_Destroy			();
 	virtual BOOL			net_Spawn			(CSE_Abstract*	DC);
 	virtual void			save				(NET_Packet &output_packet);
 	virtual void			load				(IReader &input_packet);
+	//virtual void Save(CSaveObjectSave* Object) const override;
+	//virtual void Load(CSaveObjectLoad* Object) override;
+	virtual void Serialize(ISaveObject& Object) override;
 			void			init				();
 
 	virtual void			OnChangeVisual		();
@@ -124,7 +138,7 @@ private://IPhysicsShellHolder
 	virtual	void					_BCL					ObjectProcessingDeactivate			()						;
 	virtual	void					_BCL					ObjectProcessingActivate			()						;				
 	virtual	void					_BCL					ObjectSpatialMove					()						;
-	virtual	CPhysicsShell*&			_BCL					ObjectPPhysicsShell					()						;
+	virtual	CPhysicsShell*			_BCL					ObjectPPhysicsShell					()						;
 //	virtual	void						enable_notificate					()						;
 	virtual bool					_BCL					has_parent_object					()						;
 //	virtual	void						on_physics_disable					()						;
@@ -141,6 +155,7 @@ private://IPhysicsShellHolder
 #ifdef	DEBUG
 	virtual	xr_string				_BCL					dump								(EDumpType type) const  ;
 #endif
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 
 #endif

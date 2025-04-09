@@ -68,19 +68,11 @@ void CRender::render_main	(bool deffered, bool zfill)
 		{
 			// Traverse object database
 			g_SpatialSpace->q_frustum
-				(
-				lstRenderablesMain,
-				ISpatial_DB::O_ORDERED,
-				STYPE_RENDERABLE + STYPE_RENDERABLESHADOW + STYPE_PARTICLE + STYPE_LIGHTSOURCE,
-				ViewBase
-				);
-
-			// (almost) Exact sorting order (front-to-back)
-			std::sort(lstRenderablesMain.begin(), lstRenderablesMain.end(), [](ISpatial* _1, ISpatial* _2) {
-			float d1 = _1->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
-			float d2 = _2->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
-			return d1 < d2;
-			});
+			(
+			lstRenderablesMain,
+			ISpatial_DB::O_ORDERED,
+			STYPE_RENDERABLE + STYPE_RENDERABLESHADOW + STYPE_PARTICLE + STYPE_LIGHTSOURCE,
+			ViewBase);//nearest sorting
 
 			// Determine visibility for dynamic part of scene
 			set_Object							(0);
@@ -118,7 +110,7 @@ void CRender::render_main	(bool deffered, bool zfill)
 			Fmatrix m_project;
 			m_project.build_projection(
 				deg2rad(Device.fFOV/* *Device.fASPECT*/), 
-				Device.fASPECT, VIEWPORT_NEAR, 
+				Device.fASPECT, Device.fViewportNear,
 				ps_r2_zfill * g_pGamePersistent->Environment().CurrentEnv->far_plane);
 			mftrans.mul(m_project,Device.mView);
 		}
@@ -165,7 +157,7 @@ void CRender::render_main	(bool deffered, bool zfill)
 		// Traverse frustums
 		for (u32 o_it=0; o_it<lstRenderablesMain.size(); o_it++)
 		{
-			ISpatial*	spatial	= lstRenderablesMain[o_it];
+			ISpatial*	spatial	= lstRenderablesMain[o_it].get();
 			if	(0==spatial) continue; spatial->spatial_updatesector();
 			CSector* sector = (CSector*)spatial->spatial.sector;
 			if	(0==sector) continue;
@@ -191,23 +183,7 @@ void CRender::render_main	(bool deffered, bool zfill)
 				if(light* L = (light*)(spatial->dcast_Light()))
 				{
 					if (L->get_LOD()>EPS_L&&!L->flags.bHudMode)
-					{
-						
-						if(dont_test_sectors)
-							Lights.add_light(L);
-						else
-						{
-							for (u32 s_it = 0; s_it < L->m_sectors.size(); s_it++)
-							{
-								CSector* sector_ = (CSector*)L->m_sectors[s_it];
-								if(PortalTraverser.i_marker == sector_->r_marker)
-								{
-									Lights.add_light(L);
-									break;
-								}
-							}
-						}
-					}
+						Lights.add_light(L);
 				}
 				continue;
 			}
@@ -396,7 +372,9 @@ void CRender::render_menu() {
 Fvector3 ps_r_taa_jitter_full = {0,0,0};
 
 extern u32 g_r;
-void CRender::Render		()
+bool is_render_cubemap = false;
+
+void CRender::Render()
 {
 	PIX_EVENT(CRender_Render);
 
@@ -426,7 +404,92 @@ void CRender::Render		()
 		return;
 	}
 
-	if(ps_r_scale_mode > 1) {
+	if(RImplementation.o.offscreen_reflecitons && pLastSector) {
+		PIX_EVENT(CRender_RenderReflections);
+
+		is_render_cubemap = true;
+		static Fmatrix cProj{}, cView{}, cTrans{};
+		static Fvector cmNorm[6]{}, cmDir[6]{};
+
+		auto& CurrentEnv = *g_pGamePersistent->Environment().CurrentEnv;
+		u32 RefSize = Target->rt_Reflection->dwSize;
+
+		Fvector4 fog_color4 = {
+			CurrentEnv.fog_color.x / (1.0f + CurrentEnv.fog_color.x),
+			CurrentEnv.fog_color.y / (1.0f + CurrentEnv.fog_color.y),
+			CurrentEnv.fog_color.z / (1.0f + CurrentEnv.fog_color.z),
+			CurrentEnv.far_plane
+		};
+
+		cProj.build_projection(PI_DIV_2 + 0.002f, 1.0f,
+			Device.fViewportNear, CurrentEnv.far_plane * ps_r4_vslr_distance);
+
+		cmDir[2].mul(Device.vCameraTop, +1.0f);
+		cmDir[3].mul(Device.vCameraTop, -1.0f);
+
+		cmNorm[2].mul(Device.vCameraDirection, -1.0f);
+		cmNorm[3].mul(Device.vCameraDirection, +1.0f);
+
+		cmDir[0].mul(Device.vCameraRight, +1.0f);
+		cmDir[1].mul(Device.vCameraRight, -1.0f);
+
+		cmNorm[0].mul(Device.vCameraTop, +1.0f);
+		cmNorm[1].mul(Device.vCameraTop, +1.0f);
+
+		cmDir[4].mul(Device.vCameraDirection, +1.0f);
+		cmDir[5].mul(Device.vCameraDirection, -1.0f);
+
+		cmNorm[4].mul(Device.vCameraTop, +1.0f);
+		cmNorm[5].mul(Device.vCameraTop, +1.0f);
+
+		RCache.set_xform_project(cProj);
+
+		phase = PHASE_REFLECT;
+
+		HOM.Disable();
+		r_pmask(true, false, true);
+
+		ps_r_taa_jitter.set(0, 0, -1);
+		ps_r_taa_jitter_full.set(ps_r_taa_jitter);
+		
+		Fvector PointPos = Device.vCameraPosition;
+		RContext->CopyResource(Target->rt_Reflection_temp->pSurface, Target->rt_Reflection->pSurface);
+
+		for(auto i = 0; i < 6; ++i) {
+			PIX_EVENT(CRender_RenderReflectionsBySide);
+
+			cView.build_camera_dir(PointPos, cmDir[i], cmNorm[i]);
+			cTrans.mul(cProj, cView);
+
+			r_dsgraph_render_subspace(pLastSector, cTrans, PointPos, FALSE, FALSE);
+
+			RCache.set_xform_view(cView);
+			mapWmark.clear();
+
+			RContext->ClearRenderTargetView(Target->rt_Reflection->pRT[i], (FLOAT*)&fog_color4);
+			RContext->ClearDepthStencilView(Target->rt_Depth->pZRT, D3D_CLEAR_DEPTH, 1.0f, 0);
+
+			Target->u_setrt(RefSize, RefSize,
+				Target->rt_Reflection->pRT[i], NULL, NULL, Target->rt_Depth->pZRT);
+			
+			RImplementation.rmNormal();
+
+			RCache.set_Stencil(FALSE);
+			RCache.set_ColorWriteEnable();
+
+			r_dsgraph_render_graph(0);
+		}
+
+		RContext->GenerateMips(Target->rt_Reflection->pTexture->get_SRView());
+
+		RCache.set_xform_project(Device.mProject);
+		RCache.set_xform_view(Device.mView);
+
+		is_render_cubemap = false;
+		phase = PHASE_NORMAL;
+	}
+
+	if(ps_r_scale_mode > 1 || ps_r2_aa_type == 3) {
 		int32_t jitterPhaseCount = ffxFsr2GetJitterPhaseCount((int32_t)RCache.get_width(), (int32_t)RCache.get_target_width());
 		ffxFsr2GetJitterOffset(&ps_r_taa_jitter_full.x, &ps_r_taa_jitter_full.y, Device.dwFrame, jitterPhaseCount);
 
@@ -452,21 +515,18 @@ void CRender::Render		()
 
 	g_pGamePersistent->Environment().RenderSky();
 
-	// Configure
-	RImplementation.o.distortion				= FALSE;		// disable distorion
-	Fcolor					sun_color			= ((light*)Lights.sun_adapted._get())->color;
-	bool					bSUN				= !o.sunstatic && (u_diffuse2s(sun_color.r,sun_color.g,sun_color.b)>EPS);
-
-	// Msg						("sstatic: %s, sun: %s",o.sunstatic?;"true":"false", bSUN?"true":"false");
+	RImplementation.o.distortion = FALSE;
+	Fcolor sun_color = ((light*)Lights.sun_adapted._get())->color;
+	bool bSUN = !o.sunstatic && u_diffuse2s(sun_color) > EPS;
 
 	RCache.set_xform_world(Fidentity);
 
-	// HOM
-	ViewBase.CreateFromMatrix					(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
-	View										= 0;
-	if (!ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
-		HOM.Enable									();
-		HOM.Render									(ViewBase);
+	ViewBase.CreateFromMatrix(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
+	View = 0;
+
+	if(!ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC)) {
+		HOM.Enable();
+		HOM.Render(ViewBase);
 	}
 	
 	//******* Z-prefill calc - DEFERRER RENDERER
@@ -475,7 +535,6 @@ void CRender::Render		()
 		PIX_EVENT(DEFER_Z_FILL);
 		Device.Statistic->RenderCALC.Begin			();
 		r_pmask										(true,false);	// enable priority "0"
-		set_Recorder								(nullptr)		;
 		phase										= PHASE_SMAP;
 		render_main									(false,true)	;
 		r_pmask										(true,false);	// disable priority "1"
@@ -486,52 +545,19 @@ void CRender::Render		()
 		RCache.set_ColorWriteEnable					(FALSE);
 		r_dsgraph_render_graph						(0);
 		RCache.set_ColorWriteEnable					( );
-	} 
+	}
 	else 
 	{
 		Target->phase_scene_prepare					();
-	}
-
-	//*******
-	// Sync point
-	{
-		PROF_EVENT("CPUWaitGPU");
-		Device.Statistic->RenderDUMP_Wait_S.Begin();
-		if (1)
-		{
-			CTimer	T;							T.Start();
-			BOOL	result = FALSE;
-			HRESULT	hr = S_FALSE;
-			//while	((hr=q_sync_point[q_sync_count]->GetData	(&result,sizeof(result),D3DGETDATA_FLUSH))==S_FALSE) {
-			while ((hr = GetData(q_sync_point[q_sync_count], &result, sizeof(result))) == S_FALSE)
-			{
-				if (!SwitchToThread())			Sleep(ps_r2_wait_sleep);
-				if (T.GetElapsed_ms() > 500) {
-					result = FALSE;
-					break;
-				}
-			}
-		}
-		Device.Statistic->RenderDUMP_Wait_S.End();
-		q_sync_count = (q_sync_count + 1) % 2;
-		//CHK_DX										(q_sync_point[q_sync_count]->Issue(D3DISSUE_END));
-		CHK_DX(EndQuery(q_sync_point[q_sync_count]));
 	}
 
 	//******* Main calc - DEFERRER RENDERER
 	// Main calc
 	Device.Statistic->RenderCALC.Begin			();
 	r_pmask										(true,false,true);	// enable priority "0",+ capture wmarks
-	if (bSUN)									set_Recorder	(&main_coarse_structure);
-	else										set_Recorder	(nullptr);
 	phase										= PHASE_NORMAL;
-	{
-		PROF_EVENT("lights_spatial_move");
-		for (light* L : v_all_lights)
-			L->spatial_move();
-	}
+
 	render_main									(true);
-	set_Recorder								(nullptr);
 	r_pmask										(true,false);	// disable priority "1"
 	Device.Statistic->RenderCALC.End			();
 
@@ -540,9 +566,7 @@ void CRender::Render		()
 
 	rmNormal();
 
-	// Landshaft phase 
 	Target->u_setrt((u32)RCache.get_width(), (u32)RCache.get_height(), nullptr, nullptr, nullptr, RDepth);
-	r_dsgraph_render_landscape(0, false);
 
 	//******* Main render :: PART-0	-- first
 	if (!split_the_scene_to_minimize_wait)
@@ -554,7 +578,6 @@ void CRender::Render		()
 		r_dsgraph_render_graph					(0);
 		r_dsgraph_render_lods					(true,true);
 		if(Details)	Details->Render				();
-		r_dsgraph_render_landscape				(1, true);
 		Target->phase_scene_end					();
 	} 
 	else 
@@ -563,7 +586,6 @@ void CRender::Render		()
 		// level, SPLIT
 		Target->phase_scene_begin				();
 		r_dsgraph_render_graph					(0);
-		r_dsgraph_render_landscape				(1, true);
 		Target->disable_aniso					();
 	}
 
@@ -646,7 +668,8 @@ void CRender::Render		()
 	{
 		PIX_EVENT(ZBUFFER_COPY);
 		RCache.set_ZB(NULL);
-		ID3D11Resource* res;
+
+		ID3D11Resource* res{};
 		RDepth->GetResource(&res);
 
 		RContext->CopyResource(Target->rt_Position->pSurface, res);

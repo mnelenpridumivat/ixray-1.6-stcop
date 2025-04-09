@@ -32,6 +32,9 @@ struct SHeliEnemy{
 	void Update						();
 	void save						(NET_Packet &output_packet);
 	void load						(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 	void Load						(LPCSTR section);
 };
 
@@ -55,6 +58,9 @@ struct SHeliBodyState{
 
 	void save						(NET_Packet &output_packet);
 	void load						(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 	void Load						(LPCSTR section);
 
 };
@@ -124,6 +130,9 @@ public:
 	void	CreateRoundPoints			(Fvector center, float radius, float start_h, float end_h, xr_vector<STmpPt>& round_points);
 	void	save						(NET_Packet &output_packet);
 	void	load						(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const;
+	virtual void Load(CSaveObjectLoad* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 	void	Load						(LPCSTR section);
 	void	net_Destroy					();
 };
@@ -274,11 +283,19 @@ public:
 
 	virtual BOOL					net_Spawn			(CSE_Abstract*		DC);
 	virtual void					net_Destroy			();
-	virtual void					net_Export			(NET_Packet &P){};
-	virtual void					net_Import			(NET_Packet &P){};
+	virtual void					net_Export			(NET_Packet &P) override;
+	virtual void					net_Import			(NET_Packet &P) override;
+
+	virtual void SyncRead(NET_Packet& Packet) override;
+	virtual void SyncWrite(NET_Packet& Packet)override;
+
+	virtual BOOL					net_Relevant		() override;
 	virtual void					net_Relcase			(CObject* O );
 	virtual void					save				(NET_Packet &output_packet);
 	virtual void					load				(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const override;
+	virtual void Load(CSaveObjectLoad* Object) override;*/
+	virtual void Serialize(ISaveObject& Object) override;
 
 	virtual void					SpawnInitPhysics	(CSE_Abstract	*D);
 	virtual CPhysicsShellHolder*	PPhysicsShellHolder	()						{return PhysicsShellHolder();}

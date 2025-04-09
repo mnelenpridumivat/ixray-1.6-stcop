@@ -12,6 +12,7 @@
 #include "object_broker.h"
 #include "alife_human_brain.h"
 
+#include "../xrEngine/string_table.h"
 
 
 #ifndef AI_COMPILER
@@ -37,6 +38,8 @@
 #	include "custommonster.h"
 #	include "movement_manager.h"
 #	include "location_manager.h"
+#	include "../xrGame/Level.h"
+#include "../xrGame/InventoryOwner.h"
 #endif
 
 void setup_location_types_section(GameGraph::TERRAIN_VECTOR &m_vertex_types, CInifile const * ini, LPCSTR section)
@@ -116,6 +119,33 @@ void setup_location_types(GameGraph::TERRAIN_VECTOR &m_vertex_types, CInifile co
 
 using namespace ALife;
 
+xr_string TranslateName(LPCSTR nameStr)
+{
+	xr_string ret;
+
+	// Savegame (before this tweak) + custom npc compatibility
+	if (!strstr(nameStr, ":lname_"))
+	{
+		ret = g_pStringTable->translate(nameStr).c_str();
+		return ret;
+	}
+
+	// Split name string and translate it
+	R_ASSERT2(_GetItemCount(nameStr, ':') == 2, nameStr);
+
+	string512 name;
+	_GetItem(nameStr, 0, name, ':');
+
+	string512 lname;
+	_GetItem(nameStr, 1, lname, ':');
+
+	ret = g_pStringTable->translate(name).c_str();
+	ret += " ";
+	ret += g_pStringTable->translate(lname).c_str();
+
+	return ret;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeTraderAbstract
 ////////////////////////////////////////////////////////////////////////////
@@ -180,7 +210,7 @@ void CSE_ALifeTraderAbstract::STATE_Write	(NET_Packet &tNetPacket)
 	tNetPacket.w_s32			(NO_RANK);
 	tNetPacket.w_s32			(NO_REPUTATION);
 #endif
-	save_data					(m_character_name, tNetPacket);
+	save_data					(m_character_name_raw, tNetPacket);
 	
 	tNetPacket.w_u8				( (m_deadbody_can_take)? 1 : 0 );
 	tNetPacket.w_u8				( (m_deadbody_closed)? 1 : 0 );
@@ -242,8 +272,10 @@ void CSE_ALifeTraderAbstract::STATE_Read	(NET_Packet &tNetPacket, u16 size)
 			tNetPacket.r_s32	(m_reputation);
 		}
 
-		if (m_wVersion > 104) {
-			load_data			(m_character_name, tNetPacket);
+		if (m_wVersion > 104) 
+		{
+			load_data(m_character_name_raw, tNetPacket);
+			m_character_name = TranslateName(m_character_name_raw.c_str());
 		}
 	}
 
@@ -428,36 +460,35 @@ void CSE_ALifeTraderAbstract::set_specific_character	(shared_str new_spec_char)
 	}
 
 	m_icon_name = selected_char.IconName();
-
-	m_character_name = *(g_pStringTable->translate(selected_char.Name()));
+	m_character_name_raw = selected_char.Name();
 	
 	LPCSTR gen_name = "GENERATE_NAME_";
-	if( strstr(m_character_name.c_str(),gen_name) ){
-		//select name and lastname
-		xr_string subset			= m_character_name.c_str()+xr_strlen(gen_name);
+	if (strstr(m_character_name_raw.c_str(), gen_name))
+	{
+		// select name and lastname
+		xr_string subset = m_character_name_raw.c_str() + xr_strlen(gen_name);
 
-		string_path					t1;
-		xr_strconcat(t1,"stalker_names_",subset.c_str());
-		u32 name_cnt				= pSettings->r_u32(t1, "name_cnt");
-		u32 last_name_cnt			= pSettings->r_u32(t1, "last_name_cnt");
-		
-		string512			S;
-		xr_string n			= "name_";
-		n					+= subset;
-		n					+= "_";
-		n					+= _itoa(::Random.randI(name_cnt),S,10);
-		m_character_name	= *(g_pStringTable->translate(n.c_str()));
-		m_character_name	+= " ";
+		string_path t1;
+		xr_strconcat(t1, "stalker_names_", subset.c_str());
+		u32 name_cnt = pSettings->r_u32(t1, "name_cnt");
+		u32 last_name_cnt = pSettings->r_u32(t1, "last_name_cnt");
 
-		n					= "lname_";
-		n					+= subset;
-		n					+= "_";
-		n					+= _itoa(::Random.randI(last_name_cnt),S,10);
-		m_character_name	+= *(g_pStringTable->translate(n.c_str()));
+		string512 S;
+		xr_string n = "name_";
+		n += subset;
+		n += "_";
+		n += itoa(::Random.randI(name_cnt), S, 10);
+		m_character_name_raw = n.c_str();
+		m_character_name_raw += ":";
 
-
-	
+		n = "lname_";
+		n += subset;
+		n += "_";
+		n += itoa(::Random.randI(last_name_cnt), S, 10);
+		m_character_name_raw += n.c_str();
 	}
+	m_character_name = TranslateName(m_character_name_raw.c_str());
+
 	u32 min_m = selected_char.MoneyDef().min_money;
 	u32 max_m = selected_char.MoneyDef().max_money;
 	if(min_m!=0 && max_m!=0){
@@ -528,6 +559,44 @@ void CSE_ALifeTraderAbstract::UPDATE_Write	(NET_Packet &tNetPacket)
 void CSE_ALifeTraderAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 {
 };
+
+void CSE_ALifeTraderAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTraderAbstract::STATE")
+	{
+		Object << m_dwMoney;
+#ifndef XRGAME_EXPORTS
+		if (!Object.IsSave()) {
+#endif
+			Object << m_SpecificCharacter;
+#ifndef XRGAME_EXPORTS
+		}
+		else {
+			shared_str s;
+			Object << s;
+		}
+#endif
+		Object << m_trader_flags << m_sCharacterProfile;
+#ifndef XRGAME_EXPORTS
+		if (!Object.IsSave()) {
+#endif
+			Object << m_community_index << m_rank << m_reputation;
+#ifndef XRGAME_EXPORTS
+		}
+		else {
+			u32 CommunitiIndex = NO_COMMUNITY_INDEX, Rank = NO_RANK, Reputation = NO_REPUTATION;
+			Object << CommunitiIndex << Rank << Reputation;
+		}
+#endif
+		Object << m_character_name << m_deadbody_can_take << m_deadbody_closed;
+	}
+}
+
+void CSE_ALifeTraderAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTraderAbstract::UPDATE")
+	{}
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -619,6 +688,24 @@ void CSE_ALifeTrader::UPDATE_Read			(NET_Packet &tNetPacket)
 	inherited2::UPDATE_Read		(tNetPacket);
 };
 
+void CSE_ALifeTrader::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTrader::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeTrader::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTrader::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
+
 bool CSE_ALifeTrader::interactive			() const
 {
 	return						(false);
@@ -700,6 +787,23 @@ void CSE_ALifeCustomZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeCustomZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeCustomZone::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCustomZone::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_owner_id << m_enabled_time << m_disabled_time << m_start_time_shift;
+	}
+}
+
+void CSE_ALifeCustomZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCustomZone::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -821,6 +925,23 @@ void CSE_ALifeAnomalousZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write	(tNetPacket);
 }
 
+void CSE_ALifeAnomalousZone::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeAnomalousZone::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_offline_interactive_radius << m_artefact_spawn_count << m_artefact_position_offset;
+	}
+}
+
+void CSE_ALifeAnomalousZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeAnomalousZone::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeAnomalousZone::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -870,6 +991,24 @@ void CSE_ALifeTorridZone::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeTorridZone::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeTorridZone::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTorridZone::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		CSE_Motion::motion_serialize(Object);
+		set_editor_flag(flMotionChange);
+	}
+}
+
+void CSE_ALifeTorridZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTorridZone::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -925,6 +1064,24 @@ void CSE_ALifeZoneVisual::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeZoneVisual::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeZoneVisual::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeZoneVisual::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		visual_serialize(Object);
+		Object << startup_animation << attack_animation;
+	}
+}
+
+void CSE_ALifeZoneVisual::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeZoneVisual::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1081,6 +1238,31 @@ void CSE_ALifeCreatureAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 	tNetPacket.r_u8				(s_squad);
 	tNetPacket.r_u8				(s_group);
 };
+
+void CSE_ALifeCreatureAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureAbstract::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << s_team << s_squad << s_group << fHealth << m_dynamic_out_restrictions << m_dynamic_in_restrictions << m_killer_id;
+		if (Object.IsSave()) {
+			o_model = o_torso.yaw;
+			o_torso.pitch = o_Angle.x;
+			o_torso.yaw = o_Angle.y;
+		}
+		R_ASSERT(!(get_health() > 0.0f && get_killer_id() != u16(-1)));
+		Object << m_game_death_time;
+	}
+}
+
+void CSE_ALifeCreatureAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureAbstract::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << fHealth << timestamp << flags << o_Position << o_model << o_torso << s_team << s_squad << s_group;
+	}
+}
 
 u8 CSE_ALifeCreatureAbstract::g_team		()
 {
@@ -1309,6 +1491,24 @@ void CSE_ALifeMonsterAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 
 };
 
+void CSE_ALifeMonsterAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterAbstract::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		Object << m_out_space_restrictors << m_in_space_restrictors << m_smart_terrain_id << m_task_reached;
+	}
+}
+
+void CSE_ALifeMonsterAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterAbstract::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		Object << m_tNextGraphID << m_tPrevGraphID << m_fDistanceFromPoint << m_fDistanceToPoint;
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeMonsterAbstract::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -1440,7 +1640,21 @@ void CSE_ALifeCreatureActor::load(NET_Packet &tNetPacket)
 
 BOOL CSE_ALifeCreatureActor::Net_Relevant()
 {
-	return TRUE; // this is a big question ;)
+#ifdef XRGAME_EXPORTS
+	return IsGameTypeSingle(); // this is a big question ;)
+#else
+	return true;
+#endif
+}
+
+void CSE_ALifeCreatureActor::SyncRead(NET_Packet& Packet)
+{
+	IsWaunded = Packet.r_u8();
+}
+
+void CSE_ALifeCreatureActor::SyncWrite(NET_Packet& Packet)
+{
+	Packet.w_u8(IsWaunded);
 }
 
 void CSE_ALifeCreatureActor::UPDATE_Read	(NET_Packet	&tNetPacket)
@@ -1452,6 +1666,7 @@ void CSE_ALifeCreatureActor::UPDATE_Read	(NET_Packet	&tNetPacket)
 	tNetPacket.r_sdir			(velocity	);
 	tNetPacket.r_float			(fRadiation	);
 	tNetPacket.r_u8				(weapon		);
+
 	////////////////////////////////////////////////////
 	tNetPacket.r_u16			(m_u16NumItems);
 
@@ -1495,7 +1710,8 @@ void CSE_ALifeCreatureActor::UPDATE_Write	(NET_Packet	&tNetPacket)
 	tNetPacket.w_u8				(weapon		);
 	////////////////////////////////////////////////////
 	tNetPacket.w_u16			(m_u16NumItems);
-	if (!m_u16NumItems) return;	
+	if (!m_u16NumItems)
+		return;	
 
 	if (m_u16NumItems == 1)
 	{
@@ -1522,6 +1738,45 @@ void CSE_ALifeCreatureActor::UPDATE_Write	(NET_Packet	&tNetPacket)
 		u32 BodyDataSize = 24 + m_BoneDataSize*m_u16NumItems;
 		tNetPacket.w(m_DeadBodyData, BodyDataSize);
 	};
+}
+
+void CSE_ALifeCreatureActor::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureActor::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		inherited3::STATE_Serialize(Object);
+		Object << m_holderID;
+	}
+}
+
+void CSE_ALifeCreatureActor::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureActor::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		inherited3::UPDATE_Serialize(Object);
+		Object << mstate << accel << velocity << fRadiation << weapon << m_u16NumItems;
+
+		if(m_u16NumItems == 1)
+		{
+			BEGIN_CHUNK(Object,"CSE_ALifeCreatureActor::UPDATE::m_u16NumItems::eq1")
+			{
+				Object << m_AliveState.enabled << m_AliveState.angular_vel << m_AliveState.linear_vel << m_AliveState.force 
+					<< m_AliveState.torque << m_AliveState.position << m_AliveState.quaternion;
+			}
+		} else if (m_u16NumItems > 1)
+		{
+			BEGIN_CHUNK(Object,"CSE_ALifeCreatureActor::UPDATE::m_u16NumItems::dead_body")
+			{
+				Object << m_BoneDataSize;
+				VERIFY(m_BoneDataSize <= 1024);
+				Object << m_DeadBodyData;
+			}
+		}
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1579,6 +1834,22 @@ void CSE_ALifeCreatureCrow::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeCreatureCrow::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureCrow::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeCreatureCrow::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreatureCrow::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeCreatureCrow::FillProps			(LPCSTR pref, PropItemVec& values)
 {
@@ -1625,6 +1896,22 @@ void CSE_ALifeCreaturePhantom::UPDATE_Read		(NET_Packet	&tNetPacket)
 void CSE_ALifeCreaturePhantom::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeCreaturePhantom::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreaturePhantom::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeCreaturePhantom::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCreaturePhantom::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1745,6 +2032,29 @@ void CSE_ALifeMonsterRat::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
 	inherited2::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeMonsterRat::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object, "CSE_ALifeMonsterRat::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << fEyeFov << fEyeRange << fMinSpeed << fMaxSpeed << fAttackSpeed << fMaxPursuitRadius
+			<< fMaxHomeRadius << fMoraleSuccessAttackQuant << fMoraleDeathQuant << fMoraleFearQuant
+			<< fMoraleRestoreQuant << u16MoraleRestoreTimeInterval << fMoraleMinValue << fMoraleMaxValue
+			<< fMoraleNormalValue << fHitPower << u16HitInterval << fAttackDistance << fAttackAngle 
+			<< fAttackSuccessProbability;
+	}
+}
+
+void CSE_ALifeMonsterRat::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterRat::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
 }
 
 CSE_Abstract *CSE_ALifeMonsterRat::init			()
@@ -1878,6 +2188,24 @@ void CSE_ALifeMonsterZombie::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeMonsterZombie::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterZombie::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << fEyeFov << fEyeRange << fMinSpeed << fMaxSpeed << fAttackSpeed << fMaxPursuitRadius
+			<< fMaxHomeRadius << fHitPower << u16HitInterval << fAttackDistance << fAttackAngle;
+	}
+}
+
+void CSE_ALifeMonsterZombie::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterZombie::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeMonsterZombie::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -1936,42 +2264,92 @@ void CSE_ALifeMonsterBase::STATE_Write	(NET_Packet	&tNetPacket)
 	tNetPacket.w_u16			(m_spec_object_id);	
 }
 
+void CSE_ALifeMonsterBase::SyncWrite(NET_Packet& Packet)
+{
+	Packet.w_angle8(o_torso.pitch);
+	Packet.w_angle8(o_torso.yaw);
+
+	Packet << phSyncFlag;
+
+	if (phSyncFlag) 
+	{
+#ifdef XRGAME_EXPORTS
+		physics_state->write(Packet);
+#endif
+	}
+	else 
+	{
+		Packet << o_Position;
+	}
+
+	// Sound Sync
+	Packet << m_snd_sync_flag;
+
+	if (m_snd_sync_flag != eMonsterSound::monster_sound_no) 
+	{
+		Packet << m_snd_sync_sound;
+
+		if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay)
+		{
+			Packet << m_snd_sync_sound_delay;
+		}
+	}
+
+	Packet << u_motion_idx;
+	Packet << u_motion_slot;
+
+	float whealth = f_health;
+	clamp(whealth, 0.f, 1.f);
+
+	Packet.w_float_q8(whealth, 0, 1);
+}
+
+void CSE_ALifeMonsterBase::SyncRead(NET_Packet& Packet)
+{
+	Packet.r_angle8(o_torso.pitch);
+	Packet.r_angle8(o_torso.yaw);
+
+	Packet >> phSyncFlag;
+
+	if (phSyncFlag)
+	{
+#ifdef XRGAME_EXPORTS
+		physics_state->read(Packet);
+		o_Position.set(physics_state->physics_position);
+#endif
+	}
+	else
+	{
+		Packet >> o_Position;
+	}
+
+	// Sound Sync
+	Packet >> m_snd_sync_flag;
+
+	if (m_snd_sync_flag != eMonsterSound::monster_sound_no)
+	{
+		Packet >> m_snd_sync_sound;
+
+		if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay)
+		{
+			Packet >> m_snd_sync_sound_delay;
+		}
+	}
+
+	// Sound Sync
+	Packet >> u_motion_idx;
+	Packet >> u_motion_slot;
+
+	float health = 0;
+	Packet.r_float_q8(health, 0, 1);
+	set_health(health);
+}
+
 void CSE_ALifeMonsterBase::UPDATE_Read	(NET_Packet	&tNetPacket)
 {
 #ifdef XRGAME_EXPORTS
-	if(g_pGamePersistent->GameType() != eGameIDSingle) {
-		tNetPacket.r_angle8(o_torso.pitch);
-		tNetPacket.r_angle8(o_torso.yaw);
-
-		tNetPacket >> phSyncFlag;
-
-		if(phSyncFlag) 
-		{
-			physics_state->read(tNetPacket);
-			o_Position.set(physics_state->physics_position);
-		}
-		else
-		{
-			tNetPacket >> o_Position;
-		}
-
-		// Sound Sync
-		tNetPacket >> m_snd_sync_flag;
-
-		if(m_snd_sync_flag != eMonsterSound::monster_sound_no) {
-			tNetPacket >> m_snd_sync_sound;
-
-			if(m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
-				tNetPacket >> m_snd_sync_sound_delay;
-			}
-		}
-		// Sound Sync
-
-		tNetPacket >> u_motion_idx;
-		tNetPacket >> u_motion_slot;
-
-		tNetPacket >> f_health;
-		set_health(f_health);
+	if(g_pGamePersistent->GameType() != eGameIDSingle)
+	{
 		return;
 	}
 #endif
@@ -1985,34 +2363,6 @@ void CSE_ALifeMonsterBase::UPDATE_Write(NET_Packet& tNetPacket)
 #ifdef XRGAME_EXPORTS
 	if(g_pGamePersistent->GameType() != eGameIDSingle) 
 	{
-		tNetPacket.w_angle8(o_torso.pitch);
-		tNetPacket.w_angle8(o_torso.yaw);
-
-		tNetPacket << phSyncFlag;
-
-		if(phSyncFlag) {
-			physics_state->write(tNetPacket);
-		}
-		else {
-			tNetPacket << o_Position;
-		}
-
-		// Sound Sync
-		tNetPacket << m_snd_sync_flag;
-
-		if(m_snd_sync_flag != eMonsterSound::monster_sound_no) {
-			tNetPacket << m_snd_sync_sound;
-
-			if(m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
-				tNetPacket << m_snd_sync_sound_delay;
-			}
-		}
-		// Sound Sync
-
-		tNetPacket << u_motion_idx;
-		tNetPacket << u_motion_slot;
-
-		tNetPacket << get_health();
 		return;
 	}
 #endif
@@ -2021,10 +2371,58 @@ void CSE_ALifeMonsterBase::UPDATE_Write(NET_Packet& tNetPacket)
 	inherited2::UPDATE_Write(tNetPacket);
 }
 
+void CSE_ALifeMonsterBase::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterBase::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << m_spec_object_id;
+	}
+}
+
+void CSE_ALifeMonsterBase::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMonsterBase::UPDATE")
+	{
+#ifdef XRGAME_EXPORTS
+		if (g_pGamePersistent->GameType() != eGameIDSingle)
+		{
+			Object << o_torso.pitch << o_torso.yaw << phSyncFlag;
+			if (phSyncFlag) {
+				physics_state->serialize(Object);
+			}
+			else {
+				Object << o_Position;
+			}
+			// Sound Sync
+			{
+				u8* Value = (u8*)&m_snd_sync_flag;
+				Object << *Value;
+			}
+			if (m_snd_sync_flag != eMonsterSound::monster_sound_no) {
+				Object << m_snd_sync_sound;
+				if (m_snd_sync_flag == eMonsterSound::monster_sound_play_with_delay) {
+					Object << m_snd_sync_sound_delay;
+				}
+			}
+			// Sound Sync
+			Object << u_motion_idx << u_motion_slot << f_health;
+			set_health(f_health);
+			return;
+		}
+#endif
+
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
+
 BOOL CSE_ALifeMonsterBase::Net_Relevant() 
 {
 #ifdef XRGAME_EXPORTS
-	if(g_pGamePersistent->GameType() != eGameIDSingle) {
+	if(g_pGamePersistent->GameType() != eGameIDSingle)
+	{
 		return g_Alive();
 	}
 #endif
@@ -2074,6 +2472,22 @@ void CSE_ALifePsyDogPhantom::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifePsyDogPhantom::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifePsyDogPhantom::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifePsyDogPhantom::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifePsyDogPhantom::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifePsyDogPhantom::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2152,6 +2566,25 @@ void CSE_ALifeHumanAbstract::UPDATE_Read	(NET_Packet &tNetPacket)
 	}
 };
 
+void CSE_ALifeHumanAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHumanAbstract::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		brain().on_state_serialize(Object);
+	}
+}
+
+void CSE_ALifeHumanAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHumanAbstract::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeHumanAbstract::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -2191,24 +2624,78 @@ void CSE_ALifeHumanStalker::STATE_Read		(NET_Packet &tNetPacket, u16 size)
 		tNetPacket.r_u8			();
 }
 
-void CSE_ALifeHumanStalker::UPDATE_Write	(NET_Packet &tNetPacket)
+void CSE_ALifeHumanStalker::UPDATE_Write(NET_Packet& tNetPacket)
 {
-	inherited1::UPDATE_Write	(tNetPacket);
-	inherited2::UPDATE_Write	(tNetPacket);
-	tNetPacket.w_stringZ		(m_start_dialog);
+#ifdef XRGAME_EXPORTS
+	if (g_pGamePersistent->GameType() != eGameIDSingle)
+	{
+		return;
+	}
+#endif
+
+	inherited1::UPDATE_Write(tNetPacket);
+	inherited2::UPDATE_Write(tNetPacket);
+	tNetPacket.w_stringZ(m_start_dialog);
 }
 
-void CSE_ALifeHumanStalker::UPDATE_Read		(NET_Packet &tNetPacket)
+void CSE_ALifeHumanStalker::UPDATE_Read(NET_Packet& tNetPacket)
 {
-	inherited1::UPDATE_Read		(tNetPacket);
-	inherited2::UPDATE_Read		(tNetPacket);
-	tNetPacket.r_stringZ		(m_start_dialog);
+#ifdef XRGAME_EXPORTS
+	if (g_pGamePersistent->GameType() != eGameIDSingle)
+	{
+		return;
+	}
+#endif
+
+	inherited1::UPDATE_Read(tNetPacket);
+	inherited2::UPDATE_Read(tNetPacket);
+	tNetPacket.r_stringZ(m_start_dialog);
+}
+
+void CSE_ALifeHumanStalker::SyncRead(NET_Packet& Packet)
+{
+#ifdef XRGAME_EXPORTS
+	m_state_mngr.CSE_StateRead(Packet);
+	m_state_mngr.GetStateCSE(this);
+#endif
+}
+
+void CSE_ALifeHumanStalker::SyncWrite(NET_Packet& Packet)
+{
+#ifdef XRGAME_EXPORTS
+	m_state_mngr.FillStateCSE(this);
+	m_state_mngr.CSE_StateWrite(Packet);
+#endif
+}
+
+BOOL CSE_ALifeHumanStalker::Net_Relevant()
+{
+	return g_Alive();
 }
 
 void CSE_ALifeHumanStalker::load			(NET_Packet &tNetPacket)
 {
 	inherited1::load			(tNetPacket);
 	inherited2::load			(tNetPacket);
+}
+
+void CSE_ALifeHumanStalker::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHumanStalker::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeHumanStalker::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHumanStalker::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+		Object << m_start_dialog;
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2307,6 +2794,29 @@ void CSE_ALifeOnlineOfflineGroup::UPDATE_Write				(NET_Packet &tNetPacket)
 void CSE_ALifeOnlineOfflineGroup::UPDATE_Read				(NET_Packet &tNetPacket)
 {
 	inherited1::UPDATE_Read		(tNetPacket);
+}
+
+void CSE_ALifeOnlineOfflineGroup::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeOnlineOfflineGroup::STATE")
+	{
+		((CSaveObject&)Object).Serialize(m_members, fastdelegate::MakeDelegate(this, &CSE_ALifeOnlineOfflineGroup::STATE_SerializePerElem));
+	}
+}
+
+void CSE_ALifeOnlineOfflineGroup::STATE_SerializePerElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, MEMBER*>& Value) {
+	Object << Value.first;
+	if (!Object.IsSave()) {
+		Value.second = nullptr;
+	}
+}
+
+void CSE_ALifeOnlineOfflineGroup::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeOnlineOfflineGroup::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS

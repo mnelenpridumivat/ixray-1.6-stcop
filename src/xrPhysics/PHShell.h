@@ -186,7 +186,7 @@ public:
 	virtual		CPhysicsElement		*get_ElementByStoreOrder		(u16 num);
 				CPhysicsElement		*get_PhysicsParrentElement		( u16 bone_id );
 	virtual		u16					get_ElementsNumber				()const{return (u16)elements.size();}
-	virtual		CPHSynchronize		*get_ElementSync				(u16 element);
+	virtual		CPHSynchronize		*get_ElementSync				(u16 element) const;
 	virtual		u16					get_elements_number				(){return get_ElementsNumber();}
 	virtual		CPHSynchronize		*get_element_sync				(u16 element){return get_ElementSync(element);}
 	virtual		CPhysicsElement		*NearestToPoint					(const Fvector& point, NearestToPointCallback *cb = 0 );

@@ -22,6 +22,8 @@ enum ESoundTypes;
 
 class CCustomMonster;
 class CAI_Stalker;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 class CSoundMemoryManager {
 public:
@@ -87,6 +89,7 @@ public:
 	virtual void				feel_sound_new			(CObject* who, int eType, CSound_UserDataPtr user_data, const Fvector &Position, float power);
 	virtual	void				update					();
 			void				remove_links			(CObject *object);
+			void				remove					(const MemorySpace::CSoundObject *sound_object);
 
 public:
 			void				enable					(const CObject *object, bool enable);
@@ -105,6 +108,10 @@ public:
 public:
 			void				save					(NET_Packet &packet) const;
 			void				load					(IReader &packet);
+			/*virtual void Save(CSaveObjectSave* Object);
+			virtual void Load(CSaveObjectLoad* Object);*/
+			virtual void Serialize(ISaveObject& Object);
+			virtual void SerializeSingle(ISaveObject& Object, CSoundObject& Value);
 			void				on_requested_spawn		(CObject *object);
 
 private:

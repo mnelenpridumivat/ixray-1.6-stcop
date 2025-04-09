@@ -41,7 +41,7 @@ struct  SFillPropData
 	RStringVec						character_profiles;
 	RStringVec						smart_covers;
 	xr_map<shared_str, u32>			location_colors;
-	u32								counter;
+	xr_atomic_u32					counter;
 	SFillPropData					();
 	~SFillPropData					();
 	void							load					();
@@ -50,7 +50,7 @@ struct  SFillPropData
 	void							dec						();
 };
 
-SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeSchedulable,IPureSchedulableObject)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeSchedulable, IPureSchedulableObject)
 	CSE_ALifeItemWeapon				*m_tpCurrentBestWeapon;
 	CSE_ALifeDynamicObject			*m_tpBestDetector;
 	u64								m_schedule_counter;
@@ -162,7 +162,7 @@ public:
 #endif
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeGroupAbstract)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeGroupAbstract, IPureStateUpdateObject)
 	ALife::OBJECT_VECTOR			m_tpMembers;
 	bool							m_bCreateSpawnPositions;
 	u16								m_wCount;
@@ -197,28 +197,64 @@ public:
 	{
 	};
 	
-	virtual void STATE_Read			(NET_Packet	&tNetPacket, u16 size)
+	virtual void STATE_Read			(NET_Packet	&tNetPacket, u16 size) override
 	{
 		inherited1::STATE_Read		(tNetPacket,size);
 		inherited2::STATE_Read		(tNetPacket,size);
 	};
 
-	virtual void STATE_Write		(NET_Packet	&tNetPacket)
+	virtual void STATE_Write		(NET_Packet	&tNetPacket) override
 	{
 		inherited1::STATE_Write		(tNetPacket);
 		inherited2::STATE_Write		(tNetPacket);
 	};
 
-	virtual void UPDATE_Read		(NET_Packet	&tNetPacket)
+	virtual void UPDATE_Read		(NET_Packet	&tNetPacket) override
 	{
 		inherited1::UPDATE_Read		(tNetPacket);
 		inherited2::UPDATE_Read		(tNetPacket);
 	};
 
-	virtual void UPDATE_Write		(NET_Packet	&tNetPacket)
+	virtual void UPDATE_Write		(NET_Packet	&tNetPacket) override
 	{
 		inherited1::UPDATE_Write	(tNetPacket);
 		inherited2::UPDATE_Write	(tNetPacket);
+	};
+
+	/*virtual void STATE_ReadSave(CSaveObjectLoad* Object) override
+	{
+		inherited1::STATE_ReadSave(Object);
+		inherited2::STATE_ReadSave(Object);
+	};
+
+	virtual void STATE_WriteSave(CSaveObjectSave* Object) const override
+	{
+		inherited1::STATE_WriteSave(Object);
+		inherited2::STATE_WriteSave(Object);
+	};*/
+
+	virtual void STATE_Serialize(ISaveObject& Object) override
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	};
+
+	/*virtual void UPDATE_ReadSave(CSaveObjectLoad* Object) override
+	{
+		inherited1::UPDATE_ReadSave(Object);
+		inherited2::UPDATE_ReadSave(Object);
+	};
+
+	virtual void UPDATE_WriteSave(CSaveObjectSave* Object) const override
+	{
+		inherited1::UPDATE_WriteSave(Object);
+		inherited2::UPDATE_WriteSave(Object);
+	};*/
+
+	virtual void UPDATE_Serialize(ISaveObject& Object) override
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
 	};
 
 	virtual CSE_Abstract *init		()
@@ -349,7 +385,7 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeLevelChanger,CSE_ALifeSpaceRestrictor)
 	Fvector							m_tAngles;
 	shared_str						m_caLevelToChange;
 	shared_str						m_caLevelPointToChange;
-	BOOL							m_bSilentMode;
+	bool							m_bSilentMode;
 
 									CSE_ALifeLevelChanger		(LPCSTR caSection);
 	virtual							~CSE_ALifeLevelChanger		();
@@ -420,6 +456,7 @@ public:
 	};
 	/////////// network ///////////////
 	u8								m_u8NumItems;
+	Flags8							m_State;
 	bool							prev_freezed;
 	bool							freezed;
 	SPHNetState						State;
@@ -498,6 +535,13 @@ SERVER_ENTITY_DECLARE_BEGIN3(CSE_ALifeHelicopter,CSE_ALifeDynamicObjectVisual,CS
 	virtual bool					used_ai_locations			() const;
 	virtual CSE_Motion*		motion						();
 	virtual CSE_Abstract			*cast_abstract			() {return this;}
+	virtual BOOL					Net_Relevant() override;
+
+	// For new sync system
+	Fvector PointPos;
+
+	virtual void SyncRead(NET_Packet& Packet);
+	virtual void SyncWrite(NET_Packet& Packet);
 
 SERVER_ENTITY_DECLARE_END
 
@@ -506,6 +550,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 	{
 		void read	(NET_Packet& P);
 		void write   (NET_Packet& P);
+		//void read(CSaveObjectLoad* Object);
+		//void write(CSaveObjectSave* Object) const;
 		u8 open_state;
 		float health;
 	};
@@ -513,6 +559,8 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 	{
 		void read	(NET_Packet& P);
 		void write   (NET_Packet& P);
+		//void read(CSaveObjectLoad* Object);
+		//void write(CSaveObjectSave* Object) const;
 		float health;
 	};
 	xr_vector<SDoorState>			door_states;
@@ -533,7 +581,13 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeCar,CSE_ALifeDynamicObjectVisual,CSE_PHSke
 protected:
 	virtual void					data_load				(NET_Packet &tNetPacket);
 	virtual void					data_save				(NET_Packet &tNetPacket);
+	//virtual void					data_load(CSaveObjectLoad* Object) override;
+	//virtual void					data_save(CSaveObjectSave* Object) const override;
+	virtual void					data_serialize(ISaveObject& Object) override;
 SERVER_ENTITY_DECLARE_END
+
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SDoorState& Value);
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SWheelState& Value);
 
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeObjectBreakable,CSE_ALifeDynamicObjectVisual)
     float							m_health;

@@ -138,8 +138,7 @@ void CCar::cb_Steer(CBoneInstance* B)
 void	CCar::Load(LPCSTR section)
 {
 	inherited::Load(section);
-	ISpatial* self = smart_cast<ISpatial*> (this);
-	if (self)		self->spatial.type |= STYPE_VISIBLEFORAI;
+	SpatialComponent->spatial.type |= STYPE_VISIBLEFORAI;
 
 	CInventoryOwner::Load(section);
 	inventory().m_pOwner = this;
@@ -397,7 +396,7 @@ void CCar::UpdateEx(float fov)
 	{
 		cam_Update(Device.fTimeDelta, fov);
 		OwnerActor()->Cameras().UpdateFromCamera(Camera());
-		OwnerActor()->Cameras().ApplyDevice(VIEWPORT_NEAR);
+		OwnerActor()->Cameras().ApplyDevice(Device.fViewportNear);
 	}
 }
 
@@ -1579,8 +1578,7 @@ bool CCar::Use(const Fvector& pos, const Fvector& dir, const Fvector& foot_pos)
 							continue;
 					}
 
-					CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-					pGameSP->StartCarBody(Actor(), this);
+					CurrentGameUI()->StartCarBody(Actor(), this);
 				}
 				else if (IsDoorBone)
 				{

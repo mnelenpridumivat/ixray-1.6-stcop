@@ -9,10 +9,12 @@
 #pragma once
 
 #include "../xrScripts/script_export_space.h"
+#include "Save/SaveInterface.h"
 
 class CSE_ALifeObject;
 class CScriptGameObject;
 class NET_Packet;
+class CSaveObject;
 
 class CScriptBinderObject {
 public:
@@ -31,6 +33,9 @@ public:
 	virtual void		shedule_Update		(u32 time_delta);
 	virtual void		save				(NET_Packet *output_packet);
 	virtual void		load				(IReader	*input_packet);
+	//virtual void Save(ISaveObject* Object);
+	//virtual void Load(ISaveObject* Object);
+	virtual void Serialize(ISaveObject* Object);
 	virtual bool		net_SaveRelevant	();
 	virtual void		net_Relcase			(CScriptGameObject *object);
 

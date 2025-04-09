@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------
-#define TSTRING_COUNT 	10
+constexpr auto TSTRING_COUNT = 10;
 const LPCSTR TEXTUREString[TSTRING_COUNT] = { "Custom...","$null","$base0", "$base1" ,"$base2" ,"$base3" ,"$base4","$base5" ,"$base6" ,"$base7" };
 template<typename T>
 inline bool DrawNumeric(PropItem* item, bool& change, bool read_only)
@@ -43,12 +43,12 @@ inline bool DrawNumeric<float>(PropItem* item, bool& change, bool read_only)
 	change = ImGui::InputFloat("##value", &temp, 0.01, 0.1, V->dec, read_only ? ImGuiInputTextFlags_ReadOnly : 0);
 	if (change)
 	{
-		if (!isinf(V->lim_mn) &&V->lim_mn > temp)
-			temp = V->lim_mn;
-		if (!isinf(V->lim_mx) && V->lim_mx < temp)
-			temp = V->lim_mx;
 		if ( item->AfterEdit< NumericValue<float>, float>(temp) && !read_only)
 		{
+			if (!isinf(V->lim_mn) && V->lim_mn > temp)
+				temp = V->lim_mn;
+			if (!isinf(V->lim_mx) && V->lim_mx < temp)
+				temp = V->lim_mx;
 			change = item->ApplyValue< NumericValue<float>, float>(temp);
 		}
 	}
@@ -181,6 +181,24 @@ void UIPropertiesItem::DrawProp()
 			new_val_as_BOOL = new_val;
 			if (PItem->AfterEdit<BOOLValue, BOOL>(new_val_as_BOOL))
 				if (PItem->ApplyValue<BOOLValue, BOOL>(new_val_as_BOOL))
+				{
+					PropertiesFrom->Modified();
+				}
+		}
+
+	}
+	break;
+	case PROP_BOOL:
+	{
+		BoolValue* V = dynamic_cast<BoolValue*>(PItem->GetFrontValue()); VERIFY(V);
+		bool new_val_as_bool = V->GetValue();
+		PItem->BeforeEdit<BoolValue, bool>(new_val_as_bool);
+		bool new_val = new_val_as_bool;
+		if (ImGui::Checkbox("##value", &new_val))
+		{
+			new_val_as_bool = new_val;
+			if (PItem->AfterEdit<BoolValue, bool>(new_val_as_bool))
+				if (PItem->ApplyValue<BoolValue, bool>(new_val_as_bool))
 				{
 					PropertiesFrom->Modified();
 				}

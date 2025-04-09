@@ -10,6 +10,7 @@
 #	include "../../xrUI/xrUIXmlParser.h"
 #	include "PhraseDialog.h"
 #	include "xrServer_Objects_ALife_Monsters.h"
+#include "Save/SaveObject.h"
 #else // XRGAME_EXPORTS
 #	include "xrUIXmlParser.h"
 #endif // XRGAME_EXPORTS
@@ -182,6 +183,14 @@ void CCharacterInfo::load	(IReader& stream)
 void CCharacterInfo::save	(NET_Packet& stream)
 {
 	stream.w_stringZ	(m_StartDialog);
+}
+
+void CCharacterInfo::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CInventoryOwner")
+	{
+		Object << m_StartDialog;
+	}
 }
 
 #endif

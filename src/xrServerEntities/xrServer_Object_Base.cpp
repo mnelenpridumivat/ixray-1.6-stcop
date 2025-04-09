@@ -25,6 +25,9 @@
 #ifdef XRGAME_EXPORTS
 #	include "ai_space.h"
 #	include "alife_simulator.h"
+#	include "alife_storage_manager.h"
+#	include "Level.h"
+#	include "GameObject.h"
 #endif 
 
 LPCSTR script_section = "script";
@@ -62,6 +65,18 @@ void CPureServerObject::save				(NET_Packet	&tNetPacket)
 {
 }
 
+/*void CPureServerObject::Load(CSaveObjectLoad* Object)
+{
+}
+
+void CPureServerObject::Save(CSaveObjectSave* Object) const
+{
+}*/
+
+void CPureServerObject::Serialize(ISaveObject& Object)
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // CSE_Abstract
 ////////////////////////////////////////////////////////////////////////////
@@ -87,6 +102,7 @@ CSE_Abstract::CSE_Abstract					(LPCSTR caSection)
 	m_script_version			= 0;
 	m_tClassID					= TEXT2CLSID(pSettings->r_string(caSection,"class"));
 
+	s_flags.set(M_SPAWN_VERSION, TRUE);
 //	m_spawn_probability			= 1.f;
 	m_spawn_flags.zero			();
 	m_spawn_flags.set			(flSpawnEnabled			,TRUE);
@@ -218,6 +234,7 @@ void CSE_Abstract::Spawn_Write				(NET_Packet	&tNetPacket, BOOL bLocal)
 	if (client_data_size > 0) {
 		tNetPacket.w			(&*client_data.begin(),client_data_size);
 	}
+	tNetPacket.w_u64(client_data_new);
 
 	tNetPacket.w_u16			(m_tSpawnID);
 //	tNetPacket.w_float			(m_spawn_probability);
@@ -315,8 +332,13 @@ BOOL CSE_Abstract::Spawn_Read				(NET_Packet	&tNetPacket)
 		else
 			client_data.clear	();
 	}
-	else
-		client_data.clear		();
+	else {
+		client_data.clear();
+	}
+
+	if (m_wVersion > 129) {
+		tNetPacket.r_u64(client_data_new);
+	}
 
 	if (m_wVersion > 79)
 		tNetPacket.r_u16			(m_tSpawnID);
@@ -451,18 +473,78 @@ bool CSE_Abstract::validate					()
 	return						(true);
 }
 
-/**
-void CSE_Abstract::save_update				(NET_Packet &tNetPacket)
+bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal) 
 {
-	tNetPacket.w				(&m_spawn_count,sizeof(m_spawn_count));
-	tNetPacket.w				(&m_last_spawn_time,sizeof(m_last_spawn_time));
-	tNetPacket.w				(&m_next_spawn_time,sizeof(m_next_spawn_time));
-}
+	BEGIN_CHUNK(Object,"CSE_Abstract")
+	{
+		Object << s_name << s_name_replace << s_RP << o_Position << o_Angle << RespawnTime << ID << ID_Parent << ID_Phantom;
 
-void CSE_Abstract::load_update				(NET_Packet &tNetPacket)
-{
-	tNetPacket.r				(&m_spawn_count,sizeof(m_spawn_count));
-	tNetPacket.r				(&m_last_spawn_time,sizeof(m_last_spawn_time));
-	tNetPacket.r				(&m_next_spawn_time,sizeof(m_next_spawn_time));
+		{
+			u16 FlagsTemp;
+			u16 SpawnVersion;
+			if (Object.IsSave()) {
+				if (bLocal) {
+					FlagsTemp = u16(s_flags.flags | M_SPAWN_OBJECT_LOCAL);
+				}
+				else {
+					FlagsTemp = u16(s_flags.flags & ~(M_SPAWN_OBJECT_LOCAL | M_SPAWN_OBJECT_ASPLAYER));
+				}
+				SpawnVersion = SPAWN_VERSION;
+			}
+			Object << FlagsTemp << SpawnVersion;
+			if (!Object.IsSave()) {
+				s_flags.assign(FlagsTemp);
+				m_wVersion = SpawnVersion;
+			}
+		}
+		Object << m_gameType.m_GameType;
+		{
+			u16 SpawnVer;
+			if (Object.IsSave()) {
+				SpawnVer = script_server_object_version();
+			}
+			Object << SpawnVer;
+			if(!Object.IsSave()) {
+				m_script_version = SpawnVer;
+			}
+		}
+
+#ifdef XRGAME_EXPORTS
+		BEGIN_CHUNK(Object,"CSE_Abstract::ClientObject")
+		{
+			bool has_data = false;
+			if (Object.IsSave()) {
+				auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
+				if (Obj)
+				{
+					has_data = true;
+				}
+				Object << has_data;
+				if (Obj) {
+					Obj->net_Serialize(Object);
+				}
+			}
+			else {
+				Object << has_data;
+				if(has_data)
+				{
+					client_data_new = Object.ExtractCurrentChunk();
+				}
+			}
+		}
+#endif
+
+		Object << m_tSpawnID;
+
+#ifdef XRSE_FACTORY_EXPORTS
+		assign();
+#endif
+
+		{
+			auto ChunkDepth = Object.GetChunkStackDepth();
+			STATE_Serialize(Object);
+			R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "STATE_Serialize", name());
+		}
+	}
+	return true;
 }
-/**/

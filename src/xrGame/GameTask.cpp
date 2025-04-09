@@ -192,21 +192,27 @@ bool CGameTask::CheckInfo(const xr_vector<shared_str>& v) const
 bool CGameTask::CheckFunctions(const task_state_functors& v) const
 {
 	bool res = false;
-	task_state_functors::const_iterator it	= v.begin();
-	for(;it!=v.end();++it)
+	try
 	{
-		if( (*it).is_valid() ) res = (*it)(m_ID.c_str());
-		if(!res) break;
-	}
+		for (const luabind::functor<bool>& functor : v)
+		{
+			if (functor.is_valid()) res = functor(m_ID.c_str());
+			if (!res) break;
+		}
+	}catch (...) {}
+
 	return res;
 
 }
 void CGameTask::CallAllFuncs(const task_state_functors& v)
 {
-	task_state_functors::const_iterator it	= v.begin();
-	for(;it!=v.end();++it){
-		if( (*it).is_valid() ) (*it)(m_ID.c_str());
-	}
+	try
+	{
+		for (const luabind::functor<bool>& functor : v)
+		{
+			if (functor.is_valid()) functor(m_ID.c_str());
+		}
+	}catch(...){}
 }
 void CGameTask::SendInfo(const xr_vector<shared_str>& v)
 {
@@ -254,6 +260,27 @@ void CGameTask::load_task(IReader &stream)
 	load_data				(m_priority,		stream);
 	CommitScriptHelperContents();
 	CreateMapLocation		(true);
+}
+
+void CGameTask::serialize_task(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CGameTask")
+	{
+		{
+			u8* Value = (u8*)&m_task_state;
+			Object << *Value;
+		}
+		{
+			u8* Value = (u8*)&m_task_type;
+			Object << *Value;
+		}
+		Object << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish << m_Title << m_Description << m_Description
+			<< m_icon_texture_name << m_map_hint << m_map_location << m_map_object_id << m_priority << m_pScriptHelper;
+		if (!Object.IsSave()) {
+			CommitScriptHelperContents();
+			CreateMapLocation(true);
+		}
+	}
 }
 
 void CGameTask::CommitScriptHelperContents()
@@ -346,7 +373,45 @@ void SGameTaskKey::load(IReader &stream)
 
 }
 
+void SGameTaskKey::serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"SGameTaskKey")
+	{
+		game_task = new CGameTask();
+		Object << task_id;
+		game_task->m_ID = task_id;
+		game_task->serialize_task(Object);
+	}
+}
+
 void SGameTaskKey::destroy()
 {
 	delete_data(game_task);
+}
+
+ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value)
+{
+	BEGIN_CHUNK(Object,"SScriptTaskHelper")
+	{
+		BEGIN_CHUNK(Object,"SScriptTaskHelper::complete_cond")
+		{
+			Object << Value.m_s_complete_lua_functions;
+		}
+
+		BEGIN_CHUNK(Object,"SScriptTaskHelper::fail_cond")
+		{
+			Object << Value.m_s_fail_lua_functions;
+		}
+
+		BEGIN_CHUNK(Object,"SScriptTaskHelper::on_complete")
+		{
+			Object << Value.m_s_lua_functions_on_complete;
+		}
+
+		BEGIN_CHUNK(Object,"SScriptTaskHelper::on_fail")
+		{
+			Object << Value.m_s_lua_functions_on_fail;
+		}
+	}
+	return Object;
 }

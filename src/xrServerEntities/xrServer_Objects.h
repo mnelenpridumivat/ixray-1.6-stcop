@@ -163,13 +163,17 @@
 // 127	 CSE_ALifeObjectClimable		added material;
 // 128	 CSE_ALifeObjectClimable		added can_fire in smart covers;
 // 129	 CSE_ALifeItemWeapon			added cur_scope
+//       CSE_AlifeCreatureActor         added IsWaunded and helicopter sync
 //------------------------------------------------------------------------------
-#define SPAWN_VERSION	u16(129)
+#define SPAWN_VERSION	u16(130)
 
 SERVER_ENTITY_DECLARE_BEGIN2(CSE_Shape,ISE_Shape,CShapeData)
 public:
 	void							cform_read		(NET_Packet& P);
 	void							cform_write		(NET_Packet& P);
+	//void							cform_read(CSaveObjectLoad* Object);
+	//void							cform_write(CSaveObjectSave* Object) const;
+	void							cform_serialize(ISaveObject& Object);
 									CSE_Shape		();
 	virtual							~CSE_Shape		();
 	virtual ISE_Shape*  	shape			() = 0;
@@ -188,7 +192,7 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_Temporary,CSE_Abstract)
 	virtual							~CSE_Temporary	();
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_PHSkeleton)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_PHSkeleton, IPureStateUpdateObject)
 								CSE_PHSkeleton(LPCSTR caSection);
 virtual							~CSE_PHSkeleton();
 
@@ -209,6 +213,9 @@ enum{
 protected:
 	virtual void					data_load				(NET_Packet &tNetPacket);
 	virtual void					data_save				(NET_Packet &tNetPacket);
+	//virtual void					data_load(CSaveObjectLoad* Object);
+	//virtual void					data_save(CSaveObjectSave* Object) const;
+	virtual void					data_serialize(ISaveObject& Object);
 public:
 SERVER_ENTITY_DECLARE_END
 

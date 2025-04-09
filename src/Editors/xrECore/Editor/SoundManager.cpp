@@ -71,27 +71,30 @@ void CSoundManager::MuteSounds(BOOL bVal)
 
 void CSoundManager::RenameSound(LPCSTR nm0, LPCSTR nm1, EItemType type)
 {
-	if (TYPE_FOLDER==type){
-    	FS.dir_delete			(_sounds_,nm0,FALSE);
-    	FS.dir_delete			(_game_sounds_,nm0,FALSE);
-    }else if (TYPE_OBJECT==type){
-        string_path fn0,fn1,temp;
+    if (TYPE_FOLDER == type)
+    {
+        FS.dir_delete(_sounds_, nm0, FALSE);
+        FS.dir_delete(_game_sounds_, nm0, FALSE);
+    }
+    else if (TYPE_OBJECT == type)
+    {
+        string_path fn0, fn1;
         // rename base file
-        FS.update_path(fn0,_sounds_,nm0); 	strcat(fn0,".wav");
-        FS.update_path(fn1,_sounds_,nm1);	strcat(fn1,".wav");
-        FS.file_rename(fn0,fn1,false);
+        FS.update_path(fn0, _sounds_, nm0); strcat(fn0, ".wav");
+        FS.update_path(fn1, _sounds_, nm1);	strcat(fn1, ".wav");
+        FS.file_rename(fn0, fn1, false);
 
         // rename thm
-        FS.update_path(fn0,_sounds_,nm0);	strcat(fn0,".thm");
-        FS.update_path(fn1,_sounds_,nm1);	strcat(fn1,".thm");
-        FS.file_rename(fn0,fn1,false);
+        FS.update_path(fn0, _sounds_, nm0);	strcat(fn0, ".thm");
+        FS.update_path(fn1, _sounds_, nm1);	strcat(fn1, ".thm");
+        FS.file_rename(fn0, fn1, false);
 
         // rename ogg
-        FS.update_path(fn0,_game_sounds_,nm0);	strcat(fn0,".ogg");
-        FS.update_path(fn1,_game_sounds_,nm1);	strcat(fn1,".ogg");
-        FS.file_rename(fn0,fn1,false);
-	    Sound->refresh_sources();
-	}
+        FS.update_path(fn0, _game_sounds_, nm0); strcat(fn0, ".ogg");
+        FS.update_path(fn1, _game_sounds_, nm1); strcat(fn1, ".ogg");
+        FS.file_rename(fn0, fn1, false);
+        Sound->refresh_sources();
+    }
 }
 
 BOOL CSoundManager::RemoveSound(LPCSTR fname, EItemType type)
@@ -317,7 +320,7 @@ void CSoundManager::SynchronizeSounds(bool sync_thm, bool sync_game, bool bForce
     	UI->ProgressEnd(pb);
 }
 
-void CSoundManager::CleanupSounds()
+void CSoundManager::CleanupSounds(bool IsSoft)
 {
 	FS_FileSet 	    M_BASE;
 	FS_FileSet 	    M_THUM;
@@ -342,7 +345,7 @@ void CSoundManager::CleanupSounds()
         xr_strlwr				(base_name);
 		FS_FileSetIt bs 		= M_BASE.find(base_name);
 
-    	if (bs==M_BASE.end())
+    	if (!IsSoft && bs==M_BASE.end())
         	M_GAME_DEL.insert	(*it);
     }
     it				= M_THUM.begin();
@@ -419,7 +422,7 @@ void CSoundManager::ChangeFileAgeTo(FS_FileSet* tgt_map, int age)
 // если передан параметр modif - обновляем DX-Surface only и только из списка
 // иначе полная синхронизация
 //------------------------------------------------------------------------------
-void CSoundManager::RefreshSounds(bool bSync)
+void CSoundManager::RefreshSounds(bool bSync, bool IsSoft)
 {
     if (FS.can_write_to_alias(_sounds_))
     {
@@ -430,14 +433,17 @@ void CSoundManager::RefreshSounds(bool bSync)
 
         FS.rescan_path(SoundDir, true);
 
-        if (bSync){
-            SynchronizeSounds	(true,true,false,0,0);
-            CleanupSounds		();
+        if (bSync) 
+        {
+            SynchronizeSounds(true, true, false, 0, 0);
+            CleanupSounds(IsSoft);
         }
+
         Sound->refresh_sources();
         UI->SetStatus("");
-    }else{
+    }
+    else 
+    {
         Log("#!You don't have permisions to modify sounds.");
     }
 }
-

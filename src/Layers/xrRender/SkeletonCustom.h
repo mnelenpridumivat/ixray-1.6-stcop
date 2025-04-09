@@ -69,18 +69,6 @@ public:
 using SkeletonWMVec = xr_vector<intrusive_ptr<CSkeletonWallmark>>;
 using SkeletonWMVecIt = SkeletonWMVec::iterator;
 
-// sanity check
-#ifdef DEBUG
-	struct dbg_marker{
-		BOOL*			lock;
-		dbg_marker		(BOOL* b)	{lock=b; VERIFY(*lock==FALSE); *lock=TRUE;}
-		~dbg_marker		()			{*lock=FALSE;}
-	};
-#	define _DBG_SINGLE_USE_MARKER	dbg_marker	_dbg_marker(&dbg_single_use_marker)
-#else
-#	define _DBG_SINGLE_USE_MARKER
-#endif
-
 class 	CKinematics: public FHierrarhyVisual, public IKinematics
 {
 private:
@@ -229,7 +217,8 @@ public:
 
     BOOL					_BCL	LL_GetBoneVisible	(u16 bone_id)		{ 
 		VERIFY2(bone_id < LL_BoneCount(), make_string<const char*>("visual_name: %s, bone: %s, bone_id: %d", dbg_name.c_str(), LL_BoneName_dbg(bone_id), bone_id));
-		return visimask.is(bone_id);	}
+		return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id));	
+	}
 	void							LL_SetBoneVisible	(u16 bone_id, BOOL val, BOOL bRecursive);
 	VisMask					_BCL	LL_GetBonesVisible	()					{	return visimask;	}
 	void							LL_SetBonesVisible	(VisMask mask);

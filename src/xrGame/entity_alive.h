@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "Save/SaveObject.h"
 
 
 // Igor 
@@ -17,6 +18,8 @@ class CCharacterPhysicsSupport;
 class CMaterialManager;
 class CVisualMemoryManager;
 class CBlend;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 class CEntityAlive : public CEntity {
 private:
 	typedef	CEntity			inherited;	
@@ -75,6 +78,9 @@ public:
 	//object serialization
 	virtual void			save					(NET_Packet &output_packet);
 	virtual void			load					(IReader &input_packet);
+	/*virtual void Save(CSaveObjectSave* Object) const override; 
+	virtual void Load(CSaveObjectLoad* Object) override;*/
+	virtual void Serialize(ISaveObject& Object) override;
 
 
 	virtual BOOL			net_Spawn				(CSE_Abstract* DC);

@@ -24,6 +24,7 @@
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
 #include "../xrEngine/IGame_Persistent.h"
+#include "Save/SaveObject.h"
 
 #ifndef MASTER_GOLD
 #	include "actor.h"
@@ -119,7 +120,7 @@ IC	u32	 CSoundMemoryManager::priority	(const MemorySpace::CSoundObject &sound) c
 
 void CSoundMemoryManager::enable		(const CObject *object, bool enable)
 {
-	xr_vector<CSoundObject>::iterator	J = std::find(m_sounds->begin(),m_sounds->end(),object_id(object));
+	xr_vector<CSoundObject>::iterator	J = std::find(m_sounds->begin(),m_sounds->end(), CMemoryObject::object_id(object));
 	if (J == m_sounds->end())
 		return;
 	(*J).m_enabled		= enable;
@@ -130,93 +131,90 @@ IC	bool is_sound_type(int s, const ESoundTypes &t)
 	return	((s & t) == t);
 }
 
-void CSoundMemoryManager::feel_sound_new(CObject *object, int sound_type, CSound_UserDataPtr user_data, const Fvector &position, float sound_power)
+void CSoundMemoryManager::feel_sound_new(CObject* object, int sound_type, CSound_UserDataPtr user_data, const Fvector& position, float sound_power)
 {
 #ifndef MASTER_GOLD
-	if (object && smart_cast<CActor*>(object) && psAI_Flags.test(aiIgnoreActor))
+	if (object && object->cast_actor() && psAI_Flags.test(aiIgnoreActor))
 		return;
 #endif // MASTER_GOLD
 
-	VERIFY					(_valid(sound_power));
+	VERIFY(_valid(sound_power));
 	if (!m_sounds)
 		return;
 	PROF_EVENT("SoundMemory::feel_sound_new");
 	if (user_data)
-		user_data->accept	(m_visitor);
+		user_data->accept(m_visitor);
 
-	CObject					*self = m_object;
-	VERIFY					(self);
+	CObject* self = m_object;
+	VERIFY(self);
 #ifndef SILENCE
-	Msg						("%s (%d) - sound type %x from %s at %d in (%.2f,%.2f,%.2f) with power %.2f",*self->cName(),Device.dwTimeGlobal,sound_type,object ? *object->cName() : "world",Device.dwTimeGlobal,position.x,position.y,position.z,sound_power);
+	Msg("%s (%d) - sound type %x from %s at %d in (%.2f,%.2f,%.2f) with power %.2f", *self->cName(), Device.dwTimeGlobal, sound_type, object ? *object->cName() : "world", Device.dwTimeGlobal, position.x, position.y, position.z, sound_power);
 #endif
 
-	VERIFY					(_valid(m_sound_threshold));
-	m_object->sound_callback(object,sound_type,position,sound_power);
-	VERIFY					(_valid(m_sound_threshold));
-		
-	update_sound_threshold	();
+	VERIFY(_valid(m_sound_threshold));
+	m_object->sound_callback(object, sound_type, position, sound_power);
+	VERIFY(_valid(m_sound_threshold));
 
-	CEntityAlive			*entity_alive = m_object;
+	update_sound_threshold();
+
+	CEntityAlive* entity_alive = m_object;
 	if (!entity_alive->g_Alive())
 		return;
-	
-	VERIFY					(_valid(sound_power));
-	if (is_sound_type(sound_type,SOUND_TYPE_WEAPON))
-		sound_power			*= m_weapon_factor;
-	
-	VERIFY					(_valid(sound_power));
-	if (is_sound_type(sound_type,SOUND_TYPE_ITEM))
-		sound_power			*= m_item_factor;
 
-	VERIFY					(_valid(sound_power));
-	if (is_sound_type(sound_type,SOUND_TYPE_MONSTER))
-		sound_power			*= m_npc_factor;
+	VERIFY(_valid(sound_power));
+	if (is_sound_type(sound_type, SOUND_TYPE_WEAPON))
+		sound_power *= m_weapon_factor;
 
-	VERIFY					(_valid(sound_power));
-	if (is_sound_type(sound_type,SOUND_TYPE_ANOMALY))
-		sound_power			*= m_anomaly_factor;
-	
-	VERIFY					(_valid(sound_power));
-	if (is_sound_type(sound_type,SOUND_TYPE_WORLD))
-		sound_power			*= m_world_factor;
-	
-	VERIFY					(_valid(sound_power));
+	VERIFY(_valid(sound_power));
+	if (is_sound_type(sound_type, SOUND_TYPE_ITEM))
+		sound_power *= m_item_factor;
+
+	VERIFY(_valid(sound_power));
+	if (is_sound_type(sound_type, SOUND_TYPE_MONSTER))
+		sound_power *= m_npc_factor;
+
+	VERIFY(_valid(sound_power));
+	if (is_sound_type(sound_type, SOUND_TYPE_ANOMALY))
+		sound_power *= m_anomaly_factor;
+
+	VERIFY(_valid(sound_power));
+	if (is_sound_type(sound_type, SOUND_TYPE_WORLD))
+		sound_power *= m_world_factor;
+
+	VERIFY(_valid(sound_power));
 	if (sound_power >= m_sound_threshold) {
-		if (is_sound_type(sound_type,SOUND_TYPE_WEAPON_SHOOTING)) {
+		if (is_sound_type(sound_type, SOUND_TYPE_WEAPON_SHOOTING)) {
 			// this is fake!
-			CEntityAlive	*_entity_alive = smart_cast<CEntityAlive*>(object);
+			CEntityAlive* _entity_alive = object ? object->cast_entity_alive() : NULL;
 			if (_entity_alive && (self->ID() != _entity_alive->ID()) && (_entity_alive->g_Team() != entity_alive->g_Team()))
 				m_object->memory().hit().add(_entity_alive);
 		}
 		if (!m_stalker || !m_stalker->memory().enemy().selected())
-			add				(object,sound_type,position,sound_power);
+			add(object, sound_type, position, sound_power);
 		else {
-			if (object) {
-//				bool		is_shooting = is_sound_type(sound_type,SOUND_TYPE_WEAPON_SHOOTING);
-//				bool		is_colliding = is_sound_type(sound_type,SOUND_TYPE_WORLD_OBJECT_COLLIDING);
-//				bool		very_close = m_stalker->Position().distance_to_sqr(object->Position()) <= COMBAT_SOUND_PERCEIVE_RADIUS_SQR;
-//				if (is_shooting || is_colliding || very_close)
-					add		(object,sound_type,position,sound_power);
+			if (object)
+			{
+				add(object, sound_type, position, sound_power);
 			}
 		}
 	}
 
-	m_last_sound_time		= Device.dwTimeGlobal;
-	VERIFY					(_valid(m_sound_threshold));
-	m_sound_threshold		= _max(m_sound_threshold,sound_power);
-	VERIFY					(_valid(m_sound_threshold));
+	m_last_sound_time = Device.dwTimeGlobal;
+	VERIFY(_valid(m_sound_threshold));
+	m_sound_threshold = _max(m_sound_threshold, sound_power);
+	VERIFY(_valid(m_sound_threshold));
 }
 
 void CSoundMemoryManager::add			(const CSoundObject &sound_object, bool check_for_existance)
 {
 	if (check_for_existance) {
-		if (m_sounds->end() != std::find(m_sounds->begin(),m_sounds->end(),object_id(sound_object.m_object)))
+		if (m_sounds->end() != std::find(m_sounds->begin(),m_sounds->end(), CMemoryObject::object_id(sound_object.m_object)))
 			return;
 	}
 
 	VERIFY					(m_max_sound_count);
 	if (m_max_sound_count <= m_sounds->size()) {
-		xr_vector<CSoundObject>::iterator	I = std::min_element(m_sounds->begin(),m_sounds->end(),SLevelTimePredicate<CGameObject>());
+		xr_vector<CSoundObject>::iterator	I = std::min_element(m_sounds->begin(),m_sounds->end(),SLevelTimePredicate());
 		VERIFY				(m_sounds->end() != I);
 		*I					= sound_object;
 	}
@@ -224,8 +222,9 @@ void CSoundMemoryManager::add			(const CSoundObject &sound_object, bool check_fo
 		m_sounds->push_back	(sound_object);
 }
 
-void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fvector &position, float sound_power)
+void CSoundMemoryManager::add(const CObject* O, int sound_type, const Fvector& position, float sound_power)
 {
+	CObject* object = const_cast<CObject*>(O);
 	PROF_EVENT("SoundMemory::add");
 #ifndef SAVE_OWN_SOUNDS
 	// we do not want to save our own sounds
@@ -241,44 +240,44 @@ void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fv
 
 #ifndef SAVE_NON_ALIVE_OBJECT_SOUNDS
 	// we do not want to save sounds from the non-alive objects (?!)
-	if (object && !m_object->memory().enemy().selected() && !smart_cast<const CEntityAlive*>(object))
+	if (object && !m_object->memory().enemy().selected() && !object->cast_entity_alive())
 		return;
 #endif
 
 	// we do not want to save sounds from the teammates and neutrals items
-	CEntityAlive *me_entity_alive = m_object;
-	if (object && object->H_Parent() && smart_cast<const CEntityAlive*>(object->H_Parent()) && (me_entity_alive->tfGetRelationType(smart_cast<const CEntityAlive*>(object->H_Parent())) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(smart_cast<const CEntityAlive*>(object->H_Parent())) == ALife::eRelationTypeNeutral))
+	CEntityAlive* me_entity_alive = m_object;
+	if (object && object->H_Parent() && object->H_Parent()->cast_entity_alive() && (me_entity_alive->tfGetRelationType(object->H_Parent()->cast_entity_alive()) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(object->H_Parent()->cast_entity_alive()) == ALife::eRelationTypeNeutral))
 		return;
 
-	const CEntityAlive *who_entity_alive = smart_cast<const CEntityAlive*>(object);
+	const CEntityAlive* who_entity_alive = object ? object->cast_entity_alive() : NULL;
 	// we do not want to save sounds from the teammates and neutrals
 	if (who_entity_alive && me_entity_alive && (me_entity_alive->tfGetRelationType(who_entity_alive) == ALife::eRelationTypeFriend || me_entity_alive->tfGetRelationType(who_entity_alive) == ALife::eRelationTypeNeutral))
 		return;
 
-	if(who_entity_alive && !m_object->memory().enemy().is_useful(who_entity_alive))
+	if (who_entity_alive && !m_object->memory().enemy().is_useful(who_entity_alive))
 		return;
 
-	const CGameObject		*game_object = smart_cast<const CGameObject*>(object);
+	const CGameObject* game_object = object ? object->cast_game_object() : NULL;
 	if (!game_object && object)
 		return;
 
-	bool heavy_sound = ((sound_type&SOUND_TYPE_WEAPON_SHOOTING) == SOUND_TYPE_WEAPON_SHOOTING ||
-						(sound_type&SOUND_TYPE_WEAPON_BULLET_HIT) == SOUND_TYPE_WEAPON_BULLET_HIT ||
-						(sound_type&SOUND_TYPE_WEAPON_EMPTY_CLICKING) == SOUND_TYPE_WEAPON_EMPTY_CLICKING || 
-						(sound_type&SOUND_TYPE_STEP) == SOUND_TYPE_STEP);
+	bool heavy_sound = ((sound_type & SOUND_TYPE_WEAPON_SHOOTING) == SOUND_TYPE_WEAPON_SHOOTING ||
+		(sound_type & SOUND_TYPE_WEAPON_BULLET_HIT) == SOUND_TYPE_WEAPON_BULLET_HIT ||
+		(sound_type & SOUND_TYPE_WEAPON_EMPTY_CLICKING) == SOUND_TYPE_WEAPON_EMPTY_CLICKING ||
+		(sound_type & SOUND_TYPE_STEP) == SOUND_TYPE_STEP);
 
-	if(heavy_sound && sound_power >= 4.f)
+	if (heavy_sound && sound_power >= 4.f)
 	{
-		if(CAI_Stalker	*stalker = smart_cast<CAI_Stalker*>(m_object))
+		if (CAI_Stalker* stalker = m_object ? m_object->cast_stalker() : NULL)
 		{
-			if(who_entity_alive && who_entity_alive->g_Alive() && !m_object->memory().visual().visible_now(who_entity_alive))
+			if (who_entity_alive && who_entity_alive->g_Alive() && !m_object->memory().visual().visible_now(who_entity_alive))
 			{
 				stalker->movement().set_mental_state(eMentalStateDanger);
 				CNotYetVisibleObject		new_object;
-				new_object.m_object			= game_object;
-				new_object.m_value			= 1.0f;
-				new_object.m_prev_time		= Device.dwTimeGlobal-1;
-				new_object.m_update_time	= Device.dwTimeGlobal;
+				new_object.m_object = game_object;
+				new_object.m_value = 1.0f;
+				new_object.m_prev_time = Device.dwTimeGlobal - 1;
+				new_object.m_update_time = Device.dwTimeGlobal;
 				m_object->memory().visual().add_not_yet_visible_object(new_object);
 				m_object->memory().visual().add_visible_object(object, Device.fTimeDelta);
 				//Msg("sound_power %f", sound_power);
@@ -286,25 +285,20 @@ void CSoundMemoryManager::add			(const CObject *object, int sound_type, const Fv
 		}
 	}
 
-	const CGameObject		*self = m_object;
+	const CGameObject* self = m_object;
 
-	xr_vector<CSoundObject>::iterator	J = std::find(m_sounds->begin(),m_sounds->end(),object_id(object));
+	xr_vector<CSoundObject>::iterator	J = std::find(m_sounds->begin(), m_sounds->end(), CMemoryObject::object_id(object));
 	if (m_sounds->end() == J) {
 		CSoundObject			sound_object;
 
-		sound_object.fill		(game_object,self,ESoundTypes(sound_type),sound_power,!m_stalker ? squad_mask_type(-1) : m_stalker->agent_manager().member().mask(m_stalker));
+		sound_object.fill(game_object, self, ESoundTypes(sound_type), sound_power, !m_stalker ? u64(-1) : m_stalker->agent_manager().member().mask(m_stalker));
 		if (!game_object)
 			sound_object.m_object_params.m_position = position;
-#ifdef USE_FIRST_GAME_TIME
-		sound_object.m_first_game_time	= Level().GetGameTime();
-#endif
-#ifdef USE_FIRST_LEVEL_TIME
-		sound_object.m_first_level_time	= Device.dwTimeGlobal;
-#endif
-		add						(sound_object);
+
+		add(sound_object);
 	}
 	else {
-		(*J).fill				(game_object,self,ESoundTypes(sound_type),sound_power,(!m_stalker ? (*J).m_squad_mask.get() : ((*J).m_squad_mask.get() | m_stalker->agent_manager().member().mask(m_stalker))));
+		(*J).fill(game_object, self, ESoundTypes(sound_type), sound_power, (!m_stalker ? (*J).m_squad_mask.get() : ((*J).m_squad_mask.get() | m_stalker->agent_manager().member().mask(m_stalker))));
 		if (!game_object)
 			(*J).m_object_params.m_position = position;
 	}
@@ -394,6 +388,25 @@ void CSoundMemoryManager::remove_links	(CObject *object)
 #endif
 }
 
+struct CRemoveSoundObjectPredicate {
+	const MemorySpace::CSoundObject* m_object;
+
+	CRemoveSoundObjectPredicate(const MemorySpace::CSoundObject* object) : m_object(object)
+	{
+	}
+	bool operator() (const MemorySpace::CSoundObject& object) const
+	{
+		return (m_object == &object);
+	}
+};
+
+void CSoundMemoryManager::remove(const MemorySpace::CSoundObject* sound_object)
+{
+	SOUNDS::iterator I = std::find_if(m_sounds->begin(), m_sounds->end(), CRemoveSoundObjectPredicate(sound_object));
+	if (I != m_sounds->end())
+		m_sounds->erase(I);
+}
+
 void CSoundMemoryManager::save	(NET_Packet &packet) const
 {
 	if (!m_object->g_Alive())
@@ -408,28 +421,14 @@ void CSoundMemoryManager::save	(NET_Packet &packet) const
 		// object params
 		packet.w_u32			((*I).m_object_params.m_level_vertex_id);
 		packet.w_vec3			((*I).m_object_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.w_float			((*I).m_object_params.m_orientation.yaw);
-		packet.w_float			((*I).m_object_params.m_orientation.pitch);
-		packet.w_float			((*I).m_object_params.m_orientation.roll);
-#endif // USE_ORIENTATION
+
 		// self params
 		packet.w_u32			((*I).m_self_params.m_level_vertex_id);
 		packet.w_vec3			((*I).m_self_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.w_float			((*I).m_self_params.m_orientation.yaw);
-		packet.w_float			((*I).m_self_params.m_orientation.pitch);
-		packet.w_float			((*I).m_self_params.m_orientation.roll);
-#endif // USE_ORIENTATION
-#ifdef USE_LEVEL_TIME
+
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_LEVEL_TIME
 		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_FIRST_LEVEL_TIME
-		packet.w_u32			((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
-#endif // USE_FIRST_LEVEL_TIME
+
 		packet.w_u32			((*I).m_sound_type);
 		packet.w_float			((*I).m_power);
 	}
@@ -451,41 +450,29 @@ void CSoundMemoryManager::load	(IReader &packet)
 
 		CSoundObject				&object = delayed_object.m_sound_object;
 		if (delayed_object.m_object_id != ALife::_OBJECT_ID(-1))
-			object.m_object			= smart_cast<CGameObject*>(Level().Objects.net_Find(delayed_object.m_object_id));
+		{
+			CObject* O = Level().Objects.net_Find(delayed_object.m_object_id);
+			object.m_object = O ? O->cast_game_object() : NULL;
+		}
 		else
 			object.m_object			= 0;
 
 		// object params
 		object.m_object_params.m_level_vertex_id	= packet.r_u32();
 		packet.r_fvector3			(object.m_object_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.r_float				(object.m_object_params.m_orientation.yaw);
-		packet.r_float				(object.m_object_params.m_orientation.pitch);
-		packet.r_float				(object.m_object_params.m_orientation.roll);
-#endif
+
 		// self params
 		object.m_self_params.m_level_vertex_id	= packet.r_u32();
 		packet.r_fvector3			(object.m_self_params.m_position);
-#ifdef USE_ORIENTATION
-		packet.r_float				(object.m_self_params.m_orientation.yaw);
-		packet.r_float				(object.m_self_params.m_orientation.pitch);
-		packet.r_float				(object.m_self_params.m_orientation.roll);
-#endif
-#ifdef USE_LEVEL_TIME
+
 		VERIFY						(Device.dwTimeGlobal >= object.m_level_time);
 		object.m_level_time			= packet.r_u32();
 		object.m_level_time			= Device.dwTimeGlobal - object.m_level_time;
-#endif // USE_LEVEL_TIME
-#ifdef USE_LAST_LEVEL_TIME
+
 		VERIFY						(Device.dwTimeGlobal >= object.m_last_level_time);
 		object.m_last_level_time	= packet.r_u32();
 		object.m_last_level_time	= Device.dwTimeGlobal - object.m_last_level_time;
-#endif // USE_LAST_LEVEL_TIME
-#ifdef USE_FIRST_LEVEL_TIME
-		VERIFY						(Device.dwTimeGlobal >= (*I).m_first_level_time);
-		object.m_first_level_time	= packet.r_u32();
-		object.m_first_level_time	= Device.dwTimeGlobal - object.m_first_level_time;
-#endif // USE_FIRST_LEVEL_TIME
+
 		object.m_sound_type			= (ESoundTypes)packet.r_u32();
 		object.m_power				= packet.r_float();
 
@@ -507,6 +494,237 @@ void CSoundMemoryManager::load	(IReader &packet)
 			}
 		}
 #endif // DEBUG
+	}
+}
+
+/*void CSoundMemoryManager::Save(CSaveObjectSave* Object)
+{
+	Object->BeginChunk("CSoundMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		SOUNDS::const_iterator		I = objects().begin();
+		SOUNDS::const_iterator		E = objects().end();
+		Object->GetCurrentChunk()->WriteArray(objects().size());
+		for (; I != E; ++I) {
+			Object->BeginChunk("CSoundMemoryManager::object");
+			{
+				Object->GetCurrentChunk()->w_u16((*I).m_object ? (*I).m_object->ID() : ALife::_OBJECT_ID(-1));
+				// object params
+				Object->GetCurrentChunk()->w_u32((*I).m_object_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->w_vec3((*I).m_object_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->BeginChunk("CSoundMemoryManager::object::object_params_orientation");
+				{
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->w_float((*I).m_object_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif // USE_ORIENTATION
+			// self params
+				Object->GetCurrentChunk()->w_u32((*I).m_self_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->w_vec3((*I).m_self_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->BeginChunk("CSoundMemoryManager::object::self_params_orientation");
+				{
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->w_float((*I).m_self_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif // USE_ORIENTATION
+#ifdef USE_LEVEL_TIME
+				Object->BeginChunk("CSoundMemoryManager::object::level_time");
+				{
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_level_time) : 0);
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_last_level_time) : 0);
+				}
+				Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+				Object->BeginChunk("CSoundMemoryManager::object::first_level_time");
+				{
+					Object->GetCurrentChunk()->w_u32((Device.dwTimeGlobal >= (*I).m_level_time) ? (Device.dwTimeGlobal - (*I).m_first_level_time) : 0);
+				}
+				Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+				Object->GetCurrentChunk()->w_u32((*I).m_sound_type);
+				Object->GetCurrentChunk()->w_float((*I).m_power);
+			}
+			Object->EndChunk();
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}
+
+void CSoundMemoryManager::Load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("CSoundMemoryManager");
+	{
+		if (!m_object->g_Alive()) {
+			Object->EndChunk();
+			return;
+		}
+
+		typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+		CALLBACK_TYPE					callback;
+		callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+
+		u64								count;
+		Object->GetCurrentChunk()->ReadArray(count);
+		for (u64 i = 0; i < count; ++i) {
+			Object->BeginChunk("CSoundMemoryManager::object");
+			{
+				CDelayedSoundObject			delayed_object;
+				Object->GetCurrentChunk()->r_u16(delayed_object.m_object_id);
+
+				CSoundObject& object = delayed_object.m_sound_object;
+				if (delayed_object.m_object_id != ALife::_OBJECT_ID(-1)) {
+					object.m_object = smart_cast<CGameObject*>(Level().Objects.net_Find(delayed_object.m_object_id));
+				}
+				else {
+					object.m_object = 0;
+				}
+
+				// object params
+				Object->GetCurrentChunk()->r_u32(object.m_object_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->r_vec3(object.m_object_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->FindChunk("CSoundMemoryManager::object::object_params_orientation");
+				{
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->r_float(object.m_object_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif
+				// self params
+				Object->GetCurrentChunk()->r_u32(object.m_self_params.m_level_vertex_id);
+				Object->GetCurrentChunk()->r_vec3(object.m_self_params.m_position);
+#ifdef USE_ORIENTATION
+				Object->FindChunk("CSoundMemoryManager::object::self_params_orientation");
+				{
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.yaw);
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.pitch);
+					Object->GetCurrentChunk()->r_float(object.m_self_params.m_orientation.roll);
+				}
+				Object->EndChunk();
+#endif
+#ifdef USE_LEVEL_TIME
+				Object->BeginChunk("CSoundMemoryManager::object::level_time");
+				{
+					VERIFY(Device.dwTimeGlobal >= object.m_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_level_time);
+					object.m_level_time = Device.dwTimeGlobal - object.m_level_time;
+					VERIFY(Device.dwTimeGlobal >= object.m_last_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_last_level_time);
+					object.m_last_level_time = Device.dwTimeGlobal - object.m_last_level_time;
+				}
+				Object->EndChunk();
+#endif // USE_LAST_LEVEL_TIME
+#ifdef USE_FIRST_LEVEL_TIME
+				Object->FindChunk("CSoundMemoryManager::object::first_level_time");
+				{
+					VERIFY(Device.dwTimeGlobal >= (*I).m_first_level_time);
+					Object->GetCurrentChunk()->r_u32(object.m_first_level_time);
+					object.m_first_level_time = Device.dwTimeGlobal - object.m_first_level_time;
+				}
+				Object->EndChunk();
+#endif // USE_FIRST_LEVEL_TIME
+				{
+					u32 Value;
+					Object->GetCurrentChunk()->r_u32(Value);
+					object.m_sound_type = (ESoundTypes)Value;
+				}
+				Object->GetCurrentChunk()->r_float(object.m_power);
+
+				if (object.m_object || (delayed_object.m_object_id == ALife::_OBJECT_ID(-1))) {
+					add(object, true);
+					continue;
+				}
+
+				m_delayed_objects.push_back(delayed_object);
+
+				const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+				if (!spawn_callback || !spawn_callback->m_object_callback) {
+					if (!g_dedicated_server) {
+						Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+					}
+#ifdef DEBUG
+					else if (spawn_callback && spawn_callback->m_object_callback) {
+						VERIFY(spawn_callback->m_object_callback == callback);
+					}
+#endif // DEBUG
+				}
+			}
+			Object->EndChunk();
+		}
+		Object->GetCurrentChunk()->EndArray();
+	}
+	Object->EndChunk();
+}*/
+
+void CSoundMemoryManager::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSoundMemoryManager")
+	{
+
+		if (!m_object->g_Alive()) {
+			return;
+		}
+
+		((CSaveObject&)Object).Serialize(*m_sounds, fastdelegate::MakeDelegate(this, &CSoundMemoryManager::SerializeSingle));
+	}
+}
+
+void CSoundMemoryManager::SerializeSingle(ISaveObject& Object, CSoundObject& Value)
+{
+	BEGIN_CHUNK(Object,"CSoundObject")
+	{
+		Value.Serialize(Object);
+		if (Object.IsSave()) {
+			VERIFY(m_object);
+			u16 Value = m_object->ID();
+			Object << Value;
+		}
+		else {
+
+			CDelayedSoundObject			delayed_object;
+			Object << delayed_object.m_object_id;
+
+			CSoundObject& object = delayed_object.m_sound_object;
+			object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+
+			//////////////////////////////////////////////////////////
+
+			if (object.m_object) {
+				add(object);
+			}
+			else {
+				m_delayed_objects.push_back(delayed_object);
+				const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+				if (!spawn_callback || !spawn_callback->m_object_callback) {
+					typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+					CALLBACK_TYPE					callback;
+					callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+					if (!g_dedicated_server) {
+						Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
+					}
+#ifdef DEBUG
+					else {
+						if (spawn_callback && spawn_callback->m_object_callback) {
+							VERIFY(spawn_callback->m_object_callback == callback);
+						}
+					}
+#endif // DEBUG
+				}
+			}
+		}
 	}
 }
 
@@ -534,7 +752,7 @@ void CSoundMemoryManager::on_requested_spawn	(CObject *object)
 			continue;
 		
 		if (m_object->g_Alive()) {
-			(*I).m_sound_object.m_object= smart_cast<CGameObject*>(object);
+			(*I).m_sound_object.m_object= object ? object->cast_game_object() : NULL;
 			VERIFY						((*I).m_sound_object.m_object);
 			add							((*I).m_sound_object,true);
 		}

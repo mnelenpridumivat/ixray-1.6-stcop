@@ -64,9 +64,71 @@ void SLocationKey::load(IReader &stream)
 		location = new CMapLocation(*spot_type, object_id);
 	}
 
-	location  = new CMapLocation(*spot_type, object_id);
+	//TODO: Make commit to IX-Ray to fix this
+	//location  = new CMapLocation(*spot_type, object_id);
 
 	location->load	(stream);
+}
+
+/*void SLocationKey::save(CSaveObjectSave* Object) const
+{
+	Object->BeginChunk("SLocationKey");
+	{
+		Object->GetCurrentChunk()->w_u16(object_id);
+		Object->GetCurrentChunk()->w_stringZ(spot_type);
+		Object->GetCurrentChunk()->w_bool(location->IsUserDefined());
+		Object->GetCurrentChunk()->w_u8(0);
+		location->save(Object);
+	}
+	Object->EndChunk();
+}
+
+void SLocationKey::load(CSaveObjectLoad* Object)
+{
+	Object->BeginChunk("SLocationKey");
+	{
+		Object->GetCurrentChunk()->r_u16(object_id);
+		Object->GetCurrentChunk()->r_stringZ(spot_type);
+		bool bUserDefined;
+		Object->GetCurrentChunk()->r_bool(bUserDefined);
+		if (bUserDefined)
+		{
+			Level().Server->PerformIDgen(object_id);
+			location = new CMapLocation(*spot_type, object_id, true);
+		}
+		else
+		{
+			location = new CMapLocation(*spot_type, object_id);
+		}
+		location->load(Object);
+	}
+	Object->EndChunk();
+}*/
+ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data) {
+
+	BEGIN_CHUNK(Object,"SLocationKey")
+	{
+		Object << Data.object_id << Data.spot_type;
+		if (Object.IsSave()) {
+			bool Value = Data.location->IsUserDefined();
+			Object << Value;
+		}
+		else {
+			bool Value;
+			Object << Value;
+			if (Value)
+			{
+				Level().Server->PerformIDgen(Data.object_id);
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id, true);
+			}
+			else
+			{
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id);
+			}
+		}
+		Data.location->serialize(Object);
+	}
+	return Object;
 }
 
 void SLocationKey::destroy()
@@ -143,6 +205,16 @@ CMapLocation* CMapManager::AddRelationLocation(CInventoryOwner* pInvOwner)
 	Locations().push_back( SLocationKey(sname, pInvOwner->object_id()) );
 	Locations().back().location = l;
 	return l;
+}
+
+void CMapManager::RemoveRelationLocation(CInventoryOwner* pInvOwner)
+{
+	for (int t = ALife::eRelationTypeFriend; t < ALife::eRelationTypeLast; ++t)
+	{
+		ALife::ERelationType tt = (ALife::ERelationType)t;
+		Level().MapManager().RemoveMapLocation(RELATION_REGISTRY().GetSpotName(tt), pInvOwner->object_id());
+	}
+	Level().MapManager().RemoveMapLocation("deadbody_location", pInvOwner->object_id());
 }
 
 CMapLocation* CMapManager::AddUserLocation(const shared_str& spot_type, const shared_str& level_name, Fvector position)

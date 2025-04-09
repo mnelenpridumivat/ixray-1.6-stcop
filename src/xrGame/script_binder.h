@@ -7,17 +7,21 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "Save/SaveInterface.h"
 
 class CSE_Abstract;
 class CScriptBinderObject;
 class NET_Packet;
+class CSaveObject;
+class CGameObject;
 
 class CScriptBinder {
 protected:
 	CScriptBinderObject			*m_object;
+	CGameObject* m_Owner;
 
 public:
-								CScriptBinder	();
+								CScriptBinder	(CGameObject* Owner);
 	virtual						~CScriptBinder	();
 			void				init			();
 			void				clear			();
@@ -29,6 +33,9 @@ public:
 	virtual void				shedule_Update	(u32 time_delta);
 	virtual void				save			(NET_Packet &output_packet);
 	virtual void				load			(IReader &input_packet);
+	//virtual void Save(ISaveObject* Object);
+	//virtual void Load(ISaveObject* Object);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL				net_SaveRelevant();
 	virtual void				net_Relcase		(CObject *object);
 			void				set_object		(CScriptBinderObject *object);

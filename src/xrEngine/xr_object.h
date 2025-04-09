@@ -1,7 +1,7 @@
 #ifndef __XR_OBJECT_H__
 #define __XR_OBJECT_H__
 
-#include "../xrCDB/ISpatial.h"
+#include "../xrCore/Collision/ISpatial.h"
 #include "ISheduled.h"
 #include "IRenderable.h"
 #include "ICollidable.h"
@@ -13,20 +13,29 @@ class	ENGINE_API	IRender_Sector;
 class	ENGINE_API	IRender_ObjectSpecific;
 class	ENGINE_API	CCustomHUD;
 class	NET_Packet	;
-class	CSE_Abstract;
 
+class CSE_Abstract;
+class CGameObject;
+class CActor;
+class CInventoryItem;
+class CEntity;
+class CEntityAlive;
+class CInventoryOwner;
+class CMissile;
+class CPhysicsShellHolder;
+class CWeapon;
 //-----------------------------------------------------------------------------------------------------------
 #define CROW_RADIUS		(30.f)
 #define CROW_RADIUS2	(60.f)
 //-----------------------------------------------------------------------------------------------------------
 //	CObject
 //-----------------------------------------------------------------------------------------------------------
-class	IPhysicsShell;
+class IPhysicsShell;
 class IObjectPhysicsCollision;
 #pragma pack(push,4)
-class	ENGINE_API						CObject :	
+
+class ENGINE_API CObject :	
 	public DLL_Pure,
-	public ISpatial,
 	public ISheduled,
 	public IRenderable,
 	public ICollidable
@@ -54,6 +63,7 @@ public:
 		};
 		u32	storage;
 	};
+
 private:
 	// Some property variables
 	ObjectProperties					Props;
@@ -94,7 +104,7 @@ public:
 	virtual BOOL						Ready				()					{ return Props.net_Ready;	}
 	BOOL								GetTmpPreDestroy		()		const	{ return Props.bPreDestroy;	}
 	void								SetTmpPreDestroy	(BOOL b)			{ Props.bPreDestroy = b;}
-	virtual float						shedule_Scale		()					{ return Device.vCameraPosition.distance_to(Position())/200.f; }
+	virtual float						shedule_Scale();
 	virtual bool						shedule_Needed		()					{return processing_enabled();};
 
 	// Parentness
@@ -120,7 +130,7 @@ public:
 	virtual float						Radius				()			const;
 	virtual const Fbox&					BoundingBox			()			const;
 	
-	IC IRender_Sector*					Sector				()					{ return H_Root()->spatial.sector;	}
+	IC IRender_Sector*					Sector				()					{ return H_Root()->SpatialComponent->spatial.sector;	}
 	IC IRender_ObjectSpecific*			ROS					()					{ return renderable_ROS();			}
 	virtual BOOL						renderable_ShadowGenerate	()			{ return TRUE;						}
 	virtual BOOL						renderable_ShadowReceive	()			{ return TRUE;						}
@@ -128,8 +138,21 @@ public:
 	// Accessors and converters
 	ICF IRenderVisual*					Visual				() const			{ return renderable.visual;			}
 	ICF ICollisionForm*					CFORM				() const			{ return collidable.model;			}
-	virtual		CObject*				dcast_CObject		()					{ return this;						}
-	virtual		IRenderable*			dcast_Renderable	()					{ return this;						}
+	virtual		CObject*				dcast_CObject		() override			{ return this;						}
+	virtual		IRenderable*			dcast_Renderable	() override			{ return this;						}
+	virtual		Feel::Sound*			dcast_FeelSound		() override			{ return nullptr;					}
+
+	virtual	CGameObject*				cast_game_object	()					{return nullptr;}
+	virtual	CActor*						cast_actor			()					{return nullptr;}
+	virtual CInventoryOwner*			cast_inventory_owner()					{return nullptr;}
+	virtual CInventoryItem*				cast_inventory_item	()					{return nullptr;}
+	virtual CEntity*					cast_entity			()					{return nullptr;}
+	virtual CEntityAlive*				cast_entity_alive	()					{return nullptr;}
+	virtual CMissile*					cast_missile		()					{return nullptr;}
+	virtual CPhysicsShellHolder*		cast_physics_shell_holder()				{return nullptr;}
+	virtual CWeapon*					cast_weapon			()					{return nullptr;}
+
+
 	virtual void						OnChangeVisual		()					{ }
 	virtual		IPhysicsShell			*physics_shell		()					{ return  0; }
 
@@ -177,6 +200,10 @@ virtual	const IObjectPhysicsCollision	*physics_collision	()					{ return  0; }
 	virtual void						net_Destroy			();
 	virtual void						net_Export			(NET_Packet& P) {};					// export to server
 	virtual void						net_Import			(NET_Packet& P) {};					// import from server
+
+	virtual void						SyncRead			(NET_Packet& Packet) {};
+	virtual void						SyncWrite			(NET_Packet& Packet) {};
+
 	virtual	void						net_ImportInput		(NET_Packet& P)	{};
 	virtual BOOL						net_Relevant		()				{ return FALSE; };	// relevant for export to server
 	virtual void						net_MigrateInactive	(NET_Packet& P)	{ Props.net_Local = FALSE;		};

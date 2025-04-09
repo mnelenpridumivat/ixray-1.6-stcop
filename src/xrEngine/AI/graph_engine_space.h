@@ -68,12 +68,12 @@ template <
 struct SGameVertex;
 
 namespace GraphEngineSpace {
-	typedef float		_dist_type;
-	typedef u32			_index_type;
-	typedef u32			_iteration_type;
-	typedef u16			_solver_dist_type;
-	typedef u32			_solver_condition_type;
-	typedef bool		_solver_value_type;
+	using _dist_type = float;
+	using _index_type = u32;
+	using _iteration_type = u32;
+	using _solver_dist_type = u16;
+	using _solver_condition_type = u32;
+	using _solver_value_type = bool;
 
 	struct CSolverConditionValue {
 		_solver_condition_type	m_condition;

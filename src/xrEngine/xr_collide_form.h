@@ -1,7 +1,7 @@
 #ifndef __XR_COLLIDE_FORM_H__
 #define __XR_COLLIDE_FORM_H__
 
-#include "../xrCDB/xr_collide_defs.h"
+#include "../xrCore/Collision/xr_collide_defs.h"
 #include "VisMask.h"
 
 // refs
@@ -172,16 +172,21 @@ class ENGINE_API	CCF_Shape	: public ICollisionForm
 public:
 	union shape_data
 	{
-		Fsphere		sphere;
-		struct{
+		Fsphere sphere = {};
+		struct
+		{
 			Fmatrix	box;
 			Fmatrix	ibox;
 		};
+		
+		shape_data() : box() {};
 	};
 	struct shape_def
 	{
 		int			type;
 		shape_data	data;
+
+		shape_def() : type(0), data() {};
 	};
 	xr_vector<shape_def>	shapes;
 public:

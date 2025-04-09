@@ -53,6 +53,8 @@ class CPHCharacter;
 // Lain: added
 class CMonsterSquad;
 class squad_grouping_behaviour;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 #ifdef DEBUG
 namespace debug { class text_tree; }
@@ -122,12 +124,18 @@ public:
 	virtual void			net_Import						(NET_Packet& P);
 	virtual void			net_Relcase						(CObject *O);
 
+	virtual void			SyncRead(NET_Packet& Packet) override;
+	virtual void			SyncWrite(NET_Packet& Packet) override;
+
 	virtual void			net_Export_Sounds(NET_Packet& P);
 	virtual void			net_Import_Sounds(NET_Packet& P);
 
 	//save/load server serialization
 	virtual void			save							(NET_Packet &output_packet) {inherited::save(output_packet);}
 	virtual void			load							(IReader &input_packet)		{inherited::load(input_packet);}
+	//virtual void Save(CSaveObjectSave* Object) const override;
+	//virtual void Load(CSaveObjectLoad* Object) override;
+	virtual void Serialize(ISaveObject& Object) override;
 
 
 	virtual void			UpdateCL						();
@@ -187,6 +195,7 @@ public:
 
 	virtual	void			on_before_sell					(CInventoryItem *item);
 	virtual bool			unlimited_ammo					() override { return false; }
+	virtual bool infinite_fire() override { return false; }
 
 			float			GetSatiety						()							{return 0.5f;}
 			void			ChangeSatiety					(float v)					{}

@@ -1,20 +1,24 @@
-#ifndef __V3D__
-#define __V3D__
+#pragma once
 
 // Inline call
 #ifndef IC
 #define IC __forceinline
 #endif
 
+#include "Save/SaveInterface.h"
+
 template <class T>
-struct _vector3 {
+struct _vector3 
+{
 public:
 	typedef T			TYPE;
 	typedef _vector3<T>	Self;
 	typedef Self&		SelfRef;
 	typedef const Self&	SelfCRef;
 public:
-	T	x,y,z;
+	T x = 0;
+	T y = 0;
+	T z = 0;
 
 	// access operators
 	ICF	T&			operator[] (int i)					{ return *((T*)this + i); }
@@ -621,4 +625,11 @@ aa2_largest:	// aa2 is largest
 IC BOOL	exact_normalize	(Fvector3& a)	{	return exact_normalize(&a.x);	}
 #pragma warning(pop)
 
-#endif
+template<typename T> ISaveObject& operator<<(ISaveObject& Object, _vector3<T>& Value) {
+	return Object << Value.x << Value.y << Value.z;
+}
+
+/*template<> CSaveObject& operator<<(CSaveObject& Object, Fvector& Value);
+template<> CSaveObject& operator<<(CSaveObject& Object, Dvector& Value);
+template<> CSaveObject& operator<<(CSaveObject& Object, Ivector& Value);*/
+

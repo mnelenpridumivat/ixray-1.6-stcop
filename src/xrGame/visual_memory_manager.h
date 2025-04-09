@@ -14,6 +14,8 @@
 class CCustomMonster;
 class CAI_Stalker;
 class vision_client;
+class CSaveObjectSave;
+class CSaveObjectLoad;
 
 class CVisualMemoryManager {
 #ifdef DEBUG_DRAW
@@ -90,6 +92,7 @@ public:
 	virtual	void	update					(float time_delta);
 	virtual	float	feel_vision_mtl_transp	(CObject* O, u32 element);	
 			void	remove_links			(CObject *object);
+			void	remove					(const MemorySpace::CVisibleObject *visible_object);
 
 public:
 			bool	visible					(const CGameObject *game_object, float time_delta);
@@ -125,19 +128,18 @@ public:
 
 public:
 	IC		const VISIBLES			&objects					() const;
+	IC		const VISIBLES* objectsPtr() const;
 	IC		const RAW_VISIBLES		&raw_objects				() const;
 	IC		const NOT_YET_VISIBLES	&not_yet_visible_objects	() const;
 			const CVisionParameters &current_state				() const;
-			squad_mask_type			mask						() const;
-
-public:
-#ifdef DEBUG
-			void					check_visibles				() const;
-#endif
+			u64			mask						() const;
 
 public:
 			void					save						(NET_Packet &packet) const;
 			void					load						(IReader &packet);
+			//virtual void Save(CSaveObjectSave* Object);
+			//virtual void Load(CSaveObjectLoad* Object);
+			virtual void Serialize(ISaveObject& Object);
 			void					on_requested_spawn			(CObject *object);
 
 private:

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#ifdef	DEBUG
+#ifndef	MASTER_GOLD
 std::string get_string( const Fvector& v )
 {
 	return make_string<std::string>("( %f, %f, %f )", v.x, v.y, v.z );

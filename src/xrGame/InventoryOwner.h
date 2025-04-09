@@ -10,6 +10,11 @@
 #include "../xrScripts/script_space_forward.h"
 #include "character_info.h"
 #include "inventory_space.h"
+#include "../xrScripts/script_export_space.h"
+
+extern xr_string TranslateName(LPCSTR nameStr);
+
+extern xr_string TranslateName(LPCSTR nameStr);
 
 class CSE_Abstract;
 class CInventory;
@@ -27,6 +32,8 @@ class CTradeParameters;
 class CPurchaseList;
 class CWeapon;
 class CCustomOutfit;
+class CHelmet;
+class CSaveObject;
 
 class CInventoryOwner : public CAttachmentOwner {							
 public:
@@ -49,8 +56,12 @@ public:
 	//serialization
 	virtual void	save						(NET_Packet &output_packet);
 	virtual void	load						(IReader &input_packet);
+	/*virtual void Save(CSaveObject* Object) const;
+	virtual void Load(CSaveObject* Object);*/
+	virtual void Serialize(ISaveObject& Object);
 
-	
+			void	RefreshNamesNPC();
+
 	//обновление
 	virtual void	UpdateInventoryOwner		(u32 deltaT);
 	virtual bool	CanPutInSlot				(PIItem item, u32 slot){return true;};
@@ -58,6 +69,10 @@ public:
 
 	CPda* GetPDA		() const;
 
+	void ChangeName(LPCSTR name) {
+		m_game_name_str = name;
+		m_game_name = TranslateName(name);
+	}
 
 	// инвентарь
 	CInventory	*m_inventory;			
@@ -66,6 +81,7 @@ public:
 	//торговля и общение с персонажем
 
 	virtual bool	AllowItemToTrade 	(CInventoryItem const * item, const SInvItemPlace& place) const;
+	virtual bool	AllowItemToBarter(CInventoryItem const* item, const SInvItemPlace& place) const;
 	virtual void	OnFollowerCmd		(int cmd)		{};//redefine for CAI_Stalkker
 			bool	bDisableBreakDialog;
 	//инициализация объекта торговли
@@ -151,6 +167,7 @@ public:
 	virtual float MaxCarryWeight			() const;
 
 	CCustomOutfit* GetOutfit				() const;
+	CHelmet*	   GetHelmet				() const;
 
 	bool CanPlayShHdRldSounds				() const {return m_play_show_hide_reload_sounds;};
 	void SetPlayShHdRldSounds				(bool play) {m_play_show_hide_reload_sounds = play;};
@@ -180,14 +197,14 @@ public:
 protected:
 	CCharacterInfo*			m_pCharacterInfo;
 	xr_string				m_game_name;
-
+	xr_string				m_game_name_str;
 public:
 	virtual void			renderable_Render		();
 	virtual void			OnItemTake				(CInventoryItem *inventory_item);
 	
-	virtual void			OnItemBelt				(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
-	virtual void			OnItemRuck				(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
-	virtual void			OnItemSlot				(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
+	virtual void			OnItemBelt				(CInventoryItem *inventory_item, const SInvItemPlace previous_place);
+	virtual void			OnItemRuck				(CInventoryItem *inventory_item, const SInvItemPlace previous_place);
+	virtual void			OnItemSlot				(CInventoryItem *inventory_item, const SInvItemPlace previous_place);
 	
 	virtual void			OnItemDrop				(CInventoryItem *inventory_item, bool just_before_destroy);
 	virtual void			OnItemDropUpdate		();
@@ -204,6 +221,7 @@ public:
 
 public:
 	virtual bool				unlimited_ammo			()	= 0;
+	virtual bool				infinite_fire() = 0;
 	virtual	void				on_weapon_shot_start	(CWeapon *weapon);
 	virtual	void				on_weapon_shot_update	();
 	virtual	void				on_weapon_shot_stop		();
@@ -215,16 +233,25 @@ public:
 
 private:
 	CTradeParameters			*m_trade_parameters;
+	CTradeParameters* m_barter_parameters = nullptr;
 	CPurchaseList				*m_purchase_list;
+	CPurchaseList* m_barter_purchase_list = nullptr;
 	BOOL						m_need_osoznanie_mode;
 	bool						m_deadbody_can_take;
 	bool						m_deadbody_closed;
 
 public:
 	IC		CTradeParameters	&trade_parameters		() const;
+	IC		bool can_barter() const;
+	IC		CTradeParameters* barter_parameters() const;
+	IC		CPurchaseList& trade_purchase_list() const;
+	IC		CPurchaseList& barter_purchase_list() const;
 	virtual	LPCSTR				trade_section			() const;
+	virtual	LPCSTR				barter_section() const;
 			float				deficit_factor			(const shared_str &section) const;
+			float				barter_deficit_factor(const shared_str& section) const;
 			void				buy_supplies			(CInifile &ini_file, LPCSTR section);
+			void				barter_buy_supplies(CInifile& ini_file, LPCSTR section);
 			void				sell_useless_items		();
 	virtual	void				on_before_sell			(CInventoryItem *item) {}
 	virtual	void				on_before_buy			(CInventoryItem *item) {}
@@ -238,6 +265,7 @@ public:
 	IC		bool				deadbody_can_take_status() const { return m_deadbody_can_take; }
 			void				deadbody_closed			(bool status);
 	IC		bool				deadbody_closed_status	() const { return m_deadbody_closed; }
+	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 
 #include "inventory_owner_inline.h"

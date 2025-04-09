@@ -15,6 +15,7 @@ enum EPropType{
     PROP_CHOOSE,
 	PROP_NUMERIC,	// {u8,u16,u32,s8,s16,s32,f32}
 	PROP_BOOLEAN,
+    PROP_BOOL,
 	PROP_FLAG,
     PROP_VECTOR, 
 	PROP_TOKEN,
@@ -441,6 +442,7 @@ public:
 };
 
 typedef CustomValue<BOOL>		BOOLValue;
+typedef CustomValue<bool>		BoolValue;
 //------------------------------------------------------------------------------
 
 IC bool operator == (const WaveForm& A, const WaveForm& B){return !!A.Similar(B);}

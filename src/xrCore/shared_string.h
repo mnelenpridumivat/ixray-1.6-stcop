@@ -1,4 +1,5 @@
 #pragma once
+#include "Save/SaveInterface.h"
 #pragma pack(push,4)
 //////////////////////////////////////////////////////////////////////////
 using str_c = const char*;
@@ -6,11 +7,14 @@ using str_c = const char*;
 #pragma warning(disable : 4200)
 struct XRCORE_API str_value
 {
-	u32 dwReference;
+	xr_atomic_u32 dwReference;
 	u32 dwLength;
 	u32 dwCRC;
 
 	str_value* next;
+#ifdef DEBUG
+	str_c value_ptr;
+#endif
 	char value[];
 };
 
@@ -49,13 +53,7 @@ public:
 
 	str_value* dock(str_c value);
 	void clean();
-	void dump();
-	void dump(IWriter* W);
-	void verify();
 	u32  stat_economy();
-//#ifdef PROFILE_CRITICAL_SECTIONS
-//	str_container() :cs(MUTEX_PROFILE_ID(str_container)) {}
-//#endif // PROFILE_CRITICAL_SECTIONS
 };
 
 /*class XRCORE_API str_container_handle {
@@ -157,5 +155,7 @@ namespace std
 		}
 	};
 }
+
+//XRCORE_API ISaveObject& operator<<(ISaveObject& Object, shared_str& Value);
 
 #pragma pack(pop)
