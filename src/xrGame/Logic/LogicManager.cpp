@@ -38,6 +38,7 @@ void CLogicManager::SBinderConditionHasInfo::Execute(MessageBase* data)
     {
         Satisfied = message->IsGet;
     }
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionDontHasInfo::Execute(MessageBase* data)
@@ -48,6 +49,7 @@ void CLogicManager::SBinderConditionDontHasInfo::Execute(MessageBase* data)
     {
         Satisfied = !message->IsGet;
     }
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionCloseEnoughNVis::Execute(MessageBase* data)
@@ -56,6 +58,7 @@ void CLogicManager::SBinderConditionCloseEnoughNVis::Execute(MessageBase* data)
     auto Obj = Level().Objects.net_Find(data->id);
     VERIFY(Obj);
     Satisfied = Obj->Position().distance_to_sqr(Actor()->Position()) <= distance*distance;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionFarEnough::Execute(MessageBase* data)
@@ -68,6 +71,7 @@ void CLogicManager::SBinderConditionFarEnough::Execute(MessageBase* data)
     auto actor = Actor();
     VERIFY(actor);
     Satisfied = Casted->g_Alive() && actor->memory().visual().visible_now(Casted) && Obj->Position().distance_to_sqr(Actor()->Position()) > distance*distance;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionCloseEnough::Execute(MessageBase* data)
@@ -80,6 +84,7 @@ void CLogicManager::SBinderConditionCloseEnough::Execute(MessageBase* data)
     auto actor = Actor();
     VERIFY(actor);
     Satisfied = Casted->g_Alive() && actor->memory().visual().visible_now(Casted) && Obj->Position().distance_to_sqr(Actor()->Position()) <= distance*distance;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionFarEnoughNVis::Execute(MessageBase* data)
@@ -88,6 +93,7 @@ void CLogicManager::SBinderConditionFarEnoughNVis::Execute(MessageBase* data)
     auto Obj = Level().Objects.net_Find(data->id);
     VERIFY(Obj);
     Satisfied = Obj->Position().distance_to_sqr(Actor()->Position()) > distance*distance;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionTimer::Execute(MessageBase* data)
@@ -96,6 +102,15 @@ void CLogicManager::SBinderConditionTimer::Execute(MessageBase* data)
     auto Message = (TimerMessage*)data;
     timeLeft = timeLeft < -1 ? -1 : timeLeft - Message->timeDelta;
     Satisfied = timeLeft < 0;
+    SBinderConditionBase::Execute(data);
+}
+
+void CLogicManager::SBinderConditionSignal::Execute(MessageBase* data)
+{
+    VERIFY(data);
+    auto Message = (SignalMessage*)data;
+    Satisfied = Message->Signal == Signal;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionNPCInZone::Execute(MessageBase* data)
@@ -103,6 +118,7 @@ void CLogicManager::SBinderConditionNPCInZone::Execute(MessageBase* data)
     VERIFY(data);
     auto Message = (NPCZoneMessage*)data;
     Satisfied = Message->Zone == Zone && Message->id == npc_id ? Message->Inside : Satisfied;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderConditionNPCOutZone::Execute(MessageBase* data)
@@ -110,6 +126,7 @@ void CLogicManager::SBinderConditionNPCOutZone::Execute(MessageBase* data)
     VERIFY(data);
     auto Message = (NPCZoneMessage*)data;
     Satisfied = Message->Zone == Zone && Message->id == npc_id ? !Message->Inside : Satisfied;
+    SBinderConditionBase::Execute(data);
 }
 
 void CLogicManager::SBinderObjectRecord::VerifyConditions()
