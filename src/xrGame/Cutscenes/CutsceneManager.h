@@ -1,12 +1,10 @@
 #pragma once
 
+class CCutsceneItem;
 class IKinematicsAnimated;
 
 class CCutsceneManager {
-	IKinematicsAnimated* HudModelKinematicsAnimated = nullptr;
-	IKinematics* HudModelKinematics = nullptr;
-	IRenderVisual* HudModel = nullptr;
-	Fvector Deviation;
+	CCutsceneItem* m_pCurrentCutscene = nullptr;
 
 #ifndef MASTER_GOLD
 	bool Adjust = false;

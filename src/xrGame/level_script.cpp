@@ -57,6 +57,8 @@
 #include "ActorHelmet.h"
 #include "PickupManager.h"
 #include "UIActorMenu.h"
+#include "Cutscenes/CutsceneItem.h"
+#include "Cutscenes/CutsceneManager.h"
 
 using namespace luabind;
 
@@ -1587,6 +1589,20 @@ void CLevel::script_register(lua_State* L)
 		[
 			def("play", &CHUDAnimItem::PlayHudAnim),
 			def("play_cutscene", &CCutsceneManager::PlayCutscene)
+		];
+
+	module(L)
+		[
+			class_<SCutsceneObjectElement>("SCutsceneObjectElement")
+			.def("set_all_bones_visibility", &SCutsceneObjectElement::SetAllBonesVisibility)
+			.def("set_bone_visibility", &SCutsceneObjectElement::SetBoneVisibility)
+			.def("set_parent", &SCutsceneObjectElement::SetParent)
+			.def("set_anim_to_play", &SCutsceneObjectElement::SetAnimToPlay)
+			.def("set_on_finish_func", &SCutsceneObjectElement::SetOnFinishFunc)
+			,
+			class_<CCutsceneItem>("CCutsceneItem")
+			.def("create_object_element", &CCutsceneItem::CreateObjectElement)
+			.def("set_pivot_object", &CCutsceneItem::SetPivotObject)
 		];
 
 	module(L, "player_hud")
