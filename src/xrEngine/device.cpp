@@ -222,6 +222,14 @@ void CRenderDevice::on_idle		()
 		       ++it;
 		}
 
+		{
+			PROF_EVENT("seqParallelBeforRender");
+			for (auto& it : Device.seqParallelBeforRender)
+				it();
+
+			Device.seqParallelBeforRender.clear();
+		}
+
 		secondary_tasks.run(&XRay::Engine::PreRenderThread);
 		FrameMove();
 	}

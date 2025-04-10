@@ -2721,7 +2721,7 @@ bool CWeapon::MovingAnimAllowedNow()
 
 bool CWeapon::IsHudModeNow()
 {
-	return (HudItemData()!=nullptr);
+	return GetHUDmode();
 }
 
 void CWeapon::ZoomInc()
