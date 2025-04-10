@@ -46,7 +46,8 @@ void CHudAnimatorManager::Update()
 {
 	if (m_bNeedActivated)
 	{
-		if (!g_player_hud->attached_item(0) && !g_player_hud->attached_item(1))
+		bool wpn_hide = !g_player_hud->attached_item(0) && !m_actor->inventory().ActiveItem() && !m_actor->inventory().GetNextActiveSlot() && !m_actor->inventory().GetActiveSlot();
+		if (wpn_hide && !g_player_hud->attached_item(1))
 		{
 			PlayMotion();
 		}
