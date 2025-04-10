@@ -262,7 +262,7 @@ void CEatableItem::EatableEffects()
 		CurrentGameUI()->ActorMenu().RefreshCurrentItemCell();
 	}
 
-	if (CanDelete())
+	if (Empty() && CanDelete())
 	{
 		if (CInventoryItem* item = cast_inventory_item())
 		{
