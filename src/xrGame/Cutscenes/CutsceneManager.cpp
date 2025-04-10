@@ -23,14 +23,23 @@ void CCutsceneManager::PlayCutscene(LPCSTR section)
 	auto& Self = GetInstance();
 	R_ASSERT3(!Self.m_pCurrentCutscene, "Attempt to start new cutscene while other plays!", Self.m_pCurrentCutscene->GetName());
 	R_ASSERT2(section && strlen(section), "Invalid cutscene section name!");
-	Self.m_pCurrentCutscene = new CCutsceneItem();
-	Self.m_pCurrentCutscene->Construct(section);
+	auto new_item = new CCutsceneItem();
+	try
+	{
+		new_item->Construct(section);
+	} catch(...)
+	{
+		R_ASSERT3(false, "Failed to create cutscene item!", section);
+		xr_delete(new_item);
+		return;
+	}
+	Self.m_pCurrentCutscene = new_item;
 }
 
 void CCutsceneManager::Update()
 {
 #ifndef MASTER_GOLD
-	static shared_str PrevSection;
+	static shared_str PrevCutsceneSection = nullptr;
 	static bool PrevAjust = false;
 	if (Adjust) {
 		{
@@ -42,31 +51,28 @@ void CCutsceneManager::Update()
 			F->OutNext("Press X, Y or Z to change value on corresponding axis");
 			F->OutNext("Press LSHIFT to move in opposite direction");
 			F->OutNext("Press LALT to move faster");
+			F->OutNext("Press F to play cutscene forward");
+			F->OutNext("Press B to play cutscene backward");
+			F->OutNext("Press S to stop cutscene");
 		}
-		if (PrevSection != AdjustCutsceneSection) {
-			if (HudModel) {
-				::Render->model_Delete(HudModel);
-				HudModel = nullptr;
-				HudModelKinematics = nullptr;
-				HudModelKinematicsAnimated = nullptr;
+		if (PrevCutsceneSection != AdjustCutsceneSection) {
+			if (m_pCurrentCutscene) {
+				xr_delete(m_pCurrentCutscene);
 			}
 			if (pSettings->section_exist(AdjustCutsceneSection)) {
-				PrevSection = AdjustCutsceneSection;
-				PlayCutscene(PrevSection.c_str());
-				AdjustDeviation = pSettings->r_fvector3(PrevSection, "deviation");
+				PrevCutsceneSection = AdjustCutsceneSection;
+				PlayCutscene(PrevCutsceneSection.c_str());
+				AdjustDeviation = m_pCurrentCutscene->GetPivotObject()->Position();
 			}
 		}
-		if (HudModel) {
+		if (m_pCurrentCutscene) {
 			AdjustDeviation.add(GetAdjustDelta());
 		}
 	}
 	else if (PrevAjust) {
-		PrevSection = "";
-		if (HudModel) {
-			::Render->model_Delete(HudModel);
-			HudModel = nullptr;
-			HudModelKinematics = nullptr;
-			HudModelKinematicsAnimated = nullptr;
+		PrevCutsceneSection = "";
+		if (m_pCurrentCutscene) {
+			xr_delete(m_pCurrentCutscene);
 		}
 	}
 	PrevAjust = Adjust;
@@ -94,7 +100,18 @@ void CCutsceneManager::Update()
 #endif
 
 		
-		m_pCurrentCutscene
+#ifndef MASTER_GOLD
+		if (pInput->iGetAsyncKeyState(SDL_SCANCODE_B)) {
+			m_pCurrentCutscene->BackwardAnimation();
+		} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_S))
+		{
+			m_pCurrentCutscene->StopAnimation();
+		} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_F))
+		{
+			m_pCurrentCutscene->ForwardAnimation();
+		}
+#endif
+		m_pCurrentCutscene->Update();
 
 		::Render->set_HUD(bHud);
 	}

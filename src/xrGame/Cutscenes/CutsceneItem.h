@@ -11,7 +11,18 @@ struct SCutsceneObjectElement
     void SetOnFinishFunc(LPCSTR Name);
 
     void Activate();
+    void Update(Fvector Deviation);
+    
+#ifndef MASTER_GOLD
+    void StopAnimation();
+    void ForwardAnimation();
+    void BackwardAnimation();
+#endif
+    
 private:
+#ifndef MASTER_GOLD
+    CBlend* m_pBlend = nullptr;
+#endif
     IKinematicsAnimated* HudModelKinematicsAnimated = nullptr;
     IKinematics* HudModelKinematics = nullptr;
     IRenderVisual* HudModel = nullptr;
@@ -30,14 +41,20 @@ class CCutsceneItem
     CObject* PivotObject = nullptr;
     shared_str NameSect;
     xr_vector<SCutsceneObjectElement*> CutsceneElements;
-	Fvector Deviation;
 public:
     ~CCutsceneItem();
     
     void Construct(LPCSTR Section);
     void Activate();
+    void Update();
     LPCSTR GetName();
     SCutsceneObjectElement* CreateObjectElement(LPCSTR ObjectName);
     void SetPivotObject(CObject* PivotObject);
-    CObject* GetPivotObject(){return PivotObject;}
+    CObject* GetPivotObject() const {return PivotObject;}
+    
+#ifndef MASTER_GOLD
+    void StopAnimation();
+    void ForwardAnimation();
+    void BackwardAnimation();
+#endif
 };

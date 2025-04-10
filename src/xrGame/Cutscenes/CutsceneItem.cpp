@@ -47,9 +47,44 @@ void SCutsceneObjectElement::Activate()
         Msg("playing item animation [%s]", AnimName.c_str());
     }
 	R_ASSERT4(M2.valid(), "model has no motion", HudModel->getDebugName().c_str(), AnimName.c_str());
-    auto B = HudModelKinematicsAnimated->PlayCycle(M2, true, &OnFinishFunc, this);
-    B->update_callback = false;
+#ifndef MASTER_GOLD
+    m_pBlend = HudModelKinematicsAnimated->PlayCycle(M2, true, &OnFinishFunc, this);
+#else
+    auto m_pBlend = HudModelKinematicsAnimated->PlayCycle(M2, true, &OnFinishFunc, this);
+#endif
+    m_pBlend->update_callback = false;
 }
+
+void SCutsceneObjectElement::Update(Fvector Deviation)
+{
+    Fmatrix m_transform;
+    m_transform.identity();
+    m_transform.c = Deviation;
+    HudModelKinematics->CalculateBones(true);
+    ::Render->set_Transform(&m_transform);
+    ::Render->add_Visual(HudModel, true);
+}
+
+#ifndef MASTER_GOLD
+void SCutsceneObjectElement::StopAnimation()
+{
+    m_pBlend->playing = false;
+}
+
+void SCutsceneObjectElement::ForwardAnimation()
+{
+    m_pBlend->playing = true;
+    if(m_pBlend->speed < 0.f)
+        m_pBlend->speed = -m_pBlend->speed;
+}
+
+void SCutsceneObjectElement::BackwardAnimation()
+{
+    m_pBlend->playing = true;
+    if(m_pBlend->speed > 0.f)
+        m_pBlend->speed = -m_pBlend->speed;
+}
+#endif
 
 void SCutsceneObjectElement::SetAnimToPlay(LPCSTR AnimName)
 {
@@ -104,6 +139,15 @@ void CCutsceneItem::Activate()
     }
 }
 
+void CCutsceneItem::Update()
+{
+    auto pos = GetPivotObject()->Position();
+    for (auto& elem : CutsceneElements)
+    {
+        elem->Update(pos);
+    }
+}
+
 LPCSTR CCutsceneItem::GetName()
 {
     return NameSect.c_str();
@@ -120,6 +164,32 @@ void CCutsceneItem::SetPivotObject(CObject* PivotObject)
 {
     this->PivotObject = PivotObject;
 }
+
+#ifndef MASTER_GOLD
+void CCutsceneItem::StopAnimation()
+{
+    for(auto& elem : CutsceneElements)
+    {
+        elem->StopAnimation();
+    }
+}
+
+void CCutsceneItem::ForwardAnimation()
+{
+    for(auto& elem : CutsceneElements)
+    {
+        elem->ForwardAnimation();
+    }
+}
+
+void CCutsceneItem::BackwardAnimation()
+{
+    for(auto& elem : CutsceneElements)
+    {
+        elem->BackwardAnimation();
+    }
+}
+#endif
 
 SCutsceneObjectElement::~SCutsceneObjectElement()
 {

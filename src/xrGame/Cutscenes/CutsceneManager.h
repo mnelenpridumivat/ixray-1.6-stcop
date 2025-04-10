@@ -8,7 +8,7 @@ class CCutsceneManager {
 
 #ifndef MASTER_GOLD
 	bool Adjust = false;
-	shared_str AdjustCutsceneSection;
+	shared_str AdjustCutsceneSection = nullptr;
 	Fvector AdjustDeviation;
 #endif
 
