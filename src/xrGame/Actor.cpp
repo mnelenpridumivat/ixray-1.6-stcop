@@ -1150,7 +1150,7 @@ void CActor::UpdateCL	()
 			{
 				need_restore_detector = true;
 				if (det->GetState() == CHUDState::eIdle)
-					det->HideDetector(true);
+					det->HideDetector(true, true);
 			}
 
 			if (item != nullptr)

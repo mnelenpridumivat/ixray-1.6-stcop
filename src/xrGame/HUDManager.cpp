@@ -112,6 +112,10 @@ bool need_render_hud()
 void CHUDManager::Render_Last()
 {
 	CObject* O = g_pGameLevel->CurrentViewEntity();
+	if (!O)
+	{
+		return;
+	}
 	::Render->set_Object(O->H_Root());
 	CCutsceneManager::GetInstance().Update();
 
