@@ -13,10 +13,7 @@ CHudAnimatorManager::CHudAnimatorManager(CActor* parent)
 
 CHudAnimatorManager::~CHudAnimatorManager()
 {
-	m_bIsPlaying = false;
-	m_actor->set_inventory_disabled(false);
-	m_sounds.StopAllSounds();
-	g_player_hud->delete_animator_item();
+	StopAnimator();
 }
 
 void CHudAnimatorManager::Load()
@@ -204,6 +201,12 @@ void CHudAnimatorManager::OnMotionMark(const motion_marks& mark)
 
 void CHudAnimatorManager::OnAnimationEnd()
 {
+	CallLeftCallback();
+	CallLeft2Callback();
+	CallRightCallback();
+	CallRight2Callback();
+	CallEndCallback();
+
 	StopAnimator();
 
 	if (m_iRestoreSlot > 0 && m_actor->inventory().ItemFromSlot(m_iRestoreSlot))
@@ -224,14 +227,22 @@ void CHudAnimatorManager::StopAnimator()
 	m_bIsPlaying = false;
 	m_actor->set_inventory_disabled(false);
 	m_sounds.StopAllSounds();
-
-	CallLeftCallback();
-	CallLeft2Callback();
-	CallRightCallback();
-	CallRight2Callback();
-	CallEndCallback();
-
 	g_player_hud->delete_animator_item();
+
+	m_left_callback = nullptr;
+	m_left2_callback = nullptr;
+	m_right_callback = nullptr;
+	m_right2_callback = nullptr;
+	m_start_callback = nullptr;
+	m_end_callback = nullptr;
+
+	m_sLuaLeftCallback = "null";
+	m_sLuaLeft2Callback = "null";
+	m_sLuaRightCallback = "null";
+	m_sLuaRight2Callback = "null";
+	m_sLuaStartCallback = "null";
+	m_sLuaEndCallback = "null";
+	m_sLuaModifySect = "null";
 }
 
 void CHudAnimatorManager::CallLeftCallback()
