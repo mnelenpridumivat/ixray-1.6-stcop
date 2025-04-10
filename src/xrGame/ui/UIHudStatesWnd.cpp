@@ -103,7 +103,7 @@ void CUIHudStatesWnd::InitFromXml( CUIXml& xml, LPCSTR path )
 
 	m_back            = UIHelper::CreateStatic( xml, "back", this );
 	m_ui_health_bar   = UIHelper::CreateProgressBar( xml, "progress_bar_health", this );
-	m_ui_stamina_bar  = UIHelper::CreateProgressBar( xml, "progress_bar_stamina", this );
+	m_ui_health_bar->IsExpressionSystem = xml.ReadAttrib("progress_bar_health", 0, "expression", nullptr) != nullptr;
 
 	if (xml.NavigateToNode("back_v", 0))
 	{
@@ -210,6 +210,8 @@ void CUIHudStatesWnd::InitFromXml( CUIXml& xml, LPCSTR path )
 	{
 		m_back_over_arrow = UIHelper::CreateStatic(xml, "back_over_arrow", this);
 	}
+	m_ui_stamina_bar = UIHelper::CreateProgressBar(xml, "progress_bar_stamina", this);
+	m_ui_stamina_bar->IsExpressionSystem = xml.ReadAttrib("progress_bar_stamina", 0, "expression", nullptr) != nullptr;
 
 	if (xml.NavigateToNode("bleeding", 0))
 	{
@@ -286,6 +288,27 @@ void CUIHudStatesWnd::Update()
 
 void CUIHudStatesWnd::UpdateHealth( CActor* actor )
 {
+	if (!m_ui_health_bar->IsExpressionSystem)
+	{
+		float cur_health = actor->GetfHealth();
+		m_ui_health_bar->SetProgressPos(iCeil(cur_health * 100.0f * 35.f) / 35.f);
+		if (_abs(cur_health - m_last_health) > m_health_blink)
+		{
+			m_last_health = cur_health;
+			m_ui_health_bar->m_UIProgressItem.ResetColorAnimation();
+		}
+	}
+
+	if (!m_ui_stamina_bar->IsExpressionSystem)
+	{
+		float cur_stamina = actor->conditions().GetPower();
+		m_ui_stamina_bar->SetProgressPos(iCeil(cur_stamina * 100.0f * 35.f) / 35.f);
+		if (!actor->conditions().IsCantSprint())
+		{
+			m_ui_stamina_bar->m_UIProgressItem.ResetColorAnimation();
+		}
+	}
+
 	CCustomOutfit* outfit = actor->GetOutfit();
 	CHelmet* helmet = actor->GetHelmet();
 	if ((outfit || helmet) && m_static_armor && m_ui_armor_bar)
@@ -372,24 +395,6 @@ void CUIHudStatesWnd::UpdateActiveItemInfo(CActor* actor)
 
 				m_ui_weapon_sign_ammo->Show(true);
 				m_ui_weapon_sign_ammo->SetText(temp);
-
-				// hack ^ begin
-				CGameFont* pFont32 = UI().Font().GetFont(GRAFFITI32_FONT_NAME);
-				CGameFont* pFont22 = UI().Font().GetFont(GRAFFITI22_FONT_NAME);
-				CGameFont* pFont = pFont32;
-
-				if (UI().is_widescreen())
-				{
-					pFont = pFont22;
-				}
-				else
-				{
-					if (xr_strlen(temp) > 5)
-					{
-						pFont = pFont22;
-					}
-				}
-				m_ui_weapon_sign_ammo->SetFont(pFont);
 			}
 			else
 			{

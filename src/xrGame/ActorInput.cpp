@@ -34,7 +34,7 @@
 #include "Weapon.h"
 #include "WeaponMagazined.h"
 #include "ai/monsters/basemonster/base_monster.h"
-#include "HUDAnimItem.h"
+#include "ActorHelmet.h"
 
 extern u32 hud_adj_mode;
 
@@ -192,9 +192,9 @@ void CActor::IR_OnKeyboardPress(int cmd)
 	case kQUICK_USE_3:
 	case kQUICK_USE_4:
 		{
-			if (smart_cast<CHUDAnimItem*>(inventory().ActiveItem()) != nullptr || inventory().GetNextActiveSlot() == ANIM_SLOT)
+			if (HudAnimator() && HudAnimator()->IsActive())
 			{
-				break;
+				return;
 			}
 
 			if (!CurrentGameUI()->ActorMenu().m_pQuickSlot)
@@ -543,6 +543,11 @@ bool CActor::use_Holder				(CHolderCustom* holder)
 
 void CActor::ActorUse()
 {
+	if (HudAnimator() && HudAnimator()->IsActive())
+	{
+		return;
+	}
+
 	if (m_holder)
 	{
 		CGameObject*	GO			= smart_cast<CGameObject*>(m_holder);

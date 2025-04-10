@@ -225,6 +225,8 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 	m_disabled_hitmarks		= false;
 	m_inventory_disabled	= false;
 
+	m_hud_animator			= new CHudAnimatorManager(this);
+
 	// Alex ADD: for smooth crouch
 	CurrentHeight = -1.f;
 	bBlockSprint = false;
@@ -254,6 +256,7 @@ CActor::~CActor()
 	xr_delete				(pPickup);
 	xr_delete				(m_vehicle_anims);
 	xr_delete				(m_night_vision);
+	xr_delete				(m_hud_animator);
 }
 
 void CActor::reinit	()
@@ -1241,6 +1244,11 @@ void CActor::UpdateCL	()
 	{
 		psHUD_Flags.set( HUD_CROSSHAIR_RT2, true );
 		psHUD_Flags.set( HUD_DRAW_RT, true );
+	}
+
+	if (HudAnimator())
+	{
+		HudAnimator()->Update();
 	}
 
 	if (pWeapon)
@@ -2345,15 +2353,6 @@ void CActor::spawn_supplies			()
 {
 	inherited::spawn_supplies		();
 	CInventoryOwner::spawn_supplies	();
-
-	if (!pGameGlobals->line_exist("actor_item", "anim_fake_item"))
-	{
-		Msg("! Animation slot not registered");
-		Msg("! [anim_fake] section missing");
-		return;
-	}
-
-	Level().spawn_item(pGameGlobals->r_string("actor_item", "anim_fake_item"), Position(), ai_location().level_vertex_id(), ID());
 }
 
 

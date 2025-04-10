@@ -96,8 +96,13 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 		switch2_Idle	();
 		break;
 	case eShowing:
-		switch2_Showing	();
-		break;
+	{
+		if (Level().CurrentControlEntity() == H_Parent())
+		{
+			g_player_hud->attach_item(this);
+		}
+		switch2_Showing();
+	} break;
 	case eHiding:
 		switch2_Hiding	();
 		break;
@@ -265,7 +270,14 @@ void CWeaponKnife::OnAnimationEnd(u32 state)
 {
 	switch (state)
 	{
-	case eHiding:	SwitchState(eHidden);	break;
+	case eHiding:
+	{
+		if (Level().CurrentControlEntity() == H_Parent() && HudItemData())
+		{
+			g_player_hud->detach_item(this);
+		}
+		SwitchState(eHidden);
+	}break;
 	
 	case eFire: 
 	case eFire2: 	SwitchState(eIdle);		break;
@@ -288,12 +300,12 @@ void CWeaponKnife::switch2_Attacking	(u32 state)
 
 	if (state == eFire)
 	{
-		PlayHUDMotion("anm_attack", FALSE, this, state);
+		PlayHUDMotion("anm_attack", FALSE, state);
 		PlaySoundIfExist("sndKick1", Position());
 	}
 	else
 	{
-		PlayHUDMotion("anm_attack2", FALSE, this, state);
+		PlayHUDMotion("anm_attack2", FALSE, state);
 		PlaySoundIfExist("sndKick2", Position());
 	}
 
@@ -312,7 +324,7 @@ void CWeaponKnife::switch2_Hiding	()
 {
 	FireEnd					();
 	VERIFY(GetState()==eHiding);
-	PlayHUDMotion("anm_hide", TRUE, this, GetState());
+	PlayHUDMotion("anm_hide", TRUE, GetState());
 	PlaySoundIfExist("SndHide", get_LastFP());
 }
 
@@ -325,7 +337,7 @@ void CWeaponKnife::switch2_Hidden()
 void CWeaponKnife::switch2_Showing	()
 {
 	VERIFY(GetState()==eShowing);
-	PlayHUDMotion("anm_show", FALSE, this, GetState());
+	PlayHUDMotion("anm_show", FALSE, GetState());
 	PlaySoundIfExist("SndShow", get_LastFP());
 }
 

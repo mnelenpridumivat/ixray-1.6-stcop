@@ -69,6 +69,7 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 		}
 
 		PlayRainStep(!!HUDview());
+		PlayExoStep(!!HUDview());
 
 		m_bJumpKeyPressed	=	TRUE;
 		m_fJumpTime			=	s_fJumpTime;
@@ -212,6 +213,7 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 			m_fJumpTime			= s_fJumpTime;
 
 			PlayRainStep(!!HUDview());
+			PlayExoStep(!!HUDview());
 
 			//уменьшить силу игрока из-за выполненого прыжка
 			if (!GodMode())
@@ -578,7 +580,8 @@ bool CActor::CanRun()
 
 bool CActor::CanSprint()
 {
-	bool can_Sprint = CanAccelerate() && !conditions().IsCantSprint() && Game().PlayerCanSprint(this) && CanRun() && !(mstate_real & mcLStrafe || mstate_real & mcRStrafe) && InventoryAllowSprint() && !bBlockSprint;
+	bool is_animator = (HudAnimator() && (HudAnimator()->IsActive() && HudAnimator()->CanSprint() || !HudAnimator()->IsActive()) || !HudAnimator());
+	bool can_Sprint = CanAccelerate() && !conditions().IsCantSprint() && Game().PlayerCanSprint(this) && CanRun() && !(mstate_real & mcLStrafe || mstate_real & mcRStrafe) && InventoryAllowSprint() && !bBlockSprint && is_animator;
 
 	return can_Sprint && (m_block_sprint_counter<=0);
 }

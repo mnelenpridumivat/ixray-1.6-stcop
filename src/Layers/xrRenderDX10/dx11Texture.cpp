@@ -10,9 +10,9 @@ void fix_texture_name(LPSTR fn)
 {
 	auto _ext = strext(fn);
 	if (_ext && (0 == _stricmp(_ext, ".tga") ||
-				 0 == _stricmp(_ext, ".dds") ||
-				 0 == _stricmp(_ext, ".bmp") ||
-				 0 == _stricmp(_ext, ".ogm")))
+		0 == _stricmp(_ext, ".dds") ||
+		0 == _stricmp(_ext, ".bmp") ||
+		0 == _stricmp(_ext, ".ogm")))
 	{
 		*_ext = 0;
 	}
@@ -30,17 +30,11 @@ int get_texture_load_lod(LPCSTR fn)
 			{
 				return 0;
 			}
-			else
+			if (psTextureLOD < 3)
 			{
-				if (psTextureLOD < 3)
-				{
-					return 1;
-				}
-				else
-				{
-					return 2;
-				}
+				return 1;
 			}
+			return 2;
 		}
 	}
 
@@ -48,17 +42,11 @@ int get_texture_load_lod(LPCSTR fn)
 	{
 		return 0;
 	}
-	else
+	if (psTextureLOD < 4)
 	{
-		if (psTextureLOD < 4)
-		{
-			return 1;
-		}
-		else
-		{
-			return 2;
-		}
+		return 1;
 	}
+	return 2;
 }
 
 u32 calc_texture_size(int lod, u32 mip_cnt, u32 orig_size)
@@ -145,10 +133,8 @@ ID3DBaseTexture* CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStag
 	int img_loaded_lod = 0;
 	u32 mip_cnt = u32(-1);
 	// validation
-	R_ASSERT(fRName || fRName[0]);
-
-	bool FileExist = false;
-	HRESULT hr;
+	R_ASSERT(fRName);
+	R_ASSERT(fRName[0]);
 
 	D3D11_USAGE usage = (bStaging) ? D3D_USAGE_STAGING : D3D_USAGE_DEFAULT;
 	int bindFlags = (bStaging) ? 0 : D3D_BIND_SHADER_RESOURCE;
@@ -178,172 +164,202 @@ ID3DBaseTexture* CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStag
 	}
 
 	Msg("! Can't find texture '%s'", fname);
-	FileExist = FS.exist(fn, "$game_textures$", "ed\\ed_not_existing_texture", ".dds") != nullptr;
-	R_ASSERT2(FileExist, "File not found: ed\\ed_not_existing_texture.dds");
+	R_ASSERT(FS.exist(fn, "$game_textures$", "ed\\ed_not_existing_texture", ".dds"));
 	goto _DDS;
 
-	_DDS: {
-		// Load and get header
-		reader = FS.r_open(fn);
+	_DDS:
+		{
+			// Load and get header
+			reader = FS.r_open(fn);
 #ifdef DEBUG
-		Msg("* Loaded: %s[%d]b", fn, reader->length());
+			Msg("* Loaded: %s[%d]b", fn, reader->length());
 #endif // DEBUG
-		img_size = reader->length();
-		R_ASSERT(reader);
-		hr = GetMetadataFromDDSMemory(reader->pointer(), reader->length(), textureFlag, imageInfo);
+			img_size = reader->length();
+			R_ASSERT(reader);
+			HRESULT hr = GetMetadataFromDDSMemory(reader->pointer(), reader->length(), textureFlag, imageInfo);
 
-		if (imageInfo.width > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION ||
-			imageInfo.height > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION)
-		{
-			string512 errMsg;
-			xr_sprintf(errMsg, "Texture dimensions exceed hardware limits: %dx%d (Max: %d)",
-				imageInfo.width, imageInfo.height,
-				D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
-			//R_ASSERT3(false, errMsg, fname);
-		}
-
-		if (FAILED(hr))
-		{
-			string1024 errorMsg;
-			xr_sprintf(errorMsg, "Failed to get DDS metadata for '%s'\n"
-				"File size: %u bytes\n"
-				"Error: %s (0x%08X)\n"
-				"Possible causes:\n"
-				"- Corrupted DDS header\n"
-				"- Unsupported DDS variant", 
-				fname, reader->length(),
-				Debug.dxerror2string(hr), hr);
-
-			VERIFY2(false, errorMsg);
-			Msg("! DDS METADATA ERROR: %s", errorMsg);
-			FS.r_close(reader);
-			return nullptr;
-		}
-
-		{
-			UINT flags = 0;
-			UINT test_flags = D3D11_FORMAT_SUPPORT_SHADER_LOAD | D3D11_FORMAT_SUPPORT_SHADER_SAMPLE;
-			RDevice->CheckFormatSupport(imageInfo.format, &flags);
-
-			if (test_flags != (flags & test_flags))
+			if (imageInfo.width > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION ||
+				imageInfo.height > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION)
 			{
-				string512 errorMsg;
-				xr_sprintf(errorMsg, "Unsupported texture format for '%s'\n"
-					"                       Format: %s (%d)\n"
-					"                       Required flags: 0x%08X\n"
-					"                       Supported flags: 0x%08X\n"
-					"                       Attempting fallback to 16BPP",
-					fname,
-					magic_enum::enum_name(imageInfo.format).data(),
-					imageInfo.format,
-					test_flags,
-					flags);
-
-				Msg("! TEXTURE FORMAT ERROR: %s", errorMsg);
-				textureFlag = DDS_FLAGS::DDS_FLAGS_NO_16BPP;
-				//R_ASSERT3(false, errorMsg, fname);
+				string512 errMsg;
+				xr_sprintf(errMsg, "Texture dimensions exceed hardware limits: %dx%d (Max: %d)",
+					imageInfo.width, imageInfo.height,
+					D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
+				//R_ASSERT3(false, errMsg, fname);
 			}
+
+			if (FAILED(hr))
+			{
+				string1024 errorMsg;
+				xr_sprintf(errorMsg, "Failed to get DDS metadata for '%s'\n"
+					"File size: %u bytes\n"
+					"Error: %s (0x%08X)\n"
+					"Possible causes:\n"
+					"- Corrupted DDS header\n"
+					"- Unsupported DDS variant",
+					fname, reader->length(),
+					Debug.dxerror2string(hr), hr);
+
+				VERIFY2(false, errorMsg);
+				Msg("! DDS METADATA ERROR: %s", errorMsg);
+				FS.r_close(reader);
+				return nullptr;
+			}
+
+				{
+				UINT flags = 0;
+				UINT test_flags = D3D11_FORMAT_SUPPORT_SHADER_LOAD | D3D11_FORMAT_SUPPORT_SHADER_SAMPLE;
+				RDevice->CheckFormatSupport(imageInfo.format, &flags);
+
+				if (test_flags != (flags & test_flags))
+				{
+					string512 errorMsg;
+					xr_sprintf(errorMsg, "Unsupported texture format for '%s'\n"
+						"                       Format: %s (%d)\n"
+						"                       Required flags: 0x%08X\n"
+						"                       Supported flags: 0x%08X\n"
+						"                       Attempting fallback to 16BPP",
+						fname,
+						magic_enum::enum_name(imageInfo.format).data(),
+						imageInfo.format,
+						test_flags,
+						flags);
+
+					Msg("! TEXTURE FORMAT ERROR: %s", errorMsg);
+					textureFlag = DDS_FLAGS::DDS_FLAGS_NO_16BPP;
+					//R_ASSERT3(false, errorMsg, fname);
+				}
+				}
+
 		}
 
-		hr = LoadFromDDSMemory(reader->pointer(), reader->length(), textureFlag, &imageInfo, scratchImage);
-		FS.r_close(reader);
-
-		if (FAILED(hr))
-		{
-			const char* formatName = magic_enum::enum_name(imageInfo.format).data();
-			string1024 errorMsg;
-			xr_sprintf(errorMsg, sizeof(errorMsg),
-				"Failed to load texture '%s'\n"
-				"                         Error: %s"
-				"                         Error Code: (0x%08X)\n"
-				"                         Format: %s\n"
-				"                         Dimensions: %dx%d\n"
-				"                         Mip-levels: %d\n"
-				"                         Suggested solutions:\n"
-				"                         1. Check texture conversion settings\n"
-				"                         2. Verify GPU format support\n"
-				"                         3. Use DirectX TexTool for inspection",
-				fname,
-				Debug.dxerror2string(hr), hr, formatName,
-				imageInfo.width, imageInfo.height,
-				imageInfo.mipLevels);
-
-			R_ASSERT3(false, errorMsg, "Texture loading failed");
-			Msg("! TEXTURE ERROR: %s", errorMsg);
-
-			return nullptr;
-		}
-
-		if (imageInfo.IsCubemap() || imageInfo.IsVolumemap())
-		{
-			goto _DDS_CUBE;
-		}
-		else
-		{
-			goto _DDS_2D;
-		}
+	if (imageInfo.IsCubemap() || imageInfo.IsVolumemap())
+	{
+		goto _DDS_CUBE;
+	}
+	else
+	{
+		goto _DDS_2D;
+	}
 	_DDS_CUBE:
 		{
-		hr = CreateTextureEx(RDevice, scratchImage.GetImages(), scratchImage.GetImageCount(),
-			imageInfo, usage, bindFlags, cpuAccessFlags, miscFlags, CREATETEX_FLAGS::CREATETEX_DEFAULT, &pTexture2D);
-		scratchImage.Release();
+			HRESULT hr = LoadFromDDSMemory(reader->pointer(), reader->length(), textureFlag, &imageInfo, scratchImage);
+			if (FAILED(hr))
+			{
+				const char* formatName = magic_enum::enum_name(imageInfo.format).data();
+				string1024 errorMsg;
+				xr_sprintf(errorMsg, sizeof(errorMsg),
+					"Failed to load texture '%s'\n"
+					"                         Error: %s"
+					"                         Error Code: (0x%08X)\n"
+					"                         Format: %s\n"
+					"                         Dimensions: %dx%d\n"
+					"                         Mip-levels: %d\n"
+					"                         Suggested solutions:\n"
+					"                         1. Check texture conversion settings\n"
+					"                         2. Verify GPU format support\n"
+					"                         3. Use DirectX TexTool for inspection",
+					fname,
+					Debug.dxerror2string(hr), hr, formatName,
+					imageInfo.width, imageInfo.height,
+					imageInfo.mipLevels);
 
-		if (FAILED(hr) || pTexture2D == nullptr)
-		{
-			PrintLoadTextureError(hr, imageInfo, fname, img_loaded_lod, usage);
+				R_ASSERT3(false, errorMsg, "Texture loading failed");
+				Msg("! TEXTURE ERROR: %s", errorMsg);
+
+				return nullptr;
+			}
+			hr = CreateTextureEx(RDevice, scratchImage.GetImages(), scratchImage.GetImageCount(), imageInfo, usage,
+				bindFlags, cpuAccessFlags, miscFlags, CREATETEX_FLAGS::CREATETEX_DEFAULT, &pTexture2D);
+			scratchImage.Release();
+
+			if (FAILED(hr) || pTexture2D == nullptr)
+			{
+				PrintLoadTextureError(hr, imageInfo, fname, img_loaded_lod, usage);
+			}
+
+			FS.r_close(reader);
+			mip_cnt = static_cast<int>(imageInfo.mipLevels);
+			ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
+			return pTexture2D;
 		}
-
-		mip_cnt = (int)imageInfo.mipLevels;
-		ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
-		return pTexture2D;
-		}
-	_DDS_2D: {
-		// Check for LMAP and compress if needed
-		_strlwr(fn);
-
-		img_loaded_lod = get_texture_load_lod(fn);
-
-		int old_mipmap_cnt = 0, mip_lod = 0;
-
-		if (img_loaded_lod)
+	_DDS_2D:
 		{
-			old_mipmap_cnt = (int)imageInfo.mipLevels;
-			Reduce(imageInfo.width, imageInfo.height, imageInfo.mipLevels, img_loaded_lod);
-			mip_lod = old_mipmap_cnt - (int)imageInfo.mipLevels;
+			// Check for LMAP and compress if needed
+			_strlwr(fn);
+
+			img_loaded_lod = get_texture_load_lod(fn);
+
+			HRESULT hr = LoadFromDDSMemory(reader->pointer(), reader->length(), textureFlag, &imageInfo, scratchImage);
+			if (FAILED(hr))
+			{
+				const char* formatName = magic_enum::enum_name(imageInfo.format).data();
+				string1024 errorMsg;
+				xr_sprintf(errorMsg, sizeof(errorMsg),
+					"Failed to load texture '%s'\n"
+					"                         Error: %s"
+					"                         Error Code: (0x%08X)\n"
+					"                         Format: %s\n"
+					"                         Dimensions: %dx%d\n"
+					"                         Mip-levels: %d\n"
+					"                         Suggested solutions:\n"
+					"                         1. Check texture conversion settings\n"
+					"                         2. Verify GPU format support\n"
+					"                         3. Use DirectX TexTool for inspection",
+					fname,
+					Debug.dxerror2string(hr), hr, formatName,
+					imageInfo.width, imageInfo.height,
+					imageInfo.mipLevels);
+
+				R_ASSERT3(false, errorMsg, "Texture loading failed");
+				Msg("! TEXTURE ERROR: %s", errorMsg);
+
+				return nullptr;
+			}
+			int mip_lod = 0;
+			if (img_loaded_lod)
+			{
+				const int oldMipmapCnt = imageInfo.mipLevels;
+				Reduce(imageInfo.width, imageInfo.height, imageInfo.mipLevels, img_loaded_lod);
+				mip_lod = oldMipmapCnt - imageInfo.mipLevels;
+			}
+
+			hr = CreateTextureEx(RDevice, scratchImage.GetImages() + mip_lod, scratchImage.GetImageCount(), imageInfo,
+				usage, bindFlags, cpuAccessFlags, miscFlags, CREATETEX_FLAGS::CREATETEX_DEFAULT, &pTexture2D);
+			FS.r_close(reader);
+			scratchImage.Release();
+
+			if (FAILED(hr) || pTexture2D == nullptr)
+			{
+				PrintLoadTextureError(hr, imageInfo, fname, img_loaded_lod, usage);
+			}
+
+			mip_cnt = static_cast<int>(imageInfo.mipLevels);
+			ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
+			return pTexture2D;
 		}
-
-		hr = CreateTextureEx(RDevice, scratchImage.GetImages() + mip_lod, scratchImage.GetImageCount(),
-			imageInfo, usage, bindFlags, cpuAccessFlags, miscFlags, CREATETEX_FLAGS::CREATETEX_DEFAULT, &pTexture2D);
-		scratchImage.Release();
-		
-		if (FAILED(hr) || pTexture2D == nullptr)
+	_BUMP_from_base:
 		{
-			PrintLoadTextureError(hr, imageInfo, fname, img_loaded_lod, usage);
-		}
+			//Msg("! Fallback to default bump map: %s", fname);
+			if (strstr(fname, "_bump#"))
+			{
+				R_ASSERT2(FS.exist(fn, "$game_textures$", "ed\\ed_dummy_bump#", ".dds"), "ed_dummy_bump#");
+				reader = FS.r_open(fn);
+				R_ASSERT2(reader, fn);
+				img_size = reader->length();
+				goto _DDS_2D;
+			}
 
-		mip_cnt = (int)imageInfo.mipLevels;
-		ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
-		return pTexture2D;
-	}
-}
-	_BUMP_from_base: {
-		Msg("! Fallback to default bump map: %s", fname);
-		const char* bumpType = strstr(fname, "_bump#") ? "ed_dummy_bump#" : "ed_dummy_bump";
-		bool FileExist = FS.exist(fn, "$game_textures$", bumpType, ".dds");
+			Msg("! Fallback to default bump map: %s", fname);
+			if (strstr(fname, "_bump"))
+			{
+				R_ASSERT2(FS.exist(fn, "$game_textures$", "ed\\ed_dummy_bump", ".dds"), "ed_dummy_bump");
+				reader = FS.r_open(fn);
+				R_ASSERT2(reader, fn);
+				img_size = reader->length();
+				goto _DDS_2D;
+			}
 
-		if (!FileExist)
-		{
-			string512 errorMsg;
-			xr_sprintf(errorMsg, "Fallback bump texture missing!\n"
-				"Required file: %s.dds\n"
-				"Original texture: %s",
-				bumpType, fname);
-
-			//R_ASSERT2(FileExist, errorMsg);
-			Msg("! CRITICAL TEXTURE ERROR: %s", errorMsg);
 			return nullptr;
 		}
-	}
-
-	return nullptr;
 }

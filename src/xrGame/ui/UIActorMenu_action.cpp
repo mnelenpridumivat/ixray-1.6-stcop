@@ -451,10 +451,15 @@ void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
 	case mmBarter:
 		break;
 	case mmUpgrade:
-		if ( m_repair_mode )
+		if (m_repair_mode == 1)
 		{
 			RepairEffect_CurItem();
-			m_repair_mode = false;
+			m_repair_mode = 0;
+		}
+		else if (m_repair_mode == 2)
+		{
+			PerformDisassemble();
+			m_repair_mode = 0;
 		}
 		else
 		{
@@ -483,7 +488,7 @@ void CUIActorMenu::OnMesBoxNo(CUIWindow*, void*)
 	case mmBarter:
 		break;
 	case mmUpgrade:
-		m_repair_mode = false;
+		m_repair_mode = 0;
 		break;
 	case mmDeadBodySearch:
 		break;

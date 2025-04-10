@@ -2071,3 +2071,115 @@ void CScriptGameObject::SetCharacterDefaultVisual(LPCSTR name)
 		pActor->ChangeVisual(pActor->GetDefaultVisualOutfit());
 	}
 }
+
+
+void CScriptGameObject::StartActorAnimator(LPCSTR section)
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member StartActorAnimator!");
+		return;
+	}
+
+	if (pActor->HudAnimator())
+	{
+		pActor->HudAnimator()->StartAnimator(section);
+	}
+}
+
+void CScriptGameObject::StopActorAnimator()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member StopActorAnimator!");
+		return;
+	}
+
+	if (pActor->HudAnimator())
+	{
+		pActor->HudAnimator()->StopAnimator();
+	}
+}
+
+LPCSTR CScriptGameObject::GetActorAnimatorSection()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member GetActorAnimatorSection!");
+		return "null";
+	}
+
+	return pActor->HudAnimator() ? pActor->HudAnimator()->GetSection().c_str() : "null";
+}
+
+bool CScriptGameObject::IsAnimatorActive()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member IsAnimatorActive!");
+		return false;
+	}
+
+	return pActor->HudAnimator() && pActor->HudAnimator()->IsActive();
+}
+
+u8 CScriptGameObject::GetActorAnimatorRestoredSlot()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member GetActorAnimatorRestoredSlot!");
+		return 0;
+	}
+
+	return pActor->HudAnimator() ? pActor->HudAnimator()->GetSlotToRestore() : 0;
+}
+
+bool CScriptGameObject::GetAnimatorForceHideItems()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member GetAnimatorForceHideItems!");
+		return false;
+	}
+
+	return pActor->HudAnimator() && pActor->HudAnimator()->IsForceHideItems();
+}
+
+void CScriptGameObject::SetAnimatorForceHideItems(bool status)
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member SetAnimatorForceHideItems!");
+		return;
+	}
+
+	if (pActor->HudAnimator())
+	{
+		pActor->HudAnimator()->SetForceHideItems(status);
+	}
+}
+
+float CScriptGameObject::GetActorPowerBoostTime()
+{
+	CActor* pActor = smart_cast<CActor*>(&object());
+	if (!pActor)
+	{
+		ai().script_engine().script_log(
+			ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member GetActorPowerBoostTime!");
+		return (false);
+	}
+
+	for (auto& booster : pActor->conditions().GetCurBoosterInfluences())
+	{
+		if (booster.second.m_type == EBoostParams::eBoostPowerRestore)
+			return booster.second.fBoostTime;
+	}
+	return 0.f;
+}

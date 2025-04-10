@@ -13,7 +13,15 @@ CEngineExternal::CEngineExternal() : m_platform_type(EEngineExternalPlatform::Un
 	{
 		for (auto& Line : pOptions->r_section("shaders_options").Data)
 		{
-			ShadersOptions[*Line.first] = *Line.second;
+			if (Line.second != "0")
+			{
+				Msg("Enable shader option: %s", *Line.first);
+				ShadersOptions[*Line.first] = *Line.second;
+			}
+			else
+			{
+				Msg("Disabled shader option: %s", *Line.first);
+			}
 		}
 	}
 
