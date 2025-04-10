@@ -16,6 +16,7 @@
 #include "../xrUI/UIHelper.h"
 #include "../xrUI/Widgets/UIStatic.h"
 #include "../xrUI/Widgets/UIScrollView.h"
+#include "../xrUI/Widgets/UITabControl.h"
 #include "../xrUI/Widgets/UIListBox.h"
 #include "../xrUI/Widgets/UIListWnd.h"
 #include "../xrUI/Widgets/UITreeViewItem.h"

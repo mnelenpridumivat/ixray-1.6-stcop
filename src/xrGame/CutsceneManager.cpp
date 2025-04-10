@@ -107,7 +107,7 @@ void CCutsceneManager::Update()
 		HudModelKinematics->CalculateBones(true);
 
 		::Render->set_Transform(&m_transform);
-		::Render->add_Visual(HudModel, true, true);
+		::Render->add_Visual(HudModel, true);
 		::Render->set_HUD(bHud);
 	}
 }

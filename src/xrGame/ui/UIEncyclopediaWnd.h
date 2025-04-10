@@ -21,6 +21,8 @@ class CUIListBox;
 class CUIEncyclopediaCore;
 class CUIScrollView;
 class CUITreeViewItem;
+class CUITabControl;
+class CUIListWnd;
 
 class CUIEncyclopediaWnd : public CUIWindow
 {

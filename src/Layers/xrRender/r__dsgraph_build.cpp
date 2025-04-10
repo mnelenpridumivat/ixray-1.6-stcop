@@ -511,7 +511,7 @@ BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes, bool Force)
 #endif
 				I = pV->children.begin		();
 				E = pV->children.end		();
-				for (; I!=E; I++)	add_leafs_Dynamic	(*I, false, Force);
+				for (; I!=E; I++)	add_leafs_Dynamic	(*I, Force);
 			}
 			/*
 			I = pV->children.begin		();

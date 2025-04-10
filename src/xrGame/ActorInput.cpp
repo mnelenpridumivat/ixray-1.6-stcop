@@ -32,6 +32,7 @@
 #include "clsid_game.h"
 #include "HUDManager.h"
 #include "Weapon.h"
+#include "WeaponMagazined.h"
 #include "ai/monsters/basemonster/base_monster.h"
 #include "HUDAnimItem.h"
 

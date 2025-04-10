@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include <limits>
 
 IC	const CPatrolPath::CVertex *CPatrolPath::point	(shared_str name) const
 {
