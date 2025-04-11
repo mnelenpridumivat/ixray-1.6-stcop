@@ -35,6 +35,7 @@ protected:
 	// General
 	//кадр момента пересчета UpdateSounds
 	u32				dwUpdateSounds_Frame;
+	bool			last_sound_exist[2];
 protected:
 
 	virtual void	switch2_Idle	();
@@ -172,6 +173,7 @@ protected:
 	virtual shared_str SetCurrentReloadAnimation();
 	virtual shared_str SetCurrentShootAnimation();
 	virtual shared_str SetCurrentStateAnimation(const shared_str& first_name);
+	virtual shared_str SetCurrentAimAnimation();
 
 	virtual	int		ShotsFired			() { return m_iShotNum; }
 	virtual float	GetWeaponDeterioration	();

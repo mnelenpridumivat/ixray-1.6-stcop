@@ -164,6 +164,25 @@ void CHudItem::OnStateSwitch(u32 S)
 		}
 		break;
 	}
+	case eSprintStart:
+	{
+		m_bSwitchSprint = true;
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_idle_sprint_start"), true, eSprintStart);
+		break;
+	}
+	case eSprintEnd:
+	{
+		m_bSwitchSprint = false;
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_idle_sprint_end"), true, eSprintEnd);
+		break;
+	}
+	};
+
+	if (S != eIdle && S != eSprintStart && S != eSprintEnd)
+	{
+		m_bSwitchSprint = false;
 	}
 }
 
@@ -176,6 +195,8 @@ void CHudItem::OnAnimationEnd(u32 state)
 
 	switch(state)
 	{
+	case eSprintStart:
+	case eSprintEnd:
 	case eBore:
 	{
 		SwitchState(eIdle);
@@ -690,7 +711,18 @@ bool CHudItem::TryPlayAnimIdle()
 			u32 state = pActor->GetMovementState(eReal);
 			if (state & ACTOR_DEFS::EMoveCommand::mcSprint)
 			{
+				if (!m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_start"))
+				{
+					SwitchState(eSprintStart);
+					return true;
+				}
+
 				PlayAnimIdleSprint();
+				return true;
+			}
+			else if (m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_end"))
+			{
+				SwitchState(eSprintEnd);
 				return true;
 			}
 			else if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
@@ -809,7 +841,7 @@ void CHudItem::PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allo
 	HUD_SOUND_ITEM* SndIter = m_sounds.FindSoundItem(alias, false);
 	if (SndIter != nullptr)
 	{
-		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap);
+		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap, u8(-1));
 	}
 }
 

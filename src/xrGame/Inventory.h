@@ -7,6 +7,7 @@ class CInventoryItem;
 class CHudItem;
 class CInventoryOwner;
 class CPurchaseList;
+class CGrenade;
 
 class CInventorySlot
 {									
@@ -66,6 +67,7 @@ public:
 
 
 	void					Activate			(u16 slot, /*EActivationReason reason=eGeneral, */bool bForce=false);
+	void					PutGrenade			(CGrenade* new_grenade);
 	
 	static u32 const		qs_priorities_count = 5;
 	PIItem					GetNextItemInActiveSlot		(u8 const priority_value, bool ignore_ammo);
@@ -177,6 +179,7 @@ protected:
 	u16 				m_last_slot = 0;
 
 	CInventoryOwner*	m_pOwner;
+	CGrenade*			m_pNewGrenade = nullptr;
 
 	//флаг, показывающий наличие по€са в инвенторе
 	bool				m_bBeltUseful;

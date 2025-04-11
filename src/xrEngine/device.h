@@ -79,6 +79,15 @@ public:
 		float renderZoomRotateFactor = 0.0f;
 		bool isRenderActive{};
 		bool isRenderProcess{};
+
+		bool IsElectronicsProblemsDecreasing{};
+		float CurrentElectronicsProblemsCnt = 0.0f;
+		float TargetElectronicsProblemsCnt = 0.0f;
+
+		float ActorHealth = -1.0f;
+		float ActorOutfitCondition = -1.0f;
+		float ActorWeaponCondition = -1.0f;
+		float ActorWeaponLoading = -1.0f;
 	} hudViewportData;
 
 	// Engine flow-control
@@ -173,6 +182,10 @@ public:
 	void* GetRenderTexture() override;
 	void* GetDepthTexture() override;
 	void* GetSwapchainTexture() override;
+
+	u32 GetTimeDeltaSafe(u32 starttime);
+	u32 GetTimeDeltaSafe(u32 starttime, u32 endtime);
+
 	void* GetSwapchain() override;
 	u32	GetSwapchainWidth() override;
 	u32	GetSwapchainHeight() override;
@@ -219,7 +232,8 @@ public:
 	CRegistrator	<pureDeviceReset	>			seqDeviceReset;
 	xr_vector		<xr_delegate<void()>>	seqParallel;
 	xr_vector		<xr_delegate<void()>>	seqParallelRender;
-	xr_set			<xr_delegate<void()>>	seqParallelBeforRender;
+
+	xr_vector<xr_delegate<void()>> seqParallelBeforRender;
 
 	std::function<void()> ParticleWorkerCallback;
 	xr_delegate<void()> ModelDefferClear;

@@ -55,6 +55,9 @@ CWeaponMagazined::CWeaponMagazined(ESoundTypes eSoundType) : CWeapon()
 	m_iQueueSize				= WEAPON_ININITE_QUEUE;
 	m_bLockType					= false;
 	bMisfireReload				= false;
+
+	last_sound_exist[0] = false;
+	last_sound_exist[1] = false;
 }
 
 CWeaponMagazined::~CWeaponMagazined()
@@ -86,11 +89,29 @@ bool CWeaponMagazined::WeaponSoundExist(LPCSTR section, LPCSTR sound_name)
 void CWeaponMagazined::Load	(LPCSTR section)
 {
 	inherited::Load		(section);
-		
+	
+	if (WeaponSoundExist(section, "snd_shot_last"))
+	{
+		m_layered_sounds.LoadSound(section, "snd_shot_last", "sndShotLast", false, m_eSoundShot);
+		if (WeaponSoundExist(section, "snd_shot_last_actor"))
+			m_layered_sounds.LoadSound(section, "snd_shot_last_actor", "sndShotLastActor", false, m_eSoundShot);
+		last_sound_exist[0] = true;
+	}
+	if (WeaponSoundExist(section, "snd_silencer_shot_last"))
+	{
+		m_layered_sounds.LoadSound(section, "snd_silencer_shot_last", "sndSilencerShotLast", false, m_eSoundShot);
+		if (WeaponSoundExist(section, "snd_silencer_shot_last_actor"))
+			m_layered_sounds.LoadSound(section, "snd_silencer_shot_last_actor", "sndSilencerShotLastActor", false, m_eSoundShot);
+		last_sound_exist[1] = true;
+	}
+
 	// Sounds
 	m_sounds.LoadSound(section,"snd_draw", "sndShow"		, false, m_eSoundShow		);
 	m_sounds.LoadSound(section,"snd_holster", "sndHide"		, false, m_eSoundHide		);
 	m_layered_sounds.LoadSound(section, "snd_shoot", "sndShot", false, m_eSoundShot);
+	if (WeaponSoundExist(section, "snd_shoot_actor"))
+		m_layered_sounds.LoadSound(section, "snd_shoot_actor", "sndShotActor", false, m_eSoundShot);
+
 	m_sounds.LoadSound(section,"snd_empty", "sndEmptyClick"	, false, m_eSoundEmptyClick	);
 	m_sounds.LoadSound(section,"snd_reload", "sndReload"	, true, m_eSoundReload		);
 
@@ -117,6 +138,8 @@ void CWeaponMagazined::Load	(LPCSTR section)
 			m_sSilencerSmokeParticles = pSettings->r_string(section, "silencer_smoke_particles");
 		
 		m_layered_sounds.LoadSound(section, "snd_silncer_shot", "sndSilencerShot", false, m_eSoundShot);
+		if (WeaponSoundExist(section, "snd_silncer_shot_actor"))
+			m_layered_sounds.LoadSound(section, "snd_silncer_shot_actor", "sndSilencerShotActor", false, m_eSoundShot);
 	}
 
 	m_iBaseDispersionedBulletsCount = READ_IF_EXISTS(pSettings, r_u8, section, "base_dispersioned_bullets_count", 0);
@@ -805,9 +828,47 @@ void CWeaponMagazined::SetDefaults	()
 
 void CWeaponMagazined::OnShot()
 {
-	// Sound
-	//Alundaio: Actor sounds
-	m_layered_sounds.PlaySound(m_sSndShotCurrent.c_str(), get_LastFP(), H_Root(), !!GetHUDmode(), false, (u8)-1);
+	if (IsSilencerAttached())
+	{
+		if (HudItemData() && m_layered_sounds.FindSoundItem("sndSilencerShotActor", false))
+			m_sSndShotCurrent = "sndSilencerShotActor";
+		else
+			m_sSndShotCurrent = "sndSilencerShot";
+	}
+	else
+	{
+		if (HudItemData() && m_layered_sounds.FindSoundItem("sndShotActor", false))
+			m_sSndShotCurrent = "sndShotActor";
+		else
+			m_sSndShotCurrent = "sndShot";
+	}
+
+	// Alundaio:
+	// Alundaio: Actor sounds
+
+	//if (m_ammoElapsed.type1 == 1)
+	//{
+		if (IsSilencerAttached())
+			m_layered_sounds.PlaySound(last_sound_exist[1] ? (HudItemData() && m_layered_sounds.FindSoundItem("sndSilencerShotLastActor", false) ? "sndSilencerShotLastActor" : "sndSilencerShotLast") : m_sSndShotCurrent.c_str(),
+				get_LastFP(), H_Root(), !!GetHUDmode(), false, (u8)-1);
+		else
+			m_layered_sounds.PlaySound(last_sound_exist[0] ? (HudItemData() && m_layered_sounds.FindSoundItem("sndShotLastActor", false) ? "sndShotLastActor" : "sndShotLast") : m_sSndShotCurrent.c_str(), get_LastFP(),
+				H_Root(), !!GetHUDmode(), false, (u8)-1);
+	//}
+	//else
+	//	m_layered_sounds.PlaySound(m_sSndShotCurrent.c_str(), get_LastFP(), H_Root(), !!GetHUDmode(), false, (u8)-1);
+
+	float fAmmoElapsed = GetAmmoElapsed();
+	float fmaxMagazineSize_ = iMagazineSize;
+	float factor = fAmmoElapsed / (fmaxMagazineSize_ / 3.0f);
+	if (factor <= 1.0f)
+	{
+		clamp(factor, 0.0f, 1.0f);
+		factor = 1.0f - factor;
+		HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(factor);
+		PlaySound("sndMagShot", get_LastFP());
+		HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
+	}
 
 	// Camera	
 	AddShotEffector				();
@@ -1463,9 +1524,49 @@ void CWeaponMagazined::PlayAnimReload()
 	}
 }
 
+shared_str CWeaponMagazined::SetCurrentAimAnimation()
+{
+	shared_str anim = "anm_idle_aim";
+	if (CActor* actor = H_Parent()->cast_actor())
+	{
+		u32 state = actor->GetMovementState(ACTOR_DEFS::EMovementStates::eReal);
+		if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
+		{
+			if (IsScopeAttached())
+			{
+				AddSuffixName(anim, "_scope", "_moving");
+			}
+			else
+			{
+				AddSuffixName(anim, "_moving");
+			}
+
+			if (state & ACTOR_DEFS::EMoveCommand::mcFwd)
+			{
+				AddSuffixName(anim, "_moving", "_forward");
+			}
+			else if (state & ACTOR_DEFS::EMoveCommand::mcBack)
+			{
+				AddSuffixName(anim, "_moving", "_back");
+			}
+
+			if (state & ACTOR_DEFS::EMoveCommand::mcLStrafe)
+			{
+				AddSuffixName(anim, "_moving", "_left");
+			}
+			else if (state & ACTOR_DEFS::EMoveCommand::mcRStrafe)
+			{
+				AddSuffixName(anim, "_moving", "_right");
+			}
+		}
+	}
+
+	return SetCurrentStateAnimation(anim);
+}
+
 void CWeaponMagazined::PlayAnimAim()
 {
-	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_aim"), TRUE, GetState());
+	PlayHUDMotion(SetCurrentAimAnimation(), TRUE, GetState());
 }
 
 void CWeaponMagazined::PlaySoundAim(bool in)
@@ -1482,9 +1583,25 @@ void CWeaponMagazined::PlayAnimIdle()
 		return;
 
 	if (IsZoomed())
+	{
+		if (!m_bIsAimStarted && HudAnimationExist("anm_idle_aim_start"))
+		{
+			m_bIsAimStarted = true;
+			PlayHUDMotion(SetCurrentStateAnimation("anm_idle_aim_start"), true, GetState());
+			return;
+		}
+
 		PlayAnimAim();
+	}
 	else
 	{
+		if (m_bIsAimStarted && HudAnimationExist("anm_idle_aim_end"))
+		{
+			m_bIsAimStarted = false;
+			PlayHUDMotion(SetCurrentStateAnimation("anm_idle_aim_end"), true, GetState());
+			return;
+		}
+
 		if (TryPlayAnimIdle())
 		{
 			return;

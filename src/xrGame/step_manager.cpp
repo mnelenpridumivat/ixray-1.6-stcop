@@ -21,6 +21,7 @@ extern float psHUDStepSoundVolume;
 static xr_hash_set<xr_string_view> exoVisuals = {};
 static FS_FileSet stepExoSounds = {};
 static FS_FileSet stepRainSounds = {};
+static bool isExoSection = false;
 
 CStepManager::CStepManager()
 {
@@ -35,6 +36,11 @@ CStepManager::CStepManager()
 		{
 			m_rain_steps.emplace_back().create(stepRainSound.name.c_str(), st_Effect, sg_SourceType);
 		}
+	}
+	isExoSection = pSettings->section_exist("exo_visuals");
+	if (!isExoSection)
+	{
+		return;
 	}
 
 	if (stepExoSounds.empty())
@@ -52,11 +58,12 @@ CStepManager::CStepManager()
 
 	if (exoVisuals.empty())
 	{
-		LPCSTR exo_visual_name = {}, vall = {};
-		for (u32 k = 0; pSettings->r_line("exo_visuals", k, &exo_visual_name, &vall); ++k)
+		LPCSTR exoVisualName = {}, vall = {};
+		for (int k = 0; pSettings->r_line("exo_visuals", k, &exoVisualName, &vall); ++k)
 		{
-			exoVisuals.insert(exo_visual_name);
+			exoVisuals.insert(exoVisualName);
 		}
+
 	}
 }
 
