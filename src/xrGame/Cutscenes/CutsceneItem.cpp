@@ -48,12 +48,16 @@ void SCutsceneObjectElement::Activate()
         Msg("playing item animation [%s]", AnimName.c_str());
     }
 	R_ASSERT4(M2.valid(), "model has no motion", HudModel->getDebugName().c_str(), AnimName.c_str());
+    u16 pc = HudModelKinematicsAnimated->partitions().count();
+    for (u16 pid = 0; pid < pc; ++pid)
+    {
+        CBlend* B = HudModelKinematicsAnimated->PlayCycle(pid, M2, true);
+        R_ASSERT(B);
+        B->update_callback = false;
 #ifndef MASTER_GOLD
-    m_pBlend = HudModelKinematicsAnimated->PlayCycle(M2, true, &OnFinishFunc, this);
-#else
-    auto m_pBlend = HudModelKinematicsAnimated->PlayCycle(M2, true, &OnFinishFunc, this);
+        m_pBlends.push_back(B);
 #endif
-    m_pBlend->update_callback = false;
+    }
 }
 
 void SCutsceneObjectElement::Update(Fvector Deviation)
@@ -69,21 +73,34 @@ void SCutsceneObjectElement::Update(Fvector Deviation)
 #ifndef MASTER_GOLD
 void SCutsceneObjectElement::StopAnimation()
 {
-    m_pBlend->playing = false;
+    for (auto& B : m_pBlends)
+    {
+        B->playing = false;
+    }
 }
 
 void SCutsceneObjectElement::ForwardAnimation()
 {
-    m_pBlend->playing = true;
-    if(m_pBlend->speed < 0.f)
-        m_pBlend->speed = -m_pBlend->speed;
+    for (auto& B : m_pBlends)
+    {
+        B->playing = true;
+        if(B->speed < 0.f)
+        {
+            B->speed = -B->speed;
+        }
+    }
 }
 
 void SCutsceneObjectElement::BackwardAnimation()
 {
-    m_pBlend->playing = true;
-    if(m_pBlend->speed > 0.f)
-        m_pBlend->speed = -m_pBlend->speed;
+    for (auto& B : m_pBlends)
+    {
+        B->playing = true;
+        if(B->speed > 0.f)
+        {
+            B->speed = -B->speed;
+        }
+    }
 }
 #endif
 
@@ -140,10 +157,9 @@ void CCutsceneItem::Activate()
     }
 }
 
-void CCutsceneItem::Update()
+void CCutsceneItem::Update(Fmatrix matrix)
 {
-    R_ASSERT(GetPivotObject());
-    auto pos = GetPivotObject() ? GetPivotObject()->Position() : Fvector(0, 0, 0);
+    auto pos = matrix.c;
     for (auto& elem : CutsceneElements)
     {
         elem->Update(pos);

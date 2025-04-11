@@ -27,6 +27,7 @@ void CCutsceneManager::PlayCutscene(LPCSTR section)
 	try
 	{
 		new_item->Construct(section);
+		new_item->Activate();
 	} catch(...)
 	{
 		R_ASSERT3(false, "Failed to create cutscene item!", section);
@@ -54,6 +55,7 @@ void CCutsceneManager::Update()
 			F->OutNext("Press F to play cutscene forward");
 			F->OutNext("Press B to play cutscene backward");
 			F->OutNext("Press S to stop cutscene");
+			F->OutNext("Current pivot pos [%f, %f, %f]", AdjustDeviation.x, AdjustDeviation.y, AdjustDeviation.z);
 		}
 		if (PrevCutsceneSection != AdjustCutsceneSection) {
 			if (m_pCurrentCutscene) {
@@ -101,17 +103,19 @@ void CCutsceneManager::Update()
 
 		
 #ifndef MASTER_GOLD
-		if (pInput->iGetAsyncKeyState(SDL_SCANCODE_B)) {
-			m_pCurrentCutscene->BackwardAnimation();
-		} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_S))
-		{
-			m_pCurrentCutscene->StopAnimation();
-		} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_F))
-		{
-			m_pCurrentCutscene->ForwardAnimation();
+		if (Adjust) {
+			if (pInput->iGetAsyncKeyState(SDL_SCANCODE_B)) {
+				m_pCurrentCutscene->BackwardAnimation();
+			} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_S))
+			{
+				m_pCurrentCutscene->StopAnimation();
+			} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_F))
+			{
+				m_pCurrentCutscene->ForwardAnimation();
+			}
 		}
 #endif
-		m_pCurrentCutscene->Update();
+		m_pCurrentCutscene->Update(m_transform);
 
 		::Render->set_HUD(bHud);
 	}

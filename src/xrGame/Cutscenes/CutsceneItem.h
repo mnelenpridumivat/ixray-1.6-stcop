@@ -23,7 +23,7 @@ struct SCutsceneObjectElement
     
 private:
 #ifndef MASTER_GOLD
-    CBlend* m_pBlend = nullptr;
+    xr_vector<CBlend*> m_pBlends = {};
 #endif
     IKinematicsAnimated* HudModelKinematicsAnimated = nullptr;
     IKinematics* HudModelKinematics = nullptr;
@@ -48,7 +48,7 @@ public:
     
     void Construct(LPCSTR Section);
     void Activate();
-    void Update();
+    void Update(Fmatrix matrix);
     LPCSTR GetName();
     SCutsceneObjectElement* CreateObjectElement(LPCSTR ObjectName);
     void SetPivotObject(CScriptGameObject* PivotObject);

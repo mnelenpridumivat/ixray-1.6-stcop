@@ -34,7 +34,7 @@ void CBackpack::Load(LPCSTR section)
 }
 
 
-void CBackpack::OnMoveToSlot(const SInvItemPlace& previous_place)
+void CBackpack::OnMoveToSlot(const SInvItemPlace previous_place)
 {
     inherited::OnMoveToSlot(previous_place);
 
@@ -45,7 +45,7 @@ void CBackpack::OnMoveToSlot(const SInvItemPlace& previous_place)
     }
 }
 
-void CBackpack::OnMoveToRuck(const SInvItemPlace& previous_place)
+void CBackpack::OnMoveToRuck(const SInvItemPlace previous_place)
 {
     inherited::OnMoveToRuck(previous_place);
 

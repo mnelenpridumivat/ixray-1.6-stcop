@@ -477,7 +477,7 @@ BOOL CRender::occ_visible(Fbox& P) {
 }
 
 void CRender::add_Visual(IRenderVisual* V, bool Force) {
-	add_leafs_Dynamic((dxRender_Visual*)V);
+	add_leafs_Dynamic((dxRender_Visual*)V, Force);
 }
 void CRender::add_Geometry(IRenderVisual* V) {
 	add_Static((dxRender_Visual*)V, View->getMask());

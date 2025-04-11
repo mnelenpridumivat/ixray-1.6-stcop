@@ -25,8 +25,8 @@ public:
 
     virtual void Load(LPCSTR section) override;
 
-    virtual void OnMoveToSlot(const SInvItemPlace& prev) override;
-    virtual void OnMoveToRuck(const SInvItemPlace& previous_place) override;
+    virtual void OnMoveToSlot(const SInvItemPlace prev) override;
+    virtual void OnMoveToRuck(const SInvItemPlace previous_place) override;
 
     void Hit(float P, ALife::EHitType hit_type);
     float GetDefHitTypeProtection(ALife::EHitType hit_type) const;
