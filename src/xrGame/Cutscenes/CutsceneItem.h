@@ -1,5 +1,7 @@
 #pragma once
 
+class CScriptGameObject;
+
 struct SCutsceneObjectElement
 {
     SCutsceneObjectElement(LPCSTR ObjectName);
@@ -49,7 +51,7 @@ public:
     void Update();
     LPCSTR GetName();
     SCutsceneObjectElement* CreateObjectElement(LPCSTR ObjectName);
-    void SetPivotObject(CObject* PivotObject);
+    void SetPivotObject(CScriptGameObject* PivotObject);
     CObject* GetPivotObject() const {return PivotObject;}
     
 #ifndef MASTER_GOLD

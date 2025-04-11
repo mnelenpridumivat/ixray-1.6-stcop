@@ -4,6 +4,7 @@
 #include "ai_space.h"
 #include "Kinematics.h"
 #include "KinematicsAnimated.h"
+#include "script_game_object.h"
 
 SCutsceneObjectElement::SCutsceneObjectElement(LPCSTR ObjectName)
 {
@@ -141,7 +142,8 @@ void CCutsceneItem::Activate()
 
 void CCutsceneItem::Update()
 {
-    auto pos = GetPivotObject()->Position();
+    R_ASSERT(GetPivotObject());
+    auto pos = GetPivotObject() ? GetPivotObject()->Position() : Fvector(0, 0, 0);
     for (auto& elem : CutsceneElements)
     {
         elem->Update(pos);
@@ -160,9 +162,9 @@ SCutsceneObjectElement* CCutsceneItem::CreateObjectElement(LPCSTR ObjectName)
     return RetValue;
 }
 
-void CCutsceneItem::SetPivotObject(CObject* PivotObject)
+void CCutsceneItem::SetPivotObject(CScriptGameObject* PivotObject)
 {
-    this->PivotObject = PivotObject;
+    this->PivotObject = &PivotObject->object();
 }
 
 #ifndef MASTER_GOLD
