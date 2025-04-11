@@ -105,10 +105,11 @@ public:
 	virtual xr_vector<xr_string>		GetKnowedPortions() const ;
 	virtual void						Load				( LPCSTR section );
 
-	virtual void						shedule_Update		( u32 T ); 
+	virtual void						shedule_Update		( u32 T );
+	void PlayRainOnHelmetSound();
 	virtual void						UpdateCL			( );
 			void						UpdatePlayerView	( );
-	
+
 	virtual void						OnEvent				( NET_Packet& P, u16 type		);
 
 	// Render
@@ -145,8 +146,8 @@ struct SDefNewsMsg{
 		bool operator < (const SDefNewsMsg& other) const {return time>other.time;}
 	};
 	xr_vector<SDefNewsMsg> m_defferedMessages;
-	void UpdateDefferedMessages();	
-public:	
+	void UpdateDefferedMessages();
+public:
 	void			AddGameNews_deffered	 (GAME_NEWS_DATA& news_data, u32 delay);
 	virtual void	AddGameNews				 (GAME_NEWS_DATA& news_data);
 protected:
@@ -174,10 +175,10 @@ public:
 	virtual bool use_bolts		() const;
 
 	virtual void OnItemTake		(CInventoryItem *inventory_item);
-	
+
 	virtual void OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
 	virtual void OnItemBelt		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place);
-	
+
 	virtual void OnItemDrop		(CInventoryItem *inventory_item, bool just_before_destroy);
 	virtual void OnItemDropUpdate ();
 
@@ -197,9 +198,9 @@ public:
 	virtual float						GetMass				() ;
 	virtual float						Radius				() const;
 	virtual void						g_PerformDrop		();
-	
+
 	virtual	bool						use_default_throw_force	();
-	virtual	float						missile_throw_force		(); 
+	virtual	float						missile_throw_force		();
 
 	virtual bool						unlimited_ammo			();
 	virtual bool						infinite_fire();
@@ -207,6 +208,23 @@ public:
 	virtual ALife::_TIME_ID				TimePassedAfterDeath() const;
 
 	CPickUpManager* GetPickupManager() { return pPickup; }
+
+	float previous_electronics_problems_counter = 0.0f;
+	float current_electronics_problems_counter = 0.0f;
+	float target_electronics_problems_counter = 0.0f;
+	bool last_problems_update_was_decrease = false;
+
+	void ResetElectronicsProblems();
+	void ResetElectronicsProblems_Full();
+	const float PreviousElectronicsProblemsCnt() const;
+	bool ElectronicsProblemsImmediateApply();
+	bool ElectronicsProblemsInc();
+	const float TargetElectronicsProblemsCnt() const;
+	const float CurrentElectronicsProblemsCnt() const;
+	bool ElectronicsProblemsDec();
+	const bool IsElectronicsProblemsDecreasing() const;
+	void UpdateElectronicsProblemsCnt(u32 dt);
+
 public:
 
 	//свойства артефактов
@@ -218,10 +236,10 @@ public:
 
 protected:
 	//звук тяжелого дыхания
-	ref_sound			m_HeavyBreathSnd;
-	ref_sound			m_BloodSnd;
-	ref_sound			m_DangerSnd;
-
+	ref_sound			m_HeavyBreathSnd = {};
+	ref_sound			m_BloodSnd = {};
+	ref_sound			m_DangerSnd = {};
+	ref_sound			m_rainOnHelmetSnd = {};
 protected:
 	// Death
 	float					m_hit_slowmo;
@@ -260,6 +278,7 @@ private:
 public:
 	bool					m_bAllowDeathRemove;
 	float					m_fLegs_shift;
+	u32 _last_update_time;
 
 	void					SetZoomRndSeed			(s32 Seed = 0);
 	s32						GetZoomRndSeed			()	{ return m_ZoomRndSeed;	};

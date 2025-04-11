@@ -13,35 +13,69 @@
 
 void ImGui_Render2DWidget()
 {
-	static ImVec2 scrolling(0.0f, 0.0f);
+	static ImVec2 circlePos(100.0f, 100.0f);
+	static float circleRadius = 20.0f;
+	const float squareSize = 200.0f;
+	const float minRadius = 5.0f;
+	const float maxRadius = 50.0f;
+	const float gridStep = 8.0f;
 
-	// Using InvisibleButton() as a convenience 1) it will advance the layout cursor and 2) allows us to use IsItemHovered()/IsItemActive()
-	ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
-	ImVec2 canvas_sz = ImGui::GetContentRegionAvail();   // Resize canvas to what's available
-//	canvas_p0.x += canvas_sz.x * 0.5f;
-//	canvas_p0.y += canvas_sz.y * 0.5f;
-	canvas_sz.x = (canvas_sz.x < canvas_sz.y ? canvas_sz.x : canvas_sz.y) * 0.5f;
-	canvas_sz.y = canvas_sz.x;
+	ImGui::BeginChild("SquareArea", ImVec2(squareSize, squareSize), true,
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
+	{
+		const ImVec2 squareMin = ImGui::GetWindowPos();
+		const ImVec2 squareMax(squareMin.x + squareSize, squareMin.y + squareSize);
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-	ImVec2 reg = ImGui::GetContentRegionAvail();
+		const ImU32 gridColor = IM_COL32(100, 100, 100, 255); // Gray with 50% alpha
+		for (float x = 0; x <= squareSize; x += gridStep) {
+			ImVec2 start(squareMin.x + x, squareMin.y);
+			ImVec2 end(squareMin.x + x, squareMax.y);
+			drawList->AddLine(start, end, gridColor);
+		}
+		for (float y = 0; y <= squareSize; y += gridStep) {
+			ImVec2 start(squareMin.x, squareMin.y + y);
+			ImVec2 end(squareMax.x, squareMin.y + y);
+			drawList->AddLine(start, end, gridColor);
+		}
 
-//	canvas_p0.x += reg.x - canvas_sz.x;
-//	canvas_p0.y += reg.y - canvas_sz.y;
+		// Draw square border
+		drawList->AddRect(squareMin, squareMax, IM_COL32(255,255,255,100));
+		drawList->AddRectFilled(squareMin, squareMax, IM_COL32(255,255,255,255));
 
-	ImVec2 canvas_p1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y);
+		// Calculate circle position in screen space
+		const ImVec2 circleCenter(squareMin.x + circlePos.x, squareMin.y + circlePos.y);
 
-	// Draw border and background color
-	ImGuiIO& io = ImGui::GetIO();
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	draw_list->AddRectFilled(canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255));
-	draw_list->AddRect(canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255));
+		// Create invisible button over the circle area
+		ImGui::SetCursorScreenPos(ImVec2(circleCenter.x - circleRadius, circleCenter.y - circleRadius));
+		ImGui::InvisibleButton("##CircleDrag", ImVec2(circleRadius * 2, circleRadius * 2));
 
-	// This will catch our interactions
-	ImGui::InvisibleButton("canvas", canvas_sz, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
-	const bool is_hovered = ImGui::IsItemHovered(); // Hovered
-	const bool is_active = ImGui::IsItemActive();   // Held
-	const ImVec2 origin(canvas_p0.x + scrolling.x, canvas_p0.y + scrolling.y); // Lock scrolled origin
-	const ImVec2 mouse_pos_in_canvas(io.MousePos.x - origin.x, io.MousePos.y - origin.y);
+		// Handle dragging only when clicking inside the circle
+		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		{
+			ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+			circlePos.x = std::clamp(circlePos.x + mouseDelta.x,
+				circleRadius, squareSize - circleRadius);
+			circlePos.y = std::clamp(circlePos.y + mouseDelta.y,
+				circleRadius, squareSize - circleRadius);
+		}
+
+		// Handle mouse wheel for radius adjustment
+		if (ImGui::IsWindowHovered())
+		{
+			const float wheel = ImGui::GetIO().MouseWheel;
+			if (wheel != 0.0f)
+			{
+				circleRadius = std::clamp(circleRadius + wheel * 2.0f, minRadius, maxRadius);
+				circlePos.x = std::clamp(circlePos.x, circleRadius, squareSize - circleRadius);
+				circlePos.y = std::clamp(circlePos.y, circleRadius, squareSize - circleRadius);
+			}
+		}
+
+		// Draw the circle
+		drawList->AddCircle(circleCenter, circleRadius, IM_COL32(255, 0, 0, 200));
+	}
+	ImGui::EndChild();
 }
 
 
@@ -96,8 +130,6 @@ void RenderHUDAdjustManager()
 
 						ImGui::EndTable();
 					}
-
-
 
 
 
