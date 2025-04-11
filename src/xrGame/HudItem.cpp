@@ -711,7 +711,7 @@ bool CHudItem::TryPlayAnimIdle()
 			u32 state = pActor->GetMovementState(eReal);
 			if (state & ACTOR_DEFS::EMoveCommand::mcSprint)
 			{
-				if (!m_bSwitchSprint)
+				if (!m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_start"))
 				{
 					SwitchState(eSprintStart);
 					return true;
@@ -720,7 +720,7 @@ bool CHudItem::TryPlayAnimIdle()
 				PlayAnimIdleSprint();
 				return true;
 			}
-			else if (m_bSwitchSprint)
+			else if (m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_end"))
 			{
 				SwitchState(eSprintEnd);
 				return true;
