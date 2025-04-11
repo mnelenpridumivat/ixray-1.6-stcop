@@ -1437,7 +1437,7 @@ void CActor::UpdatePlayerView()
 					{
 						g_player_hud->detach_item(pHudItem);
 					}
-					else
+					else if (pHudItem->IsShowing())
 					{
 						g_player_hud->attach_item(pHudItem);
 					}
