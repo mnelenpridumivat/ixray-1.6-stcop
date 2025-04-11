@@ -1423,10 +1423,9 @@ void CActor::UpdatePlayerView()
 
 	setVisible(has_visible, has_shadow_only);
 
-	/*if (IsFocused())
+	if (IsFocused())
 	{
-		BOOL bHudView = HUDview();
-		if (bHudView)
+		if (!m_holder || m_holder->HUDView() && m_holder->allowWeapon())
 		{
 			CInventoryItem* pInvItem = inventory().ActiveItem();
 			if (pInvItem)
@@ -1466,7 +1465,7 @@ void CActor::UpdatePlayerView()
 		{
 			g_player_hud->detach_all_items();
 		}
-	}*/
+	}
 
 	float dt = Device.fTimeDelta;
 
