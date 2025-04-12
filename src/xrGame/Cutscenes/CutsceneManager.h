@@ -1,5 +1,6 @@
 #pragma once
 
+struct SCutsceneObjectElement;
 class CCutsceneItem;
 class IKinematicsAnimated;
 
@@ -8,8 +9,11 @@ class CCutsceneManager {
 
 #ifndef MASTER_GOLD
 	bool Adjust = false;
+	bool IsLocation = true;
 	shared_str AdjustCutsceneSection = nullptr;
 	Fvector AdjustDeviation;
+	Fvector AdjustRotation;
+	SCutsceneObjectElement* CurrentPosChangeElem;
 #endif
 
 	CCutsceneManager(){}
@@ -31,5 +35,6 @@ public:
 	void SaveAdjust();
 	void ResetAdjust();
 	Fvector GetAdjustDelta();
+	void DrawData();
 #endif
 };

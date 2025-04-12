@@ -863,10 +863,10 @@ bool CExportSkeleton::ExportGeometry(IWriter& F, u8 infl)
 		}
 
 		SkelVertVec& lst = SplitMeshData.getV_Verts();
-		for (SkelVertIt sv_it = lst.begin(); sv_it != lst.end(); sv_it++)
+		for (auto& elem : lst)
 		{
-			bone_points[sv_it->bones[0].id].push_back(sv_it->offs);
-			bones[sv_it->bones[0].id]->_RITransform().transform_tiny(bone_points[sv_it->bones[0].id].back());
+			bone_points[elem.bones[0].id].push_back(elem.offs);
+			bones[elem.bones[0].id]->_RITransform().transform_tiny(bone_points[elem.bones[0].id].back());
 		}
 
 		pb->Inc();

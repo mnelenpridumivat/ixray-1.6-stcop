@@ -8,6 +8,7 @@
 
 SCutsceneObjectElement::SCutsceneObjectElement(LPCSTR ObjectName)
 {
+    ObjName = ObjectName;
     HudModel = ::Render->model_Create(ObjectName);
     R_ASSERT3(HudModel, "Unable to find object", ObjectName);
     HudModelKinematics = smart_cast<IKinematics*>(HudModel);
@@ -38,11 +39,14 @@ void SCutsceneObjectElement::SetParent(SCutsceneObjectElement* Parent, u16 BoneI
 {
     parent = Parent;
     AttachBoneID = BoneID;
+#ifndef MASTER_GOLD
+    parent->children.push_back(this);
+#endif
 }
 
 void SCutsceneObjectElement::Activate()
 {
-    R_ASSERT2(HudModelKinematicsAnimated, "You need to create object first before set bones visibility");
+    R_ASSERT2(HudModelKinematicsAnimated, "You need to create object first before activate!");
     MotionID M2 = HudModelKinematicsAnimated->ID_Cycle_Safe(AnimName.c_str());
     if (bDebug) {
         Msg("playing item animation [%s]", AnimName.c_str());
@@ -58,13 +62,25 @@ void SCutsceneObjectElement::Activate()
         m_pBlends.push_back(B);
 #endif
     }
+    if (parent)
+    {
+        start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
+    }
 }
 
 void SCutsceneObjectElement::Update(Fvector Deviation)
 {
     Fmatrix m_transform;
     m_transform.identity();
-    m_transform.c = Deviation;
+    if (!parent)
+    {
+        m_transform.c = Deviation;
+    } else
+    {
+        auto trans = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
+        trans.c.add(start_parent_transform.c);
+        m_transform = trans;
+    }
     HudModelKinematics->CalculateBones(true);
     ::Render->set_Transform(&m_transform);
     ::Render->add_Visual(HudModel, true);
@@ -102,6 +118,29 @@ void SCutsceneObjectElement::BackwardAnimation()
         }
     }
 }
+
+SCutsceneObjectElement* SCutsceneObjectElement::DrawChildren(xr_set<SCutsceneObjectElement*>& Processed)
+{
+    SCutsceneObjectElement* Selected = nullptr;
+    if (ImGui::TreeNodeEx(ObjName.c_str()))
+    {
+        Selected = this;
+        for (auto& elem : children)
+        {
+            if (!Processed.contains(elem)){
+                Processed.insert(elem);
+                auto NewSelected = elem->DrawChildren(Processed);
+                if (NewSelected)
+                {
+                    VERIFY(!Selected);
+                    Selected = NewSelected;
+                }
+            }
+        }
+        ImGui::TreePop();
+    }
+    return Selected;
+}
 #endif
 
 void SCutsceneObjectElement::SetAnimToPlay(LPCSTR AnimName)
@@ -112,6 +151,18 @@ void SCutsceneObjectElement::SetAnimToPlay(LPCSTR AnimName)
 void SCutsceneObjectElement::SetOnFinishFunc(LPCSTR Name)
 {
     OnFinishFuncName = Name;
+}
+
+u16 SCutsceneObjectElement::GetBoneID(LPCSTR BoneName)
+{
+    R_ASSERT2(HudModelKinematics, "You need to create object first before get bone id!");
+    return HudModelKinematics->LL_BoneID(BoneName);
+}
+
+void SCutsceneObjectElement::SetBonesWeapon(u16 BoneIDR, u16 BoneIDL)
+{
+    BoneL = BoneIDL;
+    BoneR = BoneIDR;
 }
 
 void SCutsceneObjectElement::OnFinishFunc(CBlend* P)
@@ -206,6 +257,26 @@ void CCutsceneItem::BackwardAnimation()
     {
         elem->BackwardAnimation();
     }
+}
+
+SCutsceneObjectElement* CCutsceneItem::Draw()
+{
+	xr_set<SCutsceneObjectElement*> Processed;
+    SCutsceneObjectElement* Selected = nullptr;
+    for (auto& elem : CutsceneElements)
+    {
+        if (!Processed.contains(elem))
+        {
+            Processed.insert(elem);
+            auto NewSelected = elem->DrawChildren(Processed);
+            if (NewSelected)
+            {
+                VERIFY(!Selected);
+                Selected = NewSelected;
+            }
+        }
+    }
+    return Selected;
 }
 #endif
 

@@ -1649,6 +1649,8 @@ void CLevel::script_register(lua_State* L)
 			.def("set_parent", &SCutsceneObjectElement::SetParent)
 			.def("set_anim_to_play", &SCutsceneObjectElement::SetAnimToPlay)
 			.def("set_on_finish_func", &SCutsceneObjectElement::SetOnFinishFunc)
+			.def("get_bone_id", &SCutsceneObjectElement::GetBoneID)
+			.def("set_bones_weapon", &SCutsceneObjectElement::SetBonesWeapon)
 			,
 			class_<CCutsceneItem>("CCutsceneItem")
 			.def("create_object_element", &CCutsceneItem::CreateObjectElement)

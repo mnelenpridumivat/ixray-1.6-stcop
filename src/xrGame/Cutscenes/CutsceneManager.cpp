@@ -49,6 +49,7 @@ void CCutsceneManager::Update()
 			F->OutSetI(0.f, -0.8f);
 			F->SetColor(0xffffffff);
 			F->OutNext("Adjust cutscene [%s] deviation", AdjustCutsceneSection.c_str());
+			F->OutNext("Press 1 to change position, press 2 to change rotation");
 			F->OutNext("Press X, Y or Z to change value on corresponding axis");
 			F->OutNext("Press LSHIFT to move in opposite direction");
 			F->OutNext("Press LALT to move faster");
@@ -56,6 +57,16 @@ void CCutsceneManager::Update()
 			F->OutNext("Press B to play cutscene backward");
 			F->OutNext("Press S to stop cutscene");
 			F->OutNext("Current pivot pos [%f, %f, %f]", AdjustDeviation.x, AdjustDeviation.y, AdjustDeviation.z);
+			F->OutNext("Current pivot rot [%f, %f, %f]", AdjustRotation.x, AdjustRotation.y, AdjustRotation.z);
+		}
+		{
+			if (pInput->iGetAsyncKeyState(SDL_SCANCODE_1))
+			{
+				IsLocation = true;
+			} else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_2))
+			{
+				IsLocation = false;
+			}
 		}
 		if (PrevCutsceneSection != AdjustCutsceneSection) {
 			if (m_pCurrentCutscene) {
@@ -64,17 +75,45 @@ void CCutsceneManager::Update()
 			if (pSettings->section_exist(AdjustCutsceneSection)) {
 				PrevCutsceneSection = AdjustCutsceneSection;
 				PlayCutscene(PrevCutsceneSection.c_str());
-				AdjustDeviation = m_pCurrentCutscene->GetPivotObject()->Position();
+				if (m_pCurrentCutscene)
+				{
+					AdjustDeviation = m_pCurrentCutscene->GetPivotObject()->Position();
+					m_pCurrentCutscene->GetPivotObject()->XFORM().getHPB(AdjustRotation);
+				} else
+				{
+					AdjustDeviation = Fvector(0,0,0);
+					AdjustRotation = Fvector(0,0,0);
+				}
+			}
+			static SCutsceneObjectElement* PrevCurrentPosChangeElem = nullptr;
+			if (PrevCurrentPosChangeElem != CurrentPosChangeElem)
+			{
+				if (CurrentPosChangeElem)
+				{
+					AdjustDeviation = CurrentPosChangeElem->start_parent_transform.c;
+					CurrentPosChangeElem->start_parent_transform.getHPB(AdjustRotation);
+				} else
+				{
+					AdjustDeviation = Fvector(0,0,0);
+					AdjustRotation = Fvector(0,0,0);
+				}
 			}
 		}
 		if (m_pCurrentCutscene) {
-			AdjustDeviation.add(GetAdjustDelta());
+			if (IsLocation)
+			{
+				AdjustDeviation.add(GetAdjustDelta());
+			} else
+			{
+				AdjustRotation.add(GetAdjustDelta());
+			}
 		}
 	}
 	else if (PrevAjust) {
 		PrevCutsceneSection = "";
 		if (m_pCurrentCutscene) {
 			xr_delete(m_pCurrentCutscene);
+			CurrentPosChangeElem = nullptr;
 		}
 	}
 	PrevAjust = Adjust;
@@ -86,7 +125,19 @@ void CCutsceneManager::Update()
 		m_transform.identity();
 #ifndef MASTER_GOLD
 		if (Adjust) {
-			m_transform.c = AdjustDeviation;
+			if (CurrentPosChangeElem)
+			{
+				CurrentPosChangeElem->start_parent_transform.setXYZ(AdjustRotation);
+				CurrentPosChangeElem->start_parent_transform.c = AdjustDeviation;
+				if(auto Pivot = m_pCurrentCutscene->GetPivotObject();Pivot)
+				{
+					m_transform = Pivot->XFORM();
+				}
+			} else
+			{
+				m_transform.c = AdjustDeviation;
+				m_transform.setXYZ(AdjustRotation);
+			}
 		}
 		else {
 			if(auto Pivot = m_pCurrentCutscene->GetPivotObject();Pivot)
@@ -162,5 +213,13 @@ Fvector CCutsceneManager::GetAdjustDelta()
 		Delta.z += DeltaSign * Step;
 	}
 	return Delta;
+}
+
+void CCutsceneManager::DrawData()
+{
+	if (m_pCurrentCutscene)
+	{
+		CurrentPosChangeElem = m_pCurrentCutscene->Draw();
+	}
 }
 #endif

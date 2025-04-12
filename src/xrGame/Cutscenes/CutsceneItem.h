@@ -11,6 +11,8 @@ struct SCutsceneObjectElement
     void SetParent(SCutsceneObjectElement* Parent, u16 BoneID);
     void SetAnimToPlay(LPCSTR AnimName);
     void SetOnFinishFunc(LPCSTR Name);
+    u16 GetBoneID(LPCSTR BoneName);
+    void SetBonesWeapon(u16 BoneIDR, u16 BoneIDL);
 
     void Activate();
     void Update(Fvector Deviation);
@@ -19,11 +21,14 @@ struct SCutsceneObjectElement
     void StopAnimation();
     void ForwardAnimation();
     void BackwardAnimation();
+    SCutsceneObjectElement* DrawChildren(xr_set<SCutsceneObjectElement*>& Processed);
 #endif
     
 private:
 #ifndef MASTER_GOLD
     xr_vector<CBlend*> m_pBlends = {};
+    xr_vector<SCutsceneObjectElement*> children = {};
+    shared_str ObjName;
 #endif
     IKinematicsAnimated* HudModelKinematicsAnimated = nullptr;
     IKinematics* HudModelKinematics = nullptr;
@@ -31,6 +36,12 @@ private:
     
     SCutsceneObjectElement* parent = nullptr;
     u16 AttachBoneID = u16(-1);
+    u16 BoneR = u16(-1), BoneL = u16(-1);
+#ifndef MASTER_GOLD
+public:
+    Fmatrix start_parent_transform;
+#endif
+    bool start_parent_transform_set = false;
 
     shared_str AnimName;
     shared_str OnFinishFuncName = "nil";
@@ -58,5 +69,6 @@ public:
     void StopAnimation();
     void ForwardAnimation();
     void BackwardAnimation();
+    SCutsceneObjectElement* Draw();
 #endif
 };
