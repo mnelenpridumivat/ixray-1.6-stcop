@@ -53,15 +53,23 @@ void SCutsceneObjectElement::Activate()
     }
 	R_ASSERT4(M2.valid(), "model has no motion", HudModel->getDebugName().c_str(), AnimName.c_str());
     u16 pc = HudModelKinematicsAnimated->partitions().count();
+    CBlend* FirstBlend = nullptr;
     for (u16 pid = 0; pid < pc; ++pid)
     {
         CBlend* B = HudModelKinematicsAnimated->PlayCycle(pid, M2, true);
         R_ASSERT(B);
+        if (!FirstBlend)
+        {
+            FirstBlend = B;
+        }
         B->update_callback = false;
+        B->stop_at_end = true;
 #ifndef MASTER_GOLD
         m_pBlends.push_back(B);
 #endif
     }
+    VERIFY(FirstBlend);
+    FirstBlend->trigger_notify = true;
     if (parent)
     {
         start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
