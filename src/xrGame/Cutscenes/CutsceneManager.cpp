@@ -119,6 +119,12 @@ void CCutsceneManager::Update()
 	PrevAjust = Adjust;
 #endif
 	if (m_pCurrentCutscene) {
+		if (m_bToDelete)
+		{
+			m_bToDelete = false;
+			xr_delete(m_pCurrentCutscene);
+			return;
+		}
 		bool bHud = ::Render->get_HUD();
 		::Render->set_HUD(false);
 		Fmatrix	m_transform;
@@ -170,6 +176,11 @@ void CCutsceneManager::Update()
 
 		::Render->set_HUD(bHud);
 	}
+}
+
+void CCutsceneManager::FinishCurrentCutscene()
+{
+	GetInstance().m_bToDelete = true;
 }
 
 #ifndef MASTER_GOLD

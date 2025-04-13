@@ -6,6 +6,7 @@ class IKinematicsAnimated;
 
 class CCutsceneManager {
 	CCutsceneItem* m_pCurrentCutscene = nullptr;
+	bool m_bToDelete = false;
 
 #ifndef MASTER_GOLD
 	bool Adjust = false;
@@ -25,9 +26,11 @@ public:
 
 	static CCutsceneManager& GetInstance();
 	static void PlayCutscene(LPCSTR section);
+	static void FinishCurrentCutscene();
+	
 
 	void Update();
-
+	
 #ifndef MASTER_GOLD
 	inline void SetAdjust(bool Adjust) { this->Adjust = Adjust; }
 	inline bool GetAdjust() { return Adjust; }

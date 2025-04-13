@@ -70,6 +70,8 @@ void SCutsceneObjectElement::Activate()
     }
     VERIFY(FirstBlend);
     FirstBlend->trigger_notify = true;
+    FirstBlend->Callback = &SCutsceneObjectElement::OnFinishFunc;
+    FirstBlend->CallbackParam = this;
     if (parent)
     {
         start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
@@ -178,12 +180,19 @@ void SCutsceneObjectElement::OnFinishFunc(CBlend* P)
     VERIFY(P);
     auto Self = (SCutsceneObjectElement*)P->CallbackParam;
     VERIFY(Self);
-    
-    luabind::functor<void> funct;
-    if (ai().script_engine().functor(pSettings->r_string(Self->OnFinishFuncName.c_str(), "construct_func"), funct))
+
+    if (Self->OnFinishFuncName.size())
     {
-        funct(Self);
+        luabind::functor<void> funct;
+        if (ai().script_engine().functor(Self->OnFinishFuncName.c_str(), funct))
+        {
+            funct(Self);
+        }
     }
+
+    //::Render->model_Delete(Self->HudModel);
+    //Self->HudModelKinematics = nullptr;
+    //Self->HudModelKinematicsAnimated = nullptr;
 }
 
 CCutsceneItem::~CCutsceneItem()
@@ -203,7 +212,7 @@ void CCutsceneItem::Construct(LPCSTR Section)
         funct(this);
     } else
     {
-        R_ASSERT2(false, "Cutscene construct failed", Section);
+        R_ASSERT3(false, "Cutscene construct failed", Section);
     }
     
 }

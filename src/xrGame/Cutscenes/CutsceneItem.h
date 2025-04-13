@@ -44,7 +44,7 @@ public:
     bool start_parent_transform_set = false;
 
     shared_str AnimName;
-    shared_str OnFinishFuncName = "nil";
+    shared_str OnFinishFuncName = "";
 
     static void OnFinishFunc(CBlend* P);
 };

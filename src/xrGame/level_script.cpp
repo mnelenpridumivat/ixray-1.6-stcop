@@ -1638,7 +1638,8 @@ void CLevel::script_register(lua_State* L)
 	
 	module(L, "animslot")
 		[
-			def("play_cutscene", &CCutsceneManager::PlayCutscene)
+			def("play_cutscene", &CCutsceneManager::PlayCutscene),
+			def("stop_current_cutscene", &CCutsceneManager::FinishCurrentCutscene)
 		];
 
 	module(L)
