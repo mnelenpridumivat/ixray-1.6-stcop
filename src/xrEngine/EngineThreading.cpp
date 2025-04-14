@@ -6,6 +6,7 @@
 #include "Rain.h"
 
 #include "../xrCore/discord/discord.h"
+#include "Save/SaveManager.h"
 
 void XRay::Engine::PreRenderThread()
 {
@@ -60,6 +61,14 @@ void XRay::Engine::GameThread()
 		PROF_EVENT("SoundEvent_Dispatch")
 			if (g_pGameLevel && g_pGameLevel->bReady)
 				g_pGameLevel->SoundEvent_Dispatch();
+	}
+
+	{
+		PROF_EVENT("Save_writing")
+		if(CSaveManager::GetInstance().NeedSave())
+		{
+			CSaveManager::GetInstance().WriteSavedDataImpl();
+		}
 	}
 
 	{

@@ -38,6 +38,14 @@ CALifeStorageManager::~CALifeStorageManager()
 
 void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
 {
+	PROF_EVENT("CALifeStorageManager::save")
+
+	if(CSaveManager::GetInstance().NeedSave())
+	{
+		Log("Saving not processed because there is already a saving operation!");
+		return;
+	}
+	
 	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path;
 
 	string_path					save_name;
@@ -87,7 +95,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
 		registry().Serialize(*SaveObj);
 	}
 	CSaveManager::GetInstance().WriteSavedData(temp);
-
+		
 	/*u32							source_count;
 	u32							dest_count;
 	void						*dest_data;

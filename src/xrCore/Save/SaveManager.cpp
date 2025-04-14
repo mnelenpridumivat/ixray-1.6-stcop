@@ -63,8 +63,14 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 
 void CSaveManager::WriteSavedData(const string_path& to_file)
 {
+	std::copy(to_file, to_file + strlen(to_file) - 1, SavePath);
+	bNeedSave = true;
+}
+
+void CSaveManager::WriteSavedDataImpl()
+{
 	PROF_EVENT("CSaveManager::WriteSavedData")
-	SaveWriter = FS.w_open(to_file);
+	SaveWriter = FS.w_open(SavePath);
 	Buffers.Init();
 	StringsHashesMap = xr_make_unique<xr_map<u32, xr_vector<shared_str>>>();
 	BoolQueue = xr_make_unique<xr_queue<bool>>();
@@ -83,6 +89,7 @@ void CSaveManager::WriteSavedData(const string_path& to_file)
 	BoolQueue.reset();
 	Buffers.Clear();
 	FS.w_close(SaveWriter);
+	bNeedSave = false;
 }
 
 void CSaveManager::ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer)

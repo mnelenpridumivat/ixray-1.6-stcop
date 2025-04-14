@@ -54,6 +54,9 @@ class XRCORE_API CSaveManager
 	xr_unique_ptr<xr_queue<bool>> BoolQueue;
 	u64 BoolsNum = 0;
 
+	xr_atomic_bool bNeedSave = false;
+	string_path SavePath;
+
 public:
 
 	u64 RegisterHandle(ISaveChunkHandleInterface* handle);
@@ -126,6 +129,9 @@ public:
 	CSaveObjectSave* BeginSave();
 	CSaveObjectLoad* BeginLoad(IReader* stream);
 	void WriteSavedData(const string_path& to_file);
+
+	bool NeedSave(){return bNeedSave;}
+	void WriteSavedDataImpl();
 
 	void ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer);
 	void ConditionalWriteBool(bool Value, CMemoryBuffer& buffer);
