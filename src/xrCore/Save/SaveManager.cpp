@@ -63,6 +63,7 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 
 void CSaveManager::WriteSavedData(const string_path& to_file)
 {
+	PROF_EVENT("CSaveManager::WriteSavedData")
 	SaveWriter = FS.w_open(to_file);
 	Buffers.Init();
 	StringsHashesMap = xr_make_unique<xr_map<u32, xr_vector<shared_str>>>();
@@ -184,6 +185,7 @@ void CSaveManager::WriteGameInfo(const SGameInfoFast& data)
 
 void CSaveManager::WriteHeader()
 {
+	PROF_EVENT("CSaveManager::WriteHeader")
 	Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
 	Buffers.BufferHeader->Write(GameInfo.m_actor_health);
 	Buffers.BufferHeader->Write(GameInfo.m_game_time);
@@ -195,6 +197,7 @@ void CSaveManager::WriteHeader()
 
 void CSaveManager::WriteStrings()
 {
+	PROF_EVENT("CSaveManager::WriteStrings")
 	Buffers.BufferStrings->Write(ESaveVariableType::t_chunk);
 	Buffers.BufferStrings->Write(StringsHashesMap->size());
 	Buffers.BufferStrings->Write(ESaveVariableType::t_array);
@@ -211,6 +214,7 @@ void CSaveManager::WriteStrings()
 
 void CSaveManager::WriteBools()
 {
+	PROF_EVENT("CSaveManager::WriteBools")
 	Buffers.BufferBools->Write(ESaveVariableType::t_chunk);
 	Buffers.BufferBools->Write(BoolsNum);
 	Flags8 Flags;
@@ -234,6 +238,7 @@ void CSaveManager::WriteBools()
 
 void CSaveManager::WriteData()
 {
+	PROF_EVENT("CSaveManager::WriteData")
 	Buffers.BufferGeneral->Write(SaveWriter);
 }
 
@@ -299,6 +304,7 @@ void CSaveManager::ReadBools(IReader* stream)
 
 void CSaveManager::CompileData()
 {
+	PROF_EVENT("CSaveManager::CompileData")
 	Buffers.BufferGeneral->Write(ESaveVariableType::t_chunk);
 	SaveData->Write(Buffers.BufferGeneral);
 }

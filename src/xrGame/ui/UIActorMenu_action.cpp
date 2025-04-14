@@ -19,6 +19,7 @@
 
 #include "../../xrUI/UICursor.h"
 #include "UICellItem.h"
+#include "UICellItemFactory.h"
 #include "UICharacterInfo.h"
 #include "UIItemInfo.h"
 #include "UIDragDropListEx.h"

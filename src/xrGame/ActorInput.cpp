@@ -34,6 +34,7 @@
 #include "Weapon.h"
 #include "ai/monsters/basemonster/base_monster.h"
 #include "HUDAnimItem.h"
+#include "WeaponMagazined.h"
 
 extern u32 hud_adj_mode;
 

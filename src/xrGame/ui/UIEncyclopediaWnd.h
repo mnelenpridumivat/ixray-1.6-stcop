@@ -12,6 +12,8 @@
 
 #include "../encyclopedia_article_defs.h"
 
+class CUITabControl;
+class CUIListWnd;
 class CEncyclopediaArticle;
 class CUIFrameWindow;
 class CUIFrameLineWnd;
