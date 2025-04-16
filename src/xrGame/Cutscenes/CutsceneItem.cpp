@@ -189,10 +189,6 @@ void SCutsceneObjectElement::OnFinishFunc(CBlend* P)
             funct(Self);
         }
     }
-
-    //::Render->model_Delete(Self->HudModel);
-    //Self->HudModelKinematics = nullptr;
-    //Self->HudModelKinematicsAnimated = nullptr;
 }
 
 CCutsceneItem::~CCutsceneItem()
