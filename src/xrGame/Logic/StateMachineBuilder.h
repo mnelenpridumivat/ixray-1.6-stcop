@@ -1,26 +1,29 @@
 #pragma once
 
-class CStateMachine;
-class CStateBuilder;
-class CTemplateStateBuilder;
-class CActualStateBuilder;
-
-class CStateMachineBuilder
+namespace Logic
 {
+	class CStateMachine;
+	class CStateBuilder;
+	class CTemplateStateBuilder;
+	class CActualStateBuilder;
+	class CState;
 
-	xr_unique_ptr<CTemplateStateBuilder> TemplateStateBuilder;
-	xr_unique_ptr<CActualStateBuilder> ActualStateBuilder;
+	class CStateMachineBuilder
+	{
 
-	xr_hash_map<shared_str, xr_unique_ptr<CState>> ConstructedStates;
-	xr_deque<shared_str> StatesToCreate;
+		xr_unique_ptr<CTemplateStateBuilder> TemplateStateBuilder;
+		xr_unique_ptr<CActualStateBuilder> ActualStateBuilder;
 
-	CStateBuilder* GetStateBuilderBySectionName(shared_str SectionName);
+		xr_hash_map<shared_str, xr_unique_ptr<CState>> ConstructedStates;
+		xr_deque<shared_str> StatesToCreate;
 
-public:
-	CStateMachineBuilder();
+		CStateBuilder* GetStateBuilderBySectionName(shared_str SectionName);
 
-	void PreprocessFile(CInifile* Ltx);
-	CStateMachine* CreateStateMachine(CInifile* Ltx, LPCSTR StartState);
+	public:
+		CStateMachineBuilder();
 
-};
+		void PreprocessFile(CInifile* Ltx);
+		CStateMachine* CreateStateMachine(CInifile* Ltx, LPCSTR StartState);
 
+	};
+}

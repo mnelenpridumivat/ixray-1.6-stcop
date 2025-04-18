@@ -1,22 +1,25 @@
 #pragma once
 
-class CTransition;
-class CActualStateBuilder;
-class CTemplateStateBuilder;
-
-class CState
+namespace Logic
 {
-	friend class CActualStateBuilder;
-	friend class CTemplateStateBuilder;
+	class CTransition;
+	class CActualStateBuilder;
+	class CTemplateStateBuilder;
 
-	shared_str StateName;
-	xr_hash_map<shared_str, xr_variant<shared_str, double>> Mappings;
-	xr_vector<xr_unique_ptr<CTransition>> Transitions;
+	class CState
+	{
+		friend class CActualStateBuilder;
+		friend class CTemplateStateBuilder;
 
-public:
+		shared_str StateName;
+		xr_hash_map<shared_str, xr_variant<shared_str, double>> Mappings;
+		xr_vector<xr_unique_ptr<CTransition>> Transitions;
 
-	virtual void OnStateActivate();
-	virtual void OnStateDeactivate();
+	public:
 
-};
+		virtual void OnStateActivate();
+		virtual void OnStateDeactivate();
+
+	};
+}
 

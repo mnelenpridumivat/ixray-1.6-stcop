@@ -3,6 +3,8 @@
 #include "TemplateStateBuilder.h"
 #include "ActualStateBuilder.h"
 
+using namespace Logic;
+
 CStateBuilder* CStateMachineBuilder::GetStateBuilderBySectionName(shared_str SectionName)
 {
     return CTemplateStateBuilder::IsTemplateSection(SectionName.c_str()) ? (CStateBuilder*)(TemplateStateBuilder.get()) : ActualStateBuilder.get();

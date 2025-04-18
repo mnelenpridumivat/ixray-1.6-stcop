@@ -1,6 +1,8 @@
 #include "stdafx.h"
-#include "Transition.h"
+#include "ComplexTransition.h"
 #include "Condition.h"
+
+using namespace Logic;
 
 void CTransition::OnTransitionActivate()
 {
@@ -23,4 +25,20 @@ bool CTransition::CheckConditions()
 		Result = Result && elem->GetIsSucced();
 	}
 	return Result;
+}
+
+CTransition* CTransition::Create()
+{
+	return new CTransition();
+}
+
+void CTransition::SetNextState(shared_str nextState)
+{
+	VERIFY(NextState.index() != 0);
+	NextState = nextState;
+}
+
+void CTransition::SetNextState(CState* nextState)
+{
+	NextState = nextState;
 }

@@ -1,4 +1,4 @@
 #include "stdafx.h"
-#include "StateMachine.h"
+#include "InfoCondition.h"
 
 using namespace Logic;

@@ -5,17 +5,21 @@
 
 class CInifile;
 
-class Template {
+namespace Logic
+{
 
-	struct Param {
-		shared_str Key;
-		xr_vector<std::variant<xr_string, size_t>> Value;
+	class Template {
+
+		struct Param {
+			shared_str Key;
+			xr_vector<std::variant<xr_string, size_t>> Value;
+		};
+
+		xr_vector<shared_str> TemplateParams;
+		xr_vector<Param> Params;
+
+	public:
+		Template(CInifile::Sect* Ltx);
+
 	};
-
-	xr_vector<shared_str> TemplateParams;
-	xr_vector<Param> Params;
-
-public:
-	Template(CInifile::Sect* Ltx);
-
-};
+}

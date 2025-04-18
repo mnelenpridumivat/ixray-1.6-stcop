@@ -2,6 +2,8 @@
 #include "TemplateSection.h"
 #include <regex>
 
+using namespace Logic;
+
 Template::Template(CInifile::Sect* Sect)
 {
     {

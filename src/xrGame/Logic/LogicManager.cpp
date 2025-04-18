@@ -1,8 +1,10 @@
+#include "stdafx.h"
 #include "LogicManager.h"
 
 #include <discord_gamesdk/cpp/types.h>
 
 #include "actor_memory.h"
+#include "alife_simulator.h"
 #include "alife_time_manager.h"
 #include "visual_memory_manager.h"
 

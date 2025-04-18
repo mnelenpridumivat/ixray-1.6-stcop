@@ -1,6 +1,9 @@
 #pragma once
 
-class CStateMachineManager
+namespace Logic
 {
-};
+    class CStateMachineManager
+    {
+    };
+}
 

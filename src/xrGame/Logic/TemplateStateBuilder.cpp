@@ -3,6 +3,8 @@
 #include "TemplateSection.h"
 #include <regex>
 
+using namespace Logic;
+
 bool CTemplateStateBuilder::IsTemplateSection(LPCSTR SectionName)
 {
 	static std::regex Template(R"((\w+|\w+@\w+)<(\w|:)+>)");

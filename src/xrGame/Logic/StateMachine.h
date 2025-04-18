@@ -1,12 +1,15 @@
 #pragma once
 
-class CState;
-
-class CStateMachine
+namespace Logic
 {
-private:
+	class CState;
 
-	xr_hash_map<shared_str, xr_unique_ptr<CState>> States;
+	class CStateMachine
+	{
+	private:
 
-};
+		xr_hash_map<shared_str, xr_unique_ptr<CState>> States;
+
+	};
+}
 
