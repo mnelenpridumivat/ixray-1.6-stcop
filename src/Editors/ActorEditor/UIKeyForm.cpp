@@ -182,23 +182,23 @@ void UIKeyForm::Draw()
 
 				shared_str ToRemove = "";
 				int ToRemove2 = -1;
-				for (auto& elem : NotifyData.NotifyTracks) {
+				for (auto& Track : NotifyData.NotifyTracks) {
 					ImGui::PushID(id++);
-					bool NotifyBoneOpened = ImGui::TreeNode(elem.first.c_str());
+					bool NotifyBoneOpened = ImGui::TreeNode(Track.first.c_str());
 					ImGui::SameLine(146);
-					DrawNotify(elem);
+					DrawNotify(Track);
 					ImGui::PlotHistogram("##animnotifytrack", m_TempForPlotHistogram.data(), m_TempForPlotHistogram.size(), 0, NULL, 0.0f, 1.0f, size);
 					if (NotifyBoneOpened) {
 						if (ImGui::Button("Add")) {
-							elem.second.push_back({});
+							Track.second.push_back({});
 							m_currentNotify = nullptr;
 						}
 						ImGui::SameLine(146);
 						if (ImGui::Button("Remove Bone")) {
-							ToRemove = elem.first;
+							ToRemove = Track.first;
 							m_currentNotify = nullptr;
 						}
-						for (int i = 0; i < elem.second.size(); ++i) {
+						for (int i = 0; i < Track.second.size(); ++i) {
 							ImGui::PushID(id++);
 							ImGui::Text(std::to_string(i).c_str());
 							ImGui::SameLine(116);
@@ -206,7 +206,7 @@ void UIKeyForm::Draw()
 								ToRemove2 = i;
 							}
 							ImGui::SameLine(146);
-							DrawNotify(elem.second[i]);
+							DrawNotify(Track.second[i]);
 							ImGui::PlotHistogram("##animnotifytrackkeys", m_TempForPlotHistogram.data(), m_TempForPlotHistogram.size(), 0, NULL, 0.0f, 1.0f, size);
 							ImVec2 ItemSize = ImGui::GetItemRectSize();
 							if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
@@ -225,7 +225,7 @@ void UIKeyForm::Draw()
 								float TimeOffsetA = detail::RoundToTwoDecimals(LocalPosA * b);
 								float TimeOffsetB = detail::RoundToTwoDecimals(LocalPosB * b);
 
-								auto& data = elem.second[i].Notifies;
+								auto& data = Track.second[i].Notifies;
 
 								m_currentNotify = nullptr;
 								for (auto& elem : data) {
@@ -251,18 +251,16 @@ void UIKeyForm::Draw()
 								float TimeOffset = detail::RoundToTwoDecimals(LocalPos * b);
 								float Step = detail::RoundToTwoDecimals(motion_length / 100);
 
-								auto& data = elem.second[i].Notifies;
+								auto& data = Track.second[i].Notifies;
 
 								float ToErase;
 
 								for (auto [Time, _] : data)
 								{
-									for (float StartKey = TimeOffset - Step; StartKey < (TimeOffset + Step * 2); StartKey += Step)
+									if (Time > TimeOffset - Step && Time < TimeOffset + Step)
 									{
-										if (detail::compareFloat(Time, StartKey))
-										{
-											ToErase = Time;
-										}
+										ToErase = Time;
+										break;
 									}
 								}
 								data.erase(ToErase);
@@ -274,7 +272,7 @@ void UIKeyForm::Draw()
 								float LocalPosB = m_Position + NotifyWidth / ItemSize.x;
 								float TimeOffsetA = detail::RoundToTwoDecimals(LocalPosA);
 								float TimeOffsetB = detail::RoundToTwoDecimals(LocalPosB);
-								auto& data = elem.second[i].Notifies;
+								auto& data = Track.second[i].Notifies;
 								m_currentNotify = nullptr;
 								float ToRemoveTime = -1;
 								for (auto& elem : data) {
