@@ -42,10 +42,10 @@ public:
 	struct NotifyKeyframes
 	{
 		xr_vector<NotifyKeyframeData> keyframes;
+		s64 current_notify_index = 0;
 	};
 	
 	xr_hash_map<u16, NotifyKeyframes> notifies = {}; // per bone notifies
-	size_t current_notify_index = 0;
 private:
 	ECurvature		blend = ECurvature::eFREE_SLOT;
 public:
