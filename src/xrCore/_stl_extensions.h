@@ -71,6 +71,9 @@ using xr_vector = std::vector<T, allocator>;
 template <typename K, typename V>
 using xr_pair = std::pair<K, V>;
 
+template<typename... Args>
+using xr_tuple = std::tuple<Args...>;
+
 template <typename T>
 void clear_and_reserve(xr_vector<T> &vector_object) {
     if (vector_object.capacity() <= (vector_object.size() + vector_object.size() / 4)) {

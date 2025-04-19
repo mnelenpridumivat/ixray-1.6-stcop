@@ -349,17 +349,25 @@ CBlend*	CKinematicsAnimated::LL_PlayCycle(u16 part, MotionID motion_ID, BOOL  bM
 	IBlendSetup(*B, part,channel, motion_ID, bMixing, blendAccrue, blendFalloff, Speed, noloop, Callback, CallbackParam );
 	for (u32 i = 0; i < P.bones.size(); i++)
 	{
+		B->notifies[(*bones)[P.bones[i]]->GetSelfID()] = {};
+	}
+	for (u32 i = 0; i < P.bones.size(); i++)
+	{
 		if (!(*bones)[P.bones[i]])
 		{
 			Debug.fatal(DEBUG_INFO, "! MODEL: missing bone/wrong armature? : %s", *getDebugName());
 		}
 		Bone_Motion_Start_IM((*bones)[P.bones[i]], B);
-	}
 
-	{
-		auto& Notify = m_Motions[motion_ID.slot].motions.motion_notify(motion_ID.idx);
-		B->notifyKeys.resize(Notify.order.size());
-		std::ranges::copy(Notify.order.begin(), Notify.order.end(), B->notifyKeys.begin());
+		auto& Notify = m_Motions[motion_ID.slot].motions.motion_notify(motion_ID.idx, (*bones)[P.bones[i]]->GetSelfID());
+		auto& BoneNotifySlot = B->notifies[(*bones)[P.bones[i]]->GetSelfID()];
+		BoneNotifySlot.keyframes.resize(Notify.order.size());
+		for (auto& elem : Notify.order)
+		{
+			auto& notify = BoneNotifySlot.keyframes[elem];
+			notify.key = elem;
+			notify.assigned = Notify.data[elem];
+		}
 	}
 
 	constexpr size_t MAX_CYCLES_IN_PART = MAX_BLENDED * MAX_CHANNELS;
@@ -525,36 +533,19 @@ void CKinematicsAnimated::LL_UpdateTracks( float dt, bool b_force, bool leave_bl
 				E = blend_cycles[part].end(); I--; 
 			}
 
-			if (B.trigger_notify)
+			auto& Notifies = B.notifies[B.bone_or_part];
+			while (B.current_notify_index < Notifies.keyframes.size() && B.timeCurrent > Notifies.keyframes[B.current_notify_index].key)
 			{
-				auto& Notifies = m_Motions[B.motionID.slot].motions.motion_notify(B.motionID.idx);
-				while (B.current_notify_index < B.notifyKeys.size() && B.timeCurrent > B.notifyKeys[B.current_notify_index])
+				for (auto& elem : Notifies.keyframes[B.current_notify_index].assigned)
 				{
-					VERIFY(B.current_notify_index < B.notifyKeys.size());
-					VERIFY(Notifies.data.contains(B.notifyKeys[B.current_notify_index]));
-					auto& CurrentNotify = Notifies.data[B.notifyKeys[B.current_notify_index]];
-					if (CurrentNotify.GiveInfo.size())
-					{
-						Msg("AnimNotify: give info %s", CurrentNotify.GiveInfo.c_str());
-						IAnimNotifyHandler::Get().TriggerGiveInfo(CurrentNotify.GiveInfo);
-					}
-					if (CurrentNotify.DisableInfo.size())
-					{
-						Msg("AnimNotify: disable info %s", CurrentNotify.DisableInfo.c_str());
-						IAnimNotifyHandler::Get().TriggerDisableInfo(CurrentNotify.DisableInfo);
-					}
-					if (CurrentNotify.Functor.size())
-					{
-						Msg("AnimNotify: functor %s", CurrentNotify.Functor.c_str());
-						IAnimNotifyHandler::Get().TriggerFunctor(CurrentNotify.Functor);
-					}
-					if (CurrentNotify.ExternalRef.size())
-					{
-						Msg("AnimNotify: external ref %s", CurrentNotify.ExternalRef.c_str());
-						IAnimNotifyHandler::Get().TriggerNotify(CurrentNotify.ExternalRef);
-					}
-					++B.current_notify_index;
+					Msg("AnimNotify: external ref %s", elem->ExternalRef.c_str());
+					auto message = new IAnimNotifyMessage();
+					message->bone_id = B.bone_or_part;
+					message->notify = elem->ExternalRef;
+					message->render_visual = this;
+					IAnimNotifyHandler::Get().TriggerNotify(message);
 				}
+				++B.current_notify_index;
 			}
 		}
 	}
@@ -697,7 +688,7 @@ void	CKinematicsAnimated::LL_SetChannelFactor (u16	channel,float factor)
 }
 void CKinematicsAnimated::IBlend_Startup	()
 {
-	CBlend B; ZeroMemory(&B,sizeof(B));
+	CBlend B;
 
 	B.set_free_state();
 

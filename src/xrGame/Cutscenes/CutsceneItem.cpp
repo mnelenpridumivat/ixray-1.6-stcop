@@ -69,7 +69,6 @@ void SCutsceneObjectElement::Activate()
 #endif
     }
     VERIFY(FirstBlend);
-    FirstBlend->trigger_notify = true;
     FirstBlend->Callback = &SCutsceneObjectElement::OnFinishFunc;
     FirstBlend->CallbackParam = this;
     if (parent)
