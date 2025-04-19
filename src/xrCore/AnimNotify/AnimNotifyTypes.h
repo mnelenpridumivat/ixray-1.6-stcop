@@ -20,7 +20,7 @@ public:
 
 struct IAnimNotifyMessage
 {
-    IAnimNotify* notify;
+    shared_str notify;
     IRenderVisual* render_visual;
     u16 bone_id;
 };
