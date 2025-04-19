@@ -1290,7 +1290,11 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 			auto& notifies = (*motion_it)->notify;
 			for (auto& BoneTrack : notifies.NotifyTracks)
 			{
-				auto PrefetchedElem = BoneDatas[m_Source->GetBoneIndexByWMap(BoneTrack.first.c_str())];
+				if (m_Source->GetBoneIndexByWMap(BoneTrack.first.c_str()) != itm_idx)
+				{
+					continue;
+				}
+				auto& PrefetchedElem = BoneDatas[itm_idx];
 				for (auto& Track : BoneTrack.second)
 				{
 					for (auto TrackNotify : Track.Notifies)
