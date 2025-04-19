@@ -16,7 +16,7 @@ namespace detail
 	}
 }
 
-UIKeyForm::UIKeyForm():m_AutoChange(true), m_TimeFactor(1), m_Position(0), m_currentEditMotion(nullptr)
+UIKeyForm::UIKeyForm():m_AutoChange(true), m_TimeFactor(1), m_Position(0), m_currentEditMotion(nullptr), m_currentNotify(nullptr)
 {
 }
 
@@ -26,7 +26,12 @@ UIKeyForm::~UIKeyForm()
 
 void UIKeyForm::Draw()
 {
+	static auto PrevCurrentMotion = m_currentEditMotion;
 	m_currentEditMotion = ATools->GetCurrentMotion();
+	if (!m_currentEditMotion || PrevCurrentMotion != m_currentEditMotion)
+	{
+		m_currentNotify = nullptr;
+	}
 
 	bool bMarksPresent12 = (m_currentEditMotion && m_currentEditMotion->marks.size() >= 2);
 	bool bMarksPresent34 = (m_currentEditMotion && m_currentEditMotion->marks.size() == 4);
@@ -203,7 +208,9 @@ void UIKeyForm::Draw()
 							ImGui::Text(std::to_string(i).c_str());
 							ImGui::SameLine(116);
 							if (ImGui::Button("Del")) {
+								ToRemove = Track.first;
 								ToRemove2 = i;
+								m_currentNotify = nullptr;
 							}
 							ImGui::SameLine(146);
 							DrawNotify(Track.second[i]);
@@ -414,7 +421,9 @@ void UIKeyForm::DrawNotify()
             {
 	            float Key = Time * k_len;
 
-            	for (int KeyStart = int(Key) - 5; KeyStart < int(Key + 5); KeyStart++)
+            	for (int KeyStart = std::max(int(Key) - NotifyWidth, 0);
+            		KeyStart <= std::min(int(Key) + NotifyWidth + 1, (int)m_TempForPlotHistogram.size());
+            		KeyStart++)
             	{
             		if (KeyStart < 0)
             			continue;
@@ -443,7 +452,9 @@ void UIKeyForm::DrawNotify(const NotifyTracksType::value_type& elem) {
 		{
 			float Key = Time * k_len;
 
-			for (int i = std::max(int(Key) - NotifyWidth, 0); i < std::min(int(Key) + NotifyWidth + 1, (int)m_TempForPlotHistogram.size()); ++i) {
+			for (int i = std::max(int(Key) - NotifyWidth, 0);
+				i < std::min(int(Key) + NotifyWidth + 1, (int)m_TempForPlotHistogram.size());
+				++i) {
 				m_TempForPlotHistogram[i] = 1;
 			}
 
@@ -466,7 +477,9 @@ void UIKeyForm::DrawNotify(const NotifyTrack& elem) {
 	{
 		float Key = Time * k_len;
 
-		for (int i = std::max(int(Key) - NotifyWidth, 0); i < std::min(int(Key) + NotifyWidth + 1, (int)m_TempForPlotHistogram.size()); ++i) {
+		for (int i = std::max(int(Key) - NotifyWidth, 0);
+			i < std::min(int(Key) + NotifyWidth + 1, (int)m_TempForPlotHistogram.size());
+			++i) {
 			m_TempForPlotHistogram[i] = 1;
 		}
 	}
