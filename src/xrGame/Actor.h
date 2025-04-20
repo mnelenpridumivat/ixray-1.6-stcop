@@ -230,13 +230,13 @@ public:
 
 	void ResetElectronicsProblems();
 	void ResetElectronicsProblems_Full();
-	const float PreviousElectronicsProblemsCnt() const;
+	float PreviousElectronicsProblemsCnt() const;
 	bool ElectronicsProblemsImmediateApply();
 	bool ElectronicsProblemsInc();
-	const float TargetElectronicsProblemsCnt() const;
-	const float CurrentElectronicsProblemsCnt() const;
+	float TargetElectronicsProblemsCnt() const;
+	float CurrentElectronicsProblemsCnt() const;
 	bool ElectronicsProblemsDec();
-	const bool IsElectronicsProblemsDecreasing() const;
+	bool IsElectronicsProblemsDecreasing() const;
 	void UpdateElectronicsProblemsCnt(u32 dt);
 
 public:

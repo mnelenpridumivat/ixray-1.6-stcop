@@ -1203,6 +1203,7 @@ void CActor::UpdateCL()
 
 	u32 ct = Device.dwTimeGlobal;
 	u32 dt = Device.GetTimeDeltaSafe(_last_update_time, ct);
+	_last_update_time = ct;
 	UpdateElectronicsProblemsCnt(dt);
 
 	if (!g_player_hud->m_need_reload)
@@ -2727,7 +2728,7 @@ void CActor::ResetElectronicsProblems_Full()
 	last_problems_update_was_decrease = false;
 }
 
-const float CActor::PreviousElectronicsProblemsCnt() const
+float CActor::PreviousElectronicsProblemsCnt() const
 {
 	return previous_electronics_problems_counter;
 }
@@ -2744,12 +2745,12 @@ bool CActor::ElectronicsProblemsInc()
 	return true;
 }
 
-const float CActor::TargetElectronicsProblemsCnt() const
+float CActor::TargetElectronicsProblemsCnt() const
 {
 	return target_electronics_problems_counter;
 }
 
-const float CActor::CurrentElectronicsProblemsCnt() const
+float CActor::CurrentElectronicsProblemsCnt() const
 {
 	return current_electronics_problems_counter;
 }
@@ -2765,7 +2766,7 @@ bool CActor::ElectronicsProblemsDec()
 		return false;
 }
 
-const bool CActor::IsElectronicsProblemsDecreasing() const
+bool CActor::IsElectronicsProblemsDecreasing() const
 {
 	return last_problems_update_was_decrease;
 }

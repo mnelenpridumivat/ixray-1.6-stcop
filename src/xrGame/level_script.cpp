@@ -1260,7 +1260,7 @@ bool IsElectronicsApply()
 {
 	auto actor = Level().CurrentControlEntity()->cast_actor();
 	if (actor != nullptr)
-		return false; // IMPL: actor->ElectronicsProblemsImmediateApply();
+		return actor->ElectronicsProblemsImmediateApply();
 
 	return false;
 }
