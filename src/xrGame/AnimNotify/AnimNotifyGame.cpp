@@ -38,7 +38,9 @@ void CAnimNotifyHandler::Update()
 
 void CAnimNotifyHandler::ProcessNotify(IAnimNotifyMessage* Message)
 {
-    CAnimNotifyRegistry::GetInstance().get(Message->notify)->Execute(Message->render_visual, Message->bone_id);
+    auto Notify = CAnimNotifyRegistry::GetInstance().get(Message->notify);
+    R_ASSERT(Notify, "Invalid notify", Message->notify.c_str());
+    Notify->Execute(Message->render_visual, Message->bone_id);
 }
 
 IAnimNotify* CAnimNotifyHandler::ConstructNotify(const EAnimNotifyType type)
