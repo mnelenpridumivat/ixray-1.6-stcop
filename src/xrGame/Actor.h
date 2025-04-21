@@ -21,6 +21,7 @@
 #include "Save/SaveObject.h"
 #include "CustomDetector.h"
 #include "EffectorNightVision.h"
+#include "HudAnimatorManager.h"
 
 using namespace ACTOR_DEFS;
 
@@ -68,6 +69,7 @@ class CPickUpManager;
 class CCustomDetector;
 
 class CNightVisionEffector;
+class CHudAnimatorManager;
 
 class CActor: 
 	public IGame_Actor, 
@@ -113,10 +115,11 @@ public:
 	virtual xr_vector<xr_string>		GetKnowedPortions() const ;
 	virtual void						Load				( LPCSTR section );
 
-	virtual void						shedule_Update		( u32 T ); 
+	virtual void						shedule_Update		( u32 T );
+	void PlayRainOnHelmetSound();
 	virtual void						UpdateCL			( );
 			void						UpdatePlayerView	( );
-	
+
 	virtual void						OnEvent				( NET_Packet& P, u16 type		);
 
 	// Render
@@ -153,8 +156,8 @@ struct SDefNewsMsg{
 		bool operator < (const SDefNewsMsg& other) const {return time>other.time;}
 	};
 	xr_vector<SDefNewsMsg> m_defferedMessages;
-	void UpdateDefferedMessages();	
-public:	
+	void UpdateDefferedMessages();
+public:
 	void			AddGameNews_deffered	 (GAME_NEWS_DATA& news_data, u32 delay);
 	virtual void	AddGameNews				 (GAME_NEWS_DATA& news_data);
 protected:
@@ -209,9 +212,9 @@ public:
 	virtual float						GetMass				() ;
 	virtual float						Radius				() const;
 	virtual void						g_PerformDrop		();
-	
+
 	virtual	bool						use_default_throw_force	();
-	virtual	float						missile_throw_force		(); 
+	virtual	float						missile_throw_force		();
 
 	virtual bool						unlimited_ammo			();
 	virtual bool						infinite_fire();
@@ -219,6 +222,23 @@ public:
 	virtual ALife::_TIME_ID				TimePassedAfterDeath() const;
 
 	CPickUpManager* GetPickupManager() { return pPickup; }
+
+	float previous_electronics_problems_counter = 0.0f;
+	float current_electronics_problems_counter = 0.0f;
+	float target_electronics_problems_counter = 0.0f;
+	bool last_problems_update_was_decrease = false;
+
+	void ResetElectronicsProblems();
+	void ResetElectronicsProblems_Full();
+	const float PreviousElectronicsProblemsCnt() const;
+	bool ElectronicsProblemsImmediateApply();
+	bool ElectronicsProblemsInc();
+	const float TargetElectronicsProblemsCnt() const;
+	const float CurrentElectronicsProblemsCnt() const;
+	bool ElectronicsProblemsDec();
+	const bool IsElectronicsProblemsDecreasing() const;
+	void UpdateElectronicsProblemsCnt(u32 dt);
+
 public:
 
 	//свойства артефактов
@@ -230,10 +250,10 @@ public:
 
 protected:
 	//звук тяжелого дыхания
-	ref_sound			m_HeavyBreathSnd;
-	ref_sound			m_BloodSnd;
-	ref_sound			m_DangerSnd;
-
+	ref_sound			m_HeavyBreathSnd = {};
+	ref_sound			m_BloodSnd = {};
+	ref_sound			m_DangerSnd = {};
+	ref_sound			m_rainOnHelmetSnd = {};
 protected:
 	// Death
 	float					m_hit_slowmo;
@@ -267,14 +287,19 @@ protected:
 	u32						m_feel_touch_characters;
 private:
 	void					SwitchOutBorder(bool new_border_state);
+
+	CHudAnimatorManager*	m_hud_animator = nullptr;
 public:
 	bool					m_bAllowDeathRemove;
 	float					m_fLegs_shift;
+	u32 _last_update_time;
 
 	void					SetZoomRndSeed			(s32 Seed = 0);
 	s32						GetZoomRndSeed			()	{ return m_ZoomRndSeed;	};
 	void					SetShotRndSeed			(s32 Seed = 0);
 	s32						GetShotRndSeed			()	{ return m_ShotRndSeed;	};
+
+	CHudAnimatorManager*	HudAnimator()			{ return m_hud_animator; }
 
 public:
 	void					detach_Vehicle			();

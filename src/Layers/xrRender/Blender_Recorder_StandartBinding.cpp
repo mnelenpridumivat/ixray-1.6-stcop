@@ -155,7 +155,7 @@ class cl_fog_plane	: public R_constant_setup {
 	virtual void setup(R_constant* C)
 	{
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -189,7 +189,7 @@ class cl_fog_params	: public R_constant_setup {
 	virtual void setup(R_constant* C)
 	{
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -212,7 +212,7 @@ class cl_fog_color	: public R_constant_setup {
 	Fvector4	result;
 	virtual void setup	(R_constant* C)	{
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -297,7 +297,7 @@ class cl_sun0_color : public R_constant_setup {
 	Fvector4 result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -319,7 +319,7 @@ class cl_sun0_dir_w : public R_constant_setup {
 	Fvector4	result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -337,7 +337,7 @@ class cl_sun0_dir_e : public R_constant_setup {
 	Fvector4	result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -358,7 +358,7 @@ class cl_amb_color : public R_constant_setup {
 	Fvector4	result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -382,7 +382,7 @@ class cl_hemi_color : public R_constant_setup {
 	Fvector4	result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -406,7 +406,7 @@ class cl_sky_color : public R_constant_setup {
 	Fvector4 result;
 	virtual void setup(R_constant* C) {
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -474,7 +474,7 @@ static class cl_rain_params : public R_constant_setup {
 	virtual void setup(R_constant* C)
 	{
 #ifdef _EDITOR
-		if(!g_pGamePersistent || !g_pGameLevel) {
+		if (!g_pGamePersistent || !g_pGamePersistent->Environment().CurrentEnv) {
 			RCache.set_c(C, 0, 0, 0.0f, 0.0f);
 			return;
 		}
@@ -504,6 +504,27 @@ static class cl_m_hud_params : public R_constant_setup
 		RCache.set_c(C, RDEVICE.hudViewportData.isRenderProcess, RDEVICE.hudViewportData.isRenderActive, 0.0f, RDEVICE.hudViewportData.renderZoomRotateFactor);
 	}
 }    binder_m_hud_params;
+
+static class cl_affects : public R_constant_setup
+{
+	virtual void setup(R_constant* C)
+	{
+		float decr = 0.0f;
+
+		if (RDEVICE.hudViewportData.IsElectronicsProblemsDecreasing)
+			decr = 1.0f;
+
+		RCache.set_c(C, RDEVICE.hudViewportData.CurrentElectronicsProblemsCnt/10.0f, ::Random.randF(0.0f, 1.0f), RDEVICE.hudViewportData.TargetElectronicsProblemsCnt/10.0f, decr);
+	}
+} binder_affects;
+
+static class cl_actor_params : public R_constant_setup
+{
+	virtual void setup(R_constant* C)
+	{
+		RCache.set_c(C, RDEVICE.hudViewportData.ActorHealth, RDEVICE.hudViewportData.ActorOutfitCondition, RDEVICE.hudViewportData.ActorWeaponCondition, RDEVICE.hudViewportData.ActorWeaponLoading);
+	}
+} binder_actor_states;
 
 // Standart constant-binding
 void	CBlender_Compile::SetMapping()
@@ -590,6 +611,8 @@ void	CBlender_Compile::SetMapping()
 	r_Constant				("rain_params",		&binder_rain_params);
 
 	r_Constant("m_hud_params", &binder_m_hud_params);
+	r_Constant("m_affects", &binder_affects);
+	r_Constant("m_actor_params", &binder_actor_states);
 
 	// detail
 	//if (bDetail	&& detail_scaler)

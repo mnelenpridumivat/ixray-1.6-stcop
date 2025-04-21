@@ -164,6 +164,25 @@ void CHudItem::OnStateSwitch(u32 S)
 		}
 		break;
 	}
+	case eSprintStart:
+	{
+		m_bSwitchSprint = true;
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_idle_sprint_start"), true, eSprintStart);
+		break;
+	}
+	case eSprintEnd:
+	{
+		m_bSwitchSprint = false;
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_idle_sprint_end"), true, eSprintEnd);
+		break;
+	}
+	};
+
+	if (S != eIdle && S != eSprintStart && S != eSprintEnd)
+	{
+		m_bSwitchSprint = false;
 	}
 }
 
@@ -176,6 +195,8 @@ void CHudItem::OnAnimationEnd(u32 state)
 
 	switch(state)
 	{
+	case eSprintStart:
+	case eSprintEnd:
 	case eBore:
 	{
 		SwitchState(eIdle);
@@ -195,7 +216,7 @@ void CHudItem::OnAnimationEnd(u32 state)
 
 void CHudItem::PlayAnimBore()
 {
-	PlayHUDMotion("anm_bore", TRUE, nullptr, GetState());
+	PlayHUDMotion("anm_bore", TRUE, GetState());
 }
 
 bool CHudItem::ActivateItem() 
@@ -545,33 +566,27 @@ void CHudItem::on_a_hud_attach()
 	}
 }
 
-//AVO: check if animation exists
 bool CHudItem::HudAnimationExist(LPCSTR anim_name)
 {
-	if (HudItemData()) // First person
+	if (Level().CurrentControlEntity() != object().H_Parent())
+		return false;
+
+	auto HID = HudItemData();
+	if (HID)
 	{
 		string256 anim_name_r;
 		bool is_16x9 = UI().is_widescreen();
-		u16 attach_place_idx = READ_IF_EXISTS(pSettings, r_u16, HudItemData()->m_sect_name, "attach_place_idx", 0);
+		u16 attach_place_idx = HID->m_attach_place_idx;
 		xr_sprintf(anim_name_r, "%s%s", anim_name, ((attach_place_idx == 1) && is_16x9) ? "_16x9" : "");
-		player_hud_motion* anm = HudItemData()->m_hand_motions.find_motion(anim_name_r);
-		if (anm)
-			return true;
+		return HID->m_hand_motions.has_motion(anim_name_r);
 	}
-	else // Third person
+	else
 	{
-		if (g_player_hud->motion_length(anim_name, HudSection(), m_current_motion_def) > 100)
-			return true;
-
+		return g_player_hud->motion_length(anim_name, HudSection(), m_current_motion_def) > 100;
 	}
-#ifdef DEBUG
-	Msg("~ [WARNING] ------ Animation [%s] does not exist in [%s]", anim_name, HudSection().c_str());
-#endif
-	return false;
 }
-//-AVO
 
-u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 state)
+u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, u32 state)
 {
 	if (HudItemData() && !HudAnimationExist(M.c_str()))
 	{
@@ -593,6 +608,18 @@ u32 CHudItem::PlayHUDMotion(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 
 	return anim_time;
 }
 
+shared_str CHudItem::AddSuffixName(shared_str& anim, LPCSTR suffix, LPCSTR test_suffix)
+{
+	string128 new_name = {};
+	xr_strconcat(new_name, anim.c_str(), suffix, test_suffix);
+
+	if (HudAnimationExist(new_name))
+	{
+		anim = new_name;
+	}
+
+	return anim;
+}
 
 u32 CHudItem::PlayHUDMotion_noCB(const shared_str& motion_name, BOOL bMixIn)
 {
@@ -644,7 +671,34 @@ void CHudItem::PlayAnimIdle()
 		return;
 	}
 
-	PlayHUDMotion("anm_idle", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentIdleAnimation(), TRUE, GetState());
+}
+
+shared_str CHudItem::SetCurrentIdleAnimation()
+{
+	shared_str new_name = "anm_idle";
+
+	CActor* pActor = Level().CurrentControlEntity()->cast_actor();
+
+	if (pActor && pActor == object().H_Parent())
+	{
+		u32 state = pActor->GetMovementState(ACTOR_DEFS::EMovementStates::eReal);
+
+		if (state & ACTOR_DEFS::EMoveCommand::mcAccel && state & ACTOR_DEFS::EMoveCommand::mcCrouch)
+		{
+			AddSuffixName(new_name, "_crouch_slow");
+		}
+		else if (state & ACTOR_DEFS::EMoveCommand::mcAccel)
+		{
+			AddSuffixName(new_name, "_slow");
+		}
+		else if (state & ACTOR_DEFS::EMoveCommand::mcCrouch)
+		{
+			AddSuffixName(new_name, "_crouch");
+		}
+	}
+
+	return new_name;
 }
 
 bool CHudItem::TryPlayAnimIdle()
@@ -657,7 +711,18 @@ bool CHudItem::TryPlayAnimIdle()
 			u32 state = pActor->GetMovementState(eReal);
 			if (state & ACTOR_DEFS::EMoveCommand::mcSprint)
 			{
+				if (!m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_start"))
+				{
+					SwitchState(eSprintStart);
+					return true;
+				}
+
 				PlayAnimIdleSprint();
+				return true;
+			}
+			else if (m_bSwitchSprint && HudAnimationExist("anm_idle_sprint_end"))
+			{
+				SwitchState(eSprintEnd);
 				return true;
 			}
 			else if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
@@ -694,27 +759,27 @@ bool CHudItem::NeedBlendAnm()
 
 void CHudItem::PlayAnimIdleMoving()
 {
-	PlayHUDMotion("anm_idle_moving", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_moving"), TRUE, GetState());
 }
 
 void CHudItem::PlayAnimIdleMovingSlow()
 {
-	PlayHUDMotion("anm_idle_moving_slow", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_moving_slow"), TRUE, GetState());
 }
 
 void CHudItem::PlayAnimIdleMovingCrouch()
 {
-	PlayHUDMotion("anm_idle_moving_crouch", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_moving_crouch"), TRUE, GetState());
 }
 
 void CHudItem::PlayAnimIdleMovingCrouchSlow()
 {
-	PlayHUDMotion("anm_idle_moving_crouch_slow", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_moving_crouch_slow"), TRUE, GetState());
 }
 
 void CHudItem::PlayAnimIdleSprint()
 {
-	PlayHUDMotion("anm_idle_sprint", TRUE, nullptr, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_idle_sprint"), TRUE, GetState());
 }
 
 void CHudItem::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
@@ -776,7 +841,7 @@ void CHudItem::PlaySoundIfExist(LPCSTR alias, const Fvector& position, bool allo
 	HUD_SOUND_ITEM* SndIter = m_sounds.FindSoundItem(alias, false);
 	if (SndIter != nullptr)
 	{
-		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap);
+		m_sounds.PlaySound(SndIter, position, object().H_Root(), !!GetHUDmode(), false, allowOverlap, u8(-1));
 	}
 }
 

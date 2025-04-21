@@ -19,8 +19,11 @@
 #include "alife_simulator.h"
 #include "moving_objects.h"
 #include "doors_manager.h"
+#include "AnimNotify/AnimNotify.h"
+#include "AnimNotify/AnimNotifyGame.h"
+#include "AnimNotify/AnimNotifyRegistry.h"
 
-ENGINE_API	bool g_dedicated_server;
+ENGINE_API bool g_dedicated_server;
 
 CAI_Space *g_ai_space = 0;
 
@@ -57,6 +60,9 @@ void CAI_Space::init				()
 	VERIFY					(!g_pScriptEngine);
 	g_pScriptEngine = new CScriptEngine();
 	script_engine().init	();
+
+	IAnimNotifyHandler::SetHandler(new CAnimNotifyHandler());
+	CAnimNotifyRegistry::GetInstance();
 
 #ifndef NO_SINGLE
 	extern SCRIPTS_API string4096 g_ca_stdout;

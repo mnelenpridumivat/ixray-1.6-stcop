@@ -24,7 +24,9 @@ enum EHudStates {
 		eHiding,
 		eHidden,
 		eBore,
-		eLastBaseState = eBore,
+		eSprintStart,
+		eSprintEnd,
+		eLastBaseState = eSprintEnd,
 };
 
 private:
@@ -130,9 +132,12 @@ public:
 
 	virtual	void				UpdateXForm			()						= 0;
 
-	u32							PlayHUDMotion		(const shared_str& M, BOOL bMixIn, CHudItem*  W, u32 state);
+	u32							PlayHUDMotion		(const shared_str& M, BOOL bMixIn, u32 state);
 	u32							PlayHUDMotion_noCB	(const shared_str& M, BOOL bMixIn);
 	void						StopCurrentAnimWithoutCallback();
+	shared_str					AddSuffixName		(shared_str& anim, LPCSTR suffix, LPCSTR test_suffix = "");
+	shared_str					SetCurrentIdleAnimation();
+	virtual shared_str			SetCurrentStateAnimation(const shared_str& first_name) { return first_name; }
 
 	IC void						RenderHud				(BOOL B)	{ m_huditem_flags.set(fl_renderhud, B);}
 	IC BOOL						RenderHud				()			{ return m_huditem_flags.test(fl_renderhud);}
@@ -179,6 +184,7 @@ protected:
 	float m_fUD_InertiaFactor; // Фактор вертикальной инерции худа при движении камеры [-1; +1]
 
 	bool						m_bDisableBore;
+	bool						m_bSwitchSprint = false;
 
 	virtual void				SetModelBoneStatus(const char* bone, BOOL show);
 	virtual void				SetMultipleBonesStatus(const char* section, const char* line, BOOL show);

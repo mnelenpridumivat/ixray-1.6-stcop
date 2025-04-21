@@ -201,13 +201,27 @@ public:
 
 	bool	NeedBlockSprint						() const;
 
+
+	struct conditional_breaking_params
+	{
+		float start_condition = 0.0f;     // при каком состоянии начнутся проблемы
+		float end_condition = 0.0f;       // при каком состоянии отрубится вообще
+		float start_probability = 0.0f;   // вероятность проблем в стартовом состоянии
+	};
+
+	conditional_breaking_params CollimatorBreakingParams;
+	float m_fCollimatorLevelsProblem;
+
 	bool bUpdateHUDBonesVisibility = false;
+	u32 _last_update_time;
+
 	bool bReloadKeyPressed;
 	bool bAmmotypeKeyPressed;
 	bool bStopReloadSignal;
 	bool m_bUseSilHud = false;
 	bool m_bUseScopeHud = false;
 	bool m_bUseGLHud = false;
+	bool m_bHideColimSightInAlter;
 
 	shared_str hud_silencer;
 	shared_str hud_scope;
@@ -267,11 +281,14 @@ protected:
 	shared_str GetCurrentScopeSection() const { return m_scopes[m_cur_scope]; }
 	shared_str GetScopeSection(int idx) const { return m_scopes[idx]; }
 
-private:
+protected:
 
 	RStringVec m_bDefHideBones {}, m_bDefShowBones {}, m_bHideBonesOverride {}, m_bDefHideBonesGLAttached {},
 		m_bHideBonesGLAttached {}, m_bHideBonesSilAttached {}, m_bHideBonesScopeAttached {},
-		m_bHideBonesUpgrade {}, m_bScopeShowBones{}, m_bScopeHideBones{}, m_bShowBonesUpgToHide{}, m_bShowBonesUpgToShow{};
+		m_bHideBonesUpgrade {}, m_bScopeShowBones{}, m_bScopeHideBones{}, m_bShowBonesUpgToHide{}, m_bShowBonesUpgToShow{},
+		m_sCollimatorSightsBones{};
+
+	bool m_bIsAimStarted = false;
 
 	void HideOneUpgradeLevel(const char* section);
 	void LoadUpgradeBonesToHide(const char* section, const char* line);
@@ -476,7 +493,8 @@ public:
 	IC int					GetAmmoElapsed		()	const		{ return iAmmoElapsed; }
 	int						GetAmmoChamberElapsed()	const		{ return iAmmoChamberElapsed; }
 	IC int					GetAmmoMagSize		()	const		{ return iMagazineSize; }
-	bool					IsChamber			()  const		{ return m_bAmmoInChamber ;}
+	bool					IsChamber			()  const		{ return m_bAmmoInChamber; }
+	bool					IsChangeAmmoType	()	const		{ return (m_set_next_ammoType_on_reload != undefined_ammo_type || m_ammoType == m_set_next_ammoType_on_reload); }
 	void SetAmmoMagSize(int size);
 	int						GetSuitableAmmoTotal(bool use_item_to_spawn = false) const;
 
@@ -632,4 +650,5 @@ public:
 
 	float GetAimFactor() const { return m_zoom_params.m_fZoomRotationFactor; }
 	bool GetScopeBack();
+	void UpdateCollimatorSight();
 };

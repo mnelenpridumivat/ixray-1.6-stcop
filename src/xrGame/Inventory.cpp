@@ -24,6 +24,7 @@
 #include "WeaponMagazined.h"
 #include "Car.h"
 #include "purchase_list.h"
+#include "Grenade.h"
 
 using namespace InventoryUtilities;
 
@@ -75,9 +76,6 @@ CInventory::CInventory()
 		xr_sprintf(slot_persistent, "%s%d", "slot_persistent_", k);
 		xr_sprintf(slot_active, "%s%d", "slot_active_", k);
 	}
-
-	m_slots[ANIM_SLOT].m_bAct = true;
-	m_slots[ANIM_SLOT].m_bPersistent = true;
 
 	m_blocked_slots.resize(k + 1);
 
@@ -562,6 +560,21 @@ void CInventory::Activate(u16 slot, bool bForce)
 		return;
 	}
 
+	if (CActor* actor = smart_cast<CActor*>(m_pOwner))
+	{
+		if (actor->HudAnimator() && actor->HudAnimator()->IsActive())
+		{
+			if (CHudItem* hud_item = smart_cast<CHudItem*>(ActiveItem()))
+			{
+				if (hud_item->SendDeactivateItem())
+				{
+					m_iNextActiveSlot = NO_ACTIVE_SLOT;
+				}
+			}
+			return;
+		}
+	}
+
 	PIItem tmp_item = nullptr;
 	if (slot != NO_ACTIVE_SLOT)
 		tmp_item = ItemFromSlot(slot);
@@ -625,6 +638,11 @@ void CInventory::Activate(u16 slot, bool bForce)
 	}
 }
 
+void CInventory::PutGrenade(CGrenade* new_grenade)
+{
+	m_pNewGrenade = new_grenade;
+	Activate(NO_ACTIVE_SLOT);
+}
 
 PIItem CInventory::ItemFromSlot(u16 slot) const
 {
@@ -815,16 +833,27 @@ void CInventory::Update()
 				}
 			}
 			
+			if (!g_player_hud->attached_item(0) && m_pNewGrenade != nullptr && ItemFromSlot(m_pNewGrenade->BaseSlot()))
+				m_iNextActiveSlot = m_pNewGrenade->BaseSlot();
+
 			if (GetNextActiveSlot() != NO_ACTIVE_SLOT)
 			{
 				PIItem tmp_next_active = ItemFromSlot(GetNextActiveSlot());
 				if (tmp_next_active)
 				{
+					if (!g_player_hud->attached_item(0) && m_pNewGrenade != nullptr && tmp_next_active == ItemFromSlot(m_pNewGrenade->BaseSlot()))
+					{
+						Ruck(ItemFromSlot(m_pNewGrenade->BaseSlot()));
+						Slot(m_pNewGrenade->BaseSlot(), m_pNewGrenade);
+						m_pNewGrenade = nullptr;
+					}
+
 					if (IsSlotBlocked(tmp_next_active))
 					{
 						Activate(m_iActiveSlot);
 						return;
-					} else
+					}
+					else
 					{
 						tmp_next_active->ActivateItem();
 					}

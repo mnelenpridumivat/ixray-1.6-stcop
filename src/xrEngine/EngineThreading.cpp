@@ -12,14 +12,6 @@ void XRay::Engine::PreRenderThread()
 {
 	Platform::SetThreadName("X-Ray Pre-Render");
 	PROF_THREAD("Secondary Task 1");
-
-	{
-		PROF_EVENT("seqParallelBeforRender");
-		for (auto& it : Device.seqParallelBeforRender)
-			it();
-
-		Device.seqParallelBeforRender.clear();
-	}
 	{
 		PROF_EVENT("Discord Sync");
 		g_Discord.Update();

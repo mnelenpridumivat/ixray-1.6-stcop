@@ -1372,6 +1372,17 @@ void CLocatorAPI::r_close(CStreamReader*& fs)
 	fs->close();
 }
 
+void CLocatorAPI::get_all_files_in_dir(xr_set<xr_string>& out, LPCSTR dir)
+{
+	for (auto& elem : m_files)
+	{
+		if (xr_strlen(elem.name) > xr_strlen(dir) && std::isalpha(elem.name[xr_strlen(elem.name)-1]) &&  !xr_strncmp(elem.name, dir, xr_strlen(dir)-1))
+		{
+			out.emplace(elem.name);
+		}
+	}
+}
+
 IWriter* CLocatorAPI::w_open	(LPCSTR path, LPCSTR _fname)
 {
 	string_path	fname;

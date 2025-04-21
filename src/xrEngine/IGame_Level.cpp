@@ -14,8 +14,9 @@
 
 #include "FPSCounter.h"
 #include "../xrGame/CustomTimer.h"
+#include "../xrGame/AnimNotify/AnimNotifyGame.h"
 
-ENGINE_API	IGame_Level*	g_pGameLevel	= nullptr;
+ENGINE_API IGame_Level*	g_pGameLevel	= nullptr;
 extern	BOOL g_bLoaded;
 
 IGame_Level::IGame_Level	()
@@ -178,6 +179,10 @@ void	IGame_Level::OnFrame		( )
 	PROF_EVENT("IGame_Level::OnFrame");
 	// Update all objects
 	VERIFY						(bReady);
+	if(IAnimNotifyHandler::IsValid())
+	{
+		IAnimNotifyHandler::Get().Update();
+	}
 	Objects.Update				(false);
 	g_hud->OnFrame				();
 

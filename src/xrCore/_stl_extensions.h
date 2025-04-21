@@ -71,6 +71,9 @@ using xr_vector = std::vector<T, allocator>;
 template <typename K, typename V>
 using xr_pair = std::pair<K, V>;
 
+template<typename... Args>
+using xr_tuple = std::tuple<Args...>;
+
 template <typename T>
 void clear_and_reserve(xr_vector<T> &vector_object) {
     if (vector_object.capacity() <= (vector_object.size() + vector_object.size() / 4)) {
@@ -114,6 +117,8 @@ using xr_hash_map = std::unordered_map<K, V, std::hash<K>, _Traits, allocator>;
 
 template <typename K, class _Traits = std::equal_to<K>, typename allocator = xalloc<K> >
 using xr_hash_set = std::unordered_set<K, std::hash<K>, _Traits, allocator>;
+
+using xr_string_view = std::string_view;
 
 struct pred_str {
 	IC bool operator()(const char* x, const char* y) const				{	return xr_strcmp(x,y)<0;	}

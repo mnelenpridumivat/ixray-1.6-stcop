@@ -45,10 +45,10 @@ public:
 		};
     	struct
 		{
-    		Tvector i;	T	_14_;
-    		Tvector j;	T	_24_;
-    		Tvector k;	T	_34_;
-    		Tvector c;	T	_44_;
+    		Tvector i;	T	_14_; // right
+    		Tvector j;	T	_24_; // up
+    		Tvector k;	T	_34_; // forward
+    		Tvector c;	T	_44_; // location
         };
 		T m[4][4];					// Array
 	};

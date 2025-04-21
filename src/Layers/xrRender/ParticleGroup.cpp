@@ -187,7 +187,8 @@ PS::CParticleGroup::SItem::~SItem()
 	if (_children_destroy.empty())
 		return;
 
-	auto Iter = std::find(Device.seqParallelBeforRender.begin(), Device.seqParallelBeforRender.end(), xr_make_delegate(this, &PS::CParticleGroup::SItem::DelayDeleteChilds));
+	xr_delegate Callback = xr_make_delegate(this, &PS::CParticleGroup::SItem::DelayDeleteChilds);
+	auto Iter = std::find(Device.seqParallelBeforRender.begin(), Device.seqParallelBeforRender.end(), Callback);
 	if (Iter != Device.seqParallelBeforRender.end())
 	{
 		Device.seqParallelBeforRender.erase(Iter);
@@ -305,7 +306,7 @@ void CParticleGroup::SItem::Stop(BOOL def_stop)
 		static_cast<CParticleEffect*>(ChildPart)->Stop(def_stop);
 		if (!def_stop) 
 		{
-			_children_destroy.push_back(ChildPart);
+			_children_destroy.insert(ChildPart);
 		}
 	}
 
@@ -314,14 +315,8 @@ void CParticleGroup::SItem::Stop(BOOL def_stop)
 		static_cast<CParticleEffect*>(ChildPart)->Stop(def_stop);
 		if (!def_stop)
 		{
-			_children_destroy.push_back(ChildPart);
+			_children_destroy.insert(ChildPart);
 		}
-	}
-
-	if (!def_stop)
-	{
-		_children_related.clear();
-		_children_free.clear();
 	}
 }
 
@@ -440,14 +435,18 @@ void CParticleGroup::SItem::OnFrame(u32 u_dt, const CPGDef::SEffect& def, Fbox& 
 				{
 					rem_cnt++;
 					IRenderVisual* pVisual = smart_cast<IRenderVisual*>(*it);
-					_children_destroy.push_back(*it);
+					_children_destroy.insert(*it);
 				}
 			}
 		}
 
 		if (!_children_destroy.empty())
 		{
-			Device.seqParallelBeforRender.push_back(xr_make_delegate(this, &PS::CParticleGroup::SItem::DelayDeleteChilds));
+			xr_delegate Callback = xr_make_delegate(this, &PS::CParticleGroup::SItem::DelayDeleteChilds);
+			if (std::find(Device.seqParallelBeforRender.begin(), Device.seqParallelBeforRender.end(), Callback) != Device.seqParallelBeforRender.end())
+			{
+				Device.seqParallelBeforRender.emplace_back(std::move(Callback));
+			}
 		}
 	}
 }
@@ -460,7 +459,7 @@ void PS::CParticleGroup::SItem::DelayDeleteChilds()
 		if (Iter != _children_free.end())
 		{
 			_children_free.erase(Iter);
-		} 
+		}
 		else
 		{
 			Iter = std::find(_children_related.begin(), _children_related.end(), Vis);

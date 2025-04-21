@@ -65,6 +65,7 @@
 #	include "debug_text_tree.h"
 #include "level_changer.h"
 #endif
+#include <CutsceneManager.h>
 
 #include "inventory_upgrade_manager.h"
 

@@ -32,7 +32,7 @@ ICF	float	CalcSSA				(float& distSQ, Fvector& C, float R)
 	return	R/distSQ;
 }
 
-void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fvector& Center)
+void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fvector& Center, bool Force)
 {
 	CRender&	RI			=	RImplementation;
 
@@ -46,7 +46,7 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 
 	float distSQ			;
 	float SSA				=	CalcSSA		(distSQ,Center,pVisual);
-	if (SSA<=r_ssaDISCARD)		return;
+	if (SSA<=r_ssaDISCARD && !Force)		return;
 
 	// Distortive geometry should be marked and R2 special-cases it
 	// a) Allow to optimize RT order
@@ -276,7 +276,7 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual)
+void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool Force)
 {
 	//PROF_EVENT("add_leafs_Dynamic")
 	if (0==pVisual)				return;
@@ -329,7 +329,7 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual)
 #endif
 				I = pV->children.begin		();
 				E = pV->children.end		();
-				for (; I!=E; I++)	add_leafs_Dynamic	(*I);
+				for (; I!=E; I++)	add_leafs_Dynamic	(*I, Force);
 			}
 		}
 		return;
@@ -339,7 +339,7 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual)
 			// Calculate distance to it's center
 			Fvector							Tpos;
 			val_pTransform->transform_tiny	(Tpos, pVisual->vis.sphere.P);
-			r_dsgraph_insert_dynamic		(pVisual,Tpos);
+			r_dsgraph_insert_dynamic		(pVisual,Tpos, Force);
 		}
 		return;
 	}
@@ -436,7 +436,7 @@ void CRender::add_leafs_Static(dxRender_Visual *pVisual)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes)
+BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes, bool Force)
 {
 	//PROF_EVENT("add_Dynamic")
 
@@ -511,7 +511,7 @@ BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes)
 #endif
 				I = pV->children.begin		();
 				E = pV->children.end		();
-				for (; I!=E; I++)	add_leafs_Dynamic	(*I);
+				for (; I!=E; I++)	add_leafs_Dynamic	(*I, Force);
 			}
 			/*
 			I = pV->children.begin		();

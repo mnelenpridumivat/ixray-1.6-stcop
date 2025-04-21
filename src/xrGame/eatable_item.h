@@ -33,8 +33,6 @@ public:
 	virtual void			Load(LPCSTR section);
 	virtual void			load(IReader& packet);
 	virtual void			save(NET_Packet& packet);
-	//virtual void Save(CSaveObjectSave* Object) const;
-	//virtual void Load(CSaveObjectLoad* Object);
 	virtual void Serialize(ISaveObject& Object);
 	virtual bool			Useful() const;
 
@@ -44,6 +42,7 @@ public:
 	virtual void			OnH_A_Independent();
 	virtual	bool			UseBy(CEntityAlive* npc);
 	virtual float			Weight() const;
+	virtual void			EatableEffects();
 	
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
 

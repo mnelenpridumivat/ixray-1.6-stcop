@@ -190,10 +190,10 @@
 #	include "actor_mp_server.h"
 #	include "actor_mp_client.h"
 #	include "smart_cover_object.h"
-#	include "HUDAnimItem.h"
 #	include "EditorLevel.h"
 
 #include "..\xrGame\HolderEntityObject.h"
+#include "..\xrGame\ActorBackpack.h"
 #endif // NO_XR_GAME
 
 #ifndef NO_XR_GAME
@@ -295,7 +295,7 @@ void CObjectFactory::register_classes	()
 	ADD(CHelicopter				,CSE_ALifeHelicopter			,CLSID_VEHICLE_HELICOPTER		,"helicopter");
 #endif // #ifndef NO_SINGLE
 
-	ADD(CHUDAnimItem			, CSE_ALifeItemsNotSave,		CLSID_OBJECT_ANINFAKE,			"animfakeitem");
+	ADD(CBackpack, CSE_ALifeItem, CLSID_EQUIPMENT_BACKPACK, "equ_backpack");
 
 	// Artefacts
 	ADD(CMercuryBall			,CSE_ALifeItemArtefact			,CLSID_AF_MERCURY_BALL			,"art_mercury_ball");

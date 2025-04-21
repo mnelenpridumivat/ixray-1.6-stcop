@@ -37,7 +37,6 @@
 #include "ui/UIInventoryUtilities.h"
 #include "alife_object_registry.h"
 #include "xrServer_Objects_ALife_Monsters.h"
-#include "HUDAnimItem.h"
 #include "ActorCondition.h"
 #include "../xrEngine/XR_IOConsole.h"
 #include "Inventory.h"
@@ -57,6 +56,8 @@
 #include "ActorHelmet.h"
 #include "PickupManager.h"
 #include "UIActorMenu.h"
+#include "Cutscenes/CutsceneItem.h"
+#include "Cutscenes/CutsceneManager.h"
 
 using namespace luabind;
 
@@ -341,6 +342,21 @@ void change_game_time(u32 days, u32 hours, u32 mins)
 		value *= 1000;//msec		
 		g_pGamePersistent->Environment().ChangeGameTime(fValue);
 		tpGame->alife().time_manager().change_game_time(value);
+	}
+}
+
+void set_game_date_time(LPCSTR date, LPCSTR time)
+{
+	game_sv_Single* tpGame = smart_cast<game_sv_Single*>(Level().Server->game);
+	if (tpGame && ai().get_alife())
+	{
+		u32	years, months, days, hours, minutes, seconds;
+		sscanf(time, "%d:%d:%d", &hours, &minutes, &seconds);
+		sscanf(date, "%d.%d.%d", &days, &months, &years);
+		auto newTime = generate_time(years, months, days, hours, minutes, seconds);
+		float fValue = static_cast<float>(days * 86400 + hours * 3600 + minutes * 60);
+		g_pGamePersistent->Environment().ChangeGameTime(fValue);
+		tpGame->alife().time_manager().set_date_time(newTime);
 	}
 }
 
@@ -924,6 +940,7 @@ void spawn_section(LPCSTR sSection, Fvector3 vPosition, u32 LevelVertexID, u16 P
 
 #include "HUDManager.h"
 #include <CustomTimer.h>
+#include <CutsceneManager.h>
 //ability to get the target game_object at crosshair
 CScriptGameObject* g_get_target_obj()
 {
@@ -1067,11 +1084,14 @@ void RefreshNamesNPC()
 			continue;
 		}
 
-		auto obj = g_pGameLevel->Objects.net_Find(id);
-		CInventoryOwner* owner = obj->cast_inventory_owner();
-		if (owner)
+		const auto obj = g_pGameLevel->Objects.net_Find(id);
+		if (obj != nullptr)
 		{
-			owner->RefreshNamesNPC();
+			CInventoryOwner* owner = obj->cast_inventory_owner();
+			if (owner)
+			{
+				owner->RefreshNamesNPC();
+			}
 		}
 	}
 }
@@ -1195,7 +1215,7 @@ bool ElectronicsBreak()
 {
 	auto actor = Level().CurrentControlEntity()->cast_actor();
 	if (actor != nullptr)
-		return false; // TODO: IMPL actor->ElectronicsProblemsInc();
+		return actor->ElectronicsProblemsInc();
 
 	return false;
 }
@@ -1218,17 +1238,18 @@ bool IsElectronicsRestore()
 {
 	auto actor = Level().CurrentControlEntity()->cast_actor();
 	if (actor != nullptr)
-		return false; //actor->ElectronicsProblemsDec();
-
+	{
+		return actor->ElectronicsProblemsDec();
+	}
 	return false;
 }
 
-bool electronics_reset()
+bool ElectronicsReset()
 {
 	auto actor = Level().CurrentControlEntity()->cast_actor();
 	if (actor != nullptr)
 	{
-		// IMPL: actor->ResetElectronicsProblems();
+		actor->ResetElectronicsProblems();
 		return true;
 	}
 
@@ -1343,6 +1364,54 @@ u32 get_build_id()
 	return Core.BuildId;
 }
 
+extern ENGINE_API float psHUD_FOV;
+
+Fvector2 World2Ui(Fvector pos, bool hud)
+{
+	Fmatrix world = {}, res = {};
+	world.identity();
+	world.c = pos;
+
+	if (hud)
+	{
+		Fmatrix fp ={};
+		Fmatrix ft = {};
+		Fmatrix fv = {};
+		fv.build_camera_dir(Device.vCameraPosition, Device.vCameraDirection, Device.vCameraTop);
+		fp.build_projection(
+			deg2rad(psHUD_FOV * Device.fFOV),
+			Device.fASPECT, RDEVICE.fViewportNear,
+			g_pGamePersistent->Environment().CurrentEnv->far_plane);
+
+		ft.mul(fp, fv);
+		res.mul(ft, world);
+	}
+	else
+	{
+		res.mul(Device.mFullTransform, world);
+	}
+
+	Fvector4 vRes = {};
+	vRes.w = res._44;
+	vRes.x = res._41 / vRes.w;
+	vRes.y = res._42 / vRes.w;
+	vRes.z = res._43 / vRes.w;
+
+	if (vRes.z < 0 || vRes.w < 0) return { -9999,0 };
+	if (abs(vRes.x) > 1.f || abs(vRes.y) > 1.f) return { -9999,0 };
+
+	float x = (1.f + vRes.x) / 2.f * Device.TargetWidth;
+	float y = (1.f - vRes.y) / 2.f * Device.TargetHeight;
+
+	float widthFk = Device.TargetWidth / UI_BASE_WIDTH;
+	float heightFk = Device.TargetHeight / UI_BASE_HEIGHT;
+
+	x /= widthFk;
+	y /= heightFk;
+
+	return { x, y };
+}
+
 #pragma optimize("s",on)
 void CLevel::script_register(lua_State* L)
 {
@@ -1429,6 +1498,8 @@ void CLevel::script_register(lua_State* L)
 				def("get_time_hours", get_time_hours),
 				def("get_time_minutes", get_time_minutes),
 				def("change_game_time", change_game_time),
+
+				def("set_game_date_time", set_game_date_time), // runtime set new date with time
 
 				def("high_cover_in_direction", high_cover_in_direction),
 				def("low_cover_in_direction", low_cover_in_direction),
@@ -1533,7 +1604,7 @@ void CLevel::script_register(lua_State* L)
 		// TODO Guns: Drombeys to all: not impl
 		def("electronics_break", &ElectronicsBreak),
 		def("electronics_restore", &IsElectronicsRestore),
-		def("electronics_reset", &electronics_reset),
+		def("electronics_reset", &ElectronicsReset),
 		def("electronics_apply", &IsElectronicsApply),
 		def("get_parameter_upgraded_int", &GetParameterUpgradedInt),
 		def("valid_saved_game_int", &ValidSavedGameInt),
@@ -1567,7 +1638,24 @@ void CLevel::script_register(lua_State* L)
 	
 	module(L, "animslot")
 		[
-			def("play", &CHUDAnimItem::PlayHudAnim)
+			def("play_cutscene", &CCutsceneManager::PlayCutscene),
+			def("stop_current_cutscene", &CCutsceneManager::FinishCurrentCutscene)
+		];
+
+	module(L)
+		[
+			class_<SCutsceneObjectElement>("SCutsceneObjectElement")
+			.def("set_all_bones_visibility", &SCutsceneObjectElement::SetAllBonesVisibility)
+			.def("set_bone_visibility", &SCutsceneObjectElement::SetBoneVisibility)
+			.def("set_parent", &SCutsceneObjectElement::SetParent)
+			.def("set_anim_to_play", &SCutsceneObjectElement::SetAnimToPlay)
+			.def("set_on_finish_func", &SCutsceneObjectElement::SetOnFinishFunc)
+			.def("get_bone_id", &SCutsceneObjectElement::GetBoneID)
+			.def("set_bones_weapon", &SCutsceneObjectElement::SetBonesWeapon)
+			,
+			class_<CCutsceneItem>("CCutsceneItem")
+			.def("create_object_element", &CCutsceneItem::CreateObjectElement)
+			.def("set_pivot_object", &CCutsceneItem::SetPivotObject)
 		];
 
 	module(L, "player_hud")
@@ -1704,7 +1792,8 @@ void CLevel::script_register(lua_State* L)
 			def("has_active_tutorial",	&has_active_tutotial),
 			def("active_tutorial_name", &tutorial_name),
 			def("translate_string",		&translate_string),
-			def("reload_language", &ReloadLanguage)
+			def("reload_language", &ReloadLanguage),
+			def("world2ui", &World2Ui)
 	];
 }
 

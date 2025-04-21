@@ -863,10 +863,10 @@ bool CExportSkeleton::ExportGeometry(IWriter& F, u8 infl)
 		}
 
 		SkelVertVec& lst = SplitMeshData.getV_Verts();
-		for (SkelVertIt sv_it = lst.begin(); sv_it != lst.end(); sv_it++)
+		for (auto& elem : lst)
 		{
-			bone_points[sv_it->bones[0].id].push_back(sv_it->offs);
-			bones[sv_it->bones[0].id]->_RITransform().transform_tiny(bone_points[sv_it->bones[0].id].back());
+			bone_points[elem.bones[0].id].push_back(elem.offs);
+			bones[elem.bones[0].id]->_RITransform().transform_tiny(bone_points[elem.bones[0].id].back());
 		}
 
 		pb->Inc();
@@ -1026,6 +1026,9 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 	mTranslate.translate	(m_Source->a_vPosition);
 	mGT.mul					(mTranslate,mRotate);
 
+	NotifyVec PrefetchedData;
+	PrefetchedData.resize(m_Source->LastSMotion() - m_Source->FirstSMotion());
+	
 	for (SMotionIt motion_it=m_Source->FirstSMotion(); motion_it!=m_Source->LastSMotion(); motion_it++, smot++)
 	{
 		CSMotion* cur_motion = *motion_it;
@@ -1117,6 +1120,7 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 		// free temp storage
 		for (int itm_idx=0; itm_idx<b_lst.size(); ++itm_idx)
 		{
+
 			bm_item& BM 	= items[itm_idx];
 			// check T
 			R_ASSERT		(dwLen);
@@ -1273,8 +1277,56 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 			BM.destroy				();
 		}
 		xr_free						(items);
-
 		F.close_chunk				();
+		
+		F.open_chunk(m_Source->SMotionCount()+1+smot);
+
+		auto index = motion_it - m_Source->FirstSMotion();
+		PrefetchedData[index] = {};
+		
+		for (int itm_idx=0; itm_idx<b_lst.size(); ++itm_idx)
+		{
+			PrefetchedData[index][itm_idx] = {};
+			auto& BoneDatas = PrefetchedData[index];
+			auto& notifies = (*motion_it)->notify;
+			for (auto& BoneTrack : notifies.NotifyTracks)
+			{
+				if (m_Source->GetBoneIndexByWMap(BoneTrack.first.c_str()) != itm_idx)
+				{
+					continue;
+				}
+				auto& PrefetchedElem = BoneDatas[itm_idx];
+				for (auto& Track : BoneTrack.second)
+				{
+					for (auto& TrackNotify : Track.Notifies)
+					{
+						if (!PrefetchedElem.data.contains(TrackNotify.first))
+						{
+							PrefetchedElem.data[TrackNotify.first] = {};
+						}
+						PrefetchedElem.data[TrackNotify.first].push_back(&TrackNotify.second);
+					}
+				}
+			}
+		}
+
+		F.w_u32(PrefetchedData[index].size());
+		for (auto& BoneTrack : PrefetchedData[index])
+		{
+			F.w_u16(BoneTrack.first);
+			F.w_u32(BoneTrack.second.data.size());
+			for (auto& Key : BoneTrack.second.data)
+			{
+				F.w_float(Key.first);
+				F.w_u32(Key.second.size());
+				for (auto& Notify : Key.second)
+				{
+					F.w_stringZ(Notify->ExternalRef);
+				}
+			}
+		}
+			
+		F.close_chunk();
 #if 1
 		pb->Inc						();
 #endif
@@ -1349,8 +1401,10 @@ bool CExportSkeleton::ExportMotionDefs(IWriter& F)
 			F.w_u16(1);
 			F.w_stringZ("default");
 			F.w_u16((u16)m_Source->BoneCount());
-			for (int i=0; i<m_Source->BoneCount(); i++) 
+			for (int i = 0; i < m_Source->BoneCount(); i++) {
+				F.w_stringZ(m_Source->Bones()[i]->name.c_str());
 				F.w_u32(i);
+			}
 		}
 #if 1
 		pb->Inc		();

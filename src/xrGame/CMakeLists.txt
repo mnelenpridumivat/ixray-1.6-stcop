@@ -87,6 +87,7 @@ file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_IMGUI_INGAME_FILES "ImUtils/*.*")
+file(GLOB_RECURSE XGM_SOURCE_ANIM_NOTIFY_FILES "AnimNotify/*.*")
 
 # Source groups
 source_group("core" FILES ${XGM_SOURCE_ALL_FILES})
@@ -126,6 +127,7 @@ source_group("level" FILES ${XGM_SOURCE_LEVEL_FILES})
 source_group("ikan" FILES ${XGM_SOURCE_IKAN_FILES})
 source_group("inventory" FILES ${XGM_SOURCE_INV_FILES})
 source_group("Legacy" FILES ${XGM_SOURCE_LEGACY_FILES})
+source_group("AnimNotify" FILES ${XGM_SOURCE_ANIM_NOTIFY_FILES})
 
 source_group("imgui/utils" FILES ${XGM_SOURCE_IMGUI_INGAME_FILES})
 
@@ -155,6 +157,8 @@ endif()
 target_include_directories(xrGame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(xrGame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../xrServerEntities/")
 target_include_directories(xrGame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ui/")
+target_include_directories(xrGame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Cutscenes/")
+target_include_directories(xrGame PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../Include/xrRender/")
 target_include_directories(xrGame PUBLIC "${IXRAY_SDK_INC}")
 target_include_directories(xrGame PUBLIC "${IXRAY_SRC_DIR}/xrCore/")
 
