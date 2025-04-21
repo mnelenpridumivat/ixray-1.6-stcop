@@ -13,6 +13,8 @@
 #include "AnimNotifyDisableInfo.h"
 #include "AnimNotifyGiveInfo.h"
 #include "AnimNotifyLuaFunctor.h"
+#include "AnimNotifyPlayParticle.h"
+#include "AnimNotifyPlaySound.h"
 #include "Level.h"
 #include "AnimNotify/AnimNotifyRegistry.h"
 
@@ -24,15 +26,13 @@ void CAnimNotifyHandler::TriggerNotify(IAnimNotifyMessage* notify)
 
 void CAnimNotifyHandler::Update()
 {
+    xrCriticalSectionGuard guard(NotifyQueue.Lock);
+    while (!NotifyQueue.Queue.empty())
     {
-        xrCriticalSectionGuard guard(NotifyQueue.Lock);
-        while (!NotifyQueue.Queue.empty())
-        {
-            auto Name = NotifyQueue.Queue.front();
-            NotifyQueue.Queue.pop();
-            ProcessNotify(Name);
-            xr_delete(Name);
-        }
+        auto Name = NotifyQueue.Queue.front();
+        NotifyQueue.Queue.pop();
+        ProcessNotify(Name);
+        xr_delete(Name);
     }
 }
 
@@ -57,6 +57,15 @@ IAnimNotify* CAnimNotifyHandler::ConstructNotify(const EAnimNotifyType type)
         {
             return new CAnimNotifyLuaFunctor();
         }
+    case EAnimNotifyType::play_sound:
+        {
+            return new CAnimNotifyPlaySound();
+        }
+    case EAnimNotifyType::play_particle:
+        {
+            return new CAnimNotifyPlayParticle();
+        }
     }
+    VERIFY2(false, "Unknown anim notify type");
     return nullptr;
 }

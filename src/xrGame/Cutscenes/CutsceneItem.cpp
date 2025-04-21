@@ -182,10 +182,16 @@ void SCutsceneObjectElement::OnFinishFunc(CBlend* P)
 
     if (Self->OnFinishFuncName.size())
     {
-        luabind::functor<void> funct;
-        if (ai().script_engine().functor(Self->OnFinishFuncName.c_str(), funct))
+        try
         {
-            funct(Self);
+            luabind::functor<void> funct;
+            if (ai().script_engine().functor(Self->OnFinishFuncName.c_str(), funct))
+            {
+                funct(Self);
+            }
+        } catch(...)
+        {
+            R_ASSERT3(false, "Unable to process OnFinishFunc!", Self->OnFinishFuncName.c_str());
         }
     }
 }

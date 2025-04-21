@@ -1298,7 +1298,7 @@ bool CExportSkeleton::ExportMotionKeys(IWriter& F)
 				auto& PrefetchedElem = BoneDatas[itm_idx];
 				for (auto& Track : BoneTrack.second)
 				{
-					for (auto TrackNotify : Track.Notifies)
+					for (auto& TrackNotify : Track.Notifies)
 					{
 						if (!PrefetchedElem.data.contains(TrackNotify.first))
 						{
