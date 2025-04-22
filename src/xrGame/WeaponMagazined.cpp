@@ -1039,9 +1039,11 @@ void CWeaponMagazined::PlayReloadSound()
 	if(!m_sounds_enabled)
 		return;
 
+	bool empty = m_bAmmoInChamber ? iAmmoChamberElapsed == 0 : iAmmoElapsed == 0;
+
 	if (m_sounds.FindSoundItem("sndReloadMis", false) && IsMisfire() && bMisfireReload)
 		PlaySound("sndReloadMis", get_LastFP());
-	else if (m_sounds.FindSoundItem("sndReloadEmpty", false) && iAmmoElapsed == 0)
+	else if (m_sounds.FindSoundItem("sndReloadEmpty", false) && empty)
 		PlaySound("sndReloadEmpty", get_LastFP());
 	else
 		PlaySound("sndReload", get_LastFP());
