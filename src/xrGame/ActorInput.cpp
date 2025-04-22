@@ -768,29 +768,82 @@ void CActor::set_input_external_handler(CActorInputHandler *handler)
 void CActor::SwitchNightVision()
 {
 	if (CurrentGameUI() && CurrentGameUI()->TopInputReceiver())
+	{
 		return;
+	}
 
-	CWeapon* wpn1 = nullptr;
-	CWeapon* wpn2 = nullptr;
+	bool has_nvg = GetOutfit() && GetOutfit()->m_NightVisionSect.size() > 0 || GetHelmet() && GetHelmet()->m_NightVisionSect.size() > 0;
 
-	if(inventory().ItemFromSlot(INV_SLOT_2))
-		wpn1 = smart_cast<CWeapon*>(inventory().ItemFromSlot(INV_SLOT_2));
-
-	if(inventory().ItemFromSlot(INV_SLOT_3))
-		wpn2 = smart_cast<CWeapon*>(inventory().ItemFromSlot(INV_SLOT_3));
-
-	if (wpn1 && wpn1->IsZoomed())
+	if (!has_nvg)
+	{
 		return;
+	}
 
-	if (wpn2 && wpn2->IsZoomed())
-		return;
+	CWeapon* wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+	CCustomDetector* det = GetDetector();
+
+	if (wpn != nullptr && det != nullptr)
+	{
+		if (wpn->IsZoomed())
+		{
+			return;
+		}
+
+		if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		{
+			if (wpn->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+			{
+				return;
+			}
+
+			wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			wpn->SwitchState(CHUDState::eDeviceSwitch);
+			det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			det->SwitchState(CHUDState::eDeviceSwitch);
+			return;
+		}
+	}
+
+	if (wpn != nullptr)
+	{
+		if (wpn->IsZoomed())
+		{
+			return;
+		}
+
+		if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		{
+			if (wpn->GetState() != CHUDState::eIdle)
+			{
+				return;
+			}
+
+			wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			wpn->SwitchState(CHUDState::eDeviceSwitch);
+			return;
+		}
+	}
+
+	if (det != nullptr)
+	{
+		if (det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		{
+			if (det->GetState() != CHUDState::eIdle)
+			{
+				return;
+			}
+
+			det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			det->SwitchState(CHUDState::eDeviceSwitch);
+			return;
+		}
+	}
 
 	if (GetNightVisionEffector())
 	{
 		if (m_sNVGAnimator.size() > 0)
 		{
-			bool has_nvg = GetOutfit() && GetOutfit()->m_NightVisionSect.size() > 0 || GetHelmet() && GetHelmet()->m_NightVisionSect.size() > 0;
-			if (HudAnimator() && !HudAnimator()->IsActive() && has_nvg)
+			if (HudAnimator() && !HudAnimator()->IsActive())
 			{
 				HudAnimator()->StartAnimator(m_sNVGAnimator);
 				HudAnimator()->SetLeftCallback({ GetNightVisionEffector(), &CNightVisionEffector::SwitchNightVision });
@@ -805,21 +858,87 @@ void CActor::SwitchNightVision()
 	return;
 }
 
+
 void CActor::SwitchTorch()
 { 
 	if (CurrentGameUI() && CurrentGameUI()->TopInputReceiver())
-		return;
-
-	xr_vector<CAttachableItem*> const& all = CAttachmentOwner::attached_objects();
-	xr_vector<CAttachableItem*>::const_iterator it = all.begin();
-	xr_vector<CAttachableItem*>::const_iterator it_e = all.end();
-	for ( ; it != it_e; ++it )
 	{
-		CTorch* torch = smart_cast<CTorch*>(*it);
-		if ( torch )
-		{		
+		return;
+	}
+
+	if (CTorch* torch = smart_cast<CTorch*>(inventory().ItemFromSlot(TORCH_SLOT)))
+	{
+		CWeapon* wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+		CCustomDetector* det = GetDetector();
+
+		if (wpn != nullptr && det != nullptr)
+		{
+			if (wpn->IsZoomed())
+			{
+				return;
+			}
+
+			if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+			{
+				if (wpn->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+				{
+					return;
+				}
+
+				wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				wpn->SwitchState(CHUDState::eDeviceSwitch);
+				det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				det->SwitchState(CHUDState::eDeviceSwitch);
+				return;
+			}
+		}
+
+		if (wpn != nullptr)
+		{
+			if (wpn->IsZoomed())
+			{
+				return;
+			}
+
+			if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_torch))
+			{
+				if (wpn->GetState() != CHUDState::eIdle)
+				{
+					return;
+				}
+
+				wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				wpn->SwitchState(CHUDState::eDeviceSwitch);
+				return;
+			}
+		}
+
+		if (det != nullptr)
+		{
+			if (det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_torch))
+			{
+				if (det->GetState() != CHUDState::eIdle)
+				{
+					return;
+				}
+
+				det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				det->SwitchState(CHUDState::eDeviceSwitch);
+				return;
+			}
+		}
+
+		if (m_sHeadlampAnimator.size() > 0)
+		{
+			if (HudAnimator() && !HudAnimator()->IsActive())
+			{
+				HudAnimator()->StartAnimator(m_sHeadlampAnimator);
+				HudAnimator()->SetLeftCallback({ torch, &CTorch::Switch });
+			}
+		}
+		else
+		{
 			torch->Switch();
-			return;
 		}
 	}
 }
