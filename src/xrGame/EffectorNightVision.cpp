@@ -132,12 +132,6 @@ bool CNightVisionEffector::IsActive()
 	return pp != nullptr;
 }
 
-void CNightVisionEffector::OnDisabled(bool play_sound)
-{
-	if (play_sound)
-		PlaySounds(eBrokeSound);
-}
-
 void CNightVisionEffector::PlaySounds(EPlaySounds which)
 {
 	bool bPlaySoundFirstPerson = !!m_pActor->HUDview();

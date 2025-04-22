@@ -24,7 +24,6 @@ public:
 	void	Start(const shared_str& sect, bool play_sound = true);
 	void	Stop(const float factor, bool play_sound = true);
 	bool	IsActive();
-	void	OnDisabled(bool play_sound = true);
 	void	PlaySounds(EPlaySounds which);
 	void	SwitchNightVision();
 	void	SwitchNightVision(bool vision_on, bool use_sounds = true);
