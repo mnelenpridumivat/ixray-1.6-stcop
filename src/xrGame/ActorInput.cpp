@@ -787,7 +787,19 @@ void CActor::SwitchNightVision()
 
 	if (GetNightVisionEffector())
 	{
-		GetNightVisionEffector()->SwitchNightVision();
+		if (m_sNVGAnimator.size() > 0)
+		{
+			bool has_nvg = GetOutfit() && GetOutfit()->m_NightVisionSect.size() > 0 || GetHelmet() && GetHelmet()->m_NightVisionSect.size() > 0;
+			if (HudAnimator() && !HudAnimator()->IsActive() && has_nvg)
+			{
+				HudAnimator()->StartAnimator(m_sNVGAnimator);
+				HudAnimator()->SetLeftCallback({ GetNightVisionEffector(), &CNightVisionEffector::SwitchNightVision });
+			}
+		}
+		else
+		{
+			GetNightVisionEffector()->SwitchNightVision();
+		}
 	}
 
 	return;
