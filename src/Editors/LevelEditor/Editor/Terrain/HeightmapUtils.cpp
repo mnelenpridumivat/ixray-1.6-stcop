@@ -2,6 +2,218 @@
 #include "HeightmapUtils.h"
 #include <RedImage.hpp>
 
+Fvector2 CalculateUV(u32 vertexIndex, const xr_vector<Fvector>& Vertices, u32 Width, u32 Height)
+{
+	// Предполагаем, что вершины хранятся в порядке [z][x]
+	u32 z = vertexIndex / Width;
+	u32 x = vertexIndex % Width;
+
+	// Нормализованные UV от 0 до 1
+	Fvector2 uv;
+	uv.x = x / (float)(Width - 1);
+	uv.y = z / (float)(Height - 1);
+
+	// Инверсия по V для корректного отображения
+	uv.y = 1.0f - uv.y;
+
+	return uv;
+}
+
+Fvector2 GetUVForFaceVertex(u32 faceIndex, u32 vertexInFace,
+	const xr_vector<st_Face>& Faces,
+	const xr_vector<Fvector>& Vertices,
+	const xr_vector<Fvector2>& Uvs) {
+	// Получаем индекс вершины в общем массиве
+	u32 vertexIndex = Faces[faceIndex].pv[vertexInFace].pindex;
+
+	// Базовый вариант - UV из общего массива
+	Fvector2 uv = Uvs[vertexIndex];
+
+	// Здесь можно добавить проверку расщепленных UV:
+	/*
+	if (HasSplitUV(faceIndex, vertexIndex)) {
+		uv = GetSplitUV(faceIndex, vertexIndex);
+	}
+	*/
+
+	return uv;
+}
+
+void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Heightmap, CEditableObject* OutMesh)
+{
+	// 1. Проверка входных данных
+	if (!Heightmap.Data || Heightmap.Width < 2 || Heightmap.Height < 2 || !OutMesh)
+	{
+		Msg("! Invalid heightmap data or output mesh");
+		return;
+	}
+
+	// 2. Создание нового меша
+	CEditableMesh* Mesh = new CEditableMesh(OutMesh);
+	OutMesh->AppendMesh(Mesh);
+
+	// 3. Параметры террейна
+	const u32 Width = Heightmap.Width;
+	const u32 Height = Heightmap.Height;
+	const float SizeX = 1024 * Heightmap.Size.x;
+	const float SizeZ = 1024 * Heightmap.Size.z;
+
+	// 4. Подготовка вершин и UV-координат
+	xr_vector<Fvector> Vertices;
+	xr_vector<Fvector2> Uvs;
+	Vertices.reserve(Width * Height);
+	Uvs.reserve(Width * Height);
+
+	const float StepX = SizeX / (Width - 1);
+	const float StepZ = SizeZ / (Height - 1);
+	const float HalfX = SizeX / 2.0f;
+	const float HalfZ = SizeZ / 2.0f;
+
+	// 1. Параметры текстуры и террейна
+	const float uvStepX = 1.0f / (Width - 1);
+	const float uvStepZ = 1.0f / (Height - 1);
+
+	// 3. Генерация UV
+	for (u32 z = 0; z < Height; z++) {
+		for (u32 x = 0; x < Width; x++) {
+			// Мировые координаты вершины
+			Fvector V;
+			V.x = -(x * StepX - HalfX) + Heightmap.Pos.x;
+			V.z = (z * StepZ - HalfZ) + Heightmap.Pos.z;
+			V.y = Heightmap.GetHeight(x, z);
+			Vertices.push_back(V);
+
+			// Нормализованные UV от 0 до 1
+			Fvector2 uv;
+			uv.x = x * uvStepX;
+			uv.y = z * uvStepZ;  // Убрана инверсия, теперь 0 внизу, 1 вверху
+
+			Uvs.push_back(uv);
+
+			// Отладочный вывод для граничных вершин
+			if ((x == 0 && z == 0) || (x == Width - 1 && z == Height - 1) ||
+				(z == 0 && x < 10) || (z == Height - 1 && x >= Width - 10)) {
+				Fvector pos = Vertices[z * Width + x];
+				Msg("Vertex %d: Pos = (%.2f, %.2f, %.2f), UV = (%.4f, %.4f)",
+					z * Width + x, pos.x, pos.y, pos.z, uv.x, uv.y);
+			}
+		}
+	}
+
+	// 5. Создание полигонов (квадов из двух треугольников)
+	xr_vector<st_Face> Faces;
+	const u32 QuadsX = Width - 1;
+	const u32 QuadsZ = Height - 1;
+	Faces.reserve(QuadsX * QuadsZ * 2);
+
+	for (u32 z = 0; z < QuadsZ; z++)
+	{
+		for (u32 x = 0; x < QuadsX; x++)
+		{
+			const u32 V0 = z * Width + x;
+			const u32 V1 = z * Width + x + 1;
+			const u32 V2 = (z + 1) * Width + x;
+			const u32 V3 = (z + 1) * Width + x + 1;
+
+			// Проверяем, не являются ли все вершины квада черными (Y = 0)
+			if (Heightmap.GetHeight(x, z) <= 0.0f &&
+				Heightmap.GetHeight(x + 1, z) <= 0.0f &&
+				Heightmap.GetHeight(x, z + 1) <= 0.0f &&
+				Heightmap.GetHeight(x + 1, z + 1) <= 0.0f)
+			{
+				continue; // Пропускаем черные полигоны
+			}
+
+			// Первый треугольник (изменен порядок вершин)
+			st_Face Face1;
+			Face1.pv[0].pindex = V0;
+			Face1.pv[1].pindex = V1;  // Было V1
+			Face1.pv[2].pindex = V2;  // Было V2
+			Faces.push_back(Face1);
+
+			// Второй треугольник (изменен порядок вершин)
+			st_Face Face2;
+			Face2.pv[0].pindex = V1;
+			Face2.pv[1].pindex = V3;  // Было V3
+			Face2.pv[2].pindex = V2;  // Было V2
+			Faces.push_back(Face2);
+		}
+	}
+
+	// 6. Инициализация меша
+	Mesh->Create(
+		Faces.data(),
+		static_cast<u32>(Faces.size()),
+		Vertices.data(),
+		static_cast<u32>(Vertices.size()),
+		nullptr,
+		0
+	);
+
+	// 1. Инициализация UV-координат
+	xr_vector<Fvector2> Uvs(Vertices.size());
+	for (u32 i = 0; i < Vertices.size(); ++i) {
+		Uvs[i] = CalculateUV(i, Vertices, Width, Height);
+	}
+
+	// 2. Создание UV-мапы
+	st_VMap* mainUvMap = new st_VMap("Texture", vmtUV, false);
+	mainUvMap->resize(Vertices.size());
+	for (u32 i = 0; i < Vertices.size(); ++i) {
+		mainUvMap->getUV(i) = Uvs[i];
+		mainUvMap->appendVI(i);
+	}
+	Mesh->m_VMaps.push_back(mainUvMap);
+
+	// 3. Обработка полигонов с учетом возможных расщепленных UV
+	Mesh->m_VMRefs.resize(Faces.size());
+	for (u32 faceIdx = 0; faceIdx < Faces.size(); ++faceIdx) {
+		st_Face& face = Faces[faceIdx];
+		st_VMapPtLst& vmref = Mesh->m_VMRefs[faceIdx];
+
+		vmref.count = 3;
+		vmref.pts = xr_alloc<st_VMapPt>(3);
+
+		for (u32 j = 0; j < 3; ++j) {
+			u32 vertIdx = face.pv[j].pindex;
+			Fvector2 uv = GetUVForFaceVertex(faceIdx, j, Faces, Vertices, Uvs);
+
+			// Простая реализация без учета расщепленных UV
+			vmref.pts[j].vmap_index = 0;
+			vmref.pts[j].index = vertIdx;
+		}
+	}
+
+	// 9. Создание и настройка поверхности
+	CSurface* Surface = Mesh->GetSurfaceByFaceID(0);
+	Surface->SetName("terrain");
+	Surface->SetShader("levels\\zaton_earth");
+	Surface->SetShaderXRLC("default");
+	Surface->SetGameMtl("materials\\earth");
+	Surface->SetTexture("terrain\\terrain_mp_atp");
+	Surface->SetVMap("Texture");
+
+	Surface->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1);
+	Surface->OnDeviceCreate();
+	OutMesh->Surfaces().push_back(Surface);
+
+	// 10. Назначение полигонов поверхности
+	IntVec FaceIndices(Faces.size());
+	for (u32 i = 0; i < Faces.size(); ++i)
+		FaceIndices[i] = i;
+	Mesh->Surfaces()[Surface] = FaceIndices;
+
+	// 11. Генерация нормалей
+	Mesh->GenerateFNormals();
+	Mesh->GenerateVNormals(nullptr, true);
+	Mesh->GenerateAdjacency();
+
+	// 12. Обновление bounding box
+	OutMesh->UpdateBox();
+
+	Msg("Terrain mesh created successfully: %d vertices, %d faces", Vertices.size(), Faces.size());
+}
+
 void XRay::Editor::HeightmapUtils::GenerateHeightmapByMesh(CEditableObject* Mesh, const xr_string& OutputFile)
 {
 	size_t TextureSizeX = 1024;
