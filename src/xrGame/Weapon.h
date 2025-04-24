@@ -222,6 +222,7 @@ public:
 	bool m_bUseScopeHud = false;
 	bool m_bUseGLHud = false;
 	bool m_bHideColimSightInAlter;
+	bool m_bIsAimStarted = false;
 
 	shared_str hud_silencer;
 	shared_str hud_scope;
@@ -287,8 +288,6 @@ protected:
 		m_bHideBonesGLAttached {}, m_bHideBonesSilAttached {}, m_bHideBonesScopeAttached {},
 		m_bHideBonesUpgrade {}, m_bScopeShowBones{}, m_bScopeHideBones{}, m_bShowBonesUpgToHide{}, m_bShowBonesUpgToShow{},
 		m_sCollimatorSightsBones{};
-
-	bool m_bIsAimStarted = false;
 
 	void HideOneUpgradeLevel(const char* section);
 	void LoadUpgradeBonesToHide(const char* section, const char* line);
