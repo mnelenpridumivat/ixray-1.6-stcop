@@ -124,6 +124,7 @@ public:
 		eMisfire,
 		eSwitch,
 		eSwitchMode,
+		eEmptyClick,
 	};
 	enum EWeaponSubStates{
 		eSubstateReloadBegin		=0,
@@ -202,6 +203,7 @@ public:
 
 	bool	NeedBlockSprint						() const;
 
+	virtual void OnMotionMark(u32 state, const motion_marks&);
 
 	struct conditional_breaking_params
 	{
@@ -291,6 +293,7 @@ protected:
 		m_sCollimatorSightsBones{};
 
 	bool m_bFireModeConditions[2];
+	bool m_bBlockEmptyClick = false;
 
 	void HideOneUpgradeLevel(const char* section);
 	void LoadUpgradeBonesToHide(const char* section, const char* line);
