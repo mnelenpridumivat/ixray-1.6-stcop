@@ -127,6 +127,9 @@ void CWeaponMagazined::Load	(LPCSTR section)
 	if (WeaponSoundExist(section, "snd_aim_out"))
 		m_sounds.LoadSound(section, "snd_aim_out", "sndAimOut", true, m_eSoundAimOut);
 
+	if (WeaponSoundExist(section, "snd_changefiremode"))
+		m_sounds.LoadSound(section, "snd_changefiremode", "sndChangeFiremode", true, m_eSoundEmptyClick);
+
 	m_sSndShotCurrent = "sndShot";
 		
 	//звуки и партиклы глушителя, еслит такой есть
@@ -530,6 +533,11 @@ void CWeaponMagazined::OnStateSwitch	(u32 S)
 	case eHidden:
 		switch2_Hidden	();
 		break;
+	case eSwitchMode:
+	{
+		switch2_FireMode();
+		break;
+	}
 	}
 }
 
@@ -549,6 +557,7 @@ void CWeaponMagazined::UpdateCL			()
 		case eHiding:
 		case eReload:
 		case eIdle:
+		case eSwitchMode:
 			{
 				fShotTimeCounter	-=	dt;
 				clamp				(fShotTimeCounter, 0.0f, flt_max);
@@ -936,6 +945,7 @@ void CWeaponMagazined::OnAnimationEnd(u32 state)
 		case eFire:
 		case eFire2:
 		case eShowing:
+		case eSwitchMode:
 			SwitchState(eIdle);
 		break;
 	}
@@ -1055,6 +1065,7 @@ void CWeaponMagazined::switch2_Reload()
 	PlayReloadSound		();
 	SetPending			(TRUE);
 }
+
 void CWeaponMagazined::switch2_Hiding()
 {
 	OnZoomOut();
@@ -1076,6 +1087,7 @@ void CWeaponMagazined::switch2_Hidden()
 	signal_HideComplete		();
 	RemoveShotEffector		();
 }
+
 void CWeaponMagazined::switch2_Showing()
 {
 	if(m_sounds_enabled)
@@ -1083,6 +1095,44 @@ void CWeaponMagazined::switch2_Showing()
 
 	SetPending			(TRUE);
 	PlayAnimShow		();
+}
+
+void CWeaponMagazined::switch2_FireMode()
+{
+	SetPending(TRUE);
+
+	if (m_sounds_enabled)
+	{
+		PlaySoundIfExist("sndChangeFiremode", get_LastFP());
+	}
+
+	shared_str anim_name = "anm_changefiremode_from_";
+	if (m_iPrevFireMode == -1)
+	{
+		anim_name.printf("%s%s_to_", *anim_name, "a");
+	}
+	else
+	{
+		anim_name.printf("%s%d_to_", *anim_name, m_iPrevFireMode);
+	}
+
+	if (GetQueueSize() == -1)
+	{
+		anim_name.printf("%s%s", *anim_name, "a");
+	}
+	else
+	{
+		anim_name.printf("%s%d", *anim_name, GetQueueSize());
+	}
+
+	if (HudAnimationExist(anim_name))
+	{
+		PlayHUDMotion(SetCurrentStateAnimation(anim_name), true, eSwitchMode);
+	}
+	else
+	{
+		PlayHUDMotion(SetCurrentStateAnimation("anm_firemode"), true, eSwitchMode);
+	}
 }
 
 bool CWeaponMagazined::Action(u16 cmd, u32 flags) 
@@ -1715,10 +1765,12 @@ bool CWeaponMagazined::SwitchMode()
  
 void CWeaponMagazined::ChangeFireMode(u16 cmd)
 {
-	if (!HasFireModes() || GetState() != eIdle)
+	if (!HasFireModes() || GetState() != eIdle || IsZoomed() && m_bFireModeConditions[0] && !m_bFireModeConditions[1])
 	{
 		return;
 	}
+
+	m_iPrevFireMode = GetQueueSize();
 
 	if (cmd == kWPN_NEXT)
 	{
@@ -1730,6 +1782,11 @@ void CWeaponMagazined::ChangeFireMode(u16 cmd)
 	}
 
 	SetQueueSize(GetCurrentFireMode());
+
+	if (m_bFireModeConditions[0])
+	{
+		SwitchState(eSwitchMode);
+	}
 };
 
 void CWeaponMagazined::OnH_A_Chield()
