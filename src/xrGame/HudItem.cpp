@@ -971,7 +971,7 @@ void CHudItem::SetMultipleBonesStatus(const char* section, const char* line, BOO
 
 void CHudItem::OnMotionMark(u32 state, const motion_marks& mark)
 {
-	if (state == eDeviceSwitch && mark.name == "mm_device")
+	if (state == eDeviceSwitch && mark.name == "Left")
 	{
 		if (g_player_hud->attached_item(1) != nullptr && g_player_hud->attached_item(1) == HudItemData() && g_player_hud->attached_item(0) != nullptr)
 		{
