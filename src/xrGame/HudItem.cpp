@@ -589,7 +589,7 @@ void CHudItem::on_a_hud_attach()
 	}
 
 	m_eAnimationsFlags.set(EAnimationsFlags::af_torch, HudAnimationExist("anm_switch_device"));
-	m_eAnimationsFlags.set(EAnimationsFlags::af_nvg, HudAnimationExist("anm_switch_device"));
+	m_eAnimationsFlags.set(EAnimationsFlags::af_nvg, m_eAnimationsFlags.test(EAnimationsFlags::af_torch));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_clear_mask, HudAnimationExist("anm_gasmask"));
 }
 

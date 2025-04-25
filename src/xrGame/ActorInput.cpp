@@ -790,17 +790,17 @@ void CActor::SwitchNightVision()
 			return;
 		}
 
-		if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CCustomDetector::EAnimationsFlags::af_nvg))
 		{
-			if (itm->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+			if (itm->GetState() != CHUDState::eIdle || det->GetState() != CCustomDetector::eIdle)
 			{
 				return;
 			}
 
 			itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
 			itm->SwitchState(CHUDState::eDeviceSwitch);
-			det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
-			det->SwitchState(CHUDState::eDeviceSwitch);
+			det->m_eDevicesFlags.set(CCustomDetector::EDevicesFlags::df_nvg, true);
+			det->SwitchState(CCustomDetector::eDeviceSwitch);
 			return;
 		}
 	}
@@ -827,15 +827,15 @@ void CActor::SwitchNightVision()
 
 	if (det != nullptr)
 	{
-		if (det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		if (det->m_eAnimationsFlags.test(CCustomDetector::EAnimationsFlags::af_nvg))
 		{
-			if (det->GetState() != CHUDState::eIdle)
+			if (det->GetState() != CCustomDetector::eIdle)
 			{
 				return;
 			}
 
-			det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
-			det->SwitchState(CHUDState::eDeviceSwitch);
+			det->m_eDevicesFlags.set(CCustomDetector::EDevicesFlags::df_nvg, true);
+			det->SwitchState(CCustomDetector::eDeviceSwitch);
 			return;
 		}
 	}
@@ -880,17 +880,17 @@ void CActor::SwitchTorch()
 				return;
 			}
 
-			if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+			if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CCustomDetector::EAnimationsFlags::af_nvg))
 			{
-				if (itm->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+				if (itm->GetState() != CHUDState::eIdle || det->GetState() != CCustomDetector::eIdle)
 				{
 					return;
 				}
 
 				itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
 				itm->SwitchState(CHUDState::eDeviceSwitch);
-				det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
-				det->SwitchState(CHUDState::eDeviceSwitch);
+				det->m_eDevicesFlags.set(CCustomDetector::EDevicesFlags::df_torch, true);
+				det->SwitchState(CCustomDetector::eDeviceSwitch);
 				return;
 			}
 		}
@@ -917,15 +917,15 @@ void CActor::SwitchTorch()
 
 		if (det != nullptr)
 		{
-			if (det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_torch))
+			if (det->m_eAnimationsFlags.test(CCustomDetector::EAnimationsFlags::af_torch))
 			{
-				if (det->GetState() != CHUDState::eIdle)
+				if (det->GetState() != CCustomDetector::eIdle)
 				{
 					return;
 				}
 
-				det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
-				det->SwitchState(CHUDState::eDeviceSwitch);
+				det->m_eDevicesFlags.set(CCustomDetector::EDevicesFlags::df_torch, true);
+				det->SwitchState(CCustomDetector::eDeviceSwitch);
 				return;
 			}
 		}
