@@ -14,11 +14,12 @@ class CWeaponBase : public CHudItemObject,
 
     xr_unique_ptr<IWeaponMagazine> Magazine;
     xr_unique_ptr<IWeaponBarrel> Barrel;
-    xr_unique_ptr<IWeaponUnderbarrel> UnderBarrel;
+    xr_unique_ptr<IWeaponUnderbarrel> Underbarrel;
     xr_unique_ptr<IWeaponScope> PrimaryScope;
     xr_unique_ptr<IWeaponScope> SecondaryScope;
     
 public:
 	virtual void Serialize(ISaveObject& Object) override;
+	virtual void Load(LPCSTR section) override;
     
 };
