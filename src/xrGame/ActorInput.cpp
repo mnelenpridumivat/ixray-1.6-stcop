@@ -779,47 +779,48 @@ void CActor::SwitchNightVision()
 		return;
 	}
 
-	CWeapon* wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+	CHudItem* itm = smart_cast<CHudItem*>(inventory().ActiveItem());
+	CWeapon* wpn = smart_cast<CWeapon*>(itm);
 	CCustomDetector* det = GetDetector();
 
-	if (wpn != nullptr && det != nullptr)
+	if (itm != nullptr && det != nullptr)
 	{
-		if (wpn->IsZoomed())
+		if (wpn != nullptr && wpn->IsZoomed())
 		{
 			return;
 		}
 
-		if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
 		{
-			if (wpn->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+			if (itm->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
 			{
 				return;
 			}
 
-			wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
-			wpn->SwitchState(CHUDState::eDeviceSwitch);
+			itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			itm->SwitchState(CHUDState::eDeviceSwitch);
 			det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
 			det->SwitchState(CHUDState::eDeviceSwitch);
 			return;
 		}
 	}
 
-	if (wpn != nullptr)
+	if (itm != nullptr)
 	{
-		if (wpn->IsZoomed())
+		if (wpn != nullptr && wpn->IsZoomed())
 		{
 			return;
 		}
 
-		if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+		if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
 		{
-			if (wpn->GetState() != CHUDState::eIdle)
+			if (itm->GetState() != CHUDState::eIdle)
 			{
 				return;
 			}
 
-			wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
-			wpn->SwitchState(CHUDState::eDeviceSwitch);
+			itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_nvg, true);
+			itm->SwitchState(CHUDState::eDeviceSwitch);
 			return;
 		}
 	}
@@ -868,47 +869,48 @@ void CActor::SwitchTorch()
 
 	if (CTorch* torch = smart_cast<CTorch*>(inventory().ItemFromSlot(TORCH_SLOT)))
 	{
-		CWeapon* wpn = smart_cast<CWeapon*>(inventory().ActiveItem());
+		CHudItem* itm = smart_cast<CHudItem*>(inventory().ActiveItem());
+		CWeapon* wpn = smart_cast<CWeapon*>(itm);
 		CCustomDetector* det = GetDetector();
 
-		if (wpn != nullptr && det != nullptr)
+		if (itm != nullptr && det != nullptr)
 		{
-			if (wpn->IsZoomed())
+			if (wpn && wpn->IsZoomed())
 			{
 				return;
 			}
 
-			if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
+			if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg) && det->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_nvg))
 			{
-				if (wpn->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
+				if (itm->GetState() != CHUDState::eIdle && det->GetState() != CHUDState::eIdle)
 				{
 					return;
 				}
 
-				wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
-				wpn->SwitchState(CHUDState::eDeviceSwitch);
+				itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				itm->SwitchState(CHUDState::eDeviceSwitch);
 				det->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
 				det->SwitchState(CHUDState::eDeviceSwitch);
 				return;
 			}
 		}
 
-		if (wpn != nullptr)
+		if (itm != nullptr)
 		{
-			if (wpn->IsZoomed())
+			if (wpn && wpn->IsZoomed())
 			{
 				return;
 			}
 
-			if (wpn->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_torch))
+			if (itm->m_eAnimationsFlags.test(CHudItem::EAnimationsFlags::af_torch))
 			{
-				if (wpn->GetState() != CHUDState::eIdle)
+				if (itm->GetState() != CHUDState::eIdle)
 				{
 					return;
 				}
 
-				wpn->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
-				wpn->SwitchState(CHUDState::eDeviceSwitch);
+				itm->m_eDevicesFlags.set(CHudItem::EDevicesFlags::df_torch, true);
+				itm->SwitchState(CHUDState::eDeviceSwitch);
 				return;
 			}
 		}
