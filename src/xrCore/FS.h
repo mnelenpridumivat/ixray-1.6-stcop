@@ -227,6 +227,7 @@ public:
 	u32 m_last_pos;
 };
 
+// TODO: rewrite size from int to s64
 class XRCORE_API IReader :  public IReaderBase
 {
 protected:
