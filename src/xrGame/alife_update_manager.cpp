@@ -22,6 +22,7 @@
 #include "restriction_space.h"
 #include "mt_config.h"
 #include "../xrEngine/string_table.h"
+#include "Save/SaveManager.h"
 
 using namespace ALife;
 
@@ -234,6 +235,7 @@ bool CALifeUpdateManager::change_level	(NET_Packet &net_packet)
 	*m_server_command_line			= xr_strconcat(temp,autosave_name,temp0);
 	
 	save							(autosave_name);
+	CSaveManager::GetInstance().WriteSavedDataImpl();
 
 	graph().actor()->m_tGraphID		= safe_graph_vertex_id;
 	graph().actor()->m_tNodeID		= safe_level_vertex_id;

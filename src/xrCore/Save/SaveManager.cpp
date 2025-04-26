@@ -63,7 +63,8 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 
 void CSaveManager::WriteSavedData(const string_path& to_file)
 {
-	std::copy(to_file, to_file + strlen(to_file) - 1, SavePath);
+	std::memset(SavePath, 0, sizeof(SavePath));
+	std::copy(to_file, to_file + strlen(to_file), SavePath);
 	bNeedSave = true;
 }
 
