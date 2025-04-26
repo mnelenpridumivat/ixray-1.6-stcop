@@ -34,7 +34,7 @@
 #include "Weapon.h"
 #include "WeaponMagazined.h"
 #include "ai/monsters/basemonster/base_monster.h"
-#include "HUDAnimItem.h"
+//#include "HUDAnimItem.h"
 #include "WeaponMagazined.h"
 #include "ActorHelmet.h"
 

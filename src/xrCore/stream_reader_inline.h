@@ -45,11 +45,11 @@ IC void CStreamReader::remap(const u32& new_offset)
 	map(new_offset);
 }
 
-IC u32 CStreamReader::elapsed() const
+IC s32 CStreamReader::elapsed() const
 {
 	u32 offset_from_file_start = tell();
 	VERIFY(m_file_size >= offset_from_file_start);
-	return (m_file_size - offset_from_file_start);
+	return s32(m_file_size) - s32(offset_from_file_start);
 }
 
 IC u32 CStreamReader::length() const
