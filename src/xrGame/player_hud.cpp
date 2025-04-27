@@ -12,6 +12,7 @@
 #include <CutsceneManager.h>
 
 #include "CutsceneItem.h"
+#include "WeaponBinoculars.h"
 
 player_hud* g_player_hud = nullptr;
 player_hud* g_player_hud2 = nullptr;
@@ -474,52 +475,99 @@ void hud_item_measures::load(const shared_str& sect_name, IKinematics* K)
 	xr_strconcat(val_name,"gl_hud_offset_rot",_prefix);
 	m_hands_offset[1][2]		= READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, def);
 
-	//--> Смещение в стрейфе
-	xr_strconcat(val_name, "strafe_hud_offset_pos", _prefix);
-	m_strafe_offset[0][0] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, Fvector().set(0.015f, 0.f, 0.f));
-	xr_strconcat(val_name, "strafe_hud_offset_rot", _prefix);
-	m_strafe_offset[1][0] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, Fvector().set(0.f, 0.f, 4.5f));
-
-	//--> Поворот в стрейфе
-	xr_strconcat(val_name, "strafe_aim_hud_offset_pos", _prefix);
-	m_strafe_offset[0][1] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, Fvector().set(0.005f, 0.f, 0.f));
-	xr_strconcat(val_name, "strafe_aim_hud_offset_rot", _prefix);
-	m_strafe_offset[1][1] = READ_IF_EXISTS(pSettings, r_fvector3, sect_name, val_name, Fvector().set(0.f, 0.f, 2.5f));
-
-	//--> Параметры стрейфа
-	bool bStrafeEnabled = READ_IF_EXISTS(pSettings, r_bool, sect_name, "strafe_enabled", true);
-	bool bStrafeEnabled_aim = READ_IF_EXISTS(pSettings, r_bool, sect_name, "strafe_aim_enabled", false);
-	float fFullStrafeTime = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_transition_time", 0.5f);
-	float fFullStrafeTime_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_aim_transition_time", 0.15f);
-	float fStrafeCamLFactor = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_limit_factor", 0.5f);
-	float fStrafeCamLFactor_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_limit_aim_factor", 1.0f);
-	float fStrafeMinAngle = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_min_angle", 0.0f);
-	float fStrafeMinAngle_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "strafe_cam_aim_min_angle", 7.0f);
-
-	//--> (Data 1)
-	m_strafe_offset[2][0].set((bStrafeEnabled ? 1.0f : 0.0f), fFullStrafeTime, 0); // normal
-	m_strafe_offset[2][1].set((bStrafeEnabled_aim ? 1.0f : 0.0f), fFullStrafeTime_aim, 0); // aim-GL
-
-	//--> (Data 2)
-	m_strafe_offset[3][0].set(fStrafeCamLFactor, fStrafeMinAngle, 0); // normal
-	m_strafe_offset[3][1].set(fStrafeCamLFactor_aim, fStrafeMinAngle_aim, 0); // aim-GL
-
 	m_inertion_params.m_tendto_speed = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_speed", 1.0f);
 	m_inertion_params.m_tendto_speed_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_aim_speed", 1.0f);
 	m_inertion_params.m_tendto_ret_speed = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_ret_speed", 5.0f);
 	m_inertion_params.m_tendto_ret_speed_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_tendto_ret_aim_speed", 5.0f);
 
-	m_inertion_params.m_min_angle = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_min_angle", 0.0f);
-	m_inertion_params.m_min_angle_aim = READ_IF_EXISTS(pSettings, r_float, sect_name, "inertion_min_angle_aim", 3.5f);
-
-	m_inertion_params.m_offset_LRUD = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD", Fvector4().set(0.04f, 0.04f, 0.04f, 0.02f));
-	m_inertion_params.m_offset_LRUD_aim = READ_IF_EXISTS(pSettings, r_fvector4, sect_name, "inertion_offset_LRUD_aim", Fvector4().set(0.015f, 0.015f, 0.01f, 0.005f));
-
 	R_ASSERT2(pSettings->line_exist(sect_name,"fire_point")==pSettings->line_exist(sect_name,"fire_bone"),		sect_name.c_str());
 	R_ASSERT2(pSettings->line_exist(sect_name,"fire_point2")==pSettings->line_exist(sect_name,"fire_bone2"),	sect_name.c_str());
 	R_ASSERT2(pSettings->line_exist(sect_name,"shell_point")==pSettings->line_exist(sect_name,"shell_bone"),	sect_name.c_str());
 
+	m_weapon_inertion.Load(sect_name, is_16x9);
+
 	m_prop_flags.set(e_16x9_mode_now,is_16x9);
+}
+
+void weapon_inertion::Load(const shared_str& section, bool is_16x9)
+{
+	move_suicide_offset.Load(section, "hud_move_suicide_offset", is_16x9);
+
+	move_to_crouch_offset.Load(section, "hud_move_to_crouch_offset", is_16x9);
+	move_from_crouch_offset.Load(section, "hud_move_from_crouch_offset", is_16x9);
+	move_to_slow_crouch_offset.Load(section, "hud_move_to_slow_crouch_offset", is_16x9);
+	move_from_slow_crouch_offset.Load(section, "hud_move_from_slow_crouch_offset", is_16x9);
+
+	move_to_rlookout_offset.Load(section, "hud_move_to_rlookout_offset", is_16x9);
+	move_from_rlookout_offset.Load(section, "hud_move_from_rlookout_offset", is_16x9);
+	move_to_llookout_offset.Load(section, "hud_move_to_llookout_offset", is_16x9);
+	move_from_llookout_offset.Load(section, "hud_move_from_llookout_offset", is_16x9);
+
+	aim_move_to_crouch_offset.Load(section, "hud_aim_move_to_crouch_offset", is_16x9);
+	aim_move_from_crouch_offset.Load(section, "hud_aim_move_from_crouch_offset", is_16x9);
+	aim_move_to_slow_crouch_offset.Load(section, "hud_aim_move_to_slow_crouch_offset", is_16x9);
+	aim_move_from_slow_crouch_offset.Load(section, "hud_aim_move_from_slow_crouch_offset", is_16x9);
+
+	aim_move_to_rlookout_offset.Load(section, "hud_aim_move_to_rlookout_offset", is_16x9);
+	aim_move_from_rlookout_offset.Load(section, "hud_aim_move_from_rlookout_offset", is_16x9);
+	aim_move_to_llookout_offset.Load(section, "hud_aim_move_to_llookout_offset", is_16x9);
+	aim_move_from_llookout_offset.Load(section, "hud_aim_move_from_llookout_offset", is_16x9);
+
+	move_rlookout_offset.Load(section, "hud_move_rlookout_offset", is_16x9);
+	move_llookout_offset.Load(section, "hud_move_llookout_offset", is_16x9);
+
+	move_left_offset.Load(section, "hud_move_left_offset", is_16x9);
+	move_right_offset.Load(section, "hud_move_right_offset", is_16x9);
+	move_forward_offset.Load(section, "hud_move_forward_offset", is_16x9);
+	move_back_offset.Load(section, "hud_move_back_offset", is_16x9);
+
+	move_crouch_offset.Load(section, "hud_move_crouch_offset", is_16x9);
+	move_slow_crouch_offset.Load(section, "hud_move_slow_crouch_offset", is_16x9);
+
+	move_jump_offset.Load(section, "hud_move_jump_offset", is_16x9);
+	move_fall_offset.Load(section, "hud_move_fall_offset", is_16x9);
+	move_landing_offset.Load(section, "hud_move_landing_offset", is_16x9);
+	move_landing2_offset.Load(section, "hud_move_landing2_offset", is_16x9);
+
+	move_rlookout_offset_speed_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_rlookout_offset_speed_factor", 1.0f);
+	move_llookout_offset_speed_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_llookout_offset_speed_factor", 1.0f);
+
+	aim_move_slow_crouch_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_aim_move_slow_crouch_factor", 1.0f);
+	aim_move_crouch_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_aim_move_crouch_factor", 1.0f);
+	aim_move_slow_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_aim_move_slow_factor", 1.0f);
+
+	no_other_hud_moving_while_suicide = READ_IF_EXISTS(pSettings, r_bool, section, "no_other_hud_moving_while_suicide", false);
+
+	to_crouch_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "to_crouch_time", 0.0f) * 1000.f);
+	from_crouch_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "from_crouch_time", 0.0f) * 1000.f);
+	to_slow_crouch_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "to_slow_crouch_time", 0.0f) * 1000.f);
+	from_slow_crouch_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "from_slow_crouch_time", 0.0f) * 1000.f);
+
+	to_rlookout_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "to_rlookout_time", 0.0f) * 1000.f);
+	from_rlookout_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "from_rlookout_time", 0.0f) * 1000.f);
+	to_llookout_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "to_llookout_time", 0.0f) * 1000.f);
+	from_llookout_time = floor(READ_IF_EXISTS(pSettings, r_float, section, "from_llookout_time", 0.0f) * 1000.f);
+
+	move_weaponhide_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_weaponhide_factor", 1.0f);
+	move_unzoom_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_unzoom_factor", 1.0f);
+	move_stabilize_factor = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_stabilize_factor", 2.0f);
+
+	move_speed_pos = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_speed_pos", 0.1f);
+	move_speed_rot = READ_IF_EXISTS(pSettings, r_float, section, "hud_move_speed_rot", 0.4f);
+
+	move_suicide_speed_pos = READ_IF_EXISTS(pSettings, r_float, section, "suicide_speed_pos", 0.2f);
+	move_suicide_speed_rot = READ_IF_EXISTS(pSettings, r_float, section, "suicide_speed_rot", 0.002f);
+}
+
+void weapon_inertion::base_params::Load(const shared_str& section, const shared_str& str, bool is_16x9)
+{
+	shared_str name;
+
+	name.printf("%s_pos%s", *str, is_16x9 ? "_16x9" : "");
+	position = READ_IF_EXISTS(pSettings, r_fvector3, section, *name, zero_vel);
+
+	name.printf("%s_rot%s", *str, is_16x9 ? "_16x9" : "");
+	rotation = READ_IF_EXISTS(pSettings, r_fvector3, section, *name, zero_vel);
 }
 
 attachable_hud_item::~attachable_hud_item()
@@ -1776,4 +1824,507 @@ u32 animator_item::anim_play(const shared_str& anm_name_b, BOOL bMixIn, const CM
 		}
 	}
 	return ret;
+}
+
+void attachable_hud_item::set_hands_offset_pos(Fvector& offset)
+{
+	m_measures.m_hands_attach[0].set(offset);
+}
+
+void attachable_hud_item::set_hands_offset_rot(Fvector& offset)
+{
+	m_measures.m_hands_attach[1].set(offset);
+}
+
+player_hud::default_hud_coords_params player_hud::GetDefaultHudCoords(shared_str hud_sect, u16 idx, bool force)
+{
+	if (last_default_hud_params[idx].hud_sect != hud_sect || UI().is_widescreen() != last_default_hud_params[idx].is16x9 || force)
+	{
+		last_default_hud_params[idx].hud_sect = hud_sect;
+		last_default_hud_params[idx].is16x9 = UI().is_widescreen();
+
+		if (last_default_hud_params[idx].is16x9)
+		{
+			last_default_hud_params[idx].hands_position = READ_IF_EXISTS(pSettings, r_fvector3, hud_sect, "hands_position_16x9", zero_vel);
+			last_default_hud_params[idx].hands_orientation = READ_IF_EXISTS(pSettings, r_fvector3, hud_sect, "hands_orientation_16x9", zero_vel);
+		}
+		else
+		{
+			last_default_hud_params[idx].hands_position = READ_IF_EXISTS(pSettings, r_fvector3, hud_sect, "hands_position", zero_vel);
+			last_default_hud_params[idx].hands_orientation = READ_IF_EXISTS(pSettings, r_fvector3, hud_sect, "hands_orientation", zero_vel);
+		}
+	}
+
+	return last_default_hud_params[idx];
+}
+
+void player_hud::AddOffsets(weapon_inertion::base_params& base, Fvector& pos, Fvector& rot, float koef)
+{
+	Fvector tmp = zero_vel;
+
+	tmp = base.position;
+	tmp.mul(koef);
+	pos.add(tmp);
+
+	tmp = base.rotation;
+	tmp.mul(koef);
+	rot.add(tmp);
+}
+
+void player_hud::AddSuicideOffset(weapon_inertion& inertion_params, const shared_str& section, Fvector& pos, Fvector& rot)
+{
+	if (READ_IF_EXISTS(pSettings, r_bool, section, "prohibit_suicide", false))
+		return;
+
+	if (inertion_params.no_other_hud_moving_while_suicide)
+	{
+		rot.set(zero_vel);
+		pos.set(zero_vel);
+	}
+
+	AddOffsets(inertion_params.move_suicide_offset, pos, rot);
+
+}
+
+void player_hud::GetCurrentTargetOffset_aim(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real)
+{
+	pos.set(zero_vel);
+	rot.set(zero_vel);
+	factor = 1.0f;
+
+	float koef = 1.0f;
+
+	if (Actor()->GetMovementState(eReal) & mcCrouch && Actor()->GetMovementState(eReal) & mcAccel)
+	{
+		koef = inertion_params.aim_move_slow_crouch_factor;
+	}
+	else if (Actor()->GetMovementState(eReal) & mcCrouch)
+	{
+		koef = inertion_params.aim_move_crouch_factor;
+	}
+	else if (Actor()->GetMovementState(eReal) & mcAccel)
+	{
+		koef = inertion_params.aim_move_slow_factor;
+	}
+
+	if (tocrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_to_crouch_offset, pos, rot, koef);
+	}
+
+	if (fromcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_from_crouch_offset, pos, rot, koef);
+	}
+
+	if (toslowcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_to_slow_crouch_offset, pos, rot, koef);
+	}
+
+	if (fromslowcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_from_slow_crouch_offset, pos, rot, koef);
+	}
+
+	if (torlookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_to_rlookout_offset, pos, rot, koef);
+	}
+
+	if (fromrlookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_from_rlookout_offset, pos, rot, koef);
+	}
+
+	if (tollookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_to_llookout_offset, pos, rot, koef);
+	}
+
+	if (fromllookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.aim_move_from_llookout_offset, pos, rot, koef);
+	}
+}
+
+void player_hud::GetCurrentTargetOffset(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real)
+{
+	factor = inertion_params.move_stabilize_factor;
+
+	pos.set(zero_vel);
+	rot.set(zero_vel);
+
+	float koef = 1.0f;
+
+	if ((real & mcCrouch) && (real & mcAccel))
+	{
+		koef = inertion_params.aim_move_slow_crouch_factor;
+	}
+	else if (real & mcCrouch)
+	{
+		koef = inertion_params.aim_move_crouch_factor;
+	}
+	else if (real & mcAccel)
+	{
+		koef = inertion_params.aim_move_slow_factor;
+	}
+
+	if (tocrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_to_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (fromcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_from_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (toslowcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_to_slow_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (fromslowcrouch_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_from_slow_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (torlookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_to_rlookout_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (fromrlookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_from_rlookout_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (tollookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_to_llookout_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if (fromllookout_time_remains > 0)
+	{
+		AddOffsets(inertion_params.move_from_llookout_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcRLookout) && !(real & mcLLookout))
+	{
+		AddOffsets(inertion_params.move_rlookout_offset, pos, rot, koef);
+		factor = inertion_params.move_rlookout_offset_speed_factor;
+	}
+
+	if ((real & mcLLookout) && !(real & mcRLookout))
+	{
+		AddOffsets(inertion_params.move_llookout_offset, pos, rot, koef);
+		factor = inertion_params.move_llookout_offset_speed_factor;
+	}
+
+	if ((real & mcLStrafe) && !(real & mcRStrafe))
+	{
+		AddOffsets(inertion_params.move_left_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcRStrafe) && !(real & mcLStrafe))
+	{
+		AddOffsets(inertion_params.move_right_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcFwd) && !(real & mcBack))
+	{
+		AddOffsets(inertion_params.move_forward_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcBack) && !(real & mcFwd))
+	{
+		AddOffsets(inertion_params.move_back_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcCrouch) && !(real & mcAccel))
+	{
+		AddOffsets(inertion_params.move_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcCrouch) && (real & mcAccel))
+	{
+		AddOffsets(inertion_params.move_slow_crouch_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcJump) && !(real & mcFall) && !(real & mcLanding) && !(real & mcLanding2))
+	{
+		AddOffsets(inertion_params.move_jump_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcFall) && !(real & mcJump) && !(real & mcLanding) && !(real & mcLanding2))
+	{
+		AddOffsets(inertion_params.move_fall_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcLanding) && !(real & mcJump) && !(real & mcFall) && !(real & mcLanding2))
+	{
+		AddOffsets(inertion_params.move_landing_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+
+	if ((real & mcLanding2) && !(real & mcJump) && !(real & mcFall) && !(real & mcLanding))
+	{
+		AddOffsets(inertion_params.move_landing2_offset, pos, rot, koef);
+		factor = 1.0f;
+	}
+}
+
+void player_hud::UpdateWeaponOffset(u32 delta)
+{
+	static const bool isInertion = EngineExternal()[EEngineExternalGame::EnableWeaponInertion];
+
+	if (!isInertion)
+	{
+		return;
+	}
+
+	if (!Actor())
+	{
+		return;
+	}
+
+	CHudItem* itm = smart_cast<CHudItem*>(Actor()->inventory().ActiveItem());
+	CCustomDetector* det = nullptr;
+
+	if (itm == nullptr)
+		itm = Actor()->GetDetector();
+	else
+		det = Actor()->GetDetector();
+
+	if (itm == nullptr)
+		return;
+
+	attachable_hud_item* HID = itm->HudItemData();
+
+	if (HID == nullptr)
+		return;
+
+	time_accumulator += delta;
+
+	shared_str section = itm->HudSection();
+
+	auto& current_params = HID->m_measures.m_weapon_inertion;
+
+	u32 wishful = Actor()->GetMovementState(eWishful);
+	u32 real = Actor()->GetMovementState(eReal);
+
+	if ((wishful & mcCrouch) && !(real & mcCrouch))
+	{
+		tocrouch_time_remains = current_params.to_crouch_time;
+		fromcrouch_time_remains = 0;
+	}
+	else if (!(wishful & mcCrouch) && (Actor()->GetMovementState(eReal) & mcCrouch))
+	{
+		fromcrouch_time_remains = current_params.from_crouch_time;
+		tocrouch_time_remains = 0;
+	}
+
+	if ((wishful & mcCrouch) && (wishful & mcAccel) && !(real & mcAccel))
+	{
+		toslowcrouch_time_remains = current_params.to_slow_crouch_time;
+		fromslowcrouch_time_remains = 0;
+	}
+	else if ((wishful & mcCrouch) && !(wishful & mcAccel) && (real & mcAccel))
+	{
+		fromslowcrouch_time_remains = current_params.from_slow_crouch_time;
+		toslowcrouch_time_remains = 0;
+	}
+
+	if ((wishful & mcRLookout) && !(real & mcRLookout))
+	{
+		torlookout_time_remains = current_params.to_llookout_time;
+		fromrlookout_time_remains = 0;
+	}
+	else if (!(wishful & mcRLookout) && (real & mcRLookout))
+	{
+		fromrlookout_time_remains = current_params.from_rlookout_time;
+		torlookout_time_remains = 0;
+	}
+
+	if ((wishful & mcLLookout) && !(real & mcLLookout))
+	{
+		tollookout_time_remains = current_params.to_llookout_time;
+		fromllookout_time_remains = 0;
+	}
+	else if (!(wishful & mcLLookout) && (real & mcLLookout))
+	{
+		fromllookout_time_remains = current_params.from_llookout_time;
+		tollookout_time_remains = 0;
+	}
+
+	default_hud_coords_params def_hud_params = GetDefaultHudCoords(section);
+	Fvector pos = def_hud_params.hands_position;
+	Fvector rot = def_hud_params.hands_orientation;
+
+	Fvector targetpos = zero_vel;
+	Fvector targetrot = zero_vel;
+
+	float factor = 1.0f;
+
+	if (itm->GetState() == CHUDState::eHiding || (det != nullptr && det->GetState() == CHUDState::eHiding))
+	{
+		factor = current_params.move_weaponhide_factor;
+	}
+	else if ((itm->WpnCanShoot() || smart_cast<CWeaponBinoculars*>(itm) != nullptr) && (static_cast<CWeapon*>(itm)->IsZoomed() || static_cast<CWeapon*>(itm)->m_bIsAimStarted))
+	{
+		GetCurrentTargetOffset_aim(current_params, targetpos, targetrot, factor, real);
+		factor = current_params.move_unzoom_factor;
+	}
+	else
+	{
+		GetCurrentTargetOffset(current_params, targetpos, targetrot, factor, real);
+		/*if (Actor()->IsActorSuicideNow() && Actor()->CheckActorVisibilityForController())
+			AddSuicideOffset(current_params, section, targetpos, targetrot);
+		else if (HID != nullptr)
+		{
+			// TODO: Смещение в идле
+		}*/
+	}
+	targetpos.add(pos);
+	targetrot.add(rot);
+
+	float speed_pos = 0.0f;
+	float speed_rot = 0.0f;
+
+	//if (!Actor()->IsActorSuicideNow() && !itm->IsSuicideAnimPlaying())
+	{
+		speed_rot = current_params.move_speed_rot * factor / 100.0f;
+		speed_pos = current_params.move_speed_pos * factor / 100.0f;
+	}
+	//else
+	//{
+		//speed_rot = current_params.move_suicide_speed_rot;
+		//speed_pos = current_params.move_suicide_speed_pos;
+	//}
+
+	CHudItem::jitter_params& jitter = itm->GetCurJitterParams();
+
+	while (time_accumulator > 8)
+	{
+		pos = targetpos;
+		rot = targetrot;
+
+		Fvector cur_pos = HID->hands_attach_pos();
+		Fvector cur_rot = HID->hands_attach_rot();
+
+		pos.sub(cur_pos);
+		rot.sub(cur_rot);
+
+		//if (Actor()->IsActorSuicideNow())
+		//{
+		//	if (pos.magnitude() > speed_pos)
+		//	{
+		//		pos.set_length(speed_pos);
+		//	}
+		//
+		//	if (rot.magnitude() > speed_rot)
+		//	{
+		//		rot.set_length(speed_rot);
+		//	}
+		//}
+		//else
+		{
+			if (pos.magnitude() > 0.0001f)
+			{
+				pos.mul(speed_pos);
+			}
+
+			if (rot.magnitude() > 0.0001f)
+			{
+				rot.mul(speed_rot);
+			}
+		}
+
+		cur_pos.add(pos);
+		cur_rot.add(rot);
+
+		if (Actor()->IsHandJitter())
+		{
+			pos.x = ::Random.randF(0.0f, 1000.0f) - 500.0f;
+			pos.y = ::Random.randF(0.0f, 500.0f) - 250.0f;
+			pos.z = ::Random.randF(0.0f, 1000.0f) - 500.0f;
+			pos.set_length(jitter.pos_amplitude * Actor()->GetHandJitterScale(itm));
+			cur_pos.add(pos);
+
+			rot.x = ::Random.randF(0.0f, 1000.f) - 500.0f;
+			rot.y = ::Random.randF(0.0f, 1000.f) - 500.0f;
+			rot.z = ::Random.randF(0.0f, 1000.f) - 500.0f;
+			rot.set_length(jitter.rot_amplitude * Actor()->GetHandJitterScale(itm));
+			cur_rot.add(rot);
+		}
+
+		HID->set_hands_offset_pos(cur_pos);
+		HID->set_hands_offset_rot(cur_rot);
+
+		if (det != nullptr)
+		{
+			auto detector_hud = attached_item(1);
+			auto det_hud_params = GetDefaultHudCoords(det->HudSection(), 1);
+
+			cur_pos.sub(def_hud_params.hands_position).add(det_hud_params.hands_position);
+			cur_rot.sub(def_hud_params.hands_orientation).add(det_hud_params.hands_orientation);
+
+			detector_hud->set_hands_offset_pos(cur_pos);
+			detector_hud->set_hands_offset_rot(cur_rot);
+		}
+
+		time_accumulator -= 8;
+	}
+
+	//if (Actor()->IsActorSuicideNow() && Actor()->CheckActorVisibilityForController() && !(READ_IF_EXISTS(pSettings, r_bool, section, "prohibit_suicide", false) || READ_IF_EXISTS(pSettings, r_bool, section, "suicide_by_animation", false)))
+	//{
+	//	pos = HID->hands_attach_pos();
+	//	rot = HID->hands_attach_rot();
+	//
+	//	pos.sub(targetpos);
+	//	rot.sub(targetrot);
+	//
+	//	if (pos.magnitude() < jitter.pos_amplitude * 2.0f && rot.magnitude() < jitter.rot_amplitude * 2.0f)
+	//		Actor()->DoSuicideShot();
+	//}
+
+	fromcrouch_time_remains = (fromcrouch_time_remains > delta) ? fromcrouch_time_remains - delta : 0;
+	tocrouch_time_remains = (tocrouch_time_remains > delta) ? tocrouch_time_remains - delta : 0;
+	fromslowcrouch_time_remains = (fromslowcrouch_time_remains > delta) ? fromslowcrouch_time_remains - delta : 0;
+	toslowcrouch_time_remains = (toslowcrouch_time_remains > delta) ? toslowcrouch_time_remains - delta : 0;
+
+	fromrlookout_time_remains = (fromrlookout_time_remains > delta) ? fromrlookout_time_remains - delta : 0;
+	torlookout_time_remains = (torlookout_time_remains > delta) ? torlookout_time_remains - delta : 0;
+
+	fromllookout_time_remains = (fromllookout_time_remains > delta) ? fromllookout_time_remains - delta : 0;
+	tollookout_time_remains = (tollookout_time_remains > delta) ? tollookout_time_remains - delta : 0;
+}
+
+void player_hud::ResetItmHudOffset(CHudItem* itm)
+{
+	attachable_hud_item* hid = itm->HudItemData();
+	if (hid == nullptr)
+		return;
+
+	default_hud_coords_params def_hud_params = GetDefaultHudCoords(itm->HudSection(), hid->m_attach_place_idx);
+
+	hid->set_hands_offset_pos(def_hud_params.hands_position);
+	hid->set_hands_offset_rot(def_hud_params.hands_orientation);
 }

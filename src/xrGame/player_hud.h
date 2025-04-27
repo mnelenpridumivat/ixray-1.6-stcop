@@ -34,6 +34,86 @@ struct player_hud_motion_container
 	void		load				(IKinematicsAnimated* model, const shared_str& sect);
 };
 
+struct weapon_inertion
+{
+	struct base_params
+	{
+		Fvector position;
+		Fvector rotation;
+		void Load(const shared_str& section, const shared_str& str, bool is_16x9);
+	};
+
+	base_params move_suicide_offset;
+
+	base_params move_to_crouch_offset;
+	base_params move_from_crouch_offset;
+	base_params move_to_slow_crouch_offset;
+	base_params move_from_slow_crouch_offset;
+
+	base_params move_to_rlookout_offset;
+	base_params move_from_rlookout_offset;
+	base_params move_to_llookout_offset;
+	base_params move_from_llookout_offset;
+
+	base_params aim_move_to_crouch_offset;
+	base_params aim_move_from_crouch_offset;
+	base_params aim_move_to_slow_crouch_offset;
+	base_params aim_move_from_slow_crouch_offset;
+
+	base_params aim_move_to_rlookout_offset;
+	base_params aim_move_from_rlookout_offset;
+	base_params aim_move_to_llookout_offset;
+	base_params aim_move_from_llookout_offset;
+
+	base_params move_rlookout_offset;
+	base_params move_llookout_offset;
+
+	base_params move_left_offset;
+	base_params move_right_offset;
+	base_params move_forward_offset;
+	base_params move_back_offset;
+
+	base_params move_crouch_offset;
+	base_params move_slow_crouch_offset;
+
+	base_params move_jump_offset;
+	base_params move_fall_offset;
+	base_params move_landing_offset;
+	base_params move_landing2_offset;
+
+	float move_rlookout_offset_speed_factor = 1.0f;
+	float move_llookout_offset_speed_factor = 1.0f;
+
+	float aim_move_slow_crouch_factor = 1.0f;
+	float aim_move_crouch_factor = 1.0f;
+	float aim_move_slow_factor = 1.0f;
+
+	bool no_other_hud_moving_while_suicide = false;
+
+	u32 to_crouch_time = 0;
+	u32 from_crouch_time = 0;
+	u32 to_slow_crouch_time = 0;
+	u32 from_slow_crouch_time = 0;
+
+	u32 to_rlookout_time = 0;
+	u32 from_rlookout_time = 0;
+	u32 to_llookout_time = 0;
+	u32 from_llookout_time = 0;
+
+	float move_weaponhide_factor = 1.0f;
+	float move_unzoom_factor = 1.0f;
+
+	float move_speed_pos = 0.1f;
+	float move_speed_rot = 0.4f;
+
+	float move_suicide_speed_pos = 0.2f;
+	float move_suicide_speed_rot = 0.002f;
+
+	float move_stabilize_factor = 2.0f;
+
+	void Load(const shared_str& section, bool is_16x9);
+};
+
 struct hud_item_measures
 {
 	enum{e_fire_point=(1<<0), e_fire_point2=(1<<1), e_shell_point=(1<<2), e_16x9_mode_now=(1<<3)};
@@ -42,7 +122,6 @@ struct hud_item_measures
 	Fvector							m_item_attach[2];//pos,rot
 
 	Fvector							m_hands_offset[2][3];//pos,rot/ normal,aim,GL
-	Fvector							m_strafe_offset[4][2]; // pos,rot,data1,data2/ normal,aim-GL	 --#SM+#--
 
 	struct inertion_params
 	{
@@ -50,15 +129,10 @@ struct hud_item_measures
 		float m_tendto_speed_aim;
 		float m_tendto_ret_speed;
 		float m_tendto_ret_speed_aim;
-
-		float m_min_angle;
-		float m_min_angle_aim;
-
-		Fvector4 m_offset_LRUD;
-		Fvector4 m_offset_LRUD_aim;
 	};
 
 	inertion_params m_inertion_params; //--#SM+#--
+	weapon_inertion m_weapon_inertion;
 
 	u16								m_fire_bone;
 	Fvector							m_fire_point_offset;
@@ -107,6 +181,11 @@ struct attachable_hud_item
 	//hands runtime offset
 	Fvector&						hands_offset_pos();
 	Fvector&						hands_offset_rot();
+
+	void							set_hands_offset_pos(Fvector& offset);
+	void							set_hands_offset_rot(Fvector& offset);
+
+	void							UpdateWeaponOffset(u32& delta);
 
 //props
 	u32								m_upd_firedeps_frame;
@@ -177,10 +256,39 @@ public:
 	void			OnMovementChanged	(ACTOR_DEFS::EMoveCommand cmd)	;
 	void			RestoreHandBlends(LPCSTR ignored_part);
 
+	struct default_hud_coords_params
+	{
+		shared_str hud_sect;
+		Fvector hands_position = { 0,0,0 };
+		Fvector hands_orientation = { 0,0,0 };
+		bool is16x9 = true;
+	};
+
 	void			ResetBlockedPartID(){m_blocked_part_idx=u16(-1); };
 	void			SetBlockedPartID(u16 val){m_blocked_part_idx = val; }
 	void			SetHandsVisible(bool val){m_bhands_visible=val;};
 	bool			GetHandsVisible(){return m_bhands_visible;};
+
+	void			UpdateWeaponOffset(u32 delta);
+	default_hud_coords_params _last_default_hud_params;
+	void GetCurrentTargetOffset_aim(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
+	void GetCurrentTargetOffset(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
+	void AddOffsets(weapon_inertion::base_params& base, Fvector& pos, Fvector& rot, float koef = 1.0f);
+	void AddSuicideOffset(weapon_inertion& inertion_params, const shared_str& section, Fvector& pos, Fvector& rot);
+	void ResetItmHudOffset(CHudItem* itm);
+	default_hud_coords_params GetDefaultHudCoords(shared_str hud_sect, u16 idx = 0, bool force = false);
+
+	u32 time_accumulator;
+
+	u32 tocrouch_time_remains;
+	u32 fromcrouch_time_remains;
+	u32 toslowcrouch_time_remains;
+	u32 fromslowcrouch_time_remains;
+
+	u32 torlookout_time_remains;
+	u32 fromrlookout_time_remains;
+	u32 tollookout_time_remains;
+	u32 fromllookout_time_remains;
 
 	IKinematics*	m_legs_model;
 	bool			m_show_legs = true;
@@ -210,6 +318,7 @@ private:
 	attachable_hud_item*				m_attached_items[2];
 	animator_item*						m_animator_item = nullptr;
 	xr_vector<attachable_hud_item*>		m_pool;
+	default_hud_coords_params			last_default_hud_params[2];
 
 	u16									m_blocked_part_idx;
 	bool								m_bhands_visible;
