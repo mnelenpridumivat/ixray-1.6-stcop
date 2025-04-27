@@ -165,6 +165,10 @@ void CWeaponMagazined::Load	(LPCSTR section)
 		
 		m_iCurFireMode = ModesCount - 1;
 	}
+	else
+	{
+		m_aFireModes.push_back(1);
+	}
 
 	LoadSilencerKoeffs();
 }
