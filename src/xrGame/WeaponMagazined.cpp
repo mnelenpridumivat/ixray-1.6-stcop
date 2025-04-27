@@ -1029,7 +1029,7 @@ void CWeaponMagazined::switch2_Empty()
 {
 	auto play_motion_if_exists = [&](const shared_str& motion_name)
 	{
-		if (HudAnimationExist(motion_name))
+		if (HudAnimationExist(motion_name.c_str()))
 		{
 			SetPending(TRUE);
 			m_bBlockEmptyClick = true;
@@ -1180,7 +1180,7 @@ void CWeaponMagazined::switch2_FireMode()
 		anim_name.printf("%s%d", *anim_name, GetQueueSize());
 	}
 
-	if (HudAnimationExist(anim_name))
+	if (HudAnimationExist(anim_name.c_str()))
 	{
 		PlayHUDMotion(SetCurrentStateAnimation(anim_name), true, eSwitchMode);
 	}
