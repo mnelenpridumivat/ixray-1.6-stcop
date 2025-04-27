@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "HeightmapUtils.h"
 #include <RedImage.hpp>
 
@@ -150,13 +150,16 @@ void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Hei
 		0
 	);
 
-	// 1. Инициализация UV-координат
-	xr_vector<Fvector2> Uvs(Vertices.size());
-	for (u32 i = 0; i < Vertices.size(); ++i) {
-		Uvs[i] = CalculateUV(i, Vertices, Width, Height);
-	}
+    // 1. Инициализация UV-координат
+    {
+        xr_vector<Fvector2> Uvs(Vertices.size());
+        for (u32 i = 0; i < Vertices.size(); ++i)
+        {
+            Uvs[i] = CalculateUV(i, Vertices, Width, Height);
+        }
+    }
 
-	// 2. Создание UV-мапы
+    // 2. Создание UV-мапы
 	st_VMap* mainUvMap = new st_VMap("Texture", vmtUV, false);
 	mainUvMap->resize(Vertices.size());
 	for (u32 i = 0; i < Vertices.size(); ++i) {
