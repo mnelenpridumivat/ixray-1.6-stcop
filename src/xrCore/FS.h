@@ -264,11 +264,11 @@ protected:
 	u32 			advance_term_string			();
 
 public:
-	IC s32			elapsed		()	const override {	return Size-Pos;		};
-	   void			seek		(int ptr) override {	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
-		u32			tell		()	const override {	return (u32)Pos;				};
-		u32			length		()	const override {	return (u32)Size;			};
-		void		advance		(int cnt) override {	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
+	s32			elapsed		()	const override {	return Size-Pos;		};
+	void			seek		(int ptr) override {	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
+	u32			tell		()	const override {	return (u32)Pos;				};
+	u32			length		()	const override {	return (u32)Size;			};
+	void		advance		(int cnt) override {	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
 	IC void*		pointer		()	const		{	return &(data[Pos]);	};
 
 public:

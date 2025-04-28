@@ -16,9 +16,11 @@ struct ENGINE_API CVertexWithEdges {
 	using CVertex = GameGraph::CVertex;
 	using CLevelPoint = GameGraph::CLevelPoint;
 
+	~CVertexWithEdges() {}
+
 	CVertex vertex;
-	xr_vector<CEdge> edges;
-	xr_vector<CLevelPoint> death_points;
+	xr_vector<CEdge> edges = {};
+	xr_vector<CLevelPoint> death_points = {};
 
 	void Serialize(IWriter& writer);
 	void Serialize(IReader& reader);

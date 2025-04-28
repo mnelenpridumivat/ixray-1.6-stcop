@@ -64,6 +64,7 @@ private:
 			void		create_graph				(const float &start, const float &amount);
 			void		load_level_graph			(const float &start, const float &amount);
 			void		load_graph_point			(NET_Packet &net_packet);
+			void		load_graph_point			(ISaveObject& Object);
 			void		load_graph_points			(const float &start, const float &amount);
 
 private:

@@ -93,6 +93,11 @@ void StartupAI()
 			Levels += Name;
 		}
 
+		if (Levels.empty())
+		{
+			return;
+		}
+
 		string512 name = {};
 		strcpy(name, Levels.data());
 		if (xr_strlen(name))
@@ -113,6 +118,7 @@ void StartupAI()
 
 		clear_temp_folder();
 		CGameSpawnConstructor* BuilderSpawn = new CGameSpawnConstructor(name, output.data(), start_level, gCompilerMode.AI_NoSeparatorCheck);
+		xr_delete(BuilderSpawn);
 	}
 	
 }

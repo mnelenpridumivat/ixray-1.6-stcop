@@ -10,6 +10,8 @@
 #include "server_entity_wrapper.h"
 #include "xrServer_Objects.h"
 #include "xrmessages.h"
+#include "Save/MemoryBuffer.h"
+#include "Save/SaveManager.h"
 
 #ifdef AI_COMPILER
 #	include "factory_api.h"
@@ -24,7 +26,38 @@ CServerEntityWrapper::~CServerEntityWrapper	()
 
 void CServerEntityWrapper::save				(IWriter &stream)
 {
-	NET_Packet				net_packet;
+	{
+		auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+
+		stream.open_chunk		(0);
+		CMemoryBuffer buffer;
+		shared_str Name = m_object->name();
+		(*Obj) << Name;
+		m_object->Spawn_Serialize(*Obj, true);
+		buffer.Write(ESaveVariableType::t_chunk);
+		Obj->Write(&buffer);
+		buffer.Write(&stream);
+		stream.close_chunk		();
+	
+		xr_delete(Obj);
+	}
+	{
+		auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+		
+		stream.open_chunk		(1);
+		
+		CMemoryBuffer buffer;
+		m_object->UPDATE_Serialize(*Obj);
+		buffer.Write(ESaveVariableType::t_chunk);
+		Obj->Write(&buffer);
+		buffer.Write(&stream);
+		
+		stream.close_chunk		();
+		
+		xr_delete(Obj);
+	}
+	
+	/*NET_Packet				net_packet;
 
 	// Spawn
 	stream.open_chunk		(0);
@@ -48,12 +81,29 @@ void CServerEntityWrapper::save				(IWriter &stream)
 //	VERIFY					(ID==M_UPDATE);
 //	m_object->UPDATE_Read	(net_packet);
 	
-	stream.close_chunk		();
+	stream.close_chunk		();*/
 }
 
 void CServerEntityWrapper::load				(IReader &stream)
 {
-	NET_Packet				net_packet;
+	{
+		auto chunk = stream.open_chunk		(0);
+		auto Obj = CSaveManager::GetInstance().EditorBeginLoad(chunk);
+		shared_str s_name;
+		(*Obj) << s_name;
+		m_object = F_entity_Create(s_name.c_str());
+		m_object->Spawn_Serialize(*Obj, true);
+		xr_delete(Obj);
+		chunk->close			();
+	}
+	{
+		auto chunk = stream.open_chunk		(1);
+		auto Obj = CSaveManager::GetInstance().EditorBeginLoad(chunk);
+		m_object->UPDATE_Serialize(*Obj);
+		xr_delete(Obj);
+		chunk->close			();
+	}
+	/*NET_Packet				net_packet;
 	u16						ID;
 	IReader					*chunk;
 	
@@ -84,7 +134,7 @@ void CServerEntityWrapper::load				(IReader &stream)
 
 	net_packet.r_begin		(ID);
 	R_ASSERT2				(M_UPDATE == ID,"Invalid packet ID (!= M_UPDATE)!");
-	m_object->UPDATE_Read	(net_packet);
+	m_object->UPDATE_Read	(net_packet);*/
 }
 
 void CServerEntityWrapper::save_update		(IWriter &stream)

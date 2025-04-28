@@ -10,6 +10,8 @@
 #include "server_entity_wrapper.h"
 #include "..\xrServerEntities\xrServer_Objects.h"
 #include "..\xrServerEntities\xrmessages.h"
+#include "Save/MemoryBuffer.h"
+#include "Save/SaveManager.h"
 
 struct ISE_Abstract;
 
@@ -19,10 +21,39 @@ CServerEntityWrapper::~CServerEntityWrapper	()
 
 void CServerEntityWrapper::save				(IWriter &stream)
 {
+	{
+		auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+
+		stream.open_chunk		(0);
+		CMemoryBuffer buffer;
+		m_object->Spawn_Serialize(*Obj, true);
+		buffer.Write(ESaveVariableType::t_chunk);
+		Obj->Write(&buffer);
+		buffer.Write(&stream);
+		stream.close_chunk		();
+	
+		xr_delete(Obj);
+	}
+	{
+		auto Obj = CSaveManager::GetInstance().EditorBeginSave();
+		
+		stream.open_chunk		(1);
+		
+		CMemoryBuffer buffer;
+		m_object->UPDATE_Serialize(*Obj);
+		buffer.Write(ESaveVariableType::t_chunk);
+		Obj->Write(&buffer);
+		buffer.Write(&stream);
+		
+		stream.close_chunk		();
+		
+		xr_delete(Obj);
+	}
+	
 	NET_Packet				net_packet;
 
 	// Spawn
-	stream.open_chunk		(0);
+	/*stream.open_chunk		(0);
 
 	m_object->Spawn_Write	(net_packet,TRUE);
 	stream.w_u16			(u16(net_packet.B.count));
@@ -37,13 +68,8 @@ void CServerEntityWrapper::save				(IWriter &stream)
 	m_object->UPDATE_Write	(net_packet);
 	stream.w_u16			(u16(net_packet.B.count));
 	stream.w				(net_packet.B.data,net_packet.B.count);
-
-//	u16						ID;
-//	net_packet.r_begin		(ID);
-//	VERIFY					(ID==M_UPDATE);
-//	m_object->UPDATE_Read	(net_packet);
 	
-	stream.close_chunk		();
+	stream.close_chunk		();*/
 }
 
 void CServerEntityWrapper::load				(IReader &stream)

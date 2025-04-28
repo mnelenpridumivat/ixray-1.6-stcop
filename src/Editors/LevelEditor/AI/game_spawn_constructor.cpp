@@ -16,6 +16,7 @@
 #include "graph_engine_editor.h"
 #include "patrol_path_storage.h"
 #include "Save/MemoryBuffer.h"
+#include "Save/SaveManager.h"
 
 extern LPCSTR GAME_CONFIG;
 extern LPCSTR generate_temp_file_name			(LPCSTR header0, LPCSTR header1, string_path& buffer);
@@ -218,12 +219,15 @@ bool CGameSpawnConstructor::save_spawn				(LPCSTR name, LPCSTR output)
 				stream.open_chunk	(1);
 				{
 					auto& obj = (*I).second->data()->object();
-					CSaveObjectSave Obj;
-					obj.Spawn_Serialize(Obj, true);
-					obj.UPDATE_Serialize(Obj);
+					CSaveObjectSave* Obj = CSaveManager::GetInstance().EditorBeginSave();
+					shared_str temp = obj.name();
+					(*Obj) << temp;
+					obj.Spawn_Serialize(*Obj, true);
+					obj.UPDATE_Serialize(*Obj);
 					CMemoryBuffer buff;
-					Obj.Write(&buff);
-					buff.Write(&stream);
+					buff.Write(ESaveVariableType::t_chunk);
+					Obj->Write(&buff);
+					buff.Write((IWriter*)(&stream));
 				}
 				stream.close_chunk	();
 			}

@@ -103,7 +103,7 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject
 	auto ChunkDepth = Object.GetChunkStackDepth();
 	BEGIN_CHUNK(Object,"CALifeObjectRegistry::single_object")
 	{
-		auto temp = (LPSTR)object->name();
+		shared_str temp = object->name();
 		Object << temp;
 
 		++object_count;

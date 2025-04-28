@@ -22,6 +22,8 @@
 #include <direct.h>
 #include <random>
 
+#include "Save/SaveManager.h"
+
 thread_local std::mt19937 rng = std::mt19937(std::random_device()());
 
 extern LPCSTR GAME_CONFIG;
@@ -187,7 +189,73 @@ public:
 			IReader									*O = F->open_chunk_iterator(id);
 			int i = 0;
 			for (; O; O = F->open_chunk_iterator(id,O))	{
-				NET_Packet							P;
+				auto Obj = CSaveManager::GetInstance().EditorBeginLoad(O);
+				shared_str				section_id;
+				(*Obj) << section_id;
+				CSE_Abstract						*E_ = F_entity_Create(section_id.c_str());
+				R_ASSERT3							(E_,"Can't create entity.",section_id.c_str());
+				CSE_ALifeGraphPoint					*tpGraphPoint = smart_cast<CSE_ALifeGraphPoint*>(E_);
+				if (tpGraphPoint) {
+					E_->Spawn_Serialize					(*Obj, true);
+
+					Fvector							tVector;
+					tVector							= tpGraphPoint->o_Position;
+					GameGraph::_GRAPH_ID			tGraphID = GameGraph::_GRAPH_ID(-1);
+					float							fMinDistance = 1000000.f;
+					{
+						GRAPH_VERTEX_IT					B_ = m_tpVertices.begin();
+						GRAPH_VERTEX_IT					I_ = B_;
+						GRAPH_VERTEX_IT					E__ = m_tpVertices.end();
+						for ( ; I_ != E__; I_++) {
+							float fDistance = I_->vertex.tLocalPoint.distance_to(tVector);
+							if (fDistance < fMinDistance) {
+								fMinDistance	= fDistance;
+								tGraphID		= GameGraph::_GRAPH_ID(I_ - B_);
+								if (fMinDistance < EPS_L)
+									break;
+							}
+						}
+					}
+					if (fMinDistance < EPS_L) {
+						SConnectionVertex				T;
+						LPSTR							S_;
+						S_								= xr_strdup(tpGraphPoint->name_replace());
+						T.caConnectName					= xr_strdup(*tpGraphPoint->m_caConnectionPointName);
+
+						if (tpGraphPoint->m_caConnectionPointName.size())
+						{
+							R_ASSERT3(tpGraphPoint->m_caConnectionLevelName.size(), "Empty connection name in graph: ", tpGraphPoint->name_replace());
+							if (!tpGraphPoint->m_caConnectionLevelName.size())
+							{
+								continue;
+							}
+						}
+
+						T.dwLevelID						= dwfGetIDByLevelName(Ini,*tpGraphPoint->m_caConnectionLevelName);
+						//						T.tGraphID						= (GameGraph::_GRAPH_ID)i;
+						//						T.tOldGraphID					= tGraphID;
+						T.tOldGraphID					= (GameGraph::_GRAPH_ID)i;
+						T.tGraphID						= tGraphID;
+
+						bool							ok = true;
+						VERTEX_MAP::const_iterator		II = m_tVertexMap.begin();
+						VERTEX_MAP::const_iterator		EE = m_tVertexMap.end();
+						for ( ; II != EE; ++II)
+							if (T.tOldGraphID == (*II).second.tOldGraphID) {
+								ok						= false;
+								Msg						("Graph point %s is removed,because it has the same position as some another graph point",E_->name_replace());
+								break;
+							}
+
+						if (ok) {
+							m_tVertexMap.insert			(std::make_pair(S_,T));
+							i++;
+						}
+					}
+				}
+				F_entity_Destroy					(E_);
+				
+				/*NET_Packet							P;
 				P.B.count							= O->length();
 				O->r								(P.B.data,P.B.count);
 				u16									ID;
@@ -256,7 +324,7 @@ public:
 						}
 					}
 				}
-				F_entity_Destroy					(E_);
+				F_entity_Destroy					(E_);*/
 			}
 			if (i != m_tpGraph->header().vertex_count())
 				Msg									("Graph for the level %s doesn't correspond to the graph points from Level Editor! (%d : %d)",*m_tLevel.name(),i,m_tpGraph->header().vertex_count());

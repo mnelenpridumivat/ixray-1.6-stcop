@@ -97,6 +97,9 @@ CSaveObjectSave* CSaveManager::EditorBeginSave()
 {
 	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, false);
 	SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
+	//auto Obj = new CSaveObjectSave();
+	//auto Value = ESaveVariableType::t_chunk;
+	//(*Obj) << Value;
 	return new CSaveObjectSave();
 }
 

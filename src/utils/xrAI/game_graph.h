@@ -23,7 +23,7 @@ public:
 	IC		void					set_current_level		(u32 level_id);
 			virtual					~CGameGraph()
 			{
-				xr_delete(m_current_level_cross_table);
+				//xr_delete(m_current_level_cross_table);
 			}
 };
 
