@@ -14,11 +14,11 @@ public:
 	virtual void Load(LPCSTR section) = 0;
 
 	virtual EWeaponUnderbarrel GetType() = 0;
-	virtual void CreateInstance(xr_unique_ptr<IWeaponUnderbarrel>& Out) = 0;
+	virtual IWeaponUnderbarrel* CreateInstance() = 0;
     
 };
 
 namespace Weapon
 {
-	void CreateUnderbarrel(EWeaponUnderbarrel Type, xr_unique_ptr<IWeaponUnderbarrel>& Out);
+	IWeaponUnderbarrel* CreateUnderbarrel(EWeaponUnderbarrel Type);
 }

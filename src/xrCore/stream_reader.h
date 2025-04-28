@@ -43,7 +43,7 @@ public:
 public:
 	IC		const FileHandle& file_mapping_handle() const;
 
-	IC		u32		elapsed() const override;
+	IC		s32		elapsed() const override;
 	IC		u32		length() const override;
 	IC		void	seek(int offset) override;
 	IC		u32		tell() const override;

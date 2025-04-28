@@ -16,10 +16,10 @@ public:
     virtual bool IsEmpty() = 0;
 	
 	virtual EWeaponMagazine GetType() = 0;
-    virtual void CreateInstance(xr_unique_ptr<IWeaponMagazine>& Out);
+    virtual IWeaponMagazine* CreateInstance() = 0;
 };
 
 namespace Weapon
 {
-	void CreateMagazine(EWeaponMagazine Type, xr_unique_ptr<IWeaponMagazine>& Out);
+	IWeaponMagazine* CreateMagazine(EWeaponMagazine Type);
 }

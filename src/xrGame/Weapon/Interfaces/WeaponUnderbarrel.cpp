@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "WeaponUnderbarrel.h"
 
-void Weapon::CreateUnderbarrel(EWeaponUnderbarrel Type, xr_unique_ptr<IWeaponUnderbarrel>& Out)
+IWeaponUnderbarrel* Weapon::CreateUnderbarrel(EWeaponUnderbarrel Type)
 {
-    static xr_hash_map<EWeaponUnderbarrel, xr_unique_ptr<IWeaponUnderbarrel>> Templates = {
+    static xr_hash_map<EWeaponUnderbarrel, IWeaponUnderbarrel*> Templates = {
 
     };
     auto it = Templates.find(Type);
     R_ASSERT(it != Templates.end());
-    it->second->CreateInstance(Out);
+    return it->second->CreateInstance();
 }
 
 ISaveObject& operator<<(ISaveObject& Object, EWeaponUnderbarrel& Value)

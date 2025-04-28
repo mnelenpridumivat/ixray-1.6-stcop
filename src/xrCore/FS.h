@@ -146,7 +146,7 @@ public:
 	virtual CVirtualFileReader* cast_virtual_file_reader() { return nullptr; }
 	virtual IReader* cast_reader() { return nullptr; }
 
-	virtual u32			elapsed()	const = 0;
+	virtual s32			elapsed()	const = 0;
 	IC BOOL			eof			()	const		{return elapsed() <= 0;	};
 
 	virtual u32		tell() const = 0;
@@ -263,7 +263,7 @@ protected:
 	u32 			advance_term_string			();
 
 public:
-	IC u32			elapsed		()	const override {	return Size-Pos;		};
+	IC s32			elapsed		()	const override {	return Size-Pos;		};
 	   void			seek		(int ptr) override {	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
 		u32			tell		()	const override {	return (u32)Pos;				};
 		u32			length		()	const override {	return (u32)Size;			};

@@ -1,14 +1,16 @@
 #include "stdafx.h"
 #include "WeaponBarrel.h"
 
-void Weapon::CreateBarrel(EWeaponBarrel Type, xr_unique_ptr<IWeaponBarrel>& Out)
-{
-    static xr_hash_map<EWeaponBarrel, xr_unique_ptr<IWeaponBarrel>> Templates = {
+#include "Weapon/WeaponBarrelRifle.h"
 
+IWeaponBarrel* Weapon::CreateBarrel(EWeaponBarrel Type)
+{
+    static xr_hash_map<EWeaponBarrel, IWeaponBarrel* > Templates = {
+        {EWeaponBarrel::Rifle, new CWeaponBarrelRifle()}
     };
     auto it = Templates.find(Type);
     R_ASSERT(it != Templates.end());
-    it->second->CreateInstance(Out);
+    return it->second->CreateInstance();
 }
 
 ISaveObject& operator<<(ISaveObject& Object, EWeaponBarrel& Value)

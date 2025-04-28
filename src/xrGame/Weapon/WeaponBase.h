@@ -12,13 +12,14 @@ class CWeaponBase : public CHudItemObject,
 {
     typedef CHudItemObject inherited;
 
-    xr_unique_ptr<IWeaponMagazine> Magazine;
-    xr_unique_ptr<IWeaponBarrel> Barrel;
-    xr_unique_ptr<IWeaponUnderbarrel> Underbarrel;
-    xr_unique_ptr<IWeaponScope> PrimaryScope;
-    xr_unique_ptr<IWeaponScope> SecondaryScope;
+    IWeaponMagazine* Magazine = nullptr;
+    IWeaponBarrel* Barrel = nullptr;
+    IWeaponUnderbarrel* Underbarrel = nullptr;
+    IWeaponScope* PrimaryScope = nullptr;
+    IWeaponScope* SecondaryScope = nullptr;
     
 public:
+	virtual ~CWeaponBase();
 	virtual void Serialize(ISaveObject& Object) override;
 	virtual void Load(LPCSTR section) override;
     

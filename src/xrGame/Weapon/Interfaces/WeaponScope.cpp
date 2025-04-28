@@ -9,12 +9,12 @@ ISaveObject& operator<<(ISaveObject& Object, EWeaponScope& Value)
     return Object;
 }
 
-void Weapon::CreateScope(EWeaponScope Type, xr_unique_ptr<IWeaponScope>& Out)
+IWeaponScope* Weapon::CreateScope(EWeaponScope Type)
 {
-    static xr_hash_map<EWeaponScope, xr_unique_ptr<IWeaponScope>> Templates = {
+    static xr_hash_map<EWeaponScope, IWeaponScope*> Templates = {
 
     };
     auto it = Templates.find(Type);
     R_ASSERT(it != Templates.end());
-    it->second->CreateInstance(Out);
+    return it->second->CreateInstance();
 }

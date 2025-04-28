@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "WeaponMagazine.h"
 
-void Weapon::CreateMagazine(EWeaponMagazine Type, xr_unique_ptr<IWeaponMagazine>& Out)
+IWeaponMagazine* Weapon::CreateMagazine(EWeaponMagazine Type)
 {
-    static xr_hash_map<EWeaponMagazine, xr_unique_ptr<IWeaponMagazine>> Templates = {
+    static xr_hash_map<EWeaponMagazine, IWeaponMagazine*> Templates = {
 
     };
     auto it = Templates.find(Type);
     R_ASSERT(it != Templates.end());
-    it->second->CreateInstance(Out);
+    return it->second->CreateInstance();
 }
 
 ISaveObject& operator<<(ISaveObject& Object, EWeaponMagazine& Value)

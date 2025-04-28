@@ -14,11 +14,11 @@ public:
 	virtual void Load(LPCSTR section) = 0;
 
 	virtual EWeaponScope GetType() = 0;
-	virtual void CreateInstance(xr_unique_ptr<IWeaponScope>& out);
+	virtual IWeaponScope* CreateInstance();
     
 };
 
 namespace Weapon
 {
-	void CreateScope(EWeaponScope Type, xr_unique_ptr<IWeaponScope>& Out);
+	IWeaponScope* CreateScope(EWeaponScope Type);
 }
