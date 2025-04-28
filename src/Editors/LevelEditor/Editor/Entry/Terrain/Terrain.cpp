@@ -5,7 +5,7 @@ CTerrain::CTerrain(LPVOID data, LPCSTR name):
 	inherited(data,name), TerrainObject("terrain")
 {
 	Construct(data);
-	FScale.set(1, 0.3f, 1);
+	FScale.set(1, 1, 1);
 	m_RT_Flags.set(flRT_Visible, true);
 }
 
@@ -26,8 +26,8 @@ void CTerrain::OnUpdateTransform()
 bool CTerrain::LoadStream(IReader& F)
 {
 	HMap.LoadSteam(&F);
-
 	XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(HMap, &TerrainObject);
+
 	return true;
 }
 
@@ -58,13 +58,44 @@ void CTerrain::OnFrame()
 	}
 }
 
+bool CTerrain::RayPick(float& dist, const Fvector& S, const Fvector& D, SRayPickInfo* pinf)
+{
+	if (!IsLoaded && !pinf->IsForcePickup)
+		return false;
+
+	if (LTools->GetTarget() == OBJCLASS_TERRAIN)
+	{
+		if (HMap.RayPick(dist, S, D, _ITransform(), pinf))
+		{
+			if (pinf) pinf->s_obj = this;
+			return true;
+		}
+	}
+	else
+	{
+		if (TerrainObject.RayPick(dist, S, D, _ITransform(), pinf))
+		{
+			if (pinf) pinf->s_obj = this;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void CTerrain::Render(int priority, bool strictB2F)
 {
-	if (priority == 1)
+	if (LTools->GetTarget() == OBJCLASS_TERRAIN)
 	{
-		//HMap.Draw(100, 1, 0xffffff);
+		if (priority == 1)
+		{
+			HMap.Draw(100, 1.f, 0xffffff);
+		}
 	}
+	else
+	{
 		TerrainObject.Render(_Transform(), priority, strictB2F);
+	}
 }
 
 void CTerrain::Move(Fvector& amount)

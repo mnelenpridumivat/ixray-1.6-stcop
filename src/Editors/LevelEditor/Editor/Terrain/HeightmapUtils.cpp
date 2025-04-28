@@ -2,105 +2,39 @@
 #include "HeightmapUtils.h"
 #include <RedImage.hpp>
 
-Fvector2 CalculateUV(u32 vertexIndex, const xr_vector<Fvector>& Vertices, u32 Width, u32 Height)
-{
-	// Предполагаем, что вершины хранятся в порядке [z][x]
-	u32 z = vertexIndex / Width;
-	u32 x = vertexIndex % Width;
-
-	// Нормализованные UV от 0 до 1
-	Fvector2 uv;
-	uv.x = x / (float)(Width - 1);
-	uv.y = z / (float)(Height - 1);
-
-	// Инверсия по V для корректного отображения
-	uv.y = 1.0f - uv.y;
-
-	return uv;
-}
-
-Fvector2 GetUVForFaceVertex(u32 faceIndex, u32 vertexInFace,
-	const xr_vector<st_Face>& Faces,
-	const xr_vector<Fvector>& Vertices,
-	const xr_vector<Fvector2>& Uvs) {
-	// Получаем индекс вершины в общем массиве
-	u32 vertexIndex = Faces[faceIndex].pv[vertexInFace].pindex;
-
-	// Базовый вариант - UV из общего массива
-	Fvector2 uv = Uvs[vertexIndex];
-
-	// Здесь можно добавить проверку расщепленных UV:
-	/*
-	if (HasSplitUV(faceIndex, vertexIndex)) {
-		uv = GetSplitUV(faceIndex, vertexIndex);
-	}
-	*/
-
-	return uv;
-}
-
 void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Heightmap, CEditableObject* OutMesh)
 {
-	// 1. Проверка входных данных
 	if (!Heightmap.Data || Heightmap.Width < 2 || Heightmap.Height < 2 || !OutMesh)
 	{
 		Msg("! Invalid heightmap data or output mesh");
 		return;
 	}
 
-	// 2. Создание нового меша
 	CEditableMesh* Mesh = new CEditableMesh(OutMesh);
 	OutMesh->AppendMesh(Mesh);
 
-	// 3. Параметры террейна
 	const u32 Width = Heightmap.Width;
 	const u32 Height = Heightmap.Height;
-	const float SizeX = 1024 * Heightmap.Size.x;
-	const float SizeZ = 1024 * Heightmap.Size.z;
+	constexpr float SizeHM = 1024;
 
-	// 4. Подготовка вершин и UV-координат
 	xr_vector<Fvector> Vertices;
-	xr_vector<Fvector2> Uvs;
 	Vertices.reserve(Width * Height);
-	Uvs.reserve(Width * Height);
 
-	const float StepX = SizeX / (Width - 1);
-	const float StepZ = SizeZ / (Height - 1);
-	const float HalfX = SizeX / 2.0f;
-	const float HalfZ = SizeZ / 2.0f;
+	const float StepHM = SizeHM / (Width - 1);
+	constexpr float HalfHM = SizeHM / 2.0f;
 
-	// 1. Параметры текстуры и террейна
-	const float uvStepX = 1.0f / (Width - 1);
-	const float uvStepZ = 1.0f / (Height - 1);
-
-	// 3. Генерация UV
-	for (u32 z = 0; z < Height; z++) {
-		for (u32 x = 0; x < Width; x++) {
-			// Мировые координаты вершины
+	for (u32 z = 0; z < Height; z++) 
+	{
+		for (u32 x = 0; x < Width; x++) 
+		{
 			Fvector V;
-			V.x = -(x * StepX - HalfX) + Heightmap.Pos.x;
-			V.z = (z * StepZ - HalfZ) + Heightmap.Pos.z;
-			V.y = Heightmap.GetHeight(x, z);
+			V.x = -(x * StepHM - HalfHM);
+			V.z = (z * StepHM - HalfHM);
+			V.y = Heightmap.GetHeight(x, z) * 100.f;
 			Vertices.push_back(V);
-
-			// Нормализованные UV от 0 до 1
-			Fvector2 uv;
-			uv.x = x * uvStepX;
-			uv.y = z * uvStepZ;  // Убрана инверсия, теперь 0 внизу, 1 вверху
-
-			Uvs.push_back(uv);
-
-			// Отладочный вывод для граничных вершин
-			if ((x == 0 && z == 0) || (x == Width - 1 && z == Height - 1) ||
-				(z == 0 && x < 10) || (z == Height - 1 && x >= Width - 10)) {
-				Fvector pos = Vertices[z * Width + x];
-				Msg("Vertex %d: Pos = (%.2f, %.2f, %.2f), UV = (%.4f, %.4f)",
-					z * Width + x, pos.x, pos.y, pos.z, uv.x, uv.y);
-			}
 		}
 	}
 
-	// 5. Создание полигонов (квадов из двух треугольников)
 	xr_vector<st_Face> Faces;
 	const u32 QuadsX = Width - 1;
 	const u32 QuadsZ = Height - 1;
@@ -115,33 +49,32 @@ void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Hei
 			const u32 V2 = (z + 1) * Width + x;
 			const u32 V3 = (z + 1) * Width + x + 1;
 
-			// Проверяем, не являются ли все вершины квада черными (Y = 0)
 			if (Heightmap.GetHeight(x, z) <= 0.0f &&
 				Heightmap.GetHeight(x + 1, z) <= 0.0f &&
 				Heightmap.GetHeight(x, z + 1) <= 0.0f &&
 				Heightmap.GetHeight(x + 1, z + 1) <= 0.0f)
 			{
-				continue; // Пропускаем черные полигоны
+				continue;
 			}
 
-			// Первый треугольник (изменен порядок вершин)
+			// Первый треугольник
 			st_Face Face1;
 			Face1.pv[0].pindex = V0;
-			Face1.pv[1].pindex = V1;  // Было V1
-			Face1.pv[2].pindex = V2;  // Было V2
+			Face1.pv[1].pindex = V1;
+			Face1.pv[2].pindex = V2;
 			Faces.push_back(Face1);
 
-			// Второй треугольник (изменен порядок вершин)
+			// Второй треугольник
 			st_Face Face2;
 			Face2.pv[0].pindex = V1;
-			Face2.pv[1].pindex = V3;  // Было V3
-			Face2.pv[2].pindex = V2;  // Было V2
+			Face2.pv[1].pindex = V3;
+			Face2.pv[2].pindex = V2;
 			Faces.push_back(Face2);
 		}
 	}
 
-	// 6. Инициализация меша
-	Mesh->Create(
+	Mesh->Create
+	(
 		Faces.data(),
 		static_cast<u32>(Faces.size()),
 		Vertices.data(),
@@ -150,44 +83,47 @@ void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Hei
 		0
 	);
 
-    // 1. Инициализация UV-координат
-    {
-        xr_vector<Fvector2> Uvs(Vertices.size());
-        for (u32 i = 0; i < Vertices.size(); ++i)
-        {
-            Uvs[i] = CalculateUV(i, Vertices, Width, Height);
-        }
-    }
-
-    // 2. Создание UV-мапы
 	st_VMap* mainUvMap = new st_VMap("Texture", vmtUV, false);
-	mainUvMap->resize(Vertices.size());
-	for (u32 i = 0; i < Vertices.size(); ++i) {
-		mainUvMap->getUV(i) = Uvs[i];
-		mainUvMap->appendVI(i);
+	const float uvStepX = 1.0f / (Width - 1);
+	const float uvStepZ = 1.0f / (Height - 1);
+
+	for (u32 z = 0; z < Height; z++) 
+	{
+		for (u32 x = 0; x < Width; x++) 
+		{
+			u32 idx = z * Width + x;
+			Fvector2 uv;
+			uv.x = 1.f - x * uvStepX;
+			uv.y = 1.f - z * uvStepZ;
+
+			mainUvMap->appendUV(uv);
+			mainUvMap->appendVI(idx);
+		}
 	}
 	Mesh->m_VMaps.push_back(mainUvMap);
 
-	// 3. Обработка полигонов с учетом возможных расщепленных UV
 	Mesh->m_VMRefs.resize(Faces.size());
-	for (u32 faceIdx = 0; faceIdx < Faces.size(); ++faceIdx) {
-		st_Face& face = Faces[faceIdx];
+	for (u32 faceIdx = 0; faceIdx < Faces.size(); ++faceIdx)
+	{
 		st_VMapPtLst& vmref = Mesh->m_VMRefs[faceIdx];
-
 		vmref.count = 3;
 		vmref.pts = xr_alloc<st_VMapPt>(3);
 
-		for (u32 j = 0; j < 3; ++j) {
-			u32 vertIdx = face.pv[j].pindex;
-			Fvector2 uv = GetUVForFaceVertex(faceIdx, j, Faces, Vertices, Uvs);
-
-			// Простая реализация без учета расщепленных UV
-			vmref.pts[j].vmap_index = 0;
-			vmref.pts[j].index = vertIdx;
+		for (u32 j = 0; j < 3; ++j) 
+		{
+			vmref.pts[j].vmap_index = 0; // Индекс UV-карты
+			vmref.pts[j].index = Faces[faceIdx].pv[j].pindex; // Индекс UV
 		}
 	}
 
-	// 9. Создание и настройка поверхности
+	for (u32 faceIdx = 0; faceIdx < Faces.size(); ++faceIdx) 
+	{
+		for (u32 j = 0; j < 3; ++j)
+		{
+			Mesh->m_Faces[faceIdx].pv[j].vmref = faceIdx;
+		}
+	}
+
 	CSurface* Surface = Mesh->GetSurfaceByFaceID(0);
 	Surface->SetName("terrain");
 	Surface->SetShader("levels\\zaton_earth");
@@ -200,18 +136,15 @@ void XRay::Editor::HeightmapUtils::GenerateMeshByHeightmap(const SHeightMap& Hei
 	Surface->OnDeviceCreate();
 	OutMesh->Surfaces().push_back(Surface);
 
-	// 10. Назначение полигонов поверхности
 	IntVec FaceIndices(Faces.size());
 	for (u32 i = 0; i < Faces.size(); ++i)
 		FaceIndices[i] = i;
 	Mesh->Surfaces()[Surface] = FaceIndices;
 
-	// 11. Генерация нормалей
 	Mesh->GenerateFNormals();
 	Mesh->GenerateVNormals(nullptr, true);
 	Mesh->GenerateAdjacency();
 
-	// 12. Обновление bounding box
 	OutMesh->UpdateBox();
 
 	Msg("Terrain mesh created successfully: %d vertices, %d faces", Vertices.size(), Faces.size());
@@ -290,369 +223,3 @@ void XRay::Editor::HeightmapUtils::GenerateHeightmapByMesh(CEditableObject* Mesh
 	}
 }
 
-bool XRay::Editor::HeightmapUtils::SHeightMap::LoadRAW(const char* filename)
-{
-	if (!FS.TryLoad(filename))
-	{
-		return false;
-	}
-
-	IReader* F = FS.r_open(filename);
-	LoadSteam(F);
-	FS.r_close(F);
-	return true;
-}
-
-bool XRay::Editor::HeightmapUtils::SHeightMap::LoadSteam(IReader* Reader)
-{
-	if (!Reader) 
-		return false;
-
-	Width = Height = (u32)sqrt(Reader->length() / sizeof(u16));
-	if (Width * Height * sizeof(u16) != Reader->length())
-	{
-		return false;
-	}
-
-	Data = (float*)xr_malloc(Width * Height * sizeof(float));
-
-	u16* raw_data = (u16*)Reader->pointer();
-	for (u32 i = 0; i < Width * Height; ++i)
-	{
-		Data[i] = float(raw_data[i]) / 65535.f;
-	}
-
-	MinH = Data[0];
-	MaxH = Data[0];
-
-	for (u32 i = 1; i < Width * Height; ++i)
-	{
-		if (Data[i] < MinH) MinH = Data[i];
-		if (Data[i] > MaxH) MaxH = Data[i];
-	}
-
-	return true;
-}
-
-void XRay::Editor::HeightmapUtils::SHeightMap::PrecacheRenderData(float scaleY, float cellSize, u32 baseColor)
-{
-	if (!RenderData.IsDirty)
-		return;
-
-	RenderData.Clear();
-
-	float global_min_h = FLT_MAX;
-	float global_max_h = -FLT_MAX;
-
-	const u32 ChunkSize = SHeightMapRenderData::CHUNK_SIZE;
-	const float FlatThreshold = SHeightMapRenderData::FLAT_THRESHOLD;
-
-	// Calculate center offset with scale applied
-	float centerX = (Width * cellSize * Size.x) * 0.5f;
-	float centerZ = (Height * cellSize * Size.z) * 0.5f;
-
-	// Calculate scaled dimensions
-	u32 scaledWidth = u32(Width * Size.x);
-	u32 scaledHeight = u32(Height * Size.z);
-
-	u32 chunkCountX = (scaledWidth - 1) / ChunkSize + 1;
-	u32 chunkCountZ = (scaledHeight - 1) / ChunkSize + 1;
-
-	struct ChunkInfo
-	{
-		float min_h, max_h;
-		bool is_flat;
-		bool has_holes;
-	};
-
-	xr_vector<ChunkInfo> ChunkInfos(chunkCountX * chunkCountZ);
-
-	for (u32 cz = 0; cz < chunkCountZ; ++cz)
-	{
-		for (u32 cx = 0; cx < chunkCountX; ++cx)
-		{
-			float minH = FLT_MAX, maxH = -FLT_MAX;
-			bool has_holes = false;
-
-			u32 x0 = cx * ChunkSize;
-			u32 z0 = cz * ChunkSize;
-			u32 x_end = std::min(x0 + ChunkSize, scaledWidth - 1);
-			u32 z_end = std::min(z0 + ChunkSize, scaledHeight - 1);
-
-			for (u32 z = z0; z <= z_end; ++z)
-			{
-				for (u32 x = x0; x <= x_end; ++x)
-				{
-					// Применяем обратное масштабирование для получения оригинальных координат
-					u32 orig_x = u32((x - Pos.x) / Size.x);
-					u32 orig_z = u32((z - Pos.z) / Size.z);
-
-					// Проверяем границы оригинальной карты высот
-					if (orig_x >= Width || orig_z >= Height)
-					{
-						has_holes = true;
-						continue;
-					}
-
-					// Применяем масштаб по Y и оффсет
-					float h = (GetHeight(orig_x, orig_z) + Pos.y) * scaleY * Size.y;
-					if (h == 0.0f)
-						has_holes = true;
-					minH = std::min(minH, h);
-					maxH = std::max(maxH, h);
-
-					global_min_h = std::min(global_min_h, h);
-					global_max_h = std::max(global_max_h, h);
-				}
-			}
-
-			bool is_flat = (maxH - minH < FlatThreshold) && !has_holes;
-			ChunkInfos[cz * chunkCountX + cx] = { minH, maxH, is_flat, has_holes };
-		}
-	}
-
-	// Height to color conversion
-	auto Height2Color = [&](float h) -> u32
-		{
-			float t = (h - global_min_h) / std::max(global_max_h - global_min_h, EPS_S);
-			t = std::clamp(t, 0.0f, 0.9f); // Убрал нижний clamp 0.2f
-
-			// Нелинейное преобразование для лучшего восприятия глубины
-			t = pow(t, 0.7f); // Можно регулировать степень (0.5-0.8)
-
-			// Коррекция яркости для темных участков
-			float brightness = 0.2f + 0.8f * t; // Минимальная яркость 20%
-
-			return color_rgba(
-				u8(((baseColor >> 16) & 0xFF) * brightness),
-				u8(((baseColor >> 8) & 0xFF) * brightness),
-				u8((baseColor & 0xFF) * brightness),
-				255
-			);
-		};
-
-	for (u32 cz = 0; cz < chunkCountZ; ++cz)
-	{
-		for (u32 cx = 0; cx < chunkCountX; ++cx)
-		{
-			const ChunkInfo& info = ChunkInfos[cz * chunkCountX + cx];
-
-			// Check neighbors
-			bool neighbor_flat = true;
-			for (int dz = -1; dz <= 1 && neighbor_flat; ++dz)
-			{
-				for (int dx = -1; dx <= 1 && neighbor_flat; ++dx)
-				{
-					if (dx == 0 && dz == 0)
-						continue;
-
-					int nx = int(cx) + dx;
-					int nz = int(cz) + dz;
-
-					if (nx >= 0 && nz >= 0 && nx < int(chunkCountX) && nz < int(chunkCountZ))
-					{
-						const ChunkInfo& neighbor = ChunkInfos[nz * chunkCountX + nx];
-						if (!neighbor.is_flat)
-							neighbor_flat = false;
-					}
-				}
-			}
-
-			bool use_flat = info.is_flat && neighbor_flat;
-
-			SHeightMapChunk chunk;
-			chunk.BBox.invalidate();
-
-			u32 x0 = cx * ChunkSize;
-			u32 z0 = cz * ChunkSize;
-			u32 x_end = std::min(x0 + ChunkSize, scaledWidth - 1);
-			u32 z_end = std::min(z0 + ChunkSize, scaledHeight - 1);
-
-			for (u32 z = z0; z < z_end; ++z)
-			{
-				for (u32 x = x0; x < x_end; ++x)
-				{
-					// Получаем оригинальные координаты с учетом масштаба и оффсета
-					u32 orig_x = u32((x - Pos.x) / Size.x);
-					u32 orig_z = u32((z - Pos.z) / Size.z);
-					u32 orig_x1 = u32((x + 1 - Pos.x) / Size.x);
-					u32 orig_z1 = u32((z + 1 - Pos.z) / Size.z);
-
-					// Проверяем границы
-					if (orig_x >= Width || orig_z >= Height ||
-						orig_x1 >= Width || orig_z1 >= Height)
-						continue;
-
-					// Применяем масштаб и оффсет по Y
-					float h0 = (GetHeight(orig_x, orig_z) + Pos.y) * scaleY * Size.y;
-					float h1 = (GetHeight(orig_x1, orig_z) + Pos.y) * scaleY * Size.y;
-					float h2 = (GetHeight(orig_x1, orig_z1) + Pos.y) * scaleY * Size.y;
-					float h3 = (GetHeight(orig_x, orig_z1) + Pos.y) * scaleY * Size.y;
-
-					bool same_height = std::abs(h0 - h1) < FlatThreshold &&
-						std::abs(h1 - h2) < FlatThreshold &&
-						std::abs(h2 - h3) < FlatThreshold;
-
-					if (same_height)
-					{
-						if (h0 == 0.0f)
-							continue;
-
-						// Применяем масштаб и центрирование по XZ
-						Fvector v0 = { x * cellSize - centerX, h0, z * cellSize - centerZ };
-						Fvector v1 = { (x + 1) * cellSize - centerX, h1, z * cellSize - centerZ };
-						Fvector v2 = { (x + 1) * cellSize - centerX, h2, (z + 1) * cellSize - centerZ };
-						Fvector v3 = { x * cellSize - centerX, h3, (z + 1) * cellSize - centerZ };
-
-						chunk.BBox.modify(v0);
-						chunk.BBox.modify(v2);
-
-						chunk.Vertices.push_back(v0);
-						chunk.Vertices.push_back(v1);
-						chunk.Vertices.push_back(v2);
-						chunk.Vertices.push_back(v0);
-						chunk.Vertices.push_back(v2);
-						chunk.Vertices.push_back(v3);
-
-						float h_avg = (h0 + h1 + h2 + h3) * 0.25f;
-						u32 col = Height2Color(h_avg);
-						chunk.Colors.insert(chunk.Colors.end(), 6, col);
-					}
-					else
-					{
-						// Применяем масштаб и центрирование по XZ
-						Fvector v0 = { x * cellSize - centerX, h0, z * cellSize - centerZ };
-						Fvector v1 = { (x + 1) * cellSize - centerX, h1, z * cellSize - centerZ };
-						Fvector v2 = { (x + 1) * cellSize - centerX, h2, (z + 1) * cellSize - centerZ };
-						Fvector v3 = { x * cellSize - centerX, h3, (z + 1) * cellSize - centerZ };
-
-						if (h0 == 0.0f && h1 == 0.0f && h2 == 0.0f && h3 == 0.0f)
-							continue;
-
-						chunk.BBox.modify(v0);
-						chunk.BBox.modify(v2);
-
-						chunk.Vertices.push_back(v0);
-						chunk.Vertices.push_back(v1);
-						chunk.Vertices.push_back(v2);
-						chunk.Vertices.push_back(v0);
-						chunk.Vertices.push_back(v2);
-						chunk.Vertices.push_back(v3);
-
-						float h_avg = (h0 + h1 + h2 + h3) * 0.25f;
-						u32 col = Height2Color(h_avg);
-						chunk.Colors.insert(chunk.Colors.end(), 6, col);
-					}
-				}
-			}
-
-			chunk.IsFlat = use_flat;
-			chunk.IsValid = !chunk.Vertices.empty();
-
-			if (chunk.IsValid)
-				RenderData.Chunks.push_back(chunk);
-		}
-	}
-
-	RenderData.IsDirty = false;
-}
-
-void XRay::Editor::HeightmapUtils::SHeightMap::Draw(float scaleY, float cellSize, u32 baseColor)
-{
-	PrecacheRenderData(scaleY, cellSize, baseColor);
-
-	if (RenderData.Chunks.empty())
-		return;
-
-	DU_impl.DD_DrawFace_begin(false);
-	RCache.set_CullMode(CULL_NONE);
-	EDevice->SetShader(EDevice->m_WireShader);
-
-	CFrustum& frustum = ::Render->ViewBase;
-
-	for (const auto& chunk : RenderData.Chunks)
-	{
-		float aabb[6] = 
-		{
-			chunk.BBox.min.x, chunk.BBox.min.y, chunk.BBox.min.z,
-			chunk.BBox.max.x, chunk.BBox.max.y, chunk.BBox.max.z
-		};
-
-		u32 mask = 0xFF;
-		if (frustum.testAABB(aabb, mask) == fcvNone)
-			continue;
-
-		for (size_t i = 0; i < chunk.Vertices.size(); i += 3)
-		{
-			DU_impl.DD_DrawFace_push
-			(
-				chunk.Vertices[i],
-				chunk.Vertices[i + 1],
-				chunk.Vertices[i + 2],
-				chunk.Colors[i]
-			);
-		}
-	}
-
-	DU_impl.DD_DrawFace_end();
-}
-
-void XRay::Editor::HeightmapUtils::SHeightMap::MarkDirty()
-{
-	RenderData.IsDirty = true;
-}
-
-void XRay::Editor::HeightmapUtils::SHeightMapRenderData::BuildFromHeightmap(const float* Heightmap, int width, int Height)
-{
-	Chunks.clear();
-
-	for (int z = 0; z < Height; z += SHeightMapRenderData::CHUNK_SIZE)
-	{
-		for (int x = 0; x < width; x += SHeightMapRenderData::CHUNK_SIZE)
-		{
-			SHeightMapChunk chunk;
-			chunk.BBox.invalidate();
-
-			// Проверяем, можно ли чанк упростить (все высоты почти одинаковы)
-			float min_h = FLT_MAX, max_h = -FLT_MAX;
-			for (int dz = 0; dz < SHeightMapRenderData::CHUNK_SIZE && (z + dz) < Height; ++dz)
-			{
-				for (int dx = 0; dx < SHeightMapRenderData::CHUNK_SIZE && (x + dx) < width; ++dx)
-				{
-					float h = Heightmap[(z + dz) * width + (x + dx)];
-					min_h = std::min(min_h, h);
-					max_h = std::max(max_h, h);
-					chunk.BBox.modify(Fvector(x + dx, h, z + dz));
-				}
-			}
-
-			// Если разница высот маленькая — чанк "плоский", можно упростить
-			chunk.IsFlat = (max_h - min_h < SHeightMapRenderData::FLAT_THRESHOLD);
-
-			// Генерация вершин для чанка
-			if (chunk.IsFlat)
-			{
-				// Упрощённый вариант (4 вершины = 1 quad)
-				float avg_h = (min_h + max_h) * 0.5f;
-				chunk.Vertices.push_back(Fvector(x, avg_h, z));
-				chunk.Vertices.push_back(Fvector(x + SHeightMapRenderData::CHUNK_SIZE, avg_h, z));
-				chunk.Vertices.push_back(Fvector(x, avg_h, z + SHeightMapRenderData::CHUNK_SIZE));
-				chunk.Vertices.push_back(Fvector(x + SHeightMapRenderData::CHUNK_SIZE, avg_h, z + SHeightMapRenderData::CHUNK_SIZE));
-			}
-			else
-			{
-				// Полная детализация (все вершины чанка)
-				for (int dz = 0; dz <= SHeightMapRenderData::CHUNK_SIZE && (z + dz) < Height; ++dz)
-				{
-					for (int dx = 0; dx <= SHeightMapRenderData::CHUNK_SIZE && (x + dx) < width; ++dx)
-					{
-						float h = Heightmap[(z + dz) * width + (x + dx)];
-						chunk.Vertices.push_back(Fvector(x + dx, h, z + dz));
-					}
-				}
-			}
-
-			Chunks.push_back(chunk);
-		}
-	}
-}
