@@ -1518,6 +1518,12 @@ void CWeaponMagazined::HudSelector()
 	else
 		hud_sect = hud_sect_cache;
 
+	if (HudItemData())
+	{
+		g_player_hud->detach_item(this);
+		g_player_hud->attach_item(this);
+	}
+
 	bUpdateHUDBonesVisibility = false;
 }
 
