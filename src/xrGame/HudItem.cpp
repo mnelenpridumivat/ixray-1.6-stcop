@@ -190,7 +190,6 @@ void CHudItem::OnStateSwitch(u32 S)
 		if (Level().CurrentControlEntity() == object().H_Parent())
 		{
 			g_player_hud->attach_item(this);
-			g_player_hud->ResetItmHudOffset(this);
 		}
 		break;
 	}

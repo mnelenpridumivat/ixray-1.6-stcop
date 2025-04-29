@@ -3,23 +3,25 @@
 #include "../Actor.h"
 #include "../alife_simulator.h"
 #include "../alife_object_registry.h"
-
+#include "../Inventory.h"
+#include "../inventory_item.h"
 #include "../xrEngine/XR_IOConsole.h"
 #include "../xrEngine/string_table.h"
-
+#include "../player_hud.h"
 #include "ai_space.h"
 
 #include "ImUtils.h"
 
-void ImGui_Render2DWidget()
+void ImGui_Render2DWidget(float grid_step=24.0f)
 {
 	static ImVec2 circlePos(100.0f, 100.0f);
 	static float circleRadius = 20.0f;
 	const float squareSize = 200.0f;
 	const float minRadius = 5.0f;
 	const float maxRadius = 50.0f;
-	const float gridStep = 8.0f;
-
+	const auto color_hovered = IM_COL32(255, 255, 0, 200);
+	const auto color_nothovered = IM_COL32(255, 0, 0, 200);
+	const auto color_active = IM_COL32(50, 200, 50, 200);
 	ImGui::BeginChild("SquareArea", ImVec2(squareSize, squareSize), true,
 		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 	{
@@ -27,21 +29,19 @@ void ImGui_Render2DWidget()
 		const ImVec2 squareMax(squareMin.x + squareSize, squareMin.y + squareSize);
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 
+		// Draw square border
+		drawList->AddRectFilled(squareMin, squareMax, IM_COL32(25,25,25,255));
 		const ImU32 gridColor = IM_COL32(100, 100, 100, 255); // Gray with 50% alpha
-		for (float x = 0; x <= squareSize; x += gridStep) {
+		for (float x = 0; x <= squareSize; x += grid_step) {
 			ImVec2 start(squareMin.x + x, squareMin.y);
 			ImVec2 end(squareMin.x + x, squareMax.y);
 			drawList->AddLine(start, end, gridColor);
 		}
-		for (float y = 0; y <= squareSize; y += gridStep) {
+		for (float y = 0; y <= squareSize; y += grid_step) {
 			ImVec2 start(squareMin.x, squareMin.y + y);
 			ImVec2 end(squareMax.x, squareMin.y + y);
 			drawList->AddLine(start, end, gridColor);
 		}
-
-		// Draw square border
-		drawList->AddRect(squareMin, squareMax, IM_COL32(255,255,255,100));
-		drawList->AddRectFilled(squareMin, squareMax, IM_COL32(255,255,255,255));
 
 		// Calculate circle position in screen space
 		const ImVec2 circleCenter(squareMin.x + circlePos.x, squareMin.y + circlePos.y);
@@ -60,6 +60,17 @@ void ImGui_Render2DWidget()
 				circleRadius, squareSize - circleRadius);
 		}
 
+		ImU32 cursor_color = color_nothovered;
+		if (ImGui::IsItemHovered() && !ImGui::IsItemActive())
+		{
+			cursor_color = color_hovered;
+		}
+
+		if (ImGui::IsItemActive())
+		{
+			cursor_color = color_active;
+		}
+
 		// Handle mouse wheel for radius adjustment
 		if (ImGui::IsWindowHovered())
 		{
@@ -73,7 +84,7 @@ void ImGui_Render2DWidget()
 		}
 
 		// Draw the circle
-		drawList->AddCircle(circleCenter, circleRadius, IM_COL32(255, 0, 0, 200));
+		drawList->AddCircle(circleCenter, circleRadius, cursor_color);
 	}
 	ImGui::EndChild();
 }
@@ -93,7 +104,17 @@ void RenderHUDAdjustManager()
 	if (imgui_hud_adjust_manager.is_initialized == false)
 		return;
 
+	if (!g_actor)
+		return;
+
+	if (!g_player_hud)
+		return;
+
+	CInventoryItem* p_item = g_actor->inventory().ActiveItem();
+
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, kGeneralAlphaLevelForImGuiWindows));
+
+	ImGui::BeginDisabled(!p_item);
 
 	if (ImGui::Begin("Hud Adjust", &Engine.External.EditorStates[static_cast<u8>(EditorUI::Game_HudAdjustManager)]))
 	{
@@ -101,67 +122,172 @@ void RenderHUDAdjustManager()
 		{
 			if (ImGui::BeginTabItem("General"))
 			{
-				if (ImGui::CollapsingHeader("Hud"))
+				const char* p_active_weapon_name = "NO ACTIVE WEAPON";
+
+				if (p_item)
 				{
-
-
-					ImGui::SeparatorText("Position##HUD");
-
-					if (ImGui::Button("Reset##HPosition"))
-					{
-						// todo: implement
-					}
-
-					if (ImGui::BeginTable("Data##HUDP", 2))
-					{
-						ImGui::TableNextRow();
-
-						ImGui::TableNextColumn();
-
-						ImGui::SliderFloat("X##HUDP", &imgui_hud_adjust_manager.settings.hud_position.x, -1.0f, 1.0f);
-
-						ImGui::SliderFloat("Y##HUDP", &imgui_hud_adjust_manager.settings.hud_position.y, -1.0f, 1.0f);
-
-						ImGui::SliderFloat("Z##HUDP", &imgui_hud_adjust_manager.settings.hud_position.z, -1.0f, 1.0f);
-						
-						auto test = ImGui::GetContentRegionAvail();
-						ImGui::TableNextColumn();
-						ImGui_Render2DWidget();
-
-						ImGui::EndTable();
-					}
-
-
-
-
-					ImGui::SeparatorText("Rotation##HUD");
-
-					if (ImGui::Button("Reset##HRotation"))
-					{
-						// todo: implement
-					}
-
-					ImGui::SliderFloat("X##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.x, -1.0f, 1.0f);
-
-					ImGui::SliderFloat("Y##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.y, -1.0f, 1.0f);
-
-					ImGui::SliderFloat("Z##HUDR", &imgui_hud_adjust_manager.settings.hud_rotation.z, -1.0f, 1.0f);
+					p_active_weapon_name = p_item->NameShort();
 				}
+				ImGui::Text("Active weapon: %s", p_active_weapon_name);
 
-				if (ImGui::CollapsingHeader("Item"))
+				if (p_item)
 				{
-					ImGui::SeparatorText("Position##Item");
-
-					if (ImGui::Button("Item##IPosition"))
+					ImGui::Text("Item Section: %s", p_item->m_section_id.c_str());
+					
+					if (g_player_hud)
 					{
-						// todo: implement
-					}
+						const char* p_hand = "single hand";
+						bool two_hands = false;
+						if (g_player_hud->attached_item(0) && g_player_hud->attached_item(1))
+						{
+							p_hand = "two hands";
+							two_hands = true;
+						}
 
-					ImGui::SeparatorText("Rotation##Item");
+						ImGui::Text("Mode: %s", p_hand);
 
-					if (ImGui::Button("Item##IRotation"))
-					{
-						// todo: implement
+
+
+						auto p_draw_info_hud_item = [](attachable_hud_item* p_item, u8 index) -> void {
+							if (p_item)
+							{
+								char name[16] = "";
+								sprintf_s(name, "attached_item#%d", index);
+								ImGui::SeparatorText(name);
+
+							//	ImGui::Text("Hands hud: %s", p_item->m_parent->section_name().c_str());
+							//	ImGui::Text("Item hud: %s", p_item->m_sect_name.c_str());
+								R_ASSERT2(p_item->m_parent, "must be valid!");
+
+								char hud_header_name[32] = "";
+								char item_header_name[32] = "";
+
+								std::sprintf(hud_header_name, "Hud = %s##hh%d", p_item->m_parent->section_name().c_str(),index);
+								std::sprintf(item_header_name, "Item = %s##hh%d", p_item->m_sect_name.c_str(), index);
+
+								if (ImGui::CollapsingHeader(hud_header_name))
+								{
+
+
+									ImGui::SeparatorText("Position##HUD");
+
+									if (ImGui::Button("Reset##HPosition"))
+									{
+										// todo: implement
+									}
+
+									if (ImGui::BeginTable("Data##HUDP", 2))
+									{
+										ImGui::TableNextRow();
+
+										ImGui::TableNextColumn();
+
+										Fvector& position = p_item->m_measures.m_hands_attach[0];
+
+										ImGui::SliderFloat("X##HUDP", &position.x, -1.0f, 1.0f);
+
+										ImGui::SliderFloat("Y##HUDP", &position.y, -1.0f, 1.0f);
+
+										ImGui::SliderFloat("Z##HUDP", &position.z, -1.0f, 1.0f);
+										
+										
+										auto test = ImGui::GetContentRegionAvail();
+										ImGui::TableNextColumn();
+										ImGui_Render2DWidget(16.0f);
+
+										ImGui::EndTable();
+									}
+
+
+
+
+									ImGui::SeparatorText("Rotation##HUD");
+
+									if (ImGui::Button("Reset##HRotation"))
+									{
+										// todo: implement
+									}
+
+									if (ImGui::BeginTable("Data##HUDR", 2))
+									{
+										ImGui::TableNextRow();
+
+										ImGui::TableNextColumn();
+
+										Fvector& rotation = p_item->m_measures.m_hands_attach[1];
+
+										ImGui::SliderFloat("X##HUDR", &rotation.x, -360.0f, 360.0f);
+
+										ImGui::SliderFloat("Y##HUDR", &rotation.y, -360.0f, 360.0f);
+
+										ImGui::SliderFloat("Z##HUDR", &rotation.z, -360.0f, 360.0f);
+
+										ImGui::TableNextColumn();
+
+										ImGui::EndTable();
+									}
+								}
+
+								if (ImGui::CollapsingHeader(item_header_name))
+								{
+									ImGui::SeparatorText("Position##Item");
+
+									if (ImGui::BeginTable("Data##HUDPI", 2))
+									{
+										ImGui::TableNextRow();
+
+										ImGui::TableNextColumn();
+
+										Fvector& position = p_item->m_measures.m_item_attach[0];
+
+										ImGui::SliderFloat("X##HUDP", &position.x, -1.0f, 1.0f);
+
+										ImGui::SliderFloat("Y##HUDP", &position.y, -1.0f, 1.0f);
+
+										ImGui::SliderFloat("Z##HUDP", &position.z, -1.0f, 1.0f);
+
+
+										auto test = ImGui::GetContentRegionAvail();
+										ImGui::TableNextColumn();
+										ImGui_Render2DWidget(16.0f);
+
+										ImGui::EndTable();
+									}
+
+									ImGui::SeparatorText("Rotation##Item");
+
+									if (ImGui::BeginTable("Data##HUDR", 2))
+									{
+										ImGui::TableNextRow();
+
+										ImGui::TableNextColumn();
+
+										Fvector& rotation = p_item->m_measures.m_item_attach[1];
+
+										ImGui::SliderFloat("X##HUDR", &rotation.x, -360.0f, 360.0f);
+
+										ImGui::SliderFloat("Y##HUDR", &rotation.y, -360.0f, 360.0f);
+
+										ImGui::SliderFloat("Z##HUDR", &rotation.z, -360.0f, 360.0f);
+
+										ImGui::TableNextColumn();
+
+										ImGui::EndTable();
+									}
+
+								}
+							}
+						};
+
+						attachable_hud_item* p_hud_item_first = g_player_hud->attached_item(0);
+
+						p_draw_info_hud_item(p_hud_item_first,0);
+
+						if (two_hands)
+						{
+							attachable_hud_item* p_hud_item_second = g_player_hud->attached_item(1);
+							p_draw_info_hud_item(p_hud_item_second,1);
+						}
 					}
 				}
 
@@ -194,5 +320,6 @@ void RenderHUDAdjustManager()
 		ImGui::End();
 	}
 
+	ImGui::EndDisabled();
 	ImGui::PopStyleColor(1);
 }

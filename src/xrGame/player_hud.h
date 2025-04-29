@@ -141,7 +141,7 @@ struct hud_item_measures
 	u16								m_shell_bone;
 	Fvector							m_shell_point_offset;
 
-	Fvector							m_hands_attach[2];//pos,rot
+	Fvector							m_hands_attach[2], m_hands_attach_real[2];//pos,rot
 
 	void load						(const shared_str& sect_name, IKinematics* K);
 };
@@ -161,6 +161,23 @@ struct attachable_hud_item
 
 	player_hud_motion_container		m_hand_motions;
 			
+	u32 time_accumulator = 0;
+
+	u32 tocrouch_time_remains = 0;
+	u32 fromcrouch_time_remains = 0;
+	u32 toslowcrouch_time_remains = 0;
+	u32 fromslowcrouch_time_remains = 0;
+
+	u32 torlookout_time_remains = 0;
+	u32 fromrlookout_time_remains = 0;
+	u32 tollookout_time_remains = 0;
+	u32 fromllookout_time_remains = 0;
+
+	void GetCurrentTargetOffset_aim(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
+	void GetCurrentTargetOffset(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
+	void AddOffsets(weapon_inertion::base_params& base, Fvector& pos, Fvector& rot, float koef = 1.0f);
+	void AddSuicideOffset(weapon_inertion& inertion_params, const shared_str& section, Fvector& pos, Fvector& rot);
+
 			attachable_hud_item		(player_hud* pparent):m_parent(pparent),m_upd_firedeps_frame(u32(-1)),m_parent_hud_item(NULL){}
 			~attachable_hud_item	();
 	void load						(const shared_str& sect_name);
@@ -173,6 +190,7 @@ struct attachable_hud_item
 	bool need_renderable			();
 	void set_bone_visible			(const shared_str& bone_name, BOOL bVisibility, BOOL bSilent=FALSE);
 	void debug_draw_firedeps		();
+	void UpdateInertion				(u32 delta, CActor* actor);
 
 	//hands bind position
 	Fvector&						hands_attach_pos();
@@ -181,11 +199,6 @@ struct attachable_hud_item
 	//hands runtime offset
 	Fvector&						hands_offset_pos();
 	Fvector&						hands_offset_rot();
-
-	void							set_hands_offset_pos(Fvector& offset);
-	void							set_hands_offset_rot(Fvector& offset);
-
-	void							UpdateWeaponOffset(u32& delta);
 
 //props
 	u32								m_upd_firedeps_frame;
@@ -256,39 +269,12 @@ public:
 	void			OnMovementChanged	(ACTOR_DEFS::EMoveCommand cmd)	;
 	void			RestoreHandBlends(LPCSTR ignored_part);
 
-	struct default_hud_coords_params
-	{
-		shared_str hud_sect;
-		Fvector hands_position = { 0,0,0 };
-		Fvector hands_orientation = { 0,0,0 };
-		bool is16x9 = true;
-	};
-
 	void			ResetBlockedPartID(){m_blocked_part_idx=u16(-1); };
 	void			SetBlockedPartID(u16 val){m_blocked_part_idx = val; }
 	void			SetHandsVisible(bool val){m_bhands_visible=val;};
 	bool			GetHandsVisible(){return m_bhands_visible;};
 
 	void			UpdateWeaponOffset(u32 delta);
-	default_hud_coords_params _last_default_hud_params;
-	void GetCurrentTargetOffset_aim(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
-	void GetCurrentTargetOffset(weapon_inertion& inertion_params, Fvector& pos, Fvector& rot, float& factor, u32& real);
-	void AddOffsets(weapon_inertion::base_params& base, Fvector& pos, Fvector& rot, float koef = 1.0f);
-	void AddSuicideOffset(weapon_inertion& inertion_params, const shared_str& section, Fvector& pos, Fvector& rot);
-	void ResetItmHudOffset(CHudItem* itm);
-	default_hud_coords_params GetDefaultHudCoords(shared_str hud_sect, u16 idx = 0, bool force = false);
-
-	u32 time_accumulator;
-
-	u32 tocrouch_time_remains;
-	u32 fromcrouch_time_remains;
-	u32 toslowcrouch_time_remains;
-	u32 fromslowcrouch_time_remains;
-
-	u32 torlookout_time_remains;
-	u32 fromrlookout_time_remains;
-	u32 tollookout_time_remains;
-	u32 fromllookout_time_remains;
 
 	IKinematics*	m_legs_model;
 	bool			m_show_legs = true;
@@ -318,7 +304,6 @@ private:
 	attachable_hud_item*				m_attached_items[2];
 	animator_item*						m_animator_item = nullptr;
 	xr_vector<attachable_hud_item*>		m_pool;
-	default_hud_coords_params			last_default_hud_params[2];
 
 	u16									m_blocked_part_idx;
 	bool								m_bhands_visible;
