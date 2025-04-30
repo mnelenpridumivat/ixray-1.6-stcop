@@ -75,10 +75,10 @@ CNightVisionEffector::CNightVisionEffector(CActor* actor)
 
 	LPCSTR section = pGameGlobals->r_string("night_vision", "night_vision_section");
 
-	m_sounds.LoadSound(section, "snd_night_vision_on", "NightVisionOnSnd", false, SOUND_TYPE_ITEM_USING);
-	m_sounds.LoadSound(section, "snd_night_vision_off", "NightVisionOffSnd", false, SOUND_TYPE_ITEM_USING);
-	m_sounds.LoadSound(section, "snd_night_vision_idle", "NightVisionIdleSnd", false, SOUND_TYPE_ITEM_USING);
-	m_sounds.LoadSound(section, "snd_night_vision_broken", "NightVisionBrokenSnd", false, SOUND_TYPE_ITEM_USING);
+	m_sounds.LoadSound(section, "snd_night_vision_on", "NightVisionOnSnd", true, SOUND_TYPE_ITEM_USING);
+	m_sounds.LoadSound(section, "snd_night_vision_off", "NightVisionOffSnd", true, SOUND_TYPE_ITEM_USING);
+	m_sounds.LoadSound(section, "snd_night_vision_idle", "NightVisionIdleSnd", true, SOUND_TYPE_ITEM_USING);
+	m_sounds.LoadSound(section, "snd_night_vision_broken", "NightVisionBrokenSnd", true, SOUND_TYPE_ITEM_USING);
 
 	if (pSettings->line_exist(section, "night_vision_disabled_maps"))
 	{
