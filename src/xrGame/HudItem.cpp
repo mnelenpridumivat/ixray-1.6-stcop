@@ -99,6 +99,16 @@ void CHudItem::Load(LPCSTR section)
 	{
 		m_sounds.LoadSound(section, "snd_gasmask", "sndGasmask", false);
 	}
+
+	if (pSettings->line_exist(section, "snd_prepare_detector"))
+	{
+		m_sounds.LoadSound(section, "snd_prepare_detector", "sndPrepareDet", false);
+	}
+
+	if (pSettings->line_exist(section, "snd_finish_detector"))
+	{
+		m_sounds.LoadSound(section, "snd_finish_detector", "sndFinishDet", false);
+	}
 }
 
 
@@ -212,6 +222,34 @@ void CHudItem::OnStateSwitch(u32 S)
 		PlayAnimDeviceSwitch();
 		break;
 	}
+	case ePrepareDetector:
+	{
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_prepare_detector"), true, ePrepareDetector);
+		PlaySoundIfExist("sndPrepareDet", m_object->Position());
+		break;
+	}
+	case ePrepareDetectorEnd:
+	{
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_draw_detector"), true, ePrepareDetectorEnd);
+		if (CActor* pActor = m_object && m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : nullptr)
+		{
+			if (CCustomDetector* det = pActor->GetDetector(true))
+			{
+				det->SwitchState(eShowing);
+				det->TurnDetectorInternal(true);
+			}
+		}
+		break;
+	}
+	case eFinishDetector:
+	{
+		SetPending(true);
+		PlayHUDMotion(SetCurrentStateAnimation("anm_finish_detector"), true, eFinishDetector);
+		PlaySoundIfExist("sndFinishDet", m_object->Position());
+		break;
+	}
 	};
 
 	if (S != eIdle && S != eSprintStart && S != eSprintEnd)
@@ -233,6 +271,8 @@ void CHudItem::OnAnimationEnd(u32 state)
 	case eSprintEnd:
 	case eBore:
 	case eDeviceSwitch:
+	case ePrepareDetectorEnd:
+	case eFinishDetector:
 	{
 		SwitchState(eIdle);
 		break;
@@ -244,6 +284,18 @@ void CHudItem::OnAnimationEnd(u32 state)
 			g_player_hud->detach_item(this);
 		}
 		SwitchState(eHidden);
+		break;
+	}
+	case ePrepareDetector:
+	{
+		if (m_eAnimationsFlags.test(af_prepare_detector_end))
+		{
+			SwitchState(ePrepareDetectorEnd);
+		}
+		else
+		{
+			SwitchState(eIdle);
+		}
 		break;
 	}
 	}
@@ -383,6 +435,9 @@ void CHudItem::on_a_hud_attach()
 	m_eAnimationsFlags.set(EAnimationsFlags::af_torch, HudAnimationExist("anm_switch_device"));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_nvg, m_eAnimationsFlags.test(EAnimationsFlags::af_torch));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_clear_mask, HudAnimationExist("anm_gasmask"));
+	m_eAnimationsFlags.set(EAnimationsFlags::af_prepare_detector, HudAnimationExist("anm_prepare_detector"));
+	m_eAnimationsFlags.set(EAnimationsFlags::af_prepare_detector_end, HudAnimationExist("anm_draw_detector"));
+	m_eAnimationsFlags.set(EAnimationsFlags::af_finish_detector, HudAnimationExist("anm_finish_detector"));
 }
 
 bool CHudItem::HudAnimationExist(const shared_str& anim_name)
