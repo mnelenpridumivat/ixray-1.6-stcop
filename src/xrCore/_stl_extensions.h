@@ -128,7 +128,6 @@ struct pred_stri {
 };
 
 // STL extensions
-#include "FixedVector.h"
 #include "buffer_vector.h"
 
 // auxilary definition
