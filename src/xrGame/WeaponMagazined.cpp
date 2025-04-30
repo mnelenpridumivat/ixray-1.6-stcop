@@ -1514,6 +1514,7 @@ void CWeaponMagazined::InitAddons()
 
 void CWeaponMagazined::HudSelector()
 {
+	shared_str old_sect = hud_sect;
 	if (m_bUseSilHud && SilencerAttachable() && IsSilencerAttached())
 		hud_sect = hud_silencer;
 	else if (m_bUseScopeHud && ScopeAttachable() && IsScopeAttached())
@@ -1523,7 +1524,7 @@ void CWeaponMagazined::HudSelector()
 	else
 		hud_sect = hud_sect_cache;
 
-	if (HudItemData())
+	if (HudItemData() && old_sect != hud_sect)
 	{
 		g_player_hud->detach_item(this);
 		g_player_hud->attach_item(this);
