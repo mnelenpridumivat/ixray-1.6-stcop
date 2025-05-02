@@ -65,7 +65,7 @@ public:
 private:
 	LPSTR							s_name_replace = nullptr;
 
-	bool bIsTicking = false;
+	bool bIsTicking = true;
 
 public:
 
