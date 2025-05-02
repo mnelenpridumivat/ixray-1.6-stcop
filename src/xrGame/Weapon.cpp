@@ -1545,7 +1545,7 @@ void CWeapon::SetAmmoMagSize(int size)
 
 int CWeapon::GetSuitableAmmoTotal( bool use_item_to_spawn ) const
 {
-	int ae_count = iAmmoElapsed;
+	int ae_count = iAmmoElapsed + iAmmoChamberElapsed;
 	if ( !m_pInventory )
 	{
 		return ae_count;
@@ -2227,7 +2227,7 @@ bool CWeapon::can_kill	() const
 
 CInventoryItem *CWeapon::can_kill	(CInventory *inventory) const
 {
-	if ((m_bAmmoInChamber && iAmmoChamberElapsed || GetAmmoElapsed()) || m_ammoTypes.empty())
+	if ((GetAmmoChamberElapsed() + GetAmmoElapsed()) > 0 || m_ammoTypes.empty())
 		return				(const_cast<CWeapon*>(this));
 
 	TIItemContainer::iterator I = inventory->m_all.begin();
@@ -2267,7 +2267,7 @@ const CInventoryItem *CWeapon::can_kill	(const xr_vector<const CGameObject*> &it
 
 bool CWeapon::ready_to_kill	() const
 {
-	return (!IsMisfire() && ((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2)) && (m_bAmmoInChamber && iAmmoChamberElapsed || GetAmmoElapsed()));
+	return (!IsMisfire() && ((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2)) && (GetAmmoElapsed() + GetAmmoChamberElapsed()) > 0);
 }
 
 u8 CWeapon::GetCurrentHudOffsetIdx() const {
