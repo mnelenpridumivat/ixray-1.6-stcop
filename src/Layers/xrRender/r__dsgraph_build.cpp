@@ -531,7 +531,7 @@ BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes, bool Force)
 	default:
 		{
 			// General type of visual
-			r_dsgraph_insert_dynamic(pVisual,Tpos);
+			r_dsgraph_insert_dynamic(pVisual,Tpos, Force);
 		}
 		break;
 	}
