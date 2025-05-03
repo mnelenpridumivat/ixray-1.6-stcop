@@ -849,11 +849,13 @@ void CUIActorMenu::UpdateBoughtInfo(CUIDragDropListEx* pList, CTrade* pTrade)
 		break;
 	}
 	}
-	VERIFY(purchase_list);
-	for (u32 i = 0; i < pList->ItemsCount(); ++i) {
-		CUICellItem* cell_item = pList->GetItemIdx(i);
-		PIItem item = (PIItem)cell_item->m_pData;
-		purchase_list->AddItemToList(item->m_section_id);
+	if(purchase_list)
+	{
+		for (u32 i = 0; i < pList->ItemsCount(); ++i) {
+			CUICellItem* cell_item = pList->GetItemIdx(i);
+			PIItem item = (PIItem)cell_item->m_pData;
+			purchase_list->AddItemToList(item->m_section_id);
+		}
 	}
 }
 
@@ -870,10 +872,12 @@ void CUIActorMenu::UpdateSoldInfo(CUIDragDropListEx* pList, CTrade* pTrade)
 		break;
 	}
 	}
-	VERIFY(purchase_list);
-	for (u32 i = 0; i < pList->ItemsCount(); ++i) {
-		CUICellItem* cell_item = pList->GetItemIdx(i);
-		PIItem item = (PIItem)cell_item->m_pData;
-		purchase_list->RemoveItemFromList(item->m_section_id);
+	if(purchase_list)
+	{
+		for (u32 i = 0; i < pList->ItemsCount(); ++i) {
+			CUICellItem* cell_item = pList->GetItemIdx(i);
+			PIItem item = (PIItem)cell_item->m_pData;
+			purchase_list->RemoveItemFromList(item->m_section_id);
+		}
 	}
 }

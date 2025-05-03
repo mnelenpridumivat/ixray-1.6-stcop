@@ -150,7 +150,7 @@ void UIPropertiesItem::DrawItem()
 		ImGui::PushID(Name.c_str());
 		if (PropertiesFrom->IsReadOnly())
 		{
-			if (type == PROP_BOOLEAN)
+			if (type == PROP_BOOLEAN || type == PROP_BOOL)
 			{
 				FlagValueCustom* V = dynamic_cast<FlagValueCustom*>(PItem->GetFrontValue()); VERIFY(V);
 				ImGui::TextDisabled(V->GetValueEx() ? "true" : "false");
