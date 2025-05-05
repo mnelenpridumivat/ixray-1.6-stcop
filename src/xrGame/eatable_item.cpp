@@ -321,9 +321,9 @@ bool CEatableItem::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 	{
 		return false;
 	}
-	auto eatable = smart_cast<CEatableItem*>(other);
-	VERIFY(eatable);
-	return eatable->GetRemainingUses() == GetRemainingUses();
+	//auto eatable = smart_cast<CEatableItem*>(other);
+	//VERIFY(eatable);
+	return true;//eatable->GetRemainingUses() == GetRemainingUses();
 }
 
 

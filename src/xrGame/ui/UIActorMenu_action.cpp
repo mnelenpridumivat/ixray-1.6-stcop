@@ -177,32 +177,41 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 				ToBag			( itm, false );
 			break;
 		}
+	case iStackList:
 	case iActorBag:
 		{
+			auto real_itm = itm;
+			if (t_old==iStackList)
+			{
+				real_itm = GetListByType(iActorBag)->GetItemByData(itm->m_pData);
+				m_ActorStateInfo->Show(true);
+				m_pInventoryStackList->ClearAll(true);
+				m_pInventoryStackList->Show(false);
+			}
 			if ( m_currMenuMode == mmTrade || m_currMenuMode == mmBarter )
 			{
-				ToActorTrade( itm, false );
+				ToActorTrade( real_itm, false );
 				break;
 			}else
 				if ( m_currMenuMode == mmDeadBodySearch )
 				{
-					ToDeadBodyBag( itm, false );
+					ToDeadBodyBag( real_itm, false );
 					break;
 				}
-				if(m_currMenuMode!=mmUpgrade && TryUseItem( itm ))
+				if(m_currMenuMode!=mmUpgrade && TryUseItem( real_itm ))
 				{
 					break;
 				}
-				if ( TryActiveSlot( itm ) )
+				if ( TryActiveSlot( real_itm ) )
 				{
 					break;
 				}
-				PIItem iitem_to_place = (PIItem)itm->m_pData;
-				if ( !ToSlot( itm, false, iitem_to_place->BaseSlot() ) )
+				PIItem iitem_to_place = (PIItem)real_itm->m_pData;
+				if ( !ToSlot( real_itm, false, iitem_to_place->BaseSlot() ) )
 				{
-					if ( !ToBelt( itm, false ) )
+					if ( !ToBelt( real_itm, false ) )
 					{
-						ToSlot( itm, true, iitem_to_place->BaseSlot() );
+						ToSlot( real_itm, true, iitem_to_place->BaseSlot() );
 					}
 				}
 				break;

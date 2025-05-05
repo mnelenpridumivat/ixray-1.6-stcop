@@ -442,12 +442,14 @@ void CSE_ALifeItem::UPDATE_Serialize(ISaveObject& Object)
 	{
 		inherited1::UPDATE_Serialize(Object);
 		inherited2::UPDATE_Serialize(Object);
+#ifdef XRGAME_EXPORTS
 		if (!Object.IsSave()) {
 			m_physics_disabled = false;
 		}
 		else {
 			m_last_update_time = Device.dwTimeGlobal;
 		}
+#endif // XRGAME_EXPORTS
 	}
 }
 

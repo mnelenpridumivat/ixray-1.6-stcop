@@ -1582,10 +1582,10 @@ bool CInventoryItem::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 	{
 		return false;
 	}
-	if (!fsimilar(GetCondition(), other->GetCondition(), 0.01f))
-	{
-		return false;
-	}
+	//if (!fsimilar(GetCondition(), other->GetCondition(), 0.01f))
+	//{
+	//	return false;
+	//}
 	if (!equal_upgrades(other->upgardes()))
 	{
 		return false;

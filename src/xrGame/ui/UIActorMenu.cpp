@@ -411,7 +411,7 @@ CUIDragDropListEx* CUIActorMenu::GetListByType(EDDListType t)
 	{
 		case iActorBag:
 			{
-				if(m_currMenuMode==mmTrade)
+				if(m_currMenuMode==mmTrade || m_currMenuMode==mmBarter)
 					return m_pTradeActorBagList;
 				else
 					return m_pInventoryBagList;
@@ -532,7 +532,7 @@ void CUIActorMenu::InfoCurItem( CUICellItem* cell_item )
 			) {
 			m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_1");
 		}
-		else if (current_item->GetCondition() < trade_params->buy_item_condition_factor) {
+		else if (CEatableItem* eatable = smart_cast<CEatableItem*>(current_item); !eatable && current_item->GetCondition() < trade_params->buy_item_condition_factor) {
 			m_ItemInfo->InitItem(cell_item, compare_item, u32(-1), "st_no_trade_tip_2");
 		}
 		else {
