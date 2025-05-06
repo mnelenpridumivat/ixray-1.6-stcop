@@ -1038,7 +1038,7 @@ void CWeaponMagazined::switch2_Empty()
 {
 	auto play_motion_if_exists = [&](const shared_str& motion_name)
 	{
-		if (HudAnimationExist(motion_name.c_str()))
+		if (HudAnimationExist(motion_name))
 		{
 			SetPending(TRUE);
 			m_bBlockEmptyClick = true;
@@ -1189,7 +1189,7 @@ void CWeaponMagazined::switch2_FireMode()
 		anim_name.printf("%s%d", *anim_name, GetQueueSize());
 	}
 
-	if (HudAnimationExist(anim_name.c_str()))
+	if (HudAnimationExist(anim_name))
 	{
 		PlayHUDMotion(SetCurrentStateAnimation(anim_name), true, eSwitchMode);
 	}
@@ -1648,6 +1648,13 @@ void CWeaponMagazined::PlayAnimReload()
 shared_str CWeaponMagazined::SetCurrentAimAnimation()
 {
 	shared_str anim = "anm_idle_aim";
+
+	if (IsGrenadeLauncherAttached())
+	{
+		//Hack for original weapon configs
+		anim = IsGrenadeMode() && HudAnimationExist("anm_idle_g_aim") ? "anm_idle_g_aim" : (HudAnimationExist("anm_idle_w_gl_aim") ? "anm_idle_w_gl_aim" : anim);
+	}
+
 	if (CActor* actor = H_Parent()->cast_actor())
 	{
 		u32 state = actor->GetMovementState(ACTOR_DEFS::EMovementStates::eReal);
@@ -1889,41 +1896,6 @@ void CWeaponMagazined::load(IReader &input_packet)
 	load_data		(m_iQueueSize, input_packet);SetQueueSize(m_iQueueSize);
 	load_data		(m_iShotNum, input_packet);
 	load_data		(m_iCurFireMode, input_packet);
-}
-
-/*void CWeaponMagazined::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CWeaponMagazined");
-	{
-		inherited::Save(Object);
-		Object->GetCurrentChunk()->w_s32(m_iQueueSize);
-		Object->GetCurrentChunk()->w_s32(m_iShotNum);
-		Object->GetCurrentChunk()->w_s32(m_iCurFireMode);
-	}
-	Object->EndChunk();
-}
-
-void CWeaponMagazined::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CWeaponMagazined");
-	{
-		inherited::Load(Object);
-		Object->GetCurrentChunk()->r_s32(m_iQueueSize); 
-		SetQueueSize(m_iQueueSize);
-		Object->GetCurrentChunk()->r_s32(m_iShotNum);
-		Object->GetCurrentChunk()->r_s32(m_iCurFireMode);
-	}
-	Object->EndChunk();
-}*/
-
-void CWeaponMagazined::Serialize(ISaveObject& Object)
-{
-	BEGIN_CHUNK(Object,"CWeaponMagazined")
-	{
-		inherited::Serialize(Object);
-		Object << m_iQueueSize << m_iShotNum << m_iCurFireMode;
-		SetQueueSize(m_iQueueSize);
-	}
 }
 
 void CWeaponMagazined::net_Export	(NET_Packet& P)
