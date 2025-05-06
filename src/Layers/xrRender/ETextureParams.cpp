@@ -183,7 +183,8 @@ bool STextureParams::Load(IReader& F)
 		material_weight = F.r_float();
 	}
 
-	if (F.find_chunk(THM_CHUNK_BUMP))
+	bool IncorrectChunk = false;
+	if (FindAndValidateChunk(F, THM_CHUNK_BUMP, IncorrectChunk))
 	{
 		bump_virtual_height = F.r_float();
 		bump_mode = (ETBumpMode)F.r_u32();
@@ -195,7 +196,6 @@ bool STextureParams::Load(IReader& F)
 		F.r_stringZ(bump_name);
 	}
 
-	bool IncorrectChunk = false;
 	if (FindAndValidateChunk(F, THM_CHUNK_EXT_NORMALMAP, IncorrectChunk))
 		F.r_stringZ(ext_normal_map_name);
 
