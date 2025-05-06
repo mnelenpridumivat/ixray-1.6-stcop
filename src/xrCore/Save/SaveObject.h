@@ -15,9 +15,18 @@ protected:
 	xr_stack<CSaveChunk*> _chunkStack;
 	bool _isPartial = false;
 
+#ifndef MASTER_GOLD
+	xr_queue<shared_str> _debugTopChunkNamesQueue;
+#endif
+
 	CSaveChunk* GetCurrentChunk();
 
 public:
+#ifndef MASTER_GOLD
+	void ClearDebugData();
+	void PopDebugData();
+#endif
+	
 	CSaveObject();
 	CSaveObject(CSaveChunk* Root);
 	~CSaveObject();
@@ -358,6 +367,44 @@ public:
 		GetCurrentChunk()->EndArray();
 		return *this;
 	}
+	
+	template<typename T, typename H, typename Eq>
+	ISaveObject& Serialize(xr_hash_set<T, H, Eq>& Value)
+	{
+		if (IsSave())
+		{
+			GetCurrentChunk()->WriteArray();
+			for (auto& elem : Value) {
+				if constexpr (std::is_pointer<T>::value) {
+					(*this) << *elem;
+				}
+				else {
+					(*this) << elem;
+				}
+			}
+			
+		} else
+		{
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					//CreateElem(Value);
+					T Elem = new std::remove_pointer<T>::type();
+					(*this) << *Elem;
+					Value.emplace(Elem);
+				}
+				else {
+					T&& Elem = T();
+					(*this) << Elem;
+					Value.emplace(Elem);
+				}
+			}
+			
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
 
 };
 
@@ -389,6 +436,11 @@ ISaveObject& operator<<(ISaveObject& Object, xr_map<Key, Mapped>& Value) {
 
 template<typename T, size_t Size>
 ISaveObject& operator<<(ISaveObject& Object, svector<T, Size>& Value) {
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename T, typename H, typename Eq>
+ISaveObject& operator<<(ISaveObject& Object, xr_hash_set<T, H, Eq>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 

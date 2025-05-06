@@ -29,6 +29,29 @@ CSaveChunk* CSaveObject::GetCurrentChunk()
 	return _chunkStack.top();
 }
 
+#ifndef MASTER_GOLD
+void CSaveObject::ClearDebugData()
+{
+	while (!_debugTopChunkNamesQueue.empty())
+	{
+		_debugTopChunkNamesQueue.pop();
+	}
+}
+
+void CSaveObject::PopDebugData()
+{
+	Msg("The history of top chunk:");
+	while (!_debugTopChunkNamesQueue.empty())
+	{
+		xr_string Top = _debugTopChunkNamesQueue.front().c_str();
+		_debugTopChunkNamesQueue.pop();
+		Top = "\t" + Top;
+		Msg(Top.c_str());
+	}
+	Msg("End of the history of top chunk");
+}
+#endif
+
 void CSaveObject::EndChunk(ISaveObjectStackHandler handler)
 {
 	VERIFY(handler.GetDepth() != u64(-1));
@@ -36,6 +59,9 @@ void CSaveObject::EndChunk(ISaveObjectStackHandler handler)
 	xr_string chunk = _chunkStack.top()->GetChunkName();
 	_chunkStack.pop();
 	R_ASSERT3(handler.GetDepth() == _chunkStack.size(), "Chunk has invalid closing tags!", chunk.c_str());
+#ifndef MASTER_GOLD
+	_debugTopChunkNamesQueue.push(_chunkStack.top()->GetChunkName());
+#endif
 }
 
 void CSaveObject::EndArray()
@@ -91,6 +117,9 @@ ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
 	_chunkStack.push(_chunkStack.top()->BeginChunk(ChunkName));
+#ifndef MASTER_GOLD
+	_debugTopChunkNamesQueue.push(ChunkName);
+#endif
 	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }
 
@@ -192,6 +221,9 @@ CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
 ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
+#ifndef MASTER_GOLD
+	_debugTopChunkNamesQueue.push(ChunkName);
+#endif
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));
 	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }

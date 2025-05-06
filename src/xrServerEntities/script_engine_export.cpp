@@ -35,6 +35,7 @@
 #	include <EmiZone.h>
 #	include <MagnetZone.h>
 #	include <Flamethrower.h>
+#include "StoryID/ScriptStoryIDManager.h"
 #endif
 
 void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
@@ -333,6 +334,7 @@ void export_classes	(lua_State *L)
 	CAnomalPseudoGigant::script_register(L);
 	CEmiZone::script_register(L);
 	CMagnetZone::script_register(L);
+	CScriptStoryIDManager::script_register(L);
 	
 
 #endif

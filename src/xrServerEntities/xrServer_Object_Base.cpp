@@ -551,9 +551,21 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 #endif
 
 		{
+#ifndef MASTER_GOLD
+			((CSaveObject&)Object).ClearDebugData();
+#endif
 			auto ChunkDepth = Object.GetChunkStackDepth();
 			STATE_Serialize(Object);
-			R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "STATE_Serialize", name());
+			if (ChunkDepth != Object.GetChunkStackDepth())
+			{
+				R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Serializing object result invalid chunk opening and closing tags!", "STATE_Serialize", name());
+#ifndef MASTER_GOLD
+				((CSaveObject&)Object).PopDebugData();
+			} else
+			{
+				((CSaveObject&)Object).ClearDebugData();
+#endif
+			}
 		}
 	}
 	return true;

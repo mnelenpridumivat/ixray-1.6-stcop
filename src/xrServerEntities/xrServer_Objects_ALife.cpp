@@ -537,6 +537,11 @@ void CSE_ALifeObject::STATE_Serialize(ISaveObject& Object)
 {
 	BEGIN_CHUNK(Object,"CSE_ALifeObject::STATE")
 	{
+
+		BEGIN_CHUNK(Object, "CSE_Abstract::script_story_id")
+		{
+			Object << m_script_story_ID;
+		}
 		Object << m_tGraphID << m_fDistance << m_bDirectControl << m_tNodeID << m_flags
 			<< m_ini_string << m_story_id << m_spawn_story_id;
 		if(!Object.IsSave() && m_ini_file) {
@@ -565,6 +570,7 @@ void CSE_ALifeObject::FillProps				(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateFlag32		(items,	PrepareKey(pref,*s_name,"ALife\\Used AI locations"),	&m_flags,			flUsedAI_Locations);
 	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Story ID"),				&m_story_id,		&*fp_data.story_names.begin(), fp_data.story_names.size());
 	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Spawn Story ID"),		&m_spawn_story_id,	&*fp_data.spawn_story_names.begin(), fp_data.spawn_story_names.size());
+	PHelper().CreateRText		(items,	PrepareKey(pref,*s_name,"ALife\\Script Story ID"),&m_script_story_ID);
 #	endif // #ifdef XRSE_FACTORY_EXPORTS
 }
 #endif // #ifndef XRGAME_EXPORTS
