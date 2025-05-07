@@ -299,6 +299,7 @@ protected:
 
 	void HideOneUpgradeLevel(const char* section);
 	void LoadUpgradeBonesToHide(const char* section, const char* line);
+	virtual void ForceUpdateHUD();
 
 public:
 	virtual bool IsGrenadeMode() const { return false; }
