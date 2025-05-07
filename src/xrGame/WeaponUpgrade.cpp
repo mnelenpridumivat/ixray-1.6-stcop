@@ -363,7 +363,7 @@ bool CWeapon::install_upgrade_addon( LPCSTR section, bool test )
 	result |= result2;
 	return result;
 }
-
+#include "player_hud.h"
 bool CWeapon::install_upgrade_hud_sect(LPCSTR section, bool test)
 {
 	LPCSTR str;
@@ -378,7 +378,14 @@ bool CWeapon::install_upgrade_hud_sect(LPCSTR section, bool test)
 		if (new_hud_sect == "skip_reassign")
 			hud_sect = old_hud;
 		else
+		{
 			hud_sect = new_hud_sect;
+			if (HudItemData() != nullptr)
+			{
+				g_player_hud->detach_item(this);
+				g_player_hud->attach_item(this);
+			}
+		}
 
 		hud_sect_cache = hud_sect;
 	}
