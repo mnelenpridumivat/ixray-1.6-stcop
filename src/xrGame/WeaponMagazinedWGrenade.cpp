@@ -179,6 +179,11 @@ shared_str CWeaponMagazinedWGrenade::SetCurrentReloadAnimation()
 			AddSuffixName(anim, "_ammochange", end_suffix);
 		}
 
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope", end_suffix);
+		}
+
 		AddSuffixName(anim, end_suffix);
 	}
 
@@ -692,6 +697,11 @@ shared_str CWeaponMagazinedWGrenade::SetCurrentStateAnimation(const shared_str& 
 		}
 
 		AddSuffixName(anim, end_suffix);
+
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope");
+		}
 	}
 
 	return anim;

@@ -1609,6 +1609,11 @@ shared_str CWeaponMagazined::SetCurrentReloadAnimation()
 			AddSuffixName(anim, "_ammochange");
 		}
 
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope");
+		}
+
 	}
 
 	return anim;
@@ -1635,6 +1640,11 @@ shared_str CWeaponMagazined::SetCurrentStateAnimation(const shared_str& first_na
 		else if (empty)
 		{
 			AddSuffixName(anim, "_empty");
+		}
+
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope");
 		}
 	}
 
