@@ -34,7 +34,7 @@ CSE_ALifeTraderAbstract* ch_info_get_from_id (u16 id)
 }
 
 CUICharacterInfo::CUICharacterInfo()
-	: m_ownerID(u16(-1)),
+	: m_ownerID(ALife::_OBJECT_ID(-1)),
 	pUIBio(nullptr)
 {
 	ZeroMemory			(m_icons,sizeof(m_icons));
@@ -322,7 +322,7 @@ void CUICharacterInfo::Update()
 
 		if(nullptr == T)
 		{
-			m_ownerID = u16(-1);
+			m_ownerID = ALife::_OBJECT_ID(-1);
 			return;
 		}
 		else

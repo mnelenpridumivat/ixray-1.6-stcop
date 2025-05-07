@@ -340,7 +340,7 @@ void SHeliEnemy::reinit()
 {
 	type					= eEnemyNone;
 	destEnemyPos.set		(0.0f,0.0f,0.0f);
-	destEnemyID				=u16(-1);
+	destEnemyID				=ALife::_OBJECT_ID(-1);
 	fStartFireTime			=-1.0f;
 }
 

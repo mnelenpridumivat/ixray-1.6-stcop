@@ -5,7 +5,7 @@
 
 CBolt::CBolt(void) 
 {
-	m_thrower_id				=u16(-1);
+	m_thrower_id				=ALife::_OBJECT_ID(-1);
 }
 
 CBolt::~CBolt(void) 

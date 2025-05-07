@@ -14,7 +14,7 @@ class CControllerPsyHit : public CControl_ComCustom<> {
 
 	CPsyHitEffectorCam	*m_effector_cam;
 	CPsyHitEffectorPP	*m_effector_pp;
-	u16						m_curent_actor_id = u16(-1);
+	u16						m_curent_actor_id = ALife::_OBJECT_ID(-1);
 
 
 	enum ESoundState{

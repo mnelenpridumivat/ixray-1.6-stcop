@@ -45,7 +45,7 @@ void	CExplosiveItem::Hit					(SHit* pHDS)
 	VERIFY(pHDS->who);
 	if(!CDelayedActionFuse::isActive() &&
 		CDelayedActionFuse::CheckCondition(GetCondition() &&
-		pHDS->who)/*&&CExplosive::Initiator()==u16(-1)*/)
+		pHDS->who)/*&&CExplosive::Initiator()==ALife::_OBJECT_ID(-1)*/)
 	{
 		//запомнить того, кто взорвал вещь
 		SetInitiator( pHDS->who->ID());

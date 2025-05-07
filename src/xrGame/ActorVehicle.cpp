@@ -97,7 +97,7 @@ void CActor::detach_Vehicle()
 	IKinematicsAnimated* V= smart_cast<IKinematicsAnimated*>(Visual()); R_ASSERT(V);
 	V->PlayCycle		(m_anims->m_normal.legs_idle);
 	V->PlayCycle		(m_anims->m_normal.m_torso_idle);
-	m_holderID=u16(-1);
+	m_holderID=ALife::_OBJECT_ID(-1);
 
 //.	SetWeaponHideState(whs_CAR, FALSE);
 	SetWeaponHideState(INV_STATE_BLOCK_ALL, false);

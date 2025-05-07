@@ -343,7 +343,7 @@ bool CInventory::Slot(u16 slot_id, PIItem pIItem, bool bNotActivate, bool strict
 
 	if (!IsGameTypeSingle())
 	{
-		u16 real_parent = pIItem->object().H_Parent() ? pIItem->object().H_Parent()->ID() : u16(-1);
+		u16 real_parent = pIItem->object().H_Parent() ? pIItem->object().H_Parent()->ID() : ALife::_OBJECT_ID(-1);
 		if (GetOwner()->object_id() != real_parent)
 		{
 			Msg("! WARNING: CL: actor [%d] tries to place to slot not own item [%d], that has parent [%d]",

@@ -347,12 +347,12 @@ const u32 FORGET_KILLER_TIME = 180000;
 void CEntity::shedule_Update	(u32 dt)
 {
 	inherited::shedule_Update	(dt);
-	if (!getDestroy() && !g_Alive() && (m_killer_id != u16(-1))) {
+	if (!getDestroy() && !g_Alive() && (m_killer_id != ALife::_OBJECT_ID(-1))) {
 		if (Device.dwTimeGlobal > m_level_death_time + FORGET_KILLER_TIME) {
-			m_killer_id			= u16(-1);
+			m_killer_id			= ALife::_OBJECT_ID(-1);
 			NET_Packet			P;
 			u_EventGen			(P,GE_ASSIGN_KILLER,ID());
-			P.w_u16				(u16(-1));
+			P.w_u16				(ALife::_OBJECT_ID(-1));
 			if (IsGameTypeSingle())	u_EventSend			(P);
 		}
 	}

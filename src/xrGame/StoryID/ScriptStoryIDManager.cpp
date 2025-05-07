@@ -62,6 +62,11 @@ namespace ScriptStoryIDManager
     {
        return manager.GetID(id);
     }
+
+    ALife::_OBJECT_ID GetInvalid()
+    {
+        return ALife::_OBJECT_ID(-1);
+    }
 }
 
 void CScriptStoryIDManager::script_register(lua_State* L)
@@ -77,6 +82,9 @@ void CScriptStoryIDManager::script_register(lua_State* L)
             def("get_story_objects_registry", &CScriptStoryIDManager::GetInstance),
             def("check_spawn_ini_for_story_id", &CScriptStoryIDManager::VerifiedRegisterObject)
             ];
+    module(L, "object_id")[
+        def("invalid", &ScriptStoryIDManager::GetInvalid)
+    ];
 }
 
 ISaveObject& operator<<(ISaveObject& obj, CScriptStoryIDManager::SContainer& cont)

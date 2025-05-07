@@ -122,7 +122,7 @@ void CGameObject::net_Destroy	()
 	inherited::net_Destroy						();
 	setReady									(FALSE);
 	
-	if (Level().IsDemoPlayStarted() && ID() == u16(-1))
+	if (Level().IsDemoPlayStarted() && ID() == ALife::_OBJECT_ID(-1))
 	{
 		Msg("Destroying demo_spectator object");
 	} else
@@ -271,7 +271,7 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 		cName_set					(E->name_replace());
 	bool demo_spectator = false;
 	
-	if (Level().IsDemoPlayStarted() && E->ID == u16(-1))
+	if (Level().IsDemoPlayStarted() && E->ID == ALife::_OBJECT_ID(-1))
 	{
 		Msg("* Spawning demo spectator ...");
 		demo_spectator = true;

@@ -605,7 +605,7 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 
 	//set_state_box( mstate_real );
 	//character_physics_support()->movement()->ActivateBox	(0);
-	if(E->m_holderID!=u16(-1))
+	if(E->m_holderID!=ALife::_OBJECT_ID(-1))
 	{ 
 		character_physics_support()->movement()->DestroyCharacter();
 	}
@@ -717,8 +717,8 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 			Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
 	//F
 	//-------------------------------------------------------------
-	m_iLastHitterID = u16(-1);
-	m_iLastHittingWeaponID = u16(-1);
+	m_iLastHitterID = ALife::_OBJECT_ID(-1);
+	m_iLastHittingWeaponID = ALife::_OBJECT_ID(-1);
 	m_s16LastHittedElement = -1;
 	m_bWasHitted = false;
 	m_dwILastUpdateTime		= 0;
@@ -784,7 +784,7 @@ void CActor::net_Destroy	()
 
 	processing_deactivate();
 	m_holder=nullptr;
-	m_holderID=u16(-1);
+	m_holderID=ALife::_OBJECT_ID(-1);
 	
 	SetDefaultVisualOutfit(nullptr);
 
@@ -1843,8 +1843,8 @@ BOOL CActor::net_SaveRelevant()
 
 void				CActor::SetHitInfo				(CObject* who, CObject* weapon, s16 element, Fvector Pos, Fvector Dir)
 {
-	m_iLastHitterID = (who!= nullptr) ? who->ID() : u16(-1);
-	m_iLastHittingWeaponID = (weapon != nullptr) ? weapon->ID() : u16(-1);
+	m_iLastHitterID = (who!= nullptr) ? who->ID() : ALife::_OBJECT_ID(-1);
+	m_iLastHittingWeaponID = (weapon != nullptr) ? weapon->ID() : ALife::_OBJECT_ID(-1);
 	m_s16LastHittedElement = element;
 	m_fLastHealth = GetfHealth();
 	m_bWasHitted = true;

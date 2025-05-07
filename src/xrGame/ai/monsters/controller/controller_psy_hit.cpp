@@ -74,7 +74,7 @@ bool CControllerPsyHit::check_start_conditions()
 		CActor* pA = const_cast<CActor*>(smart_cast<const CActor*>(m_object->EnemyMan.get_enemy()));
 		if (pA) 
 		{
-			m_curent_actor_id = u16(-1);
+			m_curent_actor_id = ALife::_OBJECT_ID(-1);
 
 			if (pA->Cameras().GetCamEffector(eCEControllerPsyHit))
 				return						false;

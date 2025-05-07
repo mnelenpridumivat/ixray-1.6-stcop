@@ -233,14 +233,14 @@ void CUITaskWnd::ReloadTaskInfo()
         m_pSecondaryTaskItem->InitTask(additionalTask);
     }
 
-    if (!storyTask || (storyTask->m_map_object_id == u16(-1) || storyTask->m_map_location.size() == 0))
+    if (!storyTask || (storyTask->m_map_object_id == ALife::_OBJECT_ID(-1) || storyTask->m_map_location.size() == 0))
 		m_btn_focus->Show(false);
 	else
 		m_btn_focus->Show(true);
 
 	if (m_btn_focus2)
 	{
-		if (!additionalTask || (additionalTask->m_map_object_id == u16(-1) || additionalTask->m_map_location.size() == 0))
+		if (!additionalTask || (additionalTask->m_map_object_id == ALife::_OBJECT_ID(-1) || additionalTask->m_map_location.size() == 0))
 			m_btn_focus2->Show(false);
 		else
 			m_btn_focus2->Show(true);

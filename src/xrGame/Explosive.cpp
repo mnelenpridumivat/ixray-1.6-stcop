@@ -764,7 +764,7 @@ void CExplosive::net_Relcase(CObject* O)
 	if (IsGameTypeSingle())
 	{
 		if(O->ID()==m_iCurrentParentID)
-			m_iCurrentParentID=u16(-1);
+			m_iCurrentParentID=ALife::_OBJECT_ID(-1);
 	}
 
 	if (O && O->cast_game_object())
