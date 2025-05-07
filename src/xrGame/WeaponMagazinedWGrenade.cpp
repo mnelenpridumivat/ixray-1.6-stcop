@@ -167,12 +167,15 @@ shared_str CWeaponMagazinedWGrenade::SetCurrentReloadAnimation()
 		LPCSTR end_suffix = m_bGrenadeMode ? "_g" : "_w_gl";
 		if (IsMisfire())
 		{
-			AddSuffixName(anim, "_misfire", end_suffix);
-			AddSuffixName(anim, "_jammed", end_suffix);
-
 			if (empty)
 			{
-				AddSuffixName(anim, "_last", end_suffix);
+				AddSuffixName(anim, "_misfire_last", end_suffix);
+				AddSuffixName(anim, "_jammed_last", end_suffix);
+			}
+			else
+			{
+				AddSuffixName(anim, "_misfire", end_suffix);
+				AddSuffixName(anim, "_jammed", end_suffix);
 			}
 		}
 		else if (empty)
