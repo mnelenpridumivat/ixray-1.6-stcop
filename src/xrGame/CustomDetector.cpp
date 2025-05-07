@@ -155,7 +155,7 @@ void CCustomDetector::ToggleDetector(bool bFastMode, bool switching)
 			}
 			else
 			{
-				if (itm != nullptr && itm->m_eAnimationsFlags.test(EAnimationsFlags::af_prepare_detector))
+				if (itm != nullptr && !itm->bDisablePrepareAnimation && itm->m_eAnimationsFlags.test(EAnimationsFlags::af_prepare_detector))
 				{
 					if (itm->GetState() == CHUDState::eIdle)
 					{
@@ -166,6 +166,11 @@ void CCustomDetector::ToggleDetector(bool bFastMode, bool switching)
 				{
 					SwitchState(eShowing);
 					TurnDetectorInternal(true);
+
+					if (itm != nullptr && itm->bDisablePrepareAnimation)
+					{
+						itm->bDisablePrepareAnimation = false;
+					}
 				}
 			}
 		}

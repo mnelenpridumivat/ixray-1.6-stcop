@@ -183,6 +183,8 @@ public:
 	Flags32 m_eDevicesFlags;
 	Flags32 m_eAnimationsFlags;
 
+	bool bDisablePrepareAnimation = false;
+
 	bool WpnCanShoot() const;
 
 	struct jitter_params
