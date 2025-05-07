@@ -664,7 +664,7 @@ void CWeapon::SAmmoBonesParams::Load(const shared_str& section, u32 size)
 		}
 	}
 
-	shared_str configuration;
+	static shared_str configuration;
 
 	if (ConfigurationMap.size() > 0)
 	{
