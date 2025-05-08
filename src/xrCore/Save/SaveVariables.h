@@ -127,31 +127,6 @@ public:
 	
 };
 
-/*class XRCORE_API CSaveVariableArray :
-	public ISaveVariableArray//,
-	//public CSaveVariableBase
-{
-	u64 _size;
-	u64 _currentReadPos = 0;
-	xr_vector<ISaveable*> _array;
-
-protected:
-	void* GetValue() override { return nullptr; };
-
-public:
-	CSaveVariableArray(u64 Size) : _size(Size) {}
-	~CSaveVariableArray();
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_array; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-
-	virtual u64 GetSize() override { return _size; }
-	virtual ISaveable* GetCurrentElement() override { VERIFY(_currentReadPos < _size); return _array[_currentReadPos]; }
-	virtual void Next() override { ++_currentReadPos; }
-
-	virtual void AddVariable(ISaveable* data) override { _array.emplace_back(data); }
-};*/
-
 class XRCORE_API CSaveVariableBool:
 	public CSaveVariableBase 
 {

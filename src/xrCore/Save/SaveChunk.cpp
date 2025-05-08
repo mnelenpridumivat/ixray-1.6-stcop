@@ -269,11 +269,23 @@ void CSaveChunk::r_float(float& A)
 void CSaveChunk::r_double(double& A)
 {
 	if (_currentArrayStack.empty()) {
+		if (_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_float)
+		{
+			R_ASSERT(_variables[_currentReadIndex]->GetVariableType() != ESaveVariableType::t_float, "Attempt to read float as double in chunk", _chunkName.c_str());
+			A = SSaveVariableGetter::GetValue<float, CSaveVariableFloat>(_variables[_currentReadIndex++]);
+			return;
+		}
 		R_ASSERT3(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_double, "Invalid variable type access in chunk", _chunkName.c_str());
 		A = SSaveVariableGetter::GetValue<double, CSaveVariableDouble>(_variables[_currentReadIndex++]);
 	}
 	else {
 		auto CurrentArray = _currentArrayStack.top();
+		if (CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_float)
+		{
+			R_ASSERT(CurrentArray->GetCurrentElement()->GetVariableType() != ESaveVariableType::t_float, "Attempt to read float as double in chunk", _chunkName.c_str());
+			A = SSaveVariableGetter::GetValue<float, CSaveVariableFloat>(CurrentArray->GetCurrentElement());
+			return;
+		}
 		R_ASSERT3(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_double, "Invalid variable type access in chunk", _chunkName.c_str());
 		A = SSaveVariableGetter::GetValue<double, CSaveVariableDouble>((CSaveVariableDouble*)CurrentArray->GetCurrentElement());
 		CurrentArray->Next();
@@ -283,6 +295,12 @@ void CSaveChunk::r_double(double& A)
 void CSaveChunk::r_u64(u64& A)
 {
 	if (_currentArrayStack.empty()) {
+		if (_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_u8)
+		{
+			R_ASSERT(_variables[_currentReadIndex]->GetVariableType() != ESaveVariableType::t_u8, "Attempt to read u8 as u64 in chunk", _chunkName.c_str());
+			A = SSaveVariableGetter::GetValue<float, CSaveVariableU8>(_variables[_currentReadIndex++]);
+			return;
+		}
 		R_ASSERT3(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_u64, "Invalid variable type access in chunk", _chunkName.c_str());
 		A = SSaveVariableGetter::GetValue<u64, CSaveVariableU64>(_variables[_currentReadIndex++]);
 	}
