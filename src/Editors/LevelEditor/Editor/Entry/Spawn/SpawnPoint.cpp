@@ -26,6 +26,8 @@
 #define SPAWNPOINT_CHUNK_FLAGS			0xE425
 #define SPAWNPOINT_CHUNK_ENVMOD4		0xE426
 
+#define SPAWNPOINT_CHUNK_SPAWNDATA_NEWTYPE		0xE427
+
 
 #define RPOINT_SIZE 0.5f
 #define ENVMOD_SIZE 0.25f
@@ -349,7 +351,7 @@ void CSpawnPoint::SSpawnData::SaveStream(IWriter& F)
 	F.w_u8				(m_flags.get());
 	F.close_chunk		();
 
-	F.open_chunk		(SPAWNPOINT_CHUNK_SPAWNDATA);
+	F.open_chunk		(SPAWNPOINT_CHUNK_SPAWNDATA_NEWTYPE);
 
 	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
 	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
@@ -372,19 +374,25 @@ bool CSpawnPoint::SSpawnData::LoadStream(IReader& F)
 	if(F.find_chunk(SPAWNPOINT_CHUNK_FLAGS))
 		m_flags.assign	(F.r_u8());
 
-	R_ASSERT(F.find_chunk(SPAWNPOINT_CHUNK_SPAWNDATA));
-
-	auto Chunk = F.open_chunk(SPAWNPOINT_CHUNK_SPAWNDATA);
-	
-	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
-	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
-	CSaveObjectLoad LoadData = CSaveObjectLoad();
-	LoadData.Parse(Chunk);
-	Create				(temp);
-	if (Valid())
-		if(!m_Data->Spawn_Serialize(LoadData, true))
-			Destroy		();
-	Chunk->close();
+	if(auto Chunk = F.open_chunk(SPAWNPOINT_CHUNK_SPAWNDATA_NEWTYPE))
+	{
+		auto LoadData = CSaveManager::GetInstance().EditorBeginLoad(Chunk);
+		Create				(temp);
+		if (Valid())
+			if(!m_Data->Spawn_Serialize(*LoadData, true))
+				Destroy		();
+		Chunk->close();
+	}
+	if(auto Chunk = F.open_chunk(SPAWNPOINT_CHUNK_SPAWNDATA))
+	{
+		NET_Packet 			Packet;
+		Packet.B.count 		= F.r_u32();
+		F.r					(Packet.B.data,Packet.B.count);
+		Create				(temp);
+		if (Valid())
+			if (!m_Data->Spawn_Read(Packet))
+				Destroy		();
+	}
 
 	return Valid();
 }

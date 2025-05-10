@@ -148,7 +148,7 @@ public:
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
 		if (IsSave()) {
 			//GetCurrentChunk()->WriteArray(Value.size());
-			GetCurrentChunk()->WriteArray(-1);
+			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
 				{
@@ -406,6 +406,57 @@ public:
 		return *this;
 	}
 
+	template<typename Key, typename Mapped>
+	ISaveObject& Serialize(xr_hash_map<Key, Mapped>& Value) {
+		if (IsSave()) {
+			//GetCurrentChunk()->WriteArray(Value.size());
+			GetCurrentChunk()->WriteArray();
+			for (auto& elem : Value) {
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					if constexpr (std::is_pointer<Key>::value) {
+						(*this) << *(elem.first);
+					}
+					else {
+						Key Value = elem.first;
+						(*this) << Value;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						(*this) << *(elem.second);
+					}
+					else {
+						(*this) << elem.second;
+					}
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				BEGIN_CHUNK((*this), "MapElem")
+				{
+					std::pair<Key, Mapped> Elem;
+					if constexpr (std::is_pointer<Key>::value) {
+						(*this) << *(Elem.first);
+					}
+					else {
+						(*this) << Elem.first;
+					}
+					if constexpr (std::is_pointer<Mapped>::value) {
+						(*this) << *(Elem.second);
+					}
+					else {
+						(*this) << Elem.second;
+					}
+					Value.insert(Elem);
+				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
 };
 
 /*template<typename T>
@@ -441,6 +492,11 @@ ISaveObject& operator<<(ISaveObject& Object, svector<T, Size>& Value) {
 
 template<typename T, typename H, typename Eq>
 ISaveObject& operator<<(ISaveObject& Object, xr_hash_set<T, H, Eq>& Value) {
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename K, typename V, typename H, typename Eq>
+ISaveObject& operator<<(ISaveObject& Object, xr_hash_map<K, V, H, Eq>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 

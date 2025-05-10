@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ScriptStoryIDManager.h"
 
 #include "alife_object_registry.h"
@@ -39,7 +40,7 @@ void CScriptStoryIDManager::VerifiedRegisterObject(CSE_Abstract* se_obj)
         //}
         return;
     }
-    auto story_id = READ_IF_EXISTS(pSettings, r_string, se_obj->name_replace(), "story_id", nullptr);
+    auto story_id = READ_IF_EXISTS(pSettings, r_string, se_obj->name(), "story_id", nullptr);
     if (story_id)
     {
         self.Register(se_obj->ID, story_id);
@@ -71,6 +72,7 @@ namespace ScriptStoryIDManager
 
 void CScriptStoryIDManager::script_register(lua_State* L)
 {
+    using namespace luabind;
     
     module(L, "story_objects")[
         class_<CScriptStoryIDManager>("CScriptStoryIDManager")
@@ -87,91 +89,90 @@ void CScriptStoryIDManager::script_register(lua_State* L)
     ];
 }
 
-ISaveObject& operator<<(ISaveObject& obj, CScriptStoryIDManager::SContainer& cont)
+/*ISaveObject& operator<<(ISaveObject& obj, CScriptStoryIDManager::SContainer& cont)
 {
     BEGIN_CHUNK(obj, "CScriptStoryIDManager::SContainer")
     {
         obj << cont.m_obj_id << cont.m_script_story_id;
     }
     return obj;
-}
+}*/
 
 void CScriptStoryIDManager::Register(ALife::_OBJECT_ID obj_id, shared_str script_story_id)
 {
-    SContainer* container = new SContainer(obj_id, script_story_id);
-    auto ByIDIt = m_containers_by_id.find(container);
-    auto ByScriptStoryIDIt = m_containers_by_script_story_id.find(container);
-    if (ByScriptStoryIDIt != m_containers_by_script_story_id.end() && (*ByScriptStoryIDIt)->m_obj_id != obj_id)
+    xrSRWLockGuard guard(m_containers_lock.get());
+    //SContainer* container = new SContainer(obj_id, script_story_id);
+    auto ByIDIt = m_containers_by_id.find(obj_id);
+    auto ByScriptStoryIDIt = m_containers_by_script_story_id.find(script_story_id);
+    if (ByScriptStoryIDIt != m_containers_by_script_story_id.end() && ByScriptStoryIDIt->second != obj_id)
     {
         xr_string message = "You are trying to spawn two or more objects with the same story_id:[";
         message.append(script_story_id.c_str());
         message.append("] --> [");
-        auto ExistName = ai().alife().objects().object((*ByScriptStoryIDIt)->m_obj_id)->name();
+        auto ExistName = ai().alife().objects().object(ByScriptStoryIDIt->second)->name();
         message.append(ExistName);
         message.append("] try to add:[");
         auto NewName = ai().alife().objects().object(obj_id)->name();
+        message.append(NewName);
         message.append("]");
-        R_ASSERT(ByIDIt == m_containers_by_script_story_id.end(), message.c_str());
+        R_ASSERT(ByScriptStoryIDIt == m_containers_by_script_story_id.end(), message.c_str());
     }
     if (ByIDIt != m_containers_by_id.end()){
-        xr_string message = "Object [";
-        message.append(script_story_id.c_str());
-        message.append("] is already in story_objects_registry with story_id[");
-        message.append((*ByIDIt)->m_script_story_id.c_str());
-        R_ASSERT(ByScriptStoryIDIt != m_containers_by_script_story_id.end(), message.c_str());
+        VERIFY(ByScriptStoryIDIt != m_containers_by_script_story_id.end());
+        if(ByScriptStoryIDIt->first != script_story_id){
+            xr_string message = "Object [";
+            message.append(script_story_id.c_str());
+            message.append("] is already in story_objects_registry with story_id[");
+            message.append(ByIDIt->second.c_str());
+            R_ASSERT(ByScriptStoryIDIt != m_containers_by_script_story_id.end(), message.c_str());
+        }else
+        {
+            return;
+        }
     }
-    m_containers_by_id.insert(container);
-    m_containers_by_script_story_id.insert(container);
+    m_containers_by_id[obj_id] = script_story_id;
+    m_containers_by_script_story_id[script_story_id] = obj_id;
 }
 
 void CScriptStoryIDManager::Unregister(ALife::_OBJECT_ID obj_id)
 {
-    SContainer cont;
-    cont.m_obj_id = obj_id;
-    VERIFY(m_containers_by_id.contains(&cont));
-    if (m_containers_by_id.contains(&cont)){
-        auto elem = *m_containers_by_id.find(&cont);
-        m_containers_by_id.erase(elem);
-        m_containers_by_script_story_id.erase(elem);
-        xr_delete(elem);
+    xrSRWLockGuard guard(m_containers_lock.get());
+    VERIFY(m_containers_by_id.contains(obj_id));
+    if (m_containers_by_id.contains(obj_id)){
+        auto elem = *m_containers_by_id.find(obj_id);
+        m_containers_by_id.erase(elem.first);
+        m_containers_by_script_story_id.erase(elem.second);
     }
 }
 
 void CScriptStoryIDManager::Unregister(LPCSTR script_story_id)
 {
-    SContainer cont;
-    cont.m_script_story_id = script_story_id;
-    VERIFY(m_containers_by_script_story_id.contains(&cont));
-    if (m_containers_by_script_story_id.contains(&cont)){
-        auto elem = *m_containers_by_script_story_id.find(&cont);
-        m_containers_by_id.erase(elem);
-        m_containers_by_script_story_id.erase(elem);
-        xr_delete(elem);
+    xrSRWLockGuard guard(m_containers_lock.get());
+    VERIFY(m_containers_by_script_story_id.contains(script_story_id));
+    if (m_containers_by_script_story_id.contains(script_story_id)){
+        auto elem = *m_containers_by_script_story_id.find(script_story_id);
+        m_containers_by_id.erase(elem.second);
+        m_containers_by_script_story_id.erase(elem.first);
     }
 }
 
 ALife::_OBJECT_ID CScriptStoryIDManager::GetID(LPCSTR script_story_id) const
 {
-    SContainer cont;
-    cont.m_script_story_id = script_story_id;
-    return m_containers_by_script_story_id.contains(&cont) ?
-        (*m_containers_by_script_story_id.find(&cont))->m_obj_id : ALife::_OBJECT_ID(-1);
-    //R_ASSERT(m_containers_by_script_story_id.contains(&cont), "Unable to find obj ID from script story ID", script_story_id);
-    //return (*m_containers_by_script_story_id.find(&cont))->m_obj_id;
+    xrSRWLockGuard guard(m_containers_lock.get(), true);
+    return m_containers_by_script_story_id.contains(script_story_id) ?
+        m_containers_by_script_story_id.find(script_story_id)->second : ALife::_OBJECT_ID(-1);
 }
 
 LPCSTR CScriptStoryIDManager::GetID(ALife::_OBJECT_ID obj_id) const
 {
-    SContainer cont;
-    cont.m_obj_id = obj_id;
-    //return m_containers_by_id.contains(&cont) ?
-    //    (*m_containers_by_id.find(&cont))->m_script_story_id.c_str() : nullptr;
-    R_ASSERT(m_containers_by_id.contains(&cont), "Unable to find script story ID from obj ID", std::to_string(obj_id).c_str());
-    return m_containers_by_id.contains(&cont) ? (*m_containers_by_id.find(&cont))->m_script_story_id.c_str() : nullptr;
+    xrSRWLockGuard guard(m_containers_lock.get(), true);
+    //R_ASSERT(m_containers_by_id.contains(obj_id), "Unable to find script story ID from obj ID", std::to_string(obj_id).c_str());
+    return m_containers_by_id.contains(obj_id) ? m_containers_by_id.find(obj_id)->second.c_str() : nullptr;
 }
 
 void CScriptStoryIDManager::Serialize(ISaveObject& Object)
 {
+    xrSRWLockGuard guard(m_containers_lock.get(), true);
     BEGIN_CHUNK(Object, "CScriptStoryIDManager")
     {
         Object << m_containers_by_id;

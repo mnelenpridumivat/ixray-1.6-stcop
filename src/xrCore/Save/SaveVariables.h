@@ -321,38 +321,6 @@ public:
 	virtual void Write(CMemoryBuffer& Buffer) override;
 };
 
-/*class XRCORE_API CSaveVariableMatrix :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	Fmatrix _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableMatrix(const Fmatrix& Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_matrix; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};
-
-class XRCORE_API CSaveVariableClientID :
-	public CSaveVariableBase
-{
-	friend struct SSaveVariableGetter;
-	ClientID _value;
-
-protected:
-	virtual void* GetValue() override { return &_value; }
-
-public:
-	CSaveVariableClientID(ClientID Value) : _value(Value) {}
-
-	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_clientID; }
-	virtual void Write(CMemoryBuffer& Buffer) override;
-};*/
-
 struct SSaveVariableGetter {
 	template<typename TType, typename TVarClass>
 	static TType GetValue(ISaveable* Var) { return *((TType*)((TVarClass*)Var)->GetValue()); }

@@ -13,6 +13,7 @@
 #include "alife_human_brain.h"
 
 #include "../xrEngine/string_table.h"
+#include "StoryID/ScriptStoryIDManager.h"
 
 
 #ifndef AI_COMPILER
@@ -2751,6 +2752,7 @@ CSE_ALifeOnlineOfflineGroup::~CSE_ALifeOnlineOfflineGroup	()
 #endif
 }
 #ifdef XRGAME_EXPORTS
+
 CALifeSmartTerrainTask* CSE_ALifeOnlineOfflineGroup::get_current_task	()
 {
 	NODEFAULT;
