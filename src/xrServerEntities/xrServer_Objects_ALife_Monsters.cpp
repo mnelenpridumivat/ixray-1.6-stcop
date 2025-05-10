@@ -13,7 +13,6 @@
 #include "alife_human_brain.h"
 
 #include "../xrEngine/string_table.h"
-#include "StoryID/ScriptStoryIDManager.h"
 
 
 #ifndef AI_COMPILER
@@ -23,6 +22,7 @@
 #endif
 
 #ifdef XRGAME_EXPORTS
+#include "StoryID/ScriptStoryIDManager.h"
 #	include "alife_time_manager.h"
 #	include "ef_storage.h"
 #	include "game_graph.h"
