@@ -40,9 +40,9 @@
 #include "smart_cover_description.h"
 #include "physics_shell_scripted.h"
 #include "PDA.h"
-#include "ai\phantom\phantom.h"
+#include "ai/phantom/phantom.h"
 
-#include "uigamecustom.h"
+#include "UIGameCustom.h"
 #include "ui/UIActorMenu.h"
 #include "InventoryBox.h"
 
