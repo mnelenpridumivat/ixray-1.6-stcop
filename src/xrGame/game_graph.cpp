@@ -5,8 +5,8 @@ CGameGraph::CGameGraph(IReader& _stream)
 	VERIFY(!Device.IsEditorMode());
 	IReader& stream = const_cast<IReader&>(_stream);
 	m_header.load(&stream);
-	R_ASSERT2(header().version() == XRAI_CURRENT_VERSION, "Graph version mismatch!");
-
+	const u32 AIVersion = header().version();
+	R_ASSERT2(AIVersion >= XRAI_MINIMAL_VERSION && AIVersion <= XRAI_CURRENT_VERSION, "Graph version mismatch!");
 	m_nodes.resize(header().vertex_count());
 	for (auto& elem : m_nodes) {
 		elem.Serialize(_stream);
