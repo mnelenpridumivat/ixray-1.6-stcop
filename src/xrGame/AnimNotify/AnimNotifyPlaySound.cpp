@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "AnimNotifyPlaySound.h"
 
-#include "Kinematics.h"
-#include "RenderVisual.h"
+#include "../Include/xrRender/Kinematics.h"
+#include "../Include/xrRender/RenderVisual.h"
 
 constexpr u32 m_sounds_num = 20;
 

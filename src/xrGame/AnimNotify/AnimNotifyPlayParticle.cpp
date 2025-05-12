@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "AnimNotifyPlayParticle.h"
 
-#include "Kinematics.h"
-#include "RenderVisual.h"
+#include "../Include/xrRender/Kinematics.h"
+#include "../Include/xrRender/RenderVisual.h"
 #include "../xrParticles/ParticlesObject.h"
 
 constexpr u32 m_particles_num = 20;
