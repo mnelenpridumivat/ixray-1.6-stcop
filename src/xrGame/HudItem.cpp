@@ -225,14 +225,6 @@ void CHudItem::OnStateSwitch(u32 S)
 		}
 		break;
 	}
-	case eShowing:
-	{
-		if (Level().CurrentControlEntity() == object().H_Parent())
-		{
-			g_player_hud->attach_item(this);
-		}
-		break;
-	}
 	case eSprintStart:
 	{
 		m_bSwitchSprint = true;
