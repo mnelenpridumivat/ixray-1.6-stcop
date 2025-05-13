@@ -286,6 +286,11 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 	}
 }
 
+bool CCustomDetector::NeedBlockSprint() const
+{
+	return GetState() == eSprintEnd;
+}
+
 void CCustomDetector::UpdateXForm()
 {
 	CInventoryItem::UpdateXForm();
