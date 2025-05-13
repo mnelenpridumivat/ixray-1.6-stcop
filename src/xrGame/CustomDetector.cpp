@@ -245,6 +245,16 @@ void CCustomDetector::OnStateSwitch(u32 S)
 			PlayAnimIdle				();
 			SetPending					(FALSE);
 		}break;
+	case eHandDraw:
+	{
+		PlayHUDMotion("anm_hand_draw", true, eHandDraw);
+		break;
+	}
+	case eHandHide:
+	{
+		PlayHUDMotion("anm_hand_hide", true, eHandHide);
+		break;
+	}
 	}
 	m_old_state=S;
 }
@@ -275,6 +285,8 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 	switch(state)
 	{
 	case eShowing:
+	case eHandDraw:
+	case eHandHide:
 		{
 			SwitchState					(eIdle);
 		} break;
@@ -289,6 +301,16 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 bool CCustomDetector::NeedBlockSprint() const
 {
 	return GetState() == eSprintEnd;
+}
+
+bool CCustomDetector::CanDrawHand() const
+{
+	return m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_draw) && (GetState() == eIdle || GetState() == eHiding || GetState() == eHandHide);
+}
+
+bool CCustomDetector::CanHideHand() const
+{
+	return m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_hide) && (GetState() == eIdle || GetState() == eHandDraw);
 }
 
 void CCustomDetector::UpdateXForm()
