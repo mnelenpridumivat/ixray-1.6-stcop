@@ -60,8 +60,12 @@ IC const IGameLevelCrossTable& CLevelSpawnConstructor::cross_table() const
 }
 
 
-void CLevelSpawnConstructor::init()
+bool CLevelSpawnConstructor::init()
 {
+	if (!game_graph().header().level_exist(*m_level.name()))
+	{
+		return false;
+	}
 	//m_level_graph = new ILevelGraph();
 	m_level_graph = Scene->GetLevelGraph();
 	m_game_spawn_constructor->game_graph().set_current_level(game_graph().header().level(*m_level.name()).id());
@@ -85,6 +89,7 @@ void CLevelSpawnConstructor::init()
 		
 		FS.r_close			(stream);
 	}*/
+	return true;
 }
 
 CSE_Abstract* CLevelSpawnConstructor::create_object(IReader* chunk)
@@ -789,7 +794,16 @@ bool CLevelSpawnConstructor::Execute()
 	}
 	//	fill_spawn_groups					();
 
-	init();
+	try
+	{
+		if (!init())
+		{
+			return false;
+		}
+	}catch (...)
+	{
+		return false;
+	}
 
 	if (!correct_objects())
 	{

@@ -26,6 +26,8 @@ void CServerEntityWrapper::save				(IWriter &stream)
 
 		stream.open_chunk		(0);
 		CMemoryBuffer buffer;
+		shared_str Name = m_object->name();
+		(*Obj) << Name;
 		m_object->Spawn_Serialize(*Obj, true);
 		buffer.Write(ESaveVariableType::t_chunk);
 		Obj->Write(&buffer);

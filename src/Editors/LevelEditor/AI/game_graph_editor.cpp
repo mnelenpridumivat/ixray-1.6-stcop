@@ -20,7 +20,7 @@ void CGameGraphEditor::realloc(const CHeader& new_header)
 {
 	m_header = new_header;
 	m_nodes.clear();
-	m_nodes.reserve(new_header.m_vertex_count);
+	m_nodes.resize(new_header.m_vertex_count);
 	m_current_level_some_vertex_id = _GRAPH_ID(-1);
 	m_enabled.assign(header().vertex_count(), true);
 }

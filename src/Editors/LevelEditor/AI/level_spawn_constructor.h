@@ -55,7 +55,7 @@ private:
 	const IGameLevelCrossTable			*m_cross_table;
 
 protected:
-			void						init								();
+			bool						init								();
 			bool						load_objects						();
 //			void						fill_spawn_groups					();
 			bool						correct_objects						();

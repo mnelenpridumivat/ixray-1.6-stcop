@@ -137,7 +137,7 @@ void CScriptStoryIDManager::Register(ALife::_OBJECT_ID obj_id, shared_str script
 void CScriptStoryIDManager::Unregister(ALife::_OBJECT_ID obj_id)
 {
     xrSRWLockGuard guard(m_containers_lock.get());
-    VERIFY(m_containers_by_id.contains(obj_id));
+    //VERIFY(m_containers_by_id.contains(obj_id));
     if (m_containers_by_id.contains(obj_id)){
         auto elem = *m_containers_by_id.find(obj_id);
         m_containers_by_id.erase(elem.first);

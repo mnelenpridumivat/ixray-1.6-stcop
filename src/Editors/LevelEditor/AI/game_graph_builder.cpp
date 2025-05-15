@@ -651,10 +651,21 @@ bool CGameGraphBuilder::build_graph()
 
 			VERIFY((*I).second->edges().size() < 256);
 			vertex.tNeighbourCount = (u8)(*I).second->edges().size();
-			*game_graph->vertex(index++) = vertex;
+
+			auto current_index = index++;
+			*game_graph->vertex(current_index) = vertex;
+			
+			for (auto& edge : (*I).second->edges())
+			{
+				CGameGraphEditor::CEdge new_edge;
+				new_edge.m_vertex_id = edge.vertex_id();
+				new_edge.m_path_distance = edge.weight();
+				game_graph->add_edge(current_index, new_edge);
+			}
+			
 		}
 	}
-	size_t count_edges = 0;
+	/*size_t count_edges = 0;
 	{
 		graph_type::const_vertex_iterator I = graph().vertices().begin();
 		graph_type::const_vertex_iterator E = graph().vertices().end();
@@ -667,21 +678,27 @@ bool CGameGraphBuilder::build_graph()
 
 	{
 		size_t index = 0;
-		graph_type::const_vertex_iterator I = graph().vertices().begin();
-		graph_type::const_vertex_iterator E = graph().vertices().end();
+		auto I = graph().vertices().begin();
+		auto E = graph().vertices().end();
 		for (; I != E; ++I)
 		{
-			graph_type::const_iterator i = (*I).second->edges().begin();
-			graph_type::const_iterator e = (*I).second->edges().end();
+			auto i = (*I).second->edges().begin();
+			auto e = (*I).second->edges().end();
 			for (; i != e; ++i)
 			{
+				
+				GameGraph::CEdge&			edge = *i;
+				VERIFY((*i).vertex_id() < (u32(1) << (8 * sizeof(GameGraph::_GRAPH_ID))));
+				edge.m_vertex_id = (GameGraph::_GRAPH_ID)(*i).vertex_id();
+				edge.m_path_distance = (*i).weight();
+				
 				auto& edge = *game_graph->edge(index++);
 				VERIFY((*i).vertex_id() < (u32(1) << (8 * sizeof(GameGraph::_GRAPH_ID))));
 				edge.m_vertex_id = (GameGraph::_GRAPH_ID)(*i).vertex_id();
 				edge.m_path_distance = (*i).weight();
 			}
 		}
-	}
+	}*/
 
 
 	Msg("Level graph is generated successfully");
