@@ -7,6 +7,7 @@
 #include "Level_Bullet_Manager.h"
 #include "game_cl_base.h"
 #include "Actor.h"
+#include "FlamethrowerTraceCollision.h"
 #include "GamePersistent.h"
 #include "mt_config.h"
 #include "game_cl_base_weapon_usage_statistic.h"
@@ -169,6 +170,23 @@ void CBulletManager::PlayExplodePS( const Fmatrix& xf )
 	ps->UpdateParent			(xf,zero_vel);
 	GamePersistent().ps_needtoplay.push_back(ps);
 }
+
+#ifdef DEBUG
+void CBulletManager::DrawFlamethrowerTrace(FlamethrowerTrace::CManager* manager)
+{
+	//Level().debug_renderer()
+
+	for(auto Collision : manager->ActiveCollisions)
+	{
+		Fmatrix temp;
+		temp.identity();
+		temp.c = Collision->GetPosition();
+		auto r = Collision->GetCurrentRadius();
+		temp.scale(r, r, r);
+		Level().debug_renderer().draw_ellipse(temp, color_xrgb(255, 0, 0));
+	}
+}
+#endif
 
 void CBulletManager::PlayWhineSound(SBullet* bullet, CObject* object, const Fvector& pos)
 {
@@ -957,6 +975,11 @@ void CBulletManager::Render	()
 			for(it=g_hit[i].begin();it!=g_hit[i].end();++it){
 				Level().debug_renderer().draw_aabb(*it,0.01f,0.01f,0.01f,C[i]);
 			}
+
+		for(auto Manager : FlameManagersToDraw)
+		{
+			DrawFlamethrowerTrace(Manager);
+		}
 	}
 #endif
 

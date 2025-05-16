@@ -2,87 +2,6 @@
 #include "pch_script.h"
 
 #include "Flamethrower.h"
-
-#ifdef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
-
-void	CFlamethrower::OnMagazineEmpty(){}
-void	CFlamethrower::switch2_Idle(){}
-void	CFlamethrower::switch2_Fire(){}
-void	CFlamethrower::switch2_Empty() {}
-void	CFlamethrower::switch2_Reload(){}
-void	CFlamethrower::switch2_Hiding(){}
-void	CFlamethrower::switch2_Hidden(){}
-void	CFlamethrower::switch2_Showing() {}
-void    CFlamethrower::switch2_Unmis() {}
-void	CFlamethrower::OnShot() {}
-void	CFlamethrower::StopShooting(){}
-void	CFlamethrower::OnEmptyClick(){}
-void	CFlamethrower::OnAnimationEnd(u32 state) {}
-void	CFlamethrower::OnStateSwitch(u32 S) {}
-void	CFlamethrower::UpdateSounds() {}
-bool	CFlamethrower::TryReload() { return false; }
-void	CFlamethrower::ReloadMagazine() {}
-void	CFlamethrower::state_FireCharge(float dt) {}
-void	CFlamethrower::state_Fire(float dt){}
-void	CFlamethrower::state_Idle(float dt){}
-void	CFlamethrower::state_MagEmpty(float dt) {}
-void	CFlamethrower::state_Misfire(float dt) {}
-CFlamethrower::CFlamethrower(ESoundTypes eSoundType) {}
-CFlamethrower::~CFlamethrower() {}
-void	CFlamethrower::Load(LPCSTR section) {}
-bool    CFlamethrower::UseScopeTexture() { return false; }
-void	CFlamethrower::SetDefaults() {}
-void	CFlamethrower::FireStart() {}
-void	CFlamethrower::FireEnd() {}
-void	CFlamethrower::Reload() {}
-void	CFlamethrower::UpdateCL() {}
-void	CFlamethrower::net_Destroy() {}
-void	CFlamethrower::net_Export(NET_Packet& P){}
-void	CFlamethrower::net_Import(NET_Packet& P){}
-void	CFlamethrower::OnH_A_Chield() {}
-bool	CFlamethrower::Attach(PIItem pIItem, bool b_send_event) { return false; }
-bool	CFlamethrower::Detach(const char* item_section_name, bool b_spawn_item) { return false; }
-bool	CFlamethrower::DetachScope(const char* item_section_name, bool b_spawn_item) { return false; }
-bool	CFlamethrower::CanAttach(PIItem pIItem) { return false; }
-bool	CFlamethrower::CanDetach(const char* item_section_name) { return false; }
-void	CFlamethrower::InitAddons() {}
-bool	CFlamethrower::Action(u16 cmd, u32 flags) { return false; }
-bool	CFlamethrower::IsAmmoAvailable() { return false; }
-void	CFlamethrower::UnloadMagazine(bool spawn_ammo) {}
-int     CFlamethrower::CheckAmmoBeforeReload(u8& v_ammoType) { return 0; }
-void	CFlamethrower::OnMotionMark(u32 state, const motion_marks& M) {}
-bool	CFlamethrower::GetBriefInfo(II_BriefInfo& info) { return false; }
-BOOL	CFlamethrower::IsMisfire() const { return false; }
-void	CFlamethrower::OnZoomIn() {}
-void	CFlamethrower::OnZoomOut() {}
-void	CFlamethrower::save(NET_Packet& output_packet) {}
-void	CFlamethrower::load(IReader& input_packet) {}
-//void	CFlamethrower::Save(CSaveObjectSave* Object) const {}
-//void	CFlamethrower::Load(CSaveObjectLoad* Object) {}
-void	CFlamethrower::Serialize(ISaveObject& Object) {}
-void	CFlamethrower::SpawnFuelCanister(float Condition, LPCSTR ammoSect, u32 ParentID) {}
-bool	CFlamethrower::install_upgrade_impl(LPCSTR section, bool test) { return false; }
-void	CFlamethrower::PlayAnimShow() {}
-void	CFlamethrower::PlayAnimHide() {}
-void	CFlamethrower::PlayAnimReload() {}
-void	CFlamethrower::PlayAnimIdle() {}
-void	CFlamethrower::PlayAnimShoot() {}
-void	CFlamethrower::PlayReloadSound() {}
-void	CFlamethrower::PlayAnimBore() {}
-void	CFlamethrower::PlayAnimIdleSprint() {}
-void	CFlamethrower::PlayAnimIdleMoving() {}
-void    CFlamethrower::SetAnimFlag(u32 flag, LPCSTR anim_name) {}
-bool CFlamethrower::WeaponSoundExist(LPCSTR section, LPCSTR sound_name, bool log) const { return false; }
-float	CFlamethrower::GetWeaponDeterioration() { return 0.0f; }
-void	CFlamethrower::FireBullet(const Fvector& pos,
-	const Fvector& dir,
-	float fire_disp,
-	const CCartridge& cartridge,
-	u16 parent_id,
-	u16 weapon_id,
-	bool send_hit) {}
-	
-#else
 #include "actor.h"
 #include "../xrParticles/ParticlesObject.h"
 #include "scope.h"
@@ -130,23 +49,19 @@ CFlamethrower::CFlamethrower(ESoundTypes eSoundType) : CWeapon()
 
 	m_bFireSingleShot = false;
 	m_fOldBulletSpeed = 0;
-	bullet_cnt = 0;
 	m_bLockType = false;
-	m_bAutoreloadEnabled = READ_IF_EXISTS(pAdvancedSettings, r_bool, "gameplay", "autoreload_enabled", true);
 	m_bNeedBulletInGun = false;
 	m_opened = false;
 	m_bUseFiremodeChangeAnim = true;
-	bHasBulletsToHide = false;
 
 	m_sSndShotCurrent = nullptr;
 
-	TraceManager = xr_new<FlamethrowerTrace::CManager>(this);
+	TraceManager = xr_make_unique<FlamethrowerTrace::CManager>(this);
 }
 
 CFlamethrower::~CFlamethrower()
 {
 	// sounds
-	xr_delete(TraceManager);
 }
 
 
@@ -216,19 +131,6 @@ void CFlamethrower::Load(LPCSTR section)
 	if (WeaponSoundExist(section, "snd_pump_gun", true))
 		m_sounds.LoadSound(section, "snd_pump_gun", "sndPumpGun", true, m_eSoundReload);
 
-	if (pSettings->line_exist(section, "bullet_bones"))
-	{
-		bHasBulletsToHide = true;
-		LPCSTR str = pSettings->r_string(section, "bullet_bones");
-		for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-		{
-			string128 bullet_bone_name;
-			_GetItem(str, i, bullet_bone_name);
-			bullets_bones.push_back(bullet_bone_name);
-			bullet_cnt++;
-		}
-
-	}
 
 	// TODO: Completely remove magazine with bullets implementation from flamethrower
 
@@ -271,37 +173,27 @@ bool CFlamethrower::UseScopeTexture()
 
 void CFlamethrower::FireStart()
 {
+	u32 CurrentState = GetState();
 	if (!IsMisfire())
 	{
-		if (IsValid())
+
+		bool is_empty = fabs(m_current_fuel_level) < std::numeric_limits<float>::epsilon();
+
+		if (!is_empty)
 		{
 			if (!IsWorking() || AllowFireWhileWorking())
 			{
-				if (GetState() == eReload)
-					return;
-				if (GetState() == eShowing)
-					return;
-				if (GetState() == eHiding)
-					return;
-				if (GetState() == eMisfire)
-					return;
-				if (GetState() == eUnMisfire)
+				if (CurrentState == eReload || CurrentState == eShowing || CurrentState == eHiding || CurrentState == eMisfire)
 					return;
 
 				inherited::FireStart();
-
-				if (iAmmoElapsed == 0)
-					OnMagazineEmpty();
-				else {
-					R_ASSERT(H_Parent());
-					SwitchState(eFire);
-				}
+				R_ASSERT(H_Parent());
+				SwitchState(eFire);
 			}
 		}
-		else
+		else if (CurrentState == eIdle || CurrentState == eEmptyClick && !m_bBlockEmptyClick)
 		{
-			if (eReload != GetState())
-				OnMagazineEmpty();
+			SwitchState(eEmptyClick);
 		}
 	}
 	else
@@ -322,20 +214,22 @@ void CFlamethrower::FireEnd()
 {
 	inherited::FireEnd();
 
-	if (m_bAutoreloadEnabled)
+	const static bool isAutoreload = EngineExternal()[EEngineExternalGame::EnableAutoreload];
+	if (isAutoreload && H_Parent())
 	{
-		CActor* actor = smart_cast<CActor*>(H_Parent());
-
-		if (Actor()->mstate_real & (mcSprint) && !GameConstants::GetReloadIfSprint())
-			return;
-
-		if (m_pInventory && !iAmmoElapsed && actor && GetState() != eReload)
+		bool is_empty = fabs(m_current_fuel_level) < std::numeric_limits<float>::epsilon();
+		if (m_pInventory && is_empty && H_Parent()->cast_actor() && GetState() != eReload)
+		{
 			Reload();
+		}
 	}
 }
 
 void CFlamethrower::Reload()
 {
+	if (ParentIsActor() && Actor()->GetDetector() && Actor()->GetDetector()->GetState() != CCustomDetector::eIdle)
+		return;
+	
 	inherited::Reload();
 	TryReload();
 }
@@ -353,12 +247,6 @@ void CFlamethrower::OnMotionMark(u32 state, const motion_marks& M)
 			Msg("Ammo elapsed: %d", iAmmoElapsed);
 			ae += iAmmoElapsed;
 		}
-
-		last_hide_bullet = ae >= bullet_cnt ? bullet_cnt : bullet_cnt - ae - 1;
-
-		Msg("Next reload: count %d with type %d", ae, ammo_type);
-
-		HUD_VisualBulletUpdate();
 	}
 }
 
@@ -374,10 +262,10 @@ bool CFlamethrower::TryReload()
 
 		AmmoCanister = smart_cast<CFlameCanister*>(m_pInventory->GetAny(m_ammoTypes[m_ammoType].c_str()));
 
-		if (IsMisfire() && m_current_fuel_level)
+		bool is_empty = fabs(m_current_fuel_level) < std::numeric_limits<float>::epsilon();
+		if (IsMisfire() && !is_empty)
 		{
 			SetPending(TRUE);
-			SwitchState(eUnMisfire);
 			return				true;
 		}
 
@@ -439,18 +327,11 @@ void CFlamethrower::OnMagazineEmpty()
 		return;
 	}
 
-	if (GetNextState() != eMagEmpty && GetNextState() != eReload)
-	{
-		SwitchState(eMagEmpty);
-	}
-
 	inherited::OnMagazineEmpty();
 }
 
 void CFlamethrower::UnloadMagazine(bool spawn_ammo)
 {
-	last_hide_bullet = -1;
-	HUD_VisualBulletUpdate();
 
 	if (IsGameTypeSingle() && ParentIsActor())
 	{
@@ -471,9 +352,12 @@ void CFlamethrower::UnloadMagazine(bool spawn_ammo)
 int CFlamethrower::CheckAmmoBeforeReload(u8& v_ammoType)
 {
 	if (m_set_next_ammoType_on_reload != undefined_ammo_type)
+	{
 		v_ammoType = m_set_next_ammoType_on_reload;
+		m_set_next_ammoType_on_reload	= undefined_ammo_type;
+	}
 
-	Msg("Ammo type in next reload : %d", m_set_next_ammoType_on_reload);
+	Msg("Ammo type in next reload : %d", v_ammoType);
 
 	if (m_ammoTypes.size() <= v_ammoType)
 	{
@@ -584,48 +468,42 @@ void CFlamethrower::ReloadMagazine()
 
 void CFlamethrower::OnStateSwitch(u32 S)
 {
-	HUD_VisualBulletUpdate();
-
 	inherited::OnStateSwitch(S);
-	CInventoryOwner* owner = smart_cast<CInventoryOwner*>(this->H_Parent());
 	switch (S)
 	{
 	case eIdle:
-		switch2_Idle();
+		switch2_Idle	();
 		break;
 	case eFire:
-		switch2_Fire();
-		break;
-	case eUnMisfire:
-		if (owner)
-			m_sounds_enabled = owner->CanPlayShHdRldSounds();
-		switch2_Unmis();
+		switch2_Fire	();
 		break;
 	case eMisfire:
-		if (smart_cast<CActor*>(this->H_Parent()) && (Level().CurrentViewEntity() == H_Parent()))
+		if(H_Parent() && H_Parent()->cast_actor() && (Level().CurrentViewEntity() == H_Parent()))
 			CurrentGameUI()->AddCustomStatic("gun_jammed", true);
 		break;
-	case eMagEmpty:
-		switch2_Empty();
-		break;
 	case eReload:
-		if (owner)
-			m_sounds_enabled = owner->CanPlayShHdRldSounds();
-		switch2_Reload();
+		if(H_Parent() && H_Parent()->cast_inventory_owner())
+			m_sounds_enabled = H_Parent()->cast_inventory_owner()->CanPlayShHdRldSounds();
+		switch2_Reload	();
 		break;
 	case eShowing:
-		if (owner)
-			m_sounds_enabled = owner->CanPlayShHdRldSounds();
-		switch2_Showing();
+		if (H_Parent() && H_Parent()->cast_inventory_owner())
+			m_sounds_enabled = H_Parent()->cast_inventory_owner()->CanPlayShHdRldSounds();
+		switch2_Showing	();
 		break;
 	case eHiding:
-		if (owner)
-			m_sounds_enabled = owner->CanPlayShHdRldSounds();
-		switch2_Hiding();
+		if (H_Parent() && H_Parent()->cast_inventory_owner())
+			m_sounds_enabled = H_Parent()->cast_inventory_owner()->CanPlayShHdRldSounds();
+		switch2_Hiding	();
 		break;
 	case eHidden:
-		switch2_Hidden();
+		switch2_Hidden	();
 		break;
+	case eEmptyClick:
+		{
+			switch2_Empty();
+			break;
+		}
 	}
 }
 
@@ -634,11 +512,6 @@ void CFlamethrower::UpdateCL()
 {
 	inherited::UpdateCL();
 	float dt = Device.fTimeDelta;
-
-	//Msg("Update flamethrower: dt = [%f]", dt);
-
-	//����� ���������� ������ ��������� ������
-	//������ ������� �� ������
 	if (GetNextState() == GetState())
 	{
 		switch (GetState())
@@ -676,7 +549,6 @@ void CFlamethrower::UpdateCL()
 			break;
 		}
 		case eMisfire:		state_Misfire(dt);	break;
-		case eMagEmpty:		state_MagEmpty(dt);	break;
 		case eHidden:		break;
 		}
 	}
@@ -690,22 +562,27 @@ void CFlamethrower::UpdateCL()
 
 void CFlamethrower::UpdateSounds()
 {
-	if (Device.dwFrame == dwUpdateSounds_Frame)
+	if (Device.dwFrame == dwUpdateSounds_Frame)  
 		return;
-
+	
 	dwUpdateSounds_Frame = Device.dwFrame;
 
-	Fvector P = get_LastFP();
-	m_sounds.SetPosition("sndShow", P);
-	m_sounds.SetPosition("sndHide", P);
-	if (psWpnAnimsFlag.test(ANM_HIDE_EMPTY) && WeaponSoundExist(m_section_id.c_str(), "snd_close"))
-		m_sounds.SetPosition("sndClose", P);
-	if (WeaponSoundExist(m_section_id.c_str(), "snd_change_zoom"))
-		m_sounds.SetPosition("sndChangeZoom", P);
+	Fvector P						= get_LastFP();
 
-	//. nah	m_sounds.SetPosition("sndShot", P);
-	m_sounds.SetPosition("sndReload", P);
-	//. nah	m_sounds.SetPosition("sndEmptyClick", P);
+	if (Device.dwFrame % 3 == 0)
+		m_sounds.SetPosition("sndShow", P);
+	else if (Device.dwFrame % 3 == 1)
+	{
+		m_sounds.SetPosition("sndReload", P);
+		m_sounds.SetPosition("sndHide", P);
+	}
+	else if (Device.dwFrame % 3 == 2)
+	{
+		if (m_sounds.FindSoundItem("sndReloadEmpty", false))
+			m_sounds.SetPosition("sndReloadEmpty", P);
+		if (m_sounds.FindSoundItem("sndReloadMis", false))
+			m_sounds.SetPosition("sndReloadMis", P);
+	}
 }
 
 void CFlamethrower::state_FireCharge(float dt)
@@ -747,10 +624,10 @@ void CFlamethrower::state_Fire(float dt)
 		CInventoryOwner* io = smart_cast<CInventoryOwner*>(H_Parent());
 		if (nullptr == io->inventory().ActiveItem())
 		{
-			Log("current_state", GetState());
-			Log("next_state", GetNextState());
-			Log("item_sect", cNameSect().c_str());
-			Log("H_Parent", H_Parent()->cNameSect().c_str());
+			Msg("current_state", GetState());
+			Msg("next_state", GetNextState());
+			Msg("item_sect", cNameSect().c_str());
+			Msg("H_Parent", H_Parent()->cNameSect().c_str());
 		}
 
 		CEntity* E = smart_cast<CEntity*>(H_Parent());
@@ -772,63 +649,19 @@ void CFlamethrower::state_Fire(float dt)
 			OnShot();
 			m_current_fuel_level -= (m_fuel_reduce_speed_charge + m_fuel_reduce_speed_shoot) * dt;
 			clamp(m_current_fuel_level, 0.0f, 1.0f);
-		//}
-
-		/*VERIFY(!m_magazine.empty());
-
-		while (!m_magazine.empty() &&
-			fShotTimeCounter < 0 &&
-			(IsWorking() || m_bFireSingleShot)
-			)
-		{
-			if (CheckForMisfire())
-			{
-				StopShooting();
-				return;
-			}
-
-			m_bFireSingleShot = false;
-
-			fShotTimeCounter += fOneShotTime;
-
-			OnShot();
-
-			FireTrace(p1, d);
-		}*/
 
 		UpdateSounds();
 	}
+	
+	if (fabs(m_current_fuel_level) < std::numeric_limits<float>::epsilon()) {
+		OnMagazineEmpty();
+		StopShooting();
+		return;
+	}
 
-	//if (fShotTimeCounter < 0)
-	//{
-		/*
-				if(bDebug && H_Parent() && (H_Parent()->ID() != Actor()->ID()))
-				{
-					Msg("stop shooting w=[%s] magsize=[%d] sshot=[%s] qsize=[%d] shotnum=[%d]",
-							IsWorking()?"true":"false",
-							m_magazine.size(),
-							m_bFireSingleShot?"true":"false",
-							m_iQueueSize,
-							m_iShotNum);
-				}
-		*/
-		if (!m_current_fuel_level) {
-			OnMagazineEmpty();
-			StopShooting();
-			return;
-		}
-
-		if(!IsWorking()){
-			StopShooting();
-		}
-	/*}
-	else
-	{
-		fShotTimeCounter -= dt;
-	}*/
-
-	//if (m_fFactor > 0)
-		//StopShooting();
+	if(!IsWorking()){
+		StopShooting();
+	}
 }
 
 void CFlamethrower::state_Idle(float dt)
@@ -859,17 +692,11 @@ void CFlamethrower::SetDefaults()
 
 void CFlamethrower::OnShot()
 {
-	// ���� ����� ����� - ������������� ���
-	if (ParentIsActor() && GameConstants::GetStopActorIfShoot())
-		Actor()->set_state_wishful(Actor()->get_state_wishful() & (~mcSprint));
-
 	// Camera	
 	AddShotEffector();
 
 	// Animation
 	PlayAnimShoot();
-
-	HUD_VisualBulletUpdate();
 
 	// Shell Drop
 	Fvector vel;
@@ -894,7 +721,7 @@ void CFlamethrower::OnShot()
 			funct();
 
 		string128 sndName;
-		strconcat(sizeof(sndName), sndName, m_sSndShotCurrent.c_str(), "Actor");
+		xr_strconcat(sndName, m_sSndShotCurrent.c_str(), "Actor");
 		if (m_sounds.FindSoundItem(sndName, false))
 		{
 			m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
@@ -903,7 +730,7 @@ void CFlamethrower::OnShot()
 	}
 
 	string128 sndName;
-	strconcat(sizeof(sndName), sndName, m_sSndShotCurrent.c_str(), (iAmmoElapsed == 1) ? "Last" : "");
+	xr_strconcat(sndName, m_sSndShotCurrent.c_str(), (iAmmoElapsed == 1) ? "Last" : "");
 
 	if (m_sounds.FindSoundItem(sndName, false)) {
 		m_sounds.PlaySound(sndName, get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
@@ -918,17 +745,9 @@ void CFlamethrower::OnShot()
 	if (IsSilencerAttached() == false)
 	{
 		bool bIndoor = false;
-		if (H_Parent() != nullptr)
-		{
-			bIndoor = H_Parent()->renderable_ROS()->get_luminocity_hemi() < WEAPON_INDOOR_HEMI_FACTOR;
-		}
 
 		if (bIndoor && m_sounds.FindSoundItem("sndReflect", false))
 		{
-			if (IsHudModeNow())
-			{
-				HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(WEAPON_SND_REFLECTION_HUD_FACTOR);
-			}
 			PlaySound("sndReflect", get_LastFP());
 			HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
 		}
@@ -986,14 +805,6 @@ void CFlamethrower::OnAnimationEnd(u32 state)
 	case eHiding:	SwitchState(eHidden);   break;	// End of Hide
 	case eShowing:	SwitchState(eIdle);		break;	// End of Show
 	case eIdle:		switch2_Idle();			break;  // Keep showing idle
-	case eUnMisfire:
-	{
-		bMisfire = false;
-		m_magazine.pop_back();
-		iAmmoElapsed--;
-		SwitchState(eIdle);
-		break;
-	} // End of UnMisfire animation
 	}
 	inherited::OnAnimationEnd(state);
 }
@@ -1009,33 +820,13 @@ void CFlamethrower::switch2_Idle()
 
 #ifdef DEBUG
 #include "ai\stalker\ai_stalker.h"
-#include "object_handler_planner.h"
 #endif
 void CFlamethrower::switch2_Fire()
 {
-	CInventoryOwner* io = smart_cast<CInventoryOwner*>(H_Parent());
-	CInventoryItem* ii = smart_cast<CInventoryItem*>(this);
-#ifdef DEBUG
-	if (!io)
-		return;
-	//VERIFY2					(io,make_string("no inventory owner, item %s",*cName()));
-
-	if (ii != io->inventory().ActiveItem())
-		Msg("! not an active item, item %s, owner %s, active item %s", *cName(), *H_Parent()->cName(), io->inventory().ActiveItem() ? *io->inventory().ActiveItem()->object().cName() : "no_active_item");
-
-	if (!(io && (ii == io->inventory().ActiveItem())))
-	{
-		CAI_Stalker* stalker = smart_cast<CAI_Stalker*>(H_Parent());
-		if (stalker) {
-			stalker->planner().show();
-			stalker->planner().show_current_world_state();
-			stalker->planner().show_target_world_state();
-		}
-	}
-#else
-	if (!io)
-		return;
-#endif // DEBUG
+	//CInventoryOwner* io = smart_cast<CInventoryOwner*>(H_Parent());
+	//CInventoryItem* ii = smart_cast<CInventoryItem*>(this);
+	//if (!io)
+	//	return;
 
 	//
 	//	VERIFY2(
@@ -1113,28 +904,6 @@ void CFlamethrower::switch2_Hiding()
 	SetPending(TRUE);
 }
 
-void CFlamethrower::switch2_Unmis()
-{
-	VERIFY(GetState() == eUnMisfire);
-
-	if (m_sounds_enabled)
-	{
-		if (m_sounds.FindSoundItem("sndReloadMisfire", false) && isHUDAnimationExist("anm_reload_misfire"))
-			PlaySound("sndReloadMisfire", get_LastFP());
-		else if (m_sounds.FindSoundItem("sndReloadJammed", false) && isHUDAnimationExist("anm_reload_jammed"))
-			PlaySound("sndReloadJammed", get_LastFP());
-		else
-			PlayReloadSound();
-	}
-
-	if (isHUDAnimationExist("anm_reload_misfire"))
-		PlayHUDMotionIfExists({ "anm_reload_misfire", "anm_reload" }, true, GetState());
-	else if (isHUDAnimationExist("anm_reload_jammed"))
-		PlayHUDMotionIfExists({ "anm_reload_jammed", "anm_reload" }, true, GetState());
-	else
-		PlayAnimReload();
-}
-
 void CFlamethrower::switch2_Hidden()
 {
 	CWeapon::FireEnd();
@@ -1143,12 +912,8 @@ void CFlamethrower::switch2_Hidden()
 
 	signal_HideComplete();
 	RemoveShotEffector();
-
-	if (pSettings->line_exist(item_sect, "hud_fov"))
-		m_nearwall_last_hud_fov = m_base_fov;
-	else
-		m_nearwall_last_hud_fov = psHUD_FOV_def;
 }
+
 void CFlamethrower::switch2_Showing()
 {
 	if (m_sounds_enabled)
@@ -1171,25 +936,13 @@ bool CFlamethrower::Action(u16 cmd, u32 flags)
 	{
 	case kWPN_RELOAD:
 	{
-		if (Actor()->mstate_real & (mcSprint) && !GameConstants::GetReloadIfSprint()) {
-			break;
-		}
 		if (flags & CMD_START) {
 			if (m_current_fuel_level < 1.0 || IsMisfire())
 			{
-				if (GetState() == eUnMisfire) // Rietmon: ��������� �����������, ���� ������ ����� �������������� �������
-					return false;
-
-				PIItem Det = Actor()->inventory().ItemFromSlot(DETECTOR_SLOT);
-				if (!Det)
-					Reload(); // Rietmon: ���� � ����� ���� ���������, �� �� �� ����� ���� �������
-
-				if (Det)
-				{
-					CCustomDetector* pDet = smart_cast<CCustomDetector*>(Det);
-					if (!pDet->IsWorking())
-						Reload();
-				}
+				if (!bReloadKeyPressed || !bAmmotypeKeyPressed)
+					bReloadKeyPressed = true;
+				
+				Reload();
 			}
 		}
 		return true;
@@ -1317,10 +1070,6 @@ bool CFlamethrower::Attach(PIItem pIItem, bool b_send_event)
 
 	if (result)
 	{
-		if (pScope && bUseAltScope)
-		{
-			bNVsecondVPstatus = !!pSettings->line_exist(pIItem->object().cNameSect(), "scope_nightvision");
-		}
 
 		if (b_send_event && OnServer())
 		{
@@ -1357,7 +1106,6 @@ bool CFlamethrower::DetachScope(const char* item_section_name, bool b_spawn_item
 		if (!xr_strcmp(iter_scope_name, item_section_name))
 		{
 			m_cur_scope = NULL;
-			m_cur_scope_bone = nullptr;
 			detached = true;
 		}
 	}
@@ -1392,42 +1140,25 @@ void CFlamethrower::InitAddons()
 	SetAnimFlag(ANM_SHOT_AIM, "anm_shots_when_aim");
 	SetAnimFlag(ANM_SHOT_AIM_GL, "anm_shots_w_gl_when_aim");
 
-	m_weapon_attaches.clear();
 
 	if (IsScopeAttached())
 	{
-		if (m_eScopeStatus == ALife::eAddonAttachable)
+		if ( m_eScopeStatus == ALife::eAddonAttachable )
 		{
 			LoadCurrentScopeParams(GetScopeName().c_str());
-
-			if (pSettings->line_exist(m_scopes[m_cur_scope], "bones"))
-			{
-				pcstr ScopeBone = pSettings->r_string(m_scopes[m_cur_scope], "bones");
-				m_cur_scope_bone = ScopeBone;
-			}
-
-			if (m_sScopeAttachSection.size() && pSettings->line_exist(m_sScopeAttachSection, "attach_hud_visual"))
-				WeaponAttach().CreateAttach(m_sScopeAttachSection, m_weapon_attaches);
-		}
-		else if (m_eScopeStatus == ALife::eAddonPermanent)
-		{
-			if (m_sScopeAttachSection.size() && pSettings->line_exist(m_sScopeAttachSection, "attach_hud_visual"))
-				WeaponAttach().CreateAttach(m_sScopeAttachSection, m_weapon_attaches);
 		}
 	}
 	else
 	{
-		if (m_sScopeAttachSection.size() && pSettings->line_exist(m_sScopeAttachSection, "attach_hud_visual"))
-			WeaponAttach().RemoveAttach(m_sScopeAttachSection, m_weapon_attaches);
-
-		if (m_UIScope)
-			xr_delete(m_UIScope);
-
-		if (bIsSecondVPZoomPresent())
-			m_zoom_params.m_fSecondVPFovFactor = 0.0f;
-
-		if (IsZoomEnabled())
-			m_zoom_params.m_fIronSightZoomFactor = pSettings->r_float(cNameSect(), "scope_zoom_factor");
+		if ( m_UIScope )
+		{
+			xr_delete( m_UIScope );
+		}
+		
+		if ( IsZoomEnabled() )
+		{
+			m_zoom_params.m_fIronSightZoomFactor = pSettings->r_float( cNameSect(), "scope_zoom_factor" );
+		}
 	}
 
 	{
@@ -1445,33 +1176,14 @@ void CFlamethrower::InitAddons()
 
 void CFlamethrower::PlayAnimShow()
 {
-	VERIFY(GetState() == eShowing);
-
-	if (iAmmoElapsed >= 1)
-		m_opened = false;
-	else
-		m_opened = true;
-
-	HUD_VisualBulletUpdate();
-
-	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_SHOW_EMPTY))
-		PlayHUDMotion("anm_show_empty", FALSE, this, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_show_jammed"))
-		PlayHUDMotion("anm_show_jammed", false, this, GetState());
-	else
-		PlayHUDMotion("anm_show", FALSE, this, GetState());
+	VERIFY(GetState()==eShowing);
+	PlayHUDMotion(SetCurrentStateAnimation("anm_show"), FALSE, GetState());
 }
 
 void CFlamethrower::PlayAnimHide()
 {
 	VERIFY(GetState() == eHiding);
-
-	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_HIDE_EMPTY))
-		PlayHUDMotion("anm_hide_empty", TRUE, this, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_hide_jammed"))
-		PlayHUDMotion("anm_hide_jammed", true, this, GetState());
-	else
-		PlayHUDMotion("anm_hide", TRUE, this, GetState());
+	PlayHUDMotion(SetCurrentStateAnimation("anm_hide"), TRUE, GetState());
 }
 
 void CFlamethrower::PlayAnimBore()
@@ -1479,127 +1191,201 @@ void CFlamethrower::PlayAnimBore()
 	inherited::PlayAnimBore();
 }
 
-void CFlamethrower::PlayAnimIdleSprint()
+shared_str CFlamethrower::SetCurrentReloadAnimation()
 {
-	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_SPRINT_EMPTY))
-		PlayHUDMotion("anm_idle_sprint_empty", TRUE, nullptr, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_idle_sprint_jammed"))
-		PlayHUDMotion("anm_idle_sprint_jammed", true, nullptr, GetState());
-	else
-		inherited::PlayAnimIdleSprint();
+	shared_str anim = "anm_reload";
+
+	if (H_Parent() && H_Parent() == Level().CurrentControlEntity())
+	{
+		bool empty = m_bAmmoInChamber ? iAmmoChamberElapsed == 0 : iAmmoElapsed == 0;
+		if (IsMisfire())
+		{
+			AddSuffixName(anim, "_misfire");
+			AddSuffixName(anim, "_jammed");
+
+			if (empty)
+			{
+				AddSuffixName(anim, "_last");
+			}
+		}
+		else if (empty)
+		{
+			AddSuffixName(anim, "_empty");
+		}
+
+		if (IsChangeAmmoType())
+		{
+			AddSuffixName(anim, "_ammochange");
+		}
+
+		CActor* actor = Level().CurrentControlEntity()->cast_actor();
+		bool detector = actor != nullptr && actor->GetDetector() != nullptr;
+
+		if (detector)
+		{
+			AddSuffixName(anim, "_detector");
+		}
+
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope");
+		}
+
+	}
+
+	return anim;
 }
 
-void CFlamethrower::PlayAnimIdleMoving()
+shared_str CFlamethrower::SetCurrentStateAnimation(const shared_str& first_name)
 {
-	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_MOVING_EMPTY))
-		PlayHUDMotion("anm_idle_moving_empty", TRUE, nullptr, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_idle_moving_jammed"))
-		PlayHUDMotion("anm_idle_moving_jammed", true, nullptr, GetState());
-	else
-		inherited::PlayAnimIdleMoving();
+	shared_str anim = first_name;
+
+	if (H_Parent() && H_Parent() == Level().CurrentControlEntity())
+	{
+		bool empty = m_bAmmoInChamber ? iAmmoChamberElapsed == 0 : iAmmoElapsed == 0;
+
+		if (IsZoomed())
+		{
+			AddSuffixName(anim, "_aim");
+		}
+
+		if (IsMisfire())
+		{
+			AddSuffixName(anim, "_misfire");
+			AddSuffixName(anim, "_jammed");
+		}
+		else if (empty)
+		{
+			AddSuffixName(anim, "_empty");
+		}
+
+		if (ScopeAttachable() && !IsScopeAttached())
+		{
+			AddSuffixName(anim, "_noscope");
+		}
+	}
+
+	return anim;
+}
+
+shared_str CFlamethrower::SetCurrentShootAnimation()
+{
+	bool last = m_bAmmoInChamber ? iAmmoChamberElapsed == 1 && iAmmoElapsed == 0 : iAmmoElapsed == 1;
+	shared_str anim = HudAnimationExist("anm_shoot") ? "anm_shoot" : HudAnimationExist("anm_shot_l") && last ? "anm_shot" : "anm_shots";
+
+	if (H_Parent() && H_Parent() == Level().CurrentControlEntity())
+	{
+		if (IsZoomed())
+		{
+			AddSuffixName(anim, "_aim");
+		}
+
+		if (IsMisfire())
+		{
+			AddSuffixName(anim, "_misfire");
+			AddSuffixName(anim, "_jammed");
+		}
+		else if (last)
+		{
+			AddSuffixName(anim, "_last");
+			AddSuffixName(anim, "_l");
+		}
+	}
+
+	return anim;
+}
+
+shared_str CFlamethrower::SetCurrentAimAnimation()
+{
+	shared_str anim = "anm_idle_aim";
+
+	if (IsGrenadeLauncherAttached())
+	{
+		//Hack for original weapon configs
+		anim = IsGrenadeMode() && HudAnimationExist("anm_idle_g_aim") ? "anm_idle_g_aim" : (HudAnimationExist("anm_idle_w_gl_aim") ? "anm_idle_w_gl_aim" : anim);
+	}
+
+	if (CActor* actor = H_Parent()->cast_actor())
+	{
+		u32 state = actor->GetMovementState(ACTOR_DEFS::EMovementStates::eReal);
+		if (state & ACTOR_DEFS::EMoveCommand::mcAnyMove)
+		{
+			if (IsScopeAttached())
+			{
+				AddSuffixName(anim, "_scope", "_moving");
+			}
+			else
+			{
+				AddSuffixName(anim, "_moving");
+			}
+
+			if (state & ACTOR_DEFS::EMoveCommand::mcFwd)
+			{
+				AddSuffixName(anim, "_moving", "_forward");
+			}
+			else if (state & ACTOR_DEFS::EMoveCommand::mcBack)
+			{
+				AddSuffixName(anim, "_moving", "_back");
+			}
+
+			if (state & ACTOR_DEFS::EMoveCommand::mcLStrafe)
+			{
+				AddSuffixName(anim, "_moving", "_left");
+			}
+			else if (state & ACTOR_DEFS::EMoveCommand::mcRStrafe)
+			{
+				AddSuffixName(anim, "_moving", "_right");
+			}
+		}
+	}
+
+	return SetCurrentStateAnimation(anim);
+}
+
+void CFlamethrower::PlayAnimIdle()
+{
+	if (GetState() != eIdle)
+		return;
+
+	if (m_bIsAimStarted && HudAnimationExist("anm_idle_aim_end"))
+	{
+		m_bIsAimStarted = false;
+		PlayHUDMotion(SetCurrentStateAnimation("anm_idle_aim_end"), true, GetState());
+		return;
+	}
+
+	if (TryPlayAnimIdle())
+	{
+		return;
+	}
+
+	shared_str new_name = SetCurrentIdleAnimation();
+
+	PlayHUDMotion(SetCurrentStateAnimation(new_name), TRUE, GetState());
 }
 
 void CFlamethrower::PlayAnimReload()
 {
 	VERIFY(GetState() == eReload);
 
-	if (iAmmoElapsed == 0)
-		PlayHUDMotionIfExists({ "anm_reload_empty", "anm_reload" }, true, GetState());
-	else
-		PlayHUDMotion("anm_reload", TRUE, this, GetState());
-}
+	UpdateAmmoBones(m_ammo_bones_mag, iAmmoElapsed, m_ammoType);
 
-/*void CFlamethrower::PlayAnimAim()
-{
-	if (IsRotatingToZoom())
+	PlayHUDMotion(SetCurrentReloadAnimation(), TRUE, GetState());
+	if (ParentIsActor())
 	{
-		if (isHUDAnimationExist("anm_idle_aim_start"))
+		CActor* actor = Level().CurrentControlEntity()->cast_actor();
+		bool detector = actor != nullptr && actor->GetDetector() != nullptr;
+		if (detector && HudAnimationExist("anm_reload_detector"))
 		{
-			PlayHUDMotionNew("anm_idle_aim_start", true, GetState());
-			return;
+			bDisablePrepareAnimation = true;
 		}
-	}
-
-	if (const char* guns_aim_anm = GetAnimAimName())
-	{
-		if (isHUDAnimationExist(guns_aim_anm))
-		{
-			PlayHUDMotionNew(guns_aim_anm, true, GetState());
-			return;
-		}
-		else if (strstr(guns_aim_anm, "_jammed"))
-		{
-			char new_guns_aim_anm[256];
-			strcpy(new_guns_aim_anm, guns_aim_anm);
-			new_guns_aim_anm[strlen(guns_aim_anm) - strlen("_jammed")] = '\0';
-
-			if (isHUDAnimationExist(new_guns_aim_anm))
-			{
-				PlayHUDMotionNew(new_guns_aim_anm, true, GetState());
-				return;
-			}
-		}
-		else if (strstr(guns_aim_anm, "_empty"))
-		{
-			char new_guns_aim_anm[256];
-			strcpy(new_guns_aim_anm, guns_aim_anm);
-			new_guns_aim_anm[strlen(guns_aim_anm) - strlen("_empty")] = '\0';
-
-			if (isHUDAnimationExist(new_guns_aim_anm))
-			{
-				PlayHUDMotionNew(new_guns_aim_anm, true, GetState());
-				return;
-			}
-		}
-	}
-
-	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_AIM_EMPTY))
-		PlayHUDMotion("anm_idle_aim_empty", TRUE, NULL, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_idle_aim_jammed"))
-		PlayHUDMotion("anm_idle_aim_jammed", true, nullptr, GetState());
-	else
-		PlayHUDMotion("anm_idle_aim", TRUE, NULL, GetState());
-}*/
-
-void CFlamethrower::PlayAnimIdle()
-{
-	if (GetState() != eIdle)	return;
-
-	if (TryPlayAnimIdle()) return;
-
-	//if (IsZoomed())
-		//PlayAnimAim();
-	/*else */if (!m_current_fuel_level && psWpnAnimsFlag.test(ANM_IDLE_EMPTY))
-		PlayHUDMotion("anm_idle_empty", TRUE, nullptr, GetState());
-	else if (IsMisfire() && isHUDAnimationExist("anm_idle_jammed") && !TryPlayAnimIdle())
-		PlayHUDMotion("anm_idle_jammed", true, nullptr, GetState());
-	else
-	{
-		/*if (IsRotatingFromZoom())
-		{
-			if (isHUDAnimationExist("anm_idle_aim_end"))
-			{
-				PlayHUDMotionNew("anm_idle_aim_end", true, GetState());
-				return;
-			}
-		}*/
-		inherited::PlayAnimIdle();
 	}
 }
 
 void CFlamethrower::PlayAnimShoot()
 {
 	VERIFY(GetState() == eFire);
-
-	string_path guns_shoot_anm{};
-	strconcat(sizeof(guns_shoot_anm), guns_shoot_anm, (isHUDAnimationExist("anm_shoot") ? "anm_shoot" : "anm_shots"), (iAmmoElapsed == 1) ? "_last" : "", (IsZoomed() && !IsRotatingToZoom()) ? (IsScopeAttached() ? "_aim_scope" : "_aim") : "", (IsSilencerAttached() && m_bUseAimSilShotAnim) ? "_sil" : "");
-
-	//HUD_VisualBulletUpdate();
-
-	if (iAmmoElapsed == 1)
-		PlayHUDMotionIfExists({ guns_shoot_anm, "anm_shot_l", "anm_shots" }, false, GetState());
-	else
-		PlayHUDMotionIfExists({ guns_shoot_anm, "anm_shots" }, false, GetState());
+	PlayHUDMotion(SetCurrentShootAnimation(), FALSE, GetState());
 }
 
 void CFlamethrower::OnZoomIn()
@@ -1692,45 +1478,14 @@ void CFlamethrower::load(IReader& input_packet)
 	TraceManager->load(input_packet);
 }
 
-/*void CFlamethrower::Save(CSaveObjectSave* Object) const
+void CFlamethrower::Serialize(ISaveObject& Object)
 {
-	Object->BeginChunk("CFlamethrower");
-	{
-		inherited::Save(Object);
-		Object->GetCurrentChunk()->w_bool(m_is_overheated);
-		Object->GetCurrentChunk()->w_float(m_overheating_state);
-		Object->GetCurrentChunk()->w_float(m_current_charge);
-		Object->GetCurrentChunk()->w_float(m_current_fuel_level);
-		Object->GetCurrentChunk()->w_stringZ(m_fuel_section_name);
-		TraceManager->Save(Object);
-	}
-	Object->EndChunk();
-}
-
-void CFlamethrower::Load(CSaveObjectLoad* Object) 
-{
-	Object->FindChunk("CFlamethrower");
-	{
-		inherited::Load(Object);
-		Object->GetCurrentChunk()->r_bool(m_is_overheated);
-		Object->GetCurrentChunk()->r_float(m_overheating_state);
-		Object->GetCurrentChunk()->r_float(m_current_charge);
-		Object->GetCurrentChunk()->r_float(m_current_fuel_level);
-		Object->GetCurrentChunk()->r_stringZ(m_fuel_section_name);
-		TraceManager->Load(Object);
-	}
-	Object->EndChunk();
-}*/
-
-void CFlamethrower::Serialize(ISaveObject& Object) const
-{
-	Object.BeginChunk("CFlamethrower");
+	BEGIN_CHUNK(Object, "CFlamethrower")
 	{
 		inherited::Serialize(Object);
-		Object << m_is_overheated << m_overheating_state << m_current_charge << m_current_fuel_level << m_fuel_section_name << TraceManager;
+		Object << m_is_overheated << m_overheating_state << m_current_charge << m_current_fuel_level << m_fuel_section_name << *TraceManager.get();
 		//TraceManager->Save(Object);
 	}
-	Object.EndChunk();
 }
 
 void CFlamethrower::SpawnFuelCanister(float Condition, LPCSTR ammoSect, u32 ParentID)
@@ -1782,7 +1537,6 @@ void CFlamethrower::net_Import(NET_Packet& P)
 	inherited::net_Import(P);
 }
 
-#include "string_table.h"
 bool CFlamethrower::GetBriefInfo(II_BriefInfo& info)
 {
 	VERIFY(m_pInventory);
@@ -1793,22 +1547,8 @@ bool CFlamethrower::GetBriefInfo(II_BriefInfo& info)
 	info.cur_ammo = int_str;
 	info.fire_mode._set("");
 
-	if (bHasBulletsToHide)
-	{
-		last_hide_bullet = ae >= bullet_cnt ? bullet_cnt : bullet_cnt - ae - 1;
-
-		if (ae == 0) last_hide_bullet = -1;
-
-		//HUD_VisualBulletUpdate();
-	}
-
 	info.fire_mode = "";
 
-	/*if (m_pInventory->ModifyFrame() <= m_BriefInfo_CalcFrame)
-	{
-		return false;
-	}*/
-	//GetSuitableAmmoTotal();//update m_BriefInfo_CalcFrame
 	info.grenade = "";
 
 	u32 at_size = m_ammoTypes.size();
@@ -1819,62 +1559,11 @@ bool CFlamethrower::GetBriefInfo(II_BriefInfo& info)
 	}
 	else
 	{
-		//GetSuitableAmmoTotal(); //mp = all type
-
-		// Lex Addon (correct by Suhar_) 28.03.2017		(begin)
-		/*int add_ammo_count = 0;
-
-		for (int i = 0; i < at_size; i++)
-		{
-			if (m_ammoType == i)
-			{
-				xr_sprintf(int_str, "%d", GetAmmoCount(i));
-				info.fmj_ammo = int_str;
-			}
-			else
-			{
-				add_ammo_count += GetAmmoCount(i);
-			}
-		}
-		if (at_size > 1)
-			xr_sprintf(int_str, "%d", add_ammo_count);
-		else
-			xr_sprintf(int_str, "%s", "");
-
-		info.ap_ammo = int_str;*/
 
 		xr_sprintf(ammo, "%.1f%%", m_current_charge * 100.0f);
 		info.fmj_ammo._set(ammo);
 		xr_sprintf(ammo, "%.1f%%", m_overheating_state * 100.0f);
 		info.ap_ammo._set(ammo);
-
-		/*if (at_size >= 1 && at_size < 3)
-		{
-			xr_sprintf(ammo, "%d", (int)(m_current_fuel_level*100.0f));
-			info.fmj_ammo._set(ammo);
-		}
-		if (at_size == 2)
-		{
-			xr_sprintf(ammo, "%d", GetAmmoCount(1));
-			info.ap_ammo._set(ammo);
-		}
-		if (at_size >= 3)
-		{
-			xr_sprintf(ammo, "%d", GetAmmoCount(m_ammoType));
-			info.fmj_ammo._set(ammo);
-			u8 m = 0;
-			u64 ap = 0;
-			while (m < at_size)
-			{
-				if (m != m_ammoType)
-					ap += GetAmmoCount(m);
-				m++;
-			}
-			xr_sprintf(ammo, "%d", ap);
-			info.ap_ammo._set(ammo);
-		}*/
-
-		// Lex Addon (correct by Suhar_) 28.07.2017		(end)
 	}
 
 	if (ae != 0 && m_magazine.size() != 0)
@@ -1977,23 +1666,3 @@ bool CFlamethrower::WeaponSoundExist(LPCSTR section, LPCSTR sound_name, bool log
 #endif
 	return false;
 }
-
-/*void CFlamethrower::CheckMagazine()
-{
-	if (!ParentIsActor())
-	{
-		m_bNeedBulletInGun = false;
-		return;
-	}
-
-	if (psWpnAnimsFlag.test(ANM_RELOAD_EMPTY) && iAmmoElapsed >= 1 && m_bNeedBulletInGun == false)
-	{
-		m_bNeedBulletInGun = true;
-	}
-	else if (psWpnAnimsFlag.test(ANM_RELOAD_EMPTY) && iAmmoElapsed == 0 && m_bNeedBulletInGun == true)
-	{
-		m_bNeedBulletInGun = false;
-	}
-}*/
-
-#endif
