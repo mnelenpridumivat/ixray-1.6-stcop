@@ -3,16 +3,9 @@
 #include "StdAfx.h"
 
 #include "../xrCore/_stl_extensions.h"
-#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
-#include "../xrCore/xr_deque.h"
-#include "../xrCore/xr_defines.h"
-#endif
 #include "../xrEngine/feel_touch.h"
 #include "../xrCore/_types.h"
-#ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
-#include "../../xrParticles/particle_param_handle.h"
-#include "../xrCore/xr_smart_pointers.h"
-#endif
+//#include "../../xrParticles/particle_param_handle.h"
 #include "Save/SaveObject.h"
 
 class CBulletManager;

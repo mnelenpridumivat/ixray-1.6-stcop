@@ -44,7 +44,6 @@ protected:
 	virtual void	switch2_Hiding();
 	virtual void	switch2_Hidden();
 	virtual void	switch2_Showing();
-	virtual void    switch2_Unmis();
 
 	void	OnShot() override;
 	virtual void	StopShooting() override;
@@ -175,8 +174,10 @@ protected:
 	virtual void	PlayReloadSound();
 	//virtual void	PlayAnimAim();
 	void	PlayAnimBore() override;
-	void	PlayAnimIdleSprint() override;
-	void	PlayAnimIdleMoving() override;
+	virtual shared_str SetCurrentReloadAnimation();
+	virtual shared_str SetCurrentShootAnimation();
+	virtual shared_str SetCurrentStateAnimation(const shared_str& first_name);
+	virtual shared_str SetCurrentAimAnimation();
 
 protected:
 
@@ -215,6 +216,6 @@ protected:
 		u16 weapon_id,
 		bool send_hit) override;
 
-	FlamethrowerTrace::CManager* TraceManager = nullptr;
+	xr_unique_ptr<FlamethrowerTrace::CManager> TraceManager = nullptr;
 
 };
