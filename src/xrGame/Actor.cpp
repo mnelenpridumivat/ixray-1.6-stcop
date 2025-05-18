@@ -1485,7 +1485,7 @@ void CActor::UpdateCL()
 		fSprintFactor -= Device.fTimeDelta / 0.1f;
 	clamp(fSprintFactor, 0.0f, 1.0f);
 
-	CBinderManager::GetInstance().Update();
+	//CBinderManager::GetInstance().Update();
 }
 
 void CActor::UpdatePlayerView()

@@ -676,7 +676,15 @@ bool CSector::Validate(bool bMsg)
 		for (SurfFacesPairIt sf_it=it->mesh->m_SurfFaces.begin(); sf_it!=it->mesh->m_SurfFaces.end(); sf_it++){
 			CSurface* surf 		= sf_it->first;
 			Shader_xrLC* c_sh	= EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
-			if (c_sh->flags.bRendering)	bRenderableFound = true;
+			if (!c_sh)
+			{
+				ELog.Msg(mtError,"*ERROR: invalid compile shader name [%s] in object [%s]!", surf->_ShaderXRLCName(), it->object->GetName());
+				return false;
+			}
+			if (c_sh->flags.bRendering)
+			{
+				bRenderableFound = true;
+			}
 		}
 	}
 	if (!bRenderableFound){

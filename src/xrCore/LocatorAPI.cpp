@@ -39,6 +39,7 @@ void CLocatorAPI::ParseIgnoreList()
 
 bool CLocatorAPI::CheckSkip(const xr_string& Path) const
 {
+	PROF_EVENT("CLocatorAPI::CheckSkip");
 	xr_string UnixPath = Path.data();
 	std::replace(UnixPath.begin(), UnixPath.end(), '\\', '/');
 
@@ -67,6 +68,7 @@ CLocatorAPI::~CLocatorAPI()
 
 void CLocatorAPI::Register(LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real, u32 size_compressed, time_t modif)
 {
+	PROF_EVENT("CLocatorAPI::Register");
 	xr_string TempPath = name;
 	xr_strlwr(TempPath);
 
@@ -437,6 +439,7 @@ bool CLocatorAPI::load_all_unloaded_archives()
 
 void CLocatorAPI::ProcessOne(LPCSTR path, system_file* F)
 {
+	PROF_EVENT("CLocatorAPI::ProcessOne");
 	xr_string NormalPath = F->name;
 
 	if (!NormalPath.StartWith(path))
@@ -511,6 +514,7 @@ namespace Platform
 
 bool CLocatorAPI::Recurse(const char* path)
 {
+	PROF_EVENT("CLocatorAPI::Recurse");
 	string_path N = {};
 	xr_strcpy(N, sizeof(N), path);
 
@@ -549,10 +553,13 @@ bool CLocatorAPI::Recurse(const char* path)
 		else 
 			sFile.size = CurrentFile.file_size();
 
+		/*{
 #ifdef IXR_WINDOWS
-		if (GetFileAttributes(currentPath.generic_wstring().c_str()) & FILE_ATTRIBUTE_HIDDEN)
-			sFile.attrib |= _A_HIDDEN;
+			PROF_EVENT("CLocatorAPI::Recurse::GetFileAttributes");
+			if (GetFileAttributes(currentPath.generic_wstring().c_str()) & FILE_ATTRIBUTE_HIDDEN)
+				sFile.attrib |= _A_HIDDEN;
 #endif
+		}*/
 
 		sFile.time_write = xr_chrono_to_time_t(CurrentFile.last_write_time());
 		sFile.time_create = xr_chrono_to_time_t(CurrentFile.last_write_time());
@@ -578,8 +585,11 @@ bool CLocatorAPI::Recurse(const char* path)
 	FFVec StackFiles;
 	StackFiles.swap(rec_files);
 
-	std::sort(StackFiles.begin(), StackFiles.end(), pred_str_ff);
-
+	{
+		PROF_EVENT("CLocatorAPI::Recurse::Sort");
+		std::sort(StackFiles.begin(), StackFiles.end(), pred_str_ff);
+	}
+		
 	for (system_file& FileData : StackFiles)
 		ProcessOne(path, &FileData);
 
@@ -692,6 +702,7 @@ IReader *CLocatorAPI::setup_fs_ltx	(LPCSTR fs_name)
 
 void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 {
+	PROF_EVENT("CLocatorAPI::_initialize");
 	char _delimiter = '|'; //','
 	if (m_Flags.is(flReady))return;
 	CTimer t;
@@ -1597,6 +1608,7 @@ bool CLocatorAPI::path_exist(LPCSTR path)
 
 FS_Path* CLocatorAPI::append_path(LPCSTR path_alias, LPCSTR root, LPCSTR add, BOOL recursive)
 {
+	PROF_EVENT("CLocatorAPI::append_path");
 	VERIFY			(root);
 	VERIFY			(!path_exist(path_alias));
 	FS_Path* P		= new FS_Path(root,add,LPCSTR(0),LPCSTR(0),0);

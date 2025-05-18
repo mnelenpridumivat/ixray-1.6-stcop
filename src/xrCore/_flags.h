@@ -147,7 +147,7 @@ public:
 
 #else
 	IC  bool    bitTest(const u64 bitNum) const { 
-		return _bittest64((s64*)&Bits[GetChunkNumber(bitNum)].flags, bitNum);
+		return _bittest64((s64*)&Bits[GetChunkNumber(bitNum)].flags, GetBitNumber(bitNum));
 		//u64 tempFlag = flags; 
 		//return _bittest64((s64*)&tempFlag, bitNum); 
 	}
