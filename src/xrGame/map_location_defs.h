@@ -32,4 +32,5 @@ using Locations_it = Locations::iterator;
 
 struct CMapLocationRegistry : public CALifeAbstractRegistry<u16, Locations> {
 	virtual void save(IWriter &stream);
+	virtual void serialize(ISaveObject& Object);
 };
