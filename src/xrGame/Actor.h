@@ -88,6 +88,9 @@ private:
 	typedef CEntityAlive	inherited;
 	CPickUpManager* pPickup = nullptr;
 
+	const char* m_onBeforeHitCallback = {};
+	bool m_isBeforeHitCallback = false;
+
 	struct LookAtData
 	{
 		CObject* LookAtObject = nullptr;
