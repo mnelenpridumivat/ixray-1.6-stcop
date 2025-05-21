@@ -75,6 +75,9 @@ public:
 	bool				m_fake_indicators_update;
 	bool				m_cur_state_LA[it_max];
 	bool				m_b_force_update;
+
+	bool				m_isZoneTouch = false;
+	const char*			m_onZoneTouch = {};
 public:
 					CUIHudStatesWnd		();
 	virtual			~CUIHudStatesWnd	();
