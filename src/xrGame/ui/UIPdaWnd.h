@@ -19,6 +19,7 @@ class CUIRankingWnd;
 class CUILogsWnd;
 class CUIAnimatedStatic;
 class UIHint;
+class CMapSpot;
 class CUIEncyclopediaWnd; 
 
 namespace pda_section {
@@ -72,6 +73,8 @@ public:
 	CUILogsWnd*				pUILogsWnd;
 	CUIEncyclopediaWnd* pUIEncyclopediaWnd;
 
+	CMapSpot*				pSelectedMapSpot;
+
 	virtual void			Reset				();
 
 public:
@@ -111,4 +114,5 @@ public:
 
 			void PdaContentsChanged(pda_section::part type);
 
+			DECLARE_SCRIPT_REGISTER_FUNCTION
 };
