@@ -61,11 +61,11 @@ bool CTrade::CanTrade()
 	return true;
 }
 
-void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying, bool bBarter)
+void CTrade::TransferItem(CInventoryItem* pItem, bool bBuying, bool bBarter, bool bFree)
 {
 	// сумма сделки учитывая ценовой коэффициент
 	// актер цену не говорит никогда, все делают за него
-	u32 dwTransferMoney					= GetItemPrice(pItem, bBuying, bBarter ? mmBarter : mmTrade);
+	u32 dwTransferMoney					= GetItemPrice(pItem, bBuying, bBarter ? mmBarter : mmTrade, bFree);
 
 	if(bBuying)
 	{
@@ -153,8 +153,11 @@ CInventoryOwner* CTrade::GetPartner()
 	return pPartner.inv_owner;
 }
 
-u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying, EMenuMode mode)
+u32	CTrade::GetItemPrice(PIItem pItem, bool b_buying, EMenuMode mode, bool b_free)
 {
+	if (b_free)
+		return 0;
+
 	CArtefact				*pArtefact = smart_cast<CArtefact*>(pItem);
 
 	// computing base_cost

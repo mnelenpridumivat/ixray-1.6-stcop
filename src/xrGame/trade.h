@@ -52,13 +52,13 @@ public:
 
 	void					OnPerformTrade			(u32 money_get, u32 money_put);
 
-	void					TransferItem			(CInventoryItem* pItem, bool bBuying, bool bBarter = false);
+	void					TransferItem			(CInventoryItem* pItem, bool bBuying, bool bBarter = false, bool bFree=false);
 
 	CInventoryOwner*		GetPartner				();	
 	CTrade*					GetPartnerTrade			();
 	CInventory*				GetPartnerInventory		();
 
-	u32						GetItemPrice			(CInventoryItem* pItem, bool b_buying, EMenuMode mode);
+	u32						GetItemPrice			(CInventoryItem* pItem, bool b_buying, EMenuMode mode, bool b_free=false);
 
 	void					UpdateTrade				();
 
