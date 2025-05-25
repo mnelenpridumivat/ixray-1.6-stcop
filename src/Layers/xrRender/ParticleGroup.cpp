@@ -512,6 +512,8 @@ CParticleGroup::CParticleGroup()
 
 CParticleGroup::~CParticleGroup()
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
+
 	// Msg ("!!! destoy PG");
 	for (u32 i=0; i<items.size(); i++) items[i].Clear();
 	items.clear();
@@ -647,6 +649,7 @@ void CParticleGroup::OnDeviceDestroy()
 
 u32 CParticleGroup::ParticlesCount()
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
 	int p_count=0;
 	for (SItemVecIt i_it=items.begin(); i_it!=items.end(); i_it++)
 		p_count 	+= i_it->ParticlesCount();
@@ -665,6 +668,7 @@ PAPI::ParticleAction* CParticleGroup::FindPA(shared_str PEName, PAPI::PActionEnu
 
 void CParticleGroup::SetHudMode(BOOL b)
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
 	for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it)
 	{
 		CParticleEffect* E	= static_cast<CParticleEffect*>(i_it->_effect);
@@ -674,6 +678,7 @@ void CParticleGroup::SetHudMode(BOOL b)
 
 BOOL CParticleGroup::GetHudMode()
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
 	if(items.size())
 	{
 		CParticleEffect* E	= static_cast<CParticleEffect*>(items[0]._effect);
@@ -684,6 +689,7 @@ BOOL CParticleGroup::GetHudMode()
 
 void CParticleGroup::SetLiveUpdate(BOOL b)
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
 	for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it)
 	{
 		CParticleEffect* E	= static_cast<CParticleEffect*>(i_it->_effect);
@@ -693,6 +699,7 @@ void CParticleGroup::SetLiveUpdate(BOOL b)
 
 BOOL CParticleGroup::GetLiveUpdate()
 {
+	xrCriticalSectionGuard guard(&onframe_lock);
 	if(items.size())
 	{
 		CParticleEffect* E	= static_cast<CParticleEffect*>(items[0]._effect);
