@@ -142,7 +142,8 @@ BOOL SceneBuilder::MakeGame( )
         else						ELog.DlgMsg(mtInformation,"Making finished.");
     }catch(...){
     	ELog.DlgMsg(mtError,"Error has occured in builder routine. Editor aborted.");
-        abort();
+    	UI->EndEState(esBuildLevel);
+    	return false;
     }
     UI->EndEState(esBuildLevel);
 
@@ -259,7 +260,8 @@ BOOL SceneBuilder::MakeHOM( )
         else						ELog.DlgMsg(mtInformation,"Building OK...");
     }catch(...){
     	ELog.DlgMsg(mtError,"Error has occured in builder routine. Editor aborted.");
-        abort();
+    	UI->EndEState(esBuildLevel);
+    	return false;
     }
     UI->EndEState(esBuildLevel);
 
@@ -286,7 +288,8 @@ BOOL SceneBuilder::MakeSOM( )
         else						ELog.DlgMsg(mtInformation,"Building OK...");
     }catch(...){
     	ELog.DlgMsg(mtError,"Error has occured in builder routine. Editor aborted.");
-        abort();
+    	UI->EndEState(esBuildLevel);
+    	return false;
     }
     UI->EndEState(esBuildLevel);
 

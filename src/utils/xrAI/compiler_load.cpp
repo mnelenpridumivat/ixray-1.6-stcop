@@ -114,16 +114,11 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			{
 				Surface_Init();
 				F = fs->open_chunk(EB_Textures);
-#ifdef _M_X64
 				u32 tex_count = F->length() / sizeof(b_texture64);
-#else
-				u32 tex_count = F->length() / sizeof(b_texture);
-#endif
 				for (u32 t = 0; t < tex_count; t++)
 				{
 					Progress(float(t) / float(tex_count));
 
-#ifdef _M_X64
 					b_texture64	TEX;
 					F->r(&TEX, sizeof(TEX));
 					b_BuildTexture	BT;
@@ -131,23 +126,18 @@ void xrLoad(LPCSTR name, bool draft_mode)
 					// ptr should be copied separately
 					CopyMemory(&BT, &TEX, sizeof(TEX) - 4);
 					BT.pSurface = (u32*)TEX.pSurface;
-#else
-					b_texture TEX;
-					F->r(&TEX, sizeof(TEX));
-
-					b_BuildTexture BT;
-					CopyMemory(&BT, &TEX, sizeof(TEX));
-#endif
 
 					// load thumbnail
 					string128& N_ = BT.name;
-					LPSTR			extension = strext(N_);
+					LPSTR extension = strext(N_);
+
 					if (extension)
 						*extension = 0;
 
 					xr_strlwr(N_);
 
-					if (0 == xr_strcmp(N_, "level_lods")) {
+					if (0 == xr_strcmp(N_, "level_lods"))
+					{
 						// HACK for merged lod textures
 						BT.dwWidth = 1024;
 						BT.dwHeight = 1024;
@@ -246,7 +236,7 @@ void xrLoad(LPCSTR name, bool draft_mode)
 		// Header
 		b_params				Params;
 		fs.r_chunk(EB_Parameters, &Params);
-	
+
 		// Lights (Static)
 		{
 			F = fs.open_chunk(EB_Light_static);
@@ -261,11 +251,10 @@ void xrLoad(LPCSTR name, bool draft_mode)
 					Msg("! BAD light range : %f", L.range);
 					L.range = L.range > 0.f ? 10000.f : -10000.f;
 				}
-	
+
 				// type
-				if (L.type == D3DLIGHT_DIRECTIONAL)	RL.type = LT_DIRECT;
-				else											RL.type = LT_POINT;
-	
+				RL.type = (L.type == D3DLIGHT_DIRECTIONAL) ? LT_DIRECT : LT_POINT;
+
 				// generic properties
 				RL.position.set(L.position);
 				RL.direction.normalize_safe(L.direction);
@@ -274,12 +263,12 @@ void xrLoad(LPCSTR name, bool draft_mode)
 				RL.attenuation0 = L.attenuation0;
 				RL.attenuation1 = L.attenuation1;
 				RL.attenuation2 = L.attenuation2;
-	
+
 				RL.amount = L.diffuse.magnitude_rgb();
 				RL.tri[0].set(0, 0, 0);
 				RL.tri[1].set(0, 0, 0);
 				RL.tri[2].set(0, 0, 0);
-	
+
 				// place into layer
 				if (0 == temp.controller_ID)	g_lights.push_back(RL);
 			}
@@ -293,29 +282,29 @@ void xrLoad(LPCSTR name, bool draft_mode)
 		xr_strconcat(file_name, name, "build.aimap");
 		IReader* F = FS.r_open(file_name);
 		R_ASSERT2(F, file_name);
-	
+
 		R_ASSERT(F->open_chunk(E_AIMAP_CHUNK_VERSION));
 		u16 version = F->r_u16();
 		R_ASSERT(version <= E_AIMAP_VERSION);
-	
+
 		R_ASSERT(F->open_chunk(E_AIMAP_CHUNK_BOX));
 		F->r(&LevelBB, sizeof(LevelBB));
-	
+
 		R_ASSERT(F->open_chunk(E_AIMAP_CHUNK_PARAMS));
 		F->r(&g_params, sizeof(g_params));
-	
+
 		R_ASSERT(F->open_chunk(E_AIMAP_CHUNK_NODES));
 		u32 N_ = F->r_u32();
 		R_ASSERT2(N_ < MAX_AI_NODES - 1, "Too many nodes!");
 		g_nodes.resize(N_);
-	
+
 		hdrNODES H;
 		H.version = XRAI_CURRENT_VERSION;
 		H.count = N_ + 1;
 		H.size = g_params.fPatchSize;
 		H.size_y = 1.f;
 		H.aabb = LevelBB;
-	
+
 		constexpr u32 InvalidNode_v1 = 0x00ffffff;
 		typedef u32 NodeLink;
 		for (u32 i = 0; i < N_; i++)
@@ -324,13 +313,13 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			u16 pl;
 			SNodePositionOld _np;
 			NodePosition np;
-	
+
 			if (version == 1)
 			{
 				for (int j = 0; j < 4; ++j)
 				{
 					F->r(&id, 3);
-					id = id & 0x00ffffff;
+					id = id & InvalidNode_v1;
 					if (id == InvalidNode_v1)
 						id = InvalidNode;
 					g_nodes[i].n[j] = id;
@@ -344,18 +333,18 @@ void xrLoad(LPCSTR name, bool draft_mode)
 					g_nodes[i].n[j] = id;
 				}
 			}
-	
+
 			pl = F->r_u16();
 			pvDecompress(g_nodes[i].Plane.n, pl);
 			F->r(&_np, sizeof(_np));
 			CNodePositionConverter(_np, H, np);
 			g_nodes[i].Pos = vertex_position(np, LevelBB, g_params);
-	
+
 			g_nodes[i].Plane.build(g_nodes[i].Pos, g_nodes[i].Plane.n);
 		}
-	
+
 		F->close();
-	
+
 		if (strstr(Core.Params, "-clear_temp_files"))
 			DeleteFileA(file_name);
 	}

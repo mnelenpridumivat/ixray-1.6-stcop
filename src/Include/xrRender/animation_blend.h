@@ -180,8 +180,8 @@ IC	bool CBlend::update_time			( float dt )
 
 	if( at_end )
 	{
-		timeCurrent	= timeTotal/*-END_EPS*/;		// stop@end - time frozen at the end
-		//if( timeCurrent<0.f ) timeCurrent =0.f; 
+		timeCurrent	= timeTotal-END_EPS;		// stop@end - time frozen at the end
+		if( timeCurrent<0.f ) timeCurrent =0.f; 
 	}
 	else
 		timeCurrent	= 0.f;

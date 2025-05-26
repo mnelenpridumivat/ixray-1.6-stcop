@@ -69,41 +69,6 @@ void SLocationKey::load(IReader &stream)
 
 	location->load	(stream);
 }
-
-/*void SLocationKey::save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("SLocationKey");
-	{
-		Object->GetCurrentChunk()->w_u16(object_id);
-		Object->GetCurrentChunk()->w_stringZ(spot_type);
-		Object->GetCurrentChunk()->w_bool(location->IsUserDefined());
-		Object->GetCurrentChunk()->w_u8(0);
-		location->save(Object);
-	}
-	Object->EndChunk();
-}
-
-void SLocationKey::load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("SLocationKey");
-	{
-		Object->GetCurrentChunk()->r_u16(object_id);
-		Object->GetCurrentChunk()->r_stringZ(spot_type);
-		bool bUserDefined;
-		Object->GetCurrentChunk()->r_bool(bUserDefined);
-		if (bUserDefined)
-		{
-			Level().Server->PerformIDgen(object_id);
-			location = new CMapLocation(*spot_type, object_id, true);
-		}
-		else
-		{
-			location = new CMapLocation(*spot_type, object_id);
-		}
-		location->load(Object);
-	}
-	Object->EndChunk();
-}*/
 ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data) {
 
 	BEGIN_CHUNK(Object,"SLocationKey")
@@ -162,6 +127,24 @@ void CMapLocationRegistry::save(IWriter &stream)
 	}
 }
 
+void CMapLocationRegistry::serialize(ISaveObject& Object)
+{
+	if (Object.IsSave())
+	{
+		auto Serializable = m_objects;
+		std::ranges::for_each(Serializable, [&Object](auto&location)
+		{
+			std::erase_if(location.second,[&](const auto&spot)
+			{
+				return !spot.location->Serializable();
+			});
+		});
+		SaveSystemDefined::Serialize(Object, Serializable);
+	} else {
+		CALifeAbstractRegistry<unsigned short, std::vector<SLocationKey, xalloc<SLocationKey>>>::serialize(Object);
+	}
+}
+
 
 CMapManager::CMapManager()
 {
@@ -199,11 +182,11 @@ CMapLocation* CMapManager::AddRelationLocation(CInventoryOwner* pInvOwner)
 	CEntityAlive* pEntAlive = smart_cast<CEntityAlive*>(pInvOwner);
 	if( !pEntAlive->g_Alive() ) sname = "deadbody_location";
 
-	auto MapLocation = GetMapLocation(sname, pInvOwner->object_id());
-	if (MapLocation)
-	{
-		return MapLocation;
-	}
+	//auto MapLocation = GetMapLocation(sname, pInvOwner->object_id());
+	//if (MapLocation)
+	//{
+	//	return MapLocation;
+	//}
 	R_ASSERT(!HasMapLocation(sname, pInvOwner->object_id()));
 	CMapLocation* l = new CRelationMapLocation(sname, pInvOwner->object_id(), pActor->object_id());
 	Locations().push_back( SLocationKey(sname, pInvOwner->object_id()) );

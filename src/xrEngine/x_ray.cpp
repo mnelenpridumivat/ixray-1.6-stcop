@@ -383,6 +383,8 @@ ENGINE_API	bool g_dedicated_server	= false;
 
 ENGINE_API void EngineLoadStage1(char* lpCmdLine)
 {
+	PROF_START_CAPTURE()
+	PROF_EVENT("EngineLoadStage1");
 	// AVI
 	g_bIntroFinished = TRUE;
 
@@ -409,6 +411,8 @@ ENGINE_API void EngineLoadStage1(char* lpCmdLine)
 	}
 
 	EngineExternal();
+	PROF_STOP_CAPTURE()
+	PROF_SAVE_CAPTURE("ixr.opt");
 }
 
 ENGINE_API void EngineLoadStage2()
