@@ -1484,7 +1484,6 @@ void CFlamethrower::Serialize(ISaveObject& Object)
 	{
 		inherited::Serialize(Object);
 		Object << m_is_overheated << m_overheating_state << m_current_charge << m_current_fuel_level << m_fuel_section_name << *TraceManager.get();
-		//TraceManager->Save(Object);
 	}
 }
 
