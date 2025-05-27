@@ -240,3 +240,5 @@
 #define CLSID_ONLINE_OFFLINE_GROUP		MK_CLSID('O','N','_','O','F','F','_','G')
 
 #define CLSID_EQUIPMENT_BACKPACK MK_CLSID('E', 'Q', '_', 'B', 'A', 'K', 'P', 'K')
+
+#define CLSID_CONDITIONAL		MK_CLSID('C','O','N','D',' ',' ',' ',' ')

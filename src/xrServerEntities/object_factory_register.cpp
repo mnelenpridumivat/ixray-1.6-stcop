@@ -257,6 +257,7 @@ void CObjectFactory::register_classes	()
 //	add<CSE_SpawnGroup>											(CLSID_AI_SPAWN_GROUP			,"spawn_group");
 	add<CSE_ALifeGraphPoint>									(CLSID_AI_GRAPH					,"graph_point");
 	add<CSE_ALifeOnlineOfflineGroup>							(CLSID_ONLINE_OFFLINE_GROUP		,"online_offline_group");
+	add<CSE_Conditional>										(CLSID_CONDITIONAL, "conditional");
 #endif // #ifndef NO_SINGLE
 	
 	// client and server entities

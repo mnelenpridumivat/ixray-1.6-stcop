@@ -456,7 +456,7 @@ void EScene::SaveToolLTX(ObjClassID clsid, LPCSTR fn)
 			CInifile ini_part		(filename, FALSE, FALSE, FALSE);
 			tool->SaveLTX			(ini_part, i);
 			m_GUID.SaveLTX			(ini_part,"guid","guid");
-			ini_part.save_as		();
+			ini_part.save_as		(filename);
 		}
 	}
 }

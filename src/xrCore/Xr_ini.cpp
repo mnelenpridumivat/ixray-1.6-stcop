@@ -517,12 +517,23 @@ bool CInifile::save_as	(LPCSTR new_fname)
 		xr_strcpy(m_file_name, sizeof(m_file_name), new_fname);
 
 	auto fileIter = FS.exist(m_file_name);
+	shared_str newPath;
 	if (fileIter == nullptr)
 	{
-		return false;
+		//return false;
+		if (!new_fname)
+		{
+			newPath = m_file_name;
+		} else
+		{
+			newPath = new_fname;
+		}
+	} else
+	{
+		newPath = fileIter->wrap ? fileIter->wrap : fileIter->name;
 	}
 
-	shared_str newPath = fileIter->wrap ? fileIter->wrap : fileIter->name;
+	//shared_str newPath = fileIter->wrap ? fileIter->wrap : fileIter->name;
 	IWriter* F = FS.w_open_ex(newPath.c_str());
 	if (!F)
 		return false;
