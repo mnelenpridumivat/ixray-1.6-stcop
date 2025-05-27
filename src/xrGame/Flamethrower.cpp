@@ -761,6 +761,8 @@ void CFlamethrower::OnShot()
 void CFlamethrower::StopShooting()
 {
 	inherited::StopShooting();
+	//switch2_Idle();
+	SwitchState(eIdle);
 
 	TraceManager->OnShootingEnd();
 }

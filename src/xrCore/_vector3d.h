@@ -25,7 +25,7 @@ public:
 	ICF	T&			operator[] (int i)	const			{ return *((T*)this + i); }
 
 	template<class T1>
-	IC bool operator==(T1 ls)
+	IC bool operator==(T1 ls) const
 	{
 		return x == ls.x && y == ls.y && z == ls.z;
 	}
@@ -41,16 +41,16 @@ public:
 	ICF SelfRef	add(const Self &a, const Self &v)		{ x=a.x+v.x;y=a.y+v.y;	z=a.z+v.z;		return *this;	};
 	ICF SelfRef	add(const Self &a, T s)					{ x=a.x+s;  y=a.y+s;	z=a.z+s;		return *this;	};
 
-	ICF	Self operator+(const Self& v)
+	/*ICF	Self operator+(const Self& v) const
 	{
 		auto Copy(*this);
 		return Copy.add(v);
-	};
+	};*/
 	ICF	SelfRef operator+=(const Self& v)
 	{
 		return add(v);
 	};
-	ICF	Self operator+(T s)
+	ICF	Self operator+(T s) const
 	{
 		auto Copy(*this);
 		return Copy.add(s);
@@ -65,20 +65,20 @@ public:
 	ICF	SelfRef	sub(const Self &a, const Self &v)		{ x=a.x-v.x;y=a.y-v.y;	z=a.z-v.z;		return *this;	};
 	ICF SelfRef	sub(const Self &a, T s)					{ x=a.x-s;  y=a.y-s;	z=a.z-s;		return *this;	};
 
-	ICF	Self operator-(const Self& v)
+	/*ICF	Self operator-(const Self& v) const
 	{
 		auto Copy(*this);
 		return Copy.sub(v);
-	};
+	};*/
 	ICF	SelfRef operator-=(const Self& v)
 	{
 		return sub(v);
 	};
-	ICF	Self operator-(T s)
+	/*ICF	Self operator-(T s) const
 	{
 		auto Copy(*this);
 		return Copy.sub(s);
-	};
+	};*/
 	ICF	SelfRef operator-=(T s)
 	{
 		return sub(s);
@@ -89,7 +89,7 @@ public:
 	ICF	SelfRef	mul(const Self &a, const Self &v)		{ x=a.x*v.x;y=a.y*v.y;	z=a.z*v.z;		return *this;	};
 	ICF SelfRef	mul(const Self &a, T s)					{ x=a.x*s;  y=a.y*s;	z=a.z*s;		return *this;	};
 
-	ICF	Self operator*(const Self& v)
+	ICF	Self operator*(const Self& v) const
 	{
 		auto Copy(*this);
 		return Copy.mul(v);
@@ -98,11 +98,11 @@ public:
 	{
 		return mul(v);
 	};
-	ICF	Self operator*(T s)
+	/*ICF	Self operator*(T s) const
 	{
 		auto Copy(*this);
 		return Copy.mul(s);
-	};
+	};*/
 	ICF	SelfRef operator*=(T s)
 	{
 		return mul(s);
@@ -113,16 +113,16 @@ public:
 	ICF	SelfRef	div(const Self &a, const Self &v)		{ x=a.x/v.x;y=a.y/v.y;	z=a.z/v.z;		return *this;	};
 	ICF SelfRef	div(const Self &a, T s)					{ x=a.x/s;  y=a.y/s;	z=a.z/s;		return *this;	};
 
-	ICF	Self operator/(T s)
+	/*ICF	Self operator/(T s) const
 	{
 		auto Copy(*this);
 		return Copy.div(s);
-	};
+	};*/
 	ICF	SelfRef operator/=(T s)
 	{
 		return div(s);
 	};
-	ICF	Self operator/(const Self& v)
+	ICF	Self operator/(const Self& v) const
 	{
 		auto Copy(*this);
 		return Copy.div(v);
@@ -135,11 +135,11 @@ public:
 	IC	SelfRef	invert()								{ x=-x; y=-y; z=-z;						return *this;	}
 	IC	SelfRef	invert(const Self &a)					{ x=-a.x; y=-a.y; z=-a.z;				return *this;	}
 
-	ICF	Self operator-()
+	/*ICF	Self operator-() const
 	{
 		auto Copy(*this);
 		return Copy.invert();
-	};
+	};*/
 
 	IC	SelfRef	min(const Self &v1,const Self &v2)		{ x = _min(v1.x,v2.x); y = _min(v1.y,v2.y); z = _min(v1.z,v2.z);	return *this;	}
 	IC	SelfRef	min(const Self &v)						{ x = _min(x,v.x);	y = _min(y,v.y);	z = _min(z,v.z);			return *this;	}

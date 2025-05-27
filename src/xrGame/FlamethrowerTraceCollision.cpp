@@ -11,6 +11,8 @@
 #include "seniority_hierarchy_space.h"
 #include "../xrParticles/psystem.h"
 #include "../xrEngine/gamemtllib.h"
+#include "../xrParticles/particle_actions_collection.h"
+#include "_vector3d_ext.h"
 
 void FlamethrowerTrace::CPoint::UpdateAir(float delta_time)
 {
@@ -161,7 +163,7 @@ bool FlamethrowerTrace::CPoint::VerifySpawnPos(const Fvector& Position, const Fv
 {
 	collide::rq_results storage;
 #ifndef TEMPORARLY_REMOVE_FLAMETHROWER_LOGIC
-	collide::ray_defs RD(PointPosition-PointDirection, PointPosition, CDB::OPT_FULL_TEST, collide::rqtBoth);
+	collide::ray_defs RD(Position-Direction, Position, CDB::OPT_FULL_TEST, collide::rqtBoth);
 #endif
 	TraceData data;
 	data.TracedObj = this;
@@ -169,7 +171,7 @@ bool FlamethrowerTrace::CPoint::VerifySpawnPos(const Fvector& Position, const Fv
 	if (Level().ObjectSpace.RayQuery(storage, RD, FlamethrowerTrace::CPoint::hit_callback, &data, FlamethrowerTrace::CPoint::test_callback, nullptr))
 #endif
 	{
-		HitPos = PointPosition + PointDirection * (data.HitDist - 1.0f);
+		HitPos = Position+Direction * (data.HitDist - 1.0f);
 		return false;
 	}
 	return true;
@@ -205,7 +207,7 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 	Size.x = GetCurrentRadius() * m_RadiusCollisionCoeff.x;
 	Size.y = GetCurrentRadius() * m_RadiusCollisionCoeff.y;
 	Size.z = GetCurrentRadius() * m_RadiusCollisionCoeff.z;
-	//m_particle_size_handle.Set(Size);
+	*m_particle_size_ptr = Size;
 
 	if (!IsCollided()&&AttachPoint->IsCollided())
 	{
@@ -217,8 +219,27 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 		Particles::Details::Destroy(m_particles);
 		m_particles_ground = Particles::Details::Create(*m_sFlameParticlesGround, false);
 		m_particles_ground->Play(false);
-		//m_particle_alpha_handle = m_particles_ground->GetFloatHandle("AlphaHandle");
-		//m_particle_size_handle = m_particles_ground->GetVectorHandle("SizeHandle");
+		{
+			auto PA = m_particles_ground->FindAction(
+			m_particle_alpha_ground_PE_name.c_str(),
+			PAPI::PABindColorAlphaID
+			);
+			if (PA)
+			{
+				m_particle_alpha_ptr = PA->GetVariable<float>(PAPI::PABindColorAlpha::EVariable::BindValue);
+			}
+		}
+		{
+			auto PA = m_particles_ground->FindAction(
+			m_particle_size_ground_PE_name.c_str(),
+			PAPI::PABindSizeValueID
+			);
+			if (PA)
+			{
+				m_particle_size_ptr = PA->GetVariable<PAPI::pVector>(PAPI::PABindSizeValue::EVariable::BindValue);
+			}
+		}
+		
 		particles_pos.c.set(AttachPoint->GetPosition());
 		particles_pos.c.sub(CollidedParticlePivot);
 		m_particles_ground->SetXFORM(particles_pos);
@@ -239,17 +260,19 @@ void FlamethrowerTrace::CCollision::Update_AirToGround(float DeltaTime)
 		interpTime = 1.0f;
 	}
 	const float AlphaValue = 1.0f -std::pow(1.0f - interpTime, 2.0f);
-	//if (m_particle_alpha_handle.IsValid()) {
-	//	m_particle_alpha_handle.Set(AlphaValue);
-	//}
+	if (m_particle_alpha_ptr)
+	{
+		*m_particle_alpha_ptr = AlphaValue;
+	}
 	RadiusCurrent = std::max(RadiusOnCollide, AlphaValue * m_RadiusCollided);
 	PAPI::pVector Size;
 	Size.x = RadiusCurrent * m_RadiusCollisionCollidedCoeff.x;
 	Size.y = RadiusCurrent * m_RadiusCollisionCollidedCoeff.y;
 	Size.z = RadiusCurrent * m_RadiusCollisionCollidedCoeff.z;
-	//if (m_particle_size_handle.IsValid()) {
-	//	m_particle_size_handle.Set(Size);
-	//}
+	if (m_particle_size_ptr)
+	{
+		*m_particle_size_ptr = Size;
+	}
 
 	auto Position = AttachPoint->GetPosition();
 	Position.x -= CollidedParticlePivot.x * Size.x;
@@ -278,10 +301,10 @@ void FlamethrowerTrace::CCollision::Update_End(float DeltaTime)
 		return;
 	}
 	const float AlphaValue = 1.0f - std::pow(1.0f - interpTime, 2.0f);
-	//if(m_particle_alpha_handle.IsValid())
-	//{
-	//	m_particle_alpha_handle.Set(AlphaValue);
-	//}
+	if (m_particle_alpha_ptr)
+	{
+//		*m_particle_alpha_ptr = AlphaValue;
+	}
 }
 
 FlamethrowerTrace::CCollision::CCollision(FlamethrowerTrace::CManager* Manager) : Manager(Manager)
@@ -301,6 +324,10 @@ FlamethrowerTrace::CCollision::CCollision(FlamethrowerTrace::CManager* Manager) 
 	// flames
 	m_sFlameParticles = pSettings->r_string(Manager->GetSection(), "flame_particles");
 	m_sFlameParticlesGround = pSettings->r_string(Manager->GetSection(), "earth_flame_particles");
+	m_particle_size_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_size_bind");
+	m_particle_alpha_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_alpha_bind");
+	m_particle_size_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_size_bind");
+	m_particle_alpha_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_alpha_bind");
 }
 
 FlamethrowerTrace::CCollision::~CCollision()
@@ -320,15 +347,17 @@ void FlamethrowerTrace::CCollision::Load(LPCSTR section)
 	CollidedParticlePivot = pSettings->r_fvector3(section, "CollidedParticlePivot");
 	m_RadiusCollisionCollidedCoeff = pSettings->r_fvector3(section, "RadiusCollisionCollidedCoeff");
 	m_RadiusMaxTime = pSettings->r_float(section, "RadiusMaxTime");
-	//m_Velocity = pSettings->r_float(section, "Velocity");
 	m_LifeTime = pSettings->r_float(section, "LifeTime");
 	m_LifeTimeCollidedMax = pSettings->r_float(section, "LifeTimeCollided");
 	m_FlameFadeTime = pSettings->r_float(section, "FlameFadeTime");
-	//m_GravityAcceleration = pSettings->r_float(section, "GravityAcceleration");
 
 	// flames
 	m_sFlameParticles = pSettings->r_string(section, "flame_particles");
 	m_sFlameParticlesGround = pSettings->r_string(section, "earth_flame_particles");
+	m_particle_size_air_PE_name = pSettings->r_string(section, "air_flame_size_bind");
+	m_particle_alpha_air_PE_name = pSettings->r_string(section, "air_flame_alpha_bind");
+	m_particle_size_ground_PE_name = pSettings->r_string(section, "earth_flame_size_bind");
+	m_particle_alpha_ground_PE_name = pSettings->r_string(section, "earth_flame_alpha_bind");
 }
 
 void FlamethrowerTrace::CCollision::AttachToPoint(CPoint* point)
@@ -400,8 +429,15 @@ void FlamethrowerTrace::CCollision::Activate()
 {
 	m_State = ETraceState::Air;
 	m_particles = Particles::Details::Create(*m_sFlameParticles, false);
-	//m_particle_alpha_handle = m_particles->GetFloatHandle("AlphaHandle");
-	//m_particle_size_handle = m_particles->GetVectorHandle("SizeHandle");
+		
+	//m_particle_alpha_ptr = m_particles->FindAction(
+	//	m_particle_alpha_air_PE_name.c_str(),
+	//	PAPI::PABindColorAlphaID
+	//	)->GetVariable<float>(PAPI::PABindColorAlpha::EVariable::BindValue);
+	m_particle_size_ptr = m_particles->FindAction(
+		m_particle_size_air_PE_name.c_str(),
+		PAPI::PABindSizeValueID
+		)->GetVariable<PAPI::pVector>(PAPI::PABindColorAlpha::EVariable::BindValue);
 	m_particles->Play(false);
 	RadiusCurrent = m_RadiusMin;
 }
@@ -413,7 +449,8 @@ void FlamethrowerTrace::CCollision::Deactivate()
 	m_time_on_collide = 0.0f;
 	RadiusOnCollide = 0.0f;
 	AttachPoint = nullptr;
-	//m_particle_alpha_handle.Reset();
+	m_particle_alpha_ptr = nullptr;
+	m_particle_size_ptr = nullptr;
 	if (m_particles) {
 		m_particles->Stop();
 		Particles::Details::Destroy(m_particles);
@@ -670,8 +707,6 @@ void FlamethrowerTrace::CManager::UpdateOverlaps(float DeltaTime)
 	Fvector Center{};
 	float Radius = 0.0f;
 	uint16_t Num = 0;
-	//Msg("InactiveCollisions num [%u]", InactiveCollisions.size());
-	//Msg("ActiveCollisions num [%u]", ActiveCollisions.size());
 	if(!ActiveCollisions.empty()){
 		auto FirstElem = ActiveCollisions.front();
 		ActiveCollisions.pop_front();

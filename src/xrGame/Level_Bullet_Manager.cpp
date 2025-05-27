@@ -179,10 +179,9 @@ void CBulletManager::DrawFlamethrowerTrace(FlamethrowerTrace::CManager* manager)
 	for(auto Collision : manager->ActiveCollisions)
 	{
 		Fmatrix temp;
-		temp.identity();
-		temp.c = Collision->GetPosition();
 		auto r = Collision->GetCurrentRadius();
 		temp.scale(r, r, r);
+		temp.c = Collision->GetPosition();
 		Level().debug_renderer().draw_ellipse(temp, color_xrgb(255, 0, 0));
 	}
 }

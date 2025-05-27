@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "MissileSam.h"
-
+#include "_vector3d_ext.h"
 #include "debug_renderer.h"
 #include "level.h"
 #include "../xrPhysics/PhysicsCommon.h"
