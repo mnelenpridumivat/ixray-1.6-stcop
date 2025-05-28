@@ -300,7 +300,7 @@ void CSE_Conditional::UPDATE_Serialize(ISaveObject& Object)
 }
 
 #ifndef XRGAME_EXPORTS
-void CSE_Temporary::FillProps				(LPCSTR pref, PropItemVec& values)
+void CSE_Conditional::FillProps				(LPCSTR pref, PropItemVec& values)
 {
 };
 #endif // #ifndef XRGAME_EXPORTS
