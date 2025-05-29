@@ -85,6 +85,8 @@ u32			lvInterpSteps		= 0;
 CLevel::CLevel():
 	IPureClient(Device.GetTimerGlobal())
 {
+	PROF_EVENT("CLevel::CLevel");
+	
 	LoadCallbackGlobals(m_isStartAttack, m_onStartAttack, "OnStartAttack");
 	LoadCallbackGlobals(m_isKeyPress, m_onKeyPress, "OnKeyPress");
 
@@ -198,6 +200,7 @@ extern CAI_Space *g_ai_space;
 
 CLevel::~CLevel()
 {
+	PROF_EVENT("CLevel::~CLevel");
 	DestroyImGuiInGame();
 	xr_delete					(g_player_hud);
 	delete_data					(hud_zones_list);
