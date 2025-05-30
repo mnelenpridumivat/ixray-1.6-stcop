@@ -353,14 +353,14 @@ void CSpawnPoint::SSpawnData::SaveStream(IWriter& F)
 
 	F.open_chunk		(SPAWNPOINT_CHUNK_SPAWNDATA_NEWTYPE);
 
-	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
-	CSaveManager::GetInstance().SetFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization, false);
-	CSaveObjectSave SaveData = CSaveObjectSave();
-	m_Data->Spawn_Serialize(SaveData, true);
+	SSaveTask dummy;
+	CSaveObjectSave* SaveData = CSaveManager::GetInstance().EditorBeginSave();
+	m_Data->Spawn_Serialize(*SaveData, true);
 	CMemoryBuffer Buffer;
 	Buffer.Write(ESaveVariableType::t_chunk);
-	SaveData.Write(&Buffer);
+	SaveData->Write(&Buffer, &dummy);
 	Buffer.Write(&F);
+	xr_delete(SaveData);
 	
 	F.close_chunk		();
 }
@@ -418,13 +418,14 @@ bool CSpawnPoint::SSpawnData::ExportGame(SExportStreams* F, CSpawnPoint* owner)
 	}
 	// end
 
+	SSaveTask dummy;
 	CSaveObjectSave* SaveData = CSaveManager::GetInstance().EditorBeginSave();
 	CMemoryBuffer Buffer;
 	shared_str temp = m_Data->name();
 	(*SaveData) << temp;
 	m_Data->Spawn_Serialize(*SaveData, true);
 	Buffer.Write(ESaveVariableType::t_chunk);
-	SaveData->Write(&Buffer);
+	SaveData->Write(&Buffer, &dummy);
 
 	SExportStreamItem& tgt 		= (m_flags.test(eSDTypeRespawn))? F->spawn_rs : F->spawn;
 	tgt.stream.open_chunk		(tgt.chunk++);

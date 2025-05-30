@@ -154,13 +154,14 @@ bool ESceneObjectTool::ExportBreakableObjects(SExportStreams* F)
                 	
                 	F->spawn.stream.open_chunk	(F->spawn.chunk++);
 	                {
+						SSaveTask dummy;
                     	auto Obj = CSaveManager::GetInstance().EditorBeginSave();
                     	shared_str temp = m_Data->name();
                     	(*Obj) << temp;
                     	m_Data->Spawn_Serialize(*Obj, true);
                     	CMemoryBuffer buff;
 						buff.Write(ESaveVariableType::t_chunk);
-                    	Obj->Write(&buff);
+                    	Obj->Write(&buff, &dummy);
                     	buff.Write((IWriter*)(&F->spawn.stream));
                     	xr_delete(Obj);
 	                }
@@ -307,13 +308,14 @@ bool ESceneObjectTool::ExportClimableObjects(SExportStreams* F)
 
                     	F->spawn.stream.open_chunk	(F->spawn.chunk++);
                         {
+							SSaveTask dummy;
                         	auto Obj = CSaveManager::GetInstance().EditorBeginSave();
                         	shared_str temp = m_Data->name();
                         	(*Obj) << temp;
                         	m_Data->Spawn_Serialize(*Obj, true);
                         	CMemoryBuffer buff;
 							buff.Write(ESaveVariableType::t_chunk);
-                        	Obj->Write(&buff);
+                        	Obj->Write(&buff, &dummy);
                         	buff.Write((IWriter*)(&F->spawn.stream));
                         	xr_delete(Obj);
                         }

@@ -21,6 +21,7 @@ CServerEntityWrapper::~CServerEntityWrapper	()
 
 void CServerEntityWrapper::save				(IWriter &stream)
 {
+	SSaveTask dummy;
 	{
 		auto Obj = CSaveManager::GetInstance().EditorBeginSave();
 
@@ -30,7 +31,7 @@ void CServerEntityWrapper::save				(IWriter &stream)
 		(*Obj) << Name;
 		m_object->Spawn_Serialize(*Obj, true);
 		buffer.Write(ESaveVariableType::t_chunk);
-		Obj->Write(&buffer);
+		Obj->Write(&buffer, &dummy);
 		buffer.Write(&stream);
 		stream.close_chunk		();
 	
@@ -44,7 +45,7 @@ void CServerEntityWrapper::save				(IWriter &stream)
 		CMemoryBuffer buffer;
 		m_object->UPDATE_Serialize(*Obj);
 		buffer.Write(ESaveVariableType::t_chunk);
-		Obj->Write(&buffer);
+		Obj->Write(&buffer, &dummy);
 		buffer.Write(&stream);
 		
 		stream.close_chunk		();

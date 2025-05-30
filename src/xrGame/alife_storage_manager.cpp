@@ -94,7 +94,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, boo
 		objects().Serialize(*SaveObj);
 		registry().Serialize(*SaveObj);
 	}
-	CSaveManager::GetInstance().WriteSavedData(SaveObj, temp);
+	CSaveManager::GetInstance().WriteSavedData(SaveObj, temp, !non_async);
 
 	// To get the savegame fname to make our own custom save states
 	luabind::functor<void> funct2;

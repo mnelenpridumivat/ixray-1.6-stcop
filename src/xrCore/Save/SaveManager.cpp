@@ -61,13 +61,13 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 	return LoadData;
 }
 
-void CSaveManager::WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool sync)
+void CSaveManager::WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool async)
 {
 	SSaveTask* task = new SSaveTask();
 	task->GameInfo = GameInfo;
 	task->name = to_file;
 	task->Obj.reset(SaveObj);
-	if(sync)
+	if(!async)
 	{
 		task->WriteSavedDataImpl();
 		xr_delete(task);

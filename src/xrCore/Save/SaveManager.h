@@ -146,7 +146,7 @@ public:
 	bool IsSaving();
 	CSaveObjectSave* BeginSave();
 	CSaveObjectLoad* BeginLoad(IReader* stream);
-	void WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool sync = false);
+	void WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool async = true);
 
 	CSaveObjectSave* EditorBeginSave();
 	CSaveObjectLoad* EditorBeginLoad(IReader* stream);

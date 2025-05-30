@@ -209,6 +209,7 @@ bool CGameSpawnConstructor::save_spawn				(LPCSTR name, LPCSTR output)
 		stream.open_chunk			(1);
 		auto I = graph.vertices().begin();
 		auto E = graph.vertices().end();
+		SSaveTask dummy;
 		for (int i=0; I != E; ++I, ++i) {
 			stream.open_chunk		(i);
 			{
@@ -226,7 +227,7 @@ bool CGameSpawnConstructor::save_spawn				(LPCSTR name, LPCSTR output)
 					obj.UPDATE_Serialize(*Obj);
 					CMemoryBuffer buff;
 					buff.Write(ESaveVariableType::t_chunk);
-					Obj->Write(&buff);
+					Obj->Write(&buff, &dummy);
 					buff.Write((IWriter*)(&stream));
 				}
 				stream.close_chunk	();
