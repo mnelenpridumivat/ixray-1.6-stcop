@@ -526,7 +526,7 @@ public:
 	virtual ISaveObject& operator<<(bool& Value) override;
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
-	void Write(CMemoryBuffer* buffer);
+	void Write(CMemoryBuffer* buffer, SSaveTask* Task);
 };
 
 class XRCORE_API CSaveObjectLoad: public CSaveObject {

@@ -27,7 +27,7 @@ public:
 class CMemoryChunk
 {
 public:
-	static constexpr size_t ChunkSize = 2 * 1024;
+	static constexpr size_t ChunkSize = 4 * 1024;
 
 private:
 	BYTE	data[ChunkSize];

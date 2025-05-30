@@ -36,15 +36,15 @@ CALifeStorageManager::~CALifeStorageManager()
 {
 }
 
-void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
+void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, bool non_async)
 {
 	PROF_EVENT("CALifeStorageManager::save")
 
-	if(CSaveManager::GetInstance().NeedSave())
+	/*if(CSaveManager::GetInstance().NeedSave())
 	{
 		Log("Saving not processed because there is already a saving operation!");
 		return;
-	}
+	}*/
 	
 	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path;
 
@@ -81,7 +81,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
 
 	CSaveObjectSave* SaveObj = CSaveManager::GetInstance().BeginSave();
 	{
-		CSaveManager::SGameInfoFast info;
+		SGameInfoFast info;
 		info.m_actor_health = g_actor ? g_actor->GetfHealth() : 1.0f;
 		info.m_game_time = ai().alife().time_manager().game_time();
 		auto map_name = Level().name();
@@ -94,41 +94,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name)
 		objects().Serialize(*SaveObj);
 		registry().Serialize(*SaveObj);
 	}
-	CSaveManager::GetInstance().WriteSavedData(temp);
-		
-	/*u32							source_count;
-	u32							dest_count;
-	void						*dest_data;
-	{
-		CMemoryWriter stream;
-		header().save(stream);
-		time_manager().save(stream);
-		spawns().save(stream);
-		objects().save(stream);
-		registry().save(stream);
-
-		source_count = stream.tell();
-		void* source_data = stream.pointer();
-		dest_count = rtc_csize(source_count);
-		dest_data = xr_malloc(dest_count);
-		dest_count = (u32)rtc_compress(dest_data, dest_count, source_data, source_count);
-	}
-
-	string_path temp;
-	FS.update_path(temp, "$game_saves$", m_save_name);
-	IWriter* writer = FS.w_open(temp);
-	writer->w_u32(u32(-1));
-	writer->w_u32(ALIFE_VERSION);
-
-	writer->w_u32(source_count);
-	writer->w(dest_data, dest_count);
-	xr_free(dest_data);
-	FS.w_close(writer);
-#ifdef DEBUG
-	Msg("* Game %s is successfully saved to file '%s' (%d bytes compressed to %d)", m_save_name, temp, source_count, dest_count + 4);
-#else // DEBUG
-	Msg							("* Game %s is successfully saved to file '%s'",m_save_name,temp);
-#endif*/ // DEBUG
+	CSaveManager::GetInstance().WriteSavedData(SaveObj, temp);
 
 	// To get the savegame fname to make our own custom save states
 	luabind::functor<void> funct2;

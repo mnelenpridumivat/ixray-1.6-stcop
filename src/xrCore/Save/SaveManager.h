@@ -39,31 +39,15 @@ New save file structure:
 5.6) Chunk end mark
 */
 
-class XRCORE_API CSaveManager
+struct SGameInfoFast {
+	u64			m_game_time;
+	shared_str	m_level_name;
+	u16			m_level_id;
+	float		m_actor_health;
+};
+
+struct XRCORE_API SSaveTask
 {
-	CSaveManager();
-
-	CSaveObjectSave* SaveData = nullptr;
-
-	CSaveObjectLoad* LoadData = nullptr;
-	xr_hash_map<u64, ISaveChunkHandleInterface*> _handles = {};
-	bool _dirtyLoadData = false;
-
-	IWriter* SaveWriter = nullptr;
-	xr_unique_ptr<xr_map<u32, xr_vector<shared_str>>> StringsHashesMap;
-	xr_unique_ptr<xr_queue<bool>> BoolQueue;
-	u64 BoolsNum = 0;
-
-	xr_atomic_bool bNeedSave = false;
-	string_path SavePath;
-
-public:
-
-	u64 RegisterHandle(ISaveChunkHandleInterface* handle);
-	void UnregisterHandle(u64& ID);
-	ISaveChunkHandleInterface* GetHandle(u64 ID);
-	u64 GetHandlesNum();
-	void MarkLoadObjectDirty();
 
 	struct SMemoryBuffers {
 		CMemoryBuffer* BufferHeader = nullptr;
@@ -74,35 +58,69 @@ public:
 		void Init();
 		void Clear();
 
-	}; 
-
-	struct SGameInfoFast {
-		u64			m_game_time;
-		shared_str	m_level_name;
-		u16			m_level_id;
-		float		m_actor_health;
 	};
+	
+	xr_string name;
+	SGameInfoFast GameInfo;
+	xr_unique_ptr<CSaveObjectSave> Obj;
+	IWriter* SaveWriter = nullptr;
+	SMemoryBuffers Buffers;
+	xr_unique_ptr<xr_map<u32, xr_vector<shared_str>>> StringsHashesMap;
+	xr_unique_ptr<xr_queue<bool>> BoolQueue;
+	u64 BoolsNum = 0;
+	
+	void WriteSavedDataImpl();
+	
+	void CompileData(CSaveObjectSave* Data);
+	void WriteStrings();
+	void WriteBools();
+	void WriteData();
+	
+	void ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer);
+	void ConditionalWriteBool(bool Value, CMemoryBuffer& buffer);
+};
+
+class XRCORE_API CSaveManager
+{
+	CSaveManager();
+
+	//CSaveObjectSave* SaveData = nullptr;
+
+	CSaveObjectLoad* LoadData = nullptr;
+	xr_hash_map<u64, ISaveChunkHandleInterface*> _handles = {};
+	bool _dirtyLoadData = false;
+
+	IWriter* SaveWriter = nullptr;
+	xr_unique_ptr<xr_map<u32, xr_vector<shared_str>>> StringsHashesMap;
+	xr_unique_ptr<xr_queue<bool>> BoolQueue;
+	u64 BoolsNum = 0;
+
+	xr_queue<SSaveTask*> SaveTasks;
+
+public:
+
+	SSaveTask* PopSaveTask();
+
+	u64 RegisterHandle(ISaveChunkHandleInterface* handle);
+	void UnregisterHandle(u64& ID);
+	ISaveChunkHandleInterface* GetHandle(u64 ID);
+	u64 GetHandlesNum();
+	void MarkLoadObjectDirty();
 
 	bool GetGameInfoFast(IReader* stream, SGameInfoFast& data);
 	void SkipGameInfo(IReader* stream);
 	void WriteGameInfo(const SGameInfoFast& data);
 
 private:
-	SMemoryBuffers Buffers;
 	Flags8 ControlFlagsDefault;
 	Flags8 ControlFlagsRead;
 	SGameInfoFast GameInfo;
-
-	void WriteHeader();
-	void WriteStrings();
-	void WriteBools();
-	void WriteData();
 	void ReadHeader(IReader* stream);
 	void ReadStrings(IReader* stream);
 	void ReadBools(IReader* stream);
 	//void ReadData(IReader* stream);
 
-	void CompileData();
+	//void CompileData(CSaveObjectSave* Data);
 
 	shared_str ReadStringInternal(IReader* stream);
 
@@ -128,16 +146,13 @@ public:
 	bool IsSaving();
 	CSaveObjectSave* BeginSave();
 	CSaveObjectLoad* BeginLoad(IReader* stream);
-	void WriteSavedData(const string_path& to_file);
-
-	bool NeedSave(){return bNeedSave;}
-	void WriteSavedDataImpl();
+	void WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool sync = false);
 
 	CSaveObjectSave* EditorBeginSave();
 	CSaveObjectLoad* EditorBeginLoad(IReader* stream);
+	
+	void WriteHeader(CMemoryBuffer* buffer);
 
-	void ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer);
-	void ConditionalWriteBool(bool Value, CMemoryBuffer& buffer);
 	void ConditionalReadString(IReader* stream, shared_str& Value);
 	void ConditionalReadBool(IReader* stream, bool& Value);
 

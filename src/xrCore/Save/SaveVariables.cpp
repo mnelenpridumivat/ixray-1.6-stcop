@@ -19,25 +19,25 @@
 	}
 }*/
 
-void CSaveVariableBool::Write(CMemoryBuffer& Buffer)
+void CSaveVariableBool::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_bool);
-	CSaveManager::GetInstance().ConditionalWriteBool(_value, Buffer);
+	Task->ConditionalWriteBool(_value, Buffer);
 }
 
-void CSaveVariableFloat::Write(CMemoryBuffer& Buffer)
+void CSaveVariableFloat::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_float);
 	Buffer.Write(_value);
 }
 
-void CSaveVariableDouble::Write(CMemoryBuffer& Buffer)
+void CSaveVariableDouble::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_double);
 	Buffer.Write(_value);
 }
 
-void CSaveVariableU64::Write(CMemoryBuffer& Buffer)
+void CSaveVariableU64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<u8>::max()) {
@@ -60,7 +60,7 @@ void CSaveVariableU64::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableS64::Write(CMemoryBuffer& Buffer)
+void CSaveVariableS64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<s8>::max() && _value >= std::numeric_limits<s8>::min()) {
@@ -83,7 +83,7 @@ void CSaveVariableS64::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableU32::Write(CMemoryBuffer& Buffer)
+void CSaveVariableU32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<u8>::max()) {
@@ -101,7 +101,7 @@ void CSaveVariableU32::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableS32::Write(CMemoryBuffer& Buffer)
+void CSaveVariableS32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<s8>::max() && _value >= std::numeric_limits<s8>::min()) {
@@ -119,7 +119,7 @@ void CSaveVariableS32::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableU16::Write(CMemoryBuffer& Buffer)
+void CSaveVariableU16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<u8>::max()) {
@@ -132,7 +132,7 @@ void CSaveVariableU16::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableS16::Write(CMemoryBuffer& Buffer)
+void CSaveVariableS16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
 		if (_value <= std::numeric_limits<s8>::max() && _value >= std::numeric_limits<s8>::min()) {
@@ -145,22 +145,22 @@ void CSaveVariableS16::Write(CMemoryBuffer& Buffer)
 	Buffer.Write(_value);
 }
 
-void CSaveVariableU8::Write(CMemoryBuffer& Buffer)
+void CSaveVariableU8::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_u8);
 	Buffer.Write(_value);
 }
 
-void CSaveVariableS8::Write(CMemoryBuffer& Buffer)
+void CSaveVariableS8::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_s8);
 	Buffer.Write(_value);
 }
 
-void CSaveVariableString::Write(CMemoryBuffer& Buffer)
+void CSaveVariableString::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_string);
-	CSaveManager::GetInstance().ConditionalWriteString(_value, Buffer);
+	Task->ConditionalWriteString(_value, Buffer);
 }
 
 ISaveVariableArray::~ISaveVariableArray()
@@ -170,11 +170,11 @@ ISaveVariableArray::~ISaveVariableArray()
 	}
 }
 
-void ISaveVariableArray::Write(CMemoryBuffer& Buffer)
+void ISaveVariableArray::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_arrayUnspec);
 	for (const auto& elem : _array) {
-		elem->Write(Buffer);
+		elem->Write(Buffer, Task);
 	}
 	Buffer.Write(ESaveVariableType::t_arrayUnspecEnd);
 }

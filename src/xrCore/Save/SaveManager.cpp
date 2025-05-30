@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "SaveManager.h"
+
+#include <d3d9.h>
+
 #include "MemoryBuffer.h"
-//#include "../../xrGame/Level.h"
-//#include "../../xrGame/Actor.h"
-//#include "../../xrGame/ai_space.h"
 
 CSaveManager::CSaveManager() 
 {
@@ -36,11 +36,11 @@ bool CSaveManager::IsSaving()
 
 CSaveObjectSave* CSaveManager::BeginSave()
 {
-	if (SaveData) {
-		xr_delete(SaveData);
-	}
-	SaveData = new CSaveObjectSave();
-	return SaveData;
+	//if (SaveData) {
+	//	xr_delete(SaveData);
+	//}
+	//SaveData = new CSaveObjectSave();
+	return new CSaveObjectSave();
 }
 
 CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
@@ -61,27 +61,37 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 	return LoadData;
 }
 
-void CSaveManager::WriteSavedData(const string_path& to_file)
+void CSaveManager::WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool sync)
 {
-	std::memset(SavePath, 0, sizeof(SavePath));
-	std::copy(to_file, to_file + strlen(to_file), SavePath);
-	bNeedSave = true;
+	SSaveTask* task = new SSaveTask();
+	task->GameInfo = GameInfo;
+	task->name = to_file;
+	task->Obj.reset(SaveObj);
+	if(sync)
+	{
+		task->WriteSavedDataImpl();
+		xr_delete(task);
+	} else
+	{
+		SaveTasks.push(task);
+	}
 }
 
-void CSaveManager::WriteSavedDataImpl()
+void SSaveTask::WriteSavedDataImpl()
 {
 	PROF_EVENT("CSaveManager::WriteSavedData")
-	SaveWriter = FS.w_open(SavePath);
+	SaveWriter = FS.w_open(name.c_str());
 	Buffers.Init();
 	StringsHashesMap = xr_make_unique<xr_map<u32, xr_vector<shared_str>>>();
 	BoolQueue = xr_make_unique<xr_queue<bool>>();
-	CompileData();
-	WriteHeader();
-	if (TestFlag(ESaveManagerFlagsGeneral::EUseStringOptimization))
+	CompileData(Obj.get());
+	CSaveManager::GetInstance().WriteHeader(Buffers.BufferHeader);
+	Buffers.BufferHeader->Write(SaveWriter);
+	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization))
 	{
 		WriteStrings();
 	}
-	if (TestFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization))
+	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization))
 	{
 		WriteBools();
 	}
@@ -90,7 +100,6 @@ void CSaveManager::WriteSavedDataImpl()
 	BoolQueue.reset();
 	Buffers.Clear();
 	FS.w_close(SaveWriter);
-	bNeedSave = false;
 }
 
 CSaveObjectSave* CSaveManager::EditorBeginSave()
@@ -112,9 +121,9 @@ CSaveObjectLoad* CSaveManager::EditorBeginLoad(IReader* stream)
 	return Obj;
 }
 
-void CSaveManager::ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer)
+void SSaveTask::ConditionalWriteString(shared_str Value, CMemoryBuffer& buffer)
 {
-	if (TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization)) {
+	if (CSaveManager::GetInstance().TestFlag(CSaveManager::CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization)) {
 		auto StringKey = crc32(Value.c_str(), Value.size());
 		u32 StringVecID = 0;
 		auto it = StringsHashesMap->find(StringKey);
@@ -143,9 +152,9 @@ void CSaveManager::ConditionalWriteString(shared_str Value, CMemoryBuffer& buffe
 	}
 }
 
-void CSaveManager::ConditionalWriteBool(bool Value, CMemoryBuffer& buffer)
+void SSaveTask::ConditionalWriteBool(bool Value, CMemoryBuffer& buffer)
 {
-	if (TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization)) 
+	if (CSaveManager::GetInstance().TestFlag(CSaveManager::CSaveManager::ESaveManagerFlagsGeneral::EUseBoolOptimization)) 
 	{
 		BoolQueue->push(Value);
 		++BoolsNum;
@@ -210,19 +219,18 @@ void CSaveManager::WriteGameInfo(const SGameInfoFast& data)
 	GameInfo = data;
 }
 
-void CSaveManager::WriteHeader()
+void CSaveManager::WriteHeader(CMemoryBuffer* buffer)
 {
 	PROF_EVENT("CSaveManager::WriteHeader")
-	Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
-	Buffers.BufferHeader->Write(GameInfo.m_actor_health);
-	Buffers.BufferHeader->Write(GameInfo.m_game_time);
-	Buffers.BufferHeader->Write(GameInfo.m_level_id);
-	Buffers.BufferHeader->Write(GameInfo.m_level_name);
-	Buffers.BufferHeader->Write(ControlFlagsDefault.flags);
-	Buffers.BufferHeader->Write(SaveWriter);
+	buffer->Write(ESaveVariableType::t_chunk);
+	buffer->Write(GameInfo.m_actor_health);
+	buffer->Write(GameInfo.m_game_time);
+	buffer->Write(GameInfo.m_level_id);
+	buffer->Write(GameInfo.m_level_name);
+	buffer->Write(ControlFlagsDefault.flags);
 }
 
-void CSaveManager::WriteStrings()
+void SSaveTask::WriteStrings()
 {
 	PROF_EVENT("CSaveManager::WriteStrings")
 	Buffers.BufferStrings->Write(ESaveVariableType::t_chunk);
@@ -239,7 +247,7 @@ void CSaveManager::WriteStrings()
 	Buffers.BufferStrings->Write(SaveWriter);
 }
 
-void CSaveManager::WriteBools()
+void SSaveTask::WriteBools()
 {
 	PROF_EVENT("CSaveManager::WriteBools")
 	Buffers.BufferBools->Write(ESaveVariableType::t_chunk);
@@ -263,7 +271,7 @@ void CSaveManager::WriteBools()
 	Buffers.BufferBools->Write(SaveWriter);
 }
 
-void CSaveManager::WriteData()
+void SSaveTask::WriteData()
 {
 	PROF_EVENT("CSaveManager::WriteData")
 	Buffers.BufferGeneral->Write(SaveWriter);
@@ -329,11 +337,11 @@ void CSaveManager::ReadBools(IReader* stream)
 
 }*/
 
-void CSaveManager::CompileData()
+void SSaveTask::CompileData(CSaveObjectSave* Data)
 {
 	PROF_EVENT("CSaveManager::CompileData")
 	Buffers.BufferGeneral->Write(ESaveVariableType::t_chunk);
-	SaveData->Write(Buffers.BufferGeneral);
+	Data->Write(Buffers.BufferGeneral, this);
 }
 
 shared_str CSaveManager::ReadStringInternal(IReader* stream)
@@ -347,7 +355,7 @@ shared_str CSaveManager::ReadStringInternal(IReader* stream)
 	return buffer;
 }
 
-void CSaveManager::SMemoryBuffers::Init() {
+void SSaveTask::SMemoryBuffers::Init() {
 	VERIFY(!(BufferHeader || BufferStrings || BufferBools || BufferGeneral));
 	BufferHeader = new CMemoryBuffer();
 	BufferStrings = new CMemoryBuffer();
@@ -355,11 +363,22 @@ void CSaveManager::SMemoryBuffers::Init() {
 	BufferGeneral = new CMemoryBuffer();
 }
 
-void CSaveManager::SMemoryBuffers::Clear() {
+void SSaveTask::SMemoryBuffers::Clear() {
 	xr_delete(BufferHeader);
 	xr_delete(BufferStrings);
 	xr_delete(BufferBools);
 	xr_delete(BufferGeneral);
+}
+
+SSaveTask* CSaveManager::PopSaveTask()
+{
+	if(SaveTasks.size())
+	{
+		auto task = SaveTasks.front();
+		SaveTasks.pop();
+		return task;
+	}
+	return nullptr;
 }
 
 u64 CSaveManager::RegisterHandle(ISaveChunkHandleInterface* handle)

@@ -57,9 +57,15 @@ void XRay::Engine::GameThread()
 
 	{
 		PROF_EVENT("Save_writing")
-		if(CSaveManager::GetInstance().NeedSave())
+		while(auto task = CSaveManager::GetInstance().PopSaveTask())
 		{
-			CSaveManager::GetInstance().WriteSavedDataImpl();
+			Device.async_tasks.run([=]()
+			{
+				PROF_THREAD("Async Task 2")
+				PROF_EVENT("Save_writing_single")
+				task->WriteSavedDataImpl();
+				xr_delete(task);
+			});
 		}
 	}
 

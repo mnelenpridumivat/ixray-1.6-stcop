@@ -88,7 +88,7 @@ CSavedGameWrapper::CSavedGameWrapper			(LPCSTR saved_game_name)
 		return;
 	}
 
-	CSaveManager::SGameInfoFast data;
+	SGameInfoFast data;
 	if (!CSaveManager::GetInstance().GetGameInfoFast(stream, data)) {
 		FS.r_close(stream);
 		CALifeTimeManager		time_manager(alife_section);

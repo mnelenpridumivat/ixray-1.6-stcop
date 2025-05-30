@@ -244,8 +244,7 @@ bool CALifeUpdateManager::change_level	(NET_Packet &net_packet)
 	string256						temp;
 	*m_server_command_line			= xr_strconcat(temp,autosave_name,temp0);
 	
-	save							(autosave_name);
-	CSaveManager::GetInstance().WriteSavedDataImpl();
+	save							(autosave_name, true, true);
 
 	graph().actor()->m_tGraphID		= safe_graph_vertex_id;
 	graph().actor()->m_tNodeID		= safe_level_vertex_id;

@@ -30,7 +30,7 @@ public:
 
 	bool ContainsSubchunk(shared_str subchunkName);
 
-	void Write(CMemoryBuffer& Buffer);
+	void Write(CMemoryBuffer& Buffer, SSaveTask* Task);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
 

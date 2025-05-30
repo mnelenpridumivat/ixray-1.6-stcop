@@ -44,15 +44,15 @@ bool CSaveChunk::ContainsSubchunk(shared_str subchunkName)
 	return false;
 }
 
-void CSaveChunk::Write(CMemoryBuffer& Buffer)
+void CSaveChunk::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write((u8)ESaveVariableType::t_chunkStart);
-	CSaveManager::GetInstance().ConditionalWriteString(_chunkName, Buffer);
+	Task->ConditionalWriteString(_chunkName, Buffer);
 	for (const auto& elem : _subchunks) {
-		elem.second->Write(Buffer);
+		elem.second->Write(Buffer, Task);
 	}
 	for (const auto& elem : _variables) {
-		elem->Write(Buffer);
+		elem->Write(Buffer, Task);
 	}
 	Buffer.Write((u8)ESaveVariableType::t_chunkEnd);
 }

@@ -200,9 +200,9 @@ ISaveObject& CSaveObjectSave::operator<<(shared_str& S)
 	return *this;
 }
 
-void CSaveObjectSave::Write(CMemoryBuffer* buffer)
+void CSaveObjectSave::Write(CMemoryBuffer* buffer, SSaveTask* Task)
 {
-	_rootChunk->Write(*buffer);
+	_rootChunk->Write(*buffer, Task);
 }
 
 CSaveObjectLoad::CSaveObjectLoad()
