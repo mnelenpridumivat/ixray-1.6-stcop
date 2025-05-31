@@ -54,6 +54,8 @@ void CUIButton::script_register(lua_State *L)
 		.def("SetOptIBounds",			&CUITrackBar::SetOptIBounds)
 		.def("SetOptFBounds",			&CUITrackBar::SetOptFBounds)
 		.def("SetCurrentValue",			&CUITrackBar::SetCurrentOptValue)
+		.def("CurrentID",				&CUITrackBar::CurrentID)
+		.def("SetCurrentID",			&CUITrackBar::SetCurrentID)
 	];
 }
 
