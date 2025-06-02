@@ -3,33 +3,9 @@
 
 class CScriptStoryIDManager
 {
-    
-    struct SContainer
-    {
-        ALife::_OBJECT_ID m_obj_id;
-        shared_str m_script_story_id;
-
-        bool operator==(const SContainer&) const = default;
-    };
-
-    struct SContainerObjIDPred
-    {
-        size_t operator()(SContainer* s) const
-        {
-            return std::hash<ALife::_OBJECT_ID>{}(s->m_obj_id);
-        }
-    };
-
-    struct SContainerScriptStoryIDPred
-    {
-        size_t operator()(SContainer* s) const
-        {
-            return std::hash<shared_str>{}(s->m_script_story_id);
-        }
-    };
-
-    xr_hash_set<SContainer*,SContainerObjIDPred> m_containers_by_id;
-    xr_hash_set<SContainer*,SContainerScriptStoryIDPred> m_containers_by_script_story_id;
+    xr_hash_map<ALife::_OBJECT_ID, shared_str> m_containers_by_id{};
+    xr_hash_map<shared_str, ALife::_OBJECT_ID> m_containers_by_script_story_id{};
+    xr_unique_ptr<xrSRWLock> m_containers_lock = xr_make_unique<xrSRWLock>();
 
     CScriptStoryIDManager() = default;
     
