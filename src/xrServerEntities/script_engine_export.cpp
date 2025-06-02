@@ -31,12 +31,12 @@
 #	include "ui/UIActorMenu.h"
 #	include	"ActorCondition.h"
 #	include "script_xr_logic.h"
+#	include <StoryID/ScriptStoryIDManager.h>
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
 #	include "xrServer_Objects_ALife.h"
 #	include <EmiZone.h>
 #	include <MagnetZone.h>
 #	include <Flamethrower.h>
-#include "StoryID/ScriptStoryIDManager.h"
 #endif
 
 void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
@@ -337,5 +337,6 @@ void export_classes	(lua_State *L)
 	CScriptStoryIDManager::script_register(L);
 	CGameTaskManager::script_register(L);
 	CScriptXRParser::script_register(L);
+	CScriptStoryIDManager::script_register(L);
 #endif
 }

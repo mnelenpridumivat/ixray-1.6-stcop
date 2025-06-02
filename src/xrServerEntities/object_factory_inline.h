@@ -61,7 +61,7 @@ IC	const CObjectItemAbstract &CObjectFactory::item	(const CLASS_ID &clsid) const
 	{
 		string16			temp;
 		CLSID2TEXT(clsid,temp);
-		R_ASSERT(I != clsids().end(), "Unable to find class_id", temp);
+		R_ASSERT3(I != clsids().end(), "Unable to find class_id", temp);
 		return (**I);
 	}
 #ifdef DEBUG
@@ -145,7 +145,7 @@ IC	int	CObjectFactory::script_clsid	(const CLASS_ID &clsid) const
 	{
 		string16			temp;
 		CLSID2TEXT(clsid,temp);
-		R_ASSERT(I != clsids().end(), "Unable to find class_id", temp);
+		R_ASSERT3(I != clsids().end(), "Unable to find class_id", temp);
 		return (int(I - clsids().begin()));
 	}
 #ifdef DEBUG
