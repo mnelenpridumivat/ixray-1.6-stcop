@@ -337,6 +337,5 @@ void export_classes	(lua_State *L)
 	CScriptStoryIDManager::script_register(L);
 	CGameTaskManager::script_register(L);
 	CScriptXRParser::script_register(L);
-	CScriptStoryIDManager::script_register(L);
 #endif
 }
