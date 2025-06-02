@@ -30,6 +30,7 @@
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
 #	include	"ActorCondition.h"
+#	include "script_xr_logic.h"
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
 #	include "xrServer_Objects_ALife.h"
 #	include <EmiZone.h>
@@ -330,13 +331,11 @@ void export_classes	(lua_State *L)
 	CMedkit::script_register(L);
 	CPhysicsShellHolder::script_register(L);
 	CWeaponAmmo::script_register(L);
-
 	CAnomalPseudoGigant::script_register(L);
 	CEmiZone::script_register(L);
 	CMagnetZone::script_register(L);
 	CScriptStoryIDManager::script_register(L);
-	
-
 	CGameTaskManager::script_register(L);
+	CScriptXRParser::script_register(L);
 #endif
 }
