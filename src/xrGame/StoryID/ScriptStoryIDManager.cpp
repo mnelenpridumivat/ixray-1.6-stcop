@@ -103,7 +103,7 @@ void CScriptStoryIDManager::Register(ALife::_OBJECT_ID obj_id, shared_str script
         auto NewName = ai().alife().objects().object(obj_id)->name();
         message.append(NewName);
         message.append("]");
-        R_ASSERT(ByScriptStoryIDIt == m_containers_by_script_story_id.end(), message.c_str());
+        R_ASSERT2(ByScriptStoryIDIt == m_containers_by_script_story_id.end(), message.c_str());
     }
     if (ByIDIt != m_containers_by_id.end()){
         VERIFY(ByScriptStoryIDIt != m_containers_by_script_story_id.end());
@@ -112,7 +112,7 @@ void CScriptStoryIDManager::Register(ALife::_OBJECT_ID obj_id, shared_str script
             message.append(script_story_id.c_str());
             message.append("] is already in story_objects_registry with story_id[");
             message.append(ByIDIt->second.c_str());
-            R_ASSERT(ByScriptStoryIDIt != m_containers_by_script_story_id.end(), message.c_str());
+            R_ASSERT2(ByScriptStoryIDIt != m_containers_by_script_story_id.end(), message.c_str());
         }else
         {
             return;
