@@ -15,6 +15,7 @@
 #include "../xrCore/client_id.h"
 #include "Save/SaveObject.h"
 
+class CSE_ALifeItemMagazine;
 class NET_Packet;
 class xrClientData;
 class CSE_ALifeGroupAbstract;
@@ -169,6 +170,7 @@ BOOL							net_Ready;
 
 	virtual CSE_ALifeObject* cast_alife_object() { return nullptr; };
 	virtual CSE_ALifeDynamicObject* cast_alife_dynamic_object() { return nullptr; };
+	virtual CSE_ALifeItemMagazine* cast_alife_item_magazine() { return nullptr; };
 	virtual CSE_ALifeItemAmmo* cast_item_ammo() { return nullptr; };
 	virtual CSE_ALifeItemFuel* cast_item_fuel() { return nullptr; };
 	virtual CSE_ALifeItemWeapon* cast_item_weapon() { return nullptr; };

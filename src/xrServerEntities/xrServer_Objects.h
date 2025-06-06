@@ -196,7 +196,8 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_Conditional,CSE_Abstract)
 
 	enum class Conditions
 	{
-		LuaFunc
+		LuaFunc,
+		MagazinesEnabled
 	};
 
 	CSE_Conditional	(LPCSTR caSection);

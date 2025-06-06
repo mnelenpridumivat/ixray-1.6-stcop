@@ -121,9 +121,22 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemAmmo,CSE_ALifeItem)
 	u16								a_elapsed;
 	u16								m_boxSize;
 
-									CSE_ALifeItemAmmo	(LPCSTR caSection);
+	CSE_ALifeItemAmmo	(LPCSTR caSection);
 	virtual							~CSE_ALifeItemAmmo	();
 	virtual CSE_ALifeItemAmmo		*cast_item_ammo		()  {return this;};
+	virtual bool					can_switch_online	() const;
+	virtual bool					can_switch_offline	() const;
+SERVER_ENTITY_DECLARE_END
+
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemMagazine,CSE_ALifeItem)
+	LPCSTR							m_caAmmoSections;
+	u16								a_elapsed;
+	u16								m_boxSize;
+	u8								m_ammo_type;
+
+									CSE_ALifeItemMagazine	(LPCSTR caSection);
+	virtual							~CSE_ALifeItemMagazine	();
+	virtual CSE_ALifeItemMagazine	*cast_item_magazine		()  {return this;};
 	virtual bool					can_switch_online	() const;
 	virtual bool					can_switch_offline	() const;
 SERVER_ENTITY_DECLARE_END

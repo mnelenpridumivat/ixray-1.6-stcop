@@ -98,6 +98,8 @@ CSE_Abstract *CALifeSimulatorBase::spawn_item	(LPCSTR section, const Fvector &po
 	CSE_Abstract				*abstract = F_entity_Create(section);
 	R_ASSERT3					(abstract,"Cannot find item with section",section);
 
+	u16 AmmoNum = u16(-1);
+
 	if (auto conditional = smart_cast<CSE_Conditional*>(abstract))
 	{
 		auto OldAbstract = abstract;
@@ -109,6 +111,9 @@ CSE_Abstract *CALifeSimulatorBase::spawn_item	(LPCSTR section, const Fvector &po
 			R_ASSERT(ai().script_engine().functor(buffer.c_str() ,func), "Unable to find spawn function for conditional", buffer.c_str());
 			section = func() ? conditional->m_section_meet_cond.c_str() : conditional->m_section_not_meet_cond.c_str();
 			abstract = F_entity_Create(section);
+			break;
+		case CSE_Conditional::Conditions::MagazinesEnabled:
+			
 			break;
 		}
 

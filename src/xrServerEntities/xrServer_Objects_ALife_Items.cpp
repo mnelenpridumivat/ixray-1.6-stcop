@@ -1118,6 +1118,10 @@ void CSE_ALifeItemAmmo::STATE_Serialize(ISaveObject& Object)
 	BEGIN_CHUNK(Object,"CSE_ALifeItemAmmo::STATE")
 	{
 		inherited::STATE_Serialize(Object);
+		BEGIN_CHUNK(Object, "CSE_ALifeItemAmmo::STATE::elapsed")
+		{
+			Object << a_elapsed;
+		}
 	}
 }
 
@@ -1142,6 +1146,81 @@ bool CSE_ALifeItemAmmo::can_switch_online	() const
 }
 
 bool CSE_ALifeItemAmmo::can_switch_offline	() const
+{
+	return ( inherited::can_switch_offline() && a_elapsed!=0 );
+}
+
+////////////////////////////////////////////////////////////////////////////
+// CSE_ALifeItemAmmo
+////////////////////////////////////////////////////////////////////////////
+CSE_ALifeItemMagazine::CSE_ALifeItemMagazine		(LPCSTR caSection) : CSE_ALifeItem(caSection)
+{
+	m_caAmmoSections			= pSettings->r_string(caSection,"ammo_class");
+	a_elapsed					= m_boxSize = (u16)pSettings->r_s32(caSection, "box_size");
+	if (pSettings->section_exist(caSection) && pSettings->line_exist(caSection,"visual"))
+		set_visual				(pSettings->r_string(caSection,"visual"));
+}
+
+CSE_ALifeItemMagazine::~CSE_ALifeItemMagazine		()
+{
+}
+
+void CSE_ALifeItemMagazine::STATE_Read			(NET_Packet	&tNetPacket, u16 size)
+{
+	inherited::STATE_Read		(tNetPacket,size);
+	tNetPacket.r_u16			(a_elapsed);
+}
+
+void CSE_ALifeItemMagazine::STATE_Write			(NET_Packet	&tNetPacket)
+{
+	inherited::STATE_Write		(tNetPacket);
+	tNetPacket.w_u16			(a_elapsed);
+}
+
+void CSE_ALifeItemMagazine::UPDATE_Read			(NET_Packet	&tNetPacket)
+{
+	inherited::UPDATE_Read		(tNetPacket);
+
+	tNetPacket.r_u16			(a_elapsed);
+}
+
+void CSE_ALifeItemMagazine::UPDATE_Write		(NET_Packet	&tNetPacket)
+{
+	inherited::UPDATE_Write		(tNetPacket);
+
+	tNetPacket.w_u16			(a_elapsed);
+}
+
+void CSE_ALifeItemMagazine::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemMagazine::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << a_elapsed << m_ammo_type;
+	}
+}
+
+void CSE_ALifeItemMagazine::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemMagazine::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
+#ifndef XRGAME_EXPORTS
+void CSE_ALifeItemMagazine::FillProps			(LPCSTR pref, PropItemVec& values) {
+	inherited::FillProps			(pref,values);
+	PHelper().CreateU16			(values, PrepareKey(pref, *s_name, "Ammo: left"), &a_elapsed, 0, m_boxSize, m_boxSize);
+}
+#endif // #ifndef XRGAME_EXPORTS
+
+bool CSE_ALifeItemMagazine::can_switch_online	() const
+{
+	return inherited::can_switch_online();
+}
+
+bool CSE_ALifeItemMagazine::can_switch_offline	() const
 {
 	return ( inherited::can_switch_offline() && a_elapsed!=0 );
 }
