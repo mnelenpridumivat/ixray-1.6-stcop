@@ -411,7 +411,7 @@ void RenderSpawnManagerWindow() {
 					imgui_spawn_manager.weapon_sort_by_min_fire_distance = false;
 					imgui_spawn_manager.weapon_sort_by_min_hit_power = false;
 				}
-				ImGui::SetItemTooltip("Sorts items by maximum hit_power field for current game difficulty[%s] that defined in weapon section in ltx file", translate_difficulty(g_SingleGameDifficulty));
+				ImGui::SetItemTooltip("Sorts items by maximum hit_power field for current game difficulty[%s] that defined in weapon section in ltx file", translate_difficulty(CSingleGameStats::GetInstance().GetSingleGameDifficulty()));
 
 				if (ImGui::Checkbox("sort by min fire distance##CheckBox_InGameSpawnManager", &imgui_spawn_manager.weapon_sort_by_min_fire_distance))
 				{
@@ -427,9 +427,9 @@ void RenderSpawnManagerWindow() {
 					imgui_spawn_manager.weapon_sort_by_max_fire_distance = false;
 					imgui_spawn_manager.weapon_sort_by_min_fire_distance = false;
 				}
-				ImGui::SetItemTooltip("Sorts items by minimal hit_power field for current game difficulty[%s]that defined in weapon section in ltx file", translate_difficulty(g_SingleGameDifficulty));
+				ImGui::SetItemTooltip("Sorts items by minimal hit_power field for current game difficulty[%s]that defined in weapon section in ltx file", translate_difficulty(CSingleGameStats::GetInstance().GetSingleGameDifficulty()));
 
-				ImGui::Text("current difficulty: %s", translate_difficulty(g_SingleGameDifficulty));
+				ImGui::Text("current difficulty: %s", translate_difficulty(CSingleGameStats::GetInstance().GetSingleGameDifficulty()));
 				SectionStatistics(imgui_spawn_manager.WeaponsSections);
 
 				if (imgui_spawn_manager.sort_by_max_cost)
@@ -516,22 +516,22 @@ void RenderSpawnManagerWindow() {
 							{
 								auto hit_str = pSettings->r_string_wb(pLeftName, "hit_power");
 								string32 buffer{};
-								if (g_SingleGameDifficulty == egdNovice)
+								if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdNovice)
 								{
 									_GetItem(*hit_str, 3, buffer);
 									value_left = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdStalker)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdStalker)
 								{
 									_GetItem(*hit_str, 2, buffer);
 									value_left = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdVeteran)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdVeteran)
 								{
 									_GetItem(*hit_str, 1, buffer);
 									value_left = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdMaster)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdMaster)
 								{
 									_GetItem(*hit_str, 0, buffer);
 									value_left = atof(buffer);
@@ -542,22 +542,22 @@ void RenderSpawnManagerWindow() {
 							{
 								auto hit_str = pSettings->r_string_wb(pRightName, "hit_power");
 								string32 buffer{};
-								if (g_SingleGameDifficulty == egdNovice)
+								if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdNovice)
 								{
 									_GetItem(*hit_str, 3, buffer);
 									value_right = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdStalker)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdStalker)
 								{
 									_GetItem(*hit_str, 2, buffer);
 									value_right = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdVeteran)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdVeteran)
 								{
 									_GetItem(*hit_str, 1, buffer);
 									value_right = atof(buffer);
 								}
-								else if (g_SingleGameDifficulty == egdMaster)
+								else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdMaster)
 								{
 									_GetItem(*hit_str, 0, buffer);
 									value_right = atof(buffer);
@@ -588,22 +588,22 @@ void RenderSpawnManagerWindow() {
 								{
 									auto hit_str = pSettings->r_string_wb(pLeftName, "hit_power");
 									string32 buffer{};
-									if (g_SingleGameDifficulty == egdNovice)
+									if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdNovice)
 									{
 										_GetItem(*hit_str, 3, buffer);
 										value_left = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdStalker)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdStalker)
 									{
 										_GetItem(*hit_str, 2, buffer);
 										value_left = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdVeteran)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdVeteran)
 									{
 										_GetItem(*hit_str, 1, buffer);
 										value_left = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdMaster)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdMaster)
 									{
 										_GetItem(*hit_str, 0, buffer);
 										value_left = atof(buffer);
@@ -614,22 +614,22 @@ void RenderSpawnManagerWindow() {
 								{
 									auto hit_str = pSettings->r_string_wb(pRightName, "hit_power");
 									string32 buffer{};
-									if (g_SingleGameDifficulty == egdNovice)
+									if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdNovice)
 									{
 										_GetItem(*hit_str, 3, buffer);
 										value_right = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdStalker)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdStalker)
 									{
 										_GetItem(*hit_str, 2, buffer);
 										value_right = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdVeteran)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdVeteran)
 									{
 										_GetItem(*hit_str, 1, buffer);
 										value_right = atof(buffer);
 									}
-									else if (g_SingleGameDifficulty == egdMaster)
+									else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdMaster)
 									{
 										_GetItem(*hit_str, 0, buffer);
 										value_right = atof(buffer);
@@ -1022,16 +1022,16 @@ float SpawnManager_ParseHitPower(const shared_str& hit_str) {
 	string32 buffer{};
 	float result{};
 
-	if (g_SingleGameDifficulty == egdNovice) {
+	if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdNovice) {
 		result = atof(_GetItem(*hit_str, 3, buffer));
 	}
-	else if (g_SingleGameDifficulty == egdStalker) {
+	else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdStalker) {
 		result = atof(_GetItem(*hit_str, 2, buffer));
 	}
-	else if (g_SingleGameDifficulty == egdVeteran) {
+	else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdVeteran) {
 		result = atof(_GetItem(*hit_str, 1, buffer));
 	}
-	else if (g_SingleGameDifficulty == egdMaster) {
+	else if (CSingleGameStats::GetInstance().GetSingleGameDifficulty() == egdMaster) {
 		result = atof(_GetItem(*hit_str, 0, buffer));
 	}
 

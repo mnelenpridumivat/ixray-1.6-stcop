@@ -493,7 +493,7 @@ void CShootingObject::FireBullet(const Fvector& pos,
 	{
 		if (IsGameTypeSingle())
 		{
-			l_fHitPower			= fvHitPower[g_SingleGameDifficulty];
+			l_fHitPower			= fvHitPower[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 		}
 		else
 		{

@@ -118,7 +118,7 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 			{
 				if (IsGameTypeSingle())
 				{
-					fCurrentHit			= fvHitPower_1[g_SingleGameDifficulty];
+					fCurrentHit			= fvHitPower_1[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 				}
 				else
 				{
@@ -142,7 +142,7 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 			{
 				if (IsGameTypeSingle())
 				{
-					fCurrentHit			= fvHitPower_2[g_SingleGameDifficulty];
+					fCurrentHit			= fvHitPower_2[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 				}
 				else
 				{

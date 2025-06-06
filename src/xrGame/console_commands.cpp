@@ -82,7 +82,7 @@ extern	BOOL	g_ShowAnimationInfo;
 #endif // DEBUG
 extern	BOOL	g_bShowHitSectors;
 //extern	BOOL	g_bDebugDumpPhysicsStep	;
-extern	ESingleGameDifficulty g_SingleGameDifficulty;
+//extern	ESingleGameDifficulty g_SingleGameDifficulty;
 extern	UI_API BOOL	g_show_wnd_rect2;
 //-----------------------------------------------------------
 extern	float	g_fTimeFactor;
@@ -191,7 +191,7 @@ public:
 // console commands
 class CCC_GameDifficulty : public CCC_Token {
 public:
-	CCC_GameDifficulty(LPCSTR N) : CCC_Token(N, (u32*)&g_SingleGameDifficulty, difficulty_type_token) {};
+	CCC_GameDifficulty(LPCSTR N) : CCC_Token(N, (u32*)&CSingleGameStats::GetInstance().SingleGameDifficulty, CSingleGameStats::GetInstance().difficulty_type_token) {};
 	virtual void Execute(LPCSTR args) {
 		CCC_Token::Execute(args);
 		if (g_pGameLevel && Level().game) {

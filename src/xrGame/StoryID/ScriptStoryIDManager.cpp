@@ -94,15 +94,6 @@ void CScriptStoryIDManager::script_register(lua_State* L)
     ];
 }
 
-/*ISaveObject& operator<<(ISaveObject& obj, CScriptStoryIDManager::SContainer& cont)
-{
-    BEGIN_CHUNK(obj, "CScriptStoryIDManager::SContainer")
-    {
-        obj << cont.m_obj_id << cont.m_script_story_id;
-    }
-    return obj;
-}*/
-
 void CScriptStoryIDManager::Register(ALife::_OBJECT_ID obj_id, shared_str script_story_id)
 {
     xrSRWLockGuard guard(m_containers_lock.get());

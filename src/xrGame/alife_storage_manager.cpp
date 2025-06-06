@@ -24,6 +24,7 @@
 #include "Save/SaveManager.h"
 #include <Actor.h>
 #include "alife_simulator.h"
+#include "game_cl_single.h"
 #include "../xrEngine/string_table.h"
 
 XRCORE_API string_path g_bug_report_file;
@@ -89,6 +90,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, boo
 		info.m_level_id = map_name.size() ? ai().level_graph().level_id() : u16(-1);
 		CSaveManager::GetInstance().WriteGameInfo(info);
 		header().Serialize(*SaveObj);
+		CSingleGameStats::GetInstance().Serialize(*SaveObj);
 		time_manager().Serialize(*SaveObj);
 		spawns().Serialize(*SaveObj);
 		objects().Serialize(*SaveObj);
@@ -157,6 +159,7 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 	{
 		//CSaveManager::GetInstance().SkipGameInfo(stream);
 		header().Serialize(*SaveObj);
+		CSingleGameStats::GetInstance().Serialize(*SaveObj);
 		time_manager().Serialize(*SaveObj);
 		spawns().Serialize(*SaveObj);
 		graph().on_load();

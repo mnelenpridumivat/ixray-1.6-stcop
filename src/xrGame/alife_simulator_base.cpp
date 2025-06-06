@@ -27,6 +27,8 @@
 #pragma warning(push)
 #pragma warning(disable:4995)
 #include <malloc.h>
+
+#include "game_cl_single.h"
 #pragma warning(pop)
 
 using namespace ALife;
@@ -105,18 +107,21 @@ CSE_Abstract *CALifeSimulatorBase::spawn_item	(LPCSTR section, const Fvector &po
 		auto OldAbstract = abstract;
 		switch (conditional->m_condition) {
 		case CSE_Conditional::Conditions::LuaFunc:
-			xr_string buffer = "conditional_spawn.";
-			buffer += section;
-			luabind::functor<bool> func;
-			R_ASSERT(ai().script_engine().functor(buffer.c_str() ,func), "Unable to find spawn function for conditional", buffer.c_str());
-			section = func() ? conditional->m_section_meet_cond.c_str() : conditional->m_section_not_meet_cond.c_str();
-			abstract = F_entity_Create(section);
-			break;
+			{
+				xr_string buffer = "conditional_spawn.";
+				buffer += section;
+				luabind::functor<bool> func;
+				R_ASSERT(ai().script_engine().functor(buffer.c_str() ,func), "Unable to find spawn function for conditional", buffer.c_str());
+				section = func() ? conditional->m_section_meet_cond.c_str() : conditional->m_section_not_meet_cond.c_str();
+				break;
+			}
 		case CSE_Conditional::Conditions::MagazinesEnabled:
-			
-			break;
+			{
+				section = CSingleGameStats::GetInstance().GetUseMagazines() ? conditional->m_section_meet_cond.c_str() : conditional->m_section_not_meet_cond.c_str();
+				break;
+			}
 		}
-
+		abstract = F_entity_Create(section);
 		F_entity_Destroy(OldAbstract);
 	}
 

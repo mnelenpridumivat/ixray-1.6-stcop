@@ -7,15 +7,15 @@
 
 using namespace luabind;
 
-ESingleGameDifficulty g_SingleGameDifficulty = egdStalker;
+//ESingleGameDifficulty g_SingleGameDifficulty = egdStalker;
 
-xr_token	difficulty_type_token						[ ]={
+/*xr_token	difficulty_type_token						[ ]={
 	{ "gd_novice",						egdNovice									},
 	{ "gd_stalker",						egdStalker									},
 	{ "gd_veteran",						egdVeteran									},
 	{ "gd_master",						egdMaster									},
 	{ 0,							0											}
-};
+};*/
 
 game_cl_Single::game_cl_Single()
 {
@@ -42,6 +42,33 @@ char*	game_cl_Single::getTeamSection(int Team)
 void game_cl_Single::OnDifficultyChanged()
 {
 	Actor()->OnDifficultyChanged();
+}
+
+CSingleGameStats& CSingleGameStats::GetInstance()
+{
+	static CSingleGameStats stats;
+	return stats;
+}
+
+void CSingleGameStats::SetSingleGameDifficulty(ESingleGameDifficulty dif)
+{
+	SingleGameDifficulty = dif;
+	if (g_pGameLevel)
+	{
+		game_cl_Single* game = smart_cast<game_cl_Single*>(Level().game); VERIFY(game);
+		game->OnDifficultyChanged();
+	}
+}
+
+void CSingleGameStats::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object, "CSingleGameStats")
+	{
+		Object << UseMagazines;
+		u8 temp = u8(SingleGameDifficulty);
+		Object << temp;
+		SingleGameDifficulty = ESingleGameDifficulty(temp);
+	}
 }
 
 #include "ai_space.h"

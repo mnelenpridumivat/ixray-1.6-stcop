@@ -302,13 +302,11 @@ float get_global_time_factor() { return (Device.time_factor()); }
 
 void set_game_difficulty(ESingleGameDifficulty dif)
 {
-	g_SingleGameDifficulty = dif;
-	game_cl_Single* game = smart_cast<game_cl_Single*>(Level().game); VERIFY(game);
-	game->OnDifficultyChanged();
+	CSingleGameStats::GetInstance().SetSingleGameDifficulty(dif);
 }
 ESingleGameDifficulty get_game_difficulty()
 {
-	return g_SingleGameDifficulty;
+	return CSingleGameStats::GetInstance().GetSingleGameDifficulty();
 }
 
 u32 get_time_days()
