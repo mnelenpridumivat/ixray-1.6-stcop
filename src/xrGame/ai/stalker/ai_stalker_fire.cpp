@@ -1117,7 +1117,7 @@ void CAI_Stalker::update_throw_params		()
 	static float const distances[] = {
 		30.f, 40.f, 50.f, 60.f
 	};
-	VERIFY					(g_SingleGameDifficulty < sizeof(distances)/sizeof(distances[0]));
+	VERIFY					(CSingleGameStats::GetInstance().GetSingleGameDifficulty() < sizeof(distances)/sizeof(distances[0]));
 	float const max_distance= distances[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 
 	// computing velocity with minimum magnitude

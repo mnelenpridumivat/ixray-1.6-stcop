@@ -299,7 +299,7 @@ void CHudItem::OnAnimationEnd(u32 state)
 		SwitchState(eIdle);
 		break;
 	}
-	case eHiding:
+	/*case eHiding:
 	{
 		if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
 		{
@@ -307,7 +307,7 @@ void CHudItem::OnAnimationEnd(u32 state)
 		}
 		SwitchState(eHidden);
 		break;
-	}
+	}*/
 	case ePrepareDetector:
 	{
 		if (m_eAnimationsFlags.test(af_prepare_detector_end))

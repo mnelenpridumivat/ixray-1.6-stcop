@@ -111,7 +111,10 @@ bool CUIGameSP::IR_UIOnKeyboardPress(int dik)
 	case kINVENTORY:
 		{
 			if ( !pActor->inventory_disabled() )
+			{
 				ShowActorMenu();
+				Actor()->inventory().SetActiveSlot(NO_ACTIVE_SLOT);
+			}
 
 			break;
 		}

@@ -2582,7 +2582,7 @@ bool CActor::can_attach			(const CInventoryItem *inventory_item) const
 void CActor::OnDifficultyChanged	()
 {
 	// immunities
-	VERIFY(g_SingleGameDifficulty>=egdNovice && g_SingleGameDifficulty<=egdMaster); 
+	VERIFY(CSingleGameStats::GetInstance().GetSingleGameDifficulty()>=egdNovice && CSingleGameStats::GetInstance().GetSingleGameDifficulty()<=egdMaster); 
 	LPCSTR diff_name				= CSingleGameStats::GetInstance().GetDifficultyTypeString();
 	string128						tmp;
 	xr_strconcat(tmp,"actor_immunities_",diff_name);

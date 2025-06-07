@@ -462,7 +462,7 @@ void CWeaponKnife::FastStrike(u32 state)
 		m_eHitType = m_eHitType_1;
 
 		if (GameID() == eGameIDSingle)
-			fCurrentHit = fvHitPower_1[g_SingleGameDifficulty];
+			fCurrentHit = fvHitPower_1[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 		else
 			fCurrentHit = fvHitPower_1[egdMaster];
 
@@ -478,7 +478,7 @@ void CWeaponKnife::FastStrike(u32 state)
 		m_eHitType = m_eHitType_2;
 
 		if (GameID() == eGameIDSingle)
-			fCurrentHit = fvHitPower_2[g_SingleGameDifficulty];
+			fCurrentHit = fvHitPower_2[CSingleGameStats::GetInstance().GetSingleGameDifficulty()];
 		else
 			fCurrentHit = fvHitPower_2[egdMaster];
 

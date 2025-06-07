@@ -609,7 +609,7 @@ bool CUIActorMenu::ToSlot(CUICellItem* itm, bool force_place, u16 slot_id)
 
 		SendEvent_Item2Slot					(iitem, m_pActorInvOwner->object_id(), slot_id);
 
-		SendEvent_ActivateSlot				(slot_id, m_pActorInvOwner->object_id());
+		//SendEvent_ActivateSlot				(slot_id, m_pActorInvOwner->object_id());
 
 		//ColorizeItem						( itm, false );
 		if ( slot_id == OUTFIT_SLOT )

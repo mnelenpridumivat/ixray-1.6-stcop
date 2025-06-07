@@ -2659,7 +2659,7 @@ void CWeapon::debug_draw_firedeps()
 
 const float &CWeapon::hit_probability	() const
 {
-	VERIFY					((g_SingleGameDifficulty >= egdNovice) && (g_SingleGameDifficulty <= egdMaster)); 
+	VERIFY					((CSingleGameStats::GetInstance().GetSingleGameDifficulty() >= egdNovice) && (CSingleGameStats::GetInstance().GetSingleGameDifficulty() <= egdMaster)); 
 	return					(m_hit_probability[egdNovice]);
 }
 
