@@ -30,8 +30,8 @@
 #	include "ai/crow/ai_crow.h"
 #	include "ui/UIActorMenu.h"
 #	include	"ActorCondition.h"
-#	include "script_xr_logic.h"
-#	include <StoryID/ScriptStoryIDManager.h>
+#	include "ScriptsSubsystems/Condlist/script_xr_logic.h"
+#	include "ScriptsSubsystems/StoryID/StoryIDManager.h"
 #	include <ai/monsters/anomal_pseudogigant/anomal_pseudo_gigant.h>
 #	include "xrServer_Objects_ALife.h"
 #	include <EmiZone.h>
