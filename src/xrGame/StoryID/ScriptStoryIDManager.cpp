@@ -34,10 +34,6 @@ void CScriptStoryIDManager::VerifiedRegisterObject(CSE_Abstract* se_obj)
             R_ASSERT3(false, "Field 'story_id' in [story_object] section got no value :object", se_obj->name());
         }
         self.Register(se_obj->ID, value);
-        //if (auto Casted = smart_cast<CSE_ALifeDynamicObject*>(se_obj); Casted)
-        //{
-        //    Casted->m_script_story_ID = value;
-        //}
         return;
     }
     Msg("[TEST] try to get story_id from config section [%s]", se_obj->name());
@@ -45,10 +41,6 @@ void CScriptStoryIDManager::VerifiedRegisterObject(CSE_Abstract* se_obj)
     if (story_id)
     {
         self.Register(se_obj->ID, story_id);
-        //if (auto Casted = smart_cast<CSE_ALifeDynamicObject*>(se_obj); Casted)
-        //{
-        //    Casted->m_script_story_ID = story_id;
-        //}
     }
 }
 
