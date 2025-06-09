@@ -158,7 +158,7 @@ LPCSTR CScriptStoryIDManager::GetID(ALife::_OBJECT_ID obj_id) const
 
 void CScriptStoryIDManager::Serialize(ISaveObject& Object)
 {
-    xrSRWLockGuard guard(m_containers_lock.get(), true);
+    xrSRWLockGuard guard(m_containers_lock, true);
     BEGIN_CHUNK(Object, "CScriptStoryIDManager")
     {
         Object << m_containers_by_id;

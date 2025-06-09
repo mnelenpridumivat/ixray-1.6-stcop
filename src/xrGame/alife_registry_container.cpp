@@ -70,42 +70,42 @@ void CALifeRegistryContainer::Serialize(ISaveObject& Object)
 	{
 		BEGIN_CHUNK(Object,"CInfoPortionRegistry")
 		{
-			CInfoPortionRegistry::serialize(Object);
+			m_info_portions.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CRelationRegistry")
 		{
-			CRelationRegistry::serialize(Object);
+			m_character_relations.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CEncyclopediaRegistry")
 		{
-			CEncyclopediaRegistry::serialize(Object);
+			m_encyclopedia_registry.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CGameNewsRegistry")
 		{
-			CGameNewsRegistry::serialize(Object);
+			m_game_news.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CSpecificCharacterRegistry")
 		{
-			CSpecificCharacterRegistry::serialize(Object);
+			m_specific_characters.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CMapLocationRegistry")
 		{
-			CMapLocationRegistry::serialize(Object);
+			m_map_locations.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CGameTaskRegistry")
 		{
-			CGameTaskRegistry::serialize(Object);
+			m_game_tasks.serialize(Object);
 		}
 
 		BEGIN_CHUNK(Object,"CActorStatisticRegistry")
 		{
-			CActorStatisticRegistry::serialize(Object);
+			m_actor_statistics.serialize(Object);
 		}
 	}
 }

@@ -22,7 +22,7 @@
 #endif
 
 #ifdef XRGAME_EXPORTS
-#include "StoryID/ScriptStoryIDManager.h"
+#include "ScriptsSubsystems/StoryID/StoryIDManager.h"
 #	include "alife_time_manager.h"
 #	include "ef_storage.h"
 #	include "game_graph.h"
