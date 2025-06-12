@@ -149,6 +149,7 @@
 #include "EmiZone.h"
 #include "MagnetZone.h"
 #include "MissileSam.h"
+#include "Magazine.h"
 #include "SamZone.h"
 
 #	include "torch.h"
@@ -354,6 +355,7 @@ void CObjectFactory::register_classes	()
 	ADD(CScope					,CSE_ALifeItem					,CLSID_OBJECT_W_SCOPE			,"wpn_scope");
 	ADD(CSilencer				,CSE_ALifeItem					,CLSID_OBJECT_W_SILENCER		,"wpn_silencer");
 	ADD(CGrenadeLauncher		,CSE_ALifeItem					,CLSID_OBJECT_W_GLAUNCHER		,"wpn_grenade_launcher");
+	ADD(CMagazine				,CSE_ALifeItemMagazine			,CLSID_OBJECT_W_MAGAZINE		,"wpn_magazine");
 
 	// Inventory
 #ifndef NO_SINGLE
@@ -413,6 +415,7 @@ void CObjectFactory::register_classes	()
 	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,CLSID_Z_AMEBA					,"ameba_zone");
 	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,CLSID_Z_NOGRAVITY				,"nogravity_zone");
 	ADD(CZoneCampfire			,CSE_ALifeAnomalousZone			,CLSID_Z_CAMPFIRE				,"zone_campfire");
+	ADD(CSamZone				,CSE_ALifeSpaceRestrictor		,TEXT2CLSID("SAM_ZONE")			,"sam_zone");
 	// Detectors
 	ADD(CSimpleDetector			,CSE_ALifeItemDetector			,CLSID_DETECTOR_SIMPLE			,"device_detector_simple");
 	ADD(CAdvancedDetector		,CSE_ALifeItemDetector			,CLSID_DETECTOR_ADVANCED		,"device_detector_advanced");

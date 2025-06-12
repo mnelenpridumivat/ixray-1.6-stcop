@@ -245,8 +245,7 @@ void	CHelicopter::Hit							(SHit* pHDS)
 		smart_cast<CCustomZone*>(pHDS->who) )
 		{
 			callback(GameObject::eHelicopterOnHit)(pHDS->damage(),pHDS->impulse,pHDS->hit_type,pHDS->who->ID());
-		}
-		if (smart_cast<CMissileSam*>(pHDS->who))
+		} else if (smart_cast<CMissileSam*>(pHDS->who))
 		{
 			callback(GameObject::eHelicopterOnSamHit)(pHDS->damage(),pHDS->impulse,pHDS->hit_type);
 		}

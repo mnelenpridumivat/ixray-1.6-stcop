@@ -3,6 +3,7 @@
 #include "Scope.h"
 #include "Silencer.h"
 #include "GrenadeLauncher.h"
+#include "Magazine.h"
 
 CScope::CScope	()
 {
@@ -26,6 +27,9 @@ void CScope::script_register	(lua_State *L)
 			.def(constructor<>()),
 
 		class_<CGrenadeLauncher,CGameObject>("CGrenadeLauncher")
+			.def(constructor<>()),
+
+		class_<CMagazine, CGameObject>("CMagazine")
 			.def(constructor<>())
 	];
 }
