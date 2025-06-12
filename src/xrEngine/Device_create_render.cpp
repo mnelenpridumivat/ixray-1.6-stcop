@@ -199,11 +199,11 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 	{
 		auto& States = Engine.External.EditorStates;
 
-		if (ImGui::BeginMainMenuBar())
+		if (ImGui::BeginMainMenuBar()) 
 		{
 			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("Exit", ""))
+			 {
+				if (ImGui::MenuItem("Exit", "")) 
 				{
 					g_pEventManager->Event.Defer("KERNEL:disconnect");
 					g_pEventManager->Event.Defer("KERNEL:quit");
@@ -212,13 +212,18 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("View"))
-			{
-				ImGui::MenuItem("Debug Render", nullptr, &States[static_cast<u8>(EditorUI::DebugDraw)]);
+			if (ImGui::BeginMenu("View")) {
 				ImGui::MenuItem("Actor InfoPortions", nullptr, &States[static_cast<u8>(EditorUI::ActorInfos)]);
 				ImGui::MenuItem("Scenes Viewer", nullptr, &States[static_cast<u8>(EditorUI::ScenesViewer)]);
-				ImGui::MenuItem("Console", nullptr, &States[static_cast<u8>(EditorUI::CmdConsole)]);
-				ImGui::MenuItem("Effectors", nullptr, &States[static_cast<u8>(EditorUI::CameraEffectors)]);
+
+				// TODO: Необходима доработка, лог выводится некорректно
+				//ImGui::MenuItem("Console", nullptr, &States[static_cast<u8>(EditorUI::CmdConsole)]);
+				
+				ImGui::MenuItem("Console variables", nullptr, &States[static_cast<u8>(EditorUI::CmdVars)]);
+				
+				// TODO: Необходима доработка
+				// ImGui::MenuItem("Effectors", nullptr, &States[static_cast<u8>(EditorUI::CameraEffectors)]);
+
 				ImGui::EndMenu();
 			}
 
@@ -227,33 +232,20 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 				ImGui::MenuItem("Spawn Manager", nullptr, &States[static_cast<u8>(EditorUI::Game_SpawnManager)]);
 				ImGui::MenuItem("Weapon Manager", nullptr, &States[static_cast<u8>(EditorUI::Game_WeaponManager)]);
 				ImGui::MenuItem("Search Manager", nullptr, &States[static_cast<u8>(EditorUI::Game_SearchManager)]);
-				ImGui::MenuItem("Time Manager", nullptr, &States[static_cast<u8>(EditorUI::Game_TimeManager)]);
-
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Tools"))
-			{
-				ImGui::MenuItem("Lua: Run code", nullptr, &States[static_cast<u8>(EditorUI::LuaCodespace)]);
-				ImGui::MenuItem("Lua: Attach to VSCode", nullptr, &States[static_cast<u8>(EditorUI::LuaDebug)]);
-				ImGui::MenuItem("Shader Debug", nullptr, &States[static_cast<u8>(EditorUI::Shaders)]);
-				ImGui::MenuItem("Console variables", nullptr, &States[static_cast<u8>(EditorUI::CmdVars)]);
-				ImGui::MenuItem("Hud Adjust", nullptr, &States[static_cast<u8>(EditorUI::HudAdjust)]);
+				ImGui::MenuItem("Weather Editor", nullptr, &States[static_cast<u8>(EditorUI::Weather)]);
+				//ImGui::MenuItem("Time Manager", nullptr, &States[static_cast<u8>(EditorUI::Game_TimeManager)]);
+				ImGui::MenuItem("Hud Adjust", nullptr, &States[static_cast<u8>(EditorUI::Game_HudAdjustManager)]);
+				ImGui::MenuItem("Hud Adjust (Legacy)", nullptr, &States[static_cast<u8>(EditorUI::HudAdjust)]);
 				ImGui::MenuItem("Cutscene Adjust", nullptr, &States[static_cast<u8>(EditorUI::CutsceneAdjust)]);
 
-				if (ImGui::BeginMenu("Editors##ToolsInGameImGui"))
-				{
-					ImGui::MenuItem("Weather Editor", nullptr, &States[static_cast<u8>(EditorUI::Weather)]);
-					ImGui::MenuItem("OMF##ToolsInGameImGui", nullptr, &States[static_cast<u8>(EditorUI::Tools_OMFEditor)]);
-					ImGui::EndMenu();
-				}
-
-
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Profiler"))
+			if (ImGui::BeginMenu("Debug"))
 			{
+				ImGui::MenuItem("Shader Debug", nullptr, &States[static_cast<u8>(EditorUI::Shaders)]);
+				ImGui::MenuItem("Render Debug", nullptr, &States[static_cast<u8>(EditorUI::DebugDraw)]);
+
 				if (ImGui::MenuItem("Optick Start Capture"))
 				{
 					PROF_START_CAPTURE();
@@ -264,8 +256,26 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 					PROF_STOP_CAPTURE();
 					PROF_SAVE_CAPTURE("ixr.opt");
 				}
+				
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Tools"))
+			{
+				ImGui::MenuItem("Lua: Run code", nullptr, &States[static_cast<u8>(EditorUI::LuaCodespace)]);
+				ImGui::MenuItem("Lua: Attach to VSCode", nullptr, &States[static_cast<u8>(EditorUI::LuaDebug)]);
+
+				if (ImGui::BeginMenu("Editors##ToolsInGameImGui"))
+				{
+					ImGui::MenuItem("OMF##ToolsInGameImGui", nullptr, &States[static_cast<u8>(EditorUI::Tools_OMFEditor)]);
+					ImGui::EndMenu();
+				}
+
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::MenuItem("Click `Alt+I` (English language layout)");
 			ImGui::EndMainMenuBar();
 		}
 
@@ -285,7 +295,7 @@ bool CRenderDevice::InitRenderDevice(APILevel API)
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		if (ImGui::Begin("DockSpaceViewport_Main", nullptr, dockspace_window_flags))
+		if (ImGui::Begin("DockSpaceViewport_Main", nullptr, dockspace_window_flags)) 
 		{
 			ImGui::DockSpace(ImGui::GetID("DockSpace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 		}
@@ -329,7 +339,7 @@ void CRenderDevice::DestroyRenderDevice()
 {
 	CImGuiManager::Instance().Destroy();
 
-	switch (CurrentAPILevel)
+	switch (CurrentAPILevel) 
 	{
 	case APILevel::DX9:  DestroyD3D9(); break;
 	case APILevel::DX11: DestroyD3D11(); break;
