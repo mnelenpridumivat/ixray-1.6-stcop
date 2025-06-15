@@ -30,6 +30,7 @@
 #include "smart_cover_object.h"
 #include "detail_path_manager_space.h"
 #include "patrol_path_manager_space.h"
+#include "InventoryOwner.h"
 
 using namespace luabind;
 
@@ -368,16 +369,16 @@ class_<CScriptGameObject> script_register_game_object1(class_<CScriptGameObject>
 		.def("set_smart_cover_target_default",			&CScriptGameObject::set_smart_cover_target_default)
 
 		.def("idle_min_time",				(void (CScriptGameObject::*)	(float))&CScriptGameObject::idle_min_time)
-		.def("idle_min_time",				(float (CScriptGameObject::*)	() const)&CScriptGameObject::idle_min_time)
+		.def("idle_min_time",				(const float (CScriptGameObject::*)	() const)&CScriptGameObject::idle_min_time)
 
 		.def("idle_max_time",				(void (CScriptGameObject::*)	(float))&CScriptGameObject::idle_max_time)
-		.def("idle_max_time",				(float (CScriptGameObject::*)	() const)&CScriptGameObject::idle_max_time)
+		.def("idle_max_time",				(const float (CScriptGameObject::*)	() const)&CScriptGameObject::idle_max_time)
 
 		.def("lookout_min_time",			(void (CScriptGameObject::*)	(float))&CScriptGameObject::lookout_min_time)
-		.def("lookout_min_time",			(float (CScriptGameObject::*)	() const)&CScriptGameObject::lookout_min_time)
+		.def("lookout_min_time",			(const float (CScriptGameObject::*)	() const)&CScriptGameObject::lookout_min_time)
 
 		.def("lookout_max_time",			(void (CScriptGameObject::*)	(float))&CScriptGameObject::lookout_max_time)
-		.def("lookout_max_time",			(float (CScriptGameObject::*)	() const)&CScriptGameObject::lookout_max_time)
+		.def("lookout_max_time",			(const float (CScriptGameObject::*)	() const)&CScriptGameObject::lookout_max_time)
 
 		.def("in_loophole_fov",				&CScriptGameObject::in_loophole_fov)
 		.def("in_current_loophole_fov",		&CScriptGameObject::in_current_loophole_fov)
@@ -418,6 +419,6 @@ class_<CScriptGameObject> script_register_game_object1(class_<CScriptGameObject>
 	.def("get_hud_animator_restored_slot", &CScriptGameObject::GetActorAnimatorRestoredSlot)
 	.def("get_hud_animator_force_hide_items", &CScriptGameObject::GetAnimatorForceHideItems)
 	.def("set_hud_animator_force_hide_items", &CScriptGameObject::SetAnimatorForceHideItems)
-
+	.property("mechanic",					&CScriptGameObject::getMechanic, &CScriptGameObject::setMechanic)
 	;
 }
