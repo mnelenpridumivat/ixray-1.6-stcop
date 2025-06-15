@@ -140,6 +140,7 @@ void CSE_ALifeLevelChanger::script_register(lua_State *L)
 			"cse_alife_level_changer",
 			CSE_ALifeSpaceRestrictor
 		)
+			.def_readonly("dest_level_name", &CSE_ALifeLevelChanger::destLeveName)
 	];
 }
 
