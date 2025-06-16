@@ -1491,11 +1491,6 @@ bool CWeapon::Action(u16 cmd, u32 flags)
 			{
 				return SwitchAmmoType(flags);
 			} 
-		case kWPN_FUNC:
-		{
-			if (GetState() == eIdle && !IsPending()) { SwitchState(eBore); }
-			break;
-		}
 		case kWPN_ZOOM:
 			if(IsZoomEnabled())
 			{
