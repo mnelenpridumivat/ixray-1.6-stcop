@@ -68,11 +68,15 @@ public:
 	bool NeedBlockSprint() const;
 	bool CanDrawHand() const;
 	bool CanHideHand() const;
+	bool CanThrowHand() const;
 
 	enum EDetectorStates
 	{
 		eHandHide = eLastBaseState + 1,
 		eHandDraw,
+		eHandThrowStart,
+		eHandThrowIdle,
+		eHandThrowEnd,
 	};
 
 protected:

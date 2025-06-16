@@ -255,6 +255,21 @@ void CCustomDetector::OnStateSwitch(u32 S)
 		PlayHUDMotion("anm_hand_hide", true, eHandHide);
 		break;
 	}
+	case eHandThrowStart:
+	{
+		PlayHUDMotion("anm_hand_throw_start", true, eHandThrowStart);
+		break;
+	}
+	case eHandThrowIdle:
+	{
+		PlayHUDMotion("anm_hand_throw_idle", true, eHandThrowIdle);
+		break;
+	}
+	case eHandThrowEnd:
+	{
+		PlayHUDMotion("anm_hand_throw_end", true, eHandThrowEnd);
+		break;
+	}
 	}
 	m_old_state=S;
 }
@@ -287,6 +302,7 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 	case eShowing:
 	case eHandDraw:
 	case eHandHide:
+	case eHandThrowEnd:
 		{
 			SwitchState					(eIdle);
 		} break;
@@ -295,6 +311,12 @@ void CCustomDetector::OnAnimationEnd(u32 state)
 			SwitchState					(eHidden);
 			TurnDetectorInternal		(false);
 		} break;
+	case eHandThrowStart:
+	case eHandThrowIdle:
+	{
+		SwitchState(eHandThrowIdle);
+		break;
+	}
 	}
 }
 
@@ -311,6 +333,12 @@ bool CCustomDetector::CanDrawHand() const
 bool CCustomDetector::CanHideHand() const
 {
 	return m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_hide) && (GetState() == eIdle || GetState() == eHandDraw);
+}
+
+bool CCustomDetector::CanThrowHand() const
+{
+	bool has_anims = m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_throw_start) && m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_throw_idle) && m_eAnimationsFlags.test(EAnimationsFlags::af_det_hand_throw_end);
+	return has_anims && GetState() != eHidden && GetState() != eShowing && GetState() != eHiding;
 }
 
 void CCustomDetector::UpdateXForm()
@@ -419,6 +447,11 @@ void CCustomDetector::UpdateVisibility()
 			m_bNeedActivation = false;
 			return;
 		}
+	}
+
+	if (g_player_hud->attached_item(0) == nullptr && GetState() >= EDetectorStates::eHandThrowStart && GetState() <= EDetectorStates::eHandThrowEnd)
+	{
+		SwitchState(eIdle);
 	}
 
 	PIItem pItem = m_pInventory->ActiveItem();
