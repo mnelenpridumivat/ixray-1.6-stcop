@@ -286,9 +286,9 @@ void CALifeSimulator__release					(CALifeSimulator *self_, CSE_Abstract *object,
 	VERIFY								(self_);
 //	self->release						(object,true);
 
-	THROW								(object);
+	R_ASSERT(object, "alife():release requires an object to pass!");
 	CSE_ALifeObject						*alife_object = smart_cast<CSE_ALifeObject*>(object);
-	THROW								(alife_object);
+	R_ASSERT(alife_object, "alife():release requires an alife object to pass!");
 	if (!alife_object->m_bOnline) {
 		self_->release					(object,true);
 		return;
