@@ -185,10 +185,10 @@ cphysics_shell_scripted* CScriptGameObject::get_physics_shell() const
 
 CHelicopter* CScriptGameObject::get_helicopter	()
 {
-	CHelicopter		*helicopter = smart_cast<CHelicopter*>(&object());
+	CHelicopter		*helicopter = smart_cast<CHelicopter*>(m_game_object);
 	if (!helicopter) {
-		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CGameObject : cannot access class member get_helicopter!");
-		NODEFAULT;
+		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CGameObject [%s]: cannot access class member get_helicopter!", m_game_object ? m_game_object->Name() : "null");
+		//NODEFAULT;
 	}
 	return helicopter;
 }
@@ -198,8 +198,8 @@ CHangingLamp* CScriptGameObject::get_hanging_lamp()
 {
 	CHangingLamp*	lamp = smart_cast<CHangingLamp*>(&object());
 	if (!lamp) {
-		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CGameObject : it is not a lamp!");
-		NODEFAULT;
+		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CGameObject [%s]: it is not a lamp!", m_game_object ? m_game_object->Name() : "null");
+		//NODEFAULT;
 	}
 	return lamp;
 }
@@ -208,7 +208,7 @@ CHolderCustom* CScriptGameObject::get_custom_holder()
 {
 	CHolderCustom* holder=smart_cast<CHolderCustom*>(&object());
 	if(!holder){
-		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,"CGameObject : it is not a holder!");
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError,"CGameObject [%s]: it is not a holder!", m_game_object ? m_game_object->Name() : "null");
 	}
 	return holder;
 }

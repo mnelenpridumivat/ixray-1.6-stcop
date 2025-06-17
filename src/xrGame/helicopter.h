@@ -137,6 +137,73 @@ public:
 	void	net_Destroy					();
 };
 
+class CHeliFlare
+{
+public:
+	struct Constants
+	{
+		float xzStartSpeed = 0.0f;
+		float xzSlowing = 0.0f;
+		float GravitySpeed = 0.0f;
+		float LifeTimeMax = 0.0f;
+	};
+
+private:
+
+	Constants* constants_ = nullptr;
+	Fvector FlarePosition{};
+	Fvector FlareDirection{};
+	float CurrentSpeed = 0.0f;
+
+	//Fmatrix xform{};
+	float LifeTime = 0.0f;
+
+	xr_shared_ptr<CParticlesObject> m_particles = nullptr;
+
+public:
+	~CHeliFlare();
+	void InitParticle(Constants* constants_, xr_string ParticlesName);
+
+	void Serialize(ISaveObject& Object);
+	void SetTransform(Fmatrix xform){FlarePosition = xform.c;}
+	void SetDirection(Fvector fvector){FlareDirection = fvector;}
+	void Activate();
+	void Deactivate();
+
+	bool IsExpired() { return LifeTime >= constants_->LifeTimeMax; }
+	void Update(float f_time_delta);
+};
+
+ISaveObject& operator<<(ISaveObject& Object, CHeliFlare& HeliFlare);
+
+class CHeliFlareManager
+{
+
+	CHeliFlareManager();
+
+	CHeliFlare* GetInactiveFlare();
+	
+	CHeliFlare::Constants FlareData = {};
+	xr_deque<CHeliFlare*> InactiveFlares = {};
+	xr_deque<CHeliFlare*> ActiveFlares = {};
+	xr_string FlareParticle = "";
+	
+public:
+
+	CHeliFlareManager(const CHeliFlareManager&) = delete;
+	CHeliFlareManager(CHeliFlareManager&&) = delete;
+	CHeliFlareManager& operator=(const CHeliFlareManager&) = delete;
+	CHeliFlareManager& operator=(CHeliFlareManager&&) = delete;
+
+	static CHeliFlareManager& GetInstance();
+
+	void Load(LPCSTR section);
+
+	void Update(float delta);
+	void Serialize(ISaveObject& Object);
+	void ActivateFlare(Fmatrix xform, Fvector dir);
+};
+
 class CHelicopter : 	public CEntity,
 						public CShootingObject,
 						public CRocketLauncher,
@@ -240,9 +307,10 @@ protected:
 	CParticlesObject*				m_pParticle;
 	Fmatrix							m_particleXFORM;
 
-	// TODO: Reimplement flares feature
 	u32 FlaresPairsDropCount = 0;
 	u32 RequestedDropFlaresCount = 0;
+	float FlaresDropDelay = 0.0f;
+	float LastFlareDropTime = 0.0f;
 
 	void							StartFlame					();
 	void							UpdateHeliParticles			();

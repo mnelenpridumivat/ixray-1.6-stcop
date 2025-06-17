@@ -79,6 +79,7 @@
 #include "CustomTimer.h"
 #include <CutsceneManager.h>
 
+#include "helicopter.h"
 #include "../xrEngine/Rain.h"
 #include "script_hit.h"
 #include "../../xrScripts/script_engine.h"
@@ -1324,6 +1325,7 @@ void CActor::UpdateCL()
 
 	CTimerManager::GetInstance().Update();
 	CBinderManager::GetInstance().Update();
+	CHeliFlareManager::GetInstance().Update(Device.dwTimeDelta);
 
 	if(m_feel_touch_characters>0)
 	{

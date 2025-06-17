@@ -14,7 +14,7 @@ void CScriptStoryIDManager::VerifiedRegisterObject(CSE_Abstract* se_obj)
 {
     auto& self = CScriptStoryIDManager::GetInstance();
     {
-        if (auto Casted = smart_cast<CSE_ALifeDynamicObject*>(se_obj); Casted && Casted->m_script_story_ID.size())
+        if (auto Casted = smart_cast<CSE_ALifeObject*>(se_obj); Casted && Casted->m_script_story_ID.size())
         {
             self.Register(se_obj->ID, Casted->m_script_story_ID);
             return;
@@ -36,7 +36,7 @@ void CScriptStoryIDManager::VerifiedRegisterObject(CSE_Abstract* se_obj)
         self.Register(se_obj->ID, value);
         return;
     }
-    Msg("[TEST] try to get story_id from config section [%s]", se_obj->name());
+    //Msg("[TEST] try to get story_id from config section [%s]", se_obj->name());
     auto story_id = READ_IF_EXISTS(pSettings, r_string, se_obj->name(), "story_id", nullptr);
     if (story_id)
     {

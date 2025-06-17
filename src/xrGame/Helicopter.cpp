@@ -117,6 +117,8 @@ void CHelicopter::Load(LPCSTR section)
 	LPCSTR lanim						= pSettings->r_string	(section,"light_color_animmator");
 	m_lanim								= LALib.FindItem(lanim);
 
+	FlaresPairsDropCount				= pSettings->r_u32(section, "flares_count");
+	FlaresDropDelay = pSettings->r_float(section, "flares_drop_delay");
 
 }
 
@@ -416,6 +418,18 @@ void CHelicopter::UpdateCL()
 		m_engineSound.set_position(XFORM().c);
 	
 
+	LastFlareDropTime += Device.fTimeDelta;
+	LastFlareDropTime = std::min(LastFlareDropTime, FlaresDropDelay);
+	if(RequestedDropFlaresCount > 0 && LastFlareDropTime >= FlaresDropDelay)
+	{
+		LastFlareDropTime -= FlaresDropDelay;
+		--RequestedDropFlaresCount;
+		//Fvector ForwardDir = Direction();
+		Fvector RightDir = XFORM().i;
+		//Fvector RightDir = XFORM().i;
+		CHeliFlareManager::GetInstance().ActivateFlare(XFORM(), RightDir);
+		CHeliFlareManager::GetInstance().ActivateFlare(XFORM(), RightDir.invert());
+	}
 
 	m_enemy.Update();
 	//weapon

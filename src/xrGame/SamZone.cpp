@@ -25,7 +25,7 @@ BOOL CSamZone::net_Spawn(CSE_Abstract* DC)
 
 void CSamZone::Load(LPCSTR section)
 {
-	m_missile_section = pSettings->r_string(section, "missle_section");
+	m_missile_section = pSettings->r_string(section, "missile_section");
 	//CRocketLauncher::SpawnRocket(m_missile_section, this);
 	m_layered_sounds.LoadSound(section, "snd_shoot_rocket", "sndRocket", false, ESoundTypes::SOUND_TYPE_WEAPON_SHOOTING);
 }

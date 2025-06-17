@@ -41,19 +41,18 @@ public:
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
 				{
-					if constexpr (std::is_pointer<Key>::value) {
+					if constexpr (std::is_pointer_v<Key>) {
 						(*this) << *(elem.first);
 					}
 					else {
 						Key Value = elem.first;
 						(*this) << Value;
 					}
-					if constexpr (std::is_pointer<Mapped>::value) {
+					if constexpr (std::is_pointer_v<Mapped>) {
 						(*this) << *(elem.second);
 					}
 					else {
@@ -69,13 +68,13 @@ public:
 				BEGIN_CHUNK((*this), "MapElem")
 				{
 					std::pair<Key, Mapped> Elem;
-					if constexpr (std::is_pointer<Key>::value) {
+					if constexpr (std::is_pointer_v<Key>) {
 						(*this) << *(Elem.first);
 					}
 					else {
 						(*this) << Elem.first;
 					}
-					if constexpr (std::is_pointer<Mapped>::value) {
+					if constexpr (std::is_pointer_v<Mapped>) {
 						(*this) << *(Elem.second);
 					}
 					else {
@@ -117,7 +116,7 @@ public:
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
 			for (u64 i = 0; i < Size; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					(*this) << *(Value[i]);
 				}
 				else {
@@ -129,9 +128,9 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					//CreateElem(Value);
-					T Elem = new std::remove_pointer<T>::type();
+					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *(Value[i]);
 					Value[i] = Elem;
 				}
@@ -152,13 +151,13 @@ public:
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
 				{
-					if constexpr (std::is_pointer<Key>::value) {
+					if constexpr (std::is_pointer_v<Key>) {
 						(*this) << *(elem.first);
 					}
 					else {
 						(*this) << elem.first;
 					}
-					if constexpr (std::is_pointer<Mapped>::value) {
+					if constexpr (std::is_pointer_v<Mapped>) {
 						(*this) << *(elem.second);
 					}
 					else {
@@ -174,8 +173,8 @@ public:
 				BEGIN_CHUNK((*this), "MapElem")
 				{
 					std::pair<Key, Mapped> Elem;
-					if constexpr (std::is_pointer<Key>::value) {
-						Elem.first = new std::remove_pointer<Key>::type();
+					if constexpr (std::is_pointer_v<Key>) {
+						Elem.first = new std::remove_pointer_t<Key>();
 						(*this) << *(Elem.first);
 					}
 					else {
@@ -183,7 +182,7 @@ public:
 						(*this) << Elem.first;
 					}
 					if constexpr (std::is_pointer<Mapped>::value) {
-						Elem.second = new std::remove_pointer<Mapped>::type();
+						Elem.second = new std::remove_pointer_t<Mapped>();
 						(*this) << *(Elem.second);
 					}
 					else {
@@ -201,7 +200,6 @@ public:
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value, fastdelegate::FastDelegate<void(ISaveObject&, typename std::pair<Key, Mapped>&)> PerElem) {
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				PerElem(*this, elem);
@@ -225,7 +223,7 @@ public:
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
 			for (u64 i = 0; i < Size; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					(*this) << *(Value[i]);
 				}
 				else {
@@ -237,9 +235,8 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
-					//CreateElem(Value);
-					T Elem = new std::remove_pointer<T>::type();
+				if constexpr (std::is_pointer_v<T>) {
+					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *(Value[i]);
 					Value[i] = Elem;
 				}
@@ -256,10 +253,9 @@ public:
 	ISaveObject& Serialize(xr_vector<T>& Value)
 	{
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					(*this) << *elem;
 				}
 				else {
@@ -271,9 +267,8 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
-					//CreateElem(Value);
-					T Elem = new std::remove_pointer<T>::type();
+				if constexpr (std::is_pointer_v<T>) {
+					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *Elem;
 					Value.emplace_back(Elem);
 				}
@@ -292,7 +287,6 @@ public:
 	ISaveObject& Serialize(xr_vector<xr_shared_ptr<T>>& Value)
 	{
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				(*this) << *elem;
@@ -314,7 +308,6 @@ public:
 	ISaveObject& Serialize(xr_vector<xr_unique_ptr<T>>& Value)
 	{
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				(*this) << *elem;
@@ -340,7 +333,7 @@ public:
 			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					PerElem(*this, *elem);
 				}
 				else {
@@ -352,8 +345,8 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
-					auto Elem = new std::remove_pointer<T>::type();
+				if constexpr (std::is_pointer_v<T>) {
+					auto Elem = new std::remove_pointer_t<T>();
 					PerElem(*this, *Elem);
 					Value.emplace_back(Elem);
 				}
@@ -375,7 +368,7 @@ public:
 		{
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					(*this) << *elem;
 				}
 				else {
@@ -388,9 +381,9 @@ public:
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
-				if constexpr (std::is_pointer<T>::value) {
+				if constexpr (std::is_pointer_v<T>) {
 					//CreateElem(Value);
-					T Elem = new std::remove_pointer<T>::type();
+					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *Elem;
 					Value.emplace(Elem);
 				}
@@ -414,14 +407,14 @@ public:
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
 				{
-					if constexpr (std::is_pointer<Key>::value) {
+					if constexpr (std::is_pointer_v<Key>) {
 						(*this) << *(elem.first);
 					}
 					else {
 						Key Value = elem.first;
 						(*this) << Value;
 					}
-					if constexpr (std::is_pointer<Mapped>::value) {
+					if constexpr (std::is_pointer_v<Mapped>) {
 						(*this) << *(elem.second);
 					}
 					else {
@@ -437,19 +430,53 @@ public:
 				BEGIN_CHUNK((*this), "MapElem")
 				{
 					std::pair<Key, Mapped> Elem;
-					if constexpr (std::is_pointer<Key>::value) {
+					if constexpr (std::is_pointer_v<Key>) {
 						(*this) << *(Elem.first);
 					}
 					else {
 						(*this) << Elem.first;
 					}
-					if constexpr (std::is_pointer<Mapped>::value) {
+					if constexpr (std::is_pointer_v<Mapped>) {
 						(*this) << *(Elem.second);
 					}
 					else {
 						(*this) << Elem.second;
 					}
 					Value.insert(Elem);
+				}
+			}
+		}
+		GetCurrentChunk()->EndArray();
+		return *this;
+	}
+
+	template<typename T>
+	ISaveObject& Serialize(xr_deque<T>& Value)
+	{
+		if (IsSave()) {
+			GetCurrentChunk()->WriteArray();
+			for (auto& elem : Value) {
+				if constexpr (std::is_pointer_v<T>) {
+					(*this) << *elem;
+				}
+				else {
+					(*this) << elem;
+				}
+			}
+		}
+		else {
+			u64 ArrSize;
+			GetCurrentChunk()->ReadArray(ArrSize);
+			for (u64 i = 0; i < ArrSize; ++i) {
+				if constexpr (std::is_pointer<T>::value) {
+					T Elem = new std::remove_pointer_t<T>();
+					(*this) << *Elem;
+					Value.emplace_back(Elem);
+				}
+				else {
+					T&& Elem = T();
+					(*this) << Elem;
+					Value.emplace_back(Elem);
 				}
 			}
 		}
@@ -497,6 +524,12 @@ ISaveObject& operator<<(ISaveObject& Object, xr_hash_set<T, H, Eq>& Value) {
 
 template<typename K, typename V, typename H, typename Eq>
 ISaveObject& operator<<(ISaveObject& Object, xr_hash_map<K, V, H, Eq>& Value) {
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
+template<typename T>
+ISaveObject& operator<<(ISaveObject& Object, xr_deque<T>& Value)
+{
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 

@@ -16,7 +16,7 @@ struct ENGINE_API CVertexWithEdges {
 	using CVertex = GameGraph::CVertex;
 	using CLevelPoint = GameGraph::CLevelPoint;
 
-	~CVertexWithEdges() {}
+	//~CVertexWithEdges() {}
 
 	CVertex vertex;
 	xr_vector<CEdge> edges = {};
@@ -48,7 +48,7 @@ public:
 
 protected:
 	CHeader										m_header;
-	xr_vector<CVertexWithEdges>	m_nodes;
+	xr_vector<CVertexWithEdges>	m_nodes = {};
 	LEVEL_POINT_VECTOR							m_points;
 	mutable ENABLED					m_enabled;
 	_GRAPH_ID						m_current_level_some_vertex_id;

@@ -468,6 +468,7 @@ void CSE_ALifeObject::STATE_Write			(NET_Packet &tNetPacket)
 	tNetPacket.w_stringZ		(m_ini_string);
 	tNetPacket.w_u32			(m_story_id);
 	tNetPacket.w_u32			(m_spawn_story_id);
+	tNetPacket.w_stringZ		(m_script_story_ID);
 }
 
 void CSE_ALifeObject::STATE_Read			(NET_Packet &tNetPacket, u16 size)
@@ -523,6 +524,9 @@ void CSE_ALifeObject::STATE_Read			(NET_Packet &tNetPacket, u16 size)
 
 	if (m_wVersion > 111)
 		tNetPacket.r_u32		(m_spawn_story_id);
+
+	if (m_wVersion > 129)
+		tNetPacket.r_stringZ		(m_script_story_ID);
 }
 
 void CSE_ALifeObject::UPDATE_Write			(NET_Packet &tNetPacket)

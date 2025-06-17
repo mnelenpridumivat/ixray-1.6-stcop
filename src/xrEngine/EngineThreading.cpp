@@ -61,7 +61,7 @@ void XRay::Engine::GameThread()
 		{
 			Device.async_tasks.run([=]()
 			{
-				PROF_THREAD("Async Task 2")
+				PROF_THREAD("Async Task")
 				PROF_EVENT("Save_writing_single")
 				task->WriteSavedDataImpl();
 				xr_delete(task);
