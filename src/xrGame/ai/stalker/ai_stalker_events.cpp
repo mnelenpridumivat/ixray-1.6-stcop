@@ -94,11 +94,16 @@ void CAI_Stalker::OnEvent		(NET_Packet& P, u16 type)
 
 		case GE_STALKER_DIALOG:
 		{
-			shared_str start_dialog;
-			P.r_stringZ(start_dialog);
-
 			if (OnClient())
-				SetStartDialog(start_dialog);
+			{
+				shared_str start_dialog;
+				u16 start_dialogs_num = P.r_u16();
+				for (u16 i = 0; i < start_dialogs_num; ++i)
+				{
+					P.r_stringZ(start_dialog);
+					SetStartDialog(start_dialog);
+				}
+			}
 		}break;
 
 	}

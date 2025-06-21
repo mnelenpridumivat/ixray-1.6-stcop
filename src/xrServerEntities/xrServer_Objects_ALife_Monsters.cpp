@@ -2604,7 +2604,7 @@ void CSE_ALifeHumanAbstract::FillProps		(LPCSTR pref, PropItemVec& items)
 CSE_ALifeHumanStalker::CSE_ALifeHumanStalker(LPCSTR caSection) : CSE_ALifeHumanAbstract(caSection),CSE_PHSkeleton(caSection)
 {
 	m_trader_flags.set			(eTraderFlagInfiniteAmmo,TRUE);
-	m_start_dialog				= "";
+	m_start_dialog.clear();
 }
 
 CSE_ALifeHumanStalker::~CSE_ALifeHumanStalker()
@@ -2639,7 +2639,11 @@ void CSE_ALifeHumanStalker::UPDATE_Write(NET_Packet& tNetPacket)
 
 	inherited1::UPDATE_Write(tNetPacket);
 	inherited2::UPDATE_Write(tNetPacket);
-	tNetPacket.w_stringZ(m_start_dialog);
+	tNetPacket.w_u16(m_start_dialog.size());
+	for (auto& Dialog : m_start_dialog)
+	{
+		tNetPacket.w_stringZ(Dialog);
+	}
 }
 
 void CSE_ALifeHumanStalker::UPDATE_Read(NET_Packet& tNetPacket)
@@ -2653,7 +2657,15 @@ void CSE_ALifeHumanStalker::UPDATE_Read(NET_Packet& tNetPacket)
 
 	inherited1::UPDATE_Read(tNetPacket);
 	inherited2::UPDATE_Read(tNetPacket);
-	tNetPacket.r_stringZ(m_start_dialog);
+	u16 DialogsNum;
+	m_start_dialog.clear();
+	tNetPacket.r_u16(DialogsNum);
+	for (u16 i = 0; i < DialogsNum; ++i)
+	{
+		shared_str Dialog;
+		tNetPacket.r_stringZ(Dialog);
+		m_start_dialog.push_back(Dialog);
+	}
 }
 
 void CSE_ALifeHumanStalker::SyncRead(NET_Packet& Packet)

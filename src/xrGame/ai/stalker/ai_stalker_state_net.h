@@ -40,7 +40,7 @@ public:
 	u16								graph_vertex_id;
  	float							distance_lvgraph;
  
- 	shared_str						m_sStartDialog;
+ 	xr_vector<shared_str>			m_sStartDialog;
 	shared_str						script_logic_data;
 	u32								script_dwUpdate = 0;
   

@@ -15,7 +15,7 @@ SSpecificCharacterData::SSpecificCharacterData()
 	m_sNpcConfigSect.clear	();
 
 
-	m_StartDialog			= nullptr;
+	m_StartDialog.clear();
 	m_ActorDialogs.clear	(); 
 
 	m_Rank					= NO_RANK;
@@ -100,15 +100,15 @@ void CSpecificCharacter::load_shared	(LPCSTR)
 	
 #ifdef  XRGAME_EXPORTS
 
-	LPCSTR start_dialog = pXML->Read("start_dialog", 0, nullptr);
-	if(start_dialog)
+	data()->m_StartDialog.clear();
+	int dialogs_num = pXML->GetNodesNum(pXML->GetLocalRoot(), "start_dialog");
+	for (int i = 0; i < dialogs_num; ++i)
 	{
-		data()->m_StartDialog	= start_dialog;
+		shared_str dialog_name = pXML->Read(pXML->GetLocalRoot(), "start_dialog", i, "");
+		data()->m_StartDialog.push_back(dialog_name);
 	}
-	else
-		data()->m_StartDialog	= nullptr;
 
-	int dialogs_num = pXML->GetNodesNum(pXML->GetLocalRoot(), "actor_dialog");
+	dialogs_num = pXML->GetNodesNum(pXML->GetLocalRoot(), "actor_dialog");
 	data()->m_ActorDialogs.clear();
 	for(int i=0; i<dialogs_num; ++i)
 	{

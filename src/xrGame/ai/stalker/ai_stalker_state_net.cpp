@@ -154,7 +154,11 @@ void aistalker_state_net::FillState(CAI_Stalker* stalker)
 
 		NET_Packet packet;
 		stalker->u_EventGen(packet, GE_STALKER_DIALOG, stalker->ID());
-		packet.w_stringZ(stalker->GetStartDialog());
+		packet.w_u16(stalker->GetStartDialog().size());
+		for (auto& elem : stalker->GetStartDialog())
+		{
+			packet.w_stringZ(elem);
+		}
 		stalker->u_EventSend(packet);
 	}
 

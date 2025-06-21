@@ -63,7 +63,11 @@ void CAI_Stalker::net_Export(NET_Packet& P)
 		P.w(&f1, sizeof(f1));
 	}
 
-	P.w_stringZ(m_sStartDialog);
+	P.w_u16(m_sStartDialog.size());
+	for (auto& Dialog : m_sStartDialog)
+	{
+		P.w_stringZ(Dialog);
+	}
 }
 
 void CAI_Stalker::net_Import(NET_Packet& P)
@@ -103,8 +107,14 @@ void CAI_Stalker::net_Import(NET_Packet& P)
 	P.r_float();
 	P.r_float();
 
-	shared_str temp;
-	P.r_stringZ(temp);
+	u16 DialogsNum = P.r_u16();
+	m_sStartDialog.clear();
+	for (u16 i = 0; i < DialogsNum; ++i)
+	{
+		shared_str DialogName;
+		P.r_stringZ(DialogName);
+		m_sStartDialog.push_back(DialogName);
+	}
 
 	setVisible(TRUE);
 	setEnabled(TRUE);

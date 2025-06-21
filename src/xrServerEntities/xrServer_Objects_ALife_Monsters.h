@@ -519,7 +519,7 @@ private:
 SERVER_ENTITY_DECLARE_END
 
 SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeHumanStalker,CSE_ALifeHumanAbstract,CSE_PHSkeleton)
-	shared_str						m_start_dialog;
+	xr_vector<shared_str>				m_start_dialog;
 #ifdef XRGAME_EXPORTS
 	aistalker_state_net				m_state_mngr;
 #endif
