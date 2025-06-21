@@ -216,14 +216,15 @@ void CHudItem::OnStateSwitch(u32 S)
 	}
 	case eBore:
 	{
-		SetPending(FALSE);
+		SetPending		(FALSE);
 
-		PlayAnimBore();
-		if (HudItemData())
+		PlayAnimBore	();
+		if(HudItemData())
 		{
-			Fvector P = HudItemData()->m_item_transform.c;
+			Fvector P		= HudItemData()->m_item_transform.c;
 			m_sounds.PlaySound("sndBore", P, object().H_Root(), !!GetHUDmode(), false, m_started_rnd_anim_idx);
 		}
+
 		break;
 	}
 	case eSprintStart:
@@ -283,7 +284,7 @@ void CHudItem::OnStateSwitch(u32 S)
 
 void CHudItem::OnAnimationEnd(u32 state)
 {
-	if (CActor* pActor = m_object && m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : nullptr)
+	if (CActor* pActor = m_object&&m_object->H_Parent() ? m_object->H_Parent()->cast_actor() : NULL)
 	{
 		pActor->callback(GameObject::eActorHudAnimationEnd)(smart_cast<CGameObject*>(this)->lua_game_object(), hud_sect.c_str(), m_current_motion.c_str(), state, animation_slot());
 	}
@@ -300,15 +301,6 @@ void CHudItem::OnAnimationEnd(u32 state)
 		SwitchState(eIdle);
 		break;
 	}
-	/*case eHiding:
-	{
-		if (Level().CurrentControlEntity() == object().H_Parent() && HudItemData())
-		{
-			g_player_hud->detach_item(this);
-		}
-		SwitchState(eHidden);
-		break;
-	}*/
 	case ePrepareDetector:
 	{
 		if (m_eAnimationsFlags.test(af_prepare_detector_end))
@@ -321,7 +313,7 @@ void CHudItem::OnAnimationEnd(u32 state)
 		}
 		break;
 	}
-	}
+	};
 }
 
 void CHudItem::PlayAnimBore()
@@ -427,19 +419,30 @@ void CHudItem::OnH_B_Chield		()
 	StopCurrentAnimWithoutCallback();
 }
 
-void CHudItem::OnH_B_Independent(bool just_before_destroy)
+void CHudItem::OnH_B_Independent	(bool just_before_destroy)
 {
 	m_sounds.StopAllSounds	();
 	UpdateXForm				();
-}
-
-void CHudItem::OnH_A_Independent()
-{
+	
+	// next code was commented 
+	/*
+	if(HudItemData() && !just_before_destroy)
+	{
+		object().XFORM().set( HudItemData()->m_item_transform );
+	}
+	
 	if (HudItemData())
 	{
 		g_player_hud->detach_item(this);
-	}
+		Msg("---Detaching hud item [%s][%d]", this->HudSection().c_str(), this->object().ID());
+	}*/
+	//SetHudItemData			(nullptr);
+}
 
+void CHudItem::OnH_A_Independent	()
+{
+	if(HudItemData())
+		g_player_hud->detach_item(this);
 	StopCurrentAnimWithoutCallback();
 }
 
@@ -890,18 +893,4 @@ void CHudItem::OnMotionMark(u32 state, const motion_marks& mark)
 
 		m_eDevicesFlags.zero();
 	}
-}
-
-#include "WeaponMagazined.h"
-#include "WeaponBinoculars.h"
-
-bool CHudItem::WpnCanShoot() const
-{
-	return !!(smart_cast<CWeaponMagazined*>(this) != nullptr && smart_cast<CWeaponBinoculars*>(this) == nullptr);
-}
-
-void CHUDState::SetState(u32 v) {
-	m_hud_item_state = v;
-	m_dw_curr_state_time = Device.dwTimeGlobal;
-	ResetSubStateTime();
 }
