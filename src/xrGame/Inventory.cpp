@@ -25,6 +25,7 @@
 #include "Car.h"
 #include "purchase_list.h"
 #include "Grenade.h"
+#include "../xrScripts/script_callback_ex.h"
 #include "CustomDetector.h"
 
 using namespace InventoryUtilities;

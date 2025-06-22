@@ -28,6 +28,7 @@
 #include "Bolt.h"
 #include "actor_mp_server.h"
 #include "ActorHelmet.h"
+#include "../xrScripts/script_callback_ex.h"
 #include "Save/SaveObject.h"
 
 CInventoryOwner::CInventoryOwner			()
@@ -51,8 +52,6 @@ CInventoryOwner::CInventoryOwner			()
 	m_deadbody_can_take				= true;
 	m_deadbody_closed				= false;
 	m_play_show_hide_reload_sounds	= true;
-
-	//m_trader_flags.zero();
 }
 
 DLL_Pure *CInventoryOwner::_construct		()
