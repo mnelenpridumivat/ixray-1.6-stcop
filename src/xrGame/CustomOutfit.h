@@ -46,6 +46,7 @@ protected:
 public:
 	bool IsExo = false;
 	bool IsExoProto = false;
+	bool GlassPresent = false;
 
 	float					m_fPowerLoss;
 	float					m_additional_weight;

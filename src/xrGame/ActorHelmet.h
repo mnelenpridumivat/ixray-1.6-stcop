@@ -16,17 +16,10 @@ public:
 	virtual void			Hit						(float P, ALife::EHitType hit_type);
 
 	shared_str				m_BonesProtectionSect;
-
-	bool					m_b_HasGlass;
-
 	shared_str				m_NightVisionSect;
-	u32						m_NightVisionType;
-	float					m_fNightVisionLumFactor;
 
-	IC int			GetHelmetNV_Type() const { return m_NightVisionType; }
-
-	virtual void			OnMoveToSlot			(const SInvItemPlace previous_place) override;
-	virtual void			OnMoveToRuck			(const SInvItemPlace previous_place) override;
+	virtual void			OnMoveToSlot			(const SInvItemPlace& previous_place);
+	virtual void			OnMoveToRuck			(const SInvItemPlace& previous_place);
 	virtual BOOL			net_Spawn				(CSE_Abstract* DC);
 	virtual void			net_Export				(NET_Packet& P);
 	virtual void			net_Import				(NET_Packet& P);
@@ -39,6 +32,8 @@ public:
 	float					HitThroughArmor			(float hit_power, s16 element, float ap, bool& add_wound, ALife::EHitType hit_type);
 
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+
+	bool					GlassPresent = false;
 
 	float					m_fPowerLoss;
 	float					m_fHealthRestoreSpeed;
