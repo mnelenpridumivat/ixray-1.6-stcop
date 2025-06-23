@@ -881,7 +881,7 @@ bool CUIActorMenu::highlight_addons_for_weapon( PIItem weapon_item, CUICellItem*
 	}
 
 	CScope* pScope = smart_cast<CScope*>(item);
-	if ( pScope && weapon_item->CanAttach(pScope) )
+	if (pScope && weapon_item->CanAttach(item))
 	{
 		ci->m_select_armament = true;
 		return true;
@@ -932,7 +932,7 @@ void CUIActorMenu::highlight_weapons_for_addon( PIItem addon_item, CUIDragDropLi
 			continue;
 		}
 
-		if ( pScope && weapon->CanAttach(pScope) )
+		if (pScope && weapon->ScopeAttachable() && weapon->ScopeFit(pScope))
 		{
 			ci->m_select_armament = true;
 			continue;

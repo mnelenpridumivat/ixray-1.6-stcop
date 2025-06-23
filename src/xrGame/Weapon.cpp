@@ -3356,3 +3356,16 @@ void CWeapon::UpdateShellBones(u32 idx, u8 type)
 	kin->CalculateBones_Invalidate();
 	kin->CalculateBones(TRUE);
 }
+
+bool CWeapon::ScopeFit(CScope* pIItem) const
+{
+	for (const shared_str& scope : m_scopes)
+	{
+		if (pSettings->r_string(scope, "scope_name") == pIItem->cNameSect())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
