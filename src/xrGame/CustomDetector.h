@@ -70,6 +70,7 @@ public:
 	bool CanDrawHand() const;
 	bool CanHideHand() const;
 	bool CanThrowHand() const;
+	bool CanKick() const;
 
 	enum EDetectorStates
 	{
@@ -78,6 +79,8 @@ public:
 		eHandThrowStart,
 		eHandThrowIdle,
 		eHandThrowEnd,
+		eHandKick1,
+		eHandKick2,
 	};
 
 protected:
