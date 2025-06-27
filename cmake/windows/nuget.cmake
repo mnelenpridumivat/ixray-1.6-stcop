@@ -55,12 +55,12 @@ set(CORE_DXMATH ${CMAKE_BINARY_DIR}/packages/directxmath.2024.2.15.1/)
 # Steam Sockets
 set(STEAM_SOCKETS_PATH ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.GameNetworkingSockets.Vcpkg.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.1.4.1)
 
-# RedImage
-set(REDIMAGE_PATH ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.RedImageTool.Runtimes.win-x64.0.1.0)
+# LuaJIT 
+set(LUAJIT ${CMAKE_BINARY_DIR}/packages/IXRay.LuaJIT.Binaries.win10.0.19041.0-${NUGET_PACKAGE_PLATFORM}.1626960173.0.0-open/)
 
 set(LUAJIT_NAME lua51.dll)
-set(LUAJIT_LIB ${LUAJIT}runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/lua51.lib)
-set(LUAJIT_BIN ${LUAJIT}runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/${LUAJIT_NAME})
+set(LUAJIT_LIB ${LUAJIT}lib/lua51.lib)
+set(LUAJIT_BIN ${LUAJIT}bin/${LUAJIT_NAME})
 
 # FreeImage
 set(FREEIMAGE ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.FreeImage.WinMerge.2023.8.19-open)
@@ -106,3 +106,8 @@ set(YAML_INCL ${YAML_CORE}/build/native/include)
 set(YAML_LIB  ${YAML_CORE}/runtimes/win-x64/native/Release/yaml-cpp.lib)
 set(YAML_BIN  ${YAML_CORE}/runtimes/win-x64/native/Release/yaml-cpp.dll)
 set(YAML_LIB_NAME yaml-cpp.dll)
+
+# RedImage
+set(REDIMAGE_INCL ${CMAKE_BINARY_DIR}/packages/IXRay.RedImage.0.1.1/include/)
+set(REDIMAGE_LIB  ${CMAKE_BINARY_DIR}/packages/IXRay.RedImage.0.1.1/lib/RedImageTool.lib)
+set(REDIMAGE_BIN  ${CMAKE_BINARY_DIR}/packages/IXRay.RedImage.0.1.1/bin/RedImageTool.dll)
