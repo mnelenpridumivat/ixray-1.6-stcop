@@ -411,8 +411,13 @@ void CWeaponKnife::UpdateCL()
 
 void CWeaponKnife::FireStart()
 {	
+	if (GetState() != eIdle)
+	{
+		return;
+	}
+
 	inherited::FireStart();
-	SwitchState			(eFire);
+	SwitchState(eFire);
 }
 
 void CWeaponKnife::Fire2Start()
