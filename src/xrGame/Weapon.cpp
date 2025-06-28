@@ -3356,7 +3356,11 @@ void CWeapon::UpdateAmmoBones(xr_vector<SAmmoBonesParams*>& lVector, u32 idx, u8
 			auto& Node = bone_param->ConfigurationMap[idx];
 			for (const auto& configuration_bone : Node.val.second)
 			{
-				kin->LL_SetBoneVisible(kin->LL_BoneID(configuration_bone), TRUE, FALSE);
+				u16 bone_id = kin->LL_BoneID(configuration_bone);
+				if (bone_id != BI_NONE)
+				{
+					kin->LL_SetBoneVisible(bone_id, TRUE, FALSE);
+				}
 			}
 		}
 	}
@@ -3379,7 +3383,11 @@ void CWeapon::UpdateShellBones(u32 idx, u8 type)
 	{
 		for (const auto& bone_name : bone_param->AllBones)
 		{
-			kin->LL_SetBoneVisible(kin->LL_BoneID(bone_name), FALSE, FALSE);
+			u16 bone_id = kin->LL_BoneID(bone_name);
+			if (bone_id != BI_NONE)
+			{
+				kin->LL_SetBoneVisible(bone_id, FALSE, FALSE);
+			}
 		}
 	}
 
