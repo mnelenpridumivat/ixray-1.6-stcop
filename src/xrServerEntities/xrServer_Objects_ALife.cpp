@@ -1136,7 +1136,7 @@ void CSE_ALifeLevelChanger::FillProps		(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateRList		(items,PrepareKey(pref,*s_name,"Level to change"),		&m_caLevelToChange,		&*fp_data.level_ids.begin(), fp_data.level_ids.size());
 	PHelper().CreateRText		(items,PrepareKey(pref,*s_name,"Level point to change"),	&m_caLevelPointToChange);
 
-	PHelper().CreateBool		(items,PrepareKey(pref,*s_name,"Silent mode"),	&m_bSilentMode);
+	PHelper().CreateBOOL		(items,PrepareKey(pref,*s_name,"Silent mode"),	&m_bSilentMode);
 #	endif // #ifdef XRSE_FACTORY_EXPORTS
 }
 #endif // #ifndef XRGAME_EXPORTS

@@ -3,6 +3,7 @@
 #include "../xrSound/ai_sounds.h"
 #include "weapon.h"
 #include "FlameCanister.h"
+#include "FlamethrowerTraceCollision.h"
 
 namespace FlamethrowerTrace
 {

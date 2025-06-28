@@ -15,10 +15,10 @@ CHelmet::CHelmet()
 
 	m_boneProtection = new SBoneProtections();
 
-	m_NightVisionType = 0;
+	/*m_NightVisionType = 0;
 	m_fNightVisionLumFactor = 0.0f;
 
-	m_b_HasGlass = false;
+	m_b_HasGlass = false;*/
 }
 
 CHelmet::~CHelmet()
@@ -67,10 +67,10 @@ void CHelmet::Load(LPCSTR section)
 	// Added by Axel, to enable optional condition use on any item
 	m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
 
-	m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
+	/*m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
 	m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
 
-	m_b_HasGlass = READ_IF_EXISTS(pSettings, r_bool, section, "has_glass", false);
+	m_b_HasGlass = READ_IF_EXISTS(pSettings, r_bool, section, "has_glass", false);*/
 }
 
 void CHelmet::ReloadBonesProtection()
@@ -112,7 +112,7 @@ void CHelmet::OnH_A_Chield()
 //	ReloadBonesProtection();
 }
 
-void CHelmet::OnMoveToSlot(const SInvItemPlace previous_place)
+/*void CHelmet::OnMoveToSlot(const SInvItemPlace previous_place)
 {
 	inherited::OnMoveToSlot		(previous_place);
 }
@@ -128,7 +128,7 @@ void CHelmet::OnMoveToRuck(const SInvItemPlace previous_place)
 			pActor->GetNightVisionEffector()->SwitchNightVision(false);
 		}
 	}
-}
+}*/
 
 void CHelmet::Hit(float hit_power, ALife::EHitType hit_type)
 {
@@ -177,8 +177,8 @@ bool CHelmet::install_upgrade_impl( LPCSTR section, bool test )
 	if ( result2 && !test )
 	{
 		m_NightVisionSect._set( str );
-		m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
-		m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
+		//m_NightVisionType = READ_IF_EXISTS(pSettings, r_u32, m_NightVisionSect, "shader_nightvision_type", 0);
+		//m_fNightVisionLumFactor = READ_IF_EXISTS(pSettings, r_float, m_NightVisionSect, "shader_nightvision_lum_factor", 0.0f);
 	}
 	result |= result2;
 

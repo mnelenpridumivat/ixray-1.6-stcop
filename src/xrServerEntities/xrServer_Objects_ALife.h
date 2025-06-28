@@ -13,6 +13,7 @@
 #include "xrServer_Objects.h"
 #include "alife_space.h"
 #include "game_graph_space.h"
+#include "object_interfaces.h"
 #ifdef XRGAME_EXPORTS
 #include "alife_smart_terrain_task.h"
 #endif //#ifdef XRGAME_EXPORTS
@@ -163,7 +164,7 @@ public:
 #endif
 SERVER_ENTITY_DECLARE_END
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeGroupAbstract)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeGroupAbstract, IPureStateUpdateObject)
 	ALife::OBJECT_VECTOR			m_tpMembers;
 	bool							m_bCreateSpawnPositions;
 	u16								m_wCount;

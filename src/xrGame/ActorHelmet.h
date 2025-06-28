@@ -18,8 +18,8 @@ public:
 	shared_str				m_BonesProtectionSect;
 	shared_str				m_NightVisionSect;
 
-	virtual void			OnMoveToSlot			(const SInvItemPlace& previous_place);
-	virtual void			OnMoveToRuck			(const SInvItemPlace& previous_place);
+	//virtual void			OnMoveToSlot			(const SInvItemPlace& previous_place);
+	//virtual void			OnMoveToRuck			(const SInvItemPlace& previous_place);
 	virtual BOOL			net_Spawn				(CSE_Abstract* DC);
 	virtual void			net_Export				(NET_Packet& P);
 	virtual void			net_Import				(NET_Packet& P);

@@ -37,6 +37,7 @@
 #	include <EmiZone.h>
 #	include <MagnetZone.h>
 #	include <Flamethrower.h>
+#include "FlamethrowerTraceCollision.h"
 #endif
 
 void register_script_class_rec(const script_export_hashmap& container, script_exporter_key_base class_key, lua_State* L) {
