@@ -93,6 +93,15 @@ bool CCustomDetector::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 	return art_det->GetCurrentChargeLevel() == GetCurrentChargeLevel();*/
 }
 
+void CCustomDetector::HideAndSetCallback(detector_fn_t fn)
+{
+	m_bNeedActivation = false;
+	m_bFastAnimMode = true;
+	SwitchState(eHiding);
+
+		hide_callback = fn;
+}
+
 void CCustomDetector::HideDetector(bool bFastMode, bool force)
 {
 	if (force)
@@ -150,6 +159,22 @@ void CCustomDetector::ToggleDetector(bool bFastMode, bool switching)
 		{
 			if (slot_to_activate != NO_ACTIVE_SLOT)
 			{
+				if (OnServer())
+				{
+					// �������� ������� ���������� �������: ���, ������ ��� ��
+					// ��� ���� ����� �������� ������� ������
+					m_pInventory->Activate(slot_to_activate);
+				}
+				else
+				{
+					if (H_Parent() && H_Parent() == Level().CurrentViewEntity())
+					{
+						NET_Packet						P;
+						CGameObject::u_EventGen(P, GEG_PLAYER_ACTIVATE_SLOT, H_Parent()->ID());
+						P.w_u16(slot_to_activate);
+						CGameObject::u_EventSend(P);
+					}
+				}
 				m_pInventory->Activate(slot_to_activate);
 				m_bNeedActivation = true;
 			}
@@ -186,6 +211,39 @@ void CCustomDetector::ToggleDetector(bool bFastMode, bool switching)
 	}
 
 }
+
+void CCustomDetector::SwitchState(u32 S)
+{
+	if (IsGameTypeSingle() || OnServer())
+	{
+		inherited::SwitchState(S);
+		return;
+	}
+
+	if (!IsGameTypeSingle() && OnClient())
+	{
+		SetNextState(S);
+		OnStateSwitch(u32(S));
+
+		switch (S)
+		{
+		case eHidden:
+			if (hide_callback)
+			{
+				hide_callback();
+			}
+			ClearCallback();
+			break;
+		case eShowing:
+		case eIdle:
+			ClearCallback();
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 
 void  CCustomDetector::ShowingCallback(CBlend*B)
 {
@@ -473,6 +531,9 @@ void CCustomDetector::UpdateVisibility()
 	if (!m_pInventory)
 		return;
 
+	if (!Actor())
+		return;
+
 	if (m_bNeedActivation)
 	{
 		CActor* actor = Level().CurrentControlEntity()->cast_actor();
@@ -594,6 +655,12 @@ void CCustomDetector::OnMoveToRuck(const SInvItemPlace prev)
 {
 	inherited::OnMoveToRuck	(prev);
 	m_bDetectorActive			= false;
+	if(prev.type==eItemPlaceSlot)
+	{
+		SwitchState					(eHidden);
+		g_player_hud->detach_item	(this);
+		m_bNeedActivation = false;
+	}
 	TurnDetectorInternal			(false);
 	StopCurrentAnimWithoutCallback	();
 }
