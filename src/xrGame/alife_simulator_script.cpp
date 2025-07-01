@@ -281,26 +281,35 @@ ALife::_SPAWN_ID CALifeSimulator__spawn_id		(CALifeSimulator *self_, ALife::_SPA
 	return								(((const CALifeSimulator *)self_)->spawns().spawn_id(spawn_story_id));
 }
 
-void CALifeSimulator__release					(CALifeSimulator *self_, CSE_Abstract *object, bool)
+void CALifeSimulator__release(CALifeSimulator* self_, CSE_Abstract* object, bool)
 {
-	VERIFY								(self_);
-//	self->release						(object,true);
+	VERIFY(self_);
 
-	R_ASSERT(object, "alife():release requires an object to pass!");
-	CSE_ALifeObject						*alife_object = smart_cast<CSE_ALifeObject*>(object);
-	R_ASSERT(alife_object, "alife():release requires an alife object to pass!");
-	if (alife_object != nullptr && !alife_object->m_bOnline) {
-		self_->release					(object,true);
+	if (object == nullptr)
+	{
+		R_ASSERT(object, "alife():release requires an object to pass!");
+		return;
+	}
+
+	CSE_ALifeObject* alife_object = smart_cast<CSE_ALifeObject*>(object);
+	if (!alife_object)
+	{
+		R_ASSERT(alife_object, "alife():release requires an alife object to pass!");
+		return;
+	}
+	if (!alife_object->m_bOnline)
+	{
+		self_->release(object, true);
 		return;
 	}
 
 	// awful hack, for stohe only
 	NET_Packet							packet;
-	packet.w_begin						(M_EVENT);
-	packet.w_u32						(Level().timeServer());
-	packet.w_u16						(GE_DESTROY);
-	packet.w_u16						(object->ID);
-	Level().Send						(packet,net_flags(TRUE,TRUE));
+	packet.w_begin(M_EVENT);
+	packet.w_u32(Level().timeServer());
+	packet.w_u16(GE_DESTROY);
+	packet.w_u16(object->ID);
+	Level().Send(packet, net_flags(TRUE, TRUE));
 }
 
 void CALifeSimulator__release2(CALifeSimulator *self, CSE_Abstract *object)

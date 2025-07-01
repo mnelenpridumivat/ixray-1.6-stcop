@@ -75,6 +75,9 @@ protected:
 	// Parentness
 	CObject*							Parent;
 
+	float u_optimize_time = 0;
+	float f_optimize_dist = 0;
+
 	// Geometric (transformation)
 	svector<SavedPosition,4>			PositionStack;
 public:
@@ -106,6 +109,7 @@ public:
 	BOOL								GetTmpPreDestroy		()		const	{ return Props.bPreDestroy;	}
 	void								SetTmpPreDestroy	(BOOL b)			{ Props.bPreDestroy = b;}
 	virtual float						shedule_Scale();
+	virtual float shedule_Scale_Base();
 	virtual bool						shedule_Needed		()					{return processing_enabled() && bIsTicking;};
 	bool IsTicking() const {return bIsTicking;}
 	void SetTicking(bool b);
