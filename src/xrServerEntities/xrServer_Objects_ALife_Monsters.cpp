@@ -1673,7 +1673,7 @@ void CSE_ALifeCreatureActor::UPDATE_Read	(NET_Packet	&tNetPacket)
 
 	////////////////////////////////////////////////////
 	tNetPacket.r_u16			(m_u16NumItems);
-
+	
 	if (!m_u16NumItems) return;
 
 	if (m_u16NumItems == 1)
@@ -2306,6 +2306,12 @@ void CSE_ALifeMonsterBase::SyncWrite(NET_Packet& Packet)
 	clamp(whealth, 0.f, 1.f);
 
 	Packet.w_float_q8(whealth, 0, 1);
+
+	Packet.w_u8(m_flags.flags);
+	if (m_flags.test(fHasCustomSyncFlag))
+	{
+		Packet.w_u8(m_custom_flags);
+	}
 }
 
 void CSE_ALifeMonsterBase::SyncRead(NET_Packet& Packet)
@@ -2347,6 +2353,12 @@ void CSE_ALifeMonsterBase::SyncRead(NET_Packet& Packet)
 	float health = 0;
 	Packet.r_float_q8(health, 0, 1);
 	set_health(health);
+
+	Packet.r_u8(m_flags.flags);
+	if (m_flags.test(fHasCustomSyncFlag))
+	{
+		Packet.r_u8(m_custom_flags);
+	}
 }
 
 void CSE_ALifeMonsterBase::UPDATE_Read	(NET_Packet	&tNetPacket)
@@ -2357,7 +2369,7 @@ void CSE_ALifeMonsterBase::UPDATE_Read	(NET_Packet	&tNetPacket)
 		return;
 	}
 #endif
-
+	
 	inherited1::UPDATE_Read(tNetPacket);
 	inherited2::UPDATE_Read(tNetPacket);
 }
