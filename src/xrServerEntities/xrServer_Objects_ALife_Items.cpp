@@ -14,12 +14,14 @@
 #include "Save/SaveObject.h"
 #include "shared_string.h"
 
-#	include "../xrEngine/bone.h"
+#include "../xrEngine/bone.h"
+
 #ifdef XRGAME_EXPORTS
 #	ifdef DEBUG
 #		define PHPH_DEBUG
 #	endif
 #endif
+
 #ifdef PHPH_DEBUG
 #include "PHDebug.h"
 #endif
