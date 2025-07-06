@@ -260,7 +260,7 @@ void CActorCondition::UpdateCondition()
 		SetMaxPower(1.f);
 	}
 
-	if (IsGameTypeSingle())
+	if (IsGameTypeSingleCompatible() && !g_dedicated_server)
 	{
 		CEffectorCam* pAlcoholEffector = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
 		if ((Alcohol.Current > 0.0001f))
