@@ -1640,6 +1640,11 @@ bool CWeapon::SwitchAmmoType( u32 flags )
 	if ( !(flags & CMD_START) )
 		return false;
 
+	if (IsMisfire())
+	{
+		return false;
+	}
+
 	if (IsTriStateReload() && iAmmoElapsed == iMagazineSize)
 		return false;
 
