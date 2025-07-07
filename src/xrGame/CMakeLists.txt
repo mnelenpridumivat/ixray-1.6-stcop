@@ -61,6 +61,8 @@ file(GLOB_RECURSE XGM_SOURCE_SERV_FILES
 file(GLOB_RECURSE XGM_SOURCE_STORY_ID_FILES "ScriptsSubsystems/StoryID/*.*")
 file(GLOB_RECURSE XGM_SOURCE_CONDLIST_ID_FILES "ScriptsSubsystems/Condlist/*.*")
 
+file(GLOB_RECURSE XGM_SOURCE_AI_STALKER_FILES "ai/stalker/*.*")
+file(GLOB_RECURSE XGM_SOURCE_AI_TRADER_FILES "ai/trader/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_BASE_FILES "ai/monsters/base_monster/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_GS_FILES "ai/monsters/group_states/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_STATE_FILES "ai/monsters/states/*.*")
@@ -80,11 +82,10 @@ file(GLOB_RECURSE XGM_SOURCE_AI_RATS_FILES "ai/monsters/rats/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_SNORK_FILES "ai/monsters/snork/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_TUSH_FILES "ai/monsters/tushkano/*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_ZOMB_FILES "ai/monsters/zombie/*.*")
+file(GLOB_RECURSE XGM_SOURCE_WPN_FILES "Weapon*.*")
 file(GLOB_RECURSE XGM_SOURCE_AI_ANOM_PGIG_FILES "ai/monsters/anomal_pseudogigant/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_AI_POLT_ABILITIES_FILES "ai/monsters/abilities/poltergeist/*.*")
-
-file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
 file(GLOB_RECURSE XGM_SOURCE_LEGACY_FILES "Legacy/*.*")
 
@@ -96,6 +97,8 @@ source_group("core" FILES ${XGM_SOURCE_ALL_FILES})
 source_group("ui" FILES ${XGM_SOURCE_UI_FILES})
 #source_group("ai" FILES ${XGM_SOURCE_AI_FILES})
 source_group("ai/car" FILES ${XGM_SOURCE_CAR_FILES})
+source_group("ai/trader" FILES ${XGM_SOURCE_AI_TRADER_FILES})
+source_group("ai/stalker" FILES ${XGM_SOURCE_AI_STALKER_FILES})
 source_group("ai/smart_cover" FILES ${XGM_SOURCE_SC_FILES})
 source_group("ai/space_restictor" FILES ${XGM_SOURCE_SR_FILES})
 source_group("ai/monsters/base" FILES ${XGM_SOURCE_AI_BASE_FILES})
@@ -122,11 +125,12 @@ source_group("ai/monsters/anomal_pseudogigant" FILES ${XGM_SOURCE_AI_ANOM_PGIG_F
 source_group("ai/monsters/abilities/poltergeist" FILES ${XGM_SOURCE_AI_POLT_ABILITIES_FILES})
 
 source_group("alife" FILES ${XGM_SOURCE_ALIFE_FILES})
-source_group("server" FILES ${XGM_SOURCE_SERV_FILES})
+source_group("client&server" FILES ${XGM_SOURCE_SERV_FILES})
 source_group("actor" FILES ${XGM_SOURCE_ACTOR_FILES})
 source_group("level" FILES ${XGM_SOURCE_LEVEL_FILES})
 source_group("ikan" FILES ${XGM_SOURCE_IKAN_FILES})
 source_group("inventory" FILES ${XGM_SOURCE_INV_FILES})
+source_group("weapons" FILES ${XGM_SOURCE_WPN_FILES})
 source_group("ai/legacy_planner" FILES ${XGM_SOURCE_LEGACY_FILES})
 source_group("AnimNotify" FILES ${XGM_SOURCE_ANIM_NOTIFY_FILES})
 source_group("scripts/story_id" FILES ${XGM_SOURCE_STORY_ID_FILES})
@@ -171,12 +175,6 @@ target_compile_definitions(xrGame PRIVATE _USRDLL)
 target_compile_definitions(xrGame PRIVATE XRGAME_EXPORTS)
 target_compile_definitions(xrGame PRIVATE dSINGLE)
 
-if (IXRAY_MP)
-	target_compile_definitions(xrGame PRIVATE XR_MP_BUILD)
-endif()
-
-add_compile_options(/fp:fast)
-add_compile_options(/FS)
 target_compile_definitions(xrGame PRIVATE "$<$<CONFIG:Debug>:DEBUG>")
 
 # Linker list
