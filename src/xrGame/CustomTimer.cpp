@@ -338,7 +338,7 @@ void CTimerManager::load(IReader& packet)
 
 void CTimerManager::Serialize(ISaveObject& Object)
 {
-    BEGIN_CHUNK(Object,"CBinderManager")
+    BEGIN_CHUNK(Object,"CTimerManager")
     {
         Object << Timers;
     }
