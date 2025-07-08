@@ -281,11 +281,11 @@ void CGameTask::serialize_task(ISaveObject& Object)
 	BEGIN_CHUNK(Object,"CGameTask")
 	{
 		{
-			u8* Value = (u8*)&m_task_state;
+			u16* Value = (u16*)&m_task_state;
 			Object << *Value;
 		}
 		{
-			u8* Value = (u8*)&m_task_type;
+			u16* Value = (u16*)&m_task_type;
 			Object << *Value;
 		}
 		Object << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish << m_Title << m_Description << m_Description
@@ -391,7 +391,10 @@ void SGameTaskKey::serialize(ISaveObject& Object)
 {
 	BEGIN_CHUNK(Object,"SGameTaskKey")
 	{
-		game_task = new CGameTask();
+		if (!game_task)
+		{
+			game_task = new CGameTask();
+		}
 		Object << task_id;
 		game_task->m_ID = task_id;
 		game_task->serialize_task(Object);
