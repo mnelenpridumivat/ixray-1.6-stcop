@@ -1873,7 +1873,7 @@ shared_str CWeaponMagazined::SetCurrentReloadAnimation()
 		{
 			AddSuffixName(anim, "_empty");
 		}
-		else if (m_bNeedFirstShootAnims &&  m_bJustAfterReload)
+		else if (m_bJustAfterReload)
 		{
 			AddSuffixName(anim, "_first");
 		}
@@ -1923,7 +1923,7 @@ shared_str CWeaponMagazined::SetCurrentStateAnimation(const shared_str& first_na
 		{
 			AddSuffixName(anim, "_empty");
 		}
-		else if (m_bNeedFirstShootAnims && m_bJustAfterReload)
+		else if (m_bJustAfterReload)
 		{
 			AddSuffixName(anim, "_first");
 		}
@@ -2093,7 +2093,7 @@ shared_str CWeaponMagazined::SetCurrentShootAnimation()
 			AddSuffixName(anim, "_l");
 		}
 
-		if (m_bJustAfterReload && m_bNeedFirstShootAnims)
+		if (m_bJustAfterReload)
 		{
 			AddSuffixName(anim, "_first");
 		}
@@ -2514,7 +2514,7 @@ void CWeaponMagazined::OnMotionMark(u32 state, const motion_marks& mark)
 			GiveAmmoFromMagToChamber();
 		}
 
-		if (!grenade_mode && m_bNeedFirstShootAnims)
+		if (!grenade_mode)
 		{
 			m_bJustAfterReload = true;
 		}
