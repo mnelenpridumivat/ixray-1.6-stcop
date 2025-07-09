@@ -2187,7 +2187,7 @@ bool CWeaponMagazined::SwitchMode()
  
 void CWeaponMagazined::ChangeFireMode(u16 cmd)
 {
-	if (!HasFireModes() || GetState() != eIdle || IsZoomed() && m_bFireModeConditions[0] && !m_bFireModeConditions[1])
+	if (!HasFireModes() || GetState() != eIdle || IsZoomed() && m_eAnimationsFlags.test(EAnimationsFlags::af_firemode) && m_bDisableFireModeAim)
 	{
 		return;
 	}
@@ -2205,7 +2205,7 @@ void CWeaponMagazined::ChangeFireMode(u16 cmd)
 
 	SetQueueSize(GetCurrentFireMode());
 
-	if (m_bFireModeConditions[0])
+	if (m_eAnimationsFlags.test(EAnimationsFlags::af_firemode))
 	{
 		SwitchState(eSwitchMode);
 	}
