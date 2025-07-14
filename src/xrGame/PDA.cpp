@@ -186,7 +186,7 @@ CInventoryOwner* CPda::GetOriginalOwner()
 
 
 
-void CPda::ActivePDAContacts(xr_vector<CPda*>& res)
+void CPda::ActivePDAContacts(xr_vector<CInventoryOwner*>& res)
 {
 	res.resize(0);
 	xr_vector<CObject*>::iterator it		= m_active_contacts.begin();
@@ -194,7 +194,7 @@ void CPda::ActivePDAContacts(xr_vector<CPda*>& res)
 
 	for(;it!=it_e;++it)
 	{
-		CPda* p = GetPdaFromOwner(*it);
+		CInventoryOwner* p = GetOwner(*it);
 		if(p)
 			res.push_back(p);
 	}
@@ -265,9 +265,9 @@ LPCSTR		CPda::Name				()
 }
 */
 
-CPda* CPda::GetPdaFromOwner(CObject* owner)
+CInventoryOwner* CPda::GetOwner(CObject* owner)
 {
-	return (owner&&!owner->getDestroy()&&owner->cast_inventory_owner()) ? owner->cast_inventory_owner()->GetPDA() : NULL;
+	return (owner&&!owner->getDestroy()&&owner->cast_inventory_owner()) ? owner->cast_inventory_owner() : NULL;
 }
 
 void CPda::PlayScriptFunction()
