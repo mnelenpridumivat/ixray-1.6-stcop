@@ -3,7 +3,7 @@
 #include "../../xrEngine/ILoadingScreen.h"
 #include "../../xrUI/Widgets/UIStatic.h"
 #include "../../xrUI/Widgets/UIWindow.h"
-#include "../../xrUI/Widgets/UIProgressBar.h"
+#include "../../xrUI/Widgets/UILoadingScreenProgress.h"
 
 class CApplication;
 
@@ -12,8 +12,7 @@ class UILoadingScreen :
     public CUIWindow 
 {
     CUIStatic* loadingProgressBackground;
-    CUIProgressBar* loadingProgress;
-    CUIProgressBar* loadingProgressRight;
+    CUILoadingScreenProgress* loadingProgress;
     CUIStatic* loadingLogo;
     CUIStatic* loadingProgressPercent;
 
@@ -21,8 +20,7 @@ class UILoadingScreen :
     CUIStatic* loadingHeader;
     CUIStatic* loadingTipNumber;
     CUIStatic* loadingTip;
-    bool rightProgressbarPresent;
-
+    bool progressUnderBackground;
 public:
     UILoadingScreen();
 
@@ -34,4 +32,5 @@ public:
     void SetLevelLogo(const char* name) const override;
     void SetStageTitle(const char* title) const override;
     void SetStageTip(const char* header, const char* tipNumber, const char* tip) const override;
+    virtual void Draw();
 };
