@@ -1198,7 +1198,7 @@ void player_hud::load(const shared_str& player_hud_sect)
 	m_sect_name = player_hud_sect;
 
 	const shared_str& model_name = pSettings->r_string(player_hud_sect, "visual");
-	m_model = smart_cast<IKinematicsAnimated*>(::Render->model_Create(model_name.c_str()));
+	m_model = ::Render->model_Create(model_name.c_str())->dcast_PKinematicsAnimated();
 
 	auto pathOmfs = EngineExternal().GetPlayerHudOmfAdditional();
 	if (pathOmfs && pathOmfs[0])
@@ -1665,7 +1665,7 @@ bool player_hud::allow_activation(CHudItem* item)
 			CActor* pActor = smart_cast<CActor*>(pEntity);
 			if(pActor)
 			{
-				CHudItem* pDetector = smart_cast<CHudItem*>(pActor->inventory().ItemFromSlot(DETECTOR_SLOT));
+				CHudItem* pDetector = pActor->inventory().ItemFromSlot(DETECTOR_SLOT) ? pActor->inventory().ItemFromSlot(DETECTOR_SLOT)->cast_hud_item() : nullptr;
 				if(pDetector && pDetector->GetState()!=CHUDState::eHidden)
 					return pDetector->CheckCompatibility(item);
 			}
@@ -1804,7 +1804,7 @@ void player_hud::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 				{
 					if(pActor->inventory().ActiveItem())
 					{
-						CHudItem* pWeap = smart_cast<CHudItem*>(pActor->inventory().ActiveItem());
+						CHudItem* pWeap = pActor->inventory().ActiveItem()->cast_hud_item();
 						if(pWeap && pWeap->GetState()==CHUDState::eIdle)
 							pWeap->PlayAnimIdle();
 					}
@@ -1820,7 +1820,7 @@ void player_hud::OnMovementChanged(ACTOR_DEFS::EMoveCommand cmd)
 				{
 					if(pActor->inventory().GetActiveSlot() != NO_ACTIVE_SLOT)
 					{
-						CHudItem* pWeap = smart_cast<CHudItem*>(pActor->inventory().ActiveItem());
+						CHudItem* pWeap = pActor->inventory().ActiveItem()->cast_hud_item();
 						if(pWeap && pWeap->GetState()!=CHUDState::eHidden)
 							pWeap->OnMovementChanged(cmd);
 					}
