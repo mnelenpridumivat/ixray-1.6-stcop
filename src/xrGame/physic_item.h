@@ -36,8 +36,9 @@ public:
 	virtual void	create_box_physic_shell			();
 	virtual void	create_box2sphere_physic_shell	();
 	virtual void	create_physic_shell				();
-	/*virtual void Save(CSaveObjectSave* Object) const override { inherited::Save(Object); }
-	virtual void Load(CSaveObjectLoad* Object) override { inherited::Load(Object); }*/
+	virtual CPhysicItem* cast_physics_item() { return this; }
+	virtual CPhysicsShellHolder* cast_physics_shell_holder() { return this; }
+	
 	virtual void Serialize(ISaveObject& Object) override { inherited::Serialize(Object); }
 };
 

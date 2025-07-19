@@ -333,6 +333,7 @@ public:
 	virtual CSilencer* cast_addon_silencer() {return nullptr;}
 	virtual CScope* cast_addon_scope() {return nullptr;}
 	virtual CGrenadeLauncher* cast_addon_grenade_launcher() {return nullptr;}
+	virtual CPhysicItem* cast_physics_item() { return nullptr; }
 	virtual CFlameCanister* cast_flame_canister() { return nullptr; }
 	virtual CFlamethrower* cast_flamethrower() { return nullptr; }
 
