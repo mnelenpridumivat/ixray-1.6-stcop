@@ -52,6 +52,9 @@ public:
 	//virtual void Load(CSaveObjectLoad* Object) override;
 	virtual void Serialize(ISaveObject& Object) override;
 
+	virtual CGameObject* cast_game_object() { return this; }
+	virtual CLevelChanger* cast_level_changer() { return this; }
+
 #ifdef DEBUG_DRAW
 	virtual void		OnRender();
 #endif
