@@ -63,6 +63,8 @@ public:
 	//virtual void Load(CSaveObjectLoad* Object) override;
 	virtual void Serialize(ISaveObject& Object) override;
 
+	virtual CPda* cast_pda() { return this; }
+
 //*	virtual LPCSTR							Name					();
 
 protected:

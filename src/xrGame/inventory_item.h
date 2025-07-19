@@ -32,6 +32,24 @@ class CWeapon;
 class CPhysicsShellHolder;
 class NET_Packet;
 class CEatableItem;
+class CArtefact;
+class CCustomOutfit;
+class CHelmet;
+class CCustomDetector;
+class CWeaponMagazined;
+class CWeaponMagazinedWGrenade;
+class CWeaponBinoculars;
+class CWeaponKnife;
+class CWeaponBM16;
+class CWeaponRPG7;
+class CWeaponRG6;
+class CTorch;
+class CBolt;
+class CPda;
+class CGrenade;
+class CSilencer;
+class CScope;
+class CGrenadeLauncher;
 class CFlamethrower;
 class CFlameCanister;
 struct SPHNetState;
@@ -296,8 +314,26 @@ public:
 	virtual CMissile			*cast_missile				()	{return nullptr;}
 	virtual CHudItem			*cast_hud_item				()	{return nullptr;}
 	virtual CWeaponAmmo			*cast_weapon_ammo			()	{return nullptr;}
-	virtual CFlameCanister* cast_flame_canister() { return nullptr; }
 	virtual CGameObject			*cast_game_object			()  {return nullptr;}
+	virtual CArtefact			*cast_artefact				()  {return nullptr;}
+	virtual CCustomOutfit		*cast_outfit				()	{return nullptr;}
+	virtual CHelmet				*cast_helmet				()	{return nullptr;}
+	virtual CCustomDetector		*cast_custom_detector		()	{return nullptr;}
+	virtual CWeaponBinoculars	*cast_weapon_binoculars		()  {return nullptr;}
+	virtual CWeaponKnife		*cast_weapon_knife			()  {return nullptr;}
+	virtual CWeaponMagazined	*cast_weapon_magazined		()  {return nullptr;}
+	virtual CWeaponMagazinedWGrenade* cast_weapon_magazined_w_grenade() {return nullptr;}
+	virtual CWeaponBM16			*cast_weapon_bm16			()  {return nullptr;}
+	virtual CTorch				*cast_torch					()  {return nullptr;}
+	virtual CWeaponRPG7* cast_weapon_rpg7() { return nullptr; }
+	virtual CWeaponRG6* cast_weapon_rg6() { return nullptr; }
+	virtual CBolt* cast_bolt() { return nullptr; }
+	virtual CPda* cast_pda() { return nullptr; }
+	virtual CGrenade* cast_grenade() { return nullptr; }
+	virtual CSilencer* cast_addon_silencer() {return nullptr;}
+	virtual CScope* cast_addon_scope() {return nullptr;}
+	virtual CGrenadeLauncher* cast_addon_grenade_launcher() {return nullptr;}
+	virtual CFlameCanister* cast_flame_canister() { return nullptr; }
 	virtual CFlamethrower* cast_flamethrower() { return nullptr; }
 
 	////////// upgrades //////////////////////////////////////////////////

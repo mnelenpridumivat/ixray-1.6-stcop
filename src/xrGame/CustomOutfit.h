@@ -30,6 +30,8 @@ public:
 	virtual void			OnMoveToRuck		(const SInvItemPlace previous_place) override;
 	virtual void			OnH_A_Chield		();
 
+	virtual CCustomOutfit* cast_outfit() { return this; }
+
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
 
 protected:
