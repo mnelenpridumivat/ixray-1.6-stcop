@@ -212,6 +212,7 @@ void CLevel::ClientSend()
 //		if (!(Game().local_player) || Game().local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)) return;
 		if (CurrentControlEntity()) 
 		{
+			PROF_EVENT("CLevel::CurrentControlEntity");
 			CObject* pObj = CurrentControlEntity();
 			if (!pObj->getDestroy() && pObj->net_Relevant())
 			{				
@@ -242,6 +243,7 @@ void CLevel::ClientSend()
 		return;
 	}
 	//-------------------------------------------------
+	PROF_EVENT("CLevel::Objects");
 	while (1)
 	{
 		P.w_begin						(M_UPDATE);
@@ -332,7 +334,9 @@ void CLevel::Send(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
 
 void CLevel::net_Update	()
 {
+	PROF_EVENT("CLevel::net_Update");
 	if(game_configured){
+		PROF_EVENT("CLevel::net_Update::ClientSend");
 		// If we have enought bandwidth - replicate client data on to server
 		Device.Statistic->netClient2.Begin	();
 		ClientSend					();
@@ -340,6 +344,7 @@ void CLevel::net_Update	()
 	}
 	// If server - perform server-update
 	if (Server && OnServer())	{
+		PROF_EVENT("CLevel::net_Update::Server");
 		Device.Statistic->netServer.Begin();
 		Server->Update					();
 		Device.Statistic->netServer.End	();

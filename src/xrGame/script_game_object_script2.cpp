@@ -411,6 +411,8 @@ class_<CScriptGameObject> script_register_game_object1(class_<CScriptGameObject>
 		.def("SetCharacterIcon", &CScriptGameObject::SetCharacterIcon)
 		.def("SetCharacterDefaultVisual", &CScriptGameObject::SetCharacterDefaultVisual)
 
+		.def("SetIgnoreOnPDA", &CScriptGameObject::SetIgnoreOnPDA)
+
 
 	.def("start_hud_animator", &CScriptGameObject::StartActorAnimator)
 	.def("stop_hud_animator", &CScriptGameObject::StopActorAnimator)

@@ -224,10 +224,12 @@ void xrServer::Update	()
 	game->ProcessDelayedEvent();
 	game->Update						();
 
+	PROF_EVENT("xrServer::SpawnQueue");
 	// spawn queue
 	u32 svT								= Device.TimerAsync();
 	while (!(q_respawn.empty() || (svT<q_respawn.begin()->timestamp)))
 	{
+		PROF_EVENT("xrServer::SpawnQueueElem");
 		// get
 		svs_respawn	R					= *q_respawn.begin();
 		q_respawn.erase					(q_respawn.begin());
@@ -244,6 +246,7 @@ void xrServer::Update	()
 	}
 
 
+	PROF_EVENT("xrServer::SendUpdatesToAll");
 	SendUpdatesToAll();
 
 

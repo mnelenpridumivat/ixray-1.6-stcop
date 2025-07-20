@@ -94,6 +94,7 @@ BIND_FUNCTION01	(&object(),	CScriptGameObject::SetSleepiness,		CEntityAlive,	con
 BIND_FUNCTION01	(&object(),	CScriptGameObject::SetThirst,			CEntityAlive,	conditions().ChangeThirst,		float,							float);
 BIND_FUNCTION01	(&object(),	CScriptGameObject::SetCircumspection,	CEntityAlive,	conditions().ChangeCircumspection,float,							float);
 BIND_FUNCTION01	(&object(),	CScriptGameObject::SetMorale,			CEntityAlive,	conditions().ChangeEntityMorale,	float,							float);
+BIND_FUNCTION01 (&object(), CScriptGameObject::SetIgnoreOnPDA,		CEntityAlive,	SetIgnoreOnPDA,		bool,	bool);
 BIND_FUNCTION02	(&object(),	CScriptGameObject::SetScriptControl,	CScriptEntity,	SetScriptControl,	bool,								LPCSTR,					bool,					shared_str);
 BIND_FUNCTION10	(&object(),	CScriptGameObject::GetScriptControl,	CScriptEntity,	GetScriptControl,	bool,								false);
 BIND_FUNCTION10	(&object(),	CScriptGameObject::GetScriptControlName,CScriptEntity,GetScriptControlName,LPCSTR,					"");

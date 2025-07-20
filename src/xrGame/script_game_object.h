@@ -230,6 +230,7 @@ public:
 	_DECLARE_FUNCTION11	(SetThirst,			void, float);
 	_DECLARE_FUNCTION11	(SetCircumspection,	void, float);
 	_DECLARE_FUNCTION11	(SetMorale,			void, float);
+	_DECLARE_FUNCTION11 (SetIgnoreOnPDA,	void, bool);
 
 			void				set_fov				(float new_fov);
 			void				set_range			(float new_range);
