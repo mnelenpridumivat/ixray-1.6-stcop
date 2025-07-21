@@ -92,6 +92,23 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 			if( tp.detail_name.size() &&
 				tp.flags.is_any(STextureParams::flDiffuseDetail|STextureParams::flBumpDetail) )
 			{
+				string_path src_detail_name;
+				FS.update_path(src_detail_name, _game_textures_, tp.detail_name.c_str());
+				xr_strcat(src_detail_name, ".dds");
+				if (!FS.exist(src_detail_name))
+				{
+					if (!FS.exist(src_detail_name))
+					{
+						Msg("! Detail texture not found\n"
+							"  Detail texture name: %s\n"
+							"  Expected path: %s\n"
+							"  Source texture: %s\n",
+							tp.detail_name.c_str(),
+							src_detail_name,
+							fn);
+					}
+				}
+
 				if(desc.m_assoc)
 					xr_delete				(desc.m_assoc);
 
@@ -116,21 +133,38 @@ void CTextureDescrMngr::LoadTHM(LPCSTR initial)
 
 			desc.m_spec					= new texture_spec();
 			desc.m_spec->m_material		= (float)tp.material+tp.material_weight;
-			desc.m_spec->m_use_steep_parallax = false;
+			desc.m_spec->m_use_steep_parallax = tp.bump_mode == STextureParams::tbmUseParallax;
 			desc.m_spec->m_use_pbr = (tp.material == STextureParams::tmPBR_Material);
 			
-			if(tp.bump_mode==STextureParams::tbmUse)
+			if (tp.bump_mode == STextureParams::tbmUse || tp.bump_mode == STextureParams::tbmUseParallax)
 			{
-				desc.m_spec->m_bump_name	= tp.bump_name;
-			}
-			else if (tp.bump_mode==STextureParams::tbmUseParallax)
-			{
-				desc.m_spec->m_bump_name	= tp.bump_name;
-				desc.m_spec->m_use_steep_parallax = true;
-			}
+				string_path src_bump_name;
+				FS.update_path(src_bump_name, _game_textures_, tp.bump_name.c_str());
+				xr_strcat(src_bump_name, ".dds");
 
+				if (tp.bump_name == "")
+				{
+					Msg("! Missing bumpmap reference\n"
+						"  Texture: %s\n"
+						"  Reason: Bumpmap name is empty\n",
+						(*It).name.c_str(), fn);
+				}
+				else if (!FS.exist(src_bump_name))
+				{
+					Msg("! Bumpmap texture not found\n"
+						"  Bumpmap name: %s\n"
+						"  Expected path: %s\n"
+						"  Source texture: %s\n"
+						"  Material requires: %s\n",
+						tp.bump_name.c_str(),
+						src_bump_name,
+						fn,
+						(tp.bump_mode == STextureParams::tbmUseParallax) ? "parallax bump" : "bump");
+				}
+
+				desc.m_spec->m_bump_name = tp.bump_name;
+			}
 		}
-
 	}
 }
 
