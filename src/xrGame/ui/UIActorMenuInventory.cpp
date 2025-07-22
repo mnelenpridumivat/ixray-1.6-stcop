@@ -1386,7 +1386,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
 	}
 	case INVENTORY_EAT4_ACTION:
 	{
-		CGameObject* GO = smart_cast<CGameObject*>(item);
+		CGameObject* GO = item->cast_game_object();
 		LPCSTR functor_name = READ_IF_EXISTS(pSettings, r_string, GO->cNameSect(), "use3_functor", 0);
 		if (functor_name)
 		{
@@ -1401,7 +1401,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked(CUIWindow* w, void* d)
 	}
 	case INVENTORY_EAT5_ACTION:
 	{
-		CGameObject* GO = smart_cast<CGameObject*>(item);
+		CGameObject* GO = item->cast_game_object();
 		LPCSTR functor_name = READ_IF_EXISTS(pSettings, r_string, GO->cNameSect(), "use4_functor", 0);
 		if (functor_name)
 		{
