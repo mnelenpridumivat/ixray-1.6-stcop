@@ -35,6 +35,7 @@ class CAI_Stalker;
 class CEntity;
 class CBaseMonster;
 class CCar;
+class CAI_Trader;
 class CSaveObject;
 
 class CInventoryOwner : public CAttachmentOwner {							
@@ -52,6 +53,7 @@ public:
 	virtual CGameObject*		cast_game_object		()	{return nullptr;}
 	virtual CBaseMonster*		cast_base_monster		()	{return nullptr;}
 	virtual CCar*				cast_car				()	{return nullptr;}
+	virtual CAI_Trader*			cast_trader				()  {return nullptr;}
 public:
 
 	virtual DLL_Pure	*_construct				();
