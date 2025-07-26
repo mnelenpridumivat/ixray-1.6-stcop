@@ -28,6 +28,7 @@ class CUIMessageBoxEx;
 class CUIPropertiesBox;
 class CTrade;
 class CUIProgressBar;
+class CUIItemDropAmountWnd;
 class CScriptGameObject;
 
 namespace inventory { namespace upgrade {
@@ -114,6 +115,7 @@ protected:
 	xr_vector<CUIStatic*>		m_ArtefactSlotsHighlight;
 
 	CUIInventoryUpgradeWnd*		m_pUpgradeWnd = nullptr;
+	CUIItemDropAmountWnd*		m_pItemDropAmountWnd = nullptr;
 	
 	CUIStatic*					m_LeftBackground = nullptr;
 
@@ -346,7 +348,6 @@ protected:
 	void						SendEvent_Item_Drop			(PIItem	pItem, u16 parent);
 	void						SendEvent_Item_Eat			(PIItem	pItem, u16 parent);
 	void						SendEvent_ActivateSlot		(u16 slot, u16 recipient);
-	void						DropAllCurrentItem			();
 	void						OnPressUserKey				();
 
 	// trade
@@ -366,6 +367,9 @@ public:
 								CUIActorMenu				();
 	virtual						~CUIActorMenu				();
 
+	void						DropAllCurrentItem			(u32 item_amount);
+	void						MoveAllCurrentItem			(u32 item_amount);
+	void						TakeAllCurrentItem			(u32 item_amount);
 	CUICellItem*				CurrentItem					();
 	void						SetCurrentItem				(CUICellItem* itm);
 	virtual bool				StopAnyMove					();

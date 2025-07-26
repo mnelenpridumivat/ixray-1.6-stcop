@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251" ?>
 <string_table>
     <string id="st_ixray_title">
-        <text>S.T.A.L.K.E.R.: Clear Sky</text>
+        <text>S.T.A.L.K.E.R.: Call of Pripyat</text>
     </string>
     <string id="st_discord_menu">
         <text>Main menu</text>
@@ -54,6 +54,9 @@
     <string id="st_filter_fsr">
         <text>FSR2</text>
     </string>
+	<string id="st_filter_xess">
+		<text>Intel XeSS</text>
+	</string>
     <string id="st_freemp">
         <text>Freeplay</text>
     </string>
@@ -387,5 +390,39 @@
 	</string>
 	<string id="st_track_opt_on">
 		<text>on</text>
+	</string>
+	<string id="Contacts">
+		<text>Contacts</text>
+	</string>
+	<string id="pda_btn_contacts">
+		<text>Contacts</text>
+	</string>
+	<string id="pda_btn_contacts_hint">
+		<text>Show stalker contact list</text>
+	</string>
+	<string id="st_undress_backpack">
+		<text>take off backpack</text>
+	</string>
+	<string id="st_dress_backpack">
+		<text>put on backpack</text>
+	</string>
+	
+	<string id="st_drop_amount">
+		<text>drop amount</text>
+	</string>
+	<string id="st_move_amount">
+		<text>move amount</text>
+	</string>
+	<string id="st_take_amount">
+		<text>take amount</text>
+	</string>
+	<string id="st_custom_drop_hint_0">
+		<text>Specify amount of items to drop</text>
+	</string>
+	<string id="st_custom_drop_hint_1">
+		<text>Specify amount of items to move</text>
+	</string>
+	<string id="st_custom_drop_hint_2">
+		<text>Specify amount of items to take</text>
 	</string>
 </string_table>
