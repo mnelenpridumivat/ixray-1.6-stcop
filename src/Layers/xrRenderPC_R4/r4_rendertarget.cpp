@@ -443,8 +443,6 @@ CRenderTarget::CRenderTarget()
 		DisplayRT(rt_sslr_temp);
 		DisplayRT(rt_ssao_temp);
 		DisplayRT(rt_Velocity);
-		DisplayRT(rt_GammaLUT);
-
 #undef DisplayRT
 
 		static int stack_levels = 3;
@@ -561,11 +559,8 @@ CRenderTarget::CRenderTarget()
 
 	// Screen Post Process
 	{
-		b_spp = new CBlender_SPP;
+		b_spp = new CBlender_SPP();
 		s_spp.create(b_spp);
-
-		b_gasmask = new CBlenderGasMask;
-		s_gasmask.create(b_gasmask);
 	}
 
 	// SMAA
@@ -607,8 +602,6 @@ CRenderTarget::CRenderTarget()
 	// Gamma
 	b_gamma = new CBlender_gamma();
 	s_gamma.create(b_gamma);
-
-	rt_GammaLUT.create(r2_RT_gamma_lut, 1024, 1, DxgiFormat::DXGI_FORMAT_R10G10B10A2_UNORM);
 
 	// OCCLUSION
 	s_occq.create(b_occq, "r2\\occq");
@@ -964,7 +957,6 @@ CRenderTarget::~CRenderTarget	()
 	xr_delete(b_smaa);
 	xr_delete(b_gamma);
 	xr_delete(b_spp);
-	xr_delete(b_gasmask);
 	xr_delete(b_accum_mask);
 	xr_delete(b_occq);
 	xr_delete(b_cas);

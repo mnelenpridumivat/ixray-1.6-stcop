@@ -40,7 +40,6 @@ public:
 
 	IBlender*					b_fxaa;
 	IBlender*					b_spp;
-	IBlender*					b_gasmask;
 	IBlender*					b_smaa;
 	IBlender*					b_scale;
 	IBlender*					b_cas;
@@ -117,7 +116,6 @@ public:
 	ref_texture					t_noise				[TEX_jitter_count];
 private:
 	ref_shader					s_spp;
-	ref_shader					s_gasmask;
 	ref_shader					s_fxaa;
 	ref_shader					s_smaa;
 	ref_shader					s_scale;
@@ -127,7 +125,6 @@ private:
 	ref_shader					s_taa;
 
 	// For gamma correction in windowed mode
-	ref_rt						rt_GammaLUT;		// 24bit, 256x1 (r,g,b)
 	ref_shader					s_gamma;
 
 	// OCCq
@@ -278,8 +275,6 @@ public:
 	void						PhaseAberration			();
 	void						PhaseVignette			();
 	void						PhaseSaturation			();
-	void						PhaseRaindrops();
-	void						PhaseGasmask			();
 	void						PhaseWinter				();
 
 	void						phase_scene_forward		();
@@ -352,8 +347,7 @@ public:
 	void						increment_light_marker();
 
 	void						DoAsyncScreenshot		();
-	void PhaseGammaApply();
-	void PhaseGammaGenerateLUT();
+	void						PhaseGammaApply			();
 
 #ifdef DEBUG
 	IC void						dbg_addline				(Fvector& P0, Fvector& P1, u32 c)					{
