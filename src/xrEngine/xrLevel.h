@@ -378,5 +378,4 @@ constexpr u32 XRAI_LARGE_VERSION = 13;
 #pragma warning(pop)
 
 #define CHECK_SPAWN_VERSION(m_version) \
-	(m_version >= XRAI_SOC_VERSION && m_version <= XRAI_CURRENT_VERSION) || \
-	m_version == XRAI_LARGE_VERSION
+	m_version >= XRAI_MINIMAL_VERSION && m_version <= XRAI_CURRENT_VERSION

@@ -32,23 +32,53 @@ CLevelGraph::CLevelGraph()
 
 	switch (AIVersion)
 	{
-		case XRAI_MINIMAL_VERSION:
+		case XRAI_MINIMAL_VERSION: // ver 10 - CS/CoP format
 		{
-			NodeCompressed10* temp = (NodeCompressed10*)m_reader->pointer();
+			NodeCompressed10* Src = (NodeCompressed10*)m_reader->pointer();
 			m_nodes = new CVertex[header().vertex_count()];
 
 			for (u32 i = 0; i < header().vertex_count(); ++i)
 			{
-				std::memcpy(&m_nodes[i].high, &temp[i].high, sizeof(temp[i].high) + sizeof(temp[i].low) + sizeof(temp[i].plane) + sizeof(temp[i].p));
+
 
 				for (u8 j = 0; j < 4; ++j)
 				{
-					m_nodes[i].link(j, temp[i].link(j));
+					u32 link_value = Src[i].link(j);
+					m_nodes[i].UncompressedNode.link(j, link_value);
 				}
-				m_nodes[i].light(temp[i].light());
+
+				// Îñòàëüíûå ïîëÿ
+				m_nodes[i].UncompressedNode.high = Src[i].high;
+				m_nodes[i].UncompressedNode.low = Src[i].low;
+				m_nodes[i].UncompressedNode.plane = Src[i].plane;
+
+				m_nodes[i].UncompressedNode.p.xz(Src[i].p.xz());
+				m_nodes[i].UncompressedNode.p.y(Src[i].p.y());
 			}
 			break;
 		}
+		/*case XRAI_CURRENT_VERSION: // ver 11 - 25-bit format
+		{
+			NodeCompressed* compressed_nodes = (NodeCompressed*)m_reader->pointer();
+			m_nodes = new CVertex[header().vertex_count()];
+
+			for (size_t i = 0; i < header().vertex_count(); ++i)
+			{
+				for (u8 link_idx = 0; link_idx < 4; ++link_idx)
+				{
+					u32 old_link = compressed_nodes[i].link(link_idx);
+					m_nodes[i].UncompressedNode.link(link_idx, old_link);
+				}
+
+				m_nodes[i].UncompressedNode.high = compressed_nodes[i].high;
+				m_nodes[i].UncompressedNode.low = compressed_nodes[i].low;
+				m_nodes[i].UncompressedNode.plane = compressed_nodes[i].plane;
+
+				m_nodes[i].UncompressedNode.p.xz(compressed_nodes[i].p.xz());
+				m_nodes[i].UncompressedNode.p.y(compressed_nodes[i].p.y());
+			}
+			break;
+		}*/
 		case XRAI_CURRENT_VERSION:
 		{
 			m_nodes = (CVertex*)m_reader->pointer();
