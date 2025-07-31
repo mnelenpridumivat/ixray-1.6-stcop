@@ -28,6 +28,9 @@ public:
 	virtual void				SetDefaultStartDialog		(const DIALOG_ID_VECTOR& phrase_dialog);
 	virtual const DIALOG_ID_VECTOR& 	GetStartDialog						()								{return m_sStartDialog;}
 	virtual void				RestoreDefaultStartDialog	();
+
+	virtual CPhraseDialogManager* cast_phrase_dialog_manager() { return this; }
+
 protected:
 	//диалог, если не NULL, то его персонаж запустит
 	//при встрече с актером

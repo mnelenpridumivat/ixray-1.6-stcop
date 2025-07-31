@@ -82,6 +82,7 @@ public:
 	CMapSpot*				pSelectedMapSpot;
 
 	virtual void			Reset				();
+	virtual CUIWindow* ui_cast_window() { return this; }
 
 public:
 							CUIPdaWnd			();
