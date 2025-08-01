@@ -44,6 +44,7 @@ public:
 	virtual	bool			UseBy(CEntityAlive* npc);
 	virtual float			Weight() const;
 	virtual void			EatableEffects();
+	virtual	void			Hit(SHit* pHDS);
 	
 	virtual bool				CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
 

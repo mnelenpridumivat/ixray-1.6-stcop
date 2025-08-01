@@ -89,26 +89,6 @@ void CEatableItem::save(NET_Packet& packet)
 	packet.w_u8(m_iRemainingUses);
 }
 
-/*void CEatableItem::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CEatableItem");
-	{
-		inherited::Save(Object);
-		Object->GetCurrentChunk()->w_float(m_iPortionsMarker);
-	}
-	Object->EndChunk();
-}
-
-void CEatableItem::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CEatableItem");
-	{
-		inherited::Load(Object);
-		Object->GetCurrentChunk()->r_float(m_iPortionsMarker);
-	}
-	Object->EndChunk();
-}*/
-
 void CEatableItem::Serialize(ISaveObject& Object)
 {
 	BEGIN_CHUNK(Object,"CEatableItem")
@@ -315,6 +295,10 @@ float CEatableItem::Weight() const
 	return res;
 }
 
+void CEatableItem::Hit(SHit* pHDS)
+{
+	//Предмет получает урон и не стакается по использованиям, поэтому функция пустая
+}
 bool CEatableItem::CheckInventoryIconItemSimilarity(CInventoryItem* other)
 {
 	if (!inherited::CheckInventoryIconItemSimilarity(other))
