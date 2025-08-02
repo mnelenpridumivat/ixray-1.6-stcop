@@ -77,6 +77,7 @@ class CScriptZone;
 class CHelicopter;
 class CHangingLamp;
 class CPhraseDialogManager;
+class CBackpack;
 
 class IKinematics;
 class CAI_Trader;
@@ -161,6 +162,7 @@ public:
 	virtual CHelicopter* cast_helicopter() { return nullptr; }
 	virtual CHangingLamp* cast_hanging_lamp() { return nullptr; }
 	virtual CPhraseDialogManager* cast_phrase_dialog_manager() { return nullptr; }
+	virtual CBackpack* cast_backpack() { return nullptr; }
 
 public:
 	virtual BOOL						feel_touch_on_contact	(CObject *)					{return TRUE;}
