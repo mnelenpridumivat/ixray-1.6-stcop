@@ -260,7 +260,7 @@ void CUIDragDropListEx::OnItemSelected(CUIWindow* w, void* pData)
 	VerifyDeselected(NewSelected);
 	m_selected_item						= NewSelected;
 	VERIFY								(m_selected_item);
-	if(m_f_item_selected)
+	if(m_f_item_selected){
 		m_f_item_selected(m_selected_item);
 	}
 }
@@ -270,7 +270,9 @@ void CUIDragDropListEx::OnItemDeselected(CUIWindow* w, void* pData)
 	m_selected_item						= smart_cast<CUICellItem*>(w);
 	VERIFY								(m_selected_item);
 	if(m_f_item_deselected)
+	{
 		m_f_item_deselected(m_selected_item);
+	}
 }
 
 void  CUIDragDropListEx::OnItemFocusReceived(CUIWindow* w, void* pData)
