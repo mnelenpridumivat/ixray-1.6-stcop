@@ -481,7 +481,7 @@ public:
 			CScriptGameObject	*GetBestEnemy		();
 			const CDangerObject	*GetBestDanger		();
 			CScriptGameObject	*GetBestItem		();
-
+			void				SetBestEnemy		(CScriptGameObject* lua_game_object);
 	_DECLARE_FUNCTION10			(GetActionCount,u32);
 	
 			const				CScriptEntityAction	*GetActionByIndex(u32 action_index = 0);
@@ -981,6 +981,7 @@ public:
 
 			void		SetCharacterName(LPCSTR name);
 			void		SetCharacterIcon(LPCSTR iconName);
+			void SetCharacterMaxWeight(float value);
 			void		SetCharacterDefaultVisual(LPCSTR name);
 	void StartActorAnimator(LPCSTR section);
 	void StopActorAnimator();
@@ -988,6 +989,8 @@ public:
 	bool IsAnimatorActive();
 	u8 GetActorAnimatorRestoredSlot();
 	float GetActorPowerBoostTime();
+	LPCSTR GetCutsceneVisual();
+	void SetInvulnerable(bool value);
 	bool GetAnimatorForceHideItems();
 	void SetAnimatorForceHideItems(bool status);
 

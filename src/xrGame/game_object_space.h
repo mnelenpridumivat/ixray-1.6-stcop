@@ -83,6 +83,7 @@ namespace GameObject {
 
 		eActorBeforeDeath,
 		eActorHudAnimationEnd,
+		eOnBestEnemySelected,
 
 		eDangerousMaterialTouch,
 

@@ -414,13 +414,16 @@ class_<CScriptGameObject> script_register_game_object1(class_<CScriptGameObject>
 		.def("SetIgnoreOnPDA", &CScriptGameObject::SetIgnoreOnPDA)
 
 
-	.def("start_hud_animator", &CScriptGameObject::StartActorAnimator)
-	.def("stop_hud_animator", &CScriptGameObject::StopActorAnimator)
-	.def("is_hud_animator_active", &CScriptGameObject::IsAnimatorActive)
-	.def("get_hud_animator_section", &CScriptGameObject::GetActorAnimatorSection)
-	.def("get_hud_animator_restored_slot", &CScriptGameObject::GetActorAnimatorRestoredSlot)
-	.def("get_hud_animator_force_hide_items", &CScriptGameObject::GetAnimatorForceHideItems)
-	.def("set_hud_animator_force_hide_items", &CScriptGameObject::SetAnimatorForceHideItems)
-	.property("mechanic",					&CScriptGameObject::getMechanic, &CScriptGameObject::setMechanic)
+		.def("start_hud_animator", &CScriptGameObject::StartActorAnimator)
+		.def("stop_hud_animator", &CScriptGameObject::StopActorAnimator)
+		.def("is_hud_animator_active", &CScriptGameObject::IsAnimatorActive)
+		.def("get_hud_animator_section", &CScriptGameObject::GetActorAnimatorSection)
+		.def("get_hud_animator_restored_slot", &CScriptGameObject::GetActorAnimatorRestoredSlot)
+		.def("get_hud_animator_force_hide_items", &CScriptGameObject::GetAnimatorForceHideItems)
+		.def("set_hud_animator_force_hide_items", &CScriptGameObject::SetAnimatorForceHideItems)
+			
+		.def("SetCharacterMaxWeight",			&CScriptGameObject::SetCharacterMaxWeight)
+	
+		.property("mechanic",					&CScriptGameObject::getMechanic, &CScriptGameObject::setMechanic)
 	;
 }

@@ -37,7 +37,6 @@ public:
 protected:
 	HitImmunity::HitTypeSVec		m_HitTypeProtection;
 
-	shared_str				m_ActorVisual;
 	shared_str				m_full_icon_name;
 	shared_str				m_character_portrait;
 	SBoneProtections*		m_boneProtection;	
@@ -46,6 +45,7 @@ protected:
 	u32						m_artefact_count;
 
 public:
+	shared_str				m_ActorVisual;
 	bool IsExo = false;
 	bool IsExoProto = false;
 	bool GlassPresent = false;
