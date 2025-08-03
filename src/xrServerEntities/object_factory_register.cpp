@@ -193,8 +193,9 @@
 #	include "smart_cover_object.h"
 #	include "EditorLevel.h"
 
-#include "../xrGame/HolderEntityObject.h"
-#include "../xrGame/ActorBackpack.h"
+#	include "../xrGame/HolderEntityObject.h"
+#	include "../xrGame/ActorBackpack.h"
+#	include "../xrGame/InventoryItems/Dosimeter/Dosimeter.h"
 #endif // NO_XR_GAME
 
 #ifndef NO_XR_GAME
@@ -427,6 +428,7 @@ void CObjectFactory::register_classes	()
 	ADD(CCompass				,CSE_ALifeItemDetector			,CLSID_DEVICE_COMPASS			,"device_compass");
 	ADD(CPda					,CSE_ALifeItemPDA				,CLSID_DEVICE_PDA				,"device_pda");
 	ADD(CFlare					,CSE_ALifeItem					,CLSID_DEVICE_FLARE				,"device_flare");
+	ADD(CDosimeter				,CSE_ALifeItemDetector			,CLSID_DEVICE_DOSIMETER			,"device_dosimeter");
 
 	// objects
 	ADD(CProjector				,CSE_ALifeObjectProjector		,CLSID_OBJECT_PROJECTOR			,"projector");
