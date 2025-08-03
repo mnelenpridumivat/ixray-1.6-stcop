@@ -1165,52 +1165,6 @@ void CWeaponMagazined::OnAnimationEnd(u32 state)
 			{
 				bMisfire = false;
 				bMisfireReload = false;
-			}
-			else
-			{
-				if (!m_bIsReloaded)
-				{
-					m_bIsReloaded = true;
-					ReloadMagazine();
-				}
-				GiveAmmoFromMagToChamber();
-			}
-			SwitchState(eIdle);
-		} break;
-	case eHiding:
-		SwitchState(eHidden);  
-		break;
-	case eIdle:
-		switch2_Idle();
-		break;
-	case eEmptyClick:
-		{
-			m_bBlockEmptyClick = false;
-			SwitchState(eIdle);
-			break;
-		}
-	case eFire:
-	case eFire2:
-	case eShowing:
-	case eSwitchMode:
-		SwitchState(eIdle);
-		break;
-	}
-	inherited::OnAnimationEnd(state);
-	/*switch(state) 
-	{
-		case eReload:
-		{
-			if (!IsTriStateReload())
-			{
-				bReloadKeyPressed = false;
-				bAmmotypeKeyPressed = false;
-			}
-
-			if (bMisfireReload)
-			{
-				bMisfire = false;
-				bMisfireReload = false;
 				m_bJustAfterReload = true;
 			}
 			else
@@ -1245,34 +1199,25 @@ void CWeaponMagazined::OnAnimationEnd(u32 state)
 			}
 			SwitchState(eIdle);
 		} break;
-		case eHiding:
-			SwitchState(eHidden);  
+	case eHiding:
+		SwitchState(eHidden);  
 		break;
-		case eIdle:
-			switch2_Idle();
+	case eIdle:
+		switch2_Idle();
 		break;
-		case eEmptyClick:
+	case eEmptyClick:
 		{
 			m_bBlockEmptyClick = false;
 			SwitchState(eIdle);
 			break;
 		}
-		case eFire:
-		{
-			if (ParentIsActor())
-			{
-				SwitchState(eIdle);
-			}
-			break;
-		}
-		case eFire2:
-		case eShowing:
-		case eSwitchMode:
-		case eDevice:
-			SwitchState(eIdle);
+	case eShowing:
+	case eSwitchMode:
+	case eDevice:
+		SwitchState(eIdle);
 		break;
 	}
-	inherited::OnAnimationEnd(state);*/
+	inherited::OnAnimationEnd(state);
 }
 
 void CWeaponMagazined::switch2_Idle	()
