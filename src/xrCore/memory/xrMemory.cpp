@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 
 #pragma hdrstop
@@ -7,14 +6,12 @@
 #include "memory_alloc_xr.h"
 #include "memory_alloc_mimalloc.h"
 
-#include	"xrsharedmem.h"
-#include	"xrMemory_pure.h"
+#include "xrsharedmem.h"
 
 // HACK: ForserX: Хак для установки уровня инициализации переменной в глобальном пространстве
 #pragma section(".Hook",read)
 
-BOOL		mem_initialized	= FALSE;
-//bool		shared_str_initialized	= false;
+BOOL mem_initialized	= FALSE;
 
 //fake fix of memory corruptions in multiplayer game :(
 XRCORE_API	bool g_allow_heap_min = true;
@@ -65,15 +62,12 @@ void xrMemory::_initialize(BOOL bDebug)
 
 	mem_initialized = TRUE;
 
-	//g_pStringContainer = new str_container();
-	//shared_str_initialized = true;
 	g_pSharedMemoryContainer = new smem_container();
 }
 
 void xrMemory::_destroy()
 {
 	xr_delete					(g_pSharedMemoryContainer);
-	//xr_delete					(g_pStringContainer);
 
 	mem_initialized				= FALSE;
 }
