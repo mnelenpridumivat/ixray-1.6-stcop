@@ -148,12 +148,53 @@ void CAI_Space::validate			(const u32 level_id) const
 {
 	VERIFY					(level_graph().header().vertex_count() == cross_table().header().level_vertex_count());
 	for (GameGraph::_GRAPH_ID i=0, n = game_graph().header().vertex_count(); i<n; ++i)
-		if ((level_id == game_graph().vertex(i)->level_id()) && 
-			(!level_graph().valid_vertex_id(game_graph().vertex(i)->level_vertex_id()) ||
-			(cross_table().vertex(game_graph().vertex(i)->level_vertex_id()).game_vertex_id() != i) ||
-			!level_graph().inside(game_graph().vertex(i)->level_vertex_id(),game_graph().vertex(i)->level_point()))) {
-			Msg				("! Graph doesn't correspond to the cross table");
-			R_ASSERT2		(false,"Graph doesn't correspond to the cross table");
+		if (level_id == game_graph().vertex(i)->level_id()){
+			u32 current_game_vertex_level_vertex_id = game_graph().vertex(i)->level_vertex_id();
+			bool level_graph_vertex_id_valid = level_graph().valid_vertex_id(current_game_vertex_level_vertex_id);
+			if (!level_graph_vertex_id_valid)
+			{
+				xr_string buff = (
+					"Invalid corresponding level graph vertex id ["
+					+ std::to_string(current_game_vertex_level_vertex_id)
+					+ "] for game graph vertex ["
+					+ std::to_string(i)
+					+ "]"
+					).c_str();
+				VERIFY(level_graph_vertex_id_valid, buff.c_str());
+			}
+			auto cross_table_game_vertex_id = cross_table().vertex(current_game_vertex_level_vertex_id).game_vertex_id();
+			bool cross_table_game_vertex_id_eq = cross_table_game_vertex_id == i;
+			if (!cross_table_game_vertex_id_eq)
+			{
+				xr_string buff = (
+					"cross table vertex ["
+					+ std::to_string(current_game_vertex_level_vertex_id)
+					+ "] has game vertex id ["
+					+ std::to_string(cross_table_game_vertex_id)
+					+ "] different from current game grapg vertex id ["
+					+ std::to_string(i)
+					+ "]"
+					).c_str();
+				VERIFY(cross_table_game_vertex_id_eq, buff.c_str());
+			}
+			auto& game_vertex_position = game_graph().vertex(i)->level_point();
+			bool game_vertex_inside_level_graph = level_graph().inside(current_game_vertex_level_vertex_id,game_vertex_position);
+			if (!game_vertex_inside_level_graph)
+			{
+				xr_string buff = (
+					"game vertex ["
+					+ std::to_string(current_game_vertex_level_vertex_id)
+					+ "] with position ["
+					+ get_string(game_vertex_position)
+					+ "] is not on level graph"
+				).c_str();
+				VERIFY(game_vertex_inside_level_graph, buff.c_str());
+			}
+			if (!level_graph_vertex_id_valid || !cross_table_game_vertex_id_eq || !game_vertex_inside_level_graph)
+			{
+				Msg				("! Graph doesn't correspond to the cross table");
+				R_ASSERT2		(false,"Graph doesn't correspond to the cross table");
+			}
 		}
 
 //	Msg						("death graph point id : %d",cross_table().vertex(455236).game_vertex_id());

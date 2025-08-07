@@ -57,7 +57,7 @@ CLevelGraph::CLevelGraph()
 			}
 			break;
 		}
-		/*case XRAI_CURRENT_VERSION: // ver 11 - 25-bit format
+		case XRAI_CURRENT_VERSION: // ver 11 - 25-bit format
 		{
 			NodeCompressed* compressed_nodes = (NodeCompressed*)m_reader->pointer();
 			m_nodes = new CVertex[header().vertex_count()];
@@ -78,8 +78,8 @@ CLevelGraph::CLevelGraph()
 				m_nodes[i].UncompressedNode.p.y(compressed_nodes[i].p.y());
 			}
 			break;
-		}*/
-		case XRAI_CURRENT_VERSION:
+		}
+		case XRAI_LARGE_VERSION:
 		{
 			m_nodes = (CVertex*)m_reader->pointer();
 			break;

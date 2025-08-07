@@ -15,6 +15,7 @@
 #include "object_broker.h"
 #include "GametaskManager.h"
 #include "GameTask.h"
+#include "Inventory.h"
 
 #include "ui/UIActorMenu.h"
 #include "ui/UIPdaWnd.h"

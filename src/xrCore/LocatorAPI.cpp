@@ -1376,6 +1376,7 @@ void CLocatorAPI::r_close(IReader*& fs)
 void CLocatorAPI::r_close(CStreamReader*& fs)
 {
 	fs->close();
+	fs = nullptr;
 }
 
 void CLocatorAPI::get_all_files_in_dir(xr_set<xr_string>& out, LPCSTR dir)
