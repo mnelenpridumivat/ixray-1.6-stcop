@@ -185,7 +185,9 @@ void CCharacterInfo::load(IReader& stream)
 		stream.r_stringZ(DialogName);
 		m_StartDialog.push_back(DialogName);
 	}
+	m_SpecificCharacter.load(stream);
 }
+
 void CCharacterInfo::save(NET_Packet& stream)
 {
 	stream.w_u16(m_StartDialog.size());
@@ -193,6 +195,7 @@ void CCharacterInfo::save(NET_Packet& stream)
 	{
 		stream.w_stringZ(Dialog);
 	}
+	m_SpecificCharacter.save(stream);
 }
 
 void CCharacterInfo::Serialize(ISaveObject& Object)
@@ -201,6 +204,7 @@ void CCharacterInfo::Serialize(ISaveObject& Object)
 	{
 		Object << m_StartDialog;
 	}
+	m_SpecificCharacter.Serialize(Object);
 }
 
 #endif
