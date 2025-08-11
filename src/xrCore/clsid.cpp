@@ -6,7 +6,15 @@ XRCORE_API void  CLSID2TEXT(CLASS_ID id, LPSTR text) {
 	for (int i=7; i>=0; i--) { text[i]=char(id&0xff); id>>=8; }
 }
 XRCORE_API CLASS_ID  TEXT2CLSID(LPCSTR text) {
-	VERIFY3(xr_strlen(text)<=8,"Beer from creator CLASS_ID:",text);
+	if (auto len = xr_strlen(text); len>8)
+	{
+		xr_string message = "Beer from creator CLASS_ID [";
+		message += text;
+		message +=  "], strlen [";
+		message += std::to_string(len);
+		message += "]";
+		R_ASSERT(len<=8, message.c_str());
+	}
 	char buf[9]; buf[8] = 0;
 	strncpy_s(buf,sizeof(buf),text,8);
 	size_t need = 8-xr_strlen(buf);

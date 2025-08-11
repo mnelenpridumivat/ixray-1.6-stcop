@@ -417,6 +417,7 @@ void CObjectFactory::register_classes	()
 	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,CLSID_Z_NOGRAVITY				,"nogravity_zone");
 	ADD(CZoneCampfire			,CSE_ALifeAnomalousZone			,CLSID_Z_CAMPFIRE				,"zone_campfire");
 	ADD(CSamZone				,CSE_ALifeSpaceRestrictor		,TEXT2CLSID("SAM_ZONE")			,"sam_zone");
+	ADD(CSpaceRestrictor		,CSE_ALifeDynamicWallmark		,TEXT2CLSID("DYNA_WM")			,"dynamic_wallmark");
 	// Detectors
 	ADD(CSimpleDetector			,CSE_ALifeItemDetector			,CLSID_DETECTOR_SIMPLE			,"device_detector_simple");
 	ADD(CAdvancedDetector		,CSE_ALifeItemDetector			,CLSID_DETECTOR_ADVANCED		,"device_detector_advanced");
