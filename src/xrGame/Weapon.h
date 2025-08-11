@@ -140,6 +140,7 @@ public:
 		eSwitchMode,
 		eEmptyClick,
 		eDevice,
+		eLightMis,
 	};
 	enum EWeaponSubStates{
 		eSubstateReloadBegin		=0,
@@ -153,8 +154,8 @@ public:
 	BOOL					IsUpdating			();
 
 
-	virtual BOOL					IsMisfire			() const;
-	BOOL					CheckForMisfire		();
+	virtual bool			IsMisfire			() const;
+	bool					CheckForMisfire		();
 
 
 	BOOL					AutoSpawnAmmo		() const		{ return m_bAutoSpawnAmmo; };
@@ -243,6 +244,10 @@ public:
 
 	virtual void OnMotionMark(u32 state, const motion_marks&);
 
+	bool IsJamProhibited();
+	bool OnWeaponJam();
+	bool CheckForMisfire_validate_NoMisfire();
+
 	struct conditional_breaking_params
 	{
 		float start_condition = 0.0f;     // при каком состоянии начнутся проблемы
@@ -253,14 +258,23 @@ public:
 	conditional_breaking_params CollimatorBreakingParams;
 	conditional_breaking_params TorchBreakingParams;
 
-	float m_fCollimatorLevelsProblem;
+	struct light_misfire_params
+	{
+		float startcond = 1.0f;
+		float endcond = 0.0f;
+		float startprob = 1.0f;
+		float endprob = 0.0f;
+	} light_misfire;
+
+	float m_fCollimatorLevelsProblem = 0.0f;
+	float m_fMisfireAfterProblemsLevel = 10.0f;
 
 	bool bUpdateHUDBonesVisibility = false;
 	u32 _last_update_time;
 
-	bool bReloadKeyPressed;
-	bool bAmmotypeKeyPressed;
-	bool bStopReloadSignal;
+	bool bReloadKeyPressed = false;
+	bool bAmmotypeKeyPressed = false;
+	bool bStopReloadSignal = false;
 	bool m_bUseSilHud = false;
 	bool m_bUseScopeHud = false;
 	bool m_bUseGLHud = false;
@@ -273,7 +287,12 @@ public:
 	bool m_bAddCartridgeInOpen = false;
 	bool m_bBlockUpdateAmmoBonesShooting = false;
 	bool m_bUseLastAmmoType = false;
-	bool m_bBlockReload;
+	bool m_bBlockReload = false;
+	bool m_bJamNotShot = true;
+	bool m_bUseLightMis = false;
+	bool m_bDisableLightMisDet = false;
+	bool m_bNoJamFirstShot = false;
+	bool m_bActorCanShoot = true;
 
 	shared_str hud_silencer;
 	shared_str hud_scope;
