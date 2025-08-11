@@ -117,7 +117,7 @@ bool CUIGameSP::IR_UIOnKeyboardPress(int dik)
 	{
 	case kACTIVE_JOBS:
 		{
-			if ( !pActor->inventory_disabled() )
+			if ( !pActor->pda_disabled() )
 				ShowPdaMenu();
 			break;
 		}
@@ -134,7 +134,7 @@ bool CUIGameSP::IR_UIOnKeyboardPress(int dik)
 		}
 
 	case kSCORES:
-        if (!pActor->inventory_disabled())
+        if (!pActor->pda_disabled())
         {
             m_game_objective = AddCustomStatic("main_task", true);
             CGameTask* t1 = Level().GameTaskManager()->ActiveTask(eTaskTypeStoryline);
