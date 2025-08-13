@@ -179,6 +179,9 @@ public:
 	virtual float GetHudFov();
 	virtual bool AllowBore() { return !m_bDisableBore && m_eAnimationsFlags.test(EAnimationsFlags::af_bore); }
 
+	bool CanStartAction(CActor* pActor);
+	bool SetKeyRepeatFlag(u32 kfACTTYPE);
+
 	enum EDevicesFlags
 	{
 		df_torch = (1 << 0),
