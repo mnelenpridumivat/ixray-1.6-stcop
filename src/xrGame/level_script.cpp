@@ -54,7 +54,6 @@
 #include "ai_object_location.h"
 
 #include "ActorHelmet.h"
-#include "DynamicWallmarkZone.h"
 #include "PickupManager.h"
 #include "UIActorMenu.h"
 #include "Cutscenes/CutsceneItem.h"
@@ -1146,9 +1145,6 @@ int get_custom_timer(LPCSTR name)
 
 void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
 {
-	if (OnClient()) {
-		return;
-	}
 	if (!launch_object)
 	{
 		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is NULL!");
@@ -1157,7 +1153,7 @@ void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
 	auto sam = smart_cast<CSamZone*>(&launch_object->object());
 	if (!sam)
 	{
-		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object [%s] is not a CSamZone!", launch_object->object().Name());
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "launch_sam: launch object is not a CSamZone!");
 		return;
 	}
 	if (!target)
@@ -1165,26 +1161,10 @@ void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
 		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "target_sam: target is NULL!");
 		return;
 	}
-	sam->LaunchMissile(&target->object());
-}
-
-void switch_wallmark(CScriptGameObject* object, bool isOn)
-{
 	if (OnClient()) {
 		return;
 	}
-	if (!object)
-	{
-		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "switch_wallmark: dynamic wallmark object is NULL!");
-		return;
-	}
-	auto DW = smart_cast<CDynamicWallmarkZone*>(&object->object());
-	if (!DW)
-	{
-		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "switch_wallmark: dynamic wallmark object [%s] is not a CDynamicWallmarkZone!", object->object().Name());
-		return;
-	}
-	DW->SwitchWallmark(isOn);
+	sam->LaunchMissile(&target->object());
 }
 
 bool IsUIShown()
@@ -1661,7 +1641,6 @@ void CLevel::script_register(lua_State* L)
 		def("get_user_name", &get_user_name),
 
 		def("launch_sam", &launch_sam),
-		def("switch_wallmark", &switch_wallmark),
 
 		// new for fmp
 		def("get_object_by_client", &get_object_by_client),
