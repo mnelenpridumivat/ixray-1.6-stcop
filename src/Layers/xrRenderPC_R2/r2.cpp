@@ -413,7 +413,7 @@ void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::
 {
 	if (T->suppress_wm)	return;
 	VERIFY2(_valid(P) && _valid(s) && T && verts && (s > EPS_L), "Invalid static wallmark params");
-	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s, Flags8(CWallmarksEngine::static_wallmark::flTimeToLive), UseCameraDirection);
+	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s, UseCameraDirection);
 }
 
 void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V, bool UseCameraDirection)
@@ -427,22 +427,6 @@ void CRender::add_StaticWallmark			(const wm_shader& S, const Fvector& P, float 
 {
 	dxUIShader* pShader = (dxUIShader*)&*S;
 	add_StaticWallmark		(pShader->hShader, P, s, T, V);
-}
-
-StaticWallmarkHandle::WallmarkHandlePtr CRender::add_DynamicWallmark(const wm_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
-{
-	if (T->suppress_wm)
-	{
-		R_ASSERT(!T->suppress_wm, "Unable to add dynamic wallmark!");
-		return nullptr;
-	}
-	VERIFY2(_valid(P) && _valid(s) && T && V && (s > EPS_L), "Invalid static wallmark params");
-	dxUIShader* pShader = (dxUIShader*)&*S;
-	auto wm = Wallmarks->AddStaticWallmark(
-		T, V, P, pShader->hShader, s,
-		Flags8(StaticWallmarkHandle::flHandler|StaticWallmarkHandle::flForceSpawn));
-	VERIFY(wm);
-	return wm->handler;
 }
 
 void					CRender::clear_static_wallmarks	()
