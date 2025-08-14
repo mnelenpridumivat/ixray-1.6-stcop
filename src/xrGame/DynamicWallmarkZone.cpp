@@ -52,11 +52,7 @@ BOOL CDynamicWallmarkZone::trace_callback(collide::rq_result& result, LPVOID par
 
 	wm_trace_data->self->handler = ::Render->add_DynamicWallmark(
 		CDynamicWallmarkRegistry::Instance().GetWallmarkShader(wm_trace_data->self->shader, wm_trace_data->self->texture),
-		collide_position,
-		wm_trace_data->self->w,
-		wm_trace_data->self->h,
-		wm_trace_data->self->r,
-		pTri, pVerts);
+		collide_position, wm_trace_data->self->r, pTri, pVerts);
 }
 
 BOOL CDynamicWallmarkZone::test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params)
