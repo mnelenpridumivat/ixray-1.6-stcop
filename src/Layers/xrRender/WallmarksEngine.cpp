@@ -77,19 +77,34 @@ void CWallmarksEngine::clear()
 }
 
 // allocate
-CWallmarksEngine::static_wallmark*	CWallmarksEngine::static_wm_allocate		()
+CWallmarksEngine::static_wallmark*	CWallmarksEngine::static_wm_allocate		(Flags8 flags)
 {
 	static_wallmark* W = 0;
 	if (static_pool.empty())  W = new static_wallmark();
 	else { W = static_pool.back(); static_pool.pop_back(); }
 
-	W->ttl				= ps_r__WallmarkTTL;
+	VERIFY(!flags.test(StaticWallmarkHandle::flForceRemove));
+	VERIFY(W->flags.test(StaticWallmarkHandle::flTimeToLive) != W->flags.test(StaticWallmarkHandle::flHandler));
+	W->flags = flags;
+	if (W->flags.test(StaticWallmarkHandle::flTimeToLive))
+	{
+		W->ttl				= ps_r__WallmarkTTL;
+	}
+	if (W->flags.test(StaticWallmarkHandle::flHandler))
+	{
+		W->handler = xr_make_shared<StaticWallmarkHandle::CWallmarkHandle>(&W->flags);
+	}
 	W->verts.clear		();
 	return W;
 }
 // destroy
 void		CWallmarksEngine::static_wm_destroy		(CWallmarksEngine::static_wallmark*	W	)
 {
+	if (W->flags.test(StaticWallmarkHandle::flHandler))
+	{
+		W->handler->Reset();
+		W->handler.reset();
+	}
 	static_pool.push_back	(W);
 }
 // render
@@ -180,7 +195,8 @@ void CWallmarksEngine::BuildMatrix	(Fmatrix &mView, float invsz, const Fvector& 
 	mView.mulA_43		(mScale);
 }
 
-void CWallmarksEngine::AddWallmark_internal	(CDB::TRI* pTri, const Fvector* pVerts, const Fvector &contact_point, ref_shader hShader, float sz, bool UseCameraDirection)
+CWallmarksEngine::static_wallmark* CWallmarksEngine::AddWallmark_internal(
+	CDB::TRI* pTri, const Fvector* pVerts, const Fvector &contact_point, ref_shader hShader, float sz, bool UseCameraDirection, Flags8 WMFlags)
 {
 	// query for polygons in bounding box
 	// calculate adjacency
@@ -194,7 +210,7 @@ void CWallmarksEngine::AddWallmark_internal	(CDB::TRI* pTri, const Fvector* pVer
 		xrc.box_query		(g_pGameLevel->ObjectSpace.GetStaticModel(),bbc,bbd);
 		u32	triCount		= xrc.r_count	();
 		if (0==triCount)	
-			return;
+			return nullptr;
 
 		CDB::TRI* tris		= g_pGameLevel->ObjectSpace.GetStaticTris();
 		sml_collector.clear	();
@@ -230,14 +246,14 @@ void CWallmarksEngine::AddWallmark_internal	(CDB::TRI* pTri, const Fvector* pVer
 	sml_clipper.CreateFromMatrix	(mView,FRUSTUM_P_LRTB);
 
 	// create wallmark
-	static_wallmark* W	= static_wm_allocate();
+	static_wallmark* W	= static_wm_allocate(WMFlags);
 	RecurseTri			(0, mView, *W);
 
 	// calc sphere
 	if (W->verts.size()<3) 
 	{ 
 		static_wm_destroy(W); 
-		return; 
+		return nullptr; 
 	}else 
 	{
 		Fbox bb;	bb.invalidate();
@@ -263,7 +279,7 @@ void CWallmarksEngine::AddWallmark_internal	(CDB::TRI* pTri, const Fvector* pVer
 				{ // replace
 					static_wm_destroy	(wm);
 					*it					=	W;
-					return;
+					return W;
 				}
 			}
 		} else {
@@ -273,22 +289,26 @@ void CWallmarksEngine::AddWallmark_internal	(CDB::TRI* pTri, const Fvector* pVer
 		// no similar - register _new_
 		slot->static_items.push_back(W);
 	}
+	return W;
 	//else
 	//{
 	//	static_wm_destroy(W);
 	//}
 }
 
-void CWallmarksEngine::AddStaticWallmark	(CDB::TRI* pTri, const Fvector* pVerts, const Fvector &contact_point, ref_shader hShader, float sz, bool UseCameraDirection)
+CWallmarksEngine::static_wallmark* CWallmarksEngine::AddStaticWallmark(CDB::TRI* pTri, const Fvector* pVerts, const Fvector &contact_point, ref_shader hShader, float sz, Flags8 flags, bool UseCameraDirection)
 {
 	// optimization cheat: don't allow wallmarks more than 100 m from viewer/actor
-	if (contact_point.distance_to_sqr(Device.vCameraPosition) > _sqr(100.f))	
-		return;
+	if (!flags.test(StaticWallmarkHandle::flForceSpawn) && contact_point.distance_to_sqr(Device.vCameraPosition) > _sqr(100.f))
+	{
+		return nullptr;
+	}
 
 	// Physics may add wallmarks in parallel with rendering
 	lock.Enter				();
-	AddWallmark_internal	(pTri,pVerts,contact_point,hShader,sz, UseCameraDirection);
+	auto result = AddWallmark_internal(pTri,pVerts,contact_point,hShader,sz, UseCameraDirection, flags);
 	lock.Leave				();
+	return result;
 }
 
 void CWallmarksEngine::AddSkeletonWallmark	(const Fmatrix* xf, CKinematics* obj, ref_shader& sh, const Fvector& start, const Fvector& dir, float size)
@@ -379,8 +399,9 @@ void CWallmarksEngine::Render()
 		// static wallmarks
 		{
 			PROF_EVENT("STATIC_WALLMARKS");
-			for (StaticWMVecIt w_it=slot->static_items.begin(); w_it!=slot->static_items.end(); ){
-				static_wallmark* W	= *w_it;
+			for (size_t i = 0; i < slot->static_items.size(); )
+			{
+				static_wallmark* W	= slot->static_items[i];
 				if (RImplementation.ViewBase.testSphere_dirty(W->bounds.P,W->bounds.R)){
 					Device.Statistic->RenderDUMP_WMS_Count++;
 					float dst	= Device.vCameraPosition.distance_to_sqr(W->bounds.P);
@@ -397,13 +418,18 @@ void CWallmarksEngine::Render()
 				} else {
 					W->ttl	-= Device.fTimeDelta;
 				}
-				if (W->ttl<=EPS){	
-					static_wm_destroy	(W);
-					*w_it				= slot->static_items.back();
-					slot->static_items.pop_back();
-				}else{
-					w_it++;
+				if (W->flags.test(StaticWallmarkHandle::flTimeToLive) && W->ttl<=EPS)
+				{
+					W->flags.set(StaticWallmarkHandle::flForceRemove, true);
 				}
+				if (W->flags.test(StaticWallmarkHandle::flForceRemove))
+				{
+					static_wm_destroy	(W);
+					slot->static_items[i] = slot->static_items.back();
+					slot->static_items.pop_back();
+					continue;
+				}
+				++i;
 			}
 		}
 		// Flush stream
