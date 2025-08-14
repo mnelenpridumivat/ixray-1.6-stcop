@@ -60,7 +60,7 @@ void CWallmarksEngine::CMatrixBuilder_SizeCam::CreateMatrix(Fmatrix& out, const 
 	out.mulA_43		(mRot);
 }
 
-void CWallmarksEngine::CMatrixBuilder_SizeCam::FindBoxCenterAndDim(Fvector& bc, Fvector bd)
+void CWallmarksEngine::CMatrixBuilder_SizeCam::FindBoxCenterAndDim(Fvector& bc, Fvector& bd)
 {
 	Fbox bb_query;
 	bb_query.set(contact_point,contact_point);
@@ -88,7 +88,7 @@ void CWallmarksEngine::CMatrixBuilder_WHR::CreateMatrix(Fmatrix& out, const Fvec
 	out.mulA_43		(mRot);
 }
 
-void CWallmarksEngine::CMatrixBuilder_WHR::FindBoxCenterAndDim(Fvector& bc, Fvector bd)
+void CWallmarksEngine::CMatrixBuilder_WHR::FindBoxCenterAndDim(Fvector& bc, Fvector& bd)
 {
 	Fbox bb_query;
 	bb_query.set(contact_point,contact_point);
