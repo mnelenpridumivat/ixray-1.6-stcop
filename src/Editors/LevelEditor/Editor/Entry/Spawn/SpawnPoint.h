@@ -94,7 +94,6 @@ public:
 		void    		OnFrame			();
     	void 	OnAnimControlClick		(ButtonValue* value, bool& bModif, bool& bSafe);
 		void	OnWallmarkUpdateClick(ButtonValue* value, bool& bModif, bool& bSafe);
-		void	OnWallmarkDetachClick(ButtonValue* value, bool& bModif, bool& bSafe);
         
 		virtual void get_bone_xform				(LPCSTR name, Fmatrix& xform);
         IC CSE_Abstract* GetEntity()const { return m_Data; }
