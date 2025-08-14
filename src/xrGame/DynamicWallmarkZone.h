@@ -48,8 +48,6 @@ protected:
 public:
 
 	virtual BOOL					net_Spawn(CSE_Abstract* DC) override;
-	
-	virtual void Serialize(ISaveObject& Object) override;
 
 	void SwitchWallmark(bool isOn);
 

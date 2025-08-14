@@ -104,13 +104,3 @@ void CDynamicWallmarkZone::SwitchWallmark(bool isOn)
 		handler = nullptr;
 	}
 }
-
-void CDynamicWallmarkZone::Serialize(ISaveObject& Object)
-{
-	BEGIN_CHUNK(Object, "CDynamicWallmarkZone::Serialize")
-	{
-		inherited::Serialize(Object);
-		Object << CurrentStatus;
-		SwitchWallmark(CurrentStatus);
-	}
-}
