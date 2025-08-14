@@ -9,7 +9,6 @@
 #include "../../xrEngine/x_ray.h"
 #include "../../xrEngine/GameFont.h"
 #include "SkeletonCustom.h"
-#include "../../xrEngine/WallmarkHandle.h"
 
 u32 g_r = 1;
 

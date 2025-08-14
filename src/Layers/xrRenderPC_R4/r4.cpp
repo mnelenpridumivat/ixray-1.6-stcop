@@ -5,7 +5,6 @@
 #include "../../xrEngine/CustomHUD.h"
 #include "../../xrEngine/IGame_Persistent.h"
 #include "../../xrEngine/Environment.h"
-#include "../../xrEngine/WallmarkHandle.h"
 #include "../xrRender/SkeletonCustom.h"
 #include "../xrRender/LightTrack.h"
 #include "../xrRender/dxRenderDeviceRender.h"

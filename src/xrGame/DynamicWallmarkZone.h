@@ -1,4 +1,6 @@
 #pragma once
+#include "hudsound.h"
+#include "rocketlauncher.h"
 #include "smart_zone.h"
 #include "space_restrictor.h"
 

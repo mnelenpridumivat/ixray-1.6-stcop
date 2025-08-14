@@ -9,7 +9,7 @@ namespace StaticWallmarkHandle {
         flForceSpawn = 1 << 3,
     };
     
-    class ENGINE_API CWallmarkHandle{
+    class CWallmarkHandle{
         Flags8* HandledWallmarkFlags = nullptr;
     public:
         CWallmarkHandle(Flags8* HandledWallmarkFlags);

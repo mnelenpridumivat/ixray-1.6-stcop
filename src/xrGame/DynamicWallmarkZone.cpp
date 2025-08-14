@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "DynamicWallmarkZone.h"
 
-#include "Level.h"
-#include "WallMarkArray.h"
+#include "../xrSound/ai_sounds.h"
+#include "ai_space.h"
 #include "../xrScripts/script_engine.h"
+#include "xrMessages.h"
 #include "xrServer_Objects_ALife.h"
+#include "../utils/xrLC_Light/xrLC_GlobalData.h"
 
 CDynamicWallmarkRegistry::CDynamicWallmarkRegistry()
 {
@@ -55,8 +57,6 @@ BOOL CDynamicWallmarkZone::trace_callback(collide::rq_result& result, LPVOID par
 		wm_trace_data->self->h,
 		wm_trace_data->self->r,
 		pTri, pVerts);
-
-	return true;
 }
 
 BOOL CDynamicWallmarkZone::test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params)
