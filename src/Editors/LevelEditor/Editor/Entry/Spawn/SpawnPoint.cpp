@@ -534,6 +534,14 @@ void CSpawnPoint::SSpawnData::OnWallmarkUpdateClick(ButtonValue* value, bool& bM
 	}
 }
 
+void CSpawnPoint::SSpawnData::OnWallmarkDetachClick(ButtonValue* value, bool& bModif, bool& bSafe)
+{
+	if (Wallmark)
+	{
+		Wallmark->Detach();
+	}
+}
+
 void CSpawnPoint::SSpawnData::FillProp(LPCSTR pref, PropItemVec& items)
 {
 	xrCriticalSectionGuard guard(mLuaEnter);
@@ -553,8 +561,10 @@ void CSpawnPoint::SSpawnData::FillProp(LPCSTR pref, PropItemVec& items)
 
 	if (CSE_ALifeDynamicWallmark* DW = smart_cast<CSE_ALifeDynamicWallmark*>(m_Data);DW)
 	{
-		auto Button = PHelper().CreateButton(items, PrepareKey(pref,m_Data->name(), "UpdateWallmark"), "Update", 0);
+		auto Button = PHelper().CreateButton(items, PrepareKey(pref,m_Data->name(), "Update Wallmark"), "Update", 0);
 		Button->OnBtnClickEvent.bind(this, &CSpawnPoint::SSpawnData::OnWallmarkUpdateClick);
+		Button = PHelper().CreateButton(items, PrepareKey(pref, m_Data->name(), "Detach Wallmark"), "Detach", 0);
+		Button->OnBtnClickEvent.bind(this, &CSpawnPoint::SSpawnData::OnWallmarkDetachClick);
 	}
 }
 
