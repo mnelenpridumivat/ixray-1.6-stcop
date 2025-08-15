@@ -238,6 +238,21 @@ void CSaveChunk::w_string(shared_str S)
 	}
 }
 
+void CSaveChunk::CopySubchunks(CSaveChunk* Chunk)
+{
+	const auto& OtherSubchunks = Chunk->_subchunks;
+	for (auto& element : OtherSubchunks)
+	{
+		auto VerificationFind = _subchunks.find(element.first);
+		if (VerificationFind != _subchunks.end())
+		{
+			VERIFY(VerificationFind == _subchunks.end(), "There is already a subchunk with name", element.first.c_str());
+			continue;
+		}
+		_subchunks[element.first] = (CSaveChunk*)element.second->MakeCopy();
+	}
+}
+
 void CSaveChunk::r_bool(bool& A)
 {
 	if (_currentArrayStack.empty()) {
@@ -905,4 +920,18 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			}
 		}
 	}
+}
+
+ISaveable* CSaveChunk::MakeCopy()
+{
+	CSaveChunk* Copy = new CSaveChunk(_chunkName);
+	for (auto& Var : _variables)
+	{
+		Copy->_variables.emplace_back(Var->MakeCopy());
+	}
+	for (auto& SubChunk : _subchunks)
+	{
+		Copy->_subchunks[SubChunk.first] = (CSaveChunk*)(SubChunk.second->MakeCopy());
+	}
+	return Copy;
 }

@@ -3,26 +3,25 @@
 #include "MemoryBuffer.h"
 #include "SaveManager.h"
 
-/*CSaveVariableArray::~CSaveVariableArray()
+ISaveable* ISaveVariableArray::MakeCopy()
 {
-	for (size_t i = 0; i < _array.size(); ++i) {
-		xr_delete(_array[i]);
+	ISaveVariableArray* copy = new ISaveVariableArray();
+	for (auto elem : _array)
+	{
+		copy->AddVariable(elem->MakeCopy());
 	}
-}*/
-
-/*void CSaveVariableArray::Write(CMemoryBuffer& Buffer)
-{
-	Buffer.Write(ESaveVariableType::t_array);
-	Buffer.Write(_size);
-	for (const auto& elem : _array) {
-		elem->Write(Buffer);
-	}
-}*/
+	return copy;
+}
 
 void CSaveVariableBool::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_bool);
 	Task->ConditionalWriteBool(_value, Buffer);
+}
+
+ISaveable* CSaveVariableBool::MakeCopy()
+{
+	return new CSaveVariableBool(_value);
 }
 
 void CSaveVariableFloat::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
@@ -31,10 +30,20 @@ void CSaveVariableFloat::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableFloat::MakeCopy()
+{
+	return new CSaveVariableFloat(_value);
+}
+
 void CSaveVariableDouble::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_double);
 	Buffer.Write(_value);
+}
+
+ISaveable* CSaveVariableDouble::MakeCopy()
+{
+	return new CSaveVariableDouble(_value);
 }
 
 void CSaveVariableU64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
@@ -60,6 +69,11 @@ void CSaveVariableU64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableU64::MakeCopy()
+{
+	return new CSaveVariableU64(_value);
+}
+
 void CSaveVariableS64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
@@ -83,6 +97,11 @@ void CSaveVariableS64::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableS64::MakeCopy()
+{
+	return new CSaveVariableS64(_value);
+}
+
 void CSaveVariableU32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
@@ -99,6 +118,11 @@ void CSaveVariableU32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	}
 	Buffer.Write(ESaveVariableType::t_u32);
 	Buffer.Write(_value);
+}
+
+ISaveable* CSaveVariableU32::MakeCopy()
+{
+	return new CSaveVariableU32(_value);
 }
 
 void CSaveVariableS32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
@@ -119,6 +143,11 @@ void CSaveVariableS32::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableS32::MakeCopy()
+{
+	return new CSaveVariableS32(_value);
+}
+
 void CSaveVariableU16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseIntOptimization)) {
@@ -130,6 +159,11 @@ void CSaveVariableU16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	}
 	Buffer.Write(ESaveVariableType::t_u16);
 	Buffer.Write(_value);
+}
+
+ISaveable* CSaveVariableU16::MakeCopy()
+{
+	return new CSaveVariableU16(_value);
 }
 
 void CSaveVariableS16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
@@ -145,10 +179,20 @@ void CSaveVariableS16::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableS16::MakeCopy()
+{
+	return new CSaveVariableS16(_value);
+}
+
 void CSaveVariableU8::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_u8);
 	Buffer.Write(_value);
+}
+
+ISaveable* CSaveVariableU8::MakeCopy()
+{
+	return new CSaveVariableU8(_value);
 }
 
 void CSaveVariableS8::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
@@ -157,10 +201,20 @@ void CSaveVariableS8::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 	Buffer.Write(_value);
 }
 
+ISaveable* CSaveVariableS8::MakeCopy()
+{
+	return new CSaveVariableS8(_value);
+}
+
 void CSaveVariableString::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write(ESaveVariableType::t_string);
 	Task->ConditionalWriteString(_value, Buffer);
+}
+
+ISaveable* CSaveVariableString::MakeCopy()
+{
+	return new CSaveVariableString(_value);
 }
 
 ISaveVariableArray::~ISaveVariableArray()

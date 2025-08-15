@@ -45,6 +45,14 @@ CSaveObjectSave* CSaveManager::BeginSave()
 
 CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 {
+	if (LoadData)
+	{
+		for (auto& elem : _handles)
+		{
+			xr_delete(elem.second);
+		}
+		xr_delete(LoadData);
+	}
 	ReadHeader(stream);
 	if (TestFlag(ESaveManagerFlagsGeneral::EUseStringOptimization))
 	{
@@ -54,7 +62,7 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 	{
 		ReadBools(stream);
 	}
-	VERIFY(!LoadData);
+	//VERIFY(!LoadData);
 	_dirtyLoadData = false;
 	LoadData = new CSaveObjectLoad();
 	LoadData->Parse(stream);

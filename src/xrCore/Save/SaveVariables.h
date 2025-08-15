@@ -63,6 +63,8 @@ public:
 	virtual void Next() = 0;
 	virtual void AddVariable(ISaveable* data) = 0;
 	virtual u64 GetSize() = 0;
+	
+	virtual ISaveable* MakeCopy() = 0;
 };
 
 class XRCORE_API CSaveVariableBase:
@@ -79,19 +81,8 @@ public:
 	virtual u64 GetSize() override { return 0; };
 };
 
-/*class XRCORE_API ISaveVariableArray:
-	public ISaveable
-{
-public:
-	virtual ISaveable* GetCurrentElement() = 0;
-	virtual void Next() = 0;
-	virtual void AddVariable(ISaveable* data) = 0;
-	virtual u64 GetSize() = 0;
-};*/
-
 class XRCORE_API ISaveVariableArray :
-	public ISaveable//,
-	//public CSaveVariableBase
+	public ISaveable
 {
 	using array_type = xr_vector<ISaveable*>;
 	u64 _currentReadPos = 0;
@@ -126,6 +117,8 @@ public:
 	array_type::const_reverse_iterator crbegin() const { return _array.crbegin(); }
 	array_type::const_reverse_iterator crend() const { return _array.crend(); }
 	
+	virtual ISaveable* MakeCopy() override;
+	
 };
 
 class XRCORE_API CSaveVariableBool:
@@ -142,6 +135,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_bool; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableFloat :
@@ -158,6 +153,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_float; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableDouble :
@@ -174,6 +171,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_double; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableU64 :
@@ -190,6 +189,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u64; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableS64 :
@@ -206,6 +207,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s64; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableU32 :
@@ -222,6 +225,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u32; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableS32 :
@@ -238,6 +243,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s32; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableU16 :
@@ -254,6 +261,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u16; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableS16 :
@@ -270,6 +279,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s16; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableU8 :
@@ -286,6 +297,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_u8; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableS8 :
@@ -302,6 +315,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_s8; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 class XRCORE_API CSaveVariableString :
@@ -320,6 +335,8 @@ public:
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_string; }
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
 };
 
 struct SSaveVariableGetter {

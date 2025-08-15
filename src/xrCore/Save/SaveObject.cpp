@@ -92,12 +92,17 @@ bool CSaveObject::HasChunk(shared_str ChunkName)
 	}
 }*/
 
-u64 CSaveObject::ExtractCurrentChunk()
+u64 CSaveObjectLoad::ExtractCurrentChunk()
 {
 	auto CurrentChunk = _chunkStack.top();
 	auto Result = new CSaveChunkHandle(this, CurrentChunk);
 	auto ID = CSaveManager::GetInstance().RegisterHandle(Result);
 	return ID;
+}
+
+void CSaveObjectLoad::MergeChunkByHandle(ISaveChunkHandleInterface* handle)
+{
+	VERIFY(false, "Attempt to copy chunk into load object!");
 }
 
 CSaveObjectSave::CSaveObjectSave()
@@ -126,6 +131,18 @@ ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 void CSaveObjectSave::BeginArray()
 {
 	GetCurrentChunk()->WriteArray();
+}
+
+u64 CSaveObjectSave::ExtractCurrentChunk()
+{
+	VERIFY(false, "Cannot extract chunk from saving object!");
+}
+
+void CSaveObjectSave::MergeChunkByHandle(ISaveChunkHandleInterface* handle)
+{
+	auto InsertingChunk = handle->GetChunk();
+	auto CurrentChunk = GetCurrentChunk();
+	CurrentChunk->CopySubchunks(InsertingChunk);
 }
 
 ISaveObject& CSaveObjectSave::operator<<(float& Value)

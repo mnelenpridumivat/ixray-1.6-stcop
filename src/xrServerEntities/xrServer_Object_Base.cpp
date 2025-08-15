@@ -16,6 +16,8 @@
 #pragma warning(push)
 #pragma warning(disable:4995)
 #include <malloc.h>
+
+#include "Save/SaveManager.h"
 #pragma warning(pop)
 
 #ifndef AI_COMPILER
@@ -525,13 +527,17 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 			bool has_data = false;
 			if (Object.IsSave()) {
 				auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-				if (Obj)
-				{
-					has_data = true;
-				}
+				auto Handle = CSaveManager::GetInstance().GetHandle(client_data_new);
+				has_data = Obj || Handle;
 				Object << has_data;
-				if (Obj) {
-					Obj->net_Serialize(Object);
+				if (has_data)
+				{
+					if (Obj) {
+						Obj->net_Serialize(Object);
+					} else
+					{
+						Object.MergeChunkByHandle(Handle);
+					}
 				}
 			}
 			else {

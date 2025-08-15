@@ -17,6 +17,8 @@ class XRCORE_API CSaveChunk: public ISaveable {
 protected:
 	virtual void* GetValue() { return nullptr; };
 
+	virtual ISaveable* MakeCopy() override;
+
 public:
 	CSaveChunk(shared_str ChunkName) : _chunkName(ChunkName) {}
 	~CSaveChunk();
@@ -54,6 +56,8 @@ public:
 	void w_u8(u8 a);
 	void w_s8(s8 a);
 	void w_string(shared_str S);
+
+	void CopySubchunks(CSaveChunk* Chunk);
 
 	// reading - utilities
 	void r_bool(bool& A);

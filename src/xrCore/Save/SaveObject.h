@@ -35,7 +35,6 @@ public:
 	bool HasChunk(shared_str ChunkName) override;
 
 	//void MarkDirty();
-	virtual u64 ExtractCurrentChunk() override;
 	virtual u64 GetChunkStackDepth() override {return _chunkStack.size();}
 
 	template<typename Key, typename Mapped>
@@ -545,6 +544,9 @@ public:
 	virtual void BeginArray() override;
 
 	virtual bool IsSave() override { return true; }
+	
+	virtual u64 ExtractCurrentChunk() override;
+	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 
 	virtual ISaveObject& operator<<(float& Value) override;
 	virtual ISaveObject& operator<<(double& Value) override;
@@ -571,6 +573,9 @@ public:
 	virtual void BeginArray() override;
 
 	virtual bool IsSave() override { return false; }
+	
+	virtual u64 ExtractCurrentChunk() override;
+	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 
 	virtual ISaveObject& operator<<(float& Value) override;
 	virtual ISaveObject& operator<<(double& Value) override;
@@ -586,55 +591,4 @@ public:
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
 	void Parse(IReader* stream);
-
-	/*void r_bool(bool& Value) {
-		*this << Value;
-	}
-
-	void r_vec3(Fvector& Value) {
-		*this << Value;
-	}
-
-	void r_float(float& Value) {
-		*this << Value;
-	}
-
-	void r_u64(u64& Value) {
-		*this << Value;
-	}
-
-	void r_s64(s64& Value) {
-		*this << Value;
-	}
-
-	void r_u32(u32& Value) {
-		*this << Value;
-	}
-
-	void r_s32(s32& Value) {
-		*this << Value;
-	}
-
-	void r_u16(u16& Value) {
-		*this << Value;
-	}
-
-	void r_s16(s16& Value) {
-		*this << Value;
-	}
-
-	void r_u8(u8& Value) {
-		*this << Value;
-	}
-
-	void r_s8(s8& Value) {
-		*this << Value;
-	}
-
-	void r_string(LPCSTR& Value) {
-		shared_str temp;
-		*this << temp;
-		Value = temp.c_str();
-	}*/
-
 };
