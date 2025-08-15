@@ -1980,12 +1980,10 @@ bool CWeapon::OnWeaponJam()
 {
 	CActor* pActor = H_Parent()->cast_actor();
 
-	SetMisfireStatus(true);
 	//_wanim_force_assign = true;
 
 	//if (pActor->IsActorSuicideNow())
 	//{
-	//	SetMisfireStatus(false);
 	//	return false;
 	//}
 
@@ -2014,8 +2012,9 @@ bool CWeapon::OnWeaponJam()
 
 		if (::Random.randF(0.0f, 1.0f) < curprob)
 		{
-			SetMisfireStatus(false);
 			//ApplyLensRecoil(GetMisfireRecoil());
+			SetState(eLightMis);
+			SetNextState(eLightMis);
 			SwitchState(eLightMis);
 			return true;
 		}
@@ -2027,6 +2026,7 @@ bool CWeapon::OnWeaponJam()
 		return true;
 	}
 
+	SetMisfireStatus(true);
 	return false;
 }
 
