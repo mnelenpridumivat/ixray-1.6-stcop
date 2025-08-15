@@ -1071,7 +1071,7 @@ void CSE_ALifeDynamicWallmark::STATE_Serialize(ISaveObject& Object)
 	BEGIN_CHUNK(Object,"CSE_ALifeDynamicWallmark::STATE")
 	{
 		inherited::STATE_Serialize(Object);
-		Object << shader << texture;
+		Object << shader << texture << w << h << r;
 	}
 }
 
