@@ -136,6 +136,7 @@ void CSaveObjectSave::BeginArray()
 u64 CSaveObjectSave::ExtractCurrentChunk()
 {
 	VERIFY(false, "Cannot extract chunk from saving object!");
+	return u64(-1);
 }
 
 void CSaveObjectSave::MergeChunkByHandle(ISaveChunkHandleInterface* handle)

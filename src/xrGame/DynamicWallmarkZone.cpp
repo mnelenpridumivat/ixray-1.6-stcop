@@ -53,7 +53,7 @@ BOOL CDynamicWallmarkZone::trace_callback(collide::rq_result& result, LPVOID par
 		wm_trace_data->self->r,
 		pTri, pVerts);
 
-	return true;
+	return false;
 }
 
 BOOL CDynamicWallmarkZone::test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params)

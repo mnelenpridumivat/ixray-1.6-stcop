@@ -149,12 +149,9 @@ CWallmarksEngine::static_wallmark*	CWallmarksEngine::static_wm_allocate		(Flags8
 	else { W = static_pool.back(); static_pool.pop_back(); }
 
 	VERIFY(!flags.test(StaticWallmarkHandle::flForceRemove));
-	VERIFY(W->flags.test(StaticWallmarkHandle::flTimeToLive) != W->flags.test(StaticWallmarkHandle::flHandler));
+	VERIFY(flags.test(StaticWallmarkHandle::flTimeToLive) != flags.test(StaticWallmarkHandle::flHandler));
 	W->flags = flags;
-	if (W->flags.test(StaticWallmarkHandle::flTimeToLive))
-	{
-		W->ttl				= ps_r__WallmarkTTL;
-	}
+	W->ttl = ps_r__WallmarkTTL;
 	if (W->flags.test(StaticWallmarkHandle::flHandler))
 	{
 		W->handler = xr_make_shared<StaticWallmarkHandle::CWallmarkHandle>(&W->flags);
@@ -458,6 +455,7 @@ void CWallmarksEngine::Render()
 			for (size_t i = 0; i < slot->static_items.size(); )
 			{
 				static_wallmark* W	= slot->static_items[i];
+				float ttl_delta = 0.0f;
 				if (RImplementation.ViewBase.testSphere_dirty(W->bounds.P,W->bounds.R)){
 					Device.Statistic->RenderDUMP_WMS_Count++;
 					float dst	= Device.vCameraPosition.distance_to_sqr(W->bounds.P);
@@ -470,13 +468,17 @@ void CWallmarksEngine::Render()
 						}
 						static_wm_render	(W,w_verts);
 					}
-					W->ttl	-= 0.1f*Device.fTimeDelta;	// visible wallmarks fade much slower
+					ttl_delta = 0.1f*Device.fTimeDelta;	// visible wallmarks fade much slower
 				} else {
-					W->ttl	-= Device.fTimeDelta;
+					ttl_delta = Device.fTimeDelta;
 				}
-				if (W->flags.test(StaticWallmarkHandle::flTimeToLive) && W->ttl<=EPS)
+				if (W->flags.test(StaticWallmarkHandle::flTimeToLive))
 				{
-					W->flags.set(StaticWallmarkHandle::flForceRemove, true);
+					W->ttl -= ttl_delta;
+					if (W->ttl<=EPS)
+					{
+						W->flags.set(StaticWallmarkHandle::flForceRemove, true);
+					}
 				}
 				if (W->flags.test(StaticWallmarkHandle::flForceRemove))
 				{

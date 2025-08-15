@@ -1049,11 +1049,21 @@ CSE_ALifeDynamicWallmark::~CSE_ALifeDynamicWallmark()
 void CSE_ALifeDynamicWallmark::STATE_Read		(NET_Packet	&tNetPacket, u16 size)
 {
 	inherited::STATE_Read		(tNetPacket,size);
+	tNetPacket.r_stringZ(shader);
+	tNetPacket.r_stringZ(texture);
+	tNetPacket.r_float(w);
+	tNetPacket.r_float(h);
+	tNetPacket.r_float(r);
 }
 
 void CSE_ALifeDynamicWallmark::STATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::STATE_Write		(tNetPacket);
+	tNetPacket.w_stringZ(shader);
+	tNetPacket.w_stringZ(texture);
+	tNetPacket.w_float(w);
+	tNetPacket.w_float(h);
+	tNetPacket.w_float(r);
 }
 
 void CSE_ALifeDynamicWallmark::UPDATE_Read	(NET_Packet	&tNetPacket)
