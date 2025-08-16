@@ -38,7 +38,7 @@ private:
 
 protected:
 
-	shared_str shader = "effects\\wallmarkmult";
+	shared_str shader = "effects\\wallmark";
 	shared_str texture = "";
 	float h = 1.0f, w = 1.0f, r = 0.0f;
 
