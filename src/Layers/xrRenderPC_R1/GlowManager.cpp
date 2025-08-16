@@ -126,7 +126,6 @@ void CGlowManager::Load		(IReader* fs)
 	}
 	dwTestID		= 0;
 
-	hGeom.create	(FVF::F_LIT,RCache.Vertex.Buffer(),RCache.QuadIB);
 }
 
 void CGlowManager::Unload	()
@@ -174,6 +173,11 @@ void CGlowManager::add	(ref_glow G_)
 #ifdef DEBUG
 	Device.Statistic->RenderDUMP_Glows.End();
 #endif
+}
+
+void CGlowManager::LoadGeometry()
+{
+	hGeom.create	(FVF::F_LIT,RCache.Vertex.Buffer(),RCache.QuadIB);
 }
 
 IC void FillSprite	(FVF::LIT*& pv, const Fvector& pos, float r, u32 clr)

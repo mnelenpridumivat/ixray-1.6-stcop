@@ -276,6 +276,7 @@ void CRender::LoadLights(IReader *fs)
 	L_DB->Load		(fs);
 
 	// glows
+	L_Glows->LoadGeometry();
 	IReader			*chunk = fs->open_chunk(fsL_GLOWS);
 	if (chunk == nullptr)
 	{

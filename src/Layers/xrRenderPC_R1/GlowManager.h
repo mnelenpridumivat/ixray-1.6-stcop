@@ -65,6 +65,7 @@ class CGlowManager
 public:
 	void	add				(ref_glow	g)	;
 
+	void LoadGeometry();
 	void	Load			(IReader	*fs);
 	void	Unload			();
 
