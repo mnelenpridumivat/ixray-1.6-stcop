@@ -20,6 +20,7 @@ public:
 	static CDynamicWallmarkRegistry& Instance();
 
 	wm_shader GetWallmarkShader(shared_str shader, shared_str texture);
+	void ClearWallmarks();
 };
 
 class CDynamicWallmarkZone : public CSmartZone {

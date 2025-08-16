@@ -34,6 +34,11 @@ wm_shader CDynamicWallmarkRegistry::GetWallmarkShader(shared_str shader, shared_
 	return texture_registry_ref->GenerateWallmark();
 }
 
+void CDynamicWallmarkRegistry::ClearWallmarks()
+{
+	registry.clear();
+}
+
 BOOL CDynamicWallmarkZone::trace_callback(collide::rq_result& result, LPVOID params)
 {
 	VERIFY(!result.O);

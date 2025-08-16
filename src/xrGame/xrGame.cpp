@@ -6,6 +6,7 @@
 //	Description : Defines the entry point for the DLL application.
 ////////////////////////////////////////////////////////////////////////////
 
+#include "DynamicWallmarkZone.h"
 #include "StdAfx.h"
 #include "object_factory.h"
 #include "../../xrUI/xrUIXmlParser.h"
@@ -113,6 +114,11 @@ extern "C"
 		string_path GameGlobals = {};
 		FS.update_path(GameGlobals, "$game_config$", "game_global.ltx");
 		pGameGlobals = new CInifile(GameGlobals);
+	}
+	
+	DLL_API void __cdecl xrGameRenderPreDestroy()
+	{
+		CDynamicWallmarkRegistry::Instance().ClearWallmarks();
 	}
 
 	DLL_API DLL_Pure* __cdecl xrFactory_Create(CLASS_ID clsid)
