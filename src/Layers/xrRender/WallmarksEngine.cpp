@@ -70,9 +70,7 @@ void CWallmarksEngine::CMatrixBuilder_SizeCam::FindBoxCenterAndDim(Fvector& bc, 
 
 void CWallmarksEngine::CMatrixBuilder_WHR::CreateMatrix(Fmatrix& out, const Fvector& FaceNormal)
 {
-	Fmatrix				mRot;
-	
-	Fmatrix				mScale;
+	Fmatrix				mScale, mRot;
 	Fvector				at,up,right,y;
 	at.sub				(contact_point,FaceNormal);
 	y.set				(0,1,0);
@@ -80,12 +78,10 @@ void CWallmarksEngine::CMatrixBuilder_WHR::CreateMatrix(Fmatrix& out, const Fvec
 	right.crossproduct	(y,FaceNormal);
 	up.crossproduct		(FaceNormal,right);
 	out.build_camera	(contact_point,at,up);
+	mRot.rotateZ(r);
+	out.mulA_43		(mRot);
 	mScale.scale		(2/w,2/h,std::max(2/w,2/h));
 	out.mulA_43		(mScale);
-
-	mRot.rotateZ(r);
-
-	out.mulA_43		(mRot);
 }
 
 void CWallmarksEngine::CMatrixBuilder_WHR::FindBoxCenterAndDim(Fvector& bc, Fvector& bd)
