@@ -105,7 +105,7 @@ public:
 
 	bool	GetBriefInfo(II_BriefInfo& info) override;
 
-	virtual BOOL			IsMisfire() const override;
+	virtual bool			IsMisfire() const override;
 
 protected:
 	//�������� ������ ��������� ��������

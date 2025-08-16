@@ -1582,7 +1582,7 @@ bool CFlamethrower::GetBriefInfo(II_BriefInfo& info)
 	return true;
 }
 
-BOOL CFlamethrower::IsMisfire() const
+bool CFlamethrower::IsMisfire() const
 {
 	return m_is_overheated;
 }
