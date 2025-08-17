@@ -1396,6 +1396,9 @@ void CActor::save(NET_Packet &output_packet)
 	output_packet.w_stringZ(g_quick_use_slots[1]);
 	output_packet.w_stringZ(g_quick_use_slots[2]);
 	output_packet.w_stringZ(g_quick_use_slots[3]);
+
+	output_packet.w_u8(u8(m_inventory_disabled));
+	output_packet.w_u8(u8(m_pda_disabled));
 }
 
 void CActor::load(IReader &input_packet)
@@ -1418,6 +1421,9 @@ void CActor::load(IReader &input_packet)
 	input_packet.r_stringZ(g_quick_use_slots[1], sizeof(g_quick_use_slots[1]));
 	input_packet.r_stringZ(g_quick_use_slots[2], sizeof(g_quick_use_slots[2]));
 	input_packet.r_stringZ(g_quick_use_slots[3], sizeof(g_quick_use_slots[3]));
+
+	set_inventory_disabled(!!input_packet.r_u8());
+	set_pda_disabled(!!input_packet.r_u8());
 }
 
 void CActor::Serialize(ISaveObject& Object)
