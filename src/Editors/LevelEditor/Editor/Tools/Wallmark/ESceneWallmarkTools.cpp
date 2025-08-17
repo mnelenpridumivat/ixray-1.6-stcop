@@ -852,6 +852,7 @@ BOOL ESceneWallmarkTool::MoveSelectedWallmarkTo(const Fvector& start, const Fvec
 
 EWallmarkWrapper::EWallmarkWrapper(const WMData& data)
 {
+	m_data = data;
 	auto wm_tool = Scene->GetTool(OBJCLASS_WM);
 	((ESceneWallmarkTool*)wm_tool)->AddWallmark_internal(data.Pos,data.Dir,data.Shader,data.Texture,
 		data.w,data.h,data.r, &m_wallmark);
