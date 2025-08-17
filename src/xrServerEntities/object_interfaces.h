@@ -7,8 +7,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#if !defined(MPCF_EXPORTS) and !defined(MPB_EXPORTS) and !defined(MPSI_EXPORTS)
 #include "Save/SaveObject.h"
 #include "FS.h"
+#endif
 
 class NET_Packet;
 class ISaveObjectWrapper;
@@ -42,8 +44,10 @@ public:
 	virtual void					UPDATE_Write(NET_Packet& tNetPacket) = 0;
 	virtual void					UPDATE_Read(NET_Packet& tNetPacket) = 0;
 	
+#if !defined(MPCF_EXPORTS) and !defined(MPB_EXPORTS) and !defined(MPSI_EXPORTS)
 	virtual void					STATE_Serialize(ISaveObject& Object) = 0;
 	virtual void					UPDATE_Serialize(ISaveObject& Object) = 0;
+#endif
 };
 
 class IPureServerObject : public IPureSerializeObject<IReader,IWriter>, public IPureStateUpdateObject {};
