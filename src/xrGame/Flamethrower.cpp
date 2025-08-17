@@ -941,9 +941,6 @@ bool CFlamethrower::Action(u16 cmd, u32 flags)
 		if (flags & CMD_START) {
 			if (m_current_fuel_level < 1.0 || IsMisfire())
 			{
-				if (!bReloadKeyPressed || !bAmmotypeKeyPressed)
-					bReloadKeyPressed = true;
-				
 				Reload();
 			}
 		}
