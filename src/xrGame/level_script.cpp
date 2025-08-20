@@ -172,25 +172,36 @@ CScriptGameObject* tpfGetActor()
 		ai().script_engine().script_log(eLuaMessageTypeError, "Do not use level.actor function!");
 	first_time = false;
 
-	CActor* l_tpActor = smart_cast<CActor*>(Level().CurrentEntity());
-	if (l_tpActor)
-		return	(smart_cast<CGameObject*>(l_tpActor)->lua_game_object());
+	CObject* current_entity = Level().CurrentEntity();
+	if (CActor* l_tpActor = current_entity != nullptr ? current_entity->cast_actor() : nullptr)
+	{
+		return (smart_cast<CGameObject*>(l_tpActor)->lua_game_object());
+	}
 	else
-		return	(0);
+	{
+		return 0;
+	}
 }
 
 CScriptGameObject* get_object_by_name(LPCSTR caObjectName)
 {
 	static bool first_time = true;
 	if (first_time)
+	{
 		ai().script_engine().script_log(eLuaMessageTypeError, "Do not use level.object function!");
+	}
+
 	first_time = false;
 
-	CGameObject* l_tpGameObject = smart_cast<CGameObject*>(Level().Objects.FindObjectByName(caObjectName));
-	if (l_tpGameObject)
-		return		(l_tpGameObject->lua_game_object());
+	CObject* finded_object = Level().Objects.FindObjectByName(caObjectName);
+	if (CGameObject* l_tpGameObject = finded_object != nullptr ? finded_object->cast_game_object() : nullptr)
+	{
+		return l_tpGameObject->lua_game_object();
+	}
 	else
-		return		(0);
+	{
+		return 0;
+	}
 }
 #endif
 
@@ -982,9 +993,11 @@ u32 g_get_target_element()
 
 u8 get_active_cam()
 {
-	CActor* actor = smart_cast<CActor*>(Level().CurrentViewEntity());
-	if (actor)
+	CObject* current_entity = Level().CurrentViewEntity();
+	if (CActor* actor = current_entity != nullptr ? current_entity->cast_actor() : nullptr)
+	{
 		return (u8)actor->active_cam();
+	}
 
 	return 255;
 }
@@ -1016,25 +1029,31 @@ xrTime get_start_time()
 
 CScriptGameObject* get_view_entity_script()
 {
-	CGameObject* pGameObject = smart_cast<CGameObject*>(Level().CurrentViewEntity());
-	if (!pGameObject)
-		return (0);
+	CObject* current_entity = Level().CurrentViewEntity();
+	if (CGameObject* pGameObject = current_entity != nullptr ? current_entity->cast_game_object() : nullptr)
+	{
+		return pGameObject->lua_game_object();
+	}
 
-	return pGameObject->lua_game_object();
+	return 0;
 }
 
 void set_view_entity_script(CScriptGameObject* go)
 {
-	CObject* o = smart_cast<CObject*>(&go->object());
-	if (o)
+	if (CObject* o = &go->object() != nullptr ? go->object().dcast_CObject() : nullptr)
+	{
 		Level().SetViewEntity(o);
+	}
 }
 
 void set_active_cam(u8 mode)
 {
-	CActor* actor = smart_cast<CActor*>(Level().CurrentViewEntity());
-	if (actor && mode <= ACTOR_DEFS::EActorCameras::eacMaxCam)
+	CObject* current_entity = Level().CurrentViewEntity();
+	CActor* actor = current_entity != nullptr ? current_entity->cast_actor() : nullptr;
+	if (actor != nullptr && mode <= ACTOR_DEFS::EActorCameras::eacMaxCam)
+	{
 		actor->cam_Set((ACTOR_DEFS::EActorCameras)mode);
+	}
 }
 
 namespace level_nearest
@@ -1054,9 +1073,11 @@ namespace level_nearest
 	CScriptGameObject* Get(int Idx)
 	{
 		if (Idx > (int)ObjectList.size())
-			return nullptr;
+		{
+			return 0;
+		}
 
-		CGameObject* pObj = smart_cast<CGameObject*>(ObjectList[Idx]);
+		CGameObject* pObj = ObjectList[Idx]->cast_game_object();
 		return pObj->lua_game_object();
 	}
 }
@@ -1195,18 +1216,24 @@ bool IsUIShown()
 bool IndicatorsShown()
 {
 	if (!IsUIShown())
-		return false;
-
-	auto actor = Level().CurrentViewEntity()->cast_actor();
-	if (actor == nullptr)
-		return false;
-
-	if (actor->inventory().ActiveItem() == nullptr)
 	{
 		return false;
 	}
 
-	auto wpn = actor->inventory().ActiveItem()->cast_weapon();
+	CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr;
+	if (actor == nullptr)
+	{
+		return false;
+	}
+
+	PIItem active_item = actor->inventory().ActiveItem();
+
+	if (active_item == nullptr)
+	{
+		return false;
+	}
+
+	CWeapon* wpn = active_item->cast_weapon();
 	if (wpn == nullptr)
 	{
 		return true;
@@ -1240,18 +1267,20 @@ bool InventoryShown()
 
 bool ElectronicsBreak()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
+	{
 		return actor->ElectronicsProblemsInc();
+	}
 
 	return false;
 }
 
 bool IsPickupMode()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
+	{
 		return actor->GetPickupManager()->GetPickupMode();
+	}
 
 	return false;
 }
@@ -1263,18 +1292,17 @@ bool IsActorBurned()
 
 bool IsElectronicsRestore()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
 	{
 		return actor->ElectronicsProblemsDec();
 	}
+
 	return false;
 }
 
 bool ElectronicsReset()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
 	{
 		actor->ResetElectronicsProblems();
 		return true;
@@ -1285,9 +1313,10 @@ bool ElectronicsReset()
 
 bool IsElectronicsApply()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
+	{
 		return actor->ElectronicsProblemsImmediateApply();
+	}
 
 	return false;
 }
@@ -1304,11 +1333,12 @@ int ValidSavedGameInt(int number, const char* name)
 
 bool IsTacticalHud()
 {
-	auto actor = Level().CurrentControlEntity()->cast_actor();
-	if (actor != nullptr)
+	if (CActor* actor = Level().CurrentControlEntity() != nullptr ? Level().CurrentControlEntity()->cast_actor() : nullptr)
 	{
-		if (CHelmet* helmet = smart_cast<CHelmet*>(actor->inventory().ItemFromSlot(HELMET_SLOT)))
-			return false; //helmet->m_fShowNearestEnemiesDistance > 0.0f;
+		if (CHelmet* helmet = actor->GetHelmet())
+		{
+			return helmet->m_fShowNearestEnemiesDistance > 0.0f;
+		}
 	}
 
 	return false;
@@ -1317,11 +1347,18 @@ bool IsTacticalHud()
 CScriptGameObject* get_object_by_client(u32 clientID)
 {
 	xrClientData* xrCData = Level().Server->ID_to_client(clientID);
-	if (!xrCData || !xrCData->owner) return NULL;
+	if (!xrCData || !xrCData->owner)
+	{
+		return 0;
+	}
 
-	CGameObject* pGameObject = smart_cast<CGameObject*>(Level().Objects.net_Find(xrCData->owner->ID));
+	CObject* net_finded = Level().Objects.net_Find(xrCData->owner->ID);
+
+	CGameObject* pGameObject = net_finded != nullptr ? net_finded->cast_game_object() : nullptr;
 	if (!pGameObject)
-		return NULL;
+	{
+		return 0;
+	}
 
 	return pGameObject->lua_game_object();
 }
