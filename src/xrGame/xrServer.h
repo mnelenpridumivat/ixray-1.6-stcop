@@ -298,6 +298,8 @@ public:
 	virtual void			GetServerInfo		( CServerInfo* si );
 			void			SendPlayersInfo		(ClientID const & to_client);
 			void OnScriptEvent(NET_Packet& P, ClientID sender);
+			ScriptEvent* GetFrontServerScriptEvent();
+			void PopFrontServerScriptEvent();
 			ScriptEvent* GetLastServerScriptEvent();
 			void PopLastServerScriptEvent();
 			u32 GetSizeServerScriptEvent();
