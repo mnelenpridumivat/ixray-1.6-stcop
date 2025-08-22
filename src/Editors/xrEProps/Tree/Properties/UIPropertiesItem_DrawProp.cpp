@@ -116,15 +116,15 @@ BOOL RTokenOnEdit(PropItem* prop, bool& change)
 	prop->BeforeEdit<RTokenValue<T>, T>(edit_value);
 	int index = 0;
 
-	xr_rtoken* token_list = V->token;
-	for (int cnt=0; V->token_count>cnt; cnt++)
+	xr_rtoken* token_list = V->GetRawData();
+	for (int cnt=0; V->GetSize()>cnt; cnt++)
 	{
 		if (token_list[cnt].id == edit_value)
 		{
 			index = cnt;
 		}
 	}
-	if (ImGui::Combo("##value", &index, [](void* data, int idx, const char** out_text)->bool {*out_text = reinterpret_cast<xr_rtoken*>(data)[idx].name.c_str(); return true; }, reinterpret_cast<void*>(token_list), V->token_count))
+	if (ImGui::Combo("##value", &index, [](void* data, int idx, const char** out_text)->bool {*out_text = reinterpret_cast<xr_rtoken*>(data)[idx].name.c_str(); return true; }, reinterpret_cast<void*>(token_list), V->GetSize()))
 	{
 		T new_val = token_list[index].id;
 		if (prop->AfterEdit<RTokenValue<T>, T>(new_val))

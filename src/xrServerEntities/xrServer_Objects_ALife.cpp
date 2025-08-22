@@ -323,10 +323,10 @@ void CSE_ALifeGraphPoint::UPDATE_Serialize(ISaveObject& Object)
 void CSE_ALifeGraphPoint::FillProps			(LPCSTR pref, PropItemVec& items)
 {
 #	ifdef XRSE_FACTORY_EXPORTS
-	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\1"), &m_tLocations[0], &*fp_data.locations[0].begin(), (u32)fp_data.locations[0].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
-	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\2"), &m_tLocations[1], &*fp_data.locations[1].begin(), (u32)fp_data.locations[1].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
-	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\3"), &m_tLocations[2], &*fp_data.locations[2].begin(), (u32)fp_data.locations[2].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
-	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\4"), &m_tLocations[3], &*fp_data.locations[3].begin(), (u32)fp_data.locations[3].size())->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
+	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\1"), &m_tLocations[0], &fp_data.locations[0])->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
+	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\2"), &m_tLocations[1], &fp_data.locations[1])->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
+	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\3"), &m_tLocations[2], &fp_data.locations[2])->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
+	PHelper().CreateRToken8(items, PrepareKey(pref,*s_name,"Location\\4"), &m_tLocations[3], &fp_data.locations[3])->OnChangeEvent = xr_make_delegate(this, &CSE_ALifeGraphPoint::ChangeColorEvent);
 
 	
 	std::sort(fp_data.level_ids.begin(), fp_data.level_ids.end(), [](shared_str ItemA, shared_str ItemB)
@@ -571,8 +571,8 @@ void CSE_ALifeObject::FillProps				(LPCSTR pref, PropItemVec& items)
 	}                            
 	PHelper().CreateFlag32		(items,	PrepareKey(pref,*s_name,"ALife\\Interactive"),			&m_flags,			flInteractive);
 	PHelper().CreateFlag32		(items,	PrepareKey(pref,*s_name,"ALife\\Used AI locations"),	&m_flags,			flUsedAI_Locations);
-	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Story ID"),				&m_story_id,		&*fp_data.story_names.begin(), fp_data.story_names.size());
-	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Spawn Story ID"),		&m_spawn_story_id,	&*fp_data.spawn_story_names.begin(), fp_data.spawn_story_names.size());
+	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Story ID"),				&m_story_id,		&fp_data.story_names);
+	PHelper().CreateRToken32	(items,	PrepareKey(pref,*s_name,"ALife\\Spawn Story ID"),		&m_spawn_story_id,	&fp_data.spawn_story_names);
 	PHelper().CreateRText		(items,	PrepareKey(pref,*s_name,"ALife\\Script Story ID"),&m_script_story_ID);
 #	endif // #ifdef XRSE_FACTORY_EXPORTS
 }

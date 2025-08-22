@@ -672,23 +672,29 @@ typedef TokenValue<u8>	Token8Value;
 typedef TokenValue<u16>	Token16Value;
 typedef TokenValue<u32>	Token32Value;
 //------------------------------------------------------------------------------
-
-class RTokenValueCustom{
-public:
-	xr_rtoken*			token;
-    u32					token_count;
-    					RTokenValueCustom(xr_rtoken* _token, u32 _t_cnt):token(_token),token_count(_t_cnt){;}
-};
 template <class T>
-class RTokenValue: public CustomValue<T>, public RTokenValueCustom
+class RTokenValue: public CustomValue<T>
 {
+	RTokenVec* tokens;
 public:
-						RTokenValue		(T* val, xr_rtoken* _token, u32 _t_cnt):CustomValue<T>(val),RTokenValueCustom(_token,_t_cnt){};
+						RTokenValue		(T* val, RTokenVec* tokens):CustomValue<T>(val),tokens(tokens){VERIFY(tokens);}
+	xr_rtoken* GetRawData(){return tokens->data();}
+	size_t GetSize(){return tokens->size();}
     virtual xr_string	GetDrawText		(TOnDrawTextEvent OnDrawText)
     {
         xr_string draw_val;
-        if (!OnDrawText.empty())	OnDrawText(this, draw_val);
-        else			for(u32 k=0; k<token_count; k++) if ((T)token[k].id== this->GetValue()) return *token[k].name;
+        if (!OnDrawText.empty())	{
+			OnDrawText(this, draw_val);
+        } else
+        {
+        	for (const auto& elem : *tokens)
+        	{
+        		if ((T)elem.id == this->GetValue())
+        		{
+        			return elem.name.c_str();
+        		}
+        	}
+        }
         return draw_val;
     }
 };

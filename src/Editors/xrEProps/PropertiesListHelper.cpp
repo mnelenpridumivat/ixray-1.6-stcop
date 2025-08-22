@@ -85,12 +85,12 @@ Token16Value*	CPropHelper::CreateToken16	(PropItemVec& items, shared_str key, u1
 {   return		(Token16Value*)	AppendValue	(items,key,new Token16Value(val,token),PROP_TOKEN);				}
 Token32Value*	CPropHelper::CreateToken32	(PropItemVec& items, shared_str key, u32* val, xr_token* token)
 {   return		(Token32Value*)	AppendValue	(items,key,new Token32Value(val,token),PROP_TOKEN);				}
-RToken8Value* 	CPropHelper::CreateRToken8	(PropItemVec& items, shared_str key, u8* val, xr_rtoken* token, u32 t_cnt)
-{   return		(RToken8Value*)	AppendValue	(items,key,new RToken8Value(val,token,t_cnt),PROP_RTOKEN);		}
-RToken16Value* 	CPropHelper::CreateRToken16	(PropItemVec& items, shared_str key, u16* val, xr_rtoken* token, u32 t_cnt)
-{   return		(RToken16Value*)AppendValue	(items,key,new RToken16Value(val,token,t_cnt),PROP_RTOKEN);		}
-RToken32Value* 	CPropHelper::CreateRToken32	(PropItemVec& items, shared_str key, u32* val, xr_rtoken* token, u32 t_cnt)
-{   return		(RToken32Value*)AppendValue	(items,key,new RToken32Value(val,token,t_cnt),PROP_RTOKEN);		}
+RToken8Value* 	CPropHelper::CreateRToken8	(PropItemVec& items, shared_str key, u8* val, RTokenVec* tokens)
+{   return		(RToken8Value*)	AppendValue	(items,key,new RToken8Value(val,tokens),PROP_RTOKEN);		}
+RToken16Value* 	CPropHelper::CreateRToken16	(PropItemVec& items, shared_str key, u16* val, RTokenVec* tokens)
+{   return		(RToken16Value*)AppendValue	(items,key,new RToken16Value(val,tokens),PROP_RTOKEN);		}
+RToken32Value* 	CPropHelper::CreateRToken32	(PropItemVec& items, shared_str key, u32* val, RTokenVec* tokens)
+{   return		(RToken32Value*)AppendValue	(items,key,new RToken32Value(val,tokens),PROP_RTOKEN);		}
 TokenValueSH*   CPropHelper::CreateTokenSH	(PropItemVec& items, shared_str key, u32* val, const TokenValueSH::Item* lst, u32 cnt)
 {   return		(TokenValueSH*)	AppendValue	(items,key,new TokenValueSH(val,lst,cnt),PROP_SH_TOKEN);		}
 RListValue* 	 CPropHelper::CreateRList	(PropItemVec& items, shared_str key, shared_str* val, shared_str* lst, u32 cnt)

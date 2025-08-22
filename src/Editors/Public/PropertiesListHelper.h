@@ -53,9 +53,9 @@ public:
 	virtual Token8Value*			CreateToken8	    (PropItemVec& items, shared_str key, u8* val,  xr_token* token);
 	virtual Token16Value*			CreateToken16	    (PropItemVec& items, shared_str key, u16* val, xr_token* token);
 	virtual Token32Value*			CreateToken32	    (PropItemVec& items, shared_str key, u32* val, xr_token* token);
-	virtual RToken8Value* 			CreateRToken8	    (PropItemVec& items, shared_str key, u8* val,  xr_rtoken* token, u32 t_cnt);
-	virtual RToken16Value* 			CreateRToken16	    (PropItemVec& items, shared_str key, u16* val, xr_rtoken* token, u32 t_cnt);
-	virtual RToken32Value* 			CreateRToken32	    (PropItemVec& items, shared_str key, u32* val, xr_rtoken* token, u32 t_cnt);
+	virtual RToken8Value* 			CreateRToken8	    (PropItemVec& items, shared_str key, u8* val,  RTokenVec* tokens);
+	virtual RToken16Value* 			CreateRToken16	    (PropItemVec& items, shared_str key, u16* val, RTokenVec* tokens);
+	virtual RToken32Value* 			CreateRToken32	    (PropItemVec& items, shared_str key, u32* val, RTokenVec* tokens);
 	virtual RListValue* 	 		CreateRList		    (PropItemVec& items, shared_str key, shared_str* val, shared_str* lst, u32 cnt);
     virtual U32Value*  				CreateColor		    (PropItemVec& items, shared_str key, u32* val);
     virtual ColorValue*				CreateFColor	    (PropItemVec& items, shared_str key, Fcolor* val);
