@@ -5,12 +5,19 @@ file(GLOB_RECURSE ESHE_SOURCE_ALL_FILES CONFIGURE_DEPENDS
     "*.*"
 )
 
+file(GLOB_RECURSE ESHE_SOURCE_PUBLIC_FILES CONFIGURE_DEPENDS
+    "../Public/PropertiesListHelper.h"
+    "../Public/Shader_xrLC.h"
+)
+
 set(ESHE_SRC_FILES)
 
 source_group("src" FILES ${ESHE_SOURCE_ALL_FILES})
+source_group("public" FILES ${ESHE_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND ESHE_SRC_FILES ${ESHE_SOURCE_ALL_FILES})
+list(APPEND ESHE_SRC_FILES ${ESHE_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
 list(FILTER ESHE_SRC_FILES EXCLUDE REGEX "cl_raypick.cpp$")

@@ -132,6 +132,13 @@ file(GLOB_RECURSE ECORE_SOURCE_EXT_FILES CONFIGURE_DEPENDS
 	"../../xrServerEntities/LevelGameDef.cpp"
 )
 
+file(GLOB_RECURSE ECORE_SOURCE_PUBLIC_FILES CONFIGURE_DEPENDS
+    "../Public/PropertiesListTypes.h"
+    "../Public/PropertiesListHelper.h"
+    "../Public/Shader_xrLC.h"
+    "../Public/xrEProps.h"
+)
+
 set(ECORE_SRC_FILES)
 
 source_group("Engine" FILES ${ECORE_SOURCE_ENGINE_FILES})
@@ -142,12 +149,14 @@ source_group("RenderEx" FILES ${ECORE_SOURCE_RENDEREX_FILES})
 source_group("Other"  FILES ${ECORE_SOURCE_EXT_FILES})
 source_group("dxerr"  FILES ${ECORE_SOURCE_ERR_FILES})
 source_group("Resources"  FILES ${ECORE_SOURCE_RES_FILES})
+source_group("public" FILES ${ECORE_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_ALL_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_RENDER_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_EXT_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_RES_FILES})
+list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
 list(FILTER ECORE_SRC_FILES EXCLUDE REGEX "cl_raypick.cpp$")

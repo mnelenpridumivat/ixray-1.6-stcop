@@ -5,12 +5,18 @@ file(GLOB_RECURSE EPE_SOURCE_ALL_FILES CONFIGURE_DEPENDS
     "*.*"
 )
 
+file(GLOB_RECURSE EPE_SOURCE_PUBLIC_FILES CONFIGURE_DEPENDS
+    "../Public/PropertiesListHelper.h"
+)
+
 set(EPE_SRC_FILES)
 
 source_group("src" FILES ${EPE_SOURCE_ALL_FILES})
+source_group("public" FILES ${EPE_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND EPE_SRC_FILES ${EPE_SOURCE_ALL_FILES})
+list(APPEND EPE_SRC_FILES ${EPE_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
 list(FILTER EPE_SRC_FILES EXCLUDE REGEX "cl_raypick.cpp$")

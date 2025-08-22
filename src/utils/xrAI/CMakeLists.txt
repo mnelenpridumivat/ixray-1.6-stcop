@@ -23,13 +23,18 @@ file(GLOB_RECURSE XAI_SOURCE_ENTT_FILES
     "../../xrServerEntities/xrServer_Object_Base.cpp"
     "../../xrGame/game_level_cross_table.cpp"
 )
+file(GLOB_RECURSE XAI_SOURCE_PUBLIC_FILES
+    "../../Editors/Public/Shader_xrLC.h"
+)
 # Source groups
 source_group("kernel" FILES ${XAI_SOURCE_ALL_FILES})
 source_group("entt" FILES ${XAI_SOURCE_ENTT_FILES})
+source_group("public" FILES ${XAI_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND XAI_SRC_FILES ${XAI_SOURCE_ALL_FILES})
 list(APPEND XAI_SRC_FILES ${XAI_SOURCE_ENTT_FILES})
+list(APPEND XAI_SRC_FILES ${XAI_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
 #list(FILTER XAI_SRC_FILES EXCLUDE REGEX "lzo/*.ch")

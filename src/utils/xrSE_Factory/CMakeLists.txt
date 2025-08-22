@@ -20,16 +20,21 @@ file(GLOB_RECURSE SEF_SOURCE_SCR_FILES
     "../../xrScripts/script_stack_tracker.*"
     "../../xrScripts/script_lua_helper.*"
 )
+file(GLOB_RECURSE SEF_SOURCE_PUBLIC_FILES
+    "../../Editors/Public/xrEProps.h"
+)
 
 # Source groups
 source_group("kernel" FILES ${SEF_SOURCE_ALL_FILES})
 source_group("entt" FILES ${SEF_SOURCE_ENTT_FILES})
 source_group("script" FILES ${SEF_SOURCE_SCR_FILES})
+source_group("public" FILES ${SEF_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND SEF_SRC_FILES ${SEF_SOURCE_ALL_FILES})
 list(APPEND SEF_SRC_FILES ${SEF_SOURCE_ENTT_FILES})
 list(APPEND SEF_SRC_FILES ${SEF_SOURCE_SCR_FILES})
+list(APPEND SEF_SRC_FILES ${SEF_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
 #list(FILTER SEF_SRC_FILES EXCLUDE REGEX "lzo/*.ch")

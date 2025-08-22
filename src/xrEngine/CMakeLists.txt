@@ -66,6 +66,10 @@ file(GLOB_RECURSE ENGINE_SOURCE_AI_FILES
     "AI/.*"
 )
 
+file(GLOB_RECURSE ENGINE_SOURCE_PUBLIC_FILES
+    "../Editors/Public/xrEPropsTypes.h"
+)
+
 # File groups
 source_group("src" FILES ${ENGINE_SOURCE_ALL_FILES})
 source_group("core/fonts" FILES ${ENGINE_SOURCE_FONTS_FILES})
@@ -79,9 +83,11 @@ source_group("subsystem/lua" FILES ${ENGINE_SOURCE_LUA_FILES})
 source_group("subsystem/render" FILES ${ENGINE_SOURCE_RENDER_FILES})
 source_group("environment" FILES ${ENGINE_SOURCE_ENV_FILES})
 source_group("ai" FILES ${ENGINE_SOURCE_AI_FILES})
+source_group("public" FILES ${ENGINE_SOURCE_PUBLIC_FILES})
 
 # Apply list
 list(APPEND ENGINE_SRC_FILES ${ENGINE_SOURCE_ALL_FILES})
+list(APPEND ENGINE_SRC_FILES ${ENGINE_SOURCE_PUBLIC_FILES})
 
 # Remove files
 list(FILTER ENGINE_SRC_FILES EXCLUDE REGEX "xrLoadSurface.cpp")

@@ -47,6 +47,10 @@ file(GLOB_RECURSE XLC_SOURCE_OGF_FILES
 file(GLOB_RECURSE XLC_SOURCE_MUMODELS_FILES
     "xrMU_*"
 )
+
+file(GLOB_RECURSE XLC_SOURCE_PUBLIC_FILES
+    "../../Editors/Public/Shader_xrLC.h"
+)
  
 # Source groups
 source_group("kernel" FILES ${XLC_SOURCE_ALL_FILES})
@@ -55,6 +59,7 @@ source_group("build" FILES ${XLC_SOURCE_BUILD_FILES})
 source_group("nvidia" FILES ${XLC_SOURCE_NVIDIA_FILES})
 source_group("ogf" FILES ${XLC_SOURCE_OGF_FILES})
 source_group("ogf/mumodels" FILES ${XLC_SOURCE_MUMODELS_FILES})
+source_group("public" FILES ${XLC_SOURCE_PUBLIC_FILES})
 
 
 # Apply list
@@ -63,6 +68,7 @@ list(APPEND XLC_SRC_FILES ${XLC_SOURCE_RES_FILES})
 list(APPEND XLC_SRC_FILES ${XLC_SOURCE_BUILD_FILES})
 list(APPEND XLC_SRC_FILES ${XLC_SOURCE_NVIDIA_FILES})
 list(APPEND XLC_SRC_FILES ${XLC_SOURCE_OGF_FILES})
+list(APPEND XLC_SRC_FILES ${XLC_SOURCE_PUBLIC_FILES})
 
 
 # Remove unused files

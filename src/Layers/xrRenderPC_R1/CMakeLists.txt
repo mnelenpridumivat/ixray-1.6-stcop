@@ -29,6 +29,9 @@ file(GLOB_RECURSE XRR1_SOURCE_LUA_FILES
     "../../xrEngine/ai_script_lua*.cpp"
     "../../xrEngine/ai_script_lua*.h"
 )
+file(GLOB_RECURSE XRR1_SOURCE_EDITOR_PUBLIC_FILES
+    "../../Editors/Public/PropertiesListHelper.h"
+)
 
 # Source groups
 source_group("render/src" FILES ${XRR1_SOURCE_ALL_FILES})
@@ -38,6 +41,7 @@ source_group("general_dx9" FILES ${XRR1_SOURCE_DX9_FILES})
 source_group("lua_ext" FILES ${XRR1_SOURCE_LUA_FILES})
 source_group("blend" FILES ${XRR1_SOURCE_COMP_BLEND_FILES})
 source_group("blend" FILES ${XRR1_SOURCE_BLEND_FILES})
+source_group("public" FILES ${XRR1_SOURCE_EDITOR_PUBLIC_FILES})
 
 # Apply list
 list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_ALL_FILES})
@@ -45,6 +49,7 @@ list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_COMP_FILES})
 list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_DX9_FILES})
 list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_LUA_FILES})
 list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_INCL_FILES})
+list(APPEND XRR1_SRC_FILES ${XRR1_SOURCE_EDITOR_PUBLIC_FILES})
 
 # Remove unused files
 list(FILTER XRR1_SRC_FILES EXCLUDE REGEX "../xrRender/r__pixel_calculator.cpp")
