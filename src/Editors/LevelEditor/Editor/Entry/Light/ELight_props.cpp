@@ -239,7 +239,7 @@ void CLight::FillProp(LPCSTR pref, PropItemVec& items)
     V->OnChangeEvent.bind	(this,&CLight::OnPointDataChange);
 
     ESceneLightTool* lt	= smart_cast<ESceneLightTool*>(FParentTools); VERIFY(lt);
-	PHelper().CreateRToken32(items,PrepareKey(pref,"Light Control"),	&m_LControl, &*lt->lcontrols.begin(), lt->lcontrols.size());
+	PHelper().CreateRToken32(items,PrepareKey(pref,"Light Control"),	&m_LControl, &lt->lcontrols);
 
     switch(m_Type){
     case ELight::ltPoint:	FillPointProp	(pref, items);	break;
