@@ -188,8 +188,46 @@ _DDS:
         size_t bitSize = 0;
 
         HRESULT const result = LoadTextureDataFromMemory((uint8_t*)S->pointer(), S->length(), &header, &bitData, &bitSize);
-        if (FAILED(result)) {
+
+        D3DCAPS9 d3dCaps;
+        if (FAILED(RDevice->GetDeviceCaps(&d3dCaps)))
+        {
+            string512 errMsg;
+            xr_sprintf(errMsg, "Failed to get device capabilities for texture size check.");
+            R_ASSERT3(false, errMsg, fname);
+        }
+
+        const u32 maxTextureDimension = _max(d3dCaps.MaxTextureWidth, d3dCaps.MaxTextureHeight);
+
+        if (header && (header->width > maxTextureDimension || header->height > maxTextureDimension))
+        {
+            string512 errMsg;
+            xr_sprintf(errMsg, "Texture dimensions exceed hardware limits: %dx%d (Max: %d)",
+                header->width, header->height,
+                maxTextureDimension);
+            R_ASSERT3(false, errMsg, fname);
+        }
+
+        if (FAILED(result))
+        {
             Msg("! Unsupported texture [%s]", fn);
+            string1024 errorMsg;
+            xr_sprintf
+            (
+                errorMsg,
+                "Failed to get DDS metadata for '%s'\n"
+                "File size: %u bytes\n"
+                "Error: %s (0x%08X)\n"
+                "Possible causes:\n"
+                "- Corrupted DDS header\n"
+                "- Unsupported DDS variant",
+                fname, S->length(),
+                Debug.dxerror2string(result), result
+            );
+
+            VERIFY2(Device.IsEditorMode(), errorMsg);
+
+            Msg("! DDS METADATA ERROR: %s", errorMsg);
             FS.r_close(S);
 
             string_path temp = "";
