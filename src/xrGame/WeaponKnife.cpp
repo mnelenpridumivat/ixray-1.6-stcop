@@ -229,7 +229,10 @@ void CWeaponKnife::MakeShot(Fvector const & pos, Fvector const & dir, float cons
 	iAmmoElapsed					= (u32)m_magazine.size();
 	bool SendHit					= SendHitAllowed(H_Parent());
 
-	//PlaySoundIfExist("sndShot", pos);
+	if (!m_eSoundsFlags.test(ESoundsFlags::sf_kick))
+	{
+		PlaySound("sndShot", pos);
+	}
 
 	CActor* actor = H_Parent()->cast_actor();
 	if (actor && actor->active_cam() != eacFirstEye) {
@@ -307,9 +310,6 @@ void CWeaponKnife::state_Attacking	(float)
 
 void CWeaponKnife::switch2_Attacking(u32 state)
 {
-	if (IsPending())
-		return;
-
 	if (state == eFire)
 	{
 		if (CActor* pActor = H_Parent() != nullptr ? H_Parent()->cast_actor() : nullptr)
@@ -411,7 +411,7 @@ void CWeaponKnife::UpdateCL()
 
 void CWeaponKnife::FireStart()
 {	
-	if (GetState() != eIdle)
+	if (GetState() != eIdle && GetState() != eShowing)
 	{
 		return;
 	}
@@ -422,6 +422,11 @@ void CWeaponKnife::FireStart()
 
 void CWeaponKnife::Fire2Start()
 {
+	if (GetState() != eIdle && GetState() != eShowing)
+	{
+		return;
+	}
+
 	SwitchState(eFire2);
 }
 
@@ -436,7 +441,7 @@ bool CWeaponKnife::Action(u16 cmd, u32 flags)
 	{
 		case kWPN_ZOOM:
 		{
-			if (flags & CMD_START && GetState() == eIdle)
+			if (flags & CMD_START)
 			{
 				Fire2Start();
 			}
