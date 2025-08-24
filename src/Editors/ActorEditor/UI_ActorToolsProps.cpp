@@ -421,14 +421,14 @@ void CActorTools::FillMotionProperties(PropItemVec& items, LPCSTR pref, ListItem
 		{
 			for (BoneIt it=m_pEditObject->FirstBone(); it!=m_pEditObject->LastBone(); it++)
 				m_BoneParts.push_back	(xr_rtoken((*it)->Name().c_str(),(*it)->SelfID));
-			PHelper().CreateRToken16 	(items,PrepareKey(pref,"Motion\\FX\\Start bone"),	(u16*)&SM->m_BoneOrPart,	&*m_BoneParts.begin(), m_BoneParts.size());
+			PHelper().CreateRToken16 	(items,PrepareKey(pref,"Motion\\FX\\Start bone"),	(u16*)&SM->m_BoneOrPart,	&m_BoneParts);
 
 			PHelper().CreateFloat		(items,PrepareKey(pref,"Motion\\FX\\Power"),	 	&SM->fPower,   	0.f,10.f,0.01f,2);
 		}else{
 			m_BoneParts.push_back(xr_rtoken("--all bones--",BI_NONE));
 			for (BPIt it=m_pEditObject->FirstBonePart(); it!=m_pEditObject->LastBonePart(); it++)
 				m_BoneParts.push_back	(xr_rtoken(it->alias.c_str(),it-m_pEditObject->FirstBonePart()));
-			PHelper().CreateRToken16  	(items,PrepareKey(pref,"Motion\\Cycle\\Bone part"),		&SM->m_BoneOrPart,	&*m_BoneParts.begin(), m_BoneParts.size());
+			PHelper().CreateRToken16  	(items,PrepareKey(pref,"Motion\\Cycle\\Bone part"),		&SM->m_BoneOrPart,	&m_BoneParts);
 			PHelper().CreateFlag8	  	(items,PrepareKey(pref,"Motion\\Cycle\\Stop at end"),	&SM->m_Flags,		esmStopAtEnd);
 			PHelper().CreateFlag8	  	(items,PrepareKey(pref,"Motion\\Cycle\\No mix"),	  	&SM->m_Flags,		esmNoMix);
 			PHelper().CreateFlag8	  	(items,PrepareKey(pref,"Motion\\Cycle\\Sync part"),		&SM->m_Flags,		esmSyncPart);
