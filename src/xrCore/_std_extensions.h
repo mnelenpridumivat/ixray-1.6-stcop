@@ -136,27 +136,72 @@ IC u32							xr_strlen				( const char* S );
 
 // return pointer to ".ext"
 IC char*						strext					( const char* S )
-{	return (char*) strrchr(S,'.');	}
+{
+	if (!S)
+	{
+		VERIFY(S);
+		return nullptr;
+	}
+	return (char*) strrchr(S,'.');
+}
 
 IC u32							xr_strlen				( const char* S )
-{	return (u32)strlen(S);			}
+{
+	if (!S)
+	{
+		VERIFY(S);
+		return 0;
+	}
+	return (u32)strlen(S);
+}
 
 IC char*						xr_strlwr				(char* S)
-{	return _strlwr(S);				}
+{
+	if (!S)
+	{
+		VERIFY(S);
+		return nullptr;
+	}
+	return _strlwr(S);
+}
 
 IC int							xr_strcmp				( const char* S1, const char* S2 )
-{	return (int)strcmp(S1,S2);  }
+{
+	if (!S1 || !S2)
+	{
+		VERIFY(S1 && S2);
+		return 0;
+	}
+	return (int)strcmp(S1,S2);
+}
 
 IC int							xr_strncmp				( const char* S1, const char* S2, int n )
-{	return (int)strncmp(S1,S2,n);	}
+{
+	if (!S1 || !S2)
+	{
+		VERIFY(S1 && S2);
+		return 0;
+	}
+	return (int)strncmp(S1,S2,n);
+}
 
 inline errno_t xr_strcpy	( LPSTR destination, size_t const destination_size, LPCSTR source )
 {
+	if (!destination || !source)
+	{
+		VERIFY(destination && source);
+		return EFAULT;
+	}
 	return						strncpy_s( destination, destination_size, source, destination_size );
 }
 
 inline errno_t xr_strcat		( LPSTR destination, size_t const buffer_size, LPCSTR source )
 {
+	if (!destination || !source)
+	{
+		VERIFY(destination && source);
+		return EFAULT;
+	}
 	size_t const destination_length	= xr_strlen(destination);
 	LPSTR i						= destination + destination_length;
 	LPSTR const e				= destination + buffer_size - 1;
@@ -172,6 +217,11 @@ inline errno_t xr_strcat		( LPSTR destination, size_t const buffer_size, LPCSTR 
 
 inline int __cdecl xr_sprintf	( LPSTR destination, size_t const buffer_size, LPCSTR format_string, ... )
 {
+	if (!destination || !format_string)
+	{
+		VERIFY(destination && format_string);
+		return EFAULT;
+	}
 	va_list args;
 	va_start					( args, format_string);
 	return						vsnprintf_s( destination, buffer_size, buffer_size - 1, format_string, args );
@@ -180,6 +230,11 @@ inline int __cdecl xr_sprintf	( LPSTR destination, size_t const buffer_size, LPC
 template <int count>
 inline int __cdecl xr_sprintf	( char (&destination)[count], LPCSTR format_string, ... )
 {
+	if (!destination || !format_string)
+	{
+		VERIFY(destination && format_string);
+		return EFAULT;
+	}
 	va_list args;
 	va_start					( args, format_string);
 	return						vsnprintf_s( destination, count, count - 1, format_string, args );
