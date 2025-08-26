@@ -131,7 +131,7 @@ public:
 			CUICellItem*	GetItemByData		(void* data);
 
 			void			DestroyDragItem		();
-			void			ClearAll			(bool bDestroy);	
+			void			ClearAll(bool bDestroy, xr_vector<u16> IgnoredItemsIds = {}); // FFx0001
 			void			Compact				();
 			bool			IsOwner				(CUICellItem* itm);
 			void			clear_select_armament();
@@ -205,7 +205,7 @@ protected:
 
 				void			Grow				();
 				void			Shrink				();
-				void			ClearAll			(bool bDestroy);
+				void			ClearAll			(bool bDestroy, xr_vector<u16> IgnoredItemsIds = {}); // FFx0001
 				void			clear_select_armament();
 
 

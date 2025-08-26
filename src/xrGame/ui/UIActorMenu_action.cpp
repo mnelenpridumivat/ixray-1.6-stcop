@@ -239,10 +239,19 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 			m_ActorStateInfo->Show(true);
 			m_pInventoryStackList->ClearAll(true);
 			m_pInventoryStackList->Show(false);
-			if ( m_currMenuMode == mmDeadBodySearch )
-				ToDeadBodyBag	( itm, false );
-			else
-				ToBag			( itm, false );
+			if (m_currMenuMode == mmDeadBodySearch) {
+				// FFx0001
+				if (IsAllowPlaceToInvBox(itm)) {
+					ToDeadBodyBag(itm, false);
+				}
+			}
+			else 
+			{
+				// FFx0001
+				if (IsAllowTakeFromInvBox(itm)) {
+					ToBag(itm, false);
+				}
+			}
 			break;
 		}
 	case iStackList:
