@@ -22,7 +22,7 @@ xr_token qsmapsize_token[] = {
 	{ nullptr, 0   }
 };
 
-u32			ps_r_ssao_mode			=	2;
+u32			ps_r_ssao_mode			=	1;
 xr_token							qssao_mode_token						[ ]={
 	{ "st_opt_off",					0											},
 	{ "ui_mm_ssao",					1											},
@@ -196,7 +196,7 @@ float		ps_r3_dyn_wet_surf_far		= 30.f;				// 30.0f
 int			ps_r3_dyn_wet_surf_sm_res	= 256;				// 256
 float		ps_r2_gloss_factor = 3.14f;
 
-int			ps_r__detail_radius = 49;
+int			ps_r__detail_radius = 120;
 float		ps_r4_cas_sharpening = 0.0f;
 
 // Test float exported to shaders for development
@@ -629,7 +629,7 @@ void		xrRender_initconsole	()
 	CMD4(CCC_Float, "r__wallmark_ttl", &ps_r__WallmarkTTL, 1.0f, 10.f * 60.f);
 
 	CMD4(CCC_Float,		"r__geometry_lod",		&ps_r__LOD,					0.1f,	1.2f		);
-	CMD4(CCC_Float,		"r__detail_density",	&ps_current_detail_density,		0.1f,	0.8f	);
+	CMD4(CCC_Float,		"r__detail_density",	&ps_current_detail_density,		0.2f,	0.8f	);
 
 #ifdef DEBUG
 	CMD4(CCC_Float,		"r__detail_l_ambient",	&ps_r__Detail_l_ambient,	.5f,	.95f	);
@@ -745,7 +745,7 @@ void		xrRender_initconsole	()
 
 	// IX-Ray
 	CMD3(CCC_Mask, "r__fast_details_update",&ps_r2_ls_flags, R2FLAG_FAST_DETAILS_UPDATE);
-	CMD4(CCC_DetailRadius, "r__detail_radius", &ps_r__detail_radius, 10, 5000);
+	CMD4(CCC_DetailRadius, "r__detail_radius", &ps_r__detail_radius, 10, 350);
 	CMD3(CCC_Mask, "r__no_ram_textures", &ps_r__common_flags, RFLAG_NO_RAM_TEXTURES);
 	CMD3(CCC_Mask, "r__mt_texture_load", &ps_r__common_flags, RFLAG_MT_TEX_LOAD);
 	CMD3(CCC_Token, "r_aa", &ps_r2_aa_type, aa_type_token);
