@@ -520,6 +520,9 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeObjectHangingLamp,CSE_ALifeDynamicObjectVi
 	float							glow_radius;
 // game
     float							m_health;
+
+	bool IsInited = false;
+	bool IsSpawnActive = true;
 	
                                     CSE_ALifeObjectHangingLamp	(LPCSTR caSection);
     virtual							~CSE_ALifeObjectHangingLamp	();

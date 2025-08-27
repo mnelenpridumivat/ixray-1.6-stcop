@@ -1770,6 +1770,10 @@ void CSE_ALifeObjectHangingLamp::STATE_Serialize(ISaveObject& Object)
 		if (Object.IsSave()) {
 			set_editor_flag(flVisualAnimationChange);
 		}
+		BEGIN_CHUNK(Object,"CSE_ALifeObjectHangingLamp::STATE::Activation")
+		{
+			Object << IsInited << IsSpawnActive;
+		}
 	}
 }
 
@@ -1810,6 +1814,7 @@ void CSE_ALifeObjectHangingLamp::FillProps	(LPCSTR pref, PropItemVec& values)
 	// 
 	P=PHelper().CreateFlag16	(values, PrepareKey(pref,*s_name,"Light\\Is Spot Light"),		&flags,				flTypeSpot, "Point", "Spot");
 	P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
+	PHelper().CreateBool		(values, PrepareKey(pref,*s_name,"Light\\Active"), &IsSpawnActive);
 	PHelper().CreateColor		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color"),			&color);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Brightness"),	&brightness,		0.1f, 5.f);
 	PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color Animator"),&color_animator, 	smLAnim);

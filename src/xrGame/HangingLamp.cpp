@@ -147,10 +147,20 @@ BOOL CHangingLamp::net_Spawn(CSE_Abstract* DC)
 		//.intepolate_pos
 	}
 	if (lamp->flags.is(CSE_ALifeObjectHangingLamp::flPhysic)&&!Visual())
+	{
 		Msg("! WARNING: lamp, obj name [%s],flag physics set, but has no visual",*cName());
+	}
+
+	if (!lamp->IsInited)
+	{
+		m_bState = lamp->IsSpawnActive;
+		lamp->IsInited = true;
+	}
 	
 	if (Alive() && m_bState)
+	{
 		TurnOn	();
+	}
 	else{
 		processing_activate		();	// temporal enable
 		TurnOff					();	// -> and here is disable :)
@@ -204,26 +214,6 @@ void	CHangingLamp::load				(IReader &input_packet)
 	inherited::load(input_packet);
 	m_bState	= (u8)input_packet.r_u8();
 }
-
-/*void CHangingLamp::Save(CSaveObjectSave* Object) const
-{
-	Object->BeginChunk("CHangingLamp");
-	{
-		inherited::Save(Object);
-		Object->GetCurrentChunk()->w_bool(m_bState);
-	}
-	Object->EndChunk();
-}
-
-void CHangingLamp::Load(CSaveObjectLoad* Object)
-{
-	Object->BeginChunk("CHangingLamp");
-	{
-		inherited::Load(Object);
-		Object->GetCurrentChunk()->r_bool(m_bState);
-	}
-	Object->EndChunk();
-}*/
 
 void CHangingLamp::Serialize(ISaveObject& Object)
 {
