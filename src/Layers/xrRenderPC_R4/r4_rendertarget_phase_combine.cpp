@@ -386,6 +386,12 @@ void CRenderTarget::phase_combine()
 		phase_cas();
 	}
 
+	extern bool UseGasmak;
+	if (UseGasmak)
+	{
+		PhaseGasmask();
+	}
+
 	if (ps_r2_ls_flags_ext.test(R2FLAG_SPP_SATURATION)) {
 		GPU_EVENT(PhaseSaturation);
 		PhaseSaturation();
@@ -400,11 +406,12 @@ void CRenderTarget::phase_combine()
 		GPU_EVENT(PhaseAberration);
 		PhaseAberration();
 	}
+
 	{
 		GPU_EVENT(phase_pp);
 		phase_pp();
 	}
-
+	
 	//	Re-adapt luminance
 	RCache.set_Stencil(FALSE);
 
