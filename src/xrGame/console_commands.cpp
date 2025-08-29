@@ -2335,6 +2335,8 @@ public:
 		
 		// reload language
 		g_pStringTable->ReloadLanguage(args);
+
+		execute_console_command_deferred(Console, "ui_reload");
 		
 		if (g_pGamePersistent == nullptr)
 		{
