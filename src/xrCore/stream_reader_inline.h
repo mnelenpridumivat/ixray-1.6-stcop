@@ -39,30 +39,30 @@ IC void CStreamReader::unmap()
 	Platform::UnmapFile(m_current_map_view_of_file, m_current_window_size);
 }
 
-IC void CStreamReader::remap(const u32& new_offset)
+IC void CStreamReader::remap(const intptr_t& new_offset)
 {
 	unmap();
 	map(new_offset);
 }
 
-IC size_t CStreamReader::elapsed() const
+IC intptr_t CStreamReader::elapsed() const
 {
-	u32 offset_from_file_start = tell();
+	size_t offset_from_file_start = tell();
 	VERIFY(m_file_size >= offset_from_file_start);
-	return (m_file_size - offset_from_file_start);
+	return m_file_size - offset_from_file_start;
 }
 
-IC size_t CStreamReader::length() const
+IC intptr_t CStreamReader::length() const
 {
 	return (m_file_size);
 }
 
-IC void CStreamReader::seek(size_t offset)
+IC void CStreamReader::seek(intptr_t offset)
 {
 	advance(offset - tell());
 }
 
-IC size_t CStreamReader::tell() const
+IC intptr_t CStreamReader::tell() const
 {
 	VERIFY(m_current_pointer >= m_start_pointer);
 	VERIFY(u32(m_current_pointer - m_start_pointer) <= m_current_window_size);
