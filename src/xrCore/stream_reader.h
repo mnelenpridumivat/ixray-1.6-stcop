@@ -43,15 +43,15 @@ public:
 public:
 	IC		const FileHandle& file_mapping_handle() const;
 
-	IC		s32		elapsed() const override;
-	IC		u32		length() const override;
-	IC		void	seek(int offset) override;
-	IC		u32		tell() const override;
+	IC		size_t	elapsed() const override;
+	IC		size_t	length() const override;
+	IC		void	seek(size_t offset) override;
+	IC		size_t	tell() const override;
 
 	IC		void	close();
 
-	void			advance(int offset) override;
-	void			r(void* buffer, u32 buffer_size) override;
+	void			advance(size_t offset) override;
+	void			r(void* buffer, size_t buffer_size) override;
 	CStreamReader* open_chunk(const u32& chunk_id);
 	u32				find_chunk(u32 ID, BOOL* bCompressed = 0);
 

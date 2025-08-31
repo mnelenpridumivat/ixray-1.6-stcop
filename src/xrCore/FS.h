@@ -139,14 +139,14 @@ public:
 	virtual CVirtualFileReader* cast_virtual_file_reader() { return nullptr; }
 	virtual IReader* cast_reader() { return nullptr; }
 
-	virtual s32			elapsed()	const = 0;
-	IC BOOL			eof			()	const		{return elapsed() <= 0;	};
+	virtual size_t			elapsed()	const = 0;
+	IC		BOOL			eof		()	const		{return elapsed() <= 0;	};
 
-	virtual u32		tell() const = 0;
-	virtual u32		length() const = 0;
-	virtual void	advance(int cnt) = 0;
+	virtual size_t		tell() const = 0;
+	virtual size_t		length() const = 0;
+	virtual void	advance(size_t cnt) = 0;
 
-	virtual void	r			(void* p, u32 cnt) = 0;
+	virtual void	r			(void* p, size_t cnt) = 0;
 
 	IC Fvector		r_vec3		()			{Fvector tmp;r(&tmp,3*sizeof(float));return tmp;	};
 	IC Fvector4		r_vec4		()			{Fvector4 tmp;r(&tmp,4*sizeof(float));return tmp;	};
@@ -192,7 +192,7 @@ public:
 		A.mul		(s);
 	}
 
-	virtual void	seek(int ptr) = 0;
+	virtual void	seek(size_t ptr) = 0;
 	// Set file pointer to start of chunk data (0 for root chunk)
 	IC	void		rewind		()			{	seek(0); }
 
@@ -220,14 +220,14 @@ public:
 	u32 m_last_pos;
 };
 
-// TODO: rewrite size from int to s64
-class XRCORE_API IReader :  public IReaderBase
+class XRCORE_API IReader :
+	public IReaderBase
 {
 protected:
 	char *			data	;
-	int				Pos		;
+	size_t			Pos		;
 	size_t			Size	;
-	int				iterpos	;
+	size_t			iterpos	;
 
 public:
 	IC				IReader			()
@@ -237,7 +237,7 @@ public:
 
 	virtual			~IReader		() {}
 
-	IC				IReader			(void *_data, int _size, int _iterpos=0)
+	IC				IReader			(void *_data, size_t _size, int _iterpos=0)
 	{
 		data		= (char *)_data	;
 		Size		= _size			;
@@ -257,15 +257,15 @@ protected:
 	u32 			advance_term_string			();
 
 public:
-	s32			elapsed		()	const override {	return Size-Pos;		};
-	void			seek		(int ptr) override {	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
-	u32			tell		()	const override {	return (u32)Pos;				};
-	u32			length		()	const override {	return (u32)Size;			};
-	void		advance		(int cnt) override {	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
+	IC size_t		elapsed		()	const override {	return Size-Pos;		};
+	   void			seek		(size_t ptr) override {	Pos=ptr; VERIFY((Pos<=Size) && (Pos>=0));};
+	   size_t		tell		()	const override {	return (u32)Pos;				};
+	   size_t		length		()	const override {	return (u32)Size;			};
+		void		advance		(size_t cnt) override {	Pos+=cnt;VERIFY((Pos<=Size) && (Pos>=0));};
 	IC void*		pointer		()	const		{	return &(data[Pos]);	};
 
 public:
-	void			r			(void *p,u32 cnt) override;
+	void			r			(void *p, size_t cnt) override;
 
 	void			r_string	(char *dest, u32 tgt_sz);
 	void			r_string	(xr_string& dest);
