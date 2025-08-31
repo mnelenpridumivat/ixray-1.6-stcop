@@ -331,7 +331,8 @@ void CWeaponMagazined::FireEnd()
 	const static bool isAutoreload = EngineExternal()[EEngineExternalGame::EnableAutoreload];
 	if (isAutoreload && H_Parent())
 	{
-		if (m_pInventory && !iAmmoElapsed && H_Parent()->cast_actor() && GetState() != eReload)
+		bool is_empty = m_bAmmoInChamber ? iAmmoChamberElapsed == 0 : iAmmoElapsed == 0;
+		if (m_pInventory && is_empty && H_Parent()->cast_actor() && GetState() != eReload)
 		{
 			Reload();
 		}
@@ -776,6 +777,8 @@ void CWeaponMagazined::OnStateSwitch	(u32 S)
 	}
 }
 
+static bool is_shooting_end_callback = false;
+
 void CWeaponMagazined::UpdateCL			()
 {
 	PROF_EVENT("CWeaponMagazined::UpdateCL")
@@ -948,6 +951,13 @@ void CWeaponMagazined::state_Fire(float dt)
 			OnMagazineEmpty();
 
 		StopShooting();
+
+		if (ParentIsActor() && is_shooting_end_callback)
+		{
+			is_shooting_end_callback = false;
+			bWorking = false;
+			SwitchState(eIdle);
+		}
 	}
 	else
 	{
@@ -1059,6 +1069,13 @@ void CWeaponMagazined::state_FireChamber(float dt)
 			OnMagazineEmpty();
 
 		StopShooting();
+
+		if (ParentIsActor() && is_shooting_end_callback)
+		{
+			is_shooting_end_callback = false;
+			bWorking = false;
+			SwitchState(eIdle);
+		}
 	}
 	else
 	{
@@ -1264,8 +1281,15 @@ void CWeaponMagazined::OnAnimationEnd(u32 state)
 		{
 			if (ParentIsActor())
 			{
-				bWorking = false;
-				SwitchState(eIdle);
+				if (IsGrenadeMode())
+				{
+					bWorking = false;
+					SwitchState(eIdle);
+				}
+				else
+				{
+					is_shooting_end_callback = true;
+				}
 			}
 			break;
 		}
@@ -2206,7 +2230,7 @@ void CWeaponMagazined::PlayAnimIdle()
 shared_str CWeaponMagazined::SetCurrentShootAnimation()
 {
 	bool last = m_bAmmoInChamber ? iAmmoChamberElapsed == 1 && iAmmoElapsed == 0 : iAmmoElapsed == 1;
-	shared_str anim = HudAnimationExist("anm_shoot") ? "anm_shoot" : HudAnimationExist("anm_shot_l") && last ? "anm_shot" : "anm_shots";
+	shared_str anim = HudAnimationExist("anm_shoot") ? "anm_shoot" : HudAnimationExist("anm_shot_l") && last ? "anm_shot_l" : "anm_shots";
 
 	if (H_Parent() && H_Parent() == Level().CurrentControlEntity())
 	{
