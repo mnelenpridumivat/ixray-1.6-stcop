@@ -269,8 +269,8 @@ void CUIActorMenu::Show(bool status)
 
 void CUIActorMenu::Draw()
 {
-	CurrentGameUI()->UIMainIngameWnd->DrawZoneMap();
-	CurrentGameUI()->UIMainIngameWnd->DrawMainIndicatorsForInventory();
+	//CurrentGameUI()->UIMainIngameWnd->DrawZoneMap();
+	//CurrentGameUI()->UIMainIngameWnd->DrawMainIndicatorsForInventory();
 
 	inherited::Draw	();
 	//m_ActorStateInfo->Draw();
