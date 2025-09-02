@@ -239,6 +239,8 @@ private:
 
 	SoundRegistryMap			sound_registry;
 
+	ref_sound					m_screenshot_sound_event;
+
 public:
 	void						PrefetchSound (LPCSTR name);
 
