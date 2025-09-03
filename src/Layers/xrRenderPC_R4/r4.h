@@ -325,7 +325,7 @@ public:
 
 	xr_string						getShaderParams				();
 	void							addShaderOption				(const char* name, const char* value = "");
-	void							clearAllShaderOptions		() { m_ShaderOptions.clear(); }
+	void							clearAllShaderOptions		();
 
 	auto							ShaderOptionsCount			() { return m_ShaderOptions.size(); }
 
