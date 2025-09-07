@@ -155,7 +155,7 @@ const xr_vector<DetailPathManager::STravelPathPoint>	&CMovementManager::path	() 
 
 void CMovementManager::update_path				()
 {
-	START_PROFILE("Build Path::update")
+	PROF_EVENT("Build Path::update")
 
 	if (!enabled() || wait_for_distributed_computation())
 		return;
@@ -236,8 +236,6 @@ void CMovementManager::update_path				()
 #endif // USE_FREE_IN_RESTRICTIONS
 
 	m_build_at_once				= false;
-
-	STOP_PROFILE
 }
 
 bool CMovementManager::actual_all				() const

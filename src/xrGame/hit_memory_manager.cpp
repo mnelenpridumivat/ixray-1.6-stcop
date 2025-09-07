@@ -194,7 +194,7 @@ struct CRemoveOfflinePredicate {
 
 void CHitMemoryManager::update()
 {
-	START_PROFILE("Memory Manager/hits::update")
+	PROF_EVENT("Memory Manager/hits::update")
 
 	clear_delayed_objects		();
 
@@ -221,7 +221,6 @@ void CHitMemoryManager::update()
 		}
 	}
 #endif
-	STOP_PROFILE
 }
 
 void CHitMemoryManager::enable			(const CObject *object, bool enable)

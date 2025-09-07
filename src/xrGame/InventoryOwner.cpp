@@ -269,6 +269,7 @@ void CInventoryOwner::Serialize(ISaveObject& Object)
 
 void CInventoryOwner::UpdateInventoryOwner(u32 deltaT)
 {
+	PROF_EVENT("UpdateInvOwner");
 	inventory().Update();
 
 	if ( m_pTrade )
