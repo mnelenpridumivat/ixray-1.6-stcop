@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "level_graph.h"
 #include "Stats.h"
+
+#include <memory_resource>
+
 ILevelGraph::ILevelGraph(): m_header(nullptr), m_nodes(nullptr), m_level_id(0), m_row_length(0), m_column_length(0),
-                            m_max_x(0), m_max_z(0)
+							m_max_x(0), m_max_z(0)
 {
 }
 
@@ -10,112 +13,138 @@ ILevelGraph::~ILevelGraph()
 {
 }
 
-bool ILevelGraph::Search(u32 start_vertex_id, u32 dest_vertex_id, xr_vector<u32>& OutPath,float MaxRange, u32 MaxIterationCount, u32 MaxVisitedNodeCount) const
+bool ILevelGraph::Search(u32 start_vertex_id, u32 dest_vertex_id, xr_vector<u32>& OutPath, float MaxRange, u32 MaxIterationCount, u32 MaxVisitedNodeCount) const
 {
-	thread_local	xr_vector<std::pair<float, u32>>	TempPriorityNode;
-	thread_local	xr_hash_map<u32, u32>				TempCameFrom;
-	thread_local	xr_hash_map<u32, float>				TempCostSoFar;
-					float								m_distance_xz = header().cell_size();
+	// Используем более эффективные структуры данных
+	struct ComparePriority {
+		bool operator()(const std::pair<float, u32>& a, const std::pair<float, u32>& b) const {
+			return a.first > b.first; // min-heap
+		}
+	};
 
-	TempPriorityNode.clear();
+	thread_local std::priority_queue<std::pair<float, u32>,
+		xr_vector<std::pair<float, u32>>,
+		ComparePriority> TempPriorityNode;
+
+	thread_local std::pmr::unordered_map<u32, u32> TempCameFrom;
+	thread_local std::pmr::unordered_map<u32, float> TempCostSoFar;
+
+	// Используем memory pool с очисткой между вызовами
+	thread_local std::pmr::unsynchronized_pool_resource pool_resource;
+	thread_local bool initialized = false;
+
+	if (!initialized) {
+		TempCameFrom = std::pmr::unordered_map<u32, u32>{ &pool_resource };
+		TempCostSoFar = std::pmr::unordered_map<u32, float>{ &pool_resource };
+		initialized = true;
+	}
+
+	const float m_distance_xz = header().cell_size();
+
+	TempPriorityNode = {};
 	TempCameFrom.clear();
 	TempCostSoFar.clear();
 	OutPath.clear();
-	
-	
+
 	u32 FromID = start_vertex_id;
 	u32 ToID = dest_vertex_id;
-		
-	if (FromID == ToID)
-	{
+
+	if (FromID == ToID) {
 		OutPath.push_back(start_vertex_id);
 		return true;
 	}
-		
-	if(!is_accessible(FromID) || !is_accessible(ToID))
-	{
+
+	if (!is_accessible(FromID) || !is_accessible(ToID)) {
 		return false;
 	}
 
-	TempPriorityNode.push_back({0.f, FromID});
-	TempCameFrom.insert({FromID, FromID});
-	TempCostSoFar.insert( {FromID, 0.f});
+	// Предварительно вычисляем позицию целевого узла
+	CVertex* target_vertex = vertex(ToID);
+	float target_x, target_z;
+	unpack_xz(target_vertex, target_x, target_z);
 
-	auto CalcCost = [m_distance_xz](CVertex* Node1,CVertex* Node2)
-	{
+	TempPriorityNode.push({ 0.f, FromID });
+	TempCameFrom[FromID] = FromID;
+	TempCostSoFar[FromID] = 0.f;
+
+	auto CalcCost = [m_distance_xz](CVertex*, CVertex*) {
 		return m_distance_xz;
-	};
-	auto DistanceNode = [this,m_distance_xz](CVertex* Node1,CVertex* Node2)
-	{
-		float x1; float y1;
-		float x2; float y2;
-		unpack_xz(Node1,x1,y1);
-		unpack_xz(Node2,x2,y2);
-		return m_distance_xz*2*(fabs(x1-x2)+fabs(y1-y2));
-	};
-	while (!TempPriorityNode.empty())
-	{
-		u32 CurrentNodeID = TempPriorityNode.back().second;
-		TempPriorityNode.pop_back();
-		if (CurrentNodeID == ToID)
-		{
+		};
+
+	auto DistanceNode = [this, m_distance_xz, target_x, target_z](CVertex* Node) {
+		float x1, y1;
+		unpack_xz(Node, x1, y1);
+		return m_distance_xz * 2 * (fabs(x1 - target_x) + fabs(y1 - target_z));
+		};
+
+	u32 visited_count = 0;
+
+	while (!TempPriorityNode.empty() && MaxIterationCount > 0) {
+		u32 CurrentNodeID = TempPriorityNode.top().second;
+		TempPriorityNode.pop();
+
+		if (CurrentNodeID == ToID) {
+			// Восстанавливаем путь
 			u32 NextNode = ToID;
-			while (NextNode != FromID)
-			{
-				OutPath.insert( OutPath.begin(),NextNode);
+			while (NextNode != FromID) {
+				OutPath.insert(OutPath.begin(), NextNode);
 				NextNode = TempCameFrom[NextNode];
 			}
-			OutPath.insert( OutPath.begin(),NextNode);
+			OutPath.insert(OutPath.begin(), NextNode);
 			return true;
 		}
-		
+
 		CVertex* Node = vertex(CurrentNodeID);
-		for (s32 NeighborIndex = 0; NeighborIndex < 4; NeighborIndex++)
-		{
+
+		for (s32 NeighborIndex = 0; NeighborIndex < 4; NeighborIndex++) {
 			u32 NeighborID = Node->link(NeighborIndex);
-			if (!is_accessible(NeighborID)) continue;
-
-
-			if(MaxIterationCount == 0) continue;
-			MaxIterationCount--;
+			if (!is_accessible(NeighborID)) {
+				continue;
+			}
 
 			CVertex* Neighbor = vertex(NeighborID);
 			float NewCost = TempCostSoFar[CurrentNodeID] + CalcCost(Node, Neighbor);
-			auto TempCostSoFarIterator = TempCostSoFar.find(NeighborID);
-			if ((TempCostSoFarIterator != TempCostSoFar.end() &&TempCostSoFarIterator->second > NewCost)|| (TempCostSoFarIterator == TempCostSoFar.end() &&MaxVisitedNodeCount > TempCostSoFar.size()))
-			{
-				const float Distance = DistanceNode(vertex(ToID), Neighbor);
 
-				if(Distance>MaxRange)
-				{
-					continue;
-				}
+			auto cost_it = TempCostSoFar.find(NeighborID);
+			if (cost_it != TempCostSoFar.end() && cost_it->second <= NewCost) {
+				continue; // Уже есть лучший путь
+			}
 
-				if(TempCostSoFarIterator != TempCostSoFar.end())
-				{
-					TempCostSoFarIterator->second = NewCost; 
-				}
-				else
-				{
-					TempCostSoFar.insert({NeighborID,NewCost});
-				}
+			// Проверяем лимит посещённых узлов
+			if (TempCostSoFar.size() >= MaxVisitedNodeCount) {
+				continue;
+			}
 
-				float  priority = NewCost + Distance;
-				TempPriorityNode.insert(std::upper_bound(TempPriorityNode.begin(),TempPriorityNode.end(),std::pair<float, u32>{priority,NeighborID},[](const std::pair<float, u32>& Left, const std::pair<float, u32>& Right) {return Left.first > Right.first; }),{priority,NeighborID});
+			// Проверяем диапазон
+			const float Distance = DistanceNode(Neighbor);
+			if (Distance > MaxRange) {
+				continue;
+			}
 
-				
-				auto TempCameFromIterator = TempCameFrom.find(NeighborID);
-				if(TempCameFromIterator!=TempCameFrom.end())
-				{
-					TempCameFromIterator->second = CurrentNodeID; 
-				}
-				else
-				{
-					TempCameFrom.insert({NeighborID,CurrentNodeID});
-				}
+			// Обновляем или добавляем стоимость
+			if (cost_it != TempCostSoFar.end()) {
+				cost_it->second = NewCost;
+			}
+			else {
+				TempCostSoFar[NeighborID] = NewCost;
+			}
+
+			// Добавляем в очередь с приоритетом
+			float priority = NewCost + Distance;
+			TempPriorityNode.push({ priority, NeighborID });
+
+			// Обновляем информацию о пути
+			TempCameFrom[NeighborID] = CurrentNodeID;
+
+			// Уменьшаем счётчик итераций
+			if (--MaxIterationCount == 0) {
+				break;
 			}
 		}
+
+		visited_count++;
 	}
+
 	return false;
 }
 
