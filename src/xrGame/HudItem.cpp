@@ -365,7 +365,7 @@ void CHudItem::OnMoveToRuck(const SInvItemPlace& prev)
 	}
 }
 
-bool CHudItem::SendDeactivateItem()
+bool CHudItem::SendDeactivateItem(bool Force)
 {
 	if (GetState() == eHiding)
 		return false;
