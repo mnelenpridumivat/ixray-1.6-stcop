@@ -17,8 +17,9 @@
 #include "Widgets/UITrackBar.h"
 #include "Widgets/UIArrowStepper.h"
 #include "Widgets/UIHint.h"
-#include "Widgets/UIListWnd.h"
 #include "Widgets/UILoadingScreenProgress.h"
+#include "Widgets/UIListWnd.h"
+#include "Widgets/UIStackPanel.h"
 
 #include "UITextureMaster.h"
 #include "Widgets/UITabButtonMP.h"
@@ -218,6 +219,15 @@ bool CUIXmlInit::InitStatic(CUIXml& xml_doc, LPCSTR path,
 	pWnd->m_stat_hint_text = xml_doc.ReadAttrib(path, index, "hint", "");
 	
 	return true;
+}
+
+bool CUIXmlInit::InitStackPanel(CUIXml& xml_doc, LPCSTR path, int index, CUIStackPanel* pWnd)
+{
+	bool RetVal = InitWindow(xml_doc, path, index, pWnd);
+
+	pWnd->AlignLeft = !xml_doc.ReadAttribBool(path, index, "right", true);
+
+	return RetVal;
 }
 
 bool CUIXmlInit::InitTextWnd(CUIXml& xml_doc, LPCSTR path, int index, CUITextWnd* pWnd)
@@ -832,7 +842,12 @@ bool CUIXmlInit::InitTabControl(CUIXml &xml_doc, LPCSTR path, int index, CUITabC
 		newButton = radio ? new CUIRadioButton() : new CUITabButton();
 		status &= Init3tButton(xml_doc, "button", i, newButton);
 		newButton->m_btn_id = xml_doc.ReadAttrib("button",i,"id");
-		R_ASSERT3(newButton->m_btn_id.size(), xml_doc.m_xml_file_name, path);
+		if (!newButton->m_btn_id.size())
+		{
+			string32 temp;
+			xr_sprintf(temp, "tab_button_%d", i);
+			newButton->m_btn_id = temp;
+		}
 		pWnd->AddItem(newButton);
 	}
 	
