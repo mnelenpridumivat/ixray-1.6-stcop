@@ -42,6 +42,11 @@ void CSE_ALifeHelicopter::script_register(lua_State *L)
 
 SCRIPT_EXPORT4(CSE_ALifeHelicopter, CSE_ALifeDynamicObjectVisual, CSE_Motion, CSE_PHSkeleton);
 
+void set_yaw_car(CSE_ALifeCar* obj, const float yaw)
+{
+	obj->o_Angle.y = yaw;
+}
+
 void CSE_ALifeCar::script_register(lua_State *L)
 {
 	module(L)[
@@ -51,6 +56,7 @@ void CSE_ALifeCar::script_register(lua_State *L)
 			CSE_ALifeDynamicObjectVisual,
 			CSE_PHSkeleton
 		)
+		.def("set_yaw", &set_yaw_car)
 	];
 }
 
