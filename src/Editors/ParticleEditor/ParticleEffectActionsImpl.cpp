@@ -1439,6 +1439,11 @@ void EPABindVelocityValue::Compile(IWriter& F)
 	pBindVelocityValue(F, _vector("InitialValue").val);
 }
 
+PEd::ListTypeBase PEd::operator|(PEd::LisType lis, PEd::LisType rhs)
+{
+	return ListTypeBase(lis) | ListTypeBase(rhs);
+}
+
 /*void PS::CPEDef::Render(const Fmatrix& parent)
 {
 	Fmatrix trans; trans.translate(parent.c);
