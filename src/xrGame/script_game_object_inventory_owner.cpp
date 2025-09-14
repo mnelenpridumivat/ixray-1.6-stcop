@@ -2315,6 +2315,18 @@ void CScriptGameObject::SetCharacterIcon(LPCSTR iconName)
 	}
 }
 
+void CScriptGameObject::SetActorDefaultVisual(LPCSTR visualName)
+{
+	if (CActor* pActor = object().cast_actor())
+	{
+		pActor->SetDefaultVisualOutfit(visualName);
+	}
+	else
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CActor : cannot access class member SetActorDefaultVisual!");
+	}
+}
+
 void CScriptGameObject::SetCharacterDefaultVisual(LPCSTR name)
 {
 	if (!name)

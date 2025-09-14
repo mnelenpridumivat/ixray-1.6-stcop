@@ -987,6 +987,7 @@ public:
 
 			void		SetCharacterName(LPCSTR name);
 			void		SetCharacterIcon(LPCSTR iconName);
+			void		SetActorDefaultVisual(LPCSTR visualName);
 			void SetCharacterMaxWeight(float value);
 			void		SetCharacterDefaultVisual(LPCSTR name);
 	void StartActorAnimator(LPCSTR section);
