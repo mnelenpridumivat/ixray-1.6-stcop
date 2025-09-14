@@ -2346,7 +2346,7 @@ void CScriptGameObject::StartActorAnimator(LPCSTR section)
 	{
 		if (pActor->HudAnimator())
 		{
-			pActor->HudAnimator()->StartAnimator(section);
+			pActor->StartAnimator(section);
 		}
 	}
 	else
