@@ -15,42 +15,61 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		Msg("! SDL_Init Error: %s", SDL_GetError());
 		return 0;
 	}
+    
+    PROF_START_CAPTURE();
 
 	splash::show(IDB_PE);
 
+    START_PROFILE("Initializing Debugger")
 	splash::update(5, "Initializing Debugger");
 
 	if (!IsDebuggerPresent()) Debug._initialize(false);
-	const char* FSName = "fs.ltx";
+    STOP_PROFILE
 
-	splash::update(10, "Initializing COM Library");
+    START_PROFILE("Initializing Debugger")
+    splash::update(10, "Initializing COM Library");
 
-	CoInitialize(nullptr);
+    CoInitialize(nullptr);
+    STOP_PROFILE
 
-	splash::update(20, "Core Initialization");
+    START_PROFILE("Core Initialization")
+    splash::update(20, "Core Initialization");
 
-	Core._initialize("Patricle", ELogCallback, 1, FSName);
+    const char* FSName = "fs.ltx";
+    Core._initialize("Particle", ELogCallback, 1, FSName);
 
-	psDeviceFlags.set(rsFullscreen, false);
+    psDeviceFlags.set(rsFullscreen, false);
+    STOP_PROFILE
 
-	splash::update(35, "Initializing Particle Tools");
-	actions_token = actions_token_impl;
-	Tools = new CParticleTool();
-	PTools = (CParticleTool*)Tools;
+    START_PROFILE("Initializing Particle Tools")
+    splash::update(35, "Initializing Particle Tools");
+    actions_token = actions_token_impl;
+    Tools = new CParticleTool();
+    PTools = (CParticleTool*)Tools;
+    STOP_PROFILE
 
-	splash::update(55, "Registering UI Commands");
+    START_PROFILE("Registering UI Commands")
+    splash::update(55, "Registering UI Commands");
 
-	UI = new CParticleMain();
-	UI->RegisterCommands();
-	
-	splash::update(75, "Creating Main UI Form");
+    UI = new CParticleMain();
+    UI->RegisterCommands();
+    STOP_PROFILE
+    
+    START_PROFILE("Registering UI Commands")
+    splash::update(75, "Creating Main UI Form");
 
-	UIMainForm* MainForm = new UIMainForm();
-	::MainForm = MainForm;
-	UI->Push(MainForm, false);
+    UIMainForm* MainForm = new UIMainForm();
+    ::MainForm = MainForm;
+    UI->Push(MainForm, false);
+    STOP_PROFILE
 
-	splash::update(100, "Finalizing");
-	splash::hide();
+    START_PROFILE("Registering UI Commands")
+    splash::update(100, "Finalizing");
+    splash::hide();
+    STOP_PROFILE
+
+    PROF_STOP_CAPTURE();
+    PROF_SAVE_CAPTURE("programm-capture-startup.opt");
 
 	//MainForm->Frame();
 	bool NeedExit = false;

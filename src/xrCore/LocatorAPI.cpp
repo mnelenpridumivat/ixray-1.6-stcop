@@ -715,6 +715,7 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 	}
 	else
 	{
+		PROF_EVENT("CLocatorAPI::pFSltx_initialize");
 		IReader* pFSltx = setup_fs_ltx(fs_name);
 		// append all pathes    
 		string_path		id, root, add, def, capt;
@@ -726,6 +727,7 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 
 		while (!pFSltx->eof())
 		{
+			PROF_EVENT("CLocatorAPI::pFSltx_initialize::Line");
 			pFSltx->r_string(buf, sizeof(buf));
 			if (buf[0] == ';')		continue;
 

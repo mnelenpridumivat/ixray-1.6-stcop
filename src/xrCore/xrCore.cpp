@@ -83,6 +83,8 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, xrLogger::LogCallback cb, BOO
 
 	if (init_fs)
 	{
+		PROF_EVENT("xrCore::FS_initialize");
+		
 		u32 flags = 0;
 		if (Core.ParamsData.test(ECoreParams::build))	
 			flags |= CLocatorAPI::flBuildCopy;
@@ -91,7 +93,7 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, xrLogger::LogCallback cb, BOO
 			flags |= CLocatorAPI::flBuildCopy|CLocatorAPI::flEBuildCopy;
 
 		flags |= CLocatorAPI::flScanAppRoot;
-
+		
 		FS._initialize		(flags,0,fs_fname);
 		BuildId             = build_id;
 		Msg					("'%s' build %d, %s\n","xrCore",build_id, build_date);
