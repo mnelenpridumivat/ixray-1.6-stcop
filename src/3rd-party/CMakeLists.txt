@@ -2,12 +2,7 @@
 set(IXRAY_FOLDER_3RD FOLDER "3rd Party")
 
 # 3rd libraries
-add_subdirectory("sdl3")
-set_target_properties(SDL_uclibc PROPERTIES ${IXRAY_FOLDER_3RD})
-set_target_properties(SDL3-shared PROPERTIES ${IXRAY_FOLDER_3RD})
-
 if(NOT IXRAY_COMPRESSOR_ONLY)
-    add_subdirectory("luabind")
     add_subdirectory("ode")
     add_subdirectory("crypto")
     add_subdirectory("imgui")
@@ -34,7 +29,6 @@ endif()
 
 # Move 3rd
 if(NOT IXRAY_COMPRESSOR_ONLY)
-    set_target_properties(luabind PROPERTIES ${IXRAY_FOLDER_3RD})
     set_target_properties(ODE PROPERTIES ${IXRAY_FOLDER_3RD})
     set_target_properties(crypto PROPERTIES ${IXRAY_FOLDER_3RD})
     set_target_properties(imgui PROPERTIES ${IXRAY_FOLDER_3RD})
