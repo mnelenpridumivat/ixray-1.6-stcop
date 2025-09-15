@@ -11,6 +11,7 @@ file(GLOB_RECURSE EPROPS_SOURCE_PUBLIC_FILES CONFIGURE_DEPENDS
     "../Public/PropertiesListTypes.h"
     "../Public/PropertiesListHelper.h"
     "../Public/xrEProps.h"
+    "../Public/ItemListTypes.h"
 )
 
 set(EPROPS_SRC_FILES)
