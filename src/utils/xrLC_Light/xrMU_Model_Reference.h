@@ -21,6 +21,7 @@ public:
 	base_color_c			c_scale;
 	base_color_c			c_bias;
 public:
+	xr_vector<_vertex>								  SafeVertices;
  	xr_concurrent_unordered_map<size_t, base_color_c> colors_cuda;
 
 public:
@@ -29,16 +30,15 @@ public:
 	void					Load				( IReader& fs, xr_vector<xrMU_Model*>& mu_models );
 	
 	void					calc_lighting		();
-#ifdef LCCUDA_BUILD
 	void					calc_lighting_cuda_1  ();
 	void					calc_lighting_cuda_2  ();
 	void					calc_lighting_cuda_3  ();
-#endif
+ 
 	void					export_cform_game	(CDB::CollectorPacked& CL);
 	void					export_cform_rcast	(CDB::CollectorPacked& CL); 
 
 	void					export_cform_rcast_new(xr_vector<FaceDataIntel>& faces);
-	void					export_cform_game_new(xr_vector<FaceDataIntel>& faces);
+	
 
 };
  

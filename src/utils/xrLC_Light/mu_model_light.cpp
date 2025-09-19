@@ -110,37 +110,22 @@ void run_mu_light()
  	mu_materials.wait(100); 
 
 	// Light references
-#ifdef LCCUDA_BUILD
+	GPUTaskinSystem.RestartALL();
 	if (gCompilerMode.CUDA)
 	{
-		GPUTaskinSystem.RestartALL();
-
 		// Gathering
-		int REF_INDEX = 0;
 		for (auto& REF : inlc_global_data()->mu_refs())
-		{
-			AditionalData("REF LIGHT: %u/%u", REF_INDEX, inlc_global_data()->mu_refs().size());
 			REF->calc_lighting_cuda_1();
-			REF_INDEX++;
-		}
-		GPUTaskinSystem.LightPointPacked_MODELRun();
+ 		GPUTaskinSystem.LightPointPacked_MODELRun();
 		
 		// APPLY
-		REF_INDEX = 0;
 		for (auto& REF : inlc_global_data()->mu_refs())
 		{
-			AditionalData("REF LIGHT APPLY: %u/%u", REF_INDEX, inlc_global_data()->mu_refs().size());
-
 			REF->calc_lighting_cuda_2();
 			REF->calc_lighting_cuda_3();
-			REF_INDEX++;
 		}
-
-
-		GPUTaskinSystem.RestartALL(); // Выгружаем все Это последнее освещение 
 	}
 	else
-#endif
 	{
 		ThreadTaskID = 0;
 		for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
