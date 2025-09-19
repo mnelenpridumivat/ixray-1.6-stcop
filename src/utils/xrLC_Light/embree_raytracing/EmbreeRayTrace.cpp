@@ -31,9 +31,6 @@ EmbreeData EmbreeMain;
 // Сильно ускоряет Но не нужно сильно завышать вообще 0.01f желаетельно 
 // Влияет на яркость на выходе (если близко к 0 будет занулятся)
 // можно и 0.10f Было раньше так
-// Сильно ускоряет Но не нужно сильно завышать вообще 0.01f желаетельно 
-// Влияет на яркость на выходе (если близко к 0 будет занулятся)
-// можно и 0.10f Было раньше так
 float EmbreeEnergyMAX = 0.01f;
 
 struct RayQueryContext
@@ -44,68 +41,19 @@ struct RayQueryContext
  	Face* skip = 0;
 	R_Light* Light = 0;
 	float energy = 1.0f;
+	u32 Hits = 0;
 };
-
-// Предвычисленный LUT для прозрачности
-alignas(64) static float opacityLUT[256];
-struct OpacityInit {
-	OpacityInit() {
-		for (int i = 0; i < 256; i++) {
-			float a = float(i) / 255.f;
-			opacityLUT[i] = 1.f - a * a; // 1 - (a^2)
-		}
-	}
-} initOpacity;
-
+ 
 // Сделать потом переключалку
-bool CalculateEnergy(RayQueryContext* ctxt, RTCHit* hit, Face* F, Fvector& B)
+bool CalculateEnergy(Face* F, Fvector& B, float& energy, float u, float v)
 {
-	const b_material& M = inlc_global_data()->materials()[F->dwMaterial];
-	const b_texture& T = inlc_global_data()->textures()[M.surfidx];
-
-	// barycentrics (без Fvector, сразу в скаляры)
-	float b0 = 1.0f - hit->u - hit->v;
-	float b1 = hit->u;
-	float b2 = hit->v;
-
-	// UV сразу float
-	const Fvector2* cuv = F->getTC0();
-	float u = cuv[0].x * b0 + cuv[1].x * b1 + cuv[2].x * b2;
-	float v = cuv[0].y * b0 + cuv[1].y * b1 + cuv[2].y * b2;
-
-	int U = int(u * T.dwWidth + 0.5f);
-	int V = int(v * T.dwHeight + 0.5f);
-
-	// fast wrap (если pow2, иначе можно без ветки)
-	if ((T.dwWidth & (T.dwWidth - 1)) == 0)
-		U &= (T.dwWidth - 1);
-	else {
-		if (U < 0) U += T.dwWidth;
-		else if (U >= T.dwWidth) U %= T.dwWidth;
-	}
-
-	if ((T.dwHeight & (T.dwHeight - 1)) == 0)
-		V &= (T.dwHeight - 1);
-	else {
-		if (V < 0) V += T.dwHeight;
-		else if (V >= T.dwHeight) V %= T.dwHeight;
-	}
-
-	// fetch pixel
-	const uint32_t* raw = static_cast<const uint32_t*>(T.pSurface);
-	uint32_t pixel = raw[V * T.dwWidth + U];
-	uint32_t pixel_a = (pixel >> 24) & 0xFF;
-
-	// LUT вместо деления и sqr
-	ctxt->energy *= opacityLUT[pixel_a];
-
-	/* 
-  	b_material& M = inlc_global_data()->materials()[F->dwMaterial];
+	// Перемещаем начало луча немного дальше пересечения
+	b_material& M = inlc_global_data()->materials()[F->dwMaterial];
 	b_texture& T = inlc_global_data()->textures()[M.surfidx];
-
+	 
 	// barycentric coords
 	// note: W,U,V order
-	B.set(1.0f - hit->u - hit->v, hit->u, hit->v);
+	B.set(1.0f - u - v, u, v);
 
 	//// calc UV
 	Fvector2*   cuv = F->getTC0();
@@ -116,18 +64,16 @@ bool CalculateEnergy(RayQueryContext* ctxt, RTCHit* hit, Face* F, Fvector& B)
 	int V = iFloor(uv.y * float(T.dwHeight) + .5f);
 	U %= T.dwWidth;		if (U < 0) U += T.dwWidth;
 	V %= T.dwHeight;	if (V < 0) V += T.dwHeight;
-	
-	u32* raw	= static_cast<u32*>(T.pSurface);
-	u32 pixel	= raw[V * T.dwWidth + U];
+
+	u32* raw = static_cast<u32*>(T.pSurface);
+	u32 pixel = raw[V * T.dwWidth + U];
 	u32 pixel_a = color_get_A(pixel);
 
 	float opac = 1.f - _sqr(float(pixel_a) / 255.f);
 
 	// Дополнение Контекста
-	ctxt->energy *= opac;
-	*/
-
-	if (ctxt->energy < EmbreeEnergyMAX)
+	energy *= opac;
+	if (energy < EmbreeEnergyMAX)
 		return false;
 
 	return true;
@@ -141,9 +87,9 @@ void FilterRayTraceOpaque(const struct RTCFilterFunctionNArguments* args)
 	Face* F = EmbreeMain.static_geom.dummy[hit->primID];
 	if (F == ctxt->skip)
 	{
-		args->valid[0] = 0;  return;
+		args->valid[0] = 0; return;
 	}
- 	ctxt->energy = 0;
+	ctxt->energy = 0;
 	args->valid[0] = -1; // Приехали
 }
  
@@ -155,10 +101,10 @@ void FilterRaytraceTransparent(const struct RTCFilterFunctionNArguments* args)
 	// Собрать все
 	Face* F = EmbreeMain.static_geom_transp.dummy[hit->primID]; 
 	 
- 	if (F != ctxt->skip && !CalculateEnergy(ctxt, hit, F, ctxt->B))
+ 	if (F != ctxt->skip && !CalculateEnergy(F, ctxt->B, ctxt->energy, hit->u, hit->v))
 	{
  		ctxt->energy = 0;
-		args->valid[0] = -1; 		return;
+ 		return;
 	}
 
  	args->valid[0] = 0;
@@ -171,7 +117,8 @@ float EmbreeData::RaytraceEmbreeProcess(R_Light& L, Fvector& P, Fvector& N, floa
 	data_hits.Light = &L;
 	data_hits.skip = (Face*)skip;
 	data_hits.energy = 1.0f;
-  
+	data_hits.Hits = 0;
+ 
 	RTCRay ray;
 	SetRay1(ray, P, N, 0.1f, range);
 
@@ -198,6 +145,10 @@ size_t GetMemory()
 	return used;
 }
 
+ 
+#include <xrMU_Model.h>
+#include <xrMU_Model_Reference.h>
+
 // Loading Common 
 void LoadGeomBuffer(RTCGeometry& geom, RTCBuildQuality& quality, bool FilterTransp, TriangleContainer& geom_buffer)
 {
@@ -210,7 +161,7 @@ void LoadGeomBuffer(RTCGeometry& geom, RTCBuildQuality& quality, bool FilterTran
 		rtcSetGeometryOccludedFilterFunction(geom, &FilterRayTraceOpaque);
 
 	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, geom_buffer.vertex().data(), 0, sizeof(Fvector), geom_buffer.vertex().size());
-	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, geom_buffer.faces().data(), 0, sizeof(Triangle), geom_buffer.faces().size());
+	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, geom_buffer.faces().data(), 0, sizeof(TriEmbree), geom_buffer.faces().size());
 
 	rtcCommitGeometry(geom);
 };

@@ -50,13 +50,18 @@ void global_claculation_data::xrLoad()
 		// Embree Loader
  		EmbreeMain.build_data.build_fcnt	 = H.facecount;
 		EmbreeMain.build_data.build_vcnt	 = H.vertcount;
-  		EmbreeMain.build_data.build_verts.clear();
+
+		// Vertex Loading
+		EmbreeMain.build_data.build_verts.clear();
 		EmbreeMain.build_data.build_verts.resize(H.vertcount);
-  		EmbreeMain.build_data.build_faces.clear();
-		EmbreeMain.build_data.build_faces.resize(H.facecount);
 
 		for (u32 Vid = 0; Vid < H.vertcount; Vid++)
 			EmbreeMain.build_data.build_verts[Vid] = verts[Vid];
+
+		// Triangle Loading
+		EmbreeMain.build_data.build_faces.clear();
+		EmbreeMain.build_data.build_faces.resize(H.facecount);
+
 		for (u32 Tid = 0; Tid < H.facecount; Tid++)
 			EmbreeMain.build_data.build_faces[Tid] = tris[Tid];
 		Phase("Loading RCast CDB...");
@@ -186,60 +191,53 @@ void global_claculation_data::xrLoad()
 					{
 						clMsg("cannot find thm: %s", N);
 						is_thm_missing = true;
-						BT.bHasAlpha = false;
+						continue;
 					}
-					else {
 
-						// version
-						u32 version = 0;
-						R_ASSERT(THM->r_chunk(THM_CHUNK_VERSION,&version));
-						// if( version!=THM_CURRENT_VERSION )	FATAL	("Unsupported version of THM file.");
+					// version
+					u32 version = 0;
+					R_ASSERT(THM->r_chunk(THM_CHUNK_VERSION,&version));
+					// if( version!=THM_CURRENT_VERSION )	FATAL	("Unsupported version of THM file.");
 
-						// analyze thumbnail information
-						R_ASSERT(THM->find_chunk(THM_CHUNK_TEXTUREPARAM));
-						THM->r(&BT.THM.fmt, sizeof(STextureParams::ETFormat));
-						BT.THM.flags.assign(THM->r_u32());
-						BT.THM.border_color = THM->r_u32();
-						BT.THM.fade_color = THM->r_u32();
-						BT.THM.fade_amount = THM->r_u32();
-						BT.THM.mip_filter = THM->r_u32();
-						BT.THM.width = THM->r_u32();
-						BT.THM.height = THM->r_u32();
-						BOOL			bLOD = FALSE;
-						if (N[0] == 'l' && N[1] == 'o' && N[2] == 'd' && N[3] == '\\') bLOD = TRUE;
+					// analyze thumbnail information
+					R_ASSERT(THM->find_chunk(THM_CHUNK_TEXTUREPARAM));
+					THM->r                  (&BT.THM.fmt,sizeof(STextureParams::ETFormat));
+					BT.THM.flags.assign		(THM->r_u32());
+					BT.THM.border_color		= THM->r_u32();
+					BT.THM.fade_color		= THM->r_u32();
+					BT.THM.fade_amount		= THM->r_u32();
+					BT.THM.mip_filter		= THM->r_u32();
+					BT.THM.width			= THM->r_u32();
+					BT.THM.height           = THM->r_u32();
+					BOOL			bLOD=FALSE;
+					if (N[0]=='l' && N[1]=='o' && N[2]=='d' && N[3]=='\\') bLOD = TRUE;
 
-						// load surface if it has an alpha channel or has "implicit lighting" flag
-						BT.dwWidth				= BT.THM.width;
-						BT.dwHeight				= BT.THM.height;
-						BT.bHasAlpha			= BT.THM.HasAlphaChannel();
-						BT.pSurface				= 0;
-						BT.SetHasSurface(FALSE);
+					// load surface if it has an alpha channel or has "implicit lighting" flag
+					BT.dwWidth				= BT.THM.width;
+					BT.dwHeight				= BT.THM.height;
+					BT.bHasAlpha			= BT.THM.HasAlphaChannel();
+					BT.pSurface				= 0;
+					BT.SetHasSurface(FALSE);
 
-						if (!bLOD)
+					if (!bLOD) 
+					{
+						if (BT.bHasAlpha || BT.THM.flags.test(STextureParams::flImplicitLighted))
 						{
-							if (BT.bHasAlpha || BT.THM.flags.test(STextureParams::flImplicitLighted))
-							{
-								clMsg("- loading: %s",N);
-								u32 w=0, h=0;
-								BT.pSurface = Surface_Load(N,w,h);
-								BT.SetHasSurface(TRUE);
+							clMsg("- loading: %s",N);
+							u32 w=0, h=0;
+							BT.pSurface = Surface_Load(N,w,h);
+							BT.SetHasSurface(TRUE);
 
-								if (!BT.pSurface)
-								{
-									clMsg("cannot find tga texture: %s", N);
-									is_tga_missing = true;
-									BT.bHasAlpha = false;
-								}
-								else
-								{
-									if ((w != BT.dwWidth) || (h != BT.dwHeight)){
-										Msg("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
-										BT.dwWidth = w;
-										BT.dwHeight = h;
-									}
-									BT.Vflip	();
-								}
+							if (!BT.pSurface)
+							{
+								clMsg("cannot find tga texture: %s", N);
+								is_tga_missing = true;
+								continue;
 							}
+
+							if ((w != BT.dwWidth) || (h != BT.dwHeight))
+								Msg("! THM doesn't correspond to the texture: %dx%d -> %dx%d", BT.dwWidth, BT.dwHeight, w, h);
+							BT.Vflip	();
 						}
 					}
 				}
