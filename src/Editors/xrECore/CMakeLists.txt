@@ -14,6 +14,11 @@ file(GLOB_RECURSE ECORE_SOURCE_EDITOR_FILES CONFIGURE_DEPENDS
 	"Editor/*.*"
 )
 
+file(GLOB_RECURSE ECORE_SOURCE_EDITOR_PUBLIC_FILES CONFIGURE_DEPENDS
+	"../Public/VIMP_Processor.*"
+	"../Public/object_sliding.*"
+)
+
 file(GLOB_RECURSE ECORE_SOURCE_WM_FILES CONFIGURE_DEPENDS
 	"WildMagic/*.*"
 )
@@ -143,6 +148,7 @@ set(ECORE_SRC_FILES)
 
 source_group("Engine" FILES ${ECORE_SOURCE_ENGINE_FILES})
 source_group("Editor" FILES ${ECORE_SOURCE_EDITOR_FILES})
+source_group("MeshTools" FILES ${ECORE_SOURCE_EDITOR_PUBLIC_FILES})
 source_group("WildMagic" FILES ${ECORE_SOURCE_WM_FILES})
 source_group("Render" FILES ${ECORE_SOURCE_RENDER_FILES})
 source_group("RenderEx" FILES ${ECORE_SOURCE_RENDEREX_FILES})
@@ -156,6 +162,7 @@ list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_ALL_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_RENDER_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_EXT_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_RES_FILES})
+list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_EDITOR_PUBLIC_FILES})
 list(APPEND ECORE_SRC_FILES ${ECORE_SOURCE_PUBLIC_FILES})
 
 # Remove unused files
@@ -185,7 +192,6 @@ target_link_libraries(xrECore PUBLIC xrEProps)
 target_link_libraries(xrECore PUBLIC luabind)
 target_link_libraries(xrECore PUBLIC xrParticles)
 target_link_libraries(xrECore PUBLIC xrSound)
-target_link_libraries(xrECore PUBLIC ETools)
 target_link_libraries(xrECore PUBLIC xrAbstractions)
 target_link_libraries(xrECore PUBLIC xrPhysics)
 target_link_libraries(xrECore PUBLIC xrDXT)

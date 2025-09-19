@@ -18,10 +18,7 @@
 #include "Level.h"
 #include "Save/SaveObject.h"
 
-// comment next string when commiting
-//#define DBG_DISABLE_SCRIPTS
-
-CScriptBinder::CScriptBinder		(CGameObject* Owner)
+CScriptBinder::CScriptBinder		()
 {
 	m_Owner = Owner;
 	init					();
@@ -64,99 +61,104 @@ void CScriptBinder::Load			(LPCSTR section)
 {
 }
 
-void CScriptBinder::reload			(LPCSTR section)
+void CScriptBinder::reload(LPCSTR section)
 {
-	PROF_EVENT("CScriptBinder::reload")
-#ifndef DBG_DISABLE_SCRIPTS
-	VERIFY					(!m_object);
-	if (!pSettings->line_exist(section,"script_binding"))
+	PROF_EVENT("CScriptBinder::reload");
+
+	VERIFY(!m_object);
+	if (!pSettings->line_exist(section, "script_binding"))
 		return;
-	
+
 	luabind::functor<void>	lua_function;
-	if (!ai().script_engine().functor(pSettings->r_string(section,"script_binding"),lua_function)) {
-		ai().script_engine().script_log	(ScriptStorage::eLuaMessageTypeError,"function %s is not loaded!",pSettings->r_string(section,"script_binding"));
+	if (!ai().script_engine().functor(pSettings->r_string(section, "script_binding"), lua_function))
+	{
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "function %s is not loaded!", pSettings->r_string(section, "script_binding"));
 		return;
 	}
 	
 	CGameObject				*game_object = m_Owner;
 
-	try {
-		lua_function		(game_object ? game_object->lua_game_object() : 0);
+	try
+	{
+		lua_function(game_object ? game_object->lua_game_object() : 0);
 	}
-	catch(...) {
-		clear				();
+	catch (...)
+	{
+		clear();
 		return;
 	}
 
-	if (m_object) {
-		try {
+	if (m_object)
+	{
+		try
+		{
 			m_object->reload(section);
 		}
-		catch(...) {
-			clear			();
+		catch (...)
+		{
+			clear();
 		}
 	}
-#endif
 }
 
-BOOL CScriptBinder::net_Spawn		(CSE_Abstract* DC)
+BOOL CScriptBinder::net_Spawn(CSE_Abstract* DC)
 {
-	PROF_EVENT("CScriptBinder::net_Spawn")
-	CSE_Abstract			*abstract = (CSE_Abstract*)DC;
-	CSE_ALifeObject			*object = smart_cast<CSE_ALifeObject*>(abstract);
-	if (object && m_object) {
-		try {
-			return			((BOOL)m_object->net_Spawn(object));
+	PROF_EVENT("CScriptBinder::net_Spawn");
+	CSE_Abstract* abstract = (CSE_Abstract*)DC;
+	CSE_ALifeObject* object = smart_cast<CSE_ALifeObject*>(abstract);
+
+	if (object && m_object)
+	{
+		try
+		{
+			return m_object->net_Spawn(object);
 		}
-		catch(...) {
-			clear			();
+		catch (...)
+		{
+			clear();
 		}
 	}
 
-	return					(TRUE);
+	return TRUE;
 }
 
-void CScriptBinder::net_Destroy		()
+void CScriptBinder::net_Destroy()
 {
-	PROF_EVENT("CScriptBinder::net_Destroy")
-	if (m_object) {
-#ifdef _DEBUG
-		Msg						("* Core object %s is UNbinded from the script object",smart_cast<CGameObject*>(this) ? *smart_cast<CGameObject*>(this)->cName() : "");
-#endif // _DEBUG
-		try {
-			m_object->net_Destroy	();
+	PROF_EVENT("CScriptBinder::net_Destroy");
+	if (m_object)
+	{
+		try
+		{
+			m_object->net_Destroy();
 		}
-		catch(...) {
-			clear			();
+		catch(...)
+		{
+			clear();
 		}
 	}
-	xr_delete				(m_object);
+
+	xr_delete(m_object);
 }
 
-void CScriptBinder::set_object		(CScriptBinderObject *object)
+void CScriptBinder::set_object(CScriptBinderObject* object)
 {
 	if (IsGameTypeSingleCompatible())
 	{
-		VERIFY2				(!m_object,"Cannot bind to the object twice!");
-#ifdef _DEBUG
-		Msg					("* Core object %s is binded with the script object",smart_cast<CGameObject*>(this) ? *smart_cast<CGameObject*>(this)->cName() : "");
-#endif // _DEBUG
-		m_object			= object;
-	} else {
-		xr_delete			(object);
+		VERIFY2(!m_object, "Cannot bind to the object twice!");
+		m_object = object;
+	}
+	else
+	{
+		xr_delete(object);
 	}
 }
 
-void CScriptBinder::shedule_Update	(u32 time_delta)
+void CScriptBinder::shedule_Update(u32 time_delta)
 {
-	PROF_EVENT("CScriptBinder::shedule_Update")
-	if (m_object) {
-//		try {
-			m_object->shedule_Update	(time_delta);
-//		}
-//		catch(...) {
-//			clear			();
-//		}
+	PROF_EVENT("CScriptBinder::shedule_Update");
+	if (m_object)
+	{
+		m_object->shedule_Update(time_delta);
 	}
 }
 
@@ -185,30 +187,6 @@ void CScriptBinder::load			(IReader &input_packet)
 		}
 	}
 }
-
-/*void CScriptBinder::Save(ISaveObject* Object)
-{
-	if (m_object) {
-		try {
-			m_object->Save(Object);
-		}
-		catch (...) {
-			clear();
-		}
-	}
-}
-
-void CScriptBinder::Load(ISaveObject* Object)
-{
-	if (m_object) {
-		try {
-			m_object->Load(Object);
-		}
-		catch (...) {
-			clear();
-		}
-	}
-}*/
 
 void CScriptBinder::Serialize(ISaveObject& Object)
 {
