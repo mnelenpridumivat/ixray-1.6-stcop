@@ -2,23 +2,6 @@
 #include "CUDAContext.h"
 
 #include <fstream>
-#include <filesystem>
-#include <string>
-
-xr_path GetExecutableDir()
-{
-#ifdef IXR_WINDOWS
-	char path[MAX_PATH];
-	GetModuleFileNameA(nullptr, path, MAX_PATH);
-	return xr_path(path).parent_path();
-#else
-	char result[PATH_MAX];
-	ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-	if (count == -1)
-		throw std::runtime_error("Failed to read /proc/self/exe");
-	return xr_path(xr_string(result, count)).parent_path();
-#endif
-}
 
 bool OptixContext::Initialize()
 {
@@ -40,8 +23,8 @@ bool OptixContext::Initialize()
 	OPTIX_CHECK(optixInit());
 	OPTIX_CHECK(optixDeviceContextCreate(cudaContext, &options, &optixContext));
 
-	xr_path fullPtxPath = GetExecutableDir() / "CuTrace.ptx";
-	CreatePipeline(fullPtxPath.xstring().c_str());
+
+	CreatePipeline("X:\\GitHub\\ixray-1.6-stcop\\build\\bin\\Debug\\CuTrace.ptx");
 	return true;
 }
 
@@ -76,10 +59,8 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 {
 	auto LoadPTXLambda = [](const std::string & filename)
 	{
-		clMsg("Optix Loading PTX File: %s", filename.c_str());
 		std::ifstream file(filename, std::ios::binary);
-		if (!file) 
-			throw std::runtime_error("Failed to open PTX file");
+		if (!file) throw std::runtime_error("Failed to open PTX file");
 		return std::string(std::istreambuf_iterator<char>(file), {});
 	};
 
@@ -113,8 +94,6 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		&sizeof_log,
 		&module
 	);
-
-	clMsg("*** PTX SIZE: %u", PtxData.size());
 
 	// Создание программных групп
 	OptixProgramGroup raygen_prog_group = nullptr;
