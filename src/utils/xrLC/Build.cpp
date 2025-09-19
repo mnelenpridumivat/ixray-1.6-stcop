@@ -105,10 +105,20 @@ void CBuild::Light_prepare()
 size_t GetHeapMemory()
 {
 #ifdef IXR_WINDOWS
- 	PROCESS_MEMORY_COUNTERS_EX pmc;
+	static size_t last_update_memory = 0;
+	static CTimer tMemory;
+	// Не слишком часто обновляться
+	if (tMemory.GetElapsed_ms() < 100)
+	{
+		return last_update_memory;
+	}
+
+	PROCESS_MEMORY_COUNTERS_EX pmc;
 	if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
 	{
- 		return pmc.PrivateUsage;
+		tMemory.Start();
+		last_update_memory = pmc.PrivateUsage;
+		return pmc.PrivateUsage;
 	}
 #endif
 
@@ -117,7 +127,7 @@ size_t GetHeapMemory()
 
 void GetMemoryUsedStorage()
 {
-#if 0
+#ifdef DEBUG
 	if (!lc_global_data())
 		return;
 
@@ -237,42 +247,33 @@ void CBuild::Run(LPCSTR P)
 	CorrectTJunctions();
 	mem_Compact();
 
- 	// Tesselate + calculate
-	// Phase("Adaptive HT tessalate ...");
-	xrPhase_AdaptiveHT_tessalte();
+	// AdaptiveHT
+	BuildAdaptiveHT();
 
-
-	Phase("Building RayTrace Model...");
-	Light_prepare();
-
-#ifdef LCCUDA_BUILD
-	if (gCompilerMode.CUDA)
- 		GPUTaskinSystem.InitializeGPU();
-	else
-#endif
-	if (gCompilerMode.Embree)
-		EmbreeMain.IntelEmbereLOAD();
-	else
-		BuildRapid(false);
-
-	// Hemi MT - Calculate
-	Phase("Adaptive HT lighting ...");
-  	xrPhase_AdaptiveHT_calculate();
-  
- 	// Building normals
+	// Building normals
 	Phase("Building normals...");
- 	CalcNormals();
+	mem_Compact();
+	CalcNormals();
 
+	// Collision DB
 	//should be after normals, so that double-sided faces gets separated
+	Phase("Building collision database (CFORM)...");
+	mem_Compact();
+
+	if (!gCompilerMode.LC_BackingDisabled)
+		BuildCForm();
 	BuildPortals(*fs);
 
- 	Phase("Building CFORM ...");
- 	BuildCForm();
 
-	// se7kills: теперь тут код эксплота build.cform
-	Phase("Building Rcast Model ...");
-	EmbreeMain.BuildRcast();
- 
+	// GLOBAL-ILLUMINATION
+	if (g_build_options.b_radiosity)
+	{
+		Phase("Radiosity-Solver...");
+		mem_Compact();
+		Light_prepare();
+		xrPhase_Radiosity();
+	}
+
 	// All lighting + lmaps building and saving
 	Light();
 	RunAfterLight(fs);
