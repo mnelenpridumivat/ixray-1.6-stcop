@@ -6,224 +6,235 @@
 #include "light_point.h"
 #include "xrLC_GlobalData.h"
 #include "xrFace.h"
-#include "xrDeflector.h"
-#include "xrMU_Model_Reference.h"
-
-PackedLighting GPUTaskinSystem;
  
-void PackedLighting::InitializeGPU()
+void PackedLighting::LightPointPacked(u32 task_id, u32 SampleID, Fvector& P, Fvector& N, base_lighting& lights, u32 flags, Face* skip)
 {
-	clMsg("$ InitializeGPU RayTracing");
-	XRay::RayTrace::CUDA::InitializeRayTracing();
-}
+	RayRecvestIndex task_data;
+	auto CaptureVec = [&](R_Light& L, LGroup group, bool isSunOrHemi)
+		{
+			Fvector Ldir;
+			Fvector Pnew = P;
+			Pnew.mad(N, 0.01f);
 
-void PackedLighting::LightPointPacked(u32 U, u32 V, Fvector& P, Fvector& N, u32 flags, Face* skip)
-{
-	if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)			// Хитрость чтобы часто не вызывать блокировку
+			switch (L.type)
+			{
+			case LT_DIRECT:
+			{
+				Ldir.invert(L.direction);
+				float D = Ldir.dotproduct(N);
+				if (D <= 0)	return;
+
+				RayInfo info;
+				info.LGroup = group;
+				info.LightType = L.type;
+				info.L = &L;
+				info.isSunOrHemi = isSunOrHemi;
+				info.dotDirection = D;
+				task_data.reqInfo.push_back(std::move(info));
+
+				RayRequest data;
+				data.P = Pnew;
+				data.D = Ldir;
+				data.R = 1000.f;
+				data.skip = skip;
+				data.result = 1;
+				task_data.reqRays.push_back(std::move(data));
+				AllocatedRays++;
+
+				break;
+			}
+
+			case LT_POINT:
+			case LT_SECONDARY:
+			{
+				float sqD = P.distance_to_sqr(L.position);
+				if (sqD > L.range2)			return;
+
+				Ldir.sub(L.position, P).normalize_safe();
+				float D = Ldir.dotproduct(N);
+				if (D <= 0)					return;
+
+				if (L.type == LT_SECONDARY)
+				{
+					D *= -Ldir.dotproduct(L.direction);
+					if (D <= 0) return;
+				}
+
+				RayInfo info;
+				info.LGroup = group;
+				info.LightType = L.type;
+				info.L = &L;
+				info.isSunOrHemi = isSunOrHemi;
+				info.dotDirection = D;
+				task_data.reqInfo.push_back(std::move(info));
+
+				RayRequest data;
+				data.P = Pnew;
+				data.D = Ldir;
+				data.R = _sqrt(sqD);
+				data.skip = skip;
+				data.result = 1;
+				task_data.reqRays.push_back(std::move(data));
+
+				AllocatedRays++;
+			}
+			}
+		};
+
+	// RGB Lights
+	if (!(flags & LP_dont_rgb))
 	{
-		csAdd.Enter();
-		if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)
-			LightPointPackedRun();
-		csAdd.Leave();
+		for (R_Light& L : lights.rgb)
+		{
+			CaptureVec(L, LGroup::eRGB, false);
+		}
 	}
 
-	RayRecvestIndex task_data;		// MT SAFE
-	task_data.INDEX_TASK = MakeKey(U, V);
- 	task_data.P = P;
-	task_data.N = N;
-	// task_data.skip = skip;
+	// Sun Lights
+	if (!(flags & LP_dont_sun))
+	{
+		for (R_Light& L : lights.sun)
+		{
+			CaptureVec(L, LGroup::eSun, true);
+		}
+	}
+
+	// Hemi Lights
+	if (!(flags & LP_dont_hemi))
+	{
+		for (R_Light& L : lights.hemi)
+		{
+			CaptureVec(L, LGroup::eHemi, true);
+		}
+	}
+
+	task_data.INDEX_TASK = task_id;	// Маркировка таска
 	task_pools.push_back(std::move(task_data));
-}
+};
 
 void PackedLighting::LightPointPackedRun()
 {
- 	// Инициализируем
- 	XRay::RayTrace::CUDA::RayTraceInitialize(lc_global_data()->L_static(), current_flags);
-	xr_vector<base_color_c> colors_result; 
-	colors_result.reserve(task_pools.size());
-	
-	static CTimer TaskT;
-
-	// Устанавливаем параметры 
- 	auto process = [&](size_t begin, size_t end, size_t& GPUms, size_t& CPUms)
+ 	if (task_pools.size() > 0)
 	{
-		if (begin >= task_pools.size())		return;
-		end = std::min(end, task_pools.size());
- 
-		TaskT.Start();
-		size_t RayIndex = 0;
-		for (size_t it = begin; it < end; it++)
+		// Сшиваем 
+		CTimer t; t.Start();
+ 		xr_vector<RayRequest> rays;
+
+		size_t total_rays = 0;
+		for (const auto& task : task_pools)
+			total_rays += task.reqRays.size();
+		rays.reserve(total_rays); // Один раз выделяем память
+		 
+		// clMsg("*** Lighting Process Allocate: %u ms", t.GetElapsed_ms()); t.Start();
+		int INDEX = 0; 
+		for (auto& RAY_TASK : task_pools)
 		{
-			XRay::RayTrace::CUDA::RayTraceAddRay(task_pools[it], RayIndex);
-			RayIndex += 1;
+			RAY_TASK.begin = rays.size();
+ 			rays.insert(
+				rays.end(),
+				std::make_move_iterator(RAY_TASK.reqRays.begin()),
+				std::make_move_iterator(RAY_TASK.reqRays.end())
+			);
+
+			RAY_TASK.reqRays.clear(); // или shrink_to_fit() если надо
+ 			RAY_TASK.end = rays.size();
+			INDEX++;
 		}
-		CPUms += TaskT.GetElapsed_ms(); TaskT.Start();
 
-		// Запускаем трейсинг
-		XRay::RayTrace::CUDA::RayTraceRun(RayIndex);
-		GPUms += TaskT.GetElapsed_ms(); TaskT.Start();
+		// clMsg("*** Lighting Process Copy: %u ms", t.GetElapsed_ms()); t.Start();
 
-		// Получаем результаты
-		auto& colors = XRay::RayTrace::CUDA::RayTraceResult();
-		colors_result.insert(colors_result.end(), colors.begin(), colors.end());
- 		colors.clear();
+ 		// Ray Tracing
+		XRay::RayTrace::CUDA::RayTracePack(rays);
+ 	
+		// clMsg("*** Lighting Process GPU: %u ms", t.GetElapsed_ms()); t.Start();
 
-		CPUms += TaskT.GetElapsed_ms(); 
+		// Обратно 
+		INDEX = 0;
+		for (auto& RAY_TASK : task_pools)
+		{
+			int eStart = RAY_TASK.begin;
+			int eEnd   = RAY_TASK.end;
+
+			RAY_TASK.reqRays.insert(
+				RAY_TASK.reqRays.end(),
+				std::make_move_iterator(rays.begin() + eStart),
+				std::make_move_iterator(rays.begin() + eEnd)
+			);
+
+			INDEX++;
+		}
+  		rays.clear();
+
+		// clMsg("*** Lighting Process COPY to CPU: %u ms", t.GetElapsed_ms()); t.Start();
+	}
+}
+
+void PackedLighting::LightPointPackedApply()
+{
+ 	auto processAccum = [&](RayInfo & Info, RayRequest & Reqvest, base_color_c& C)
+	{
+		float att = 0.0f;
+		switch (Info.LightType)
+		{
+		case LT_DIRECT:
+		{
+			att = Info.isSunOrHemi ?
+				Info.L->energy * Reqvest.result :
+				Info.dotDirection * Info.L->energy * Reqvest.result;
+		} break;
+
+		case LT_POINT:
+		{
+			float scale = Info.dotDirection * Info.L->energy * Reqvest.result;
+			if (Info.isSunOrHemi)
+				att = scale / (Info.L->attenuation0 + Info.L->attenuation1 * Reqvest.R + Info.L->attenuation2 * Info.dotDirection);
+			else
+			{
+				att = (inlc_global_data()->gl_linear())
+					? scale * (1 - Reqvest.R / Info.L->range)
+					: scale * (1 / (Info.L->attenuation0 +
+						Info.L->attenuation1 * Reqvest.R + Info.L->attenuation2 * Info.dotDirection) - Reqvest.R * Info.L->falloff);
+			}
+		} break;
+
+		case LT_SECONDARY:
+		{
+			att = powf(Info.dotDirection, 0.125f) * Info.L->energy * Reqvest.result * (1 - Reqvest.R / Info.L->range);
+		}break;
+		}
+
+		switch (Info.LGroup)
+		{
+		case eSun:
+			C.sun += att;
+			break;
+		case eHemi:
+			C.hemi += att;
+			break;
+		case eRGB:
+			C.rgb.x += att * Info.L->diffuse.x;
+			C.rgb.y += att * Info.L->diffuse.y;
+			C.rgb.z += att * Info.L->diffuse.z;
+			break;
+		}
 	};
-
-	size_t Splice = MAX_RAYS_PER_GPU;
-	size_t GPUms = 0, CPUms = 0;
-	
-	int Splices = task_pools.size() / Splice;
-	int IndexSplit = 0;
-	for (size_t it = 0; it < task_pools.size(); it += Splice, IndexSplit++)
- 		process(it, it + Splice, GPUms, CPUms); 
  
-	TaskT.Start();
-	for (size_t it = 0; it < task_pools.size(); it ++)
+	for (auto& T : task_pools)
 	{
-		auto& RAY_INFO = task_pools[it];
-		Colors[RAY_INFO.INDEX_TASK].add(colors_result[it]);
+		for (auto INDEX = 0; INDEX < T.reqRays.size(); INDEX++)
+		{
+			auto& INFO = T.reqInfo[INDEX];
+			auto& REQ = T.reqRays[INDEX];
+
+			if (INFO.LGroup == eHemi)
+				processAccum(INFO, REQ, T.C);
+			if (INFO.LGroup == eRGB)
+				processAccum(INFO, REQ, T.C);
+			if (INFO.LGroup == eSun)
+				processAccum(INFO, REQ, T.C);
+		}
+
+	///	task_pools_samples[T.SampleID].push_back(T);
 	}
-	size_t ApplyColorsMs = TaskT.GetElapsed_ms();
-	// Очистка
-   	task_pools.clear();
-	 
-	clMsg("$ Elapsed GPU: %u ms | CPU Copy: %u ms | CPU Apply: %u ms", GPUms, CPUms, ApplyColorsMs);
 }
 
-// Deflectors
-
-void PackedLighting::LightPointPackedDeflector(size_t IndexTask, CDeflector* D, Fvector& P, Fvector& N, u32 flags, Face* skip)
-{
- 	RayRecvestIndex task_data;				// MT SAFE
-
-	if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)
-	{
-		csEnter.Enter();
-		
-		if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)			// Хитрость чтобы часто не вызывать блокировку
-			LightPointPackedDeflectorsRun();
-		csEnter.Leave();
-	}
-
-	task_data.INDEX_TASK = IndexTask;
-	task_data.P = P;
-	task_data.N = N;
-	task_data.Owner = D;
-  	task_pools.push_back(std::move(task_data));	
-}
-
-void PackedLighting::LightPointPackedDeflectorsRun()
-{	
-	CTimer tStats; tStats.Start();
-	// Initialize
-	XRay::RayTrace::CUDA::RayTraceInitialize(lc_global_data()->L_static(), current_flags);
- 
-	// Tasks
-	auto& recvests = task_pools;
- 	xr_vector<base_color_c> colors_result;
-	colors_result.reserve(recvests.size());
-
- 	// Устанавливаем параметры 
-	auto process = [&](size_t begin, size_t end)
-	{
-		if (begin >= recvests.size())				return;
-		end = std::min(end, recvests.size());
-	
-		size_t RayIndex = 0;
-		for (size_t it = begin; it < end; it++)
-		{
-			XRay::RayTrace::CUDA::RayTraceAddRay(recvests[it], RayIndex);
-			RayIndex += 1;
-		}
-	
-		// Запускаем трейсинг
- 		XRay::RayTrace::CUDA::RayTraceRun(RayIndex);
-		// Получаем результаты
-		
-		auto& colors = XRay::RayTrace::CUDA::RayTraceResult();
-		colors_result.insert(colors_result.end(), colors.begin(), colors.end());
- 	};
-	 
-	size_t Splice = MAX_RAYS_PER_GPU;
- 	for (size_t it = 0; it < recvests.size(); it += Splice)
-		process(it, it + Splice);
-	
- 	xr_parallel_for(size_t(0), recvests.size(), [&](size_t it)
-	{
-		auto& RAY_INFO = recvests[it];
-		auto D = (CDeflector*)RAY_INFO.Owner;
- 		D->ApplyColor(RAY_INFO.INDEX_TASK, colors_result[it]);
-	});
-
-	colors_result.clear();
-	recvests.clear();
-
-
-	clMsg("$ GPU Code: %u ms", tStats.GetElapsed_ms() );
- }
-
-// MU-MODELS
-
-void PackedLighting::LightPointPacked_MODEL(xrMU_Reference* MU, u32 I, Fvector& P, Fvector& N, u32 flags, Face* skip)
-{
-	if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)			// Хитрость чтобы часто не вызывать блокировку
-	{
-		csAdd.Enter();
-		if (task_pools.size() >= MAX_RAYS_PER_TASK - 1024)
-			LightPointPacked_MODELRun();
-		csAdd.Leave();
-	}
-
-	RayRecvestIndex task_data;		// MT SAFE
-	task_data.INDEX_TASK			= I; 
-	task_data.P = P;
-	task_data.N = N;
-	task_data.Owner = MU;
-//	task_data.skip = skip;
-
- 	task_pools.push_back(std::move(task_data));
- }
-
-void PackedLighting::LightPointPacked_MODELRun() 
-{
-	XRay::RayTrace::CUDA::RayTraceInitialize(lc_global_data()->L_static(), current_flags);
-	 
-	// Устанавливаем параметры 
-	auto process = [&](size_t begin, size_t end)
-	{
-	//	clMsg("Start Processing Rays: %u to %u", begin, end);
-
-		if (begin >= task_pools.size())		return;
-		end = std::min(end, task_pools.size());
-		size_t RayIndex = 0;
-		for (size_t it = begin; it < end; it++)
-		{
-			XRay::RayTrace::CUDA::RayTraceAddRay(task_pools[it], RayIndex);
-			RayIndex += 1;
-		}
-		// Запускаем трейсинг
-		XRay::RayTrace::CUDA::RayTraceRun(RayIndex);
-
-		// Получаем результаты
-		auto& colors = XRay::RayTrace::CUDA::RayTraceResult();
-		RayIndex = 0;
-		for (int it = begin; it < end; it++, RayIndex++)
-		{
-			auto& RAY_INFO = task_pools[it];
-			auto MU = (xrMU_Reference*) RAY_INFO.Owner;
-			if (MU != nullptr)
-				MU->colors_cuda[RAY_INFO.INDEX_TASK].add(colors[RayIndex]);
-		}
-		colors.clear();
-	};
-
-	size_t Splice = MAX_RAYS_PER_GPU;
-	for (size_t it = 0; it < task_pools.size(); it += Splice)
-	{
-		process(it, it + Splice);
-	}
-
-	task_pools.clear();
-}

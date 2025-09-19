@@ -9,16 +9,11 @@
 
 #include "../../xrCore/Collision/xrCDB.h"
 #include "../xrForms/xrThread.h"
-#include "../xrForms/CompilersUI.h"
 
-#ifdef LCCUDA_BUILD
-#	include "../xrLC_Light/CUDA/CUDARayCast.h"
-#endif
-
-const float	aht_max_edge = c_SS_maxsize / 2.5f;	// 2.0f;			// 2 m
+const	float	aht_max_edge	= c_SS_maxsize/2.5f;	// 2.0f;			// 2 m
  
 
-constexpr bool is_CCW(int _1, int _2)
+bool	is_CCW	(int _1, int _2)
 {
 	if (0==_1 && 1==_2)	return true;
 	if (1==_1 && 2==_2) return true;
@@ -89,71 +84,83 @@ virtual	void Execute()
 
 CThreadManager	precalc_base_hemi;
 
-void CBuild::xrPhase_AdaptiveHT_tessalte()
+#include "../xrForms/CompilersUI.h"
+#include "../xrLC_Light/CUDA/CUDARayCast.h"
+extern CompilersMode gCompilerMode;
+
+void CBuild::xrPhase_AdaptiveHT	()
 {
 	CDB::COLLIDER	DB;
-	DB.ray_options(0);
+	DB.ray_options	(0);
 
 	if (!lc_global_data()->GetSkipTesselate())
 	{
 		Status("Tesselating...");
-		// clear split flag from all faces + calculate normals
-		for (u32 fit = 0; fit < lc_global_data()->g_faces().size(); fit++)
-		{
-			lc_global_data()->g_faces()[fit]->flags.bSplitted = false;
-			lc_global_data()->g_faces()[fit]->flags.bLocked = true;
-			lc_global_data()->g_faces()[fit]->CalcNormal();
+		for (u32 fit=0; fit<lc_global_data()->g_faces().size(); fit++)	{		// clear split flag from all faces + calculate normals
+			lc_global_data()->g_faces()[fit]->flags.bSplitted		= false;
+			lc_global_data()->g_faces()[fit]->flags.bLocked			= true;
+			lc_global_data()->g_faces()[fit]->CalcNormal			();
 		}
-		u_Tesselate(callback_edge_longest, 0, 0);		// tesselate
+		u_Tesselate		(callback_edge_longest,0,0);		// tesselate
 	}
 
-}
-
-void CBuild::xrPhase_AdaptiveHT_calculate()
-{
-	// Build model
-	if (!gCompilerMode.CUDA)
+	// Tesselate + calculate
+	Status			("Building RayTrace Model...");
 	{
-		// Prepare
-		Status("AdaptiveHT : base hemisphere ...");
-		ThreadWorkID_Adaptive = 0;
- 		for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
-			precalc_base_hemi.start(new CPrecalcBaseHemiThread(thID));
-		precalc_base_hemi.wait();
-
-		//////////////////////////////////////////////////////////////////////////
-		Status("AdaptiveHT : Gathering lighting information...");
-		u_SmoothVertColors(5);
+ 		Light_prepare();
+ 		// Build model
+  		BuildRapid					(FALSE);
+		EmbreeMain.AttachGeometrys	(false);
  	}
-#ifdef LCCUDA_BUILD
-	else
-	{
-		clMsg("Start Processing AdaptiveHT : MEMORY: %u mb", GetHeapMemory() / 1024 / 1024);
 
-		GPUTaskinSystem.RestartALL();
-		for (size_t VertexID = 0; VertexID < lc_global_data()->g_vertices().size(); VertexID++)
+// #define USE_INTEL 
+	 
+#ifdef USE_INTEL
+	// Prepare
+	Status("AdaptiveHT : base hemisphere ...");
+	ThreadWorkID_Adaptive = 0;
+	for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
+		precalc_base_hemi.start(new CPrecalcBaseHemiThread(thID));
+	precalc_base_hemi.wait();
+
+
+	//////////////////////////////////////////////////////////////////////////
+	Status("AdaptiveHT : Gathering lighting information...");
+	u_SmoothVertColors(5);
+
+#else 
+ 	XRay::RayTrace::CUDA::InitializeRayTracing();
+	
+	CTimer t;
+	t.Start();
+	PackedLighting task_group;
+ 	for (auto VertexID = 0; VertexID < lc_global_data()->g_vertices().size(); VertexID++)
+	{		
+		// 1: VertexID, 2: SampleID
+		auto& V = lc_global_data()->g_vertices()[VertexID];
+		V->normalFromAdj();
+		task_group.LightPointPacked(VertexID, 1, V->P, V->N, pBuild->L_static(), LP_dont_rgb + LP_dont_sun, 0);
+
+		if (task_group.getAllocatedRays() > 2048)
 		{
-			// 1: VertexID, 2: SampleID
-			auto& V = lc_global_data()->g_vertices()[VertexID];
-			V->normalFromAdj();
-			GPUTaskinSystem.LightPointPacked((u32)VertexID, 0, V->P, V->N, LP_dont_rgb + LP_dont_sun, 0);
-		
-			AditionalData("Vertex : %u / %u", VertexID, lc_global_data()->g_vertices().size());
+			task_group.LightPointPackedRun();
+			task_group.LightPointPackedApply();
+			for (auto& TASK : task_group.task_pools)
+			{
+				TASK.C.mul(0.5f);
+				lc_global_data()->g_vertices()[TASK.INDEX_TASK]->C._set(TASK.C);
+			}
+			task_group.ClearPool();
 		}
+	}
+	 
 
-		GPUTaskinSystem.LightPointPackedRun();
-
-		for (auto& TASK : GPUTaskinSystem.Colors)
-		{
-			u32 U   = GPUTaskinSystem.GetU(TASK.first);
-			auto& C = TASK.second;
-			C.mul(0.5f);
-			lc_global_data()->g_vertices()[U]->C._set(C);
-		}
-
-		GPUTaskinSystem.RestartALL();
- 	}
 #endif
+
+
+
+	if (lc_global_data()->GetIsIntelUse())
+		EmbreeMain.IntelEmbereUNLOAD();
 }
 
 void CollectProblematicFaces(const Face &F, int max_id, xr_vector<Face*> & reult, Vertex** V1, Vertex** V2 )
