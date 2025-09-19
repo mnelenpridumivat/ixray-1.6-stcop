@@ -1,8 +1,6 @@
 #include "stdafx.h"
-#include "../../xrEngine/IGame_Persistent.h"
 
 bool UseGasmak = false;
-bool UseRainDrops = false;
 
 void CRenderTarget::RenderEffect(ScreenPostProcessType postProcessType) {
 	u_setrt(rt_Generic_0, nullptr, nullptr, nullptr);
@@ -50,26 +48,4 @@ void CRenderTarget::PhaseVignette() {
 
 void CRenderTarget::PhaseSaturation() {
 	RenderEffect(ScreenPostProcessType::Saturation);
-}
-
-void CRenderTarget::PhaseRaindrops()
-{
-	const bool ItemCfgHudRainDropsAvialable = g_pGamePersistent->ShaderParams.ItemCfgHudRainDropsAvialable;
-	if (!ItemCfgHudRainDropsAvialable)
-	{
-		return;
-	}
-
-	const float condition = g_pGamePersistent->ShaderParams.HelmetCondition;
-	if (condition < 0)
-	{
-		return;
-	}
-
-	if (g_pGamePersistent->Environment().wetness_factor < EPS_L)
-	{
-		return;
-	}
-
-	RenderEffect(ScreenPostProcessType::Raindrops);
 }

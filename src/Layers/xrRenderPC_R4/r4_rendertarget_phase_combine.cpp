@@ -228,7 +228,8 @@ void CRenderTarget::phase_combine()
 	// Distortion filter
 	BOOL bDistort = RImplementation.o.distortion_enabled; // This can be modified
 	{
-		if(RImplementation.mapDistort.size() < 1 && !_menu_pp) {
+		u32 count = RImplementation.mapDistort.size() + RImplementation.mapHUDDistort.size();
+		if((count < 1 && !_menu_pp)) {
 			bDistort= FALSE;
 		}
 		if(bDistort) {
@@ -396,11 +397,6 @@ void CRenderTarget::phase_combine()
 	if (UseGasmak)
 	{
 		PhaseGasmask();
-	}
-
-	extern bool UseRainDrops;
-	if (UseRainDrops) {
-		PhaseRaindrops();
 	}
 
 	if (ps_r2_ls_flags_ext.test(R2FLAG_SPP_SATURATION)) {

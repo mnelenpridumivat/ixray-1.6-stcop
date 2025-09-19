@@ -53,8 +53,6 @@ public:
 	struct ShaderParamsData
 	{
 		float HelmetCondition = 0;
-		bool ItemCfgHudGasMaskAvialable = true;
-		bool ItemCfgHudRainDropsAvialable = true;
 	};
 
 	params m_game_params;

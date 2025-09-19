@@ -2,7 +2,6 @@
 #include "../../xrEngine/IGame_Persistent.h"
 
 bool UseGasmak = false;
-bool UseRainDrops = false;
 
 void CRenderTarget::RenderEffect(ScreenPostProcessType postProcessType, bool postProcessMode)
 {
@@ -41,51 +40,20 @@ void CRenderTarget::RenderEffect(ScreenPostProcessType postProcessType, bool pos
 	}
 }
 
-void CRenderTarget::PhaseAberration()
-{
+void CRenderTarget::PhaseAberration() {
 	RenderEffect(ScreenPostProcessType::Aberration);
 }
 
-void CRenderTarget::PhaseVignette()
-{
+void CRenderTarget::PhaseVignette() {
 	RenderEffect(ScreenPostProcessType::Vignette);
 }
 
-void CRenderTarget::PhaseSaturation()
-{
+void CRenderTarget::PhaseSaturation() {
 	RenderEffect(ScreenPostProcessType::Saturation);
-}
-
-void CRenderTarget::PhaseRaindrops()
-{
-	const bool ItemCfgHudRainDropsAvialable = g_pGamePersistent->ShaderParams.ItemCfgHudRainDropsAvialable;
-	if (!ItemCfgHudRainDropsAvialable)
-	{
-		return;
-	}
-
-	const float condition = g_pGamePersistent->ShaderParams.HelmetCondition;
-	if (condition < 0)
-	{
-		return;
-	}
-
-	if (g_pGamePersistent->Environment().wetness_factor < EPS_L)
-	{
-		return;
-	}
-
-	RenderEffect(ScreenPostProcessType::Raindrops);
 }
 
 void CRenderTarget::PhaseGasmask()
 {
-	const bool ItemCfgHudGasMaskAvialable = g_pGamePersistent->ShaderParams.ItemCfgHudGasMaskAvialable;
-	if (!ItemCfgHudGasMaskAvialable)
-	{
-		return;
-	}
-
 	const float condition = g_pGamePersistent->ShaderParams.HelmetCondition;
 	if (condition < 0)
 	{
