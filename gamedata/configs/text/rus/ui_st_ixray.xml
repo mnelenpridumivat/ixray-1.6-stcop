@@ -341,7 +341,15 @@
     <string id="SO_HLAMP">
         <text>Hanging lamp</text>
     </string>
-
+    <string id="ui_mm_lights_details">
+        <text>Расширенные тени травы</text>
+    </string>
+    <string id="ui_mm_puddles">
+        <text>Объёмные лужи</text>
+    </string>
+    <string id="ui_mm_grass_distance">
+        <text>Дальность видимости травы</text>
+    </string>
     <string id="ui_mm_screenshot_format">
         <text>Формат скриншотов</text>
     </string>
@@ -392,5 +400,17 @@
 	</string>
 	<string id="pda_btn_contacts_hint">
 		<text>Показать список контактов сталкеров</text>
+	</string>
+	<string id="st_undress_backpack">
+		<text>снять рюкзак</text>
+	</string>
+	<string id="st_dress_backpack">
+		<text>надеть рюкзак</text>
+	</string>
+	<string id="ui_mm_r4_use_gasmask">
+		<text>Эффект маски стекла</text>
+	</string>
+	<string id="ui_mm_r2_use_rain_drops">
+		<text>Капли на стекле</text>
 	</string>
 </string_table>
