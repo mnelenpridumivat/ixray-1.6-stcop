@@ -11,13 +11,13 @@ struct LevelFileData
 struct CompilersMode
 {
 	bool Silent = false;
-	bool Embree = true;
+	bool Embree = false;
 	bool CUDA = true;
 
- 	bool EmbreeBVHCompact = false;
+	bool Embree_SplitBVH = false;
+	bool EmbreeBVHCompact = false;
 	bool EmbreeBVHRobust = false;
-
-	bool ClearTemp = false;
+ 	bool ClearTemp = false;
 	bool SkipTHM = false;
 
 	bool AI = false;
@@ -71,6 +71,6 @@ struct CompilersMode
 void RenderMainUI();
 void RenderCompilerUI(int X, int Y);
 void InitializeUIData();
-void SaveCompilerCfg();
+
 
 extern CompilersMode gCompilerMode;;
