@@ -27,15 +27,10 @@ class CParticleTool:
     // PE variables
     PS::CPEDef*			m_LibPED;
     PS::CParticleEffect*m_EditPE;
-	EParticleAction*	m_CurrentPA = nullptr;
 
     // PG variables
     PS::CPGDef*			m_LibPGD;
     PS::CParticleGroup*	m_EditPG;
-	PS::CPGDef::SEffect* m_CurrentEf = nullptr;
-
-	// PAC variables
-	PS::CPACDef*		m_LibAC = nullptr;
 
     Fmatrix 			m_Transform;
     Fvector				m_Vel;
@@ -171,14 +166,13 @@ public:
     void                ImportPE            ();
     PS::CPEDef*			FindPE				(LPCSTR name);
     PS::CPEDef*			AppendPE			(PS::CPEDef* src, const char* path);
-    void 				SetCurrentPE		(PS::CPEDef* P, EParticleAction* CurrentPA = nullptr);
+    void 				SetCurrentPE		(PS::CPEDef* P);
     void				CommandJumpToItem	();
 
     // PG routine
     PS::CPGDef*			FindPG				(LPCSTR name);
     PS::CPGDef*			AppendPG			(PS::CPGDef* src,const char* path);
-	void				SetCurrentPG		(PS::CPGDef* P) override {SetCurrentPG(P, nullptr);}
-    void 				SetCurrentPG		(PS::CPGDef* P, PS::CPGDef::SEffect* Ef);
+    void 				SetCurrentPG		(PS::CPGDef* P) override;
     void				DrawReferenceList	();
 
 	// PAC routine
