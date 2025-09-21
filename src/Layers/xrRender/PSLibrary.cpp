@@ -269,7 +269,7 @@ bool CPSLibrary::Load(const char* nm)
         return 				false;
     }
     
-	IReader* F = FS.r_open(nm);
+	IReader*	F			= FS.r_open(nm);
 	bool bRes 				= true;
 
     bool FoundedChunk = !!F->find_chunk(PS::Chunks::VERSION);
@@ -313,16 +313,13 @@ bool CPSLibrary::Load(const char* nm)
     // final
 	FS.r_close			(F);
 
-	std::ranges::sort(m_PEDs, ped_sort_pred);
-	std::ranges::sort(m_PGDs, pgd_sort_pred);
-	std::ranges::sort(m_PACDs, pacd_sort_pred);
+	std::sort			(m_PEDs.begin(),m_PEDs.end(),ped_sort_pred);
+	std::sort			(m_PGDs.begin(),m_PGDs.end(),pgd_sort_pred);
 
-	for (auto elem : m_PEDs)
-	{
-		elem->CreateShader();
-	}
+	for (PS::PEDIt e_it = m_PEDs.begin(); e_it!=m_PEDs.end(); e_it++)
+    	(*e_it)->CreateShader();
 
-    return bRes;
+    return			bRes;
 }
 
 bool CPSLibrary::LoadOriginal(IReader& F)
@@ -330,7 +327,7 @@ bool CPSLibrary::LoadOriginal(IReader& F)
 	bool bRes = true;
 	// second generation
 	IReader* OBJ;
-	OBJ			 			= F.open_chunk(PS::Chunks::ORIGINAL_SECONDGEN);
+	OBJ			 			= F.open_chunk(PS::Chunks::SECONDGEN);
 	if (OBJ){
 		IReader* O   		= OBJ->open_chunk(0);
 		for (int count=1; O; count++) {
@@ -348,7 +345,7 @@ bool CPSLibrary::LoadOriginal(IReader& F)
 		OBJ->close();
 	}
 	// second generation
-	OBJ 					= F.open_chunk(PS::Chunks::ORIGINAL_THIRDGEN);
+	OBJ 					= F.open_chunk(PS::Chunks::THIRDGEN);
 	if (OBJ){
 		IReader* O   		= OBJ->open_chunk(0);
 		for (int count=1; O; count++) {
@@ -370,84 +367,8 @@ bool CPSLibrary::LoadOriginal(IReader& F)
 
 bool CPSLibrary::LoadExtended(IReader& F)
 {
-	bool bRes = true;
-
-	IReader* OBJ;
-	OBJ			 			= F.open_chunk(PS::Chunks::EXTENDED_PE);
-	if (OBJ){
-		IReader* O   		= OBJ->open_chunk(0);
-		for (int count=1; O; count++) {
-			PS::CPEDef*	def	= new PS::CPEDef();
-			if (def->LoadOriginal(*O))
-			{
-				m_all_ps.push_back(def->m_Name);
-				m_PEDs.push_back(def);
-			}
-			else
-			{
-				bRes = false;
-				xr_delete(def);
-			}
-			O->close();
-			if (!bRes)
-			{
-				break;
-			}
-			O = OBJ->open_chunk(count);
-		}
-		OBJ->close();
-	}
-
-	OBJ 					= F.open_chunk(PS::Chunks::EXTENDED_PG);
-	if (OBJ){
-		IReader* O   		= OBJ->open_chunk(0);
-		for (int count=1; O; count++) {
-			PS::CPGDef*	def	= new PS::CPGDef();
-			if (def->LoadOriginal(*O))
-			{
-				m_all_ps.push_back(def->m_Name);
-				m_PGDs.push_back(def);
-			}
-			else
-			{
-				bRes = false;
-				xr_delete(def);
-			}
-			O->close();
-			if (!bRes)
-			{
-				break;
-			}
-			O = OBJ->open_chunk(count);
-		}
-		OBJ->close();
-	}
-
-	OBJ 					= F.open_chunk(PS::Chunks::EXTENDED_PAC);
-	if (OBJ){
-		IReader* O   		= OBJ->open_chunk(0);
-		for (int count=1; O; count++) {
-			PS::CPACDef*	def	= new PS::CPACDef();
-			if (def->Load(*O))
-			{
-				m_all_ps.push_back(def->getName());
-				m_PACDs.push_back(def);
-			}
-			else
-			{
-				bRes = false;
-				xr_delete(def);
-			}
-			O->close();
-			if (!bRes)
-			{
-				break;
-			}
-			O = OBJ->open_chunk(count);
-		}
-		OBJ->close();
-	}
-	return bRes;
+	R_ASSERT(false);
+	return true;
 }
 
 //----------------------------------------------------

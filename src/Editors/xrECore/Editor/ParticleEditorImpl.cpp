@@ -822,38 +822,32 @@ bool CPSLibrary::Save(const char* nm)
     CMemoryWriter F;
 
     F.open_chunk(PS::Chunks::VERSION);
-    F.w_enum(PS::Version::Latest);
+    F.w_enum(PS::Version::Original);
     F.close_chunk();
 
-    F.open_chunk(PS::Chunks::EXTENDED_PE);
+	/*
+	 * TODO: Add saving to new format
+	 */
+    F.open_chunk(PS::Chunks::SECONDGEN);
     u32 chunk_id = 0;
-    for (auto elem : m_PEDs)
+    for (PS::PEDIt it = m_PEDs.begin(); it != m_PEDs.end(); ++it, ++chunk_id)
     {
-        F.open_chunk(chunk_id++);
-        elem->Save(F);
+        F.open_chunk(chunk_id);
+        (*it)->Save(F);
         F.close_chunk();
     }
     F.close_chunk();
 
-    F.open_chunk(PS::Chunks::EXTENDED_PG);
+
+    F.open_chunk(PS::Chunks::THIRDGEN);
     chunk_id = 0;
-    for (auto elem : m_PGDs)
+    for (PS::PGDIt g_it = m_PGDs.begin(); g_it != m_PGDs.end(); ++g_it, ++chunk_id)
     {
-        F.open_chunk(chunk_id++);
-        elem->Save(F);
+        F.open_chunk(chunk_id);
+        (*g_it)->Save(F);
         F.close_chunk();
     }
     F.close_chunk();
-
-	F.open_chunk(PS::Chunks::EXTENDED_PAC);
-    chunk_id = 0;
-	for (auto elem : m_PACDs)
-	{
-		F.open_chunk(chunk_id++);
-		elem->Save(F);
-		F.close_chunk();
-	}
-	F.close_chunk();
 
     return F.save_to(nm);
 }
