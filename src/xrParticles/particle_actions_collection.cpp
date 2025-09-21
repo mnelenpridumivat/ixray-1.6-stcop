@@ -33,11 +33,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 						
 						pVector tmp = (position.p2 * (magdt / (dist*dist+epsilon))) + Vn;
 						m.vel = tmp * (vm / tmp.length());
-						if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-						{
-							m.rot_vel = m.vel;
-							m.rot_vel.normalize_safe();
-						}
 					}
 				}
 			}
@@ -58,11 +53,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 					
 					pVector tmp = (position.p2 * (magdt / (dist*dist+epsilon))) + Vn;
 					m.vel = tmp * (vm / tmp.length());
-					if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-					{
-						m.rot_vel = m.vel;
-						m.rot_vel.normalize_safe();
-					}
 				}
 			}
 		}
@@ -156,11 +146,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 				// Blend S into V.
 				pVector tmp = (S * (magdt / (t*t+epsilon))) + Vn;
 				m.vel = tmp * (vm / tmp.length());
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -252,11 +237,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 				// Blend S into V.
 				pVector tmp = (S * (magdt / (t*t+epsilon))) + Vn;
 				m.vel = tmp * (vm / tmp.length());
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -320,11 +300,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 				// Blend S into V.
 				pVector tmp = (S * (magdt / (t*t+epsilon))) + Vn;
 				m.vel = tmp * (vm / tmp.length());
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -363,11 +338,6 @@ void PAPI::PAAvoid::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 				// Blend S into V.
 				pVector tmp = (S * (magdt / (t*t+epsilon))) + Vn;
 				m.vel = tmp * (vm / tmp.length());
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -383,25 +353,13 @@ void* PAAvoid::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::position:
-		{
-			return &position;
-		}
+		return &position;
 	case EVariable::look_ahead:
-		{
-			return &look_ahead;
-		}
+		return &look_ahead;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &epsilon;
 	}
 	R_ASSERT(false, "Particle action Avoid: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -488,18 +446,9 @@ void PABounce::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				// Compute new velocity heading out:
 				// Don't apply friction if tangential velocity < cutoff
 				if(vt.length2() <= cutoffSqr)
-				{
 					m.vel = vt - vn * resilience;
-				}
 				else
-				{
 					m.vel = vt * oneMinusFriction - vn * resilience;
-				}
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -561,18 +510,9 @@ void PABounce::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				// Compute new velocity heading out:
 				// Don't apply friction if tangential velocity < cutoff
 				if(vt.length2() <= cutoffSqr)
-				{
 					m.vel = vt - vn * resilience;
-				}
 				else
-				{
 					m.vel = vt * oneMinusFriction - vn * resilience;
-				}
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -605,18 +545,9 @@ void PABounce::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				// Compute new velocity heading out:
 				// Don't apply friction if tangential velocity < cutoff
 				if(vt.length2() <= cutoffSqr)
-				{
 					m.vel = vt - vn * resilience;
-				}
 				else
-				{
 					m.vel = vt * oneMinusFriction - vn * resilience;
-				}
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -690,18 +621,9 @@ void PABounce::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				// Compute new velocity heading out:
 				// Don't apply friction if tangential velocity < cutoff
 				if(vt.length2() <= cutoffSqr)
-				{
 					m.vel = vt - vn * resilience;
-				}
 				else
-				{
 					m.vel = vt * oneMinusFriction - vn * resilience;
-				}
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 		break;
@@ -752,18 +674,9 @@ void PABounce::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 						// Compute new velocity heading out:
 						// Don't apply friction if tangential velocity < cutoff
 						if(vt.length2() <= cutoffSqr)
-						{
 							m.vel = vt - vn * resilience;
-						}
 						else
-						{
 							m.vel = vt * oneMinusFriction - vn * resilience;
-						}
-						if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-						{
-							m.rot_vel = m.vel;
-							m.rot_vel.normalize_safe();
-						}
 					}
 				}
 			}
@@ -780,25 +693,13 @@ void* PABounce::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::position:
-		{
-			return &position;
-		}
+		return &position;
 	case EVariable::oneMinusFriction:
-		{
-			return &oneMinusFriction;
-		}
+		return &oneMinusFriction;
 	case EVariable::resilience:
-		{
-			return &resilience;
-		}
+		return &resilience;
 	case EVariable::cutoffSqr:
-		{
-			return &cutoffSqr;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &cutoffSqr;
 	}
 	R_ASSERT(false, "Particle action Bounce: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -861,11 +762,6 @@ void PADamping::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			m.vel.y *= scale.y;
 			m.vel.z *= scale.z;
 		}
-		if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 }
 void PADamping::Transform(const Fmatrix&){;}
@@ -875,21 +771,11 @@ void* PADamping::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::damping:
-		{
-			return &damping;
-		}
+		return &damping;
 	case EVariable::vlowSqr:
-		{
-			return &vlowSqr;
-		}
+		return &vlowSqr;
 	case EVariable::vhighSqr:
-		{
-			return &vhighSqr;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &vhighSqr;
 	}
 	R_ASSERT(false, "Particle action Damping: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -918,11 +804,6 @@ void PAExplosion::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 		float Gd 		= expf(DistFromWaveSqr * inexp) * outexp;
 		
 		m.vel 			+= dir * (Gd * magdt / ((dist+EPS) * (distSqr + epsilon)));
-		if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 	
 	age += dt;
@@ -937,33 +818,17 @@ void* PAExplosion::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::center:
-		{
-			return &center;
-		}
+		return &center;
 	case EVariable::velocity:
-		{
-			return &velocity;
-		}
+		return &velocity;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::stdev:
-		{
-			return &stdev;
-		}
+		return &stdev;
 	case EVariable::age:
-		{
-			return &age;
-		}
+		return &age;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &epsilon;
 	}
 	R_ASSERT(false, "Particle action Explosion: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -990,11 +855,6 @@ void PAFollow::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			{
 				// Compute force exerted between the two bodies
 				m.vel += tohim * (magdt / (_sqrt(tohimlenSqr) * (tohimlenSqr + epsilon)));
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 	}
@@ -1010,11 +870,6 @@ void PAFollow::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			
 			// Compute force exerted between the two bodies
 			m.vel += tohim * (magdt / (_sqrt(tohimlenSqr) * (tohimlenSqr + epsilon)));
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -1025,21 +880,11 @@ void* PAFollow::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action Follow: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1073,13 +918,6 @@ void PAGravitate::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 					
 					m.vel += acc;
 					mj.vel -= acc;
-					if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-					{
-						m.rot_vel = m.vel;
-						m.rot_vel.normalize_safe();
-						mj.rot_vel = mj.vel;
-						mj.rot_vel.normalize_safe();
-					}
 				}
 			}
 		}
@@ -1103,13 +941,6 @@ void PAGravitate::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				
 				m.vel += acc;
 				mj.vel -= acc;
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-					mj.rot_vel = mj.vel;
-					mj.rot_vel.normalize_safe();
-				}
 			}
 		}
 	}
@@ -1121,21 +952,11 @@ void* PAGravitate::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action Gravitate: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1193,11 +1014,6 @@ void PAJet::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				
 				// Step velocity with acceleration
 				m.vel += accel * (magdt / (rSqr + epsilon));
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 	}
@@ -1219,11 +1035,6 @@ void PAJet::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			
 			// Step velocity with acceleration
 			m.vel += accel * (magdt / (rSqr + epsilon));
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -1238,29 +1049,15 @@ void* PAJet::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::center:
-		{
-			return &center;
-		}
+		return &center;
 	case EVariable::acc:
-		{
-			return &acc;
-		}
+		return &acc;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action Jet: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1295,11 +1092,6 @@ void PAScatter::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 				
 				// Step velocity with acceleration
 				m.vel += accel * (magdt / (rSqr + epsilon));
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
 			}
 		}
 	}
@@ -1321,11 +1113,6 @@ void PAScatter::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			
 			// Step velocity with acceleration
 			m.vel += accel * (magdt / (rSqr + epsilon));
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -1339,25 +1126,13 @@ void* PAScatter::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::center:
-		{
-			return &center;
-		}
+		return &center;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action Scatter: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1420,13 +1195,6 @@ void PAMatchVelocity::Execute(ParticleEffect *effect, const float dt, float& tm_
 					
 					m.vel += acc;
 					mj.vel -= acc;
-					if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-					{
-						m.rot_vel = m.vel;
-						m.rot_vel.normalize_safe();
-						mj.rot_vel = mj.vel;
-						mj.rot_vel.normalize_safe();
-					}
 				}
 			}
 		}
@@ -1450,13 +1218,6 @@ void PAMatchVelocity::Execute(ParticleEffect *effect, const float dt, float& tm_
 				
 				m.vel += acc;
 				mj.vel -= acc;
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-					mj.rot_vel = mj.vel;
-					mj.rot_vel.normalize_safe();
-				}
 			}
 		}
 	}
@@ -1468,21 +1229,11 @@ void* PAMatchVelocity::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action MatchVelocity: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1536,15 +1287,8 @@ void PAOrbitLine::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			float rSqr = into.length2();
 			
 			if(rSqr < max_radiusSqr)
-			{
 				// Step velocity with acceleration
 				m.vel += into * (magdt / (_sqrt(rSqr) + (rSqr + epsilon)));
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
-			}
 		}
 	}
 	else
@@ -1568,11 +1312,6 @@ void PAOrbitLine::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			
 			// Step velocity with acceleration
 			m.vel += into * (magdt / (_sqrt(rSqr) + (rSqr + epsilon)));
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -1587,29 +1326,15 @@ void* PAOrbitLine::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::p:
-		{
-			return &p;
-		}
+		return &p;
 	case EVariable::axis:
-		{
-			return &axis;
-		}
+		return &axis;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action OrbitLine: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1637,14 +1362,7 @@ void PAOrbitPoint::Execute(ParticleEffect *effect, const float dt, float& tm_max
 			
 			// Step velocity with acceleration
 			if(rSqr < max_radiusSqr)
-			{
 				m.vel += dir * (magdt / (_sqrt(rSqr) + (rSqr + epsilon)));
-				if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-				{
-					m.rot_vel = m.vel;
-					m.rot_vel.normalize_safe();
-				}
-			}
 		}
 	}
 	else
@@ -1663,11 +1381,6 @@ void PAOrbitPoint::Execute(ParticleEffect *effect, const float dt, float& tm_max
 			
 			// Step velocity with acceleration
 			m.vel += dir * (magdt / (_sqrt(rSqr) + (rSqr + epsilon)));
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -1681,25 +1394,13 @@ void* PAOrbitPoint::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::center:
-		{
-			return &center;
-		}
+		return &center;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::max_radius:
-		{
-			return &max_radius;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_radius;
 	}
 	R_ASSERT(false, "Particle action OrbitPoint: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1720,11 +1421,6 @@ void PARandomAccel::Execute(ParticleEffect *effect, const float dt, float& tm_ma
 		// being near the original velocity after unit time. Smaller
 		// dt approach a normal distribution instead of a square wave.
 		m.vel += acceleration * dt;
-		if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 }
 void PARandomAccel::Transform(const Fmatrix& m)
@@ -1737,13 +1433,7 @@ void* PARandomAccel::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::gen_acc:
-		{
-			return &gen_acc;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &gen_acc;
 	}
 	R_ASSERT(false, "Particle action RandomAccel: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1796,11 +1486,6 @@ void PARandomVelocity::Execute(ParticleEffect *effect, const float dt, float& tm
 		// Shouldn't multiply by dt because velocities are
 		// invariant of dt. How should dt affect this?
 		m.vel = velocity;
-		if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 }
 void PARandomVelocity::Transform(const Fmatrix& m)
@@ -1813,13 +1498,7 @@ void* PARandomVelocity::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::gen_vel:
-		{
-			return &gen_vel;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &gen_vel;
 	}
 	R_ASSERT(false, "Particle action RandomVelocity: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -1890,11 +1569,6 @@ void PARestore::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			
 			// Figure new velocity at next timestep
 			m.vel.z += a + b;
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 #else
 			Particle &m = effect->particles[i];
 			
@@ -1933,13 +1607,8 @@ void* PARestore::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::time_left:
-		{
-			return &time_left;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &time_left;
+		break;
 	}
 	R_ASSERT(false, "Particle action Restore: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -2025,7 +1694,7 @@ void PASource::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 	if(effect->p_count + rate > effect->max_particles)
 		rate = effect->max_particles - effect->p_count;
 	
-	pVector pos, posB, vel, rot_velocity, col, siz, rt;
+	pVector pos, posB, vel, rot_vel, col, siz, rt;
 	
 	if(m_Flags.is(u32(flVertexB_tracks))){
 		for(int i = 0; i < rate; i++){
@@ -2033,36 +1702,26 @@ void PASource::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			size.Generate		(siz); 	if (m_Flags.is(flSingleSize)) siz.set(siz.x,siz.x,siz.x);
 			rot.Generate		(rt);
 			velocity.Generate	(vel);	vel += parent_vel;
-			if (AlighRotVelocityToVelocity)
+			if (true/*AlighRotVelocityToVelocity*/)
 			{
-				rot_velocity = vel;
-				if (fis_zero(rot_velocity.magnitude()))
+				rot_vel = vel;
+				if (fis_zero(rot_vel.magnitude()))
 				{
-					rot_velocity.x = 1;
-					rot_velocity.y = 0;
-					rot_velocity.z = 0;
+					rot_vel.x = 1;
+					rot_vel.y = 0;
+					rot_vel.z = 0;
 				} else
 				{
-					rot_velocity.normalize();
+					rot_vel.normalize();
 				}
 			} else
 			{
-				rot_vel.Generate(rot_velocity);
-				if (fis_zero(rot_velocity.magnitude()))
-				{
-					rot_velocity.x = 1;
-					rot_velocity.y = 0;
-					rot_velocity.z = 0;
-				}
-				else
-				{
-					rot_velocity.normalize();
-				}
+				// TODO: implement
 			}
 			color.Generate		(col);
 			float ag 			= age + NRand(age_sigma);
 
-			effect->Add			(pos, pos, siz, rt, vel, rot_velocity, color_argb_f(alpha, col.x, col.y, col.z), ag);
+			effect->Add			(pos, pos, siz, rt, vel, rot_vel, color_argb_f(alpha, col.x, col.y, col.z), ag);
 		}
 	}else{
 		for(int i = 0; i < rate; i++){
@@ -2070,36 +1729,26 @@ void PASource::Execute(ParticleEffect *effect, const float dt, float& tm_max)
 			size.Generate		(siz); 	if (m_Flags.is(flSingleSize)) siz.set(siz.x,siz.x,siz.x);
 			rot.Generate		(rt);
 			velocity.Generate	(vel);	vel += parent_vel;
-			if (AlighRotVelocityToVelocity)
+			if (true/*AlighRotVelocityToVelocity*/)
 			{
-				rot_velocity = vel;
-				if (fis_zero(rot_velocity.magnitude()))
+				rot_vel = vel;
+				if (fis_zero(rot_vel.magnitude()))
 				{
-					rot_velocity.x = 1;
-					rot_velocity.y = 0;
-					rot_velocity.z = 0;
+					rot_vel.x = 1;
+					rot_vel.y = 0;
+					rot_vel.z = 0;
 				} else
 				{
-					rot_velocity.normalize();
+					rot_vel.normalize();
 				}
 			} else
 			{
-				rot_vel.Generate(rot_velocity);
-				if (fis_zero(rot_velocity.magnitude()))
-				{
-					rot_velocity.x = 1;
-					rot_velocity.y = 0;
-					rot_velocity.z = 0;
-				}
-				else
-				{
-					rot_velocity.normalize();
-				}
+				// TODO: implement
 			}
 			color.Generate		(col);
 			float ag 			= age + NRand(age_sigma);
 
-			effect->Add			(pos, posB, siz, rt, vel, rot_velocity, color_argb_f(alpha, col.x, col.y, col.z), ag);
+			effect->Add			(pos, posB, siz, rt, vel, rot_vel, color_argb_f(alpha, col.x, col.y, col.z), ag);
 		}
 	}
 }
@@ -2114,57 +1763,27 @@ void* PASource::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::position:
-		{
-			return &position;
-		}
+		return &position;
 	case EVariable::velocity:
-		{
-			return &velocity;
-		}
-	case EVariable::aligh_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
-	case EVariable::rot_vel:
-		{
-			return &rot_vel;
-		}
+		return &velocity;
 	case EVariable::rot:
-		{
-			return &rot;
-		}
+		return &rot;
 	case EVariable::size:
-		{
-			return &size;
-		}
+		return &size;
 	case EVariable::color:
-		{
-			return &color;
-		}
+		return &color;
 	case EVariable::alpha:
-		{
-			return &alpha;
-		}
+		return &alpha;
 	case EVariable::particle_rate:
-		{
-			return &particle_rate;
-		}
+		return &particle_rate;
 	case EVariable::age:
-		{
-			return &age;
-		}
+		return &age;
 	case EVariable::age_sigma:
-		{
-			return &age_sigma;
-		}
+		return &age_sigma;
 	case EVariable::parent_vel:
-		{
-			return &parent_vel;
-		}
+		return &parent_vel;
 	case EVariable::parent_motion:
-		{
-			return &parent_motion;
-		}
+		return &parent_motion;
 	}
 	R_ASSERT(false, "Particle action Source: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -2184,21 +1803,11 @@ void PASpeedLimit::Execute(ParticleEffect *effect, const float dt, float& tm_max
 		{
 			float s = _sqrt(sSqr);
 			m.vel *= (min_speed/s);
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 		else if(sSqr>max_sqr)
 		{
 			float s = _sqrt(sSqr);
 			m.vel *= (max_speed/s);
-			if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-			{
-				m.rot_vel = m.vel;
-				m.rot_vel.normalize_safe();
-			}
 		}
 	}
 }
@@ -2209,17 +1818,9 @@ void* PASpeedLimit::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::min_speed:
-		{
-			return &min_speed;
-		}
+		return &min_speed;
 	case EVariable::max_speed:
-		{
-			return &max_speed;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &max_speed;
 	}
 	R_ASSERT(false, "Particle action SpeedLimit: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -2337,11 +1938,6 @@ void PATargetVelocity::Execute(ParticleEffect *effect, const float dt, float& tm
 	{
 		Particle &m = effect->particles[i];
 		m.vel += (velocity - m.vel) * scaleFac;
-		if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 }
 void PATargetVelocity::Transform(const Fmatrix& m)
@@ -2354,17 +1950,9 @@ void* PATargetVelocity::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::velocity:
-		{
-			return &velocity;
-		}
+		return &velocity;
 	case EVariable::scale:
-		{
-			return &scale;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &scale;
 	}
 	R_ASSERT(false, "Particle action TargetVelocity: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -2582,12 +2170,7 @@ void PATurbulence::Execute(ParticleEffect *effect, const float dt, float& tm_max
 		_vmo = _mm_shuffle_ps( _vmo , _vmo , _MM_SHUFFLE( 0 , 0 , 0 , 0 ) ); // _vmo = scale | scale | scale | scale
 		_mvel = _mm_mul_ps( _mvel , _vmo );
 
-    	_mm_store_fvector( m.vel , _mvel );
-    	if (AlighRotVelocityToVelocity && !fis_zero(m.vel.length()))
-    	{
-    		m.rot_vel = m.vel;
-    		m.rot_vel.normalize_safe();
-    	}
+		_mm_store_fvector( m.vel , _mvel );
 	}
 }
 
@@ -2598,33 +2181,17 @@ void* PATurbulence::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::frequency:
-		{
-			return &frequency;
-		}
+		return &frequency;
 	case EVariable::octaves:
-		{
-			return &octaves;
-		}
+		return &octaves;
 	case EVariable::magnitude:
-		{
-			return &magnitude;
-		}
+		return &magnitude;
 	case EVariable::epsilon:
-		{
-			return &epsilon;
-		}
+		return &epsilon;
 	case EVariable::offset:
-		{
-			return &offset;
-		}
+		return &offset;
 	case EVariable::age:
-		{
-			return &age;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &age;
 	}
 	R_ASSERT(false, "Particle action Turbulence: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
@@ -2637,11 +2204,6 @@ void PABindVelocityValue::Execute(ParticleEffect* effect, const float dt, float&
 	{
 		Particle& m = effect->particles[i];
 		m.vel = BindValue;
-		if (AlighRotVelocityToVelocity)
-		{
-			m.rot_vel = m.vel;
-			m.rot_vel.normalize_safe();
-		}
 	}
 }
 void* PABindVelocityValue::GetVariableImpl(u8 VarID)
@@ -2649,13 +2211,7 @@ void* PABindVelocityValue::GetVariableImpl(u8 VarID)
 	switch ((EVariable)VarID)
 	{
 	case EVariable::BindValue:
-		{
-			return &BindValue;
-		}
-	case EVariable::align_rot_vel_to_vel:
-		{
-			return &AlighRotVelocityToVelocity;
-		}
+		return &BindValue;
 	}
 	R_ASSERT(false, "Particle action BindVelocityValue: Invalid Variable ID", std::to_string(VarID).c_str());
 	return nullptr;
