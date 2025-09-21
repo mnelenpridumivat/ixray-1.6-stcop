@@ -541,9 +541,7 @@ namespace PAPI{
 	{
 		enum class EVariable : u8
 		{
-			Animator,
-			Looped,
-			Reverse
+			Animator
 		};
 		shared_str Animator;
 		bool Looped;
@@ -561,9 +559,7 @@ namespace PAPI{
 	{
 		enum class EVariable : u8
 		{
-			Animator,
-			Looped,
-			Reverse
+			Animator
 		};
 		shared_str Animator;
 		bool Looped;
@@ -578,26 +574,7 @@ namespace PAPI{
 	{
 		enum class EVariable : u8
 		{
-			Animator,
-			Looped,
-			Reverse
-		};
-		shared_str Animator;
-		bool Looped;
-		bool Reverse;
-
-		PS::IPAC* AnimPtr = nullptr;
-
-		_METHODS;
-	};
-
-	struct PARTICLES_API PAVelocityRotationAnimator : public ParticleAction
-	{
-		enum class EVariable : u8
-		{
-			Animator,
-			Looped,
-			Reverse
+			Animator
 		};
 		shared_str Animator;
 		bool Looped;
