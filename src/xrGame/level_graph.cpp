@@ -27,7 +27,8 @@ CLevelGraph::CLevelGraph()
 	// m_header & data
 	m_header = (CHeader*)m_reader->pointer();
 	const u32 AIVersion = header().version();
-	R_ASSERT(AIVersion >= XRAI_MINIMAL_VERSION && AIVersion <= XRAI_CURRENT_VERSION);
+
+	R_ASSERT2(CHECK_SPAWN_VERSION(AIVersion), "Unsupported AI-Map version!");
 	m_reader->advance(sizeof(CHeader));
 
 	switch (AIVersion)
@@ -39,15 +40,13 @@ CLevelGraph::CLevelGraph()
 
 			for (u32 i = 0; i < header().vertex_count(); ++i)
 			{
-
-
 				for (u8 j = 0; j < 4; ++j)
 				{
 					u32 link_value = Src[i].link(j);
 					m_nodes[i].UncompressedNode.link(j, link_value);
 				}
 
-				// Îñòàëüíûå ïîëÿ
+				// Остальные поля
 				m_nodes[i].UncompressedNode.high = Src[i].high;
 				m_nodes[i].UncompressedNode.low = Src[i].low;
 				m_nodes[i].UncompressedNode.plane = Src[i].plane;
@@ -79,7 +78,7 @@ CLevelGraph::CLevelGraph()
 			}
 			break;
 		}
-		case XRAI_LARGE_VERSION:
+		case XRAI_LARGE_VERSION: // ver 13 - 26 bit (слишком огромная, двиг не расчитан на такую геометрию)
 		{
 			m_nodes = (CVertex*)m_reader->pointer();
 			break;
