@@ -41,12 +41,7 @@ public:
 	ICF SelfRef	add(const Self &a, const Self &v)		{ x=a.x+v.x;y=a.y+v.y;	z=a.z+v.z;		return *this;	};
 	ICF SelfRef	add(const Self &a, T s)					{ x=a.x+s;  y=a.y+s;	z=a.z+s;		return *this;	};
 
-	/*ICF	Self operator+(const Self& v) const
-	{
-		auto Copy(*this);
-		return Copy.add(v);
-	};*/
-	ICF	SelfRef operator+=(const Self& v)
+	/*ICF	SelfRef operator+=(const Self& v)
 	{
 		return add(v);
 	};
@@ -58,38 +53,28 @@ public:
 	ICF	SelfRef operator+=(T s)
 	{
 		return add(s);
-	};
+	};*/
 
 	ICF	SelfRef	sub(const Self &v)						{ x-=v.x;	y-=v.y;		z-=v.z;			return *this;	};
 	ICF SelfRef	sub(T s)								{ x-=s;		y-=s;		z-=s;			return *this;	};
 	ICF	SelfRef	sub(const Self &a, const Self &v)		{ x=a.x-v.x;y=a.y-v.y;	z=a.z-v.z;		return *this;	};
 	ICF SelfRef	sub(const Self &a, T s)					{ x=a.x-s;  y=a.y-s;	z=a.z-s;		return *this;	};
 
-	/*ICF	Self operator-(const Self& v) const
-	{
-		auto Copy(*this);
-		return Copy.sub(v);
-	};*/
-	ICF	SelfRef operator-=(const Self& v)
+	/*ICF	SelfRef operator-=(const Self& v)
 	{
 		return sub(v);
 	};
-	/*ICF	Self operator-(T s) const
-	{
-		auto Copy(*this);
-		return Copy.sub(s);
-	};*/
 	ICF	SelfRef operator-=(T s)
 	{
 		return sub(s);
-	};
+	};*/
 
 	ICF	SelfRef	mul(const Self &v)						{ x*=v.x;	y*=v.y;		z*=v.z;			return *this;	};
 	ICF SelfRef	mul(T s)								{ x*=s;		y*=s;		z*=s;			return *this;	};
 	ICF	SelfRef	mul(const Self &a, const Self &v)		{ x=a.x*v.x;y=a.y*v.y;	z=a.z*v.z;		return *this;	};
 	ICF SelfRef	mul(const Self &a, T s)					{ x=a.x*s;  y=a.y*s;	z=a.z*s;		return *this;	};
 
-	ICF	Self operator*(const Self& v) const
+	/*ICF	Self operator*(const Self& v) const
 	{
 		auto Copy(*this);
 		return Copy.mul(v);
@@ -98,27 +83,17 @@ public:
 	{
 		return mul(v);
 	};
-	/*ICF	Self operator*(T s) const
-	{
-		auto Copy(*this);
-		return Copy.mul(s);
-	};*/
 	ICF	SelfRef operator*=(T s)
 	{
 		return mul(s);
-	};
+	};*/
 
 	ICF	SelfRef	div(const Self &v)						{ x/=v.x;	y/=v.y;  z/=v.z;			return *this;	};
 	ICF SelfRef	div(T s)								{ x/=s;		y/=s;    z/=s;				return *this;	};
 	ICF	SelfRef	div(const Self &a, const Self &v)		{ x=a.x/v.x;y=a.y/v.y;	z=a.z/v.z;		return *this;	};
 	ICF SelfRef	div(const Self &a, T s)					{ x=a.x/s;  y=a.y/s;	z=a.z/s;		return *this;	};
 
-	/*ICF	Self operator/(T s) const
-	{
-		auto Copy(*this);
-		return Copy.div(s);
-	};*/
-	ICF	SelfRef operator/=(T s)
+	/*ICF	SelfRef operator/=(T s)
 	{
 		return div(s);
 	};
@@ -130,16 +105,10 @@ public:
 	ICF	SelfRef operator/=(const Self& v)
 	{
 		return div(v);
-	};
+	};*/
 
 	IC	SelfRef	invert()								{ x=-x; y=-y; z=-z;						return *this;	}
 	IC	SelfRef	invert(const Self &a)					{ x=-a.x; y=-a.y; z=-a.z;				return *this;	}
-
-	/*ICF	Self operator-() const
-	{
-		auto Copy(*this);
-		return Copy.invert();
-	};*/
 
 	IC	SelfRef	min(const Self &v1,const Self &v2)		{ x = _min(v1.x,v2.x); y = _min(v1.y,v2.y); z = _min(v1.z,v2.z);	return *this;	}
 	IC	SelfRef	min(const Self &v)						{ x = _min(x,v.x);	y = _min(y,v.y);	z = _min(z,v.z);			return *this;	}
@@ -568,6 +537,21 @@ public:
 			up.z		= -dir.y * right.x ;
 		}
 	}
+
+	IC float 	length		() const						{	return _sqrt(x*x+y*y+z*z);					}
+	IC float 	length2		() const						{	return (x*x+y*y+z*z);						}
+	
+	IC float 	operator*	(const _vector3 &a) const		{	return x*a.x + y*a.y + z*a.z;				}
+	IC _vector3 	operator*	(const float s) const			{	return _vector3(x*s, y*s, z*s);				}
+	IC _vector3 	operator/	(const float s) const			{	float invs = 1.0f / s;	return _vector3(x*invs, y*invs, z*invs);	}
+	IC _vector3 	operator+	(const _vector3& a) const		{	return _vector3(x+a.x, y+a.y, z+a.z);		}
+	IC _vector3 	operator-	(const _vector3& a) const		{	return _vector3(x-a.x, y-a.y, z-a.z);		}
+	IC _vector3 	operator-	()								{	x = -x;	y = -y;	z = -z;	return *this;		}
+	IC _vector3& operator+=	(const _vector3& a)				{	x += a.x;y += a.y;z += a.z;	return *this;	}
+	IC _vector3& operator-=	(const _vector3& a)		 		{	x -= a.x;y -= a.y;z -= a.z;	return *this;	}
+	IC _vector3& operator*=	(const float a)					{	x *= a;	y *= a;	z *= a;	return *this;		}
+	IC _vector3& operator/=	(const float a)					{	float b = 1.0f / a;	x *= b;	y *= b;	z *= b;	return *this;		}
+	IC _vector3 	operator^	(const _vector3& b) const		{	return _vector3(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);		}
 };
 typedef _vector3<float>		Fvector;
 typedef _vector3<float>		Fvector3;

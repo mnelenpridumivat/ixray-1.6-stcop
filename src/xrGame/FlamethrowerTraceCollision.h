@@ -10,10 +10,10 @@
 
 class CBulletManager;
 
-namespace PAPI
+/*namespace PAPI
 {
 	class pVector;
-}
+}*/
 
 class CParticlesObject;
 class CFlamethrower;
@@ -162,7 +162,7 @@ namespace FlamethrowerTrace
 		float* m_particle_alpha_ptr;
 		shared_str m_particle_alpha_air_PE_name;
 		shared_str m_particle_alpha_ground_PE_name;
-		PAPI::pVector* m_particle_size_ptr;
+		Fvector* m_particle_size_ptr;
 		shared_str m_particle_size_air_PE_name;
 		shared_str m_particle_size_ground_PE_name;
 

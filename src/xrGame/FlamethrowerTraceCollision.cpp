@@ -203,7 +203,7 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 	RadiusCurrent = m_RadiusMin + (m_RadiusMax - m_RadiusMin) * interpTime;
 	clamp(RadiusCurrent, m_RadiusMin, m_RadiusMax);
 
-	PAPI::pVector Size;
+	Fvector Size;
 	Size.x = GetCurrentRadius() * m_RadiusCollisionCoeff.x;
 	Size.y = GetCurrentRadius() * m_RadiusCollisionCoeff.y;
 	Size.z = GetCurrentRadius() * m_RadiusCollisionCoeff.z;
@@ -236,7 +236,7 @@ void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
 			);
 			if (PA)
 			{
-				m_particle_size_ptr = PA->GetVariable<PAPI::pVector>(PAPI::PABindSizeValue::EVariable::BindValue);
+				m_particle_size_ptr = PA->GetVariable<Fvector>(PAPI::PABindSizeValue::EVariable::BindValue);
 			}
 		}
 		
@@ -265,7 +265,7 @@ void FlamethrowerTrace::CCollision::Update_AirToGround(float DeltaTime)
 		*m_particle_alpha_ptr = AlphaValue;
 	}
 	RadiusCurrent = std::max(RadiusOnCollide, AlphaValue * m_RadiusCollided);
-	PAPI::pVector Size;
+	Fvector Size;
 	Size.x = RadiusCurrent * m_RadiusCollisionCollidedCoeff.x;
 	Size.y = RadiusCurrent * m_RadiusCollisionCollidedCoeff.y;
 	Size.z = RadiusCurrent * m_RadiusCollisionCollidedCoeff.z;
@@ -437,7 +437,7 @@ void FlamethrowerTrace::CCollision::Activate()
 	m_particle_size_ptr = m_particles->FindAction(
 		m_particle_size_air_PE_name.c_str(),
 		PAPI::PABindSizeValueID
-		)->GetVariable<PAPI::pVector>(PAPI::PABindColorAlpha::EVariable::BindValue);
+		)->GetVariable<Fvector>(PAPI::PABindColorAlpha::EVariable::BindValue);
 	m_particles->Play(false);
 	RadiusCurrent = m_RadiusMin;
 }
