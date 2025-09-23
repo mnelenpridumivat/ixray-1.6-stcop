@@ -626,19 +626,41 @@ CEnvDescriptor* current_environment(CEnvironment* self_)
 {
 	return		(self_->CurrentEnv);
 }
+
 extern bool g_bDisableAllInput;
+extern bool g_bDisableMouseMove;
+
 void disable_input()
 {
 	g_bDisableAllInput = true;
+	g_bDisableMouseMove = true;
 #ifdef DEBUG
 	Msg("input disabled");
 #endif // #ifdef DEBUG
 }
+
 void enable_input()
 {
 	g_bDisableAllInput = false;
+	g_bDisableMouseMove = false;
 #ifdef DEBUG
 	Msg("input enabled");
+#endif // #ifdef DEBUG
+}
+
+void disable_mouse_move()
+{
+	g_bDisableMouseMove = true;
+#ifdef DEBUG
+	Msg("mouse move disabled");
+#endif // #ifdef DEBUG
+}
+
+void enable_mouse_move()
+{
+	g_bDisableMouseMove = false;
+#ifdef DEBUG
+	Msg("mouse move enabled");
 #endif // #ifdef DEBUG
 }
 
@@ -1611,19 +1633,21 @@ void CLevel::script_register(lua_State* L)
 		def("hide_indicators",					hide_indicators),
 		def("hide_indicators_safe",				hide_indicators_safe),
 
-				def("show_indicators", show_indicators),
-				def("show_weapon", show_weapon),
-				def("add_call", ((void (*) (const luabind::functor<bool> &, const luabind::functor<void> &)) & add_call)),
-				def("add_call", ((void (*) (const luabind::object&, const luabind::functor<bool> &, const luabind::functor<void> &)) & add_call)),
-				def("add_call", ((void (*) (const luabind::object&, LPCSTR, LPCSTR)) & add_call)),
-				def("remove_call", ((void (*) (const luabind::functor<bool> &, const luabind::functor<void> &)) & remove_call)),
-				def("remove_call", ((void (*) (const luabind::object&, const luabind::functor<bool> &, const luabind::functor<void> &)) & remove_call)),
-				def("remove_call", ((void (*) (const luabind::object&, LPCSTR, LPCSTR)) & remove_call)),
-				def("remove_calls_for_object", remove_calls_for_object),
-				def("present", is_level_present),
-				def("disable_input", disable_input),
-				def("enable_input", enable_input),
-				def("spawn_phantom", spawn_phantom),
+		def("show_indicators",					show_indicators),
+		def("show_weapon",						show_weapon),
+		def("add_call",							((void (*) (const luabind::functor<bool> &,const luabind::functor<void> &)) &add_call)),
+		def("add_call",							((void (*) (const luabind::object &,const luabind::functor<bool> &,const luabind::functor<void> &)) &add_call)),
+		def("add_call",							((void (*) (const luabind::object &, LPCSTR, LPCSTR)) &add_call)),
+		def("remove_call",						((void (*) (const luabind::functor<bool> &,const luabind::functor<void> &)) &remove_call)),
+		def("remove_call",						((void (*) (const luabind::object &,const luabind::functor<bool> &,const luabind::functor<void> &)) &remove_call)),
+		def("remove_call",						((void (*) (const luabind::object &, LPCSTR, LPCSTR)) &remove_call)),
+		def("remove_calls_for_object",			remove_calls_for_object),
+		def("present",							is_level_present),
+		def("disable_input",					disable_input),
+		def("enable_input",						enable_input),
+		def("disable_mouse_move",				disable_mouse_move),
+		def("enable_mouse_move",				enable_mouse_move),
+		def("spawn_phantom",					spawn_phantom),
 
 				def("get_bounding_volume", get_bounding_volume),
 
