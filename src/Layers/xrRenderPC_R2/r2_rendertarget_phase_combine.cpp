@@ -164,8 +164,8 @@ void	CRenderTarget::phase_combine	()
 		dxEnvDescriptorMixerRender &envdescren = *(dxEnvDescriptorMixerRender*)(&*envdesc.m_pDescriptorMixer);
 
 		// Setup textures
-		IDirect3DBaseTexture9*	e0	= _menu_pp?0:envdescren.sky_r_textures_env[0].second->surface_get();
-		IDirect3DBaseTexture9*	e1	= _menu_pp?0:envdescren.sky_r_textures_env[1].second->surface_get();
+		IRHISurface*	e0	= _menu_pp?0:envdescren.sky_r_textures_env[0].second->surface_get();
+		IRHISurface*	e1	= _menu_pp?0:envdescren.sky_r_textures_env[1].second->surface_get();
 		t_envmap_0->surface_set		(e0);	_RELEASE(e0);
 		t_envmap_1->surface_set		(e1);	_RELEASE(e1);
 	
@@ -222,7 +222,8 @@ void	CRenderTarget::phase_combine	()
 	// Distortion filter
 	BOOL	bDistort	= RImplementation.o.distortion_enabled;				// This can be modified
 	{
-		if		((0==RImplementation.mapDistort.size()) && !_menu_pp)		bDistort= FALSE;
+		u32 count = RImplementation.mapDistort.size() + RImplementation.mapHUDDistort.size();
+		if		((0 == count) && !_menu_pp)		bDistort= FALSE;
 		if (bDistort)		{
 			u_setrt						(rt_Generic_1,0,0,RDepth);		// Now RT is a distortion mask
 			RCache.set_CullMode			(CULL_CCW);
@@ -377,8 +378,8 @@ void	CRenderTarget::phase_combine	()
 void CRenderTarget::phase_wallmarks		()
 {
 	// Targets
-	RCache.set_RT(nullptr,2);
-	RCache.set_RT(nullptr,1);
+	RCache.set_RT((ID3DRenderTargetView*)nullptr,2);
+	RCache.set_RT((ID3DRenderTargetView*)nullptr,1);
 	u_setrt								(rt_Color,nullptr,nullptr,RDepth);
 	// Stencil	- draw only where stencil >= 0x1
 	RCache.set_Stencil					(TRUE,D3DCMP_LESSEQUAL,0x01,0xff,0x00);

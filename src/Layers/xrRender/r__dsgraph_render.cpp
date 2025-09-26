@@ -166,6 +166,10 @@ void R_dsgraph_structure::r_dsgraph_render_graph(u32 _priority, bool _clear)
 								mapMatrixItems&				items	= Ntex.val;
 								for (_MatrixItem& Ni : items)
 								{
+									if (Ni.pVisual->shader == nullptr)
+									{
+										continue;
+									}
 									RCache.set_xform_world(Ni.Matrix);
 									RImplementation.apply_object(Ni.pObject);
 									RImplementation.apply_lmaterial();
@@ -217,8 +221,8 @@ void R_dsgraph_structure::r_dsgraph_render_hud_ui()
 #if	RENDER==R_R2
 	// Targets, use accumulator for temporary storage
 	const ref_rt	rt_null;
-	RCache.set_RT(0,	1);
-	RCache.set_RT(0,	2);
+	RCache.set_RT((ID3DRenderTargetView*)nullptr,	1);
+	RCache.set_RT((ID3DRenderTargetView*)nullptr,	2);
 	RImplementation.Target->u_setrt(RImplementation.Target->rt_Color, rt_null, rt_null, RDepth);
 #endif
 
@@ -288,7 +292,7 @@ void	R_dsgraph_structure::r_dsgraph_render_scope	()
 		ID3D11Resource* res{};
 		RDepth->GetResource(&res);
 
-		RContext->CopyResource(RImplementation.Target->rt_Position->pSurface, res);
+		RContext->CopyResource((ID3D11Resource*)RImplementation.Target->rt_Position->pSurface->GetRawTexture(), res);
 		_RELEASE(res);
 	}
 
@@ -320,6 +324,14 @@ void	R_dsgraph_structure::r_dsgraph_render_distort	()
 	// Sorted (back to front)
 	mapDistort.traverseRL	(sorted_L1);
 	mapDistort.clear		();
+
+	//	HACK: Calculate this only once
+	CHudInitializer initalizer(true);
+
+	rmNear();
+	mapHUDDistort.traverseLR(sorted_L1);
+	mapHUDDistort.clear();
+	rmNormal();
 }
 
 //////////////////////////////////////////////////////////////////////////
