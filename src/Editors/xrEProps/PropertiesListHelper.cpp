@@ -124,6 +124,7 @@ ChooseValue* CPropHelper::CreateChoose(PropItemVec& items, shared_str key, share
 }
 MultiChooseValue* CPropHelper::CreateChooseTexture(PropItemVec& items, shared_str key)
 {
+    R_ASSERT(key.size());
     MultiChooseValue* cv = (MultiChooseValue*)AppendValue(items, key, new MultiChooseValue(), PROP_CHOOSE_TEXTURE);
     cv->Owner()->IsTextureItem = true;
     return cv;

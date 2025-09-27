@@ -58,6 +58,23 @@ void MODEL::build(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* 
 {
 	R_ASSERT(S_INIT == status);
 	R_ASSERT((Vcnt >= 4) && (Tcnt >= 2));
+	if (Vcnt < 4 || Tcnt < 2)
+	{
+		if (Vcnt)
+		{
+			Fvector result = {0,0,0};
+			for (int i = 0; i < Vcnt; i++)
+			{
+				result += V[i];
+			}
+			result /= Vcnt;
+			Msg("Invalid collision face at [%f, %f, %f]", result.x, result.y, result.z);
+		} else
+		{
+			// Never know what could happen...
+			Msg("Invalid collision face: somehow there is %d faces with 0 vertices", Tcnt);
+		}
+	}
 
 	build_internal(V, Vcnt, T, Tcnt, bc, bcp, pRW, RWMode);
 	status = S_READY;

@@ -398,15 +398,19 @@ void CSceneObject::FillProp(LPCSTR pref, PropItemVec& items)
 		{
 			MultiChooseValue* MultiValue = PHelper().CreateChooseTexture(items, PrepareKey(Pref2.c_str(), "TextureView"));
 
+			R_ASSERT(s->m_Texture.size() && s->m_Texture != "", "Invalid texture name for material", s->_Name());
 			ChooseValue* Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Tex"), &s->m_Texture, smTexture);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeShader);
 
+			R_ASSERT(s->m_ShaderName.size() && s->m_Texture != "", "Invalid engine shader name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Shader"), &s->m_ShaderName, smEShader);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeShader);
 
+			R_ASSERT(s->m_ShaderXRLCName.size() && s->m_Texture != "", "Invalid compile shader name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Compile"), &s->m_ShaderXRLCName, smCShader);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeSurface);
 
+			R_ASSERT(s->m_GameMtlName.size() && s->m_Texture != "", "Invalid game material name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Mtl"), &s->m_GameMtlName, smGameMaterial);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeSurface);
 			Val->OnAfterEditEvent.bind(this, &CSceneObject::AfterEditGameMtl);
