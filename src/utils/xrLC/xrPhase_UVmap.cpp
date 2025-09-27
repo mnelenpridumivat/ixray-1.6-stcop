@@ -175,7 +175,7 @@ void CBuild::xrPhase_UVmap()
   	clMsg("%d subdivisions...", g_XSplit.size());
  
  	// VALIDATION
-	for (auto SP = 0; SP < g_XSplit[SP]->size(); SP++)
+	/*for (auto SP = 0; SP < g_XSplit[SP]->size(); SP++)
 	{
 		if (g_XSplit[SP]->size() == 0)
 		{
@@ -183,7 +183,7 @@ void CBuild::xrPhase_UVmap()
 			g_XSplit.erase(g_XSplit.begin() + SP);
 			SP--;
 		}
-	}
+	}*/
 
 
 	err_save();
