@@ -18,10 +18,6 @@ using Implicit_it = Implicit::iterator;
 #include "../xrForms/CompilersUI.h"
 #include "../xrDXT/xrDXT.h"
 
-#ifdef LCCUDA_BUILD
-#	include "CUDA/CUDARayCast.h"
-#endif
-
 class ImplicitThread :
 	public CThread
 {
@@ -34,6 +30,8 @@ public:
 	}
 	virtual void Execute();
 };
+
+
 
 void ImplicitThread::Execute()
 {
@@ -162,8 +160,7 @@ void ImplicitExecute::Execute()
 			AditionalData("CurrentV: %u | time: %.0f", V, tImplicit.GetElapsed_sec());
 	}
 }
-
-#ifdef LCCUDA_BUILD
+ 
 #include "CUDA/CUDARayCast.h"
 
 extern u64 RayTracingTime;
@@ -295,7 +292,6 @@ void RunTaskGPU()
 	);
 
 }
-#endif
 
 static xr_vector<u32> not_clear;
 void ImplicitLightingExec()
@@ -344,14 +340,8 @@ void ImplicitLightingExec()
 		Progress(0);
 		cl_globs.Initialize(defl);
 
-#ifdef LCCUDA_BUILD
-		if (gCompilerMode.CUDA)
-		{
-			RunTaskGPU();
-		}
-		else
-#endif
-		RunImplicitMultithread(defl);
+		// RunImplicitMultithread(defl);
+ 		RunTaskGPU();
 
 		defl.faces.clear();
 

@@ -9,16 +9,11 @@
 
 #include "../../xrCore/Collision/xrCDB.h"
 #include "../xrForms/xrThread.h"
-#include "../xrForms/CompilersUI.h"
 
-#ifdef LCCUDA_BUILD
-#	include "../xrLC_Light/CUDA/CUDARayCast.h"
-#endif
-
-const float	aht_max_edge = c_SS_maxsize / 2.5f;	// 2.0f;			// 2 m
+const	float	aht_max_edge	= c_SS_maxsize/2.5f;	// 2.0f;			// 2 m
  
 
-constexpr bool is_CCW(int _1, int _2)
+bool	is_CCW	(int _1, int _2)
 {
 	if (0==_1 && 1==_2)	return true;
 	if (1==_1 && 2==_2) return true;
@@ -89,6 +84,10 @@ virtual	void Execute()
 
 CThreadManager	precalc_base_hemi;
 
+#include "../xrForms/CompilersUI.h"
+#include "../xrLC_Light/CUDA/CUDARayCast.h"
+extern CompilersMode gCompilerMode;
+
 void CBuild::xrPhase_AdaptiveHT	()
 {
 	CDB::COLLIDER	DB;
@@ -114,48 +113,48 @@ void CBuild::xrPhase_AdaptiveHT	()
 		EmbreeMain.AttachGeometrys	(false);
  	}
 
-	if (!gCompilerMode.CUDA)
-	{
-		// Prepare
-		Status("AdaptiveHT : base hemisphere ...");
-		ThreadWorkID_Adaptive = 0;
+#define USE_INTEL 
+	 
+#ifdef USE_INTEL
+	// Prepare
+	Status("AdaptiveHT : base hemisphere ...");
+	ThreadWorkID_Adaptive = 0;
+	for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
+		precalc_base_hemi.start(new CPrecalcBaseHemiThread(thID));
+	precalc_base_hemi.wait();
 
-		for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
-			precalc_base_hemi.start(new CPrecalcBaseHemiThread(thID));
-		precalc_base_hemi.wait();
 
-		//////////////////////////////////////////////////////////////////////////
-		Status("AdaptiveHT : Gathering lighting information...");
-		u_SmoothVertColors(5);
-	}
-#if 0//def LCCUDA_BUILD
-	else
-	{
-		XRay::RayTrace::CUDA::InitializeRayTracing();
+	//////////////////////////////////////////////////////////////////////////
+	Status("AdaptiveHT : Gathering lighting information...");
+	u_SmoothVertColors(5);
 
-		CTimer t;
-		t.Start();
-		PackedLighting task_group;
-		for (auto VertexID = 0; VertexID < lc_global_data()->g_vertices().size(); VertexID++)
+#else 
+ 	XRay::RayTrace::CUDA::InitializeRayTracing();
+	
+	CTimer t;
+	t.Start();
+	PackedLighting task_group;
+ 	for (auto VertexID = 0; VertexID < lc_global_data()->g_vertices().size(); VertexID++)
+	{		
+		// 1: VertexID, 2: SampleID
+		auto& V = lc_global_data()->g_vertices()[VertexID];
+		V->normalFromAdj();
+		task_group.LightPointPacked(VertexID, 1, V->P, V->N, pBuild->L_static(), LP_dont_rgb + LP_dont_sun, 0);
+
+		if (task_group.getAllocatedRays() > 2048)
 		{
-			// 1: VertexID, 2: SampleID
-			auto& V = lc_global_data()->g_vertices()[VertexID];
-			V->normalFromAdj();
-			task_group.LightPointPacked(VertexID, 1, V->P, V->N, pBuild->L_static(), LP_dont_rgb + LP_dont_sun, 0);
-
-			if (task_group.getAllocatedRays() > 2048)
+			task_group.LightPointPackedRun();
+			task_group.LightPointPackedApply();
+			for (auto& TASK : task_group.task_pools)
 			{
-				task_group.LightPointPackedRun();
-				task_group.LightPointPackedApply();
-				for (auto& TASK : task_group.task_pools)
-				{
-					TASK.C.mul(0.5f);
-					lc_global_data()->g_vertices()[TASK.INDEX_TASK]->C._set(TASK.C);
-				}
-				task_group.ClearPool();
+				TASK.C.mul(0.5f);
+				lc_global_data()->g_vertices()[TASK.INDEX_TASK]->C._set(TASK.C);
 			}
+			task_group.ClearPool();
 		}
 	}
+	 
+
 #endif
 
 
