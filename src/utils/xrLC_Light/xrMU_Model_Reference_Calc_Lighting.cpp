@@ -2,10 +2,11 @@
 
 #include "xrMU_Model_Reference.h"
 #include "xrMU_Model.h"
-
 #include "light_point.h"
 #include "xrFace.h"
 #include "xrLC_GlobalData.h"
+
+#include "../xrForms/CompilersUI.h"
 
 template<typename T, typename T2>
 void vfComputeLinearRegression(xr_vector<T>& A, xr_vector<T>& B, T2& C, T2& D)
@@ -127,7 +128,7 @@ void o_test(int iA, int iB, int count, base_color* A, base_color* B, float& C, f
 
 void xrMU_Reference::calc_lighting()
 {
-	u32 flags =  (inlc_global_data()->b_nosun() ? LP_dont_sun : 0) | LP_DEFAULT;
+	u32 flags =  (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT;
 	model->calc_lighting(color, xform, inlc_global_data()->RCAST_Model(), inlc_global_data()->L_static(), flags);
 
 	R_ASSERT(color.size() == model->color.size());
@@ -156,16 +157,13 @@ void xrMU_Reference::calc_lighting()
 }
 
 // **** CUDA CODE  **** // 
- 
- 
+#ifdef LCCUDA_BUILD
 #include "xrDeflectorLight_Packed.h"
-#include "../xrForms/CompilersUI.h"
-extern CompilersMode gCompilerMode;
 
 // Capture RAYS
 void xrMU_Reference::calc_lighting_cuda_1()
 {
-	u32 flags = (inlc_global_data()->b_nosun() ? LP_dont_sun : 0) | LP_DEFAULT;
+	u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT;
 
 	// calc pure rotation matrix
 	Fmatrix Rxform, tmp, R;
@@ -174,24 +172,18 @@ void xrMU_Reference::calc_lighting_cuda_1()
 	tmp.transpose(R);
 	Rxform.invert(tmp);
 
-	// MT-Safe 
-	SafeVertices.resize(model->m_vertices.size());
-	for (size_t Iter = 0; Iter < model->m_vertices.size(); Iter++)
-		SafeVertices[Iter] = *model->m_vertices[Iter];
-
-	u32 SampleMAX = lc_global_data()->GetOverrideSettings() ? lc_global_data()->GetJitterMU() : 6;
+ 	u32 SampleMAX = lc_global_data()->GetOverrideSettings() ? lc_global_data()->GetJitterMU() : 6;
 	const int n_samples = (g_params().m_quality == ebqDraft) ? 1 : SampleMAX;
 
 	// Perform lighting
-	for (u32 I = 0; I < SafeVertices.size(); I++)
+	for (u32 I = 0; I < model->m_vertices.size(); I++)
 	{
-		_vertex& V = SafeVertices[I];
-		base_color_c			vC;
-
+		_vertex& V = *model->m_vertices[I];
+ 
 		Fvector					vP, vN;
-		xform.transform_tiny(vP, V.P);
-		Rxform.transform_dir(vN, V.N);
-		exact_normalize(vN);
+		xform.transform_tiny	(vP, V.P);
+		Rxform.transform_dir	(vN, V.N);
+		exact_normalize			(vN);
 
 		// multi-sample
 		for (u32 sample = 0; sample < (u32)n_samples; sample++)
@@ -228,6 +220,11 @@ void xrMU_Reference::calc_lighting_cuda_2()
 	u32 SampleMAX = lc_global_data()->GetOverrideSettings() ? lc_global_data()->GetJitterMU() : 6;
 	const int n_samples = (g_params().m_quality == ebqDraft) ? 1 : SampleMAX;
  
+	xr_vector<_vertex>								  SafeVertices;
+	SafeVertices.resize(model->m_vertices.size());
+	for (size_t Iter = 0; Iter < model->m_vertices.size(); Iter++)
+		SafeVertices[Iter] = *model->m_vertices[Iter];
+
 	// Perform lighting
 	for (u32 I = 0; I < SafeVertices.size(); I++)
 	{
@@ -332,6 +329,10 @@ void xrMU_Reference::calc_lighting_cuda_2()
 	}
 
 	colors_cuda.clear();
+
+	// se7kills: ’от€бы пам€ть убрать из юза
+	SafeVertices.clear();
+	SafeVertices.shrink_to_fit();
 }
 
 // Ref Code
@@ -342,8 +343,7 @@ void xrMU_Reference::calc_lighting_cuda_3()
  	// A*C + D = B
 	// build data
 	{
-		FPU::m64r();
-		xr_vector<double> A;	A.resize(color.size());
+ 		xr_vector<double> A;	A.resize(color.size());
 		xr_vector<double> B;	B.resize(color.size());
 		float* _s = (float*)&c_scale;
 		float* _b = (float*)&c_bias;
@@ -362,3 +362,4 @@ void xrMU_Reference::calc_lighting_cuda_3()
 			o_test(4, index, (u32)color.size(), &model->color.front(), &color.front(), _s[index], _b[index]);
 	}
 }
+#endif

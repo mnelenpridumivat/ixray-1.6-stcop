@@ -5,7 +5,6 @@
 #include "lm_layer.h"
 #include "uv_tri.h"
 #include "R_light.h"
-#include "xrMU_Model_Reference.h"
 
 enum LGroup : u8
 {
@@ -15,15 +14,13 @@ enum LGroup : u8
 };
 
 // Initialize TASKS
-#define MAX_RAYS_PER_TASK   1024 * 1024 * 100		// Общее кол-во Задач (на запуск GPU)
-#define MAX_RAYS_PER_GPU	1024 * 1024				// Кол-во задач которое может обработать GPU за 1 заход
-
+#define MAX_RAYS_PER_TASK   1024 * 512 // Нужно еще учесть что там будут лампочек может быть по 256 за 1 таск
+ 
 // Recvest Class
 struct RayRecvestIndex
 {
   	size_t INDEX_TASK;
 	CDeflector* Owner;
-	xrMU_Reference* xrMODEL;
 
 	// Task Pos, Dir, Skip
 	Fvector P;
@@ -31,12 +28,6 @@ struct RayRecvestIndex
 	Face* skip;
 };
 
-struct RayIndex
-{
-	size_t INDEX_TASK;
-	CDeflector* Owner;
-
-};
 
 class PackedLighting
 {
@@ -79,10 +70,6 @@ public:
 	// Deflectors Processing
 	void LightPointPackedDeflector(CDeflector* D, u32 U, u32 V, Fvector& P, Fvector& N, u32 flags, Face* skip);
 	void LightPointPackedDeflectorsRun();
-
-	// xrMuModels
- 	void LightPointPacked_MODEL(xrMU_Reference* MU, u32 I, Fvector& P, Fvector& N, u32 flags, Face* skip);
-	void LightPointPacked_MODELRun();
  
  	void RestartALL()
 	{
@@ -90,10 +77,10 @@ public:
 		current_flags = 0;
 
 		// Basic Tasks
-  		Colors.clear();
+		task_pools.clear();
+		Colors.clear();
 
 		// task pool memory clear
-		task_pools.clear();
 		task_pools.shrink_to_fit();
 	}
 
@@ -101,13 +88,13 @@ public:
 	// Task Index, Color. 
 	// простые задчи
  	color_map			Colors;	
-
+  
 	// Stats 
 	bool	isInitializedGPU = false;
 	u8	    current_flags = 0;
  
 	// tasks	
 	concurrency::concurrent_vector<RayRecvestIndex>							 task_pools;			// BASIC UV
-};
+ };
 
 extern PackedLighting GPUTaskinSystem;
