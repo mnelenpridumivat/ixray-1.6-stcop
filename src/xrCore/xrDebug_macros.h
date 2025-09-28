@@ -30,6 +30,7 @@
 #	define I_ASSERT2(expr,e2) (!!(expr))
 #	define I_ASSERT3(expr,e2,e3) (!!(expr))
 #	define I_ASSERT4(expr,e2,e3,e4) (!!(expr))
+#	define I_ASSERT_M(expr, ...) (!!(expr))
 #else
 #	define R_ASSERT(...) MACRO_CHOOSER_ASSERT(__VA_ARGS__)(__VA_ARGS__)
 #	define R_ASSERT1(expr)				do {static bool ignore_always = false; if (!ignore_always && !(expr)) ::Debug.fail(_TRE(#expr),DEBUG_INFO,ignore_always);} while(0)
@@ -39,35 +40,54 @@
 #	define R_CHK(expr)					do {static bool ignore_always = false; HRESULT __hr = expr; if (!ignore_always && FAILED(__hr)) ::Debug.error(__hr,_TRE(#expr),DEBUG_INFO,ignore_always);} while(0)
 #	define R_CHK2(expr,e2)				do {static bool ignore_always = false; HRESULT hr = expr; if (!ignore_always && FAILED(hr)) ::Debug.error(hr,_TRE(#expr),_TRE(e2),DEBUG_INFO,ignore_always);} while(0)
 
+#	if 0 // use old I_ASSERT like R_ASSERT
 #	define I_ASSERT(...) MACRO_CHOOSER_IASSERT(__VA_ARGS__)(__VA_ARGS__)
-#	define I_ASSERT1(expr) (!!(expr) || ([&](){ \
+#	define I_ASSERT1(expr) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define I_ASSERT2(expr,e2) (!!(expr) || ([&](){ \
+#	define I_ASSERT2(expr,e2) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define I_ASSERT3(expr,e2,e3) (!!(expr) || ([&](){ \
+#	define I_ASSERT3(expr,e2,e3) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),_TRE(e3),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define I_ASSERT4(expr,e2,e3,e4) (!!(expr) || ([&](){ \
+#	define I_ASSERT4(expr,e2,e3,e4) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),_TRE(e3),_TRE(e4),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
+#else
+#	define I_ASSERT(expr) ((!!(expr)) || ([&](){ \
+		static bool ignore_always = false;\
+		if (!ignore_always){ \
+			::Debug.fail(_TRE(#expr),DEBUG_INFO,ignore_always);\
+		} \
+		return false;\
+	}()))
+#	define I_ASSERT_M(expr, message, ...) ((!!(expr)) || ([&](){ \
+		static bool ignore_always = false;\
+		if (!ignore_always){ \
+			string1024 buff; \
+			xr_sprintf(buff, message, __VA_ARGS__); \
+			::Debug.fail(_TRE(#expr),buff,DEBUG_INFO,ignore_always);\
+		} \
+		return false;\
+	}()))
+#endif
 #endif
 
 #	define FATAL(description)			Debug.fatal(DEBUG_INFO,description)
@@ -92,35 +112,54 @@
 #	define VERIFY4(expr,e2,e3,e4)do {static bool ignore_always = false; if (!ignore_always && !(expr)) ::Debug.fail(#expr,e2,e3,e4,DEBUG_INFO,ignore_always);} while(0)
 #	define CHK_DX(expr)				do {static bool ignore_always = false; HRESULT __hr = expr; if (!ignore_always && FAILED(__hr)) ::Debug.error_dx(__hr,#expr,DEBUG_INFO,ignore_always);} while(0)
 
+#	if 0 // use old I_ASSERT like R_ASSERT
 #	define IVERIFY(...) MACRO_CHOOSER_IVERIFY(__VA_ARGS__)(__VA_ARGS__)
-#	define IVERIFY1(expr) (!!(expr) || ([&](){ \
+#	define IVERIFY1(expr) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define IVERIFY2(expr,e2) (!!(expr) || ([&](){ \
+#	define IVERIFY2(expr,e2) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define IVERIFY3(expr,e2,e3) (!!(expr) || ([&](){ \
+#	define IVERIFY3(expr,e2,e3) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),_TRE(e3),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
-#	define IVERIFY4(expr,e2,e3,e4) (!!(expr) || ([&](){ \
+#	define IVERIFY4(expr,e2,e3,e4) ((!!(expr)) || ([&](){ \
 		static bool ignore_always = false;\
 		if (!ignore_always){ \
 			::Debug.fail(_TRE(#expr),_TRE(e2),_TRE(e3),_TRE(e4),DEBUG_INFO,ignore_always);\
 		} \
 		return false;\
 	}()))
+#else
+#	define IVERIFY(expr) ((!!(expr)) || ([&](){ \
+		static bool ignore_always = false;\
+		if (!ignore_always){ \
+			::Debug.fail(_TRE(#expr),DEBUG_INFO,ignore_always);\
+		} \
+		return false;\
+	}()))
+#	define IVERIFY_M(expr, message, ...) ((!!(expr)) || ([&](){ \
+		static bool ignore_always = false;\
+		if (!ignore_always){ \
+			string1024 buff; \
+			xr_sprintf(buff, message, __VA_ARGS__); \
+			::Debug.fail(_TRE(#expr),buff,DEBUG_INFO,ignore_always);\
+		} \
+		return false;\
+	}()))
+#endif
 #else // DEBUG
 #	if defined(_MSC_VER)
 #		define NODEFAULT __assume(0)
@@ -139,6 +178,7 @@
 #	define IVERIFY2(expr,e2) (!!(expr))
 #	define IVERIFY3(expr,e2,e3) (!!(expr))
 #	define IVERIFY4(expr,e2,e3,e4) (!!(expr))
+#	define IVERIFY_M(expr, ...) (!!(expr))
 #endif // DEBUG
 //---------------------------------------------------------------------------------------------
 // FIXMEs / TODOs / NOTE macros

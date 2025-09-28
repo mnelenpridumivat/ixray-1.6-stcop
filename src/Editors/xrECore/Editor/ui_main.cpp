@@ -87,17 +87,21 @@ ImTextureID TUI::LoadTexture(const char* Texture) const
 
 	if (TextureStack.contains(Texture))
 	{
+		if (!I_ASSERT_M(TextureStack[Texture]->pSurface, "Unable to access loaded texture [%s]", Texture))
+		{
+			return nullptr;
+		}
 		return TextureStack[Texture]->pSurface->GetRawTexture();
 	}
 
 	TextureStack[Texture] = EDevice->Resources->_CreateTexture(Texture);
 	ref_texture& Tex = TextureStack[Texture];
 
-	if (Tex->pSurface == nullptr)
+	if (!Tex->flags.bLoaded)
 	{
 		Tex->Load();
 	}
-	if (!I_ASSERT(Tex->pSurface))
+	if (!I_ASSERT_M(Tex->pSurface, "Unable to load texture [%s]", Texture))
 	{
 		return nullptr;
 	}
