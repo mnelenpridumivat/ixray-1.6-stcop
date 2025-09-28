@@ -7,13 +7,6 @@
 class OptixGeometryBuilder
 {
 private:
-    struct VertexData
-    {
-        Fvector Vertex;
-        u32 verID;
-    };
-    xr_concurrent_unordered_map<size_t, xr_vector<VertexData>> hash_vertices;
-
     xr_vector<Fvector> vertices;
     xr_vector<CDB::TRI> triangles;
     xr_vector<Face*> facePointers;
@@ -24,7 +17,6 @@ public:
         vertices.clear();
         triangles.clear();
         facePointers.clear();
-        hash_vertices.clear();
     }
 
     void AddFace(Face* F, const Fvector& v1, const Fvector& v2, const Fvector& v3)
@@ -48,5 +40,4 @@ public:
     u32 AddVertex(const Fvector& v);
 
     bool BuildBLAS(OptixDeviceContext context, XRay::RayTrace::CUDA::OptixMeshBuffers& outBuffers);
-    bool BuildTLAS(OptixDeviceContext context, XRay::RayTrace::CUDA::OptixMeshBuffers& outScene, CUstream stream);
 };
