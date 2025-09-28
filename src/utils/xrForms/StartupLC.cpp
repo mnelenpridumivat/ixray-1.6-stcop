@@ -43,6 +43,7 @@ void StartupLC()
 			continue;
 
 		create_global_data();
+		lc_global_data()->b_nosun_set(gCompilerMode.LC_NoSun);
 		lc_global_data()->SetSkipInvalid(gCompilerMode.LC_SkipInvalidFaces);
 		lc_global_data()->SetSkipTesselate(!gCompilerMode.LC_Tess);
 		lc_global_data()->SetLmapRGBA(gCompilerMode.LC_tex_rgba);
@@ -51,6 +52,7 @@ void StartupLC()
 
 		// Se7kills
  		lc_global_data()->SetSkipWeld(gCompilerMode.LC_skipWeld);
+		lc_global_data()->SetLmapsSize(gCompilerMode.LC_sizeLmaps);
 
 		lc_global_data()->SetLevelName(Name.data());
 
