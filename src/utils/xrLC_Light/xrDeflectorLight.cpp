@@ -7,6 +7,8 @@
 #include "xrFace.h"
 #include "../xrDXT/xrDXT.h"
 
+#include "../xrForms/CompilersUI.h" 
+
 void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 {
 	static Fvector2 Jitter1[1] = {
@@ -21,7 +23,7 @@ void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 		{-1,1},		{0,1},		{1,1}
 	};
 
-	switch (g_params().m_lm_jitter_samples)
+	switch (gCompilerMode.LC_JSample)
 	{
 	case 1:
 		Jcount	= 1;
@@ -412,8 +414,7 @@ float rayTraceOriginal(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& 
 }
 
 // Embree
-#include <../xrForms/CompilersUI.h>
-#include "../xrLC_Light/CUDA/CUDARayCast.h"
+
 
 float rayTrace	(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
 {
@@ -491,12 +492,8 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 				if (D <= 0)
 					return;
 
-				Fvector Psave = L.position;
-				L.position.mad(Fvector().random_dir(L.direction, PI_DIV_4), 0.05f);
 				float R = _sqrt(sqD);
 				float trace = rayTrace(DB, MDL, L, Pnew, Ldir, R, skip);
-				L.position = Psave;
-
 				att = powf(D, 0.125f) * L.energy * trace * (1 - R / L.range);
 				break;
 			}
@@ -524,7 +521,8 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 	// RGB Lights
 	if (!(flags & LP_dont_rgb))
 	{
-		DB->ray_options(0);
+		if (DB != nullptr)
+			 DB->ray_options(0);
 		for (R_Light& L : lights.rgb)
 		{
 			processLight(L, C.rgb, false);
@@ -534,7 +532,8 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 	// Sun Lights
 	if (!(flags & LP_dont_sun))
 	{
-		DB->ray_options(0);
+		if (DB != nullptr)
+			DB->ray_options(0);
 		for (R_Light& L : lights.sun)
 		{
 			processLight(L, C.sun, true);
@@ -544,7 +543,8 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 	// Hemi Lights
 	if (!(flags & LP_dont_hemi))
 	{
-		DB->ray_options(0);
+		if (DB != nullptr)
+			DB->ray_options(0);
 		for (R_Light& L : lights.hemi)
 		{
 			processLight(L, C.hemi, true);
@@ -663,10 +663,13 @@ BOOL	compress_Zero		(lm_layer& lm, u32 rms)
 	base_color_c	_c;
 	u32				_count	= rms_average(lm,_c);
 
-	if (0==_count)	{
-		clMsg	("* ERROR: Lightmap not calculated (T:%d)");
+	if (0==_count)
+	{
+		clMsg	("* ERROR: Lightmap not calculated (W: %u | H: %u)", lm.width, lm.height);
 		return	FALSE;
-	} else		_c.scale(_count);
+	} 
+	else	
+		_c.scale(_count);
 
 	// Compress if needed
 	u8	_r	= u8_clr	(_c.rgb.x	); //.
@@ -741,8 +744,6 @@ BOOL	compress_RMS		(lm_layer& lm, u32 rms, u32& w, u32& h)
 	return FALSE;
 }
 
-
-
 void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H)
 {
 	// Geometrical bounds
@@ -769,6 +770,8 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 	if (!ApplyBorders(layer,ref))
 		break;
 
+
+	 
 	// Compression
 	try
 	{
@@ -864,3 +867,5 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 		clMsg("* ERROR: CDeflector::Light - BorderExpansion");
 	}
 }
+
+
