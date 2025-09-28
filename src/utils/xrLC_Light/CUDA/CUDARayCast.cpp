@@ -440,13 +440,14 @@ public:
 		// Синхронизируем только один раз
 		CUDA_CHECK(cudaStreamSynchronize(stream));
 
+		// clMsg("*** GPU Stream Processing: %u ms | RaysTasks : %u ", t.GetElapsed_ms(), CurrentWritedRays);
+
 		// Копия цветов
 		auto copy_color = [&](hardware_color& Chw, base_color_c& C)
 		{
 			C.hemi = Chw.hemi;
 			C.sun = Chw.sun;
-			float3 temp_rgb = Chw.get_rgb_f32();
-			C.rgb.set(temp_rgb.x, temp_rgb.y, temp_rgb.z);
+			C.rgb = { Chw.rgb.x, Chw.rgb.y, Chw.rgb.z };
 		};
 
 		// Добавляем результат в конец списка

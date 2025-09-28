@@ -143,14 +143,9 @@ __device__ void CalculatePoint(hardware_lighting& L, HardwareVector& P, Hardware
 		C.hemi += att;
 		break;
 	case eRGB:
-	{
-		float3 rgb = C.get_rgb_f32();
-		rgb.x += att * L.diffuse.x;
-		rgb.y += att * L.diffuse.y;
-		rgb.z += att * L.diffuse.z;
-
-		C.set_rgb_f32(rgb.x, rgb.y, rgb.z);
-	}
+		C.rgb.x += att * L.diffuse.x;
+		C.rgb.y += att * L.diffuse.y;
+		C.rgb.z += att * L.diffuse.z;
 		break;
 	}
 }
