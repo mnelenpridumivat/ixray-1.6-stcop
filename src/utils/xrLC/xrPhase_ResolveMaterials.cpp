@@ -11,17 +11,19 @@ struct _counter
 	u32	dwCount;
 };
 
-
+xrCriticalSection csResolveMat;
 void	CBuild::xrPhase_ResolveMaterials()
 {
-	CTimer  tProcecss; tProcecss.Start();
-	
- 	// Count number of materials
+	// Count number of materials
+	CTimer t;
+	t.Start();
  	// Calculating materials
+	// concurrency::concurrent_vector<_counter> counts_mt_safe;
 	auto& faces = lc_global_data()->g_faces();
+
 	std::unordered_map<u16, size_t> matToIndex;
  
-	// Р›РѕРєР°Р»СЊРЅС‹Рµ С…СЂР°РЅРёР»РёС‰Р° РґР»СЏ РїРѕС‚РѕРєРѕРІ -> РїРѕС‚РѕРј СЃРІРµРґС‘Рј РІ РѕР±С‰РёР№ map
+	// Локальные хранилища для потоков -> потом сведём в общий map
 	concurrency::combinable<std::unordered_map<u16, u32>> localCounts;
 
  	xr_parallel_foreach(faces.begin(), faces.end(), [&](Face* F)
@@ -29,7 +31,7 @@ void	CBuild::xrPhase_ResolveMaterials()
 			localCounts.local()[F->dwMaterial] += 1;
 		});
 
-	// РЎР»РёСЏРЅРёРµ Р»РѕРєР°Р»СЊРЅС‹С… РєР°СЂС‚ РІ РіР»РѕР±Р°Р»СЊРЅСѓСЋ
+	// Слияние локальных карт в глобальную
 	std::unordered_map<u16, u32> globalCounts;
 	localCounts.combine_each([&](const std::unordered_map<u16, u32>& lm)
 		{
@@ -39,7 +41,7 @@ void	CBuild::xrPhase_ResolveMaterials()
 
 
 	// ======================================================
-	// 2) Р’РµРєС‚РѕСЂ СЃС‡С‘С‚С‡РёРєРѕРІ + РєР°СЂС‚Р° material -> index (SC)
+	// 2) Вектор счётчиков + карта material -> index (SC)
 	// ======================================================
 	xr_vector<_counter> count;
 	count.reserve(globalCounts.size());
@@ -53,11 +55,17 @@ void	CBuild::xrPhase_ResolveMaterials()
 		count.push_back(_counter{ mat, cnt });
 		matToIndex[mat] = idx++;
 	}
+ 
+ 	
+	clMsg("Calculating materials/subdivs (MT)... Memory: [%umb] [%ums]", GetHeapMemory() / 1024 / 1024, t.GetElapsed_ms());
 
 	// Performing Subdivs
+	t.Start();
+
 	concurrency::concurrent_vector<concurrency::concurrent_vector<Face*>> bins;
 	bins.reserve(count.size());
 	bins.resize(count.size());
+
  	xr_parallel_foreach(faces.begin(), faces.end(), [&](Face* F)
 		{
 			if (!F->Shader().flags.bRendering) return;
@@ -69,18 +77,22 @@ void	CBuild::xrPhase_ResolveMaterials()
 			}
 		});
  
-	// РџРµСЂРµРЅРѕСЃРёРј РІ РёС‚РѕРіРѕРІС‹Р№ g_XSplit
+	// Переносим в итоговый g_XSplit
 	g_XSplit.reserve(count.size());
 	g_XSplit.resize(count.size());
 
 	for (size_t i = 0; i < g_XSplit.size(); ++i)
 	{
-		// vecFace РёРјРµРµС‚ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РѕС‚ РёС‚РµСЂР°С‚РѕСЂРѕРІ
+		// vecFace имеет конструктор от итераторов
 		g_XSplit[i] = new vecFace(bins[i].begin(), bins[i].end());
 	}
  
-	// РЎС‚Р°СЂС‹Р№ РєРѕРґ
- 	{
+	clMsg("Perfroming subdivisions (MT)... Memory: [%umb] [%ums]", GetHeapMemory() / 1024 / 1024, t.GetElapsed_ms());
+
+
+	// Старый код
+	t.Start();
+	{
 		for (int SP = 0; SP<int(g_XSplit.size()); SP++)
 		{
 			if (g_XSplit[SP]->empty())
@@ -88,9 +100,12 @@ void	CBuild::xrPhase_ResolveMaterials()
 		}
 		g_XSplit.erase(std::remove(g_XSplit.begin(),g_XSplit.end(),(vecFace*) NULL),g_XSplit.end());
 	}
-   
- 	for (auto F : g_XSplit)
+	clMsg("Removing empty subdivs (SC) ... Memory: [%umb] [%ums]", GetHeapMemory() / 1024 / 1024, t.GetElapsed_ms());
+  
+	t.Start();
+	for (auto F : g_XSplit)
  		Detach(F);
- 
-	clMsg				("Material %u subdivisions. %u ms", g_XSplit.size(), tProcecss.GetElapsed_ms());
+   	clMsg("Detaching subdivs (MT)... Memory: [%umb] [%ums]", GetHeapMemory() / 1024 / 1024, t.GetElapsed_ms());
+
+	clMsg				("%d subdivisions.",g_XSplit.size());
 }
