@@ -10,7 +10,7 @@
 
 #include "object_interfaces.h"
 #include "object_broker.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 template <typename _index_type, typename _data_type>
 class CALifeAbstractRegistry : public IPureSerializeObject<IReader,IWriter> {

@@ -5,7 +5,7 @@
 #include "StdAfx.h"
 #include "Wound.h"
 #include "../xrEngine/bone.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 CWound::CWound(u16 bone_num)
 {

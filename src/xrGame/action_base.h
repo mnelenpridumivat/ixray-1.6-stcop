@@ -13,7 +13,7 @@
 #include "../xrScripts/script_export_space.h"
 #include "operator_abstract.h"
 #include "alife_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CScriptGameObject;
 

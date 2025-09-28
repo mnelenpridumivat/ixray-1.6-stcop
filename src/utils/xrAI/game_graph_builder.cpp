@@ -16,7 +16,7 @@
 #include "../../xrGame/game_level_cross_table.h"
 #include "xrCrossTable.h"
 #include "graph_engine.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/SaveManager.h"
 
 CGameGraphBuilder::CGameGraphBuilder		()
 {

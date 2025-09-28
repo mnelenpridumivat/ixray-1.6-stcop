@@ -6,12 +6,12 @@
 #include "character_info_defs.h"
 #include "relation_registry_defs.h"
 #include "InfoPortionDefs.h"
-#include "_stl_extensions.h"
+#include "../xrCore/_stl_extensions.h"
 #include "map_location_defs.h"
 #include "map_location.h"
 #include "GameTaskDefs.h"
 #include "actor_statistic_defs.h"
-#include "fastdelegate.h"
+#include "../xrCore/fastdelegate.h"
 
 namespace SaveSystemDefined {
 

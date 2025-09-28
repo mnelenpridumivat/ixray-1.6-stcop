@@ -10,7 +10,7 @@
 
 #include "object_interfaces.h"
 #include "alife_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CALifeSimulatorHeader {
 protected:

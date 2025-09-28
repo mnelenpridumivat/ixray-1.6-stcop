@@ -21,7 +21,7 @@
 #include "physics_shell_animated.h"
 #include "PHCollisionDamageReceiver.h"
 #include "../xrEngine/IPhysicsShell.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 #ifdef	DEBUG
 #include "../xrEngine/ObjectDump.h"
 #endif

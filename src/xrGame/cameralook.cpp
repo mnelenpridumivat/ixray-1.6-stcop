@@ -12,7 +12,7 @@
 #include "Missile.h"
 #include "Car.h"
 
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 CCameraLook::CCameraLook(CObject* p, u32 flags ) 
 :CCameraBase(p, flags)

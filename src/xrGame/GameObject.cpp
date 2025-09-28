@@ -31,7 +31,7 @@
 #include "animation_movement_controller.h"
 #include "../xrEngine/xr_collide_form.h"
 #include "../xrScripts/script_callback_ex.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 
@@ -39,8 +39,8 @@ extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 #	include "debug_renderer.h"
 #	include "PHDebug.h"
 #endif
-#include <Save/SaveObject.h>
-#include <Save/SaveManager.h>
+#include <../xrCore/Save/SaveObject.h>
+#include <../xrCore/Save/SaveManager.h>
 
 CGameObject::CGameObject		()
 {

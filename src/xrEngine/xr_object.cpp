@@ -13,6 +13,7 @@
 #include "GameFont.h"
 
 #include "xr_collide_form.h"
+#include "../xrServerEntities/xrServer_Object_base.h"
 
 inline void CObjectList::o_crow		(CObject*	O)
 {

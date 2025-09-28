@@ -46,7 +46,7 @@
 #include "client_spawn_manager.h"
 #include "moving_object.h"
 #include "level_path_manager.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 // Lain: added
 #include "../xrEngine/IGame_Level.h"

@@ -1,9 +1,9 @@
 #include "StdAfx.h"
 #include "pch_script.h"
 #include "SaveSystem_script.h"
-#include "Save/SaveChunk.h"
-#include "Save/SaveVariables.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveChunk.h"
+#include "../xrCore/Save/SaveVariables.h"
+#include "../xrCore/Save/SaveObject.h"
 #include "../../xrGame/xr_time.h"
 
 namespace CSaveChunk_script {

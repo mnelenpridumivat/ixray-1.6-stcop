@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "DynamicWallmarkZone.h"
 
+#include "Level.h"
+#include "WallMarkArray.h"
 #include "xrServer_Objects_ALife.h"
 
 CDynamicWallmarkRegistry::CDynamicWallmarkRegistry()

@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "alife_abstract_registry.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 #include "InfoPortionDefs.h"
 #include "PdaMsg.h"

@@ -14,7 +14,7 @@
 #include "graph_abstract.h"
 #include "server_entity_wrapper.h"
 #include "ai_debug.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CServerEntityWrapper;
 class IGameGraph;

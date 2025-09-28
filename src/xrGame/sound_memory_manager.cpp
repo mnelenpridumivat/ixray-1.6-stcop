@@ -24,7 +24,7 @@
 #include "client_spawn_manager.h"
 #include "memory_manager.h"
 #include "../xrEngine/IGame_Persistent.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 #ifndef MASTER_GOLD
 #	include "actor.h"

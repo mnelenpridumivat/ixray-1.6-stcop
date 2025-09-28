@@ -6,7 +6,7 @@
 #include "../xrEngine/IObjectPhysicsCollision.h"
 #include "../xrPhysics/IPhysicsShellHolder.h"
 #include "../xrScripts/script_export_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CPHDestroyable;
 class CPHCollisionDamageReceiver;

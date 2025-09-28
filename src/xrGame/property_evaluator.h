@@ -11,7 +11,7 @@
 #include "property_storage.h"
 #include "../xrScripts/script_export_space.h"
 #include "action_management_config.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CScriptGameObject;
 

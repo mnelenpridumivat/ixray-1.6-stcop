@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "Save/SaveInterface.h"
+#include "../xrCore/Save/SaveInterface.h"
 
 class CSE_Abstract;
 class CScriptBinderObject;

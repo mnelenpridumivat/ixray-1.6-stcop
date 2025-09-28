@@ -8,8 +8,8 @@
 
 #pragma once
 #if !defined(MPCF_EXPORTS) and !defined(MPB_EXPORTS) and !defined(MPSI_EXPORTS)
-#include "Save/SaveObject.h"
-#include "FS.h"
+#include "../xrCore/Save/SaveObject.h"
+#include "../xrCore/FS.h"
 #endif
 
 class NET_Packet;

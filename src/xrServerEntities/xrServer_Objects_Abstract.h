@@ -30,7 +30,7 @@ class CDUInterface;
 #else
 	#include "../Include/xrRender/DrawUtils.h"
 #endif
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 #pragma warning(push)
 #pragma warning(disable:4005)

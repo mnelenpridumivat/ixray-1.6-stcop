@@ -5,7 +5,7 @@
 // X-Ray Engine: OGSR Project 2017
 ////////////////////////////////////////////////////////////
 #pragma once
-#include "_flags.h"
+#include "../xrCore/_flags.h"
 
 using VisMask = Flags1024;
 constexpr size_t BonesLimit = 1024;

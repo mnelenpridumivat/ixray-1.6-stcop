@@ -2,7 +2,7 @@
 
 #include "alife_space.h"
 #include "object_interfaces.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 //using INFO_DATA = shared_str;
 
@@ -18,7 +18,7 @@ struct INFO_DATA : public IPureSerializeObject<IReader, IWriter>
 	//void		serialize(ISaveObject& Object);
 
 	shared_str			info_id;
-	//время получения нужно порции информации
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	ALife::_TIME_ID		receive_time;
 };
 

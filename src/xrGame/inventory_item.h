@@ -14,7 +14,7 @@
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "../xrScripts/script_export_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 enum EHandDependence{
 	hdNone	= 0,

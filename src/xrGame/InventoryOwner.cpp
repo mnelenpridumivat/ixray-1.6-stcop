@@ -30,7 +30,7 @@
 #include "ActorHelmet.h"
 #include "ActorBackpack.h"
 #include "../xrScripts/script_callback_ex.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 CInventoryOwner::CInventoryOwner			()
 {

@@ -15,7 +15,7 @@
 #include "enemy_manager.h"
 #include "Actor.h"
 #include "object_broker.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 struct CDangerPredicate {
 	const CObject	*m_object;

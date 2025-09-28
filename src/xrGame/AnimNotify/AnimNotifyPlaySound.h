@@ -1,6 +1,6 @@
 #pragma once
 #include "script_sound.h"
-#include "AnimNotify/AnimNotifyTypes.h"
+#include "../xrCore/AnimNotify/AnimNotifyTypes.h"
 
 class CAnimNotifyPlaySound : public IAnimNotify
 {

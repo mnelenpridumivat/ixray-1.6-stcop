@@ -12,7 +12,7 @@
 #include "../xrParticles/psystem.h"
 #include "../xrEngine/gamemtllib.h"
 #include "../xrParticles/particle_actions_collection.h"
-#include "_vector3d_ext.h"
+#include "../xrCore/_vector3d_ext.h"
 
 void FlamethrowerTrace::CPoint::UpdateAir(float delta_time)
 {

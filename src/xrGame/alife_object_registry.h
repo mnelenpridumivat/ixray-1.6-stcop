@@ -9,7 +9,7 @@
 #pragma once
 
 #include "xrServer_Objects_ALife.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CALifeObjectRegistry
 {

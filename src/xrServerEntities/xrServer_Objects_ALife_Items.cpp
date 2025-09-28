@@ -11,8 +11,8 @@
 #include "xrServer_Objects_ALife_Items.h"
 #include "clsid_game.h"
 #include "object_broker.h"
-#include "Save/SaveObject.h"
-#include "shared_string.h"
+#include "../xrCore/Save/SaveObject.h"
+#include "../xrCore/shared_string.h"
 
 #include "../xrEngine/bone.h"
 

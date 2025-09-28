@@ -11,7 +11,7 @@
 #include "script_binder.h"
 #include "Hit.h"
 #include "game_object_space.h"
-#include "Save/SaveInterface.h"
+#include "../xrCore/Save/SaveInterface.h"
 
 class CPhysicsShell;
 class CSE_Abstract;

@@ -16,9 +16,9 @@
 #include "script_game_object.h"
 #include "GameObject.h"
 #include "Level.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
-CScriptBinder::CScriptBinder		()
+CScriptBinder::CScriptBinder		(CGameObject* Owner)
 {
 	m_Owner = Owner;
 	init					();

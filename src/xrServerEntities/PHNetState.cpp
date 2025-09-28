@@ -2,8 +2,8 @@
 
 
 #include "PHNetState.h"
-#include "fastdelegate.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/fastdelegate.h"
+#include "../xrCore/Save/SaveObject.h"
 
 ISaveObject& operator<<(ISaveObject& Object, SPHNetState& Value) {
 	Value.net_Serialize(Object);

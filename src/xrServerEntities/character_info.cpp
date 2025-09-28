@@ -10,7 +10,7 @@
 #	include "../../xrUI/xrUIXmlParser.h"
 #	include "PhraseDialog.h"
 #	include "xrServer_Objects_ALife_Monsters.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 #else // XRGAME_EXPORTS
 #	include "xrUIXmlParser.h"
 #endif // XRGAME_EXPORTS

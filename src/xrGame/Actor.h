@@ -18,7 +18,7 @@
 
 #include "step_manager.h"
 #include "../xrScripts/script_export_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 #include "CustomDetector.h"
 #include "EffectorNightVision.h"
 #include "HudAnimatorManager.h"
@@ -388,7 +388,7 @@ public:
 public:
 	bool					HasCameraEffector	() const { return m_pActorEffector != nullptr; };
 	CActorCameraManager&	Cameras				() 	{VERIFY(HasCameraEffector()); return *m_pActorEffector;}
-	virtual CCameraBase*	cam_Active			() override	{return cameras[cam_active];}
+	virtual CCameraBase*	cam_Active			() const override	{return cameras[cam_active];}
 	IC CCameraBase*			cam_FirstEye		()	{return cameras[eacFirstEye];}
 	IC EActorCameras active_cam() { return cam_active; }
 	virtual void cam_Set(EActorCameras style);

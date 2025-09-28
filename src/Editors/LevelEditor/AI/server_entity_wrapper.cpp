@@ -10,8 +10,8 @@
 #include "server_entity_wrapper.h"
 #include "..\xrServerEntities\xrServer_Objects.h"
 #include "..\xrServerEntities\xrmessages.h"
-#include "Save/MemoryBuffer.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/MemoryBuffer.h"
+#include "../xrCore/Save/SaveManager.h"
 
 struct ISE_Abstract;
 

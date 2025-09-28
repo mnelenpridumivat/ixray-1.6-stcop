@@ -3,8 +3,8 @@
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Objects.h"
-#include "Save/MemoryBuffer.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/MemoryBuffer.h"
+#include "../xrCore/Save/SaveManager.h"
 static bool s_draw_dbg = false;
 
 IC bool build_mesh(const Fmatrix& parent, CEditableMesh* mesh, CGeomPartExtractor* extractor, u32 game_mtl_mask, BOOL ignore_shader)

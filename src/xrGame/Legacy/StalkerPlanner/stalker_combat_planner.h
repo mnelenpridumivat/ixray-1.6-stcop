@@ -9,7 +9,7 @@
 #pragma once
 
 #include "action_planner_action_script.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CAI_Stalker;
 

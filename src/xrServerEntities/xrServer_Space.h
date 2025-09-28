@@ -9,7 +9,7 @@
 #pragma once
 
 #include "../xrScripts/script_export_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 #ifndef XRGAME_EXPORTS
 #	define SERVER_ENTITY_EDITOR_METHODS					virtual void FillProps(LPCSTR pref, PropItemVec& values);

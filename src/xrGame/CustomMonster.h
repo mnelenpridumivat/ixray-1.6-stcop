@@ -12,7 +12,7 @@
 #include "../Include/xrRender/Kinematics.h"
 #include "../xrCore/associative_vector.h"
 #include "trajectories.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 
 namespace MonsterSpace {

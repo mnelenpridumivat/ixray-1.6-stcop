@@ -14,7 +14,7 @@
 #include "AnimNotifyPlayParticle.h"
 #include "AnimNotifyPlaySound.h"
 #include "Level.h"
-#include "AnimNotify/AnimNotifyRegistry.h"
+#include "../xrCore/AnimNotify/AnimNotifyRegistry.h"
 
 void CAnimNotifyHandler::TriggerNotify(IAnimNotifyMessage* notify)
 {

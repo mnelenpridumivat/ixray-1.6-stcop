@@ -9,7 +9,7 @@
 #pragma once
 
 #include "object_interfaces.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class CSE_Abstract;
 

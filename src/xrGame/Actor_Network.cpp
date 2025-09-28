@@ -51,7 +51,7 @@
 #	include "debug_renderer.h"
 #	include "../xrPhysics/phvalide.h"
 #endif
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 int			g_cl_InterpolationType		= 0;
 u32			g_cl_InterpolationMaxPoints = 0;

@@ -21,7 +21,7 @@
 #include "saved_game_wrapper.h"
 #include "../xrEngine/IGame_Persistent.h"
 #include "autosave_manager.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/SaveManager.h"
 #include <Actor.h>
 #include "alife_simulator.h"
 #include "game_cl_single.h"

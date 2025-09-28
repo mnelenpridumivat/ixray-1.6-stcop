@@ -17,7 +17,7 @@
 #include "alife_simulator.h"
 #include "alife_spawn_registry.h"
 #include "../xrEngine/string_table.h"
-#include <Save/SaveManager.h>
+#include <../xrCore/Save/SaveManager.h>
 
 extern LPCSTR alife_section;
 

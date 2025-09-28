@@ -22,7 +22,7 @@
 #include "restriction_space.h"
 #include "mt_config.h"
 #include "../xrEngine/string_table.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/SaveManager.h"
 
 using namespace ALife;
 using namespace luabind; //Alundaio

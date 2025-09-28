@@ -6,8 +6,8 @@
 //	Description : Defines the entry point for the DLL application.
 ////////////////////////////////////////////////////////////////////////////
 
-#include "DynamicWallmarkZone.h"
 #include "StdAfx.h"
+#include "DynamicWallmarkZone.h"
 #include "object_factory.h"
 #include "../../xrUI/xrUIXmlParser.h"
 #include "../xrEngine/xr_level_controller.h"

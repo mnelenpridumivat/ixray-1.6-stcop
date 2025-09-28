@@ -1,7 +1,7 @@
 #pragma once
 
 #include "alife_space.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 class xrTime
 {

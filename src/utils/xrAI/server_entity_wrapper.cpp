@@ -10,8 +10,8 @@
 #include "server_entity_wrapper.h"
 #include "xrServer_Objects.h"
 #include "xrmessages.h"
-#include "Save/MemoryBuffer.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/MemoryBuffer.h"
+#include "../xrCore/Save/SaveManager.h"
 
 #ifdef AI_COMPILER
 #	include "factory_api.h"

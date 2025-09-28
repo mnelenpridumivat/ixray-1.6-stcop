@@ -9,7 +9,7 @@
 #pragma once
 
 #include "../xrScripts/script_export_space.h"
-#include "Save/SaveInterface.h"
+#include "../xrCore/Save/SaveInterface.h"
 
 class CSE_ALifeObject;
 class CScriptGameObject;

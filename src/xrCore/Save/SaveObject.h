@@ -2,10 +2,10 @@
 #include "SaveInterface.h"
 #include "../xrScripts/script_export_space.h"
 #include "SaveChunk.h"
-#include "fastdelegate.h"
+#include "../xrCore/fastdelegate.h"
 #include "type_traits"
-#include "shared_string.h"
-#include "associative_vector.h"
+#include "../xrCore/shared_string.h"
+#include "../xrCore/associative_vector.h"
 
 class XRCORE_API CSaveObject:
 	public ISaveObject

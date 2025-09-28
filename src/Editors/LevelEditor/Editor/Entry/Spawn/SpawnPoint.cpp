@@ -3,8 +3,8 @@
 #include "../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "../xrServerEntities/xrServer_Objects.h"
-#include "Save/MemoryBuffer.h"
-#include "Save/SaveManager.h"
+#include "../xrCore/Save/MemoryBuffer.h"
+#include "../xrCore/Save/SaveManager.h"
 #include "../../../../xrECore/Editor/Intersect.h"
 
 #define SPAWNPOINT_CHUNK_VERSION		0xE411

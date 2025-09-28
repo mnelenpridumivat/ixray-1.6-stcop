@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 
 // Igor 

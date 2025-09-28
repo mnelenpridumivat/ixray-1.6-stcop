@@ -5,7 +5,7 @@
 #include "../xrEngine/xr_level_controller.h"
 #include "../xrEngine/xr_object.h"
 #include "object_broker.h"
-#include "Save/SaveObject.h"
+#include "../xrCore/Save/SaveObject.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
