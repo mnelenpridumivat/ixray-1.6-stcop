@@ -7,8 +7,6 @@
 #include "xrFace.h"
 #include "../xrDXT/xrDXT.h"
 
-#include "../xrForms/CompilersUI.h" 
-
 void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 {
 	static Fvector2 Jitter1[1] = {
@@ -23,7 +21,7 @@ void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 		{-1,1},		{0,1},		{1,1}
 	};
 
-	switch (gCompilerMode.LC_JSample)
+	switch (g_params().m_lm_jitter_samples)
 	{
 	case 1:
 		Jcount	= 1;

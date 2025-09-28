@@ -22,7 +22,8 @@ class XRLC_LIGHT_API CDeflector
 {
 
 public:
- 	bool ApplyLmap = false;
+	xrCriticalSection csDefl;
+	bool ApplyLmap = false;
 	bool ApplyEdge = false;
 	bool ApplyResolution = false;
  	bool bMerged = false;
@@ -37,9 +38,8 @@ public:
 	Fsphere				Sphere;
 
 	// se7kills Освещение на GPU
-	xrCriticalSection csApply;
-	xr_concurrent_unordered_map<size_t, base_color_c>								def_color_map;
-	xr_concurrent_unordered_map<size_t, u8>											def_FacesCount;
+	xr_concurrent_unordered_map<size_t, base_color_c>		def_color_map;
+	xr_hash_map<size_t, u8>					def_FacesCount;
 	 
 
 public:
@@ -121,7 +121,6 @@ public:
 
 	// cuda recvest color reciver
 	void ApplyColors();
-	void ClearResults();
 	void ApplyColor(size_t INDEX, base_color_c& C);
 
 	// Stage 2

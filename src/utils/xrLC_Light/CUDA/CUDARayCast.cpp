@@ -19,7 +19,7 @@ bool XRay::RayTrace::CUDA::BuildSceneFromLCGlobalData(OptixDeviceContext context
 		return false;
 
 	OptixGeometryBuilder geometryBuilder;
- 	// 1. РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёС‡РµСЃРєСѓСЋ РіРµРѕРјРµС‚СЂРёСЋ
+ 	// 1. Обрабатываем статическую геометрию
 
 	Phase("CUDA Get LC Faces");
 
@@ -42,13 +42,18 @@ bool XRay::RayTrace::CUDA::BuildSceneFromLCGlobalData(OptixDeviceContext context
 		b_texture& T = globalData->textures()[M.surfidx];
  
 		bool isTransparent = !F->flags.bOpaque && T.pSurface && T.bHasAlpha;
-		if (!isTransparent) 
- 			geometryBuilder.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
- 		else
- 			geometryBuilder.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
-    }
+		if (!isTransparent) {
+			geometryBuilder.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+		}
+		else
+		{
+			geometryBuilder.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+		}
+   	}
 	
-	// 2. РћР±СЂР°Р±Р°С‚С‹РІР°РµРј MU-СЂРµС„РµСЂРµРЅСЃС‹
+	size_t Static = (GetHeapMemory() - Start);
+
+	// 2. Обрабатываем MU-референсы
 	for (auto ref : globalData->mu_refs())
 	{
 		xr_vector<FaceDataIntel> tempBuffer;
@@ -62,24 +67,28 @@ bool XRay::RayTrace::CUDA::BuildSceneFromLCGlobalData(OptixDeviceContext context
 
 			bool isTransparent = !F->flags.bOpaque && T.pSurface && T.bHasAlpha;
 			if (!isTransparent) 
-  				geometryBuilder.AddFace(F, pF.v1, pF.v2, pF.v3);
- 			else
+			{
  				geometryBuilder.AddFace(F, pF.v1, pF.v2, pF.v3);
- 		}
+			}
+			else
+			{
+				geometryBuilder.AddFace(F, pF.v1, pF.v2, pF.v3);
+			}
+		}
 	}
 
-	clMsg("Processing Geometry: %u ms | Memory: %u mb", t.GetElapsed_ms(), (GetHeapMemory() - Start) / 1024 / 1024);
+	clMsg("Processing Geometry: %u ms | Static: %u Memory: %u mb", t.GetElapsed_ms(), Static / 1024 / 1024, (GetHeapMemory() - Start) / 1024 / 1024);
 
 	geometryBuilder.RemoveDublicates();
 
-	Phase("CUDA Building RCastModel");
+	Phase("CUDA Building Accel BLAS");
 
-	// 3. РЎС‚СЂРѕРёРј BLAS
+	// 3. Строим BLAS
 	if (!geometryBuilder.BuildBLAS(context, outScene))
  		return false;
 
 
- 	// // 4. РЎС‚СЂРѕРёРј TLAS
+ 	// // 4. Строим TLAS
 	if (!geometryBuilder.BuildTLAS(context, outScene, stream))
 		return false;
 
@@ -94,7 +103,7 @@ bool XRay::RayTrace::CUDA::BuildSceneFromLCGlobalData(OptixDeviceContext context
 	return true;
 }
 
-// РџСЂРёРјРµСЂ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ:
+// Пример использования:
 static OptixContext optixContext;
 static CUstream cudaStream = nullptr;
 static XRay::RayTrace::CUDA::OptixMeshBuffers CommitedScene;
@@ -106,7 +115,7 @@ u32 g_faceCount;
 
 void XRay::RayTrace::CUDA::InitializeRayTracing()
 {
-	// РћРґРЅРѕРєСЂР°С‚РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
+	// Однократная инициализация
 	static bool initialized = false;
 	if (!initialized)
 	{
@@ -122,14 +131,14 @@ void XRay::RayTrace::CUDA::InitializeRayTracing()
 		}
 	}
 	
-	// РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РєРѕРЅС‚РµРєСЃС‚Р°
+	// Использование контекста
 	OptixDeviceContext context = optixContext.GetOptixContext();
 	BuildSceneFromLCGlobalData(context, cudaStream, CommitedScene);
 
 	clMsg("Processing Memory: %u mb", GetHeapMemory() / 1024 / 1024);
 }
 
-// РџСЂРё Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹
+// При завершении работы
 void CleanupRayTracing()
 {
 	OptixContext::DestroyCudaStream(cudaStream);
@@ -138,28 +147,28 @@ void CleanupRayTracing()
 
 void XRay::RayTrace::CUDA::InitializeTextures(xr_vector<TextureData>& gpuTextures, cudaTextureObject_t*& d_texObjects)
 {
-	// 1. РЎРѕР·РґР°РµРј CPU-РєРѕРїРёРё С‚РµРєСЃС‚СѓСЂРЅС‹С… РґР°РЅРЅС‹С…
+	// 1. Создаем CPU-копии текстурных данных
 	gpuTextures.resize(inlc_global_data()->textures().size());
 
-	// 2. РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ РґР»СЏ РѕР±СЉРµРєС‚РѕРІ С‚РµРєСЃС‚СѓСЂ CUDA
+	// 2. Создаем массив для объектов текстур CUDA
 	cudaTextureObject_t* texObjects = new cudaTextureObject_t[gpuTextures.size()];
 
 	for (u32 i = 0; i < gpuTextures.size(); i++) 
 	{
 		b_texture& srcTex = inlc_global_data()->textures()[i];
 
-		// Р—Р°РїРѕР»РЅСЏРµРј TextureData
+		// Заполняем TextureData
 		TextureData& dstTex = gpuTextures[i];
 		dstTex.width = srcTex.dwWidth;
 		dstTex.height = srcTex.dwHeight;
 		dstTex.hasAlpha = srcTex.bHasAlpha;
 
-		// Р’С‹РґРµР»СЏРµРј GPU РїР°РјСЏС‚СЊ Рё РєРѕРїРёСЂСѓРµРј РґР°РЅРЅС‹Рµ
+		// Выделяем GPU память и копируем данные
 		size_t texSize = srcTex.dwWidth * srcTex.dwHeight * sizeof(u32);
 		CUDA_CHECK(cudaMalloc(&dstTex.pSurface, texSize));
 		CUDA_CHECK(cudaMemcpy(dstTex.pSurface, srcTex.pSurface, texSize, cudaMemcpyHostToDevice));
 
-		// РЎРѕР·РґР°РµРј CUDA texture object
+		// Создаем CUDA texture object
 		cudaResourceDesc resDesc = {};
 		resDesc.resType = cudaResourceTypePitch2D;
 		resDesc.res.pitch2D.devPtr = dstTex.pSurface;
@@ -179,7 +188,7 @@ void XRay::RayTrace::CUDA::InitializeTextures(xr_vector<TextureData>& gpuTexture
 		dstTex.texObj = texObjects[i];
 	}
 
-	// РљРѕРїРёСЂСѓРµРј РјР°СЃСЃРёРІ texture objects РЅР° GPU
+	// Копируем массив texture objects на GPU
 	CUDA_CHECK(cudaMalloc(&d_texObjects, gpuTextures.size() * sizeof(cudaTextureObject_t)));
 	CUDA_CHECK(cudaMemcpy(d_texObjects, texObjects,
 		gpuTextures.size() * sizeof(cudaTextureObject_t),
@@ -225,8 +234,8 @@ class RayTracer
 	OPTICK_Params*		  d_params;			// GPU alloc)
 	
 	
-	CUstream	  stream;					// РћС‚РґРµР»СЊРЅС‹Р№ СЃС‚СЂРёРј
-	int			  max_rays;					// РњР°РєСЃ. РєРѕР»РёС‡РµСЃС‚РІРѕ Р»СѓС‡РµР№ РІ Р±Р°С‚С‡Рµ
+	CUstream	  stream;					// Отдельный стрим
+	int			  max_rays;					// Макс. количество лучей в батче
  
 public:
 	bool isInitialized = false;
@@ -293,7 +302,7 @@ public:
  		
 		u32 numLights = Lights.rgb.size() + Lights.hemi.size() + Lights.sun.size();
  		
-		// Р—Р°РїРѕР»РЅСЏРµРј Р±СѓС„РµСЂ РСЃС‚РѕС‡РЅРёРєРѕРІ СЃРІРµС‚Р°
+		// Заполняем буфер Источников света
  		CUDA_CHECK(cudaMallocHost(&h_lights, numLights * sizeof(hardware_lighting)));
 
 		int INDEX_LIGHT = 0;
@@ -322,7 +331,7 @@ public:
 //	u32 CurrentWritedRays = 0;
 	u8  current_flags = 0;
 
-	// Р—Р°РїРѕР»РЅСЏС‚СЊ РїРѕСЃР»Рµ РІС‹Р·РѕРІР° StartRayTracing (С‡С‚РѕР±С‹ РёРЅРґРµРєСЃ РЅР°С‡РёРЅР°Р»СЃСЏ СЃ 0) (РїСЂРё РєР°Р¶РґРѕР№ РЅРѕРІРѕР№ СЃС‚Р°РґРёРё РѕСЃРІРµС‰РµРЅРёСЏ)
+	// Заполнять после вызова StartRayTracing (чтобы индекс начинался с 0) (при каждой новой стадии освещения)
 	void WriteRayToBuffer(RayRecvestIndex& Task, size_t INDEX)
 	{
  		h_rays[INDEX] =
@@ -334,7 +343,7 @@ public:
 	
 	xr_vector<base_color_c> colors;
 
-	// Р’С‹Р·С‹РІР°С‚СЊ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РІС‹Р·РѕРІР° RayTrace
+	// Вызывать только после вызова RayTrace
  	xr_vector<base_color_c>& GetColors()
 	{
   		return colors;
@@ -350,7 +359,7 @@ public:
 	{
 		size_t CurrentWritedRays = INDEX;
 
-  		// РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РЅР° С…РѕСЃС‚Рµ
+  		// Подготавливаем данные на хосте
  		h_params[0] =
 		{
 			.handle = CommitedScene.tlasHandle,
@@ -362,7 +371,7 @@ public:
 			.counts_lights = size_lights,
 		};
  		 
-		// РљРѕРїРёСЂСѓРµРј РЎС‚Р°СЂС‚РѕРІС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ !!! Р°СЃРёРЅС…СЂРѕРЅРЅРѕ
+		// Копируем Стартовые параметры !!! асинхронно
 		CUDA_CHECK(
 			cudaMemcpyAsync(
 				d_rays,
@@ -373,7 +382,7 @@ public:
 			)
 		);
  		
-		// РљРѕРїРёСЂСѓРµРј РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
+		// Копируем на устройство
 		CUDA_CHECK(cudaMemcpyAsync(
 			d_params,
 			h_params,
@@ -382,7 +391,7 @@ public:
 			stream
 		));
 
-		// Р—Р°РїСѓСЃРєР°РµРј С‚СЂР°СЃСЃРёСЂРѕРІРєСѓ
+		// Запускаем трассировку
 		OPTIX_CHECK(optixLaunch
 		(
 			optixContext.GetPipeline(),
@@ -390,10 +399,10 @@ public:
 			reinterpret_cast<CUdeviceptr> ( d_params ),
 			sizeof(OPTICK_Params),
 			&optixContext.GetSBT(),
-			CurrentWritedRays, 1, 1  // Р—Р°РїСѓСЃРєР°РµРј N Р»СѓС‡РµР№
+			CurrentWritedRays, 1, 1  // Запускаем N лучей
 		));
 
-		// РљРѕРїРёСЂСѓРµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ Р°СЃРёРЅС…СЂРѕРЅРЅРѕ
+		// Копируем результаты асинхронно
 		CUDA_CHECK(
 		cudaMemcpyAsync(
 			h_colors,
@@ -404,10 +413,10 @@ public:
 			)
 		);
  
-		// РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р·
+		// Синхронизируем только один раз
 		CUDA_CHECK(cudaStreamSynchronize(stream));
 
-		// РљРѕРїРёСЏ С†РІРµС‚РѕРІ
+		// Копия цветов
 		auto copy_color = [&](hardware_color& Chw, base_color_c& C)
 		{
 			C.hemi = Chw.hemi;
@@ -416,15 +425,15 @@ public:
 			C.rgb.set(temp_rgb.x, temp_rgb.y, temp_rgb.z);
 		};
 
-		// Р”РѕР±Р°РІР»СЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚ РІ РєРѕРЅРµС† СЃРїРёСЃРєР°
+		// Добавляем результат в конец списка
 		for (int it = 0; it < CurrentWritedRays; it++)
 		{
 			base_color_c C;
 			copy_color(h_colors[it], C);
-			colors.push_back(C);
+			colors.push_back(C); 
 		}
 
-		// Р§РёСЃС‚РёРј СЃРїРёСЃРєРё Рё СЂРµР·СѓР»СЊС‚Р°С‚С‹
+		// Чистим списки и результаты
 		ClearDeviceResult();
 		CurrentWritedRays = 0;
 	}
@@ -438,7 +447,9 @@ void XRay::RayTrace::CUDA::RayTraceInitialize(base_lighting& L, u8 CurrentFlags)
 	if (!GPURayTracer.isInitialized)
  		GPURayTracer.Init(MAX_RAYS_PER_GPU);
  
-	GPURayTracer.current_flags = CurrentFlags; 
+	GPURayTracer.current_flags = CurrentFlags;
+	// GPURayTracer.CurrentWritedRays = 0;
+	GPURayTracer.colors.clear();
 }
 
 void XRay::RayTrace::CUDA::RayTraceAddRay(RayRecvestIndex& task, size_t index)
@@ -454,8 +465,6 @@ void XRay::RayTrace::CUDA::RayTraceRun(size_t max_rays)
 	if (!GPURayTracer.isInitialized)
  		GPURayTracer.Init(MAX_RAYS_PER_GPU);
  
-	// Р§РёСЃС‚РёРј С†РІРµС‚Р° 
-	GPURayTracer.colors.clear();
 	GPURayTracer.TraceRaysNew(max_rays);
 }
 
