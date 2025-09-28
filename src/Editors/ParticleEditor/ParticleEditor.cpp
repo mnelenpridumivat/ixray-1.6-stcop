@@ -20,53 +20,60 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	splash::show(IDB_PE);
 
-    START_PROFILE("Initializing Debugger")
-	splash::update(5, "Initializing Debugger");
+	{
+		PROF_EVENT("Initializing Debugger");
+		splash::update(5, "Initializing Debugger");
 
-	if (!IsDebuggerPresent()) Debug._initialize(false);
-    STOP_PROFILE
+		if (!IsDebuggerPresent()) Debug._initialize(false);
+	}
 
-    START_PROFILE("Initializing Debugger")
-    splash::update(10, "Initializing COM Library");
+	{
+		PROF_EVENT("Initializing Debugger");
+		splash::update(10, "Initializing COM Library");
 
-    CoInitialize(nullptr);
-    STOP_PROFILE
+		CoInitialize(nullptr);
+	}
+	
+	{
+		PROF_EVENT("Core Initialization");
+		splash::update(20, "Core Initialization");
 
-    START_PROFILE("Core Initialization")
-    splash::update(20, "Core Initialization");
+		const char* FSName = "fs.ltx";
+		Core._initialize("Particle", ELogCallback, 1, FSName);
 
-    const char* FSName = "fs.ltx";
-    Core._initialize("Particle", ELogCallback, 1, FSName);
+		psDeviceFlags.set(rsFullscreen, false);
+	}
 
-    psDeviceFlags.set(rsFullscreen, false);
-    STOP_PROFILE
+	{
+		PROF_EVENT("Initializing Particle Tools");
+		splash::update(35, "Initializing Particle Tools");
+		actions_token = actions_token_impl;
+		Tools = new CParticleTool();
+		PTools = (CParticleTool*)Tools;
+	}
 
-    START_PROFILE("Initializing Particle Tools")
-    splash::update(35, "Initializing Particle Tools");
-    actions_token = actions_token_impl;
-    Tools = new CParticleTool();
-    PTools = (CParticleTool*)Tools;
-    STOP_PROFILE
+	{
+		PROF_EVENT("Registering UI Commands");
+		splash::update(55, "Registering UI Commands");
 
-    START_PROFILE("Registering UI Commands")
-    splash::update(55, "Registering UI Commands");
-
-    UI = new CParticleMain();
-    UI->RegisterCommands();
-    STOP_PROFILE
+		UI = new CParticleMain();
+		UI->RegisterCommands();
+	}
     
-    START_PROFILE("Registering UI Commands")
-    splash::update(75, "Creating Main UI Form");
+	{
+		PROF_EVENT("Registering UI Commands");
+		splash::update(75, "Creating Main UI Form");
 
-    UIMainForm* MainForm = new UIMainForm();
-    ::MainForm = MainForm;
-    UI->Push(MainForm, false);
-    STOP_PROFILE
+		UIMainForm* MainForm = new UIMainForm();
+		::MainForm = MainForm;
+		UI->Push(MainForm, false);
+	}
 
-    START_PROFILE("Registering UI Commands")
-    splash::update(100, "Finalizing");
-    splash::hide();
-    STOP_PROFILE
+	{
+		PROF_EVENT("Registering UI Commands");
+		splash::update(100, "Finalizing");
+		splash::hide();
+	}
 
     PROF_STOP_CAPTURE();
     PROF_SAVE_CAPTURE("programm-capture-startup.opt");
