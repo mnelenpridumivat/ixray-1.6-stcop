@@ -137,8 +137,6 @@ void CBuild::xrPhase_AdaptiveHT	()
 	}
 	else
 	{
-		clMsg("Start Processing AdaptiveHT : MEMORY: %u mb", GetHeapMemory() / 1024 / 1024);
-
 		GPUTaskinSystem.RestartALL();
 		for (size_t VertexID = 0; VertexID < lc_global_data()->g_vertices().size(); VertexID++)
 		{
@@ -159,8 +157,6 @@ void CBuild::xrPhase_AdaptiveHT	()
 			C.mul(0.5f);
 			lc_global_data()->g_vertices()[U]->C._set(C);
 		}
-
-		GPUTaskinSystem.RestartALL();
  	}  
 }
 

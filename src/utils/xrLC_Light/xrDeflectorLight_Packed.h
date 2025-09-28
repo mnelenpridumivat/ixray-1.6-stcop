@@ -15,20 +15,29 @@ enum LGroup : u8
 };
 
 // Initialize TASKS
-#define MAX_RAYS_PER_TASK   1024 * 1024					// Общее кол-во Задач (на запуск GPU)
-#define MAX_RAYS_PER_GPU	128  * 1024					// Кол-во задач которое может обработать GPU за 1 заход Слишком большое кол-во вызывает недогруз ГПУ
+#define MAX_RAYS_PER_TASK   1024 * 1024 * 100		// Общее кол-во Задач (на запуск GPU)
+#define MAX_RAYS_PER_GPU	1024 * 1024				// Кол-во задач которое может обработать GPU за 1 заход
 
+// Recvest Class
 struct RayRecvestIndex
 {
-	void* Owner = 0;
-   	size_t INDEX_TASK;
+  	size_t INDEX_TASK;
+	CDeflector* Owner;
+	xrMU_Reference* xrMODEL;
 
 	// Task Pos, Dir, Skip
 	Fvector P;
 	Fvector N;
-	// Face* skip;
+	Face* skip;
 };
- 
+
+struct RayIndex
+{
+	size_t INDEX_TASK;
+	CDeflector* Owner;
+
+};
+
 class PackedLighting
 {
 	// new hash
@@ -67,14 +76,10 @@ public:
 	void LightPointPackedRun();
 
 	xrCriticalSection csAdd;
-
 	// Deflectors Processing
-	xr_atomic_u32 DeflectorsReady = 0;
-	xr_atomic_u32 DeflectorsRecvested = 0;
-
 	void LightPointPackedDeflector(CDeflector* D, u32 U, u32 V, Fvector& P, Fvector& N, u32 flags, Face* skip);
- 	void LightPointPackedDeflectorsRun();
- 
+	void LightPointPackedDeflectorsRun();
+
 	// xrMuModels
  	void LightPointPacked_MODEL(xrMU_Reference* MU, u32 I, Fvector& P, Fvector& N, u32 flags, Face* skip);
 	void LightPointPacked_MODELRun();
@@ -82,9 +87,6 @@ public:
  	void RestartALL()
 	{
 		// start
-		DeflectorsReady = 0;
-		DeflectorsRecvested = 0;
-
 		current_flags = 0;
 
 		// Basic Tasks
@@ -94,6 +96,7 @@ public:
 		task_pools.clear();
 		task_pools.shrink_to_fit();
 	}
+
  
 	// Task Index, Color. 
 	// простые задчи
@@ -104,9 +107,7 @@ public:
 	u8	    current_flags = 0;
  
 	// tasks	
-	xr_concurrent_vector<RayRecvestIndex>																task_pools;			// BASIC UV
-
-	xrCriticalSection csEnter;
+	concurrency::concurrent_vector<RayRecvestIndex>							 task_pools;			// BASIC UV
 };
 
 extern PackedLighting GPUTaskinSystem;

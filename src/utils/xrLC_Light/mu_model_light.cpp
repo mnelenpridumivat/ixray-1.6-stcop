@@ -114,24 +114,15 @@ void run_mu_light()
 	if (gCompilerMode.CUDA)
 	{
 		// Gathering
-		int REF_INDEX = 0;
 		for (auto& REF : inlc_global_data()->mu_refs())
-		{
-			AditionalData("REF LIGHT: %u/%u", REF_INDEX, inlc_global_data()->mu_refs().size());
 			REF->calc_lighting_cuda_1();
-			REF_INDEX++;
-		}
-		GPUTaskinSystem.LightPointPacked_MODELRun();
+ 		GPUTaskinSystem.LightPointPacked_MODELRun();
 		
 		// APPLY
-		REF_INDEX = 0;
 		for (auto& REF : inlc_global_data()->mu_refs())
 		{
-			AditionalData("REF LIGHT APPLY: %u/%u", REF_INDEX, inlc_global_data()->mu_refs().size());
-
 			REF->calc_lighting_cuda_2();
 			REF->calc_lighting_cuda_3();
-			REF_INDEX++;
 		}
 	}
 	else
