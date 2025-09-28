@@ -135,9 +135,6 @@ void run_mu_light()
 			REF->calc_lighting_cuda_3();
 			REF_INDEX++;
 		}
-
-
-		GPUTaskinSystem.RestartALL(); // Выгружаем все Это последнее освещение 
 	}
 	else
 #endif
