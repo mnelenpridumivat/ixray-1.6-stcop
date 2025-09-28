@@ -151,7 +151,8 @@ void CDeflector::OA_Export()
 		density	+= F->Shader().lm_density;
 		fcount	+= 1.f;
 	}
-	if (tN.magnitude()>EPS_S && _valid(tN))	normal.set(tN).normalize();
+	if (tN.magnitude()>EPS_S && _valid(tN))	
+		normal.set(tN).normalize();
 	else
 	{
 		clMsg("* ERROR: Internal precision error in CDeflector::OA_Export");
@@ -202,10 +203,14 @@ void CDeflector::OA_Export()
 	size.sub		(max,min);
 
 	// Surface
-	VERIFY(inlc_global_data());
-	u32 dwWidth		= iCeil(size.x*inlc_global_data()->g_params().m_lm_pixels_per_meter*density+.5f); clamp(dwWidth, 1u,512u-2*BORDER);
-	u32 dwHeight	= iCeil(size.y*inlc_global_data()->g_params().m_lm_pixels_per_meter*density+.5f); clamp(dwHeight,1u,512u-2*BORDER);
-	layer.create	(dwWidth,dwHeight);
+	// VERIFY(inlc_global_data());
+	u32 dwWidth		= iCeil(size.x*inlc_global_data()->g_params().m_lm_pixels_per_meter*density+.5f); clamp(dwWidth, 1u, 512u-2*BORDER);
+	u32 dwHeight	= iCeil(size.y*inlc_global_data()->g_params().m_lm_pixels_per_meter*density+.5f); clamp(dwHeight,1u, 512u-2*BORDER);
+	// layer.create	(dwWidth,dwHeight);
+
+	layer.width  = dwWidth;
+	layer.height = dwHeight;
+	// Не алоцируем
 }
 
 BOOL CDeflector::OA_Place	(Face *owner)
@@ -329,8 +334,8 @@ void CDeflector::L_Calculate(CDB::COLLIDER* DB, base_lighting* LightsSelected, H
 		}
 
 		// Calculate
-		R_ASSERT		(lm.width	<= (getLMSIZE() - 2 * BORDER));
-		R_ASSERT		(lm.height	<= (getLMSIZE() - 2 * BORDER));
+		R_ASSERT		(lm.width	<= (gCompilerMode.LC_sizeLmaps - 2 * BORDER));
+		R_ASSERT		(lm.height	<= (gCompilerMode.LC_sizeLmaps - 2 * BORDER));
   		lm.create		(lm.width, lm.height);
 		L_Direct		(DB,LightsSelected,H);
 	} catch (...)
@@ -372,13 +377,7 @@ bool	CDeflector::similar					( const CDeflector &D, float eps/* =EPS */ ) const
 	return 
 		layer.similar( D.layer, eps );
 }
-
-
-CDeflector*		CDeflector::read_create					()
-{
-	return new CDeflector();
-}
-
+ 
 void DumpDeflctor( u32 id )
 {
 	VERIFY( inlc_global_data()->g_deflectors().size()>id );
@@ -401,18 +400,4 @@ void DeflectorsStats ()
 	clMsg( "num deflectors: %d", size);
 	for( u32 i = 0; i <size ; i++ )
 			DumpDeflctor( i ); 
-}
- 
-
-extern XRLC_LIGHT_API int global_size_map = 1024;
-
-
-void setLMSIZE(int size)
-{
-	global_size_map = size;
-}
-
-u32 getLMSIZE()
-{
-	return global_size_map;
 }

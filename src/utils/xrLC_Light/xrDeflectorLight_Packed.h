@@ -14,14 +14,15 @@ enum LGroup : u8
 };
 
 // Initialize TASKS
-#define MAX_RAYS_PER_TASK   1024 * 1024 * 10 // Нужно еще учесть что там будут лампочек может быть по 256 за 1 таск
+#define MAX_RAYS_PER_TASK   1024 * 1024 * 40 // Нужно еще учесть что там будут лампочек может быть по 256 за 1 таск
  
 // Recvest Class
 struct RayRecvestIndex
 {
-  	std::pair<u32, u32> INDEX_TASK;
-	CDeflector* Owner;
-
+	CDeflector* Owner = nullptr;
+	base_color_c C;
+	std::pair<u32, u32> INDEX_TASK;
+  	
 	// Task Pos, Dir, Skip
 	Fvector P;
 	Fvector N;
@@ -30,73 +31,65 @@ struct RayRecvestIndex
 
 class PackedLighting
 {
-	typedef xr_map<std::pair<u32, u32>, u32>		  FCountsMap;
-	typedef xr_map<std::pair<u32, u32>, base_color_c> color_map;
-
 public:
 	// Result Vector
+	bool isInitializedGPU = false;
+	u8	    current_flags = 0;
+	size_t  TotalRaysProcessed = 0;
+	u32		IndexTask = 0;
+
+
+	xr_vector<RayRecvestIndex> task_pools;
+
 	PackedLighting()
 	{	
-  	};
+		// InitializeGPU();
+		task_pools.resize(MAX_RAYS_PER_TASK);
+ 		ClearPool();
+	};
  
 	~PackedLighting() 
 	{
- 	};
+		ClearPool();
+	};
 
 public:
+	RayRecvestIndex& GetRays(int Index) { return task_pools[Index]; }
  
 	void InitializeGPU();
-	
-	// Implicit (or AdaptiveHT) (No Has Deflector)
 	void LightPointPacked(u32 U, u32 V, Fvector& P, Fvector& N, u32 flags, Face* skip);
-	void LightPointPackedRun();
-
-	// Deflectors Processing
 	void LightPointPackedDeflector(u32 U, u32 V, CDeflector* D, Fvector& P, Fvector& N, u32 flags, Face* skip);
-	void LightPointPackedDeflectorsRun();
- 
- 	void RestartALL()
+ 	void LightPointPackedRun();
+   	
+	void ClearPool()
+	{ 
+		TotalRaysProcessed += IndexTask;
+		IndexTask = 0;
+	}
+
+	void RestartALL()
 	{
 		// start
 		current_flags = 0;
  
-	 	// Basic Tasks
-		task_pools.clear();
-  		Colors.clear();
-		FCountMap.clear();
-
-		// Deflectors
- 		DEF_FCountMap.clear();
-		DEF_Colors.clear();
-
-		// task pool memory clear
-		task_pools.shrink_to_fit();
+		TotalRaysProcessed = 0;
+		IndexTask = 0;
+		Colors.clear();
+ 
+		// Stats
+		StatsTotalGPUCopy = 0;
+		StatsCopyToVec = 0;
+		StatsRaysAdd = 0;
 	}
 
- 
-	// Task Index, Color. 
-	// простые задчи
-	FCountsMap			FCountMap;
-	color_map			Colors;	
-
-	// Task Index, Color. 
-	// сложные задчи СDeflector
-	xr_map<CDeflector*, FCountsMap>			DEF_FCountMap;
-	xr_map<CDeflector*, color_map>			DEF_Colors;
+	xr_map<std::pair<u32, u32>, u32>		  FCountMap;
+	xr_map<std::pair<u32, u32>, base_color_c> Colors;	// Task Index, Color.
   
 	// Stats 
-	bool	isInitializedGPU = false;
-	u8	    current_flags = 0;
-
 	CTimer tStats;
-	size_t StatsTotalGPU = 0;
-	size_t StatsTraverseGPU = 0;
- 	size_t StatsRaysAdd = 0;
-
-	xrCriticalSection csRayLaunched;
-
-	// tasks	
-	concurrency::concurrent_vector<RayRecvestIndex>							 task_pools;			// BASIC UV
- };
+	u64 StatsTotalGPUCopy = 0;
+	u64 StatsCopyToVec = 0;
+	u64 StatsRaysAdd = 0;
+};
 
 extern PackedLighting GPUTaskinSystem;
