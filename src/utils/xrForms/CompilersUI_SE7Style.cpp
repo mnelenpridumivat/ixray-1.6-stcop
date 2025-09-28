@@ -271,6 +271,7 @@ void DrawLCConfig()
 {
 	//if (ImGui::BeginChild("LC", { 200, 415 }, ImGuiChildFlags_Border, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings))
 	{
+		ImGui::PushID("LC");
 		ImGui::Checkbox("Lighting Compiler", &gCompilerMode.LC);
 		ImGui::Separator();
 
@@ -315,6 +316,7 @@ void DrawLCConfig()
 		
 		
 		//ImGui::EndChild();
+		ImGui::PopID();
 	}
 
 
@@ -322,16 +324,19 @@ void DrawLCConfig()
 
 void DrawDOConfig()
 {
+	ImGui::PushID("DO");
 	ImGui::Checkbox("Details Compiler", &gCompilerMode.DO);
 	ImGui::Separator();
 
 	ImGui::BeginDisabled(!gCompilerMode.DO);
 	ImGui::Checkbox("No Sun", &gCompilerMode.LC_NoSun);
 	ImGui::EndDisabled();
+	ImGui::PopID();
 }
 
 void DrawAIConfig()
 {
+	ImGui::PushID("AI");
 	ImGui::Checkbox("AI Compiler", &gCompilerMode.AI);
 
 	ImGui::BeginDisabled(!gCompilerMode.AI);
@@ -360,6 +365,7 @@ void DrawAIConfig()
 
 	ImGui::EndDisabled();
 	ImGui::EndDisabled();
+	ImGui::PopID();
 }
 
 extern bool SaveCForm;
