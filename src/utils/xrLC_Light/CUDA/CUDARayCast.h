@@ -8,6 +8,7 @@
 #include <optix_stubs.h>
 #include <cuda_runtime.h>
 
+struct RayRequest;
 class PackedLighting;
  
 
@@ -46,7 +47,9 @@ namespace XRay::RayTrace::CUDA
     {
         int surfidx; // Индекс текстуры
     };
-     
+
+
+
 	bool BuildSceneFromLCGlobalData(OptixDeviceContext context, CUstream stream, OptixMeshBuffers& outScene);
     void InitializeRayTracing();
     float RayTraceWrapper

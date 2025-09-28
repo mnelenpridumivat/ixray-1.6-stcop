@@ -214,9 +214,17 @@ struct hardware_lighting
 	float					energy;				// For radiosity ONLY
 };
 
-struct hardware_raytask 
+struct hardware_income 
 {
 	float3		   Position;
 	float3		   Direction;
- 
 };
+
+struct ColorsRessult
+{
+	hardware_color Color;
+	int		       Configured;
+	int			   RealProcessed;
+	int			   ResultIndex;
+};
+

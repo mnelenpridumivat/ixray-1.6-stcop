@@ -736,6 +736,8 @@ BOOL	compress_RMS		(lm_layer& lm, u32 rms, u32& w, u32& h)
 	return FALSE;
 }
 
+
+
 void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H)
 {
 	// Geometrical bounds
@@ -762,8 +764,6 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 	if (!ApplyBorders(layer,ref))
 		break;
 
-
-	 
 	// Compression
 	try
 	{
@@ -859,5 +859,3 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 		clMsg("* ERROR: CDeflector::Light - BorderExpansion");
 	}
 }
-
-
