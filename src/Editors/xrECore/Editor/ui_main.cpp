@@ -97,7 +97,11 @@ ImTextureID TUI::LoadTexture(const char* Texture) const
 	{
 		Tex->Load();
 	}
-
+	if (!I_ASSERT(Tex->pSurface))
+	{
+		return nullptr;
+	}
+	
 	return (void*)Tex->pSurface->GetRawTexture();
 }
 
