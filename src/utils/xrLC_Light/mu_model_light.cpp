@@ -110,11 +110,9 @@ void run_mu_light()
  	mu_materials.wait(100); 
 
 	// Light references
-#ifdef LCCUDA_BUILD
+	GPUTaskinSystem.RestartALL();
 	if (gCompilerMode.CUDA)
 	{
-		GPUTaskinSystem.RestartALL();
-
 		// Gathering
 		int REF_INDEX = 0;
 		for (auto& REF : inlc_global_data()->mu_refs())
@@ -137,7 +135,6 @@ void run_mu_light()
 		}
 	}
 	else
-#endif
 	{
 		ThreadTaskID = 0;
 		for (u32 thID = 0; thID < gCompilerMode.ThreadsPerWork; thID++)
