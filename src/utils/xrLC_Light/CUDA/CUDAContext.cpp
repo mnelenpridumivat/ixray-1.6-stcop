@@ -5,7 +5,7 @@
 
 bool OptixContext::Initialize()
 {
-	// 1. РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ CUDA
+	// 1. Инициализация CUDA
 	CUDA_CHECK(cudaSetDevice(cudaDeviceId));
 	CUDA_CHECK(cudaFree(0));
 
@@ -15,10 +15,10 @@ bool OptixContext::Initialize()
 	Msg("[OptiX] Using CUDA device: %s (SM %d.%d)",
 		deviceProps.name, deviceProps.major, deviceProps.minor);
 
-	// 2. РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ OptiX
+	// 2. Инициализация OptiX
 	OptixDeviceContextOptions options = {};
 	options.logCallbackFunction = &OptixLogCallback;
-	options.logCallbackLevel = 4; // РЈСЂРѕРІРµРЅСЊ Р»РѕРіРіРёСЂРѕРІР°РЅРёСЏ (1-4)
+	options.logCallbackLevel = 4; // Уровень логгирования (1-4)
 
 	OPTIX_CHECK(optixInit());
 	OPTIX_CHECK(optixDeviceContextCreate(cudaContext, &options, &optixContext));
@@ -36,7 +36,7 @@ void OptixContext::Destroy()
 	}
 }
 
-// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ Р·Р°РїРёСЃРё SBT
+// Структура для записи SBT
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RayGenRecord
 {
 	char header[OPTIX_SBT_RECORD_HEADER_SIZE];
@@ -50,10 +50,10 @@ struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) MissRecord
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitGroupRecord
 {
 	char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-	// Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РґР°РЅРЅС‹Рµ РјР°С‚РµСЂРёР°Р»Р°
+	// Здесь можно добавить данные материала
 };
 
-// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РїР°Р№РїР»Р°Р№РЅР°
+// Функция для создания пайплайна
 void OptixContext::CreatePipeline(const char* ptxCode)
 {
 	auto LoadPTXLambda = [](const std::string & filename)
@@ -63,7 +63,7 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		return std::string(std::istreambuf_iterator<char>(file), {});
 	};
 
-	// РЎРѕР·РґР°РЅРёРµ РјРѕРґСѓР»СЏ
+	// Создание модуля
 	OptixModule module = nullptr;
 	OptixModuleCompileOptions moduleCompileOptions = {};
 	moduleCompileOptions.maxRegisterCount = OPTIX_COMPILE_DEFAULT_MAX_REGISTER_COUNT;
@@ -94,9 +94,7 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		&module
 	);
 
-	clMsg("*** PTX SIZE: %u", PtxData.size());
-
-	// РЎРѕР·РґР°РЅРёРµ РїСЂРѕРіСЂР°РјРјРЅС‹С… РіСЂСѓРїРї
+	// Создание программных групп
 	OptixProgramGroup raygen_prog_group = nullptr;
 	OptixProgramGroupOptions programGroupOptions = {};
 
@@ -121,7 +119,7 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 	missDesc.miss.module = module; 
 	missDesc.miss.entryFunctionName = "__miss__ms";
 
-	// 2. РЎРѕР·РґР°РµРј Miss-РїСЂРѕРіСЂР°РјРјРЅСѓСЋ РіСЂСѓРїРїСѓ
+	// 2. Создаем Miss-программную группу
 	OptixProgramGroup missGroup = nullptr;
 	optixProgramGroupCreate(
 		optixContext,
@@ -133,12 +131,12 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		&missGroup
 	);
 
-	// РЎРѕР·РґР°РµРј РѕРїРёСЃР°РЅРёРµ С…РёС‚-РіСЂСѓРїРїС‹
+	// Создаем описание хит-группы
 	OptixProgramGroupDesc hit_group_desc = {};
 	hit_group_desc.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
 	hit_group_desc.hitgroup.moduleCH = module;  // closest-hit
 	hit_group_desc.hitgroup.entryFunctionNameCH = "__closesthit__ch";
-	hit_group_desc.hitgroup.moduleAH = module;  // any-hit (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
+	hit_group_desc.hitgroup.moduleAH = module;  // any-hit (опционально)
 	hit_group_desc.hitgroup.entryFunctionNameAH = "__anyhit__ah";
 
 	OptixProgramGroup hit_group = nullptr;
@@ -151,7 +149,7 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		0,
 		&hit_group
 	);
-	// РЎРѕР·РґР°РЅРёРµ РїР°Р№РїР»Р°Р№РЅР°
+	// Создание пайплайна
 	OptixProgramGroup programGroups[] = { raygen_prog_group, missGroup, hit_group };
 
 	OptixPipelineLinkOptions pipelineLinkOptions = {};
@@ -169,7 +167,7 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 		&m_pipeline
 	);
 
-	// РќР°СЃС‚СЂРѕР№РєР° SBT
+	// Настройка SBT
 	CUdeviceptr raygenRecord;
 	size_t raygenRecordSize = sizeof(RayGenRecord);
 	cuMemAlloc(&raygenRecord, raygenRecordSize);
@@ -196,12 +194,12 @@ void OptixContext::CreatePipeline(const char* ptxCode)
 	optixSbtRecordPackHeader(hit_group, &hgSbt);
 	cuMemcpyHtoD(hitgroupRecord, &hgSbt, hitgroupRecordSize);
 
-	// 3. РљРѕСЂСЂРµРєС‚РЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР° SBT
+	// 3. Корректная настройка SBT
 	m_sbt.raygenRecord = raygenRecord;
 	m_sbt.missRecordBase = missRecord;
 	m_sbt.missRecordStrideInBytes = sizeof(MissRecord);
 	m_sbt.missRecordCount = 1;
-	m_sbt.hitgroupRecordBase = hitgroupRecord;  // РСЃРїСЂР°РІР»РµРЅРѕ: СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РІС‹РґРµР»РµРЅРЅСѓСЋ РїР°РјСЏС‚СЊ
+	m_sbt.hitgroupRecordBase = hitgroupRecord;  // Исправлено: указатель на выделенную память
 	m_sbt.hitgroupRecordStrideInBytes = sizeof(HitGroupRecord);
 	m_sbt.hitgroupRecordCount = 1;
 }

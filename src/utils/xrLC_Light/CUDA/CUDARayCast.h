@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../R_light.h"
-#include "../base_lighting.h"
+#include "../R_Light.h"
 #include "../xrFace.h"
 
 #include <optix.h>
@@ -9,8 +8,6 @@
 #include <cuda_runtime.h>
 
 struct RayRequest;
-class PackedLighting;
- 
 
 namespace XRay::RayTrace::CUDA
 {
@@ -28,10 +25,10 @@ namespace XRay::RayTrace::CUDA
     {
         u32 width;
         u32 height;
-        u32* pSurface; // РЈРєР°Р·Р°С‚РµР»СЊ РЅР° GPU РїР°РјСЏС‚СЊ
+        u32* pSurface; // Указатель на GPU память
         bool hasAlpha;
 
-        // Р”Р»СЏ CUDA texture objects
+        // Для CUDA texture objects
         cudaTextureObject_t texObj;
     };
 
@@ -39,12 +36,12 @@ namespace XRay::RayTrace::CUDA
     {
         int dwMaterial;
         u32 flags;
-        Fvector2 tc0[3]; // UV РєРѕРѕСЂРґРёРЅР°С‚С‹
+        Fvector2 tc0[3]; // UV координаты
     };
 
     struct MaterialData
     {
-        int surfidx; // РРЅРґРµРєСЃ С‚РµРєСЃС‚СѓСЂС‹
+        int surfidx; // Индекс текстуры
     };
 
 
@@ -58,6 +55,7 @@ namespace XRay::RayTrace::CUDA
         float R, Face* skip, const FaceData* d_faces, const MaterialData* d_materials, const TextureData* d_textures
     );
     void InitializeTextures(xr_vector<TextureData>& gpuTextures, cudaTextureObject_t*& d_texObjects);
- 
-    void RayTracePackNew(PackedLighting& data_gpu, base_lighting& L);
+    float RayTrace(Fvector& P, Fvector& D, float R, Face* skip);
+
+    void RayTracePack(xr_vector<RayRequest>& data);
 }
