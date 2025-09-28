@@ -18,8 +18,11 @@ using Implicit_it = Implicit::iterator;
 #include "../xrForms/CompilersUI.h"
 #include "../xrDXT/xrDXT.h"
 
-class ImplicitThread :
-	public CThread
+#ifdef LCCUDA_BUILD
+#	include "CUDA/CUDARayCast.h"
+#endif
+
+class ImplicitThread : public CThread
 {
 public:
 
@@ -40,9 +43,11 @@ void ImplicitThread::Execute()
 }
 
 // 2 : Mainthread + UI thread
-ImplicitCalcGlobs cl_globs;
 int ThreadTaskID_Implication = 0;
 CTimer tImplicit;
+
+xrCriticalSection csLockImplicit;
+ImplicitCalcGlobs cl_globs;
 
 void RunImplicitMultithread(ImplicitDeflector& defl)
 {
@@ -59,8 +64,6 @@ void RunImplicitMultithread(ImplicitDeflector& defl)
 
 	tmanager.wait();
 }
-
-xrCriticalSection csLockImplicit;
 
 void ImplicitExecute::Execute()
 {
@@ -126,7 +129,7 @@ void ImplicitExecute::Execute()
 							wN.from_bary(V1->N, V2->N, V3->N, B);
 							wN.normalize();
 
-							u32 flags = (inlc_global_data()->b_nosun() ? LP_dont_sun : 0);
+							u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0);
 							LightPoint(&DB, inlc_global_data()->RCAST_Model(), C, wP, wN, inlc_global_data()->L_static(), flags, F);
 							Fcount++;
 						}
@@ -156,9 +159,15 @@ void ImplicitExecute::Execute()
 			AditionalData("CurrentV: %u | time: %.0f", V, tImplicit.GetElapsed_sec());
 	}
 }
- 
+
+#ifdef LCCUDA_BUILD
 void RunTaskGPU()
 {
+	clMsg("$ Run Tasks GPU");
+
+	CTimer tStats;
+	tStats.Start();
+  
  	ImplicitDeflector& defl = cl_globs.DATA();
 	// Setup variables
 	Fvector2 dim, half;
@@ -172,63 +181,29 @@ void RunTaskGPU()
 	Fvector2* Jitter;
 	Jitter_Select(Jitter, Jcount);
 
-	PackedLighting			gpu_data;
-	xr_map<u32, u32>	    FCountMap;
 
-	auto GPU_RUN_TASKS = [&]()
+	GPUTaskinSystem.RestartALL();
+
+
+	u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0);
+	GPUTaskinSystem.current_flags = flags;
+
+	//
+	xr_map<size_t, u32> FacesCount;  
+ 	for (u32 V = 0; V < defl.Height(); V++)
 	{
- 		gpu_data.LightPointPackedRun();
-		gpu_data.LightPointPackedApply();
-
-		xr_map<u32, base_color_c> Colors;
-		for (auto& INFO : gpu_data.task_pools)
+		for (u32 U = 0; U < defl.Width(); U++)
 		{
-			Colors[INFO.INDEX_TASK].add(INFO.C);
-		}
-
-		for (auto& T : Colors)
-		{
-			u32 index = T.first;
-			int V = index / defl.Width();
-			int U = index % defl.Width();
-
-			u32 Fcount = FCountMap[index];
-			if (Fcount)
-			{
-				auto& C = T.second;
-				// Calculate lighting amount
-				C.scale(Fcount);
-				C.mul(.5f);
-				defl.Lumel(U, V)._set(C);
-				defl.Marker(U, V) = 255;
-			}
-			else
-			{
-				defl.Marker(U, V) = 0;
-			}
-		}
-
-		Colors.clear();
- 	};
-
-	int RAYS_TASK = 16 * 1024; // 190 * 1024 * 1024; // * 200
-	extern u64 RayTracingTime;
-	RayTracingTime = 0;
-
-	for (u32 V = 0; V< defl.Height(); V++)
-	{
- 		for (u32 U = 0; U < defl.Width(); U++)
-		{
- 			base_color_c C;
+			base_color_c C;
 			u32 Fcount = 0;
 			try
 			{
-				for (u32 J = 0; J < Jcount; J++)
+				for (u32 SampleID = 0; SampleID < Jcount; SampleID++)
 				{
 					// LUMEL space
 					Fvector2				P;
-					P.x = float(U) / dim.x + half.x + Jitter[J].x * JS.x;
-					P.y = float(V) / dim.y + half.y + Jitter[J].y * JS.y;
+					P.x = float(U) / dim.x + half.x + Jitter[SampleID].x * JS.x;
+					P.y = float(V) / dim.y + half.y + Jitter[SampleID].y * JS.y;
 					xr_vector<Face*>& space = cl_globs.Hash().query(P.x, P.y);
 
 					// World space
@@ -247,8 +222,7 @@ void RunTaskGPU()
 							wN.from_bary(V1->N, V2->N, V3->N, B);
 							wN.normalize();
 
-							u32 flags = (inlc_global_data()->b_nosun() ? LP_dont_sun : 0);
- 							gpu_data.LightPointPacked(V * defl.Width() + U, J, wP, wN, inlc_global_data()->L_static(), flags, F);
+							GPUTaskinSystem.LightPointPacked(U, V, wP, wN, flags, F);
 							Fcount++;
 						}
 					}
@@ -259,23 +233,40 @@ void RunTaskGPU()
 				clMsg("* THREAD #%d: Access violation. Possibly recovered.");//,thID
 			}
 
-			FCountMap[V * defl.Width() + U] = Fcount;
-
-			if (gpu_data.getAllocatedRays() > RAYS_TASK)
-			{
-				CTimer t;
-				t.Start();
-				GPU_RUN_TASKS();
-				gpu_data.ClearPool();
-				// clMsg("*** Ray Recvest processing: %u ms", t.GetElapsed_ms());
-			}
+			FacesCount[GPUTaskinSystem.MakeKey(U, V)] = Fcount;
 		}
-		AditionalData("Current Height: %u | RayTraceGPU %llu ms", V, RayTracingTime / 1000);
+		AditionalData("Current: %u", V);
+	};
+
+	// Остаток доработать 
+	GPUTaskinSystem.LightPointPackedRun();
+
+	CTimer tColors; tColors.Start();
+  	for (auto& T : GPUTaskinSystem.Colors)
+	{
+		auto KEY = T.first;
+		u32 U = GPUTaskinSystem.GetU(KEY);
+		u32 V = GPUTaskinSystem.GetV(KEY);
+
+		u32 Fcount = FacesCount[KEY];
+		if (Fcount)
+		{
+			auto& C = T.second;
+			// Calculate lighting amount
+			C.scale(Fcount);
+			C.mul(.5f);
+			defl.Lumel(U, V)._set(C);
+			defl.Marker(U, V) = 255;
+		}
+		else
+		{
+			defl.Marker(U, V) = 0;
+		}
 	}
-
-	GPU_RUN_TASKS();
-
+ 	
+	GPUTaskinSystem.RestartALL();
 }
+#endif
 
 static xr_vector<u32> not_clear;
 void ImplicitLightingExec()
@@ -310,6 +301,8 @@ void ImplicitLightingExec()
 			ImplicitDeflector& ImpD = it->second;
 			ImpD.faces.push_back(F);
 		}
+
+
 	}
 
 	// Lighing
@@ -324,8 +317,14 @@ void ImplicitLightingExec()
 		Progress(0);
 		cl_globs.Initialize(defl);
 
-		// RunImplicitMultithread(defl);
- 		RunTaskGPU();
+#ifdef LCCUDA_BUILD
+		if (gCompilerMode.CUDA)
+		{
+			RunTaskGPU();
+		}
+		else
+#endif
+			RunImplicitMultithread(defl);
 
 		defl.faces.clear();
 

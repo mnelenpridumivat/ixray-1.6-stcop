@@ -6,7 +6,6 @@
 #include "../xrLC_Light/xrMU_Model_Reference.h"
 #include "../xrLC_Light/xrLC_GlobalData.h"
 #include "../xrLC_Light/xrFace.h"
-#include "../xrLC_Light/CUDA/CUDARayCast.h"
 
 CDB::MODEL*	RCAST_Model	= 0;
 
