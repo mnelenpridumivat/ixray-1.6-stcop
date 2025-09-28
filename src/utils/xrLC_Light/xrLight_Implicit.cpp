@@ -165,7 +165,9 @@ void RunTaskGPU()
 {
 	CTimer tStats;
 	tStats.Start();
-  
+
+	// XRay::RayTrace::CUDA::InitializeRayTracing();
+
  	ImplicitDeflector& defl = cl_globs.DATA();
 	// Setup variables
 	Fvector2 dim, half;
@@ -186,13 +188,11 @@ void RunTaskGPU()
 	u32 flags = (inlc_global_data()->b_nosun() ? LP_dont_sun : 0);
 	GPUTaskinSystem.current_flags = flags;
 
-	//
-	xr_map<size_t, u32> FacesCount;  
- 	for (u32 V = 0; V < defl.Height(); V++)
+	for (u32 V = 0; V < defl.Height(); V++)
 	{
-		for (u32 U = 0; U < defl.Width(); U++)
+ 		for (u32 U = 0; U < defl.Width(); U++)
 		{
-			base_color_c C;
+ 			base_color_c C;
 			u32 Fcount = 0;
 			try
 			{
@@ -230,11 +230,9 @@ void RunTaskGPU()
 			{
 				clMsg("* THREAD #%d: Access violation. Possibly recovered.");//,thID
 			}
-
-			FacesCount[GPUTaskinSystem.MakeKey(U, V)] = Fcount;
+			GPUTaskinSystem.FCountMap[{U, V}] = Fcount;
 		}
-		AditionalData("Current: %u", V);
-	};
+	}
 
 	// Остаток доработать 
 	GPUTaskinSystem.LightPointPackedRun();
@@ -242,11 +240,11 @@ void RunTaskGPU()
 	CTimer tColors; tColors.Start();
   	for (auto& T : GPUTaskinSystem.Colors)
 	{
-		auto KEY = T.first;
-		u32 U = GPUTaskinSystem.GetU(KEY);
-		u32 V = GPUTaskinSystem.GetV(KEY);
+		auto UV = T.first;
+		int U = UV.first;
+		int V = UV.second;
 
-		u32 Fcount = FacesCount[KEY];
+		u32 Fcount = GPUTaskinSystem.FCountMap[UV];
 		if (Fcount)
 		{
 			auto& C = T.second;
@@ -262,14 +260,13 @@ void RunTaskGPU()
 		}
 	}
  
-	clMsg("@ CPU Code: %llu | CPU CopyToGPU : %u | GPU(%u) | CPU copy result(%u) | Clear(%u)",
-		GPUTaskinSystem.StatsRaysAdd / 1000,
-		GPUTaskinSystem.StatsCopyRaysGPU / 1000,
+	AditionalData("CPU Code: %u | GPU Code : (%u|RayTracing: %u) | Colors : %u | Total Code: %u",
+ 		GPUTaskinSystem.StatsRaysAdd / 1000,
+ 		GPUTaskinSystem.StatsTotalGPU / 1000,
 		GPUTaskinSystem.StatsTraverseGPU / 1000,
-		GPUTaskinSystem.StatsCopyResultGPU / 1000,
-		GPUTaskinSystem.StatsClearingListGPU / 1000
+		tColors.GetElapsed_ms(),
+		tStats.GetElapsed_ms()
 	);
-
 	
 	GPUTaskinSystem.RestartALL();
 }
