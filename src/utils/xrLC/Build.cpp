@@ -117,7 +117,7 @@ size_t GetHeapMemory()
 
 void GetMemoryUsedStorage()
 {
-#if 0
+#ifdef DEBUG
 	if (!lc_global_data())
 		return;
 
@@ -248,9 +248,8 @@ void CBuild::Run(LPCSTR P)
 #ifdef LCCUDA_BUILD
 	if (gCompilerMode.CUDA)
  		GPUTaskinSystem.InitializeGPU();
-	else
 #endif
-	if (gCompilerMode.Embree)
+	else if (gCompilerMode.Embree)
 		EmbreeMain.IntelEmbereLOAD();
 	else
 		BuildRapid(false);
