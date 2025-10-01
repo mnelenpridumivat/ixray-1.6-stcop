@@ -212,6 +212,7 @@ void xrLogger::LogThreadEntry()
 				IWriter* mutableWritter = (IWriter*)logFile;
 				mutableWritter->flush();
 			}
+			bFlushRequested = false;
 		}
 	};
 
