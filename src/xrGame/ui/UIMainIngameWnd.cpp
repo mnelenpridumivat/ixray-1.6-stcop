@@ -44,6 +44,8 @@
 #	include "../../xrEngine/xr_input.h"
 #endif
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "../../xrUI/Widgets/UIScrollView.h"
 #include "map_hint.h"
 #include "../game_news.h"
@@ -616,8 +618,10 @@ void CUIMainIngameWnd::SetFlashIconState_(EFlashingIcons type, bool enable)
 {
 	// Включаем анимацию требуемой иконки
 	FlashingIcons_it icon = m_FlashingIcons.find(type);
-	R_ASSERT2(icon != m_FlashingIcons.end(), "Flashing icon with this type not existed");
-	icon->second->Show(enable);
+	if (I_ASSERT_M(icon != m_FlashingIcons.end(), "Flashing icon with type [%s] not existed", magic_enum::enum_name<EFlashingIcons>(type).data()))
+	{
+		icon->second->Show(enable);
+	}
 }
 
 void CUIMainIngameWnd::InitFlashingIcons(CUIXml* node)

@@ -40,10 +40,13 @@ BOOL ESceneCustomOTool::_RemoveObject(CCustomObject* object)
 void ESceneCustomOTool::Clear(bool bInternal)
 {
 	inherited::Clear	();
-	for (ObjectIt it=m_Objects.begin(); it!=m_Objects.end(); it++)
+    for (auto elem : m_Objects)
     {
-    	(*it)->OnSceneRemove();
-    	xr_delete(*it);
+        if (IVERIFY(elem))
+        {
+            elem->OnSceneRemove();
+            xr_delete(elem);
+        }
     }
     m_Objects.clear();
 }
