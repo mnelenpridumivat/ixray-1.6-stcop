@@ -1,5 +1,5 @@
-#include "../xrEngine/stdafx.h"
 #include "NvGPUTransferee.h"
+#include <d3d11.h>
 
 extern "C"
 {
@@ -37,32 +37,48 @@ void CNvReader::Initialize()
 			return;
 		}
 
-		auto TryToInitializeFunctionLambda = [this](void** pFuncPtr, u32 FuncId) -> bool
+		// Try to initialize functions.
+		// If `required` is true, a missing function aborts NVAPI support.
+		// If `required` is false, we log and continue but leave the pointer null so callers can fall back.
+		auto TryToInitializeFunctionLambda = [this](void** pFuncPtr, u32 FuncId, bool required = true) -> bool
 		{
 			*pFuncPtr = (*NvAPI_QueryInterface)(FuncId);
 			if (*pFuncPtr == nullptr)
 			{
-				FreeModule(hNvAPIDLL);
-				hNvAPIDLL = nullptr;
-				Msg("! Found nvapi64.dll, but DLL missing Func ID \"%u\"", FuncId);
-				return false;
+				if (required)
+				{
+					FreeModule(hNvAPIDLL);
+					hNvAPIDLL = nullptr;
+					Msg("! Found nvapi64.dll, but DLL missing Func ID \"%u\"", FuncId);
+					return false;
+				}
+				else
+				{
+					Msg("[WARN] nvapi64.dll present but missing optional Func ID \"%u\"; continuing without it", FuncId);
+					return true;
+				}
 			}
 
 			return true;
 		};
 
+		// Required essentials
 		if (!TryToInitializeFunctionLambda((void**)&NvAPI_Initialize, 0x0150E828))
 		{ return; }
 		if (!TryToInitializeFunctionLambda((void**)&NvAPI_EnumPhysicalGPUs, 0xE5AC921F))
 		{ return; }
 		if (!TryToInitializeFunctionLambda((void**)&NvAPI_EnumLogicalGPUs, 0x48B3EA59))
 		{ return; }
-		if (!TryToInitializeFunctionLambda((void**)&NvAPI_GPU_GetUsages, 0x189A1FDF))
+		// GPU usage query is optional - engine can continue without it (we'll fallback at call sites)
+		if (!TryToInitializeFunctionLambda((void**)&NvAPI_GPU_GetUsages, 0x189A1FDF, /*required=*/false))
 		{ return; }
 		if (!TryToInitializeFunctionLambda((void**)&NvAPI_GPU_PhysicalFromLogical, 0x0AEA3FA32))
 		{ return; }
+		if (!TryToInitializeFunctionLambda((void**)&NvAPI_D3D11_SetDepthBoundsTest, 0x7AAF7A04, false))
+		{ return; }
 
 		bSupport = true;
+		GPUID = ERHI_GPU::NVIDIA;
 		InitDeviceInfo();
 	}
 	else
@@ -95,8 +111,17 @@ void CNvReader::MakeGPUCount()
 
 	for (NvU32 i = 0; i < logicalGPUCount; ++i)
 	{
-		NvAPI_GPU_PhysicalFromLogical(gpuHandlesLg[i], gpuHandlesPh, &AdapterID);
-		AdapterFinal = std::max(AdapterFinal, (u64)AdapterID);
+		// NvAPI_GPU_PhysicalFromLogical is required during init; if for some reason it's null,
+		// fall back to assuming a single GPU to avoid crashes.
+		if (NvAPI_GPU_PhysicalFromLogical)
+		{
+			NvAPI_GPU_PhysicalFromLogical(gpuHandlesLg[i], gpuHandlesPh, &AdapterID);
+			AdapterFinal = std::max(AdapterFinal, (u64)AdapterID);
+		}
+		else
+		{
+			AdapterFinal = std::max(AdapterFinal, (u64)1);
+		}
 	}
 
 	if (AdapterFinal > 1)
@@ -107,6 +132,13 @@ void CNvReader::MakeGPUCount()
 
 u32 CNvReader::GetPercentActive()
 {
+	// NvAPI_GPU_GetUsages may be optional/unavailable in some environments (Wine / shim).
+	// If it's not present, return 0 (no usage info) instead of crashing.
+	if (NvAPI_GPU_GetUsages == nullptr)
+	{
+		return 0;
+	}
+
 	(*NvAPI_GPU_GetUsages)(gpuHandlesPh[0], gpuUsages);
 	int usage = gpuUsages[3];
 	return (u32)usage;
@@ -115,4 +147,15 @@ u32 CNvReader::GetPercentActive()
 u32 CNvReader::GetGPUCount()
 {
 	return u32(AdapterFinal ? AdapterFinal : 1);
+}
+
+bool CNvReader::SetDepthBounds(void* RContext, bool b, float zMin, float zMax)
+{
+	if (NvAPI_D3D11_SetDepthBoundsTest)
+	{
+		NvAPI_D3D11_SetDepthBoundsTest((ID3D11DeviceContext*)RContext, b, zMin, zMax);
+		return true;
+	}
+
+	return false;
 }
