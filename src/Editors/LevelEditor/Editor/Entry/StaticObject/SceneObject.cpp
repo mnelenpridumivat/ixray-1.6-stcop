@@ -24,61 +24,23 @@ void CSceneObject::Construct(LPVOID data)
 
 void CSceneObject::ReloadReferences()
 {
-	if (m_Flags.test(flUseSurface))
+	if (!m_pReference)
+		return;
+#if 0
+	// TODO: Дофиксить потом (или умные указатели для тупого кодера???)
+	for (CSurface* OverrideSurf : m_Surfaces)
 	{
-		if (!m_pReference)
-			return;
-
-		auto& OwnerSurfaces = m_pReference->Surfaces();
-
-		m_Surfaces.erase
-		(
-			std::remove_if
-			(
-				m_Surfaces.begin(),
-				m_Surfaces.end(),
-				[&](CSurface* Surf)
-				{
-					auto it = std::find_if
-					(
-						OwnerSurfaces.begin(),
-						OwnerSurfaces.end(),
-						[&](CSurface* OwnerSurf)
-						{
-							return xr_strcmp(Surf->_Name(), OwnerSurf->_Name()) == 0;
-						});
-					return it == OwnerSurfaces.end();
-				}
-			),
-			m_Surfaces.end()
-		);
-
-		for (CSurface* OwnerSurf : OwnerSurfaces)
-		{
-			auto it = std::find_if
-			(
-				m_Surfaces.begin(),
-				m_Surfaces.end(),
-				[&](CSurface* Surf)
-				{
-					return xr_strcmp(Surf->_Name(), OwnerSurf->_Name()) == 0;
-				}
-			);
-
-			if (it == m_Surfaces.end())
-			{
-				m_Surfaces.push_back(OwnerSurf);
-			}
-		}
+		OverrideSurf->OnDeviceDestroy();
+		xr_delete(OverrideSurf);
 	}
-	else
-	{
-		m_Surfaces.clear();
+#endif
 
-		if (m_pReference)
-		{
-			m_Surfaces = m_pReference->Surfaces();
-		}
+	for (CSurface* OwnerSurf : m_pReference->Surfaces())
+	{
+		CSurface* NewSurf = new CSurface();
+		NewSurf->CopyFrom(OwnerSurf);
+
+		m_Surfaces.push_back(NewSurf);
 	}
 }
 
@@ -87,7 +49,6 @@ CSceneObject::~CSceneObject()
 	for (CSurface* i : m_Surfaces) { i->OnDeviceDestroy(); xr_delete(i); }
 	Lib.RemoveEditObject(m_pReference);
 }
-
 
 void CSceneObject::EvictObject()
 {
@@ -156,11 +117,19 @@ void CSceneObject::Render(int priority, bool strictB2F)
 	if (!IsLoaded)
 		return;
 
+	if (m_CO_Flags.test(flObjectInGroup))
+	{
+		auto Tool = Scene->GetTool(OBJCLASS_GROUP);
+		if (!Tool->IsVisible())
+		{
+			return;
+		}
+	}
+
 	inherited::Render(priority,strictB2F);
 	if (!m_pReference) return;
-#ifdef _LEVEL_EDITOR    
+
 	Scene->SelectLightsForObject(this);
-#endif
 	m_pReference->Render(_Transform(), priority, strictB2F, &m_Surfaces);
 	if (Selected()){
 		if (1==priority){
@@ -398,19 +367,15 @@ void CSceneObject::FillProp(LPCSTR pref, PropItemVec& items)
 		{
 			MultiChooseValue* MultiValue = PHelper().CreateChooseTexture(items, PrepareKey(Pref2.c_str(), "TextureView"));
 
-			R_ASSERT(s->m_Texture.size() && s->m_Texture != "", "Invalid texture name for material", s->_Name());
 			ChooseValue* Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Tex"), &s->m_Texture, smTexture);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeShader);
 
-			R_ASSERT(s->m_ShaderName.size() && s->m_Texture != "", "Invalid engine shader name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Shader"), &s->m_ShaderName, smEShader);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeShader);
 
-			R_ASSERT(s->m_ShaderXRLCName.size() && s->m_Texture != "", "Invalid compile shader name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Compile"), &s->m_ShaderXRLCName, smCShader);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeSurface);
 
-			R_ASSERT(s->m_GameMtlName.size() && s->m_Texture != "", "Invalid game material name for material", s->_Name());
 			Val = MultiValue->CreateValue(PrepareKey(Pref2.c_str(), "Mtl"), &s->m_GameMtlName, smGameMaterial);
 			Val->OnChangeEvent.bind(this, &CSceneObject::OnChangeSurface);
 			Val->OnAfterEditEvent.bind(this, &CSceneObject::AfterEditGameMtl);
