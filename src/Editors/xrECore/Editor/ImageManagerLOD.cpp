@@ -48,7 +48,8 @@ BOOL GetPointColor(SPickQuery::SResult* R, u32& alpha, u32& color)
 
     auto& Layer = surf->m_ImageData->layers;
 
-    if (!Layer.empty())
+    auto Index = V * surf->m_ImageData->w + U;
+    if (!Layer.empty() && Index < Layer.back().size())
     {
         color = Layer.back()[V * surf->m_ImageData->w + U];
         alpha = color_get_A(color);
