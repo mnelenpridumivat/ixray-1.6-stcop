@@ -479,6 +479,11 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 			LPCSTR				GetPatrolPathName	();
+			LPCSTR				GetItemAdditionalDescription();
+			void				SetItemAdditionalDescription(LPCSTR additionalDescription);
+			void				UnsetItemAdditionalDescription();
+			bool				IsItemUsedAdditionalDescription();
+
 			u32					GetAmmoElapsed		();
 			void				SetAmmoElapsed		(int ammo_elapsed);
 			u32					GetSuitableAmmoTotal		() const;

@@ -147,6 +147,12 @@ class_<CScriptGameObject> script_register_game_object1(class_<CScriptGameObject>
 
 		.def("patrol",						&CScriptGameObject::GetPatrolPathName)
 
+		//FFx0001++
+		.def("get_item_additional_description", &CScriptGameObject::GetItemAdditionalDescription)
+		.def("set_item_additional_description", &CScriptGameObject::SetItemAdditionalDescription)
+		.def("unset_item_additional_description", &CScriptGameObject::UnsetItemAdditionalDescription)
+		.def("is_item_used_additional_description", &CScriptGameObject::IsItemUsedAdditionalDescription)
+
 		.def("get_ammo_in_magazine",		&CScriptGameObject::GetAmmoElapsed)
 		.def("get_ammo_total",				&CScriptGameObject::GetSuitableAmmoTotal)
 		.def("set_ammo_elapsed",			&CScriptGameObject::SetAmmoElapsed)

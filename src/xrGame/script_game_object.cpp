@@ -376,6 +376,68 @@ u32 CScriptGameObject::GetAmmoElapsed()
 	return 0;
 }
 
+//FFx0001++
+LPCSTR CScriptGameObject::GetItemAdditionalDescription()
+{
+	if (CInventoryItem* inventory_item = object().cast_inventory_item())
+	{
+		return inventory_item->GetAdditionalDescription();
+	}
+
+	return "";
+}
+
+//FFx0001++
+void CScriptGameObject::SetItemAdditionalDescription(LPCSTR additionalDescription)
+{
+	if (CInventoryItem* inventory_item = object().cast_inventory_item())
+	{
+		inventory_item->SetAdditionalDescription(additionalDescription);
+	}
+}
+
+//FFx0001++
+void CScriptGameObject::UnsetItemAdditionalDescription()
+{
+	if (CInventoryItem* inventory_item = object().cast_inventory_item())
+	{
+		inventory_item->UnsetAdditionalDescription();
+	}
+}
+
+//FFx0001++
+bool CScriptGameObject::IsItemUsedAdditionalDescription()
+{
+	if (CInventoryItem* inventory_item = object().cast_inventory_item())
+	{
+		inventory_item->IsUsedAdditionalDescription();
+	}
+
+	return false;
+}
+
+//FFx0001++
+u32 CScriptGameObject::GetAmmoElapsedWithChamber()
+{
+	if (const CWeapon* weapon = object().cast_weapon())
+	{
+		return weapon->GetAmmoElapsed() + weapon->GetAmmoChamberElapsed();
+	}
+
+	return 0;
+}
+
+//FFx0001++
+bool CScriptGameObject::IsWeaponUseChamber()
+{
+	if (const CWeapon* weapon = object().cast_weapon())
+	{
+		return weapon->IsChamber();
+	}
+
+	return false;
+}
+
 void CScriptGameObject::SetAmmoElapsed(int ammo_elapsed)
 {
 	if (CWeapon* weapon = object().cast_weapon())
