@@ -87,11 +87,7 @@ ImTextureID TUI::LoadTexture(const char* Texture) const
 
 	if (TextureStack.contains(Texture))
 	{
-		if (!I_ASSERT_M(TextureStack[Texture]->pSurface, "Unable to access loaded texture [%s]", Texture))
-		{
-			return nullptr;
-		}
-		return TextureStack[Texture]->pSurface->GetRawTexture();
+		return TextureStack[Texture]->get_SRView()->GetRawSRV();
 	}
 
 	TextureStack[Texture] = EDevice->Resources->_CreateTexture(Texture);
@@ -101,12 +97,8 @@ ImTextureID TUI::LoadTexture(const char* Texture) const
 	{
 		Tex->Load();
 	}
-	if (!I_ASSERT_M(Tex->pSurface, "Unable to load texture [%s]", Texture))
-	{
-		return nullptr;
-	}
-	
-	return (void*)Tex->pSurface->GetRawTexture();
+
+	return (void*)Tex->get_SRView()->GetRawSRV();
 }
 
 void TUI::OnDeviceCreate()
