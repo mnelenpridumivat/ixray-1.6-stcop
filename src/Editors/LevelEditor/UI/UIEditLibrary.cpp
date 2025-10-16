@@ -20,8 +20,8 @@ UIEditLibrary::UIEditLibrary()
 {
 	m_ObjectList = new UIItemListForm();
 	InitObjects();
-	m_ObjectList->SetOnItemFocusedEvent({this, &UIEditLibrary::OnItemFocused});
-	m_ObjectList->SetOnItemUnfocusedEvent({this, &UIEditLibrary::OnItemUnfocused});
+	m_ObjectList->SetOnItemFocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemFocused));
+	m_ObjectList->SetOnItemUnfocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemUnfocused));
 	m_ObjectList->m_Flags.set(UIItemListForm::fMultiSelect, true);
 
 	InternalProps = new UIPropertiesForm();
@@ -34,8 +34,8 @@ UIEditLibrary::UIEditLibrary()
 
 	View.OnFocusCallback = ViewportFocusCallback;
 
-	SearchList.SetOnItemFocusedEvent({this, &UIEditLibrary::OnItemFocused});
-	SearchList.SetOnItemUnfocusedEvent({this, &UIEditLibrary::OnItemUnfocused});
+	SearchList.SetOnItemFocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemFocused));
+	SearchList.SetOnItemUnfocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemUnfocused));
 }
 
 void UIEditLibrary::OnItemFocused(ListItem* item)
@@ -207,15 +207,13 @@ void UIEditLibrary::DrawObjects()
 		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 }
 
-void UIEditLibrary::GenerateLOD(RStringVec& props, bool bHighQuality)
+void UIEditLibrary::GenerateLOD(const RStringVec& props, bool bHighQuality)
 {
 	u32 lodsCnt = 0;
 	SPBItem* pb = UI->ProgressStart(props.size(), "Making LOD");
 
-	for (size_t i = 0; i < props.size(); ++i)
+	for (const shared_str& str : props)
 	{
-		const auto& str = props[i];
-		Msg("Generating LOD [%s]: %d/%d", *str, i+1, props.size());
 		RStringVec reference;
 		reference.push_back(str);
 		ChangeReference(reference);   // select item
@@ -237,7 +235,7 @@ void UIEditLibrary::GenerateLOD(RStringVec& props, bool bHighQuality)
 			_ChangeSymbol(tmp, '\\', '_');
 			tex_name = xr_string("lod_") + tmp;
 			tex_name = ImageLib.UpdateFileName(tex_name);
-			ImageLib.CreateLODTexture(O, tex_name.c_str(), LOD_IMAGE_SIZE, LOD_IMAGE_SIZE, LOD_SAMPLE_COUNT, O->Version(), bHighQuality ? 4 /*7*/ : 1);
+			ImageLib.CreateLODTexture(O, tex_name.c_str(), LOD_IMAGE_SIZE, LOD_IMAGE_SIZE, LOD_SAMPLE_COUNT, (time_t)O->Version(), bHighQuality ? 4 /*7*/ : 1);
 			O->OnDeviceDestroy();
 			O->m_objectFlags.set(CEditableObject::eoUsingLOD, bLod);
 			ELog.Msg(mtInformation, "+ LOD for object '%s' successfully created.", O->GetName());
@@ -258,6 +256,7 @@ void UIEditLibrary::GenerateLOD(RStringVec& props, bool bHighQuality)
 		ELog.DlgMsg(mtInformation, "+ '%u' LOD's succesfully created.", lodsCnt);
 }
 
+static xr_task_group LODTask;
 void UIEditLibrary::MakeLOD(bool bHighQuality)
 {
 	int res = ELog.DlgMsg(mtConfirmation, TMsgDlgButtons() | mbYes | mbNo | mbCancel, "Do you want to select multiple objects?");
@@ -273,7 +272,15 @@ void UIEditLibrary::MakeLOD(bool bHighQuality)
 			sel_items.push_back(ListItem->Key());
 		}
 
-		GenerateLOD(sel_items, bHighQuality);
+		LODTask.wait();
+		LODTask.run
+		(
+			[this, sel_items, bHighQuality]()
+			{
+				GenerateLOD(sel_items, bHighQuality);
+			}
+		);
+
 		return;
 	}
 
@@ -465,11 +472,6 @@ void UIEditLibrary::DrawRightBar()
 			ExportObj();
 		}
 
-		if (ImGui::Button("Validate", ImVec2(-1, 0)))
-		{
-			Validate();
-		}
-
 		if (!IsModify)
 		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -643,7 +645,7 @@ void UIEditLibrary::ExportObj()
 {
 	if (!m_Preview)
 	{
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Exporting to OBJ");
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
 		CSceneObject* SO = new CSceneObject((LPVOID)0, (LPSTR)0);
 
 		for (ListItem* item : ActualItemList().m_SelectedItems)
@@ -669,7 +671,7 @@ void UIEditLibrary::ExportObj()
 	}
 	else
 	{
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Exporting to OBJ");
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
 		for (CSceneObject* SO : m_pEditObjects)
 		{
 			CEditableObject* O = SO->GetReference();
@@ -686,70 +688,6 @@ void UIEditLibrary::ExportObj()
 		UI->ProgressEnd(pb);
 	}
 	ELog.DlgMsg(mtInformation, "Done.");
-}
-
-void UIEditLibrary::ValidateOne(CEditableObject* O)
-{
-	if (O)
-	{
-		if(!O->Validate())
-		{
-			Msg("[General] Object %s is invalid!", O->GetName());
-		}
-		bool HasFixes = false;
-		bool SurfaceValidation = O->ValidateSurf(true, &HasFixes);
-		if(!SurfaceValidation)
-		{
-			if(HasFixes)
-			{
-				Msg("[Surfaces] Object %s is invalid, but has some surfaces fixed!", O->GetName());
-				OnModified();
-			} else
-			{
-				Msg("[Surfaces] Object %s is invalid!", O->GetName());
-			}
-		} else if (HasFixes)
-		{
-			Msg("[Surfaces] Object %s has some surfaces fixed and now is valid!", O->GetName());
-			OnModified();
-		}
-	}
-}
-
-void UIEditLibrary::Validate()
-{
-	if (!m_Preview)
-	{
-		
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
-		CSceneObject* SO = new CSceneObject((LPVOID)0, (LPSTR)0);
-
-		for (ListItem* item : ActualItemList().m_SelectedItems)
-		{
-			pb->Inc(item->Key());
-			SO->SetReference(item->Key());
-			CEditableObject* NE = SO->GetReference();
-			ValidateOne(NE);
-		}
-
-		if (UI->NeedAbort())
-			xr_delete(SO);
-
-		UI->ProgressEnd(pb);
-	} else
-	{
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Validating");
-		for (CSceneObject* SO : m_pEditObjects)
-		{
-			CEditableObject* O = SO->GetReference();
-			pb->Inc(O->GetName());
-			ValidateOne(O);
-
-			if (UI->NeedAbort())
-				break;
-		}
-		UI->ProgressEnd(pb);
-	}
 }
 
 UIPropertiesForm* UIEditLibrary::GetPropertyWnd()

@@ -48,8 +48,7 @@ BOOL GetPointColor(SPickQuery::SResult* R, u32& alpha, u32& color)
 
     auto& Layer = surf->m_ImageData->layers;
 
-    auto Index = V * surf->m_ImageData->w + U;
-    if (!Layer.empty() && Index < Layer.back().size())
+    if (!Layer.empty() && !Layer.back().empty())
     {
         color = Layer.back()[V * surf->m_ImageData->w + U];
         alpha = color_get_A(color);
@@ -186,11 +185,8 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
     for (SurfaceIt surf_it = OBJECT->Surfaces().begin(); surf_it != OBJECT->Surfaces().end(); surf_it++) {
         CSurface* surf = *surf_it;
         Shader_xrLC* c_sh = EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
-        if (I_ASSERT(c_sh, "Invalid compile shader [%s] for object [%s]"), surf->_ShaderXRLCName(), OBJECT->m_LibName.c_str())
-        {
-            if (!c_sh->flags.bRendering) continue;
-            if (0 == surf->m_ImageData)surf->CreateImageData();
-        }
+        if (!c_sh->flags.bRendering) continue;
+        if (0 == surf->m_ImageData)surf->CreateImageData();
     }
 
     // calculate
@@ -337,7 +333,7 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
 //------------------------------------------------------------------------------
 // 
 //------------------------------------------------------------------------------
-void CImageManager::CreateLODTexture(CEditableObject* OBJECT, LPCSTR tex_name, u32 tgt_w, u32 tgt_h, int samples, int age, int quality)
+void CImageManager::CreateLODTexture(CEditableObject* OBJECT, LPCSTR tex_name, u32 tgt_w, u32 tgt_h, int samples, time_t age, int quality)
 {
     U32Vec lod_pixels, nm_pixels;
 
