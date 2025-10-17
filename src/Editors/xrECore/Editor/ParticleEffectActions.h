@@ -166,6 +166,9 @@ struct EParticleAction
     	flags.assign(flEnabled);
         type		= _type;
     }
+
+    virtual ~EParticleAction() = default;
+
 public:
 	SOrder&	appendFloat	(LPCSTR name, float v, float mn, float mx);
 	SOrder&	appendInt	(LPCSTR name, int v, int mn=-P_MAXINT, int mx=P_MAXINT);

@@ -24,7 +24,8 @@ namespace PAPI
 		PActionEnum		type;	// Type field
 		ParticleActionVersion Version = ParticleActionVersion::Original;
 		ParticleAction	() : type(action_enum_force_dword) {m_Flags.zero();}
-        
+
+		virtual ~ParticleAction() = default;
 		virtual void 	Execute		(ParticleEffect *pe, const float dt, float& m_max)	= 0;
 		virtual void 	Transform	(const Fmatrix& m)				= 0;
 
