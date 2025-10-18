@@ -46,7 +46,7 @@ namespace pda_section {
 };
 
 
-class CUIPdaWnd: public CUIDialogWnd
+class CUIPdaWnd final : public CUIDialogWnd
 {
 	typedef CUIDialogWnd	inherited;
 protected:
