@@ -46,10 +46,6 @@ CArtefact::CArtefact()
 	m_bInContainer = false;
 }
 
-
-CArtefact::~CArtefact() 
-{}
-
 void CArtefact::Load(LPCSTR section) 
 {
 	inherited::Load			(section);

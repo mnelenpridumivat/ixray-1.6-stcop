@@ -10,12 +10,6 @@
 #include "InventoryBox.h"
 #include "FlameCanister.h"
 
-CF1::CF1(void) {
-}
-
-CF1::~CF1(void) {
-}
-
 using namespace luabind;
 
 #pragma optimize("s",on)
