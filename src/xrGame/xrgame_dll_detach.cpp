@@ -82,10 +82,10 @@ void clean_game_globals()
 
 	if(!g_dedicated_server)
 	{
-//.		CInfoPortion::DeleteSharedData					();
+		CInfoPortion::DeleteSharedData					();
 		CInfoPortion::DeleteIdToIndexData				();
 
-//.		CEncyclopediaArticle::DeleteSharedData			();
+		CEncyclopediaArticle::DeleteSharedData			();
 		CEncyclopediaArticle::DeleteIdToIndexData		();
 
 		CPhraseDialog::DeleteSharedData					();

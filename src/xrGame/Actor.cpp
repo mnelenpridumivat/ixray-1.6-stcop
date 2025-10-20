@@ -135,7 +135,7 @@ void CActor::UpdateLookAt()
 CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 {
 	LoadCallbackGlobals(m_isBeforeHitCallback, m_onBeforeHitCallback, "OnBeforeHit");
-	encyclopedia_registry = new CEncyclopediaRegistryWrapper();
+	encyclopedia_registry	= new CEncyclopediaRegistryWrapper();
 	game_news_registry		= new CGameNewsRegistryWrapper();
 	// Cameras
 	cameras[eacFirstEye] = new CCameraFirstEye(this, CCameraBase::flKeepPitch);
@@ -262,6 +262,7 @@ CActor::~CActor()
 {
 	xr_delete				(m_location_manager);
 	xr_delete				(m_memory);
+    xr_delete				(encyclopedia_registry);
 	xr_delete				(game_news_registry);
 #ifdef DEBUG
 	Device.seqRender.Remove(this);
