@@ -677,7 +677,6 @@ void CSector::FillProp(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateToken8(items, PrepareKey(pref, GetName(),"Change LevelMap to"), &m_map_idx, level_sub_map);
 }
 
-
 bool CSector::GetSummaryInfo(SSceneSummary* inf)
 {
 	inherited::GetSummaryInfo	(inf);
@@ -687,13 +686,14 @@ bool CSector::GetSummaryInfo(SSceneSummary* inf)
 
 bool CSector::Validate(bool bMsg)
 {
-	bool bRes		= true;
+	bool bRes = true;
 	// verify face count
+
 	int f_cnt;
-	GetCounts		(0,0,&f_cnt);
-	if (f_cnt<=4){
-		if (bMsg) 	ELog.Msg(mtError,"*ERROR: Sector: '%s' - face count < 4!",GetName());
-		bRes		= false;
+	GetCounts(0, 0, &f_cnt);
+	if (f_cnt <= 4) {
+		if (bMsg) 	ELog.Msg(mtError, "*ERROR: Sector: '%s' - face count < 4!", GetName());
+		bRes = false;
 	}
 	// verify shader compatibility
 	bool bRenderableFound	= false;    
@@ -712,9 +712,9 @@ bool CSector::Validate(bool bMsg)
 			}
 		}
 	}
-	if (!bRenderableFound){
-		if (bMsg) 	ELog.Msg(mtError,"*ERROR: Sector: '%s' - can't find any renderable face!", GetName());
-		bRes 		= false;
-	}        
+	if (!bRenderableFound) {
+		if (bMsg) 	ELog.Msg(mtError, "*ERROR: Sector: '%s' - can't find any renderable face!", GetName());
+		bRes = false;
+	}
 	return bRes;
 }

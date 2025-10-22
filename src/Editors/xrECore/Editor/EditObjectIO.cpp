@@ -261,7 +261,7 @@ bool CEditableObject::Load(IReader& F)
 			m_Surfaces.resize(cnt);
 			for (SurfaceIt s_it=m_Surfaces.begin(); s_it!=m_Surfaces.end(); s_it++)
 			{
-				*s_it 		= new CSurface();
+				*s_it 		= xr_make_shared<CSurface>();
 				F.r_stringZ	(buf);	(*s_it)->SetName		(buf.c_str());
 				F.r_stringZ	(buf);	(*s_it)->SetShader		(buf.c_str());
 				F.r_stringZ	(buf);	(*s_it)->SetShaderXRLC	(buf.c_str());
@@ -278,7 +278,7 @@ bool CEditableObject::Load(IReader& F)
 			u32 cnt = F.r_u32();
 			m_Surfaces.resize(cnt);
 			for (SurfaceIt s_it=m_Surfaces.begin(); s_it!=m_Surfaces.end(); s_it++){
-				*s_it 		= new CSurface();
+				*s_it 		= xr_make_shared<CSurface>();
 				F.r_stringZ	(buf);	(*s_it)->SetName		(buf.c_str());
 				F.r_stringZ	(buf);	(*s_it)->SetShader		(buf.c_str());
 				F.r_stringZ	(buf);	(*s_it)->SetShaderXRLC	(buf.c_str());
@@ -295,7 +295,7 @@ bool CEditableObject::Load(IReader& F)
 			u32 cnt = F.r_u32();
 			m_Surfaces.resize(cnt);
 			for (SurfaceIt s_it=m_Surfaces.begin(); s_it!=m_Surfaces.end(); s_it++){
-				*s_it = new CSurface();
+				*s_it = xr_make_shared<CSurface>();
 				F.r_stringZ(buf);
 				(*s_it)->SetName(buf.c_str());
 				F.r_stringZ(sh_name);
