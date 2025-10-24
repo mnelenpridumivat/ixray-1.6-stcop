@@ -9,7 +9,7 @@
 using namespace PAPI; 
 using namespace EPALegacy;
 
-EParticleAction* pCreateEActionImpl(PAPI::PActionEnum type)
+EParticleAction* EPACreator::pCreateEActionImpl(PAPI::PActionEnum type)
 {
 	EParticleAction* pa	= 0;
 	switch(type){
