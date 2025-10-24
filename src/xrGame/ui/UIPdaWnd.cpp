@@ -27,9 +27,9 @@
 #include "UIRankingWnd.h"
 #include "UILogsWnd.h"
 #include "UIFactionWarWnd.h"
-#include "UIEncyclopediaWnd.h"
 #include "UIScriptWnd.h"
 #include "UIPdaContactsWnd.h"
+#include "UIEncyclopediaWnd.h"
 
 #define PDA_XML		"pda.xml"
 
@@ -46,8 +46,8 @@ CUIPdaWnd::CUIPdaWnd()
 	pUIRankingWnd    = nullptr;
 	pUILogsWnd       = nullptr;
 	UIPdaContactsWnd = nullptr;
-	pUIEncyclopediaWnd = nullptr;
 	m_hint_wnd       = nullptr;
+	pUIEncyclopediaWnd = nullptr;
 
 	LoadCallbackGlobals(m_isSetActiveSubdialog, m_onSetActiveSubdialog, "OnSetActiveSubdialog");
 	Init();
@@ -60,9 +60,9 @@ CUIPdaWnd::~CUIPdaWnd()
 	delete_data( UIPdaContactsWnd );
 	delete_data( pUIRankingWnd );
 	delete_data( pUILogsWnd );
-	delete_data(pUIEncyclopediaWnd);
 	delete_data( m_hint_wnd );
 	delete_data( UINoice );
+	delete_data( pUIEncyclopediaWnd );
 }
 
 void CUIPdaWnd::Init()
@@ -119,8 +119,12 @@ void CUIPdaWnd::Init()
 	pUILogsWnd						= new CUILogsWnd();
 	pUILogsWnd->Init				();
 
-	pUIEncyclopediaWnd = new CUIEncyclopediaWnd();
-	pUIEncyclopediaWnd->Init();
+	
+	if (UITabControl->GetButtonById("eptEncyclopedia"))
+	{
+		pUIEncyclopediaWnd = new CUIEncyclopediaWnd();
+		pUIEncyclopediaWnd->Init();
+	}
 
 	UINoice					= new CUIStatic();
 	UINoice->SetAutoDelete	( true );
@@ -228,6 +232,10 @@ void CUIPdaWnd::SetActiveSubdialog(const shared_str& section)
 	else if ( section == "eptLogs" )
 	{
 		m_pActiveDialog = pUILogsWnd;
+	}
+	else if (section == "eptEncyclopedia")
+	{
+		m_pActiveDialog = pUIEncyclopediaWnd;
 	}
 	if (m_isSetActiveSubdialog)
 	{
@@ -359,6 +367,7 @@ void CUIPdaWnd::Reset()
 	if ( UIPdaContactsWnd )	UIPdaContactsWnd->ResetAll();
 	if ( pUIRankingWnd )	pUIRankingWnd->ResetAll();
 	if ( pUILogsWnd )		pUILogsWnd->ResetAll();
+	if ( pUIEncyclopediaWnd )	pUIEncyclopediaWnd->ResetAll();
 }
 
 void CUIPdaWnd::SetCaption( LPCSTR text )
@@ -402,14 +411,4 @@ bool CUIPdaWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	}	
 
 	return inherited::OnKeyboardAction(dik,keyboard_action);
-}
-
-void CUIPdaWnd::PdaContentsChanged(pda_section::part type)
-{
-	//if (type == pda_section::encyclopedia)
-	//{
-	pUIEncyclopediaWnd->ReloadArticles();
-	CurrentGameUI()->UIMainIngameWnd->SetFlashIconState_(CUIMainIngameWnd::efiEncyclopedia, true);
-
-	//}
 }

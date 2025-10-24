@@ -21,30 +21,7 @@ class CUIAnimatedStatic;
 class UIHint;
 class CMapSpot;
 class CUIPdaContactsWnd;
-class CUIEncyclopediaWnd; 
-
-namespace pda_section {
-	enum part {
-		quests = (1 << 8),
-		map = (1 << 9),
-		diary = (1 << 10),
-		contacts = (1 << 11),
-		ranking = (1 << 12),
-		statistics = (1 << 13),
-		encyclopedia = (1 << 14),
-		skills = (1 << 15),
-		downloads = (1 << 16),
-		games = (1 << 17),
-		mplayer = (1 << 18),
-
-
-		news = diary | (1 << 1),
-		info = diary | (1 << 2),
-		journal = diary | (1 << 3),
-
-	};
-};
-
+class CUIEncyclopediaWnd;
 
 class CUIPdaWnd final : public CUIDialogWnd
 {
@@ -77,7 +54,7 @@ public:
 	CUIRankingWnd*			pUIRankingWnd;
 	CUILogsWnd*				pUILogsWnd;
 	CUIPdaContactsWnd*		UIPdaContactsWnd;
-	CUIEncyclopediaWnd* pUIEncyclopediaWnd;
+	CUIEncyclopediaWnd*		pUIEncyclopediaWnd;
 
 	CMapSpot*				pSelectedMapSpot;
 
@@ -118,8 +95,5 @@ public:
 
 			void			UpdatePda			();
 			void			UpdateRankingWnd	();
-
-			void PdaContentsChanged(pda_section::part type);
-
 			DECLARE_SCRIPT_REGISTER_FUNCTION
 };
