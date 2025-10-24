@@ -118,7 +118,12 @@ void CDynamicWallmarkZone::Serialize(ISaveObject& Object)
 	BEGIN_CHUNK(Object, "CDynamicWallmarkZone::Serialize")
 	{
 		inherited::Serialize(Object);
-		Object << CurrentStatus;
-		SwitchWallmark(CurrentStatus);
+		bool LocCurrentStatus = CurrentStatus;
+		Object << LocCurrentStatus;
+		BEGIN_CHUNK(Object, "CDynamicWallmarkZone::Serialize::WMData")
+		{
+			Object << shader << texture << w << h << r;
+		}
+		SwitchWallmark(LocCurrentStatus);
 	}
 }

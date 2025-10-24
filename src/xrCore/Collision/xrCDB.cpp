@@ -148,8 +148,9 @@ void CDB::MODEL::CreateNewTree(IWriter* pCache)
 	OPCC.mNoLeaf = true;
 	OPCC.mQuantized = false;
 
-	tree = new CDB_Model();
-	if (!tree->Build(OPCC))
+	tree = new CDB_Model(); // Sometimes, there is Opcode::Model instead CDB_Model, sometimes this object is NULL, but passes all asserts. WTF!?
+	LPCSTR debug_type_name = typeid(*tree).name();
+	if (IVERIFY(tree) && IVERIFY(tree->GetTree()) && !tree->Build(OPCC))
 	{
 		xr_free(verts);
 		xr_free(tris);
