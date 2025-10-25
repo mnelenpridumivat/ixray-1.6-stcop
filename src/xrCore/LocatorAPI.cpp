@@ -52,6 +52,22 @@ bool CLocatorAPI::CheckSkip(const xr_string& Path) const
 	return false;
 }
 
+void CLocatorAPI::FileEventAdd(LPCSTR file)
+{
+	size_t FileSize = std::filesystem::file_size(file);
+	size_t FileModif = xr_chrono_to_time_t(std::filesystem::last_write_time(file));
+	Register(file, 0xffffffff, 0, 0, FileSize, FileSize, FileModif);
+}
+
+void CLocatorAPI::FileEventDel(LPCSTR file)
+{
+	const files_it I = file_find_it(file);
+	if (I != m_files.end())
+	{
+		m_files.erase(I);
+	}
+}
+
 CLocatorAPI::CLocatorAPI()
 {
 	m_Flags.zero();
@@ -821,6 +837,39 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 	{
 		xrLogger::OpenLogFile();
 	}
+	
+	xr_string WatchedPath = ".\\";
+	WatcherPtr = new filewatch::FileWatch<std::string>(
+		WatchedPath.data(),
+		[this](const std::string& file, const filewatch::Event Event)
+		{
+			switch (Event)
+			{
+			case filewatch::Event::added:
+				{
+					Msg("[CLocatorAPI filewatcher] Added %s", file.c_str());
+					FileEventAdd(file.c_str());
+					break;
+				}
+			case filewatch::Event::removed:
+				{
+					Msg("[CLocatorAPI filewatcher] Removed %s", file.c_str());
+					FileEventDel(file.c_str());
+					break;
+				}
+			case filewatch::Event::renamed_old:
+				{
+					Msg("[CLocatorAPI filewatcher] Renamed (old) %s", file.c_str());
+					break;
+				}
+			case filewatch::Event::renamed_new:
+				{
+					Msg("[CLocatorAPI filewatcher] Renamed (new) %s", file.c_str());
+					break;
+				}
+			}
+		}
+		);
 }
 
 void CLocatorAPI::_destroy()
