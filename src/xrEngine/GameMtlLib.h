@@ -37,6 +37,7 @@ class ButtonValue;
 #define GAMEMTL_NONE_ID					u32(-1)
 #define GAMEMTL_NONE_IDX				u16(-1)
 #define GAMEMTL_FILENAME				"gamemtl.xr"
+#define GAMEMTL_REMAP_FILENAME			"gamemtl_remappings.ltx"
 
 #ifdef _EDITOR
 #define GM_NON_GAME
@@ -239,6 +240,10 @@ protected:
     u32					material_count;
     GameMtlPairVec		material_pairs_rt;
 
+#ifndef MASTER_GOLD
+	CInifile* remappings = nullptr;
+#endif
+
 public:
 	CGameMtlLibrary		();
 	~CGameMtlLibrary	()
@@ -248,7 +253,19 @@ public:
     	R_ASSERT		(0==material_pairs.size());
     	R_ASSERT		(0==materials.size());
 		*/
+		
+#ifndef MASTER_GOLD
+		if(remappings)
+		{
+			CInifile::Destroy(remappings);
+		}
+#endif
     }
+	
+#ifndef MASTER_GOLD
+	LPCSTR GetRemapping(LPCSTR OldName);
+#endif
+	
 	IC void				Unload			()
 	{
 		material_count	= 0;

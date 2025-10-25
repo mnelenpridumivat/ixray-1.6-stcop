@@ -42,6 +42,8 @@ private:
 	bool SelectionToReference(ListItemsVec* props);
 	void ExportOneOBJ(CEditableObject* EO);
 	void ExportObj();
+	void ValidateOne(CEditableObject* O);
+	void Validate();
 
 	UIPropertiesForm* GetPropertyWnd();
 

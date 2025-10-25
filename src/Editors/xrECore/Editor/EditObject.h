@@ -460,6 +460,7 @@ public:
 #endif
 	bool			ExportLWO				(LPCSTR fname);
 	bool			Validate				();
+	bool			ValidateSurf			(bool TryToFix = false, bool* HasFixes = nullptr);
 private:
 	float 			GetBonesBottom			();
 public:

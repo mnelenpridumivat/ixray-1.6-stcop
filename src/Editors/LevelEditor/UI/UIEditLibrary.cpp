@@ -465,6 +465,11 @@ void UIEditLibrary::DrawRightBar()
 			ExportObj();
 		}
 
+		if (ImGui::Button("Validate", ImVec2(-1, 0)))
+		{
+			Validate();
+		}
+
 		if (!IsModify)
 		{
 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -638,7 +643,7 @@ void UIEditLibrary::ExportObj()
 {
 	if (!m_Preview)
 	{
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Exporting to OBJ");
 		CSceneObject* SO = new CSceneObject((LPVOID)0, (LPSTR)0);
 
 		for (ListItem* item : ActualItemList().m_SelectedItems)
@@ -664,7 +669,7 @@ void UIEditLibrary::ExportObj()
 	}
 	else
 	{
-		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Exporting to OBJ");
 		for (CSceneObject* SO : m_pEditObjects)
 		{
 			CEditableObject* O = SO->GetReference();
@@ -681,6 +686,70 @@ void UIEditLibrary::ExportObj()
 		UI->ProgressEnd(pb);
 	}
 	ELog.DlgMsg(mtInformation, "Done.");
+}
+
+void UIEditLibrary::ValidateOne(CEditableObject* O)
+{
+	if (O)
+	{
+		if(!O->Validate())
+		{
+			Msg("[General] Object %s is invalid!", O->GetName());
+		}
+		bool HasFixes = false;
+		bool SurfaceValidation = O->ValidateSurf(true, &HasFixes);
+		if(!SurfaceValidation)
+		{
+			if(HasFixes)
+			{
+				Msg("[Surfaces] Object %s is invalid, but has some surfaces fixed!", O->GetName());
+				OnModified();
+			} else
+			{
+				Msg("[Surfaces] Object %s is invalid!", O->GetName());
+			}
+		} else if (HasFixes)
+		{
+			Msg("[Surfaces] Object %s has some surfaces fixed and now is valid!", O->GetName());
+			OnModified();
+		}
+	}
+}
+
+void UIEditLibrary::Validate()
+{
+	if (!m_Preview)
+	{
+		
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
+		CSceneObject* SO = new CSceneObject((LPVOID)0, (LPSTR)0);
+
+		for (ListItem* item : ActualItemList().m_SelectedItems)
+		{
+			pb->Inc(item->Key());
+			SO->SetReference(item->Key());
+			CEditableObject* NE = SO->GetReference();
+			ValidateOne(NE);
+		}
+
+		if (UI->NeedAbort())
+			xr_delete(SO);
+
+		UI->ProgressEnd(pb);
+	} else
+	{
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Validating");
+		for (CSceneObject* SO : m_pEditObjects)
+		{
+			CEditableObject* O = SO->GetReference();
+			pb->Inc(O->GetName());
+			ValidateOne(O);
+
+			if (UI->NeedAbort())
+				break;
+		}
+		UI->ProgressEnd(pb);
+	}
 }
 
 UIPropertiesForm* UIEditLibrary::GetPropertyWnd()

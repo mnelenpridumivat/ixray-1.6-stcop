@@ -1539,8 +1539,8 @@ BOOL CLocatorAPI::dir_delete(LPCSTR path,LPCSTR nm,BOOL remove_files)
 				if (!remove_files)
 					return FALSE;
 
+				//m_files.erase(cur_item);
 				Platform::Unlink(entry.name);
-				m_files.erase(cur_item);
 			}
 			else
 			{

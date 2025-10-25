@@ -13,6 +13,34 @@ CGameMtlLibrary::CGameMtlLibrary()
     PGMLib = &GMLib;
 }
 
+#ifndef MASTER_GOLD
+LPCSTR CGameMtlLibrary::GetRemapping(LPCSTR OldName)
+{
+    if (!I_ASSERT(remappings))
+    {
+        return nullptr;
+    }
+    for(auto sect : remappings->sections())
+    {
+        LPCSTR OldNameFromConf = nullptr;
+        if (!I_ASSERT(sect->line_exist("old", &OldNameFromConf)))
+        {
+            continue;
+        }
+        LPCSTR NewName = nullptr;
+        if (!I_ASSERT(sect->line_exist("new", &NewName)))
+        {
+            continue;
+        }
+        if(!xr_strcmp(OldName, OldNameFromConf))
+        {
+            return NewName;
+        }
+    }
+    return nullptr;
+}
+#endif
+
 SGameMtl* CGameMtlLibrary::GetMaterialByIdx(u16 idx)
 {
     if (idx >= materials.size())
@@ -246,6 +274,16 @@ void CGameMtlLibrary::Load()
         material_pairs_rt[idx0] = S;
         material_pairs_rt[idx1] = S;
     }
+    
+#ifndef MASTER_GOLD
+    if(remappings)
+    {
+        CInifile::Destroy(remappings);
+    }
+    string_path remap_name;
+    FS.update_path(remap_name, _game_data_, GAMEMTL_REMAP_FILENAME);
+    remappings = new CInifile(remap_name, true, true, false);
+#endif
 }
 
 #ifdef GM_NON_GAME

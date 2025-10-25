@@ -55,6 +55,16 @@ BOOL XrGameMaterialLibraryEditors::UpdateMtlPairs()
 
 XrGameMaterialLibraryEditors::XrGameMaterialLibraryEditors()
 {
+    
+#ifndef MASTER_GOLD
+    /*if(remappings)
+    {
+        CInifile::Destroy(remappings);
+    }*/
+    string_path remap_name;
+    FS.update_path(remap_name, _game_data_, GAMEMTL_REMAP_FILENAME);
+    remappings = new CInifile(remap_name, true, true, false);
+#endif
 }
 
 XrGameMaterialLibraryEditors::~XrGameMaterialLibraryEditors()

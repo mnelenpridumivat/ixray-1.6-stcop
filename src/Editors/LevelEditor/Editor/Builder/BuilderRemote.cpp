@@ -637,7 +637,7 @@ BOOL SceneBuilder::BuildMesh(	const Fmatrix& parent,
 		}
 		if (gm_id<0)
 		{
-			ELog.DlgMsg		(mtError,"Surface: '%s' contains bad game material.",surf->_Name());
+			ELog.DlgMsg		(mtError,"Surface: '%s' contains bad game material %s.",surf->_Name(), surf->m_GameMtlName.c_str());
 			bResult 		= FALSE;
 			break;
 		}

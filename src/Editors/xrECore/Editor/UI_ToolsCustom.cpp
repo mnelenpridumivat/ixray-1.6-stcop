@@ -260,17 +260,23 @@ void CToolCustom::Render()
 	temp.clear();
 	temp.resize(64);
 	cnt = 0;
-	for (SDebugDraw::FaceIt fwit = m_DebugDraw.m_WireFaces.begin(); fwit != m_DebugDraw.m_WireFaces.end(); fwit++) {
-		if (fwit->i)        sprintf(temp.data(), "F: %d", cnt++);
-		DU_impl.dbgDrawFace(fwit->p[0], fwit->p[1], fwit->p[2], fwit->c, fwit->i ? temp.c_str() : "");
+	for (const auto& elem : m_DebugDraw.m_WireFaces)
+	{
+		if (elem.i)
+		{
+			sprintf(temp.data(), "F: %d", cnt++);
+		}
+		DU_impl.dbgDrawFace(elem.p[0], elem.p[1], elem.p[2], elem.c, elem.i ? temp.c_str() : "");
 	}
 	
 	cnt = 0;
 	if (!m_DebugDraw.m_SolidFaces.empty()) {
 		EDevice->SetShader(EDevice->m_SelectionShader);
 		DU_impl.DD_DrawFace_begin(FALSE);
-		for (SDebugDraw::FaceIt fsit = m_DebugDraw.m_SolidFaces.begin(); fsit != m_DebugDraw.m_SolidFaces.end(); fsit++)
-			DU_impl.DD_DrawFace_push(fsit->p[0], fsit->p[1], fsit->p[2], fsit->c);
+		for (const auto& elem : m_DebugDraw.m_SolidFaces)
+		{
+			DU_impl.DD_DrawFace_push(elem.p[0], elem.p[1], elem.p[2], elem.c);
+		}
 		DU_impl.DD_DrawFace_end();
 	}
 	EDevice->SetShader(EDevice->m_SelectionShader);
@@ -278,11 +284,11 @@ void CToolCustom::Render()
 	temp.clear();
 	temp.resize(64);
 	cnt = 0;
-	for (SDebugDraw::OBBVecIt oit = m_DebugDraw.m_OBB.begin(); oit != m_DebugDraw.m_OBB.end(); oit++)
+	for (const auto& elem : m_DebugDraw.m_OBB)
 	{
 		sprintf(temp.data(), "OBB: %d", cnt++);
-		DU_impl.DrawOBB(Fidentity, *oit, 0x2F00FF00, 0xFF00FF00);
-		DU_impl.OutText(oit->m_translate, temp.c_str(), 0xffff0000, 0x0000000);
+		DU_impl.DrawOBB(Fidentity, elem, 0x2F00FF00, 0xFF00FF00);
+		DU_impl.OutText(elem.m_translate, temp.c_str(), 0xffff0000, 0x0000000);
 	}
 
 	EDevice->SetRS(D3DRS_CULLMODE, D3DCULL_CCW);

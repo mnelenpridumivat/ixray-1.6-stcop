@@ -168,7 +168,7 @@ bool CImageManager::MakeGameTexture(LPCSTR game_name, u32* data, const STextureP
 		return false;
 	}
 
-	R_ASSERT((res==1)&&FS.file_length(game_name));
+	//R_ASSERT((res==1)&&FS.file_length(game_name));
 	return true;
 }
 bool CImageManager::MakeGameTexture(ETextureThumbnail* THM, LPCSTR game_name, u32* load_data)

@@ -112,18 +112,48 @@ void CEditableObject::Save(IWriter& F)
     F.open_chunk	(EOBJ_CHUNK_SURFACES3);
     F.w_u32			(m_Surfaces.size());
 
-    for (SurfaceIt sf_it=m_Surfaces.begin(); sf_it!=m_Surfaces.end(); ++sf_it)
+	for(const auto& sf : m_Surfaces)
+	{
+        F.w_stringZ(sf->_Name());
+        {
+        	auto sf_shname = sf->_ShaderName();
+        	// TODO: Add shader validation
+        	F.w_stringZ(sf_shname);
+        }
+        {
+        	auto sf_shxrlcname = sf->_ShaderXRLCName();
+        	// TODO: Add shader validation
+			F.w_stringZ(sf_shxrlcname);
+        }
+        {
+	        auto sf_gmtlname = sf->_GameMtlName();
+        	if (sf->_GameMtl() == GAMEMTL_NONE_ID)
+        	{
+        		Msg("Invalid game material [%s]", sf_gmtlname);
+        	}
+        	F.w_stringZ	(sf_gmtlname);
+        }
+		F.w_stringZ(sf->_Texture());
+		F.w_stringZ(sf->_VMap());
+		F.w_u32(sf->m_Flags.get());
+		F.w_u32(sf->_FVF());
+		F.w_u32(1);
+	}
+	
+    /*for (SurfaceIt sf_it=m_Surfaces.begin(); sf_it!=m_Surfaces.end(); ++sf_it)
 	{
         F.w_stringZ	((*sf_it)->_Name			());
         F.w_stringZ	((*sf_it)->_ShaderName		());
         F.w_stringZ	((*sf_it)->_ShaderXRLCName	());
-        F.w_stringZ	((*sf_it)->_GameMtlName		());
-		F.w_stringZ	((*sf_it)->_Texture			());
+	    {
+		    F.w_stringZ	((*sf_it)->_GameMtlName		());
+	    }
+        F.w_stringZ	((*sf_it)->_Texture			());
 		F.w_stringZ	((*sf_it)->_VMap			());
         F.w_u32	((*sf_it)->m_Flags.get		());
         F.w_u32	((*sf_it)->_FVF				());
         F.w_u32	(1);
-    }
+    }*/
     F.close_chunk	();
 
     // bones

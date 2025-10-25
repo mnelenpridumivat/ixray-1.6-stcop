@@ -292,6 +292,52 @@ bool CEditableObject::Validate()
         }
     return bRes;
 }
+
+bool CEditableObject::ValidateSurf(bool TryToFix, bool* HasFixes)
+{
+	bool Valid = true;
+	for(auto sf : m_Surfaces)
+	{
+		auto sf_gmtlname = sf->_GameMtlName();
+		if (sf->_GameMtl() == GAMEMTL_NONE_ID)
+		{
+			if(!TryToFix)
+			{
+				Msg("Invalid game material [%s]", sf_gmtlname);
+				Valid = false;
+			} else
+			{
+				Msg("Invalid game material [%s], try to find remapping...", sf_gmtlname);
+				xr_set<shared_str> ProcessedMtls = {sf_gmtlname};
+				bool found = false;
+				LPCSTR remapping_name = PGMLib->GetRemapping(sf_gmtlname);
+				while(remapping_name && !ProcessedMtls.contains(remapping_name))
+				{
+					if(PGMLib->GetMaterialID(remapping_name) != GAMEMTL_NONE_ID)
+					{
+						Msg("Found remapping: [%s] -> [%s]", sf_gmtlname, remapping_name);
+						sf->SetGameMtl(remapping_name);
+						found = true;
+						if(HasFixes)
+						{
+							*HasFixes = true;
+						}
+						break;
+					}
+					ProcessedMtls.insert(remapping_name);
+					remapping_name = PGMLib->GetRemapping(remapping_name);
+				}
+				if (!found)
+				{
+					Msg("Invalid game material [%s], and no remapping found!", sf_gmtlname);
+					Valid = false;
+				}
+			}
+		}
+	}
+	return Valid;
+}
+
 //----------------------------------------------------------------------------
 //#ifdef DEBUG
 
