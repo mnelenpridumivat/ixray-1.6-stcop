@@ -144,6 +144,7 @@ public:
 		eLightMis,
 		eKick,
 		eMagCheck,
+		eFiremodeCheck,
 	};
 	enum EWeaponSubStates{
 		eSubstateReloadBegin		=0,
