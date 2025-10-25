@@ -186,8 +186,11 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
     for (SurfaceIt surf_it = OBJECT->Surfaces().begin(); surf_it != OBJECT->Surfaces().end(); surf_it++) {
         CSurface* surf = *surf_it;
         Shader_xrLC* c_sh = EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
-        if (!c_sh->flags.bRendering) continue;
-        if (0 == surf->m_ImageData)surf->CreateImageData();
+        if (I_ASSERT(c_sh, "Invalid compile shader [%s] for object [%s]"), surf->_ShaderXRLCName(), OBJECT->m_LibName.c_str())
+        {
+            if (!c_sh->flags.bRendering) continue;
+            if (0 == surf->m_ImageData)surf->CreateImageData();
+        }
     }
 
     // calculate

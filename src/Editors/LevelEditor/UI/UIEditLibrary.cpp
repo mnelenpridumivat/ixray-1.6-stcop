@@ -212,8 +212,10 @@ void UIEditLibrary::GenerateLOD(RStringVec& props, bool bHighQuality)
 	u32 lodsCnt = 0;
 	SPBItem* pb = UI->ProgressStart(props.size(), "Making LOD");
 
-	for (const shared_str& str : props)
+	for (size_t i = 0; i < props.size(); ++i)
 	{
+		const auto& str = props[i];
+		Msg("Generating LOD [%s]: %d/%d", *str, i+1, props.size());
 		RStringVec reference;
 		reference.push_back(str);
 		ChangeReference(reference);   // select item
