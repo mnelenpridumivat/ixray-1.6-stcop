@@ -36,11 +36,13 @@ void calc_ogf( xrMU_Model &	mu_model )
 	// Build OGFs
 	for (xrMU_Model::v_subdivs_it it=mu_model.m_subdivs.begin(); it!=mu_model.m_subdivs.end(); it++)
 	{
+		Status("MU : Model subdiv %u/%u", it-mu_model.m_subdivs.begin()+1, mu_model.m_subdivs.size());
 		OGF*		pOGF	= new OGF ();
 		b_material*	M		= &(pBuild->materials()[it->material]);	// and it's material
 		R_ASSERT	(M);
 
 		try {
+			clMsg("Collect faces...");
 			// Common data
 			pOGF->Sector		= 0;
 			pOGF->material		= it->material;
@@ -68,18 +70,23 @@ void calc_ogf( xrMU_Model &	mu_model )
 		}
 
 		try {
+			clMsg("Optimize...");
 			pOGF->Optimize			();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [optimize], model %s",*(mu_model.m_name)); }
 		try {
+			clMsg("CalcBounds...");
 			pOGF->CalcBounds		();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [bounds], model %s",*(mu_model.m_name)); }
 		try {
+			clMsg("CalculateTB...");
 			pOGF->CalculateTB		();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [calc_tb], model %s",*(mu_model.m_name)); }
 		try {
+			clMsg("MakeProgressive...");
 			pOGF->MakeProgressive	(c_PM_MetricLimit_mu);
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [progressive], model %s",*(mu_model.m_name)); }
 		try {
+			clMsg("Stripify...");
 			pOGF->Stripify			();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [stripify], model %s",*(mu_model.m_name)); }
 

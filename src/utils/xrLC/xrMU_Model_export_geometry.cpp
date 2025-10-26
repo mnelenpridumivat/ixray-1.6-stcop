@@ -41,6 +41,7 @@ void	export_geometry		( xrMU_Model &	mu_model )
 	// Begin building
 	for (xrMU_Model::v_subdivs_it it=mu_model.m_subdivs.begin(); it!=mu_model.m_subdivs.end(); it++)
 	{
+		Status("MU : Model building %u/%u", it-mu_model.m_subdivs.begin()+1, mu_model.m_subdivs.size());
 		// Vertices
 		{
 			g_VB.Begin		(D);
