@@ -420,6 +420,7 @@ void CUITalkWnd::SwitchToUpgrade()
 {
 	if (CurrentGameUI() && m_pOurInvOwner->IsTradeEnabled() && m_pOthersInvOwner->IsTradeEnabled())
 	{
+		UITalkDialogWnd->Hide();
 		CurrentGameUI()->StartUpgrade(m_pOurInvOwner, m_pOthersInvOwner);
 	}
 }
