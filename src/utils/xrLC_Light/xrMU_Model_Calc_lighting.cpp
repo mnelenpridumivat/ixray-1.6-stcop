@@ -183,12 +183,15 @@ void xrMU_Model::calc_lighting	()
 		BB.modify	((*vit)->P);
 
 	// Export CForm
+	clMsg					("model '%s' - export_cform_rcast.",*m_name);
 	CDB::CollectorPacked	CL	(BB,(u32)m_vertices.size(),(u32)m_faces.size());
 	export_cform_rcast		(CL,Fidentity);
 
+	clMsg					("model '%s' - build.",*m_name);
 	CDB::MODEL*				M	= new CDB::MODEL();
 	M->build				(CL.getV(),(u32)CL.getVS(),CL.getT(),(u32)CL.getTS());
 
+	clMsg					("model '%s' - calc_lighting.",*m_name);
 	calc_lighting			(color,Fidentity, M, inlc_global_data()->L_static(), LP_dont_rgb+LP_dont_sun);
 
 	xr_delete				(M);
