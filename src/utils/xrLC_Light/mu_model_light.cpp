@@ -15,7 +15,7 @@ CThreadManager mu_secondary;
  
 xrCriticalSection csMUMAPS_LOCKS;
 
-static int ThreadTaskID = 0;
+static xr_atomic_u32 ThreadTaskID = 0;
 
 // mu-light
  
@@ -45,8 +45,8 @@ public:
 
 			ThreadTaskID++;
 
-			if (ID % 512 == 0)
-				Status("Models %d/%d", ID, inlc_global_data()->mu_refs().size());
+			//if (ID % 512 == 0)
+			Status("Models %d/%d", ID, inlc_global_data()->mu_refs().size());
 			thProgress = (float(ID) / float(inlc_global_data()->mu_refs().size()));
 
 			csMUMAPS_LOCKS.Leave();
@@ -85,8 +85,8 @@ public:
 			// Light references
 			inlc_global_data()->mu_models()[ID]->calc_materials();
 			thProgress = (float(ID) / float(inlc_global_data()->mu_models().size()));
-			if (ID%512 == 0)
-				Status("Models %d/%d", ID, inlc_global_data()->mu_models().size());
+			//if (ID%512 == 0)
+			Status("Models %d/%d", ID, inlc_global_data()->mu_models().size());
 			csMUMAPS_LOCKS.Leave();
  
 			
@@ -137,7 +137,7 @@ void run_mu_light()
 		}
 
 
-		GPUTaskinSystem.RestartALL(); // Выгружаем все Это последнее освещение 
+		GPUTaskinSystem.RestartALL(); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 	}
 	else
 #endif
