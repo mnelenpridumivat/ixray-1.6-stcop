@@ -230,20 +230,22 @@ void CToolCustom::Render()
 	temp.resize(64);
 
 	int cnt = 0;
-	for (SDebugDraw::PointIt vit = m_DebugDraw.m_Points.begin(); vit != m_DebugDraw.m_Points.end(); ++vit)
 	{
-		LPCSTR s = NULL;
-		if (vit->i)
+		xrSRWLockGuard guard(m_DebugDraw.m_PointsLock, true);
+		for (const auto& elem : m_DebugDraw.m_Points)
 		{
-			sprintf(temp.data(), "P: %d", cnt++);
-			s = temp.c_str();
+			LPCSTR s = NULL;
+			if (elem.i)
+			{
+				sprintf(temp.data(), "P: %d", cnt++);
+				s = temp.c_str();
+			}
+			if (elem.descr.size())
+			{
+				s = elem.descr.c_str();
+			}
+			DU_impl.dbgDrawVert(elem.p[0], elem.c, s ? s : "");
 		}
-
-		if (vit->descr.size())
-		{
-			s = vit->descr.c_str();
-		}
-		DU_impl.dbgDrawVert(vit->p[0], vit->c, s ? s : "");
 	}
 	EDevice->SetShader(EDevice->m_SelectionShader);
 
@@ -251,44 +253,60 @@ void CToolCustom::Render()
 	temp.resize(64);
 
 	cnt = 0;
-	for (SDebugDraw::LineIt eit = m_DebugDraw.m_Lines.begin(); eit != m_DebugDraw.m_Lines.end(); eit++) {
-		if (eit->i)        sprintf(temp.data(), "L: %d", cnt++);
-		DU_impl.dbgDrawEdge(eit->p[0], eit->p[1], eit->c, eit->i ? temp.c_str() : "");
+	{
+		xrSRWLockGuard guard(m_DebugDraw.m_LinesLock, true);
+		for (const auto& elem : m_DebugDraw.m_Lines)
+		{
+			if (elem.i)
+			{
+				sprintf(temp.data(), "L: %d", cnt++);
+			}
+			DU_impl.dbgDrawEdge(elem.p[0], elem.p[1], elem.c, elem.i ? temp.c_str() : "");
+		}
 	}
 	EDevice->SetShader(EDevice->m_SelectionShader);
 
 	temp.clear();
 	temp.resize(64);
 	cnt = 0;
-	for (const auto& elem : m_DebugDraw.m_WireFaces)
 	{
-		if (elem.i)
+		xrSRWLockGuard guard(m_DebugDraw.m_WireFacesLock, true);
+		for (const auto& elem : m_DebugDraw.m_WireFaces)
 		{
-			sprintf(temp.data(), "F: %d", cnt++);
+			if (elem.i)
+			{
+				sprintf(temp.data(), "F: %d", cnt++);
+			}
+			DU_impl.dbgDrawFace(elem.p[0], elem.p[1], elem.p[2], elem.c, elem.i ? temp.c_str() : "");
 		}
-		DU_impl.dbgDrawFace(elem.p[0], elem.p[1], elem.p[2], elem.c, elem.i ? temp.c_str() : "");
 	}
 	
 	cnt = 0;
-	if (!m_DebugDraw.m_SolidFaces.empty()) {
-		EDevice->SetShader(EDevice->m_SelectionShader);
-		DU_impl.DD_DrawFace_begin(FALSE);
-		for (const auto& elem : m_DebugDraw.m_SolidFaces)
-		{
-			DU_impl.DD_DrawFace_push(elem.p[0], elem.p[1], elem.p[2], elem.c);
+	{
+		xrSRWLockGuard guard(m_DebugDraw.m_SolidFacesLock, true);
+		if (!m_DebugDraw.m_SolidFaces.empty()) {
+			EDevice->SetShader(EDevice->m_SelectionShader);
+			DU_impl.DD_DrawFace_begin(FALSE);
+			for (const auto& elem : m_DebugDraw.m_SolidFaces)
+			{
+				DU_impl.DD_DrawFace_push(elem.p[0], elem.p[1], elem.p[2], elem.c);
+			}
+			DU_impl.DD_DrawFace_end();
 		}
-		DU_impl.DD_DrawFace_end();
 	}
 	EDevice->SetShader(EDevice->m_SelectionShader);
 
 	temp.clear();
 	temp.resize(64);
 	cnt = 0;
-	for (const auto& elem : m_DebugDraw.m_OBB)
 	{
-		sprintf(temp.data(), "OBB: %d", cnt++);
-		DU_impl.DrawOBB(Fidentity, elem, 0x2F00FF00, 0xFF00FF00);
-		DU_impl.OutText(elem.m_translate, temp.c_str(), 0xffff0000, 0x0000000);
+		xrSRWLockGuard guard(m_DebugDraw.m_OBBLock, true);
+		for (const auto& elem : m_DebugDraw.m_OBB)
+		{
+			sprintf(temp.data(), "OBB: %d", cnt++);
+			DU_impl.DrawOBB(Fidentity, elem, 0x2F00FF00, 0xFF00FF00);
+			DU_impl.OutText(elem.m_translate, temp.c_str(), 0xffff0000, 0x0000000);
+		}
 	}
 
 	EDevice->SetRS(D3DRS_CULLMODE, D3DCULL_CCW);

@@ -117,13 +117,23 @@ public:
         using OBBVec = xr_vector<Fobb>;
         using OBBVecIt = OBBVec::iterator;
 
+    	xrSRWLock		m_WireFacesLock;
     	FaceVec			m_WireFaces;
+    	xrSRWLock		m_SolidFacesLock;
     	FaceVec			m_SolidFaces;
+    	xrSRWLock		m_LinesLock;
 	    LineVec			m_Lines;
+    	xrSRWLock		m_PointsLock;
 	    PointVec		m_Points;
+    	xrSRWLock		m_OBBLock;
 		OBBVec 			m_OBB;
         void			Clear()
         {
+        	xrSRWLockGuard g1(m_WireFacesLock);
+        	xrSRWLockGuard g2(m_SolidFacesLock);
+        	xrSRWLockGuard g3(m_PointsLock);
+        	xrSRWLockGuard g4(m_OBBLock);
+        	xrSRWLockGuard g5(m_LinesLock);
         	m_WireFaces.clear	();
         	m_SolidFaces.clear	();
 	    	m_Lines.clear	();
@@ -132,6 +142,7 @@ public:
         }
         void AppendPoint(const Fvector& p0, u32 c=0xff0000ff, bool i=true, bool m=true, LPCSTR descr = NULL)
         {
+        	xrSRWLockGuard g3(m_PointsLock);
         	m_Points.push_back(Point());
             m_Points.back().p[0].set(p0);
             m_Points.back().c	= c;
@@ -142,6 +153,7 @@ public:
         }
         void AppendLine	(const Fvector& p0, const Fvector& p1, u32 c=0xff00ff00, bool i=true, bool m=true)
         {
+        	xrSRWLockGuard g5(m_LinesLock);
         	m_Lines.push_back(Line());
         	m_Lines.back().p[0].set(p0);
         	m_Lines.back().p[1].set(p1);
@@ -151,6 +163,7 @@ public:
         }
         void AppendWireFace	(const Fvector& p0, const Fvector& p1, const Fvector& p2, u32 c=0xffff0000, bool i=true, bool m=true)
         {
+        	xrSRWLockGuard g1(m_WireFacesLock);
         	m_WireFaces.push_back(Face());
         	m_WireFaces.back().p[0].set(p0);
         	m_WireFaces.back().p[1].set(p1);
@@ -161,6 +174,7 @@ public:
         }
         void AppendSolidFace(const Fvector& p0, const Fvector& p1, const Fvector& p2, u32 c=0xffff0000, bool i=true, bool m=true)
         {
+        	xrSRWLockGuard g2(m_SolidFacesLock);
         	m_SolidFaces.push_back(Face());
         	m_SolidFaces.back().p[0].set(p0);
         	m_SolidFaces.back().p[1].set(p1);
@@ -171,6 +185,7 @@ public:
         }
         void AppendOBB	(const Fobb& obb)
         {
+        	xrSRWLockGuard g4(m_OBBLock);
         	m_OBB.push_back(obb);
         }
     };

@@ -1273,11 +1273,16 @@ void EScene::LoadCompilerError(LPCSTR fn)
 	Tools->ClearDebugDraw();
 	Fvector 		pt[3];
 	if (F->find_chunk(10)){ // lc error (TJ)
+		xrSRWLockGuard guard(Tools->m_DebugDraw.m_PointsLock);
 		Tools->m_DebugDraw.m_Points.resize(F->r_u32());
 		F->r(Tools->m_DebugDraw.m_Points.data(),sizeof(CLevelTool::SDebugDraw::Point)*Tools->m_DebugDraw.m_Points.size());
 	}else if (F->find_chunk(0)){ // lc error (TJ)
 		u32 cnt			= F->r_u32();
-		for (u32 k=0;k<cnt; k++){ F->r(pt,sizeof(Fvector)); Tools->m_DebugDraw.AppendPoint(pt[0],0xff00ff00,true,true,"TJ"); }
+		for (u32 k=0;k<cnt; k++)
+		{
+			F->r(pt,sizeof(Fvector));
+			Tools->m_DebugDraw.AppendPoint(pt[0],0xff00ff00,true,true,"TJ");
+		}
 	}
 /*    
 	if (F->find_chunk(11)){ // lc error (multiple edges)
@@ -1289,11 +1294,16 @@ void EScene::LoadCompilerError(LPCSTR fn)
 	}
 */
 	if (F->find_chunk(12)){ // lc error (invalid faces)
+		xrSRWLockGuard guard(Tools->m_DebugDraw.m_WireFacesLock);
 		Tools->m_DebugDraw.m_WireFaces.resize(F->r_u32());
 		F->r(Tools->m_DebugDraw.m_WireFaces.data(),sizeof(CLevelTool::SDebugDraw::Face)*Tools->m_DebugDraw.m_WireFaces.size());
 	}else if (F->find_chunk(2)){ // lc error (invalid faces)
 		u32 cnt			= F->r_u32();
-		for (u32 k=0;k<cnt; k++){ F->r(pt,sizeof(Fvector)*3); Tools->m_DebugDraw.AppendWireFace(pt[0],pt[1],pt[2]); }
+		for (u32 k=0;k<cnt; k++)
+		{
+			F->r(pt,sizeof(Fvector)*3);
+			Tools->m_DebugDraw.AppendWireFace(pt[0],pt[1],pt[2]);
+		}
 	}
 	FS.r_close(F);
 
@@ -1375,20 +1385,29 @@ void EScene::SaveCompilerError(LPCSTR fn)
 
 	// t-junction
 	err.open_chunk	(10);
-	err.w_u32		(Tools->m_DebugDraw.m_Points.size());
-	err.w			(Tools->m_DebugDraw.m_Points.data(), Tools->m_DebugDraw.m_Points.size()*sizeof(CLevelTool::SDebugDraw::Point));
+	{
+		xrSRWLockGuard guard(Tools->m_DebugDraw.m_PointsLock, true);
+		err.w_u32		(Tools->m_DebugDraw.m_Points.size());
+		err.w			(Tools->m_DebugDraw.m_Points.data(), Tools->m_DebugDraw.m_Points.size()*sizeof(CLevelTool::SDebugDraw::Point));
+	}
 	err.close_chunk	();
 
 	// m-edje
 	err.open_chunk	(11);
-	err.w_u32		(Tools->m_DebugDraw.m_Lines.size());
-	err.w			(Tools->m_DebugDraw.m_Lines.data(), Tools->m_DebugDraw.m_Lines.size()*sizeof(CLevelTool::SDebugDraw::Line));
+	{
+		xrSRWLockGuard guard(Tools->m_DebugDraw.m_LinesLock, true);
+		err.w_u32		(Tools->m_DebugDraw.m_Lines.size());
+		err.w			(Tools->m_DebugDraw.m_Lines.data(), Tools->m_DebugDraw.m_Lines.size()*sizeof(CLevelTool::SDebugDraw::Line));
+	}
 	err.close_chunk	();
 
 	// invalid
 	err.open_chunk	(12);
-	err.w_u32		(Tools->m_DebugDraw.m_WireFaces.size());
-	err.w			(Tools->m_DebugDraw.m_WireFaces.data(), Tools->m_DebugDraw.m_WireFaces.size()*sizeof(CLevelTool::SDebugDraw::Face));
+	{
+		xrSRWLockGuard guard(Tools->m_DebugDraw.m_WireFacesLock, true);
+		err.w_u32		(Tools->m_DebugDraw.m_WireFaces.size());
+		err.w			(Tools->m_DebugDraw.m_WireFaces.data(), Tools->m_DebugDraw.m_WireFaces.size()*sizeof(CLevelTool::SDebugDraw::Face));
+	}
 	err.close_chunk	();
 
 	FS.w_close		(fs);
