@@ -228,7 +228,7 @@ bool CXMLBlend::Check(const char* FileName)
 	string_path PathAndFile;
 
 	FS.update_path(PathAndFile, "$game_shaders$", "d3d11\\");
-	xr_strconcat(PathAndFile, PathAndFile, NewName);
+	xr_strconcat(PathAndFile, PathAndFile, "\\", NewName);
 
 	return FS.exist(PathAndFile);
 }

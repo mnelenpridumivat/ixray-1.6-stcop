@@ -375,7 +375,7 @@ void CRender::LoadSectors(IReader* fs) {
 
 		// Make cache
 		string_path LevelName;
-		xr_strconcat(LevelName, "level_cache\\", FS.get_path("$level$")->m_Add, "Portals.cache");
+		xr_strconcat(LevelName, "level_cache\\", FS.get_path("$level$")->m_Add.xstring().c_str(), "Portals.cache");
 		IReader* pReaderCache = CDB::GetModelCache(LevelName, crc);
 
 		// build portal model

@@ -88,7 +88,7 @@ LPCSTR FS_Path::_update(string_path& dest, LPCSTR src)const
 {
 	R_ASSERT			(dest);
     R_ASSERT			(src);
-	xr_path temp_path = (m_Path / src).lexically_normal();
+	xr_path temp_path = std::filesystem::relative((m_Path / src).lexically_normal());
 	xr_strcpy(dest, temp_path.xstring().c_str());
 	auto len = xr_strlen(dest);
 	if (dest[len - 1] == '\\' || dest[len - 1] == '/')

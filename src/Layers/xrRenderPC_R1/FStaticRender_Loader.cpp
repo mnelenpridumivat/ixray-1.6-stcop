@@ -216,7 +216,7 @@ void CRender::LoadBuffers	(CStreamReader *base_fs)
 			vbDesc.Usage = ERHI_USAGE::USAGE_DEFAULT;
 			vbDesc.CPUAccessFlags = 0;
 
-			// Временный буфер для инициализации
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			std::vector<BYTE> tmpData(vCount * vSize);
 			fs->r(tmpData.data(), tmpData.size());
 
@@ -243,7 +243,7 @@ void CRender::LoadBuffers	(CStreamReader *base_fs)
 		{
 			u32 iCount = fs->r_u32();
 
-			// Временный буфер для данных индексов
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			std::vector<u16> tmpData(iCount);
 			fs->r(tmpData.data(), iCount * sizeof(u16));
 
@@ -368,7 +368,7 @@ void CRender::LoadSectors(IReader* fs) {
 
 		// Make cache
 		string_path LevelName;
-		xr_strconcat(LevelName, "level_cache\\", FS.get_path("$level$")->m_Add, "Portals.cache");
+		xr_strconcat(LevelName, "level_cache\\", FS.get_path("$level$")->m_Add.xstring().c_str(), "Portals.cache");
 		IReader* pReaderCache = CDB::GetModelCache(LevelName, crc);
 
 		// build portal model

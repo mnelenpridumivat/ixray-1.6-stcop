@@ -651,14 +651,19 @@ void CLocatorAPI::CLocatorAPIScanner::MakeFileData(file& out, xr_path name, u32 
 	PROF_EVENT("CLocatorAPI::CLocatorAPIScanner::MakeFileData");
 	//string_path path;
 	//xr_strcpy(path, Platform::RestorePath(name));
-	out.name			= name.lexically_normal();
+	
+	//string_path ExeDir = {};
+	//FS.update_path(ExeDir, "$fs_root$", "");
+	
+	out.name			= std::filesystem::relative(name.lexically_normal());
 	{
 		xr_string temp = out.name.xstring();
+		xr_strlwr(temp);
 		if (temp.ends_with('\\') || temp.ends_with('/'))
 		{
 			temp.pop_back();
-			out.name = temp;
 		}
+		out.name = temp;
 	}
 	out.vfs			= vfs;
 	out.crc			= crc;
@@ -1199,15 +1204,21 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 						auto Loader = new CLocatorAPIArchiveLoader();
 						Loaders.push_back(Loader);
 						Loader->Archive = m_archives[i];
+#if 0
 						main_task_group.run(
+#endif
 							[Loader]()
 							{
 								Loader->LoadArchive();
 							}
+#if 0
 	#if defined(IXRAY_PROFILER)
 						, "Load archive"
 	#endif
 						);
+#else
+						();
+#endif
 					}
 				}
 				main_task_group.wait();
@@ -1399,15 +1410,15 @@ xr_vector<char*>* CLocatorAPI::file_list_open			(const char* _path, u32 flags)
 		if (0!=strncmp(entry.name.xstring().c_str(),N,base_len))	{
 			break;	// end of list
 		}
-		const char* end_symbol = entry.name.xstring().c_str()+entry.name.xstring().size()-1;
-		if ((*end_symbol) !='\\')	{
+		if (entry.modif != 0)
+		{
 			// file
 			if ((flags&FS_ListFiles) == 0)
 			{
 				continue;
 			}
 
-			const char* entry_begin = entry.name.xstring().c_str()+base_len;
+			const char* entry_begin = entry.name.xstring().c_str()+base_len+1;
 			if ((flags&FS_RootOnly)&& strchr(entry_begin,'\\'))
 			{
 				continue;	// folder in folder
@@ -1424,9 +1435,9 @@ xr_vector<char*>* CLocatorAPI::file_list_open			(const char* _path, u32 flags)
 			{
 				continue;
 			}
-			const char* entry_begin = entry.name.xstring().c_str()+base_len;
+			const char* entry_begin = entry.name.xstring().c_str()+base_len+1;
 			
-			if ((flags&FS_RootOnly)&&(strchr(entry_begin,'\\')!=end_symbol))
+			if ((flags&FS_RootOnly)&&(strchr(entry_begin,'\\')))
 			{
 				continue;	// folder in folder
 			}

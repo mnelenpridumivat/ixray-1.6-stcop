@@ -308,7 +308,9 @@ void CApplication::Level_Scan()
 	//.	R_ASSERT							(folder&&folder->size());
 
 	for (u32 i = 0; i < folder->size(); ++i)
+	{
 		Level_Append((*folder)[i]);
+	}
 
 	FS.file_list_close(folder);
 }
