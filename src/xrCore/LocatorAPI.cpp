@@ -106,6 +106,7 @@ void CLocatorAPI::Register(LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real
 
 	files_it			I = m_files.find(desc);
 
+	VERIFY(I == m_files.end());
 	if (I != m_files.end()) 
 	{
 		desc.name		= I->name;
