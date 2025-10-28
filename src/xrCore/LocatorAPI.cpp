@@ -106,7 +106,7 @@ void CLocatorAPI::Register(LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real
 
 	files_it			I = m_files.find(desc);
 
-	VERIFY(I == m_files.end());
+	//VERIFY(I == m_files.end());
 	if (I != m_files.end()) 
 	{
 		desc.name		= I->name;
@@ -504,101 +504,173 @@ namespace Platform
 	XRCORE_API xr_string TCHAR_TO_ANSI_U8(const xr_special_char* C);
 }
 
+std::unordered_set<shared_str> scanned_dirs;
+struct scan_chache
+{
+	bool dir;
+	xr_string fileName;
+	u64 fsize;
+	time_t ftime;
+};
+
+xr_vector<scan_chache> m_scan_chache;
 bool CLocatorAPI::Recurse(const char* path)
 {
-	PROF_EVENT("CLocatorAPI::Recurse");
-	string_path N = {};
-	xr_strcpy(N, sizeof(N), path);
+	//PROF_EVENT_DYNAMIC(xr_strdup(path));
+	// Проверка .xrignore
+	string_path scanPath;
+	xr_strcpy(scanPath, sizeof(scanPath), path);
+	xr_strcat(scanPath, ".xrignore");
 
-	// find all files
-	system_file sFile;
+	//DWORD attrs = GetFileAttributes(scanPath);
+	//if (attrs != INVALID_FILE_ATTRIBUTES && !(attrs & FILE_ATTRIBUTE_DIRECTORY))
+	//	return true;
 
-	xr_strcpy(N, Platform::ValidPath(N));
+	// Объявление необходимых типов
+	// Получаем адрес NtQueryDirectoryFile
+	//typedef NTSTATUS(__stdcall* NtQueryDirectoryFileFn)(HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, PVOID, ULONG, _FILE_INFORMATION_CLASS_DEF, BOOLEAN, PUNICODE_STRING, BOOLEAN);
 
-	bool bWrapPath = strlen(N) == 0;
-	if (bWrapPath)
+	//static NtQueryDirectoryFileFn NtQueryDirectoryFile = (NtQueryDirectoryFileFn)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQueryDirectoryFile");
+
+	//if (!NtQueryDirectoryFile)
+	//	return false;
+
+	// Открываем директорию
+	/*HANDLE hDir = CreateFileA(
+		path,
+		FILE_LIST_DIRECTORY,
+		FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+		nullptr,
+		OPEN_EXISTING,
+		FILE_FLAG_BACKUP_SEMANTICS,
+		nullptr
+	);*/
+
+	//if (hDir == INVALID_HANDLE_VALUE)
+	//	return false;
+
+	size_t oldSize = m_scan_chache.size();
+	m_scan_chache.reserve(oldSize + 256);
+
+	if (!std::filesystem::exists(path))
 	{
-		xr_strcpy(N, Platform::ValidPath("./"));
+		return false;
 	}
 
-	if(!std::filesystem::exists(N))
-		return false;
-
-	rec_files.reserve(512);
-
-	for (const xr_dir_entry& CurrentFile : xr_dir_iter { N })
+	for (xr_dir_entry elem : xr_dir_iter(path))
 	{
-		xr_path currentPath = CurrentFile;
-#ifdef IXR_WINDOWS
-		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(currentPath.generic_wstring().c_str());
-#else
-				xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(currentPath.generic_string().c_str());
-#endif
-		if (bWrapPath)
-			ValidFileName = ValidFileName.substr(2);
+		xr_path elem_path = elem;
 
-		xr_strcpy(sFile.name, Platform::RestorePath(ValidFileName.c_str()));
-		sFile.attrib = 0;
-
-		auto StatusFile = std::filesystem::symlink_status(CurrentFile);
-		if (StatusFile.type() == std::filesystem::file_type::not_found || !std::filesystem::exists(CurrentFile))
+		if (CheckSkip(elem_path))
 		{
-			Msg("! Dead symlink: %s", ValidFileName.c_str());
 			continue;
 		}
 
-		if (CurrentFile.is_directory())
-			sFile.attrib |= _A_SUBDIR;
-		else 
-			sFile.size = CurrentFile.file_size();
-
-		/*{
-#ifdef IXR_WINDOWS
-			PROF_EVENT("CLocatorAPI::Recurse::GetFileAttributes");
-			if (GetFileAttributes(currentPath.generic_wstring().c_str()) & FILE_ATTRIBUTE_HIDDEN)
-				sFile.attrib |= _A_HIDDEN;
-#endif
-		}*/
-
-		sFile.time_write = xr_chrono_to_time_t(CurrentFile.last_write_time());
-		sFile.time_create = xr_chrono_to_time_t(CurrentFile.last_write_time());
-
-		bool NeedSkip = false;
-		if (m_Flags.test(flNeedCheck))
-		{
-			NeedSkip = CheckSkip(sFile.name) || ignore_path(sFile.name);
-
-			// загоняем в вектор для того *.db* приходили в сортированном порядке
-			if (NeedSkip)
-				rec_files.push_back(sFile);
-		}
-		else
-		{
-			NeedSkip = CheckSkip(sFile.name);
-		}
-
-		if (!NeedSkip)
-			rec_files.push_back(sFile);
-	}
-
-	FFVec StackFiles;
-	StackFiles.swap(rec_files);
-
-	{
-		PROF_EVENT("CLocatorAPI::Recurse::Sort");
-		std::sort(StackFiles.begin(), StackFiles.end(), pred_str_ff);
-	}
+		m_scan_chache.emplace_back();
+		scan_chache& chache = m_scan_chache.back();
+		chache.dir = elem.is_directory();
+		chache.ftime = xr_chrono_to_time_t(elem.last_write_time());
+		chache.fsize = elem.file_size();
+		chache.fileName = elem_path.xfilename();
 		
-	for (system_file& FileData : StackFiles)
-		ProcessOne(path, &FileData);
+	}
 
-	// insert self
-	if (path && path[0])
+	/*static std::vector<_FILE_FULL_DIR_INFO> buffer(4096);
+	IO_STATUS_BLOCK ioStatus = { 0 };
+
+	while (NT_SUCCESS(NtQueryDirectoryFile(hDir, nullptr, nullptr, nullptr, &ioStatus, buffer.data(), 4096, FileBothDirectoryInformation, FALSE, nullptr, FALSE)))
+	{
+		PFILE_FULL_DIR_INFO pInfo = (PFILE_FULL_DIR_INFO)buffer.data();
+		while (true)
+		{
+			char fileName[MAX_PATH] = { 0 };
+			int len = WideCharToMultiByte(CP_ACP, 0, pInfo->FileName,
+				pInfo->FileNameLength / 2, fileName, sizeof(fileName), nullptr, nullptr);
+
+			if (len > 0 && !(fileName[0] == '.' && fileName[1] == 0) && !(fileName[0] == '.' && fileName[1] == '.' && fileName[2] == 0))
+			{
+				bool ignore = (pInfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? !!((fileName[0] == '.' && fileName[1] == 's' && fileName[2] == 'v' && fileName[3] == 'n' && fileName[4] == 0) || (fileName[0] == '.' && fileName[1] == 'v' && fileName[2] == 's' && fileName[3] == 0)) :
+					(pInfo->FileAttributes == INVALID_FILE_ATTRIBUTES) ? true : !!(!stricmp(fileName, "Thumbs.db"));
+
+				if (!ignore)
+				{
+					if (!(pInfo->FileAttributes & FILE_ATTRIBUTE_HIDDEN))
+					{
+						m_scan_chache.emplace_back();
+						scan_chache& chache = m_scan_chache.back();
+						chache.fattr = pInfo->FileAttributes;
+						chache.ftime = pInfo->LastWriteTime.QuadPart;
+						chache.fsize = pInfo->EndOfFile.QuadPart;
+						xr_strcpy(chache.fileName, sizeof(chache.fileName), fileName);
+					}
+				}
+			}
+
+			if (!pInfo->NextEntryOffset) break;
+			pInfo = (PFILE_FULL_DIR_INFO)(((PUCHAR)pInfo) + pInfo->NextEntryOffset);
+		}
+	}
+	buffer.clear();
+	CloseHandle((HANDLE)hDir);*/
+
+	size_t newSize = m_scan_chache.size();
+	if (newSize > oldSize)
+	{
+		for (size_t i = oldSize; i < newSize; i++)
+		{
+			auto& chache = m_scan_chache[i];
+
+			string_path N;
+			xr_strcpy(N, sizeof(N), path);
+			xr_strcat(N, chache.fileName.c_str());
+			xr_strlwr(N);
+
+			if (chache.dir)
+			{
+				if (bNoRecurse || chache.fileName == "." || chache.fileName == "..")
+				{
+					continue;
+				}
+
+				if (!m_Flags.test(flReady))
+				{
+					if (scanned_dirs.find(N) == scanned_dirs.end())
+					{
+						scanned_dirs.insert(N);
+						xr_strcat(N, "\\");
+						Recurse(N);
+						//WriteFilesChacheLine(N);
+					}
+				} else
+				{
+					xr_strcat(N, "\\");
+					Recurse(N);
+					//WriteFilesChacheLine(N);
+				}
+			}
+			else
+			{
+				if (strext(N) && (0 == strncmp(strext(N), ".db", 3) || 0 == strncmp(strext(N), ".xdb", 4)))
+				{
+					ProcessArchive(N);
+				}
+				else
+				{
+					u32 fsize = chache.fsize;
+					Register(N, 0xffffffff, 0, 0, fsize, fsize, u32(chache.ftime / 10000000 - 11644473600LL));
+				}
+			}
+		}
+		m_scan_chache.erase(m_scan_chache.begin() + oldSize, m_scan_chache.end());
+	}
+
+	if (path && path[0] != 0)
+	{
 		Register(path, 0xffffffff, 0, 0, 0, 0, 0);
-
-	rec_files.clear();
+	}
 
 	return true;
+
 }
 
 bool file_handle_internal	(LPCSTR file_name, intptr_t&size, int &file_handle);
@@ -742,6 +814,7 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 
 		Msg("pFSltx: %s", fs_name);
 
+		scanned_dirs.clear();
 		while (!pFSltx->eof())
 		{
 			PROF_EVENT("CLocatorAPI::pFSltx_initialize::Line");
@@ -803,6 +876,7 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 		FS.IsAddonPhase = true;
 		g_pAddonsManager = new CAddonManager;
 
+		scanned_dirs.clear();
 		FS_Path* AddonsArchsPath = FS.get_path("$arch_dir_addons$");
 		FS.rescan_path(AddonsArchsPath->m_Path, AddonsArchsPath->m_Flags.is(FS_Path::flRecurse));
 		FS.IsAddonPhase = false;
@@ -826,6 +900,7 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 		if (pLogsPath) pLogsPath->_set_root(c_newAppPathRoot);
 		if (pAppdataPath)
 		{
+			scanned_dirs.clear();
 			pAppdataPath->_set_root(c_newAppPathRoot);
 			rescan_path(pAppdataPath->m_Path, pAppdataPath->m_Flags.is(FS_Path::flRecurse));
 		}
@@ -1659,7 +1734,15 @@ FS_Path* CLocatorAPI::append_path(LPCSTR path_alias, LPCSTR root, LPCSTR add, BO
 	VERIFY			(!path_exist(path_alias));
 	FS_Path* P		= new FS_Path(root,add,LPCSTR(0),LPCSTR(0),0);
 	bNoRecurse		= !recursive;
-	Recurse			(P->m_Path);
+	xr_path path;
+	if (!xr_strlen(P->m_Path))
+	{
+		path = ".\\";
+	} else
+	{
+		path = P->m_Path;
+	}
+	Recurse			(path.xstring().c_str());
 
 	pathes.insert(std::make_pair(xr_strdup(path_alias), P));
 	return P;
