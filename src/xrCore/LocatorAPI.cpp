@@ -531,7 +531,7 @@ xr_hash_set<shared_str> DirHandlers = {};
 void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse)
 {
 	PROF_EVENT("CLocatorAPI::CLocatorAPIScanner::ScanDirectory");
-	Msg("Scan dir %s", path.xstring().c_str());
+	//Msg("Scan dir %s", path.xstring().c_str());
 	xr_task_group subgroup;
 	//if (path.xstring() == "gamedata\\textures\\lod")
 	//{
@@ -573,7 +573,7 @@ void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse
 				continue;
 			}
 			
-			Msg("Found dir %s", StrPtr);
+			//Msg("Found dir %s", StrPtr);
 			{
 				xrCriticalSectionGuard g(DirHandlersLock);
 				if (DirHandlers.find(StrPtr) != DirHandlers.end())
@@ -1811,13 +1811,18 @@ bool CLocatorAPI::check_for_file	(LPCSTR path, LPCSTR _fname, string_path& fname
 
 	// correct path
 	xr_strcpy				(fname,_fname);
-	xr_strlwr				(fname);
+	//xr_strlwr				(fname);
 	if (path&&path[0])
 		update_path			(fname,path,fname);
 
 	// Search entry
 	file					desc_f;
-	desc_f.name				= fname;
+	desc_f.name				= std::filesystem::proximate(fname);
+	
+	xr_strcpy				(fname,desc_f.name.xstring().c_str());
+	xr_strlwr				(fname);
+
+	desc_f.name = fname;
 
 	files_it				I = m_files.find(desc_f);
 	if (I == m_files.end())

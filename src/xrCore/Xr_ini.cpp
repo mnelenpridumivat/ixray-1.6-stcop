@@ -1233,6 +1233,10 @@ void CInifile::LTXLoad(IReader* F, LPCSTR path, xr_string_map<xr_string, Sect>& 
 				_splitpath_s(m_file_name, split_drive, sizeof(split_drive), split_dir, sizeof(split_dir), split_name, sizeof(split_name), nullptr, 0);
 
 				FilePath = xr_string(split_drive) + xr_string(split_dir);
+				if (FilePath[FilePath.size() - 1] == '/' || FilePath[FilePath.size() - 1] == '\\')
+				{
+					FilePath.pop_back();
+				}
 				FileName = split_name;
 			}
 				
@@ -1287,7 +1291,10 @@ void CInifile::LTXLoad(IReader* F, LPCSTR path, xr_string_map<xr_string, Sect>& 
 					continue;
 				}
 
-				loadFile((FilePath + ModFile.name).c_str(), FilePath.c_str(), ModFile.name.c_str());
+				xr_string FileNameFull = FilePath;
+				FileNameFull += "\\";
+				FileNameFull += ModFile.name;
+				loadFile(FileNameFull.c_str(), FilePath.c_str(), ModFile.name.c_str());
 			}
 
 			continue;

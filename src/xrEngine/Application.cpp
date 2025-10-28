@@ -276,10 +276,10 @@ void CApplication::OnFrame()
 void CApplication::Level_Append(LPCSTR folder)
 {
 	string_path	N1, N2, N3, N4;
-	xr_strconcat(N1, folder, "level");
-	xr_strconcat(N2, folder, "level.ltx");
-	xr_strconcat(N3, folder, "level.geom");
-	xr_strconcat(N4, folder, "level.cform");
+	xr_strconcat(N1, folder, "\\", "level");
+	xr_strconcat(N2, folder, "\\", "level.ltx");
+	xr_strconcat(N3, folder, "\\", "level.geom");
+	xr_strconcat(N4, folder, "\\", "level.cform");
 	if (
 		FS.exist("$game_levels$", N1) &&
 		FS.exist("$game_levels$", N2) &&
@@ -353,7 +353,7 @@ void CApplication::Level_Set(u32 L) {
 			else 
 			{
 				string_path temp3;
-				xr_strconcat(path, "intro\\intro_", Levels[L].folder);
+				xr_strconcat(path, "intro\\intro_\\", Levels[L].folder);
 				path[xr_strlen(path) - 1] = 0;
 
 				string_path nm;
@@ -402,11 +402,12 @@ int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 	if (arch_res)
 		Level_Scan();
 
-	string256 buffer;
-	xr_strconcat(buffer, name, "\\");
+	//string256 buffer;
+	//xr_strcpy(buffer, name);
+	//xr_strconcat(buffer, name, "\\");
 	for (u32 I = 0; I < Levels.size(); ++I)
 	{
-		if (0 == _stricmp(buffer, Levels[I].folder))
+		if (0 == _stricmp(name, Levels[I].folder))
 		{
 			result = int(I);
 			break;
