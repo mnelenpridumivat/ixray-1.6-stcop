@@ -12,6 +12,7 @@
 #include "Crypto/trivial_encryptor.h"
 
 #include "xrAddons.h"
+#include "../xrServerEntities/object_destroyer.h"
 
 constexpr u32 BIG_FILE_READER_WINDOW_SIZE = 1024*1024;
 
@@ -366,31 +367,36 @@ void CLocatorAPI::ProcessArchive(LPCSTR _path)
 	// find existing archive
 	shared_str path = Platform::ANSI_TO_UTF8(_path).c_str();
 
-	for (archives_it it=m_archives.begin(); it!=m_archives.end(); ++it)
-		if (it->path==path)	
-				return;
+	for (auto elem : m_archives)
+	{
+		if (elem->path == path)
+		{
+			return;
+		}
+	}
 
-	archive& A					= m_archives.emplace_back();
-	A.vfs_idx					= (u32)m_archives.size()-1;
-	A.path						= _path;
+	archive* A = new archive;
+	m_archives.push_back(A);
+	A->vfs_idx					= (u32)m_archives.size()-1;
+	A->path						= _path;
 
-	A.open						();
+	A->open						();
 
 	// Read header
 	BOOL bProcessArchiveLoading = TRUE;
 
-	IReader* hdr				= open_chunk(A.hSrcFile, CFS_HeaderChunkID, A.path.c_str(), A.size);
+	IReader* hdr				= open_chunk(A->hSrcFile, CFS_HeaderChunkID, A->path.c_str(), A->size);
 	if(hdr)
 	{
-		A.header				= new CInifile(hdr,"archive_header");
+		A->header				= new CInifile(hdr,"archive_header");
 		hdr->close				();
-		bProcessArchiveLoading	= A.header->r_bool("header","auto_load");
+		bProcessArchiveLoading	= A->header->r_bool("header","auto_load");
 	}
 	
 	if(bProcessArchiveLoading || Core.ParamsData.test(ECoreParams::auto_load_arch))
-		LoadArchive				(A);
+		LoadArchive				(*A);
 	else
-		A.close					();
+		A->close					();
 }
 
 void CLocatorAPI::unload_archive(CLocatorAPI::archive& A)
@@ -417,10 +423,10 @@ bool CLocatorAPI::load_all_unloaded_archives()
 	bool res = false;
 	for(;it!=it_e;++it)
 	{
-		archive& A = *it;
-		if(!A.hSrcFile)
+		archive* A = *it;
+		if(!A->hSrcFile)
 		{
-			LoadArchive(A);
+			LoadArchive(*A);
 			res = true;
 		}
 	}
@@ -503,6 +509,274 @@ namespace Platform
 	XRCORE_API xr_string TCHAR_TO_ANSI_U8(const xr_special_char* C);
 }
 
+//void GetAllFilesInDir(LPCSTR path, xr_vector<xr_dir_entry>& Out)
+//{
+//	static xrCriticalSection sect;
+//	xrCriticalSectionGuard g(sect);
+//	std::copy(xr_dir_iter{path}, xr_dir_iter{}, std::back_inserter(Out));
+//}
+
+xrCriticalSection DirHandlersLock;
+xr_hash_set<shared_str> DirHandlers = {};
+
+void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(LPCSTR path, bool NoRecurse)
+{
+	xr_task_group subgroup;
+	//xr_vector<xr_dir_entry> content;
+	//GetAllFilesInDir(path, content);
+	for (const auto& elem : xr_dir_iter{path})
+	{
+		if (!elem.exists())
+		{
+			continue;
+		}
+		xr_path file_path = elem;
+#ifdef IXR_WINDOWS
+		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(file_path.generic_wstring().c_str());
+#else
+		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(path.generic_string().c_str());
+#endif
+		LPCSTR StrPtr = ValidFileName.c_str();
+		if (FS.CheckSkip(ValidFileName))
+		{
+			continue;
+		}
+		if (elem.is_directory())
+		{
+			if (NoRecurse){	
+				continue;
+			}
+
+			if (0 == xr_strcmp(StrPtr, "."))
+			{
+				continue;
+			}
+
+			if (0 == xr_strcmp(StrPtr, ".."))
+			{
+				continue;
+			}
+			
+			Msg("Found dir %s", StrPtr);
+			{
+				xrCriticalSectionGuard g(DirHandlersLock);
+				if (DirHandlers.find(StrPtr) != DirHandlers.end())
+				{
+					continue;
+				} else
+				{
+					DirHandlers.insert(StrPtr);
+				}
+			}
+			auto Subscanner = new CLocatorAPIScanner();
+			subscanners.push_back(Subscanner);
+			subgroup.run(
+				[ValidFileName, Subscanner]()
+				{
+					__try
+					{
+						Subscanner->ScanDirectory(ValidFileName.c_str());
+					}
+					__except (EXCEPTION_EXECUTE_HANDLER){
+						DebugBreak();
+					}
+				}
+			);
+			MakeFileData(m_files.emplace_back(), StrPtr, 0xffffffff, 0, 0, 0, 0, 0);
+		} else
+		{
+			if (strext(StrPtr) && (0 == strncmp(strext(StrPtr), ".db", 3) || 0 == strncmp(strext(StrPtr), ".xdb", 4)))
+			{
+				Msg("Found archive %s", StrPtr);
+				archive* A					= m_archives.emplace_back(new archive);
+				A->vfs_idx					= (u32)m_archives.size()-1;
+				A->path						= StrPtr;
+
+				A->open						();
+
+				// Read header
+				BOOL bProcessArchiveLoading = TRUE;
+
+				IReader* hdr				= open_chunk(A->hSrcFile, CFS_HeaderChunkID, A->path.c_str(), A->size);
+				if(hdr)
+				{
+					A->header				= new CInifile(hdr,"archive_header");
+					hdr->close				();
+					bProcessArchiveLoading	= A->header->r_bool("header","auto_load");
+				}
+	
+				if(!(bProcessArchiveLoading || Core.ParamsData.test(ECoreParams::auto_load_arch)))
+				{
+					A->close					();
+				}
+			}else
+			{
+				MakeFileData(m_files.emplace_back(), StrPtr, 0xffffffff, 0, 0, elem.file_size(), elem.file_size(), xr_chrono_to_time_t(elem.last_write_time()));
+			}
+		}
+	}
+	subgroup.wait();
+	for (auto Subscanner : subscanners)
+	{
+		m_archives.append_range(Subscanner->m_archives);
+		m_files.append_range(Subscanner->m_files);
+	}
+	delete_data(subscanners);
+}
+
+void CLocatorAPI::CLocatorAPIScanner::MakeFileData(file& out, LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real,
+	u32 size_compressed, time_t modif)
+{
+	string_path path;
+	xr_strcpy(path, Platform::RestorePath(name));
+	out.name			= xr_strdup(path);
+	out.vfs			= vfs;
+	out.crc			= crc;
+	out.ptr			= ptr;
+	out.size_real		= size_real;
+	out.size_compressed= size_compressed;
+	out.modif			= modif;// &(~u32(0x3));
+}
+
+void CLocatorAPI::CLocatorAPIArchiveLoader::LoadArchive()
+{
+	// Create base path
+	string_path fs_entry_point;
+	bool shouldDecrypt = false;
+	fs_entry_point[0] = 0;
+
+	if(Archive->header)
+	{
+		shared_str read_path	= Archive->header->r_string("header","entry_point");
+		if(0==_stricmp(read_path.c_str(),"gamedata"))
+		{
+			read_path				= "$fs_root$";
+			PathPairIt P			= FS.pathes.find(read_path.c_str()); 
+			if(P!=FS.pathes.end())
+			{
+				FS_Path* root			= P->second;
+//				R_ASSERT3				(root, "path not found ", read_path.c_str());
+				xr_strcpy				(fs_entry_point, sizeof(fs_entry_point), root->m_Path);
+			}
+			xr_strcat					(fs_entry_point,"gamedata\\");
+		}else
+		{
+			string256			alias_name;
+			alias_name[0]		= 0;
+			R_ASSERT2			(*read_path.c_str()=='$', read_path.c_str());
+
+			int count			= sscanf(read_path.c_str(),"%[^\\]s", alias_name);
+			R_ASSERT2			(count==1,read_path.c_str());
+
+			PathPairIt P		= FS.pathes.find(alias_name); 
+
+			if(P!=FS.pathes.end())
+			{
+				FS_Path* root		= P->second;
+	//			R_ASSERT3			(root, "path not found ", alias_name);
+				xr_strcpy			(fs_entry_point, sizeof(fs_entry_point), root->m_Path);
+			}
+			xr_strcat			(fs_entry_point, sizeof(fs_entry_point), read_path.c_str()+xr_strlen(alias_name)+1);
+		}
+
+	}else
+	{
+		Msg("~ Found archive without ini header: %s", Archive->path.c_str());
+
+		if (!strstr(Archive->path.c_str(), ".xdb"))
+		{
+			Msg("Assuming that [%s] is encrypted SoC archive", Archive->path.c_str());
+			shouldDecrypt = true;
+		}
+
+		auto P = FS.pathes.find("$fs_root$");
+		if (P != FS.pathes.end())
+		{
+			FS_Path* root = P->second;
+			// R_ASSERT3 (root, "path not found ", read_path.c_str());
+			xr_strcpy(fs_entry_point, sizeof fs_entry_point, root->m_Path);
+		}
+		xr_strcat(fs_entry_point, "gamedata\\");
+	}
+
+	// Read FileSystem
+	IReader* hdr		= open_chunk(Archive->hSrcFile,1, Archive->path.c_str(), Archive->size, shouldDecrypt); 
+	R_ASSERT			(hdr);
+
+	while (!hdr->eof())
+	{
+		string_path		name,full;
+		string1024		buffer_start;
+		u16				buffer_size	= hdr->r_u16();
+		VERIFY			(buffer_size < sizeof(name) + 4*sizeof(u32));
+		VERIFY			(buffer_size < sizeof(buffer_start));
+		u8				*buffer = (u8*)&*buffer_start;
+		hdr->r			(buffer,buffer_size);
+
+		u32 size_real	= *(u32*)buffer;
+		buffer			+= sizeof(size_real);
+
+		u32 size_compr	= *(u32*)buffer;
+		buffer			+= sizeof(size_compr);
+
+		u32 crc			= *(u32*)buffer;
+		buffer			+= sizeof(crc);
+
+		u32				name_length = buffer_size - 4*sizeof(u32);
+		Memory.mem_copy	(name,buffer,name_length);
+		name[name_length] = 0;
+		buffer			+= buffer_size - 4*sizeof(u32);
+
+		u32 ptr			= *(u32*)buffer;
+		buffer			+= sizeof(ptr);
+
+		xr_strconcat(full, fs_entry_point, name);
+
+		file desc;
+		// Register file
+		desc.name			= xr_strdup(full);
+		desc.vfs			= Archive->vfs_idx;
+		desc.crc			= crc;
+		desc.ptr			= ptr;
+		desc.size_real		= size_real;
+		desc.size_compressed= size_compr;
+		desc.modif			= 0;
+
+		files_it			I = FS.m_files.find(desc);
+
+		if (I == FS.m_files.end())
+		{
+			m_files.push_back(desc);
+	
+			// Try to register folder(s)
+			string_path			temp;	
+			xr_strcpy			(temp,sizeof(temp),desc.name);
+			string_path			path;
+			string_path			folder;
+			while (temp[0]) 
+			{
+				_splitpath		(temp, path, folder, 0, 0 );
+				xr_strcat			(path,folder);
+				
+				desc.name			= xr_strdup(path);
+				desc.vfs			= 0xffffffff;
+				desc.ptr			= 0;
+				desc.size_real		= 0;
+				desc.size_compressed= 0;
+				desc.modif			= u32(-1);
+				m_files.push_back(desc);
+				
+				xr_strcpy(temp,sizeof(temp),folder);
+				if (xr_strlen(temp))
+				{
+					temp[xr_strlen(temp)-1]=0;
+				}
+			}
+		}
+	}
+	hdr->close			();
+}
+
 bool CLocatorAPI::Recurse(const char* path)
 {
 	PROF_EVENT("CLocatorAPI::Recurse");
@@ -531,7 +805,7 @@ bool CLocatorAPI::Recurse(const char* path)
 #ifdef IXR_WINDOWS
 		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(currentPath.generic_wstring().c_str());
 #else
-				xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(currentPath.generic_string().c_str());
+		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(currentPath.generic_string().c_str());
 #endif
 		if (bWrapPath)
 			ValidFileName = ValidFileName.substr(2);
@@ -721,10 +995,25 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 	if (m_Flags.is(flScanAppRoot))
 		append_path("$app_root$", Core.ApplicationPath, 0, FALSE);
 
+	/*u32 file_count = 0;
+	for (const auto& elem : xr_dir_recursive_iter{"./"})
+	{
+		xr_path file_path = elem;
+#ifdef IXR_WINDOWS
+		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(file_path.generic_wstring().c_str());
+#else
+		xr_string ValidFileName = Platform::TCHAR_TO_ANSI_U8(path.generic_string().c_str());
+#endif
+		if (!CheckSkip(ValidFileName))
+		{
+			file_count++;
+		}
+	}*/
 
 	//-----------------------------------------------------------
 	// append application data path
 	// target folder 
+    PROF_START_CAPTURE();
 	if (m_Flags.is(flTargetFolderOnly))
 	{
 		append_path("$target_folder$", target_folder, 0, TRUE);
@@ -739,7 +1028,11 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 		string16		b_v;
 		string4096		temp;
 
+		xr_task_group main_task_group;
+
 		Msg("pFSltx: %s", fs_name);
+
+		xr_vector<CLocatorAPIScanner*> Subscanners = {};
 
 		while (!pFSltx->eof())
 		{
@@ -783,18 +1076,91 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 
 			std::pair<PathPairIt, bool> I;
 			FS_Path* P = new FS_Path((p_it != pathes.end()) ? p_it->second->m_Path : root, lp_add, lp_def, lp_capt, fl);
-			bNoRecurse = !(fl & FS_Path::flRecurse);
-			Recurse(P->m_Path);
+			bool NoRecurse = !(fl & FS_Path::flRecurse);
+
 			I = pathes.insert(std::make_pair(xr_strdup(id), P));
+			if (std::filesystem::exists(P->m_Path))
+			{
+				{
+					xrCriticalSectionGuard g(DirHandlersLock);
+					if (DirHandlers.find(P->m_Path) != DirHandlers.end())
+					{
+						continue;
+					} else
+					{
+						DirHandlers.insert(P->m_Path);
+					}
+				}
+				auto Subscanner = new CLocatorAPIScanner();
+				Subscanners.emplace_back(Subscanner);
+				main_task_group.run(
+					[Subscanner, P, NoRecurse]()
+					{
+						__try
+						{
+							Subscanner->ScanDirectory(P->m_Path, NoRecurse);
+						}
+						__except (EXCEPTION_EXECUTE_HANDLER){
+							DebugBreak();
+						}
+					}
+				);
+			}
 #ifndef DEBUG
 			m_Flags.set(flCacheFiles, FALSE);
 #endif // DEBUG
 
 			CHECK_OR_EXIT(I.second, "The file 'fsgame.ltx' is corrupted (it contains duplicated lines).\nPlease reinstall the game or fix the problem manually.");
 		}
+		main_task_group.wait();
 		r_close(pFSltx);
 		R_ASSERT(path_exist("$app_data_root$"));
+
+		for (auto Subscanner : Subscanners)
+		{
+			m_files.insert_range(Subscanner->m_files);
+			m_archives.append_range(Subscanner->m_archives);
+		}
+		delete_data(Subscanners);
+
+		xr_vector<CLocatorAPIArchiveLoader*> Loaders = {};
+		std::ranges::sort(m_archives, [](archive* A, archive* B){ return xr_strcmp(A->path, B->path) < 0; });
+		for (size_t i = 0; i < m_archives.size(); ++i)
+		{
+			m_archives[i]->vfs_idx = i;
+			if (m_archives[i]->hSrcFile)
+			{
+				auto Loader = new CLocatorAPIArchiveLoader();
+				Loaders.push_back(Loader);
+				Loader->Archive = m_archives[i];
+				main_task_group.run(
+					[Loader]()
+					{
+						Loader->LoadArchive();
+					}
+				);
+			}
+		}
+		main_task_group.wait();
+
+		{
+			files_set temp_set;
+			for (auto Loader : Loaders)
+			{
+				temp_set.insert_range(Loader->m_files);
+			}
+			for (auto& elem : temp_set)
+			{
+				if (!m_files.contains(elem))
+				{
+					m_files.insert(elem);
+				}
+			}
+		}
+		delete_data(Loaders);
 	};
+	PROF_STOP_CAPTURE();
+	PROF_SAVE_CAPTURE("programm-capture-startup.opt");
 
 	// Load addons
 	if (FS.path_exist("$arch_dir_addons$"))
@@ -889,11 +1255,10 @@ void CLocatorAPI::_destroy()
 		xr_delete(p_it->second);
 	}
 	pathes.clear();
-	for (archives_it a_it = m_archives.begin(); a_it != m_archives.end(); a_it++)
+	for (auto elem : m_archives)
 	{
-
-		xr_delete(a_it->header);
-		a_it->close();
+		xr_delete(elem->header);
+		elem->close();
 	}
 	m_archives.clear();
 }
@@ -1175,7 +1540,7 @@ void CLocatorAPI::file_from_cache	(T *&R, LPSTR fname, const u32 &fname_size, co
 void CLocatorAPI::file_from_archive	(IReader *&R, LPCSTR fname, const file &desc)
 {
 	// Archived one
-	archive& A					= m_archives[desc.vfs];
+	archive& A					= *m_archives[desc.vfs];
 	u32 start					= (desc.ptr/dwAllocGranularity)*dwAllocGranularity;
 	u32 end						= (desc.ptr+desc.size_compressed)/dwAllocGranularity;
 	if ((desc.ptr+desc.size_compressed)%dwAllocGranularity)	end+=1;
@@ -1219,7 +1584,7 @@ void CLocatorAPI::file_from_archive	(IReader *&R, LPCSTR fname, const file &desc
 
 void CLocatorAPI::file_from_archive	(CStreamReader *&R, LPCSTR fname, const file &desc)
 {
-	archive						&A = m_archives[desc.vfs];
+	archive						&A = *m_archives[desc.vfs];
 	R_ASSERT2					(
 		desc.size_compressed == desc.size_real,
 		make_string<const char*>(

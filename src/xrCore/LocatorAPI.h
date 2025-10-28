@@ -44,7 +44,7 @@ public:
 		void					close();
 	};
 
-	using archives_vec = xr_vector<archive>;
+	using archives_vec = xr_vector<archive*>;
 	using archives_it = archives_vec::iterator;
 
     archives_vec				m_archives;
@@ -61,6 +61,7 @@ private:
 	};
 
 	using files_set = xr_set<file, file_pred>;
+	using files_vec = xr_vector<file>;
 	using files_it = files_set::iterator;
 
 	using FFVec = xr_vector<system_file>;
@@ -85,6 +86,26 @@ private:
 	bool						Recurse			(LPCSTR path);	
 
 	files_it					file_find_it	(LPCSTR n);
+
+	class CLocatorAPIScanner
+	{
+		
+		xr_vector<CLocatorAPIScanner*> subscanners = {};
+	public:
+		archives_vec m_archives;
+		files_vec m_files;
+		void ScanDirectory(LPCSTR path, bool NoRecurse = false);
+		void MakeFileData(file& out, LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real, u32 size_compressed, time_t modif);
+	};
+
+	class CLocatorAPIArchiveLoader
+	{
+	public:
+		archive* Archive;
+		files_vec m_files;
+
+		void LoadArchive();
+	};
 
 public:
 	bool IsAddonPhase = false;
