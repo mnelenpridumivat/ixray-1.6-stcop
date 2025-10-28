@@ -640,22 +640,28 @@ bool TUI::Idle()
 
 	Device.secondary_tasks.run([]()
 	{
-		PROF_THREAD("Secondary async")
+		__try
 		{
-			PROF_EVENT("Sheduler")
-			Engine.Sheduler.Update();
-		}
+			PROF_THREAD("Secondary async")
+			{
+				PROF_EVENT("Sheduler")
+				Engine.Sheduler.Update();
+			}
 
-		{
-			PROF_EVENT("seqParallel")
-			for (u32 pit = 0; pit < EDevice->seqParallel.size(); pit++)
-				EDevice->seqParallel[pit]();
-			EDevice->seqParallel.clear();
-		}
+			{
+				PROF_EVENT("seqParallel")
+				for (u32 pit = 0; pit < EDevice->seqParallel.size(); pit++)
+					EDevice->seqParallel[pit]();
+				EDevice->seqParallel.clear();
+			}
 
-		{
-			PROF_EVENT("seqFrameMT")
-			EDevice->seqFrameMT.Process(rp_Frame);
+			{
+				PROF_EVENT("seqFrameMT")
+				EDevice->seqFrameMT.Process(rp_Frame);
+			}
+		}
+		__except(EXCEPTION_EXECUTE_HANDLER){
+			DebugBreak();
 		}
 	});
 

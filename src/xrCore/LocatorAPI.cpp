@@ -531,7 +531,12 @@ xr_hash_set<shared_str> DirHandlers = {};
 void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse)
 {
 	PROF_EVENT("CLocatorAPI::CLocatorAPIScanner::ScanDirectory");
+	Msg("Scan dir %s", path.xstring().c_str());
 	xr_task_group subgroup;
+	//if (path.xstring() == "gamedata\\textures\\lod")
+	//{
+	//	DebugBreak();
+	//}
 	//xr_vector<xr_dir_entry> content;
 	//GetAllFilesInDir(path, content);
 	for (const auto& elem : xr_dir_iter{path})
@@ -592,6 +597,9 @@ void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse
 						DebugBreak();
 					}
 				}
+#if defined(IXRAY_PROFILER)
+					, "Scan subfolder"
+#endif
 			);
 			MakeFileData(m_files.emplace_back(), StrPtr, 0xffffffff, 0, 0, 0, 0, 0);
 		} else
@@ -627,6 +635,7 @@ void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse
 		}
 	}
 	subgroup.wait();
+	PROF_EVENT("CLocatorAPI::CLocatorAPIScanner::MakeFileData::JoinData");
 	for (auto Subscanner : subscanners)
 	{
 		m_archives.append_range(Subscanner->m_archives);
@@ -639,6 +648,7 @@ void CLocatorAPI::CLocatorAPIScanner::ScanDirectory(xr_path path, bool NoRecurse
 void CLocatorAPI::CLocatorAPIScanner::MakeFileData(file& out, xr_path name, u32 vfs, u32 crc, u32 ptr, u32 size_real,
 	u32 size_compressed, time_t modif)
 {
+	PROF_EVENT("CLocatorAPI::CLocatorAPIScanner::MakeFileData");
 	//string_path path;
 	//xr_strcpy(path, Platform::RestorePath(name));
 	out.name			= name.lexically_normal();
@@ -1151,6 +1161,9 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 							DebugBreak();
 						}
 					}
+#if defined(IXRAY_PROFILER)
+					, "Scan folder for fs file"
+#endif
 				);
 			}
 #ifndef DEBUG
@@ -1163,48 +1176,60 @@ void CLocatorAPI::_initialize(u32 flags, LPCSTR target_folder, LPCSTR fs_name)
 		r_close(pFSltx);
 		R_ASSERT(path_exist("$app_data_root$"));
 
-		for (auto Subscanner : Subscanners)
 		{
-			m_files.insert_range(Subscanner->m_files);
-			m_archives.append_range(Subscanner->m_archives);
-		}
-		delete_data(Subscanners);
-
-		xr_vector<CLocatorAPIArchiveLoader*> Loaders = {};
-		std::ranges::sort(m_archives, [](archive* A, archive* B){ return xr_strcmp(A->path, B->path) < 0; });
-		for (size_t i = 0; i < m_archives.size(); ++i)
-		{
-			m_archives[i]->vfs_idx = i;
-			if (m_archives[i]->hSrcFile)
+			PROF_EVENT("CLocatorAPI::_initialize::JoinData");
+			for (auto Subscanner : Subscanners)
 			{
-				auto Loader = new CLocatorAPIArchiveLoader();
-				Loaders.push_back(Loader);
-				Loader->Archive = m_archives[i];
-				main_task_group.run(
-					[Loader]()
-					{
-						Loader->LoadArchive();
-					}
-				);
+				m_files.insert_range(Subscanner->m_files);
+				m_archives.append_range(Subscanner->m_archives);
 			}
+			delete_data(Subscanners);
 		}
-		main_task_group.wait();
 
 		{
-			files_set temp_set;
-			for (auto Loader : Loaders)
+			xr_vector<CLocatorAPIArchiveLoader*> Loaders = {};
 			{
-				temp_set.insert_range(Loader->m_files);
-			}
-			for (auto& elem : temp_set)
-			{
-				if (!m_files.contains(elem))
+				PROF_EVENT("CLocatorAPI::_initialize::LoadArchives");
+				std::ranges::sort(m_archives, [](archive* A, archive* B){ return xr_strcmp(A->path, B->path) < 0; });
+				for (size_t i = 0; i < m_archives.size(); ++i)
 				{
-					m_files.insert(elem);
+					m_archives[i]->vfs_idx = i;
+					if (m_archives[i]->hSrcFile)
+					{
+						auto Loader = new CLocatorAPIArchiveLoader();
+						Loaders.push_back(Loader);
+						Loader->Archive = m_archives[i];
+						main_task_group.run(
+							[Loader]()
+							{
+								Loader->LoadArchive();
+							}
+	#if defined(IXRAY_PROFILER)
+						, "Load archive"
+	#endif
+						);
+					}
+				}
+				main_task_group.wait();
+			}
+
+			{
+				PROF_EVENT("CLocatorAPI::_initialize::JoinArchivesData");
+				files_set temp_set;
+				for (auto Loader : Loaders)
+				{
+					temp_set.insert_range(Loader->m_files);
+				}
+				for (auto& elem : temp_set)
+				{
+					if (!m_files.contains(elem))
+					{
+						m_files.insert(elem);
+					}
 				}
 			}
+			delete_data(Loaders);
 		}
-		delete_data(Loaders);
 	};
 
 	// Load addons
@@ -2047,7 +2072,7 @@ void CLocatorAPI::file_delete(LPCSTR path, LPCSTR nm)
 		Platform::Unlink(I->name.xstring().c_str());
 		//char* str = LPSTR(I->name);
 		//xr_free(str);
-		m_files.erase(I);
+		//m_files.erase(I);
 	}
 }
 

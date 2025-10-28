@@ -41,7 +41,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	
 	splash::update(10, "Initializing Core System");
 
-	PROF_START_CAPTURE()
+	//PROF_START_CAPTURE()
 	
 	const char* FSName = "fs.ltx";
 	{
@@ -49,8 +49,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		Core._initialize("LevelEditor", ELogCallback, 1, FSName);
 	}
 
-	PROF_STOP_CAPTURE()
-    PROF_SAVE_CAPTURE("programm-capture-startup.opt");
+	//PROF_STOP_CAPTURE()
+    //PROF_SAVE_CAPTURE("programm-capture-startup.opt");
 
 	splash::update(20, "Initializing Level Tools");
 

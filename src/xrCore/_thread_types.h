@@ -23,7 +23,32 @@ using xr_atomic_float = std::atomic<float>;
 
 // Tasks Redefinition
 #ifdef IXR_WINDOWS
+#if defined(IXRAY_PROFILER)
+class xr_task_group
+{
+private:
+	Concurrency::task_group m_taskGroup;
+
+public:
+	template<typename Func>
+	void run(const Func& func, const char* taskName = "PPL Task")
+	{
+		m_taskGroup.run([func, taskName]() {
+			PROF_THREAD(std::to_string(std::this_thread::get_id()._Get_underlying_id()).c_str())
+			OPTICK_EVENT_DYNAMIC(taskName);
+			func();
+		});
+	}
+
+	void wait()
+	{
+		OPTICK_EVENT("TaskGroup Wait");
+		m_taskGroup.wait();
+	}
+};
+#else
 using xr_task_group = concurrency::task_group;
+#endif
 
 template <typename T, typename U>
 using xr_concurrent_unordered_map = concurrency::concurrent_unordered_map<T, U>;
