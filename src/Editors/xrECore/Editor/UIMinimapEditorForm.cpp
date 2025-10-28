@@ -715,7 +715,7 @@ void UIMinimapEditorForm::CreateElementPopup()
 
 			string_path p;
 			if (!el_new.TexturePath.empty())
-				sprintf(p, "%s%s.dds", FS.get_path(_game_textures_)->m_Path, CreatingData.TexturePath.c_str());
+				sprintf(p, "%s%s.dds", FS.get_path(_game_textures_)->m_Path.xstring().c_str(), CreatingData.TexturePath.c_str());
 
 
 			if (LoadTexture(el_new, p) != 0)
@@ -839,7 +839,7 @@ void UIMinimapEditorForm::ShowMenu()
 		if (ImGui::Button("Save and Close"))
 		{
 			string_path levelLtx;
-			sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, selectedElement->name.c_str());
+			sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path.xstring().c_str(), selectedElement->name.c_str());
 
 			if (FS.exist(levelLtx))
 			{
@@ -936,7 +936,7 @@ void UIMinimapEditorForm::ShowMenu()
 			BoundRectMode = true;
 
 			string_path levelLtx;
-			sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, selectedElement->name.c_str());
+			sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path.xstring().c_str(), selectedElement->name.c_str());
 
 			if (FS.exist(levelLtx))
 			{
@@ -967,7 +967,7 @@ void UIMinimapEditorForm::OpenFile()
 bool UIMinimapEditorForm::GetTextureFromLevelLtx(const xr_string level_name, xr_string& dest )
 {
 	string_path levelLtx;
-	sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, level_name.c_str());
+	sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path.xstring().c_str(), level_name.c_str());
 
 	bool find_result = false;
 	if (!FS.exist(levelLtx))
@@ -999,7 +999,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 			auto tx = ltxFile->r_string("global_map", "texture");
 
 			string_path texturePath;
-			sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path, tx);
+			sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path.xstring().c_str(), tx);
 			LoadBGClick(texturePath);
 		}
 		if (ltxFile->line_exist("global_map", "bound_rect"))
@@ -1053,7 +1053,7 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 
 		string_path texturePath = "";
 		string_path levelLtx;
-		sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path, levelName.c_str());
+		sprintf(levelLtx, "%s%s\\level.ltx", FS.get_path("$level$")->m_Path.xstring().c_str(), levelName.c_str());
 
 		bool find_result = false;
 		if (FS.exist(levelLtx))
@@ -1064,12 +1064,14 @@ void UIMinimapEditorForm::ReloadMapInfo(const xr_string& fn)
 			{
 				auto textureFile = levelLtxFile.r_string("level_map", "texture");
 				el.TexturePath = textureFile;
-				sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path, textureFile);
+				sprintf(texturePath, "%s%s.dds", FS.get_path("$game_textures$")->m_Path.xstring().c_str(), textureFile);
 			}
 		}
 
 		if (texturePath == "")
-			sprintf(texturePath, "%smap\\map_%s.dds", FS.get_path("$game_textures$")->m_Path, levelName.c_str());
+		{
+			sprintf(texturePath, "%smap\\map_%s.dds", FS.get_path("$game_textures$")->m_Path.xstring().c_str(), levelName.c_str());
+		}
 
 		LoadTexture(el, texturePath);
 		elements.push_back(el);

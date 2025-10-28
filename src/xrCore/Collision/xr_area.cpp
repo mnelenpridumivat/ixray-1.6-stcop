@@ -98,9 +98,9 @@ void CObjectSpace::Load(IReader* F, CDB::build_callback build_callback)
 	auto LevelPath = FS.get_path("$level$")->m_Add;
 	IReader* pReaderCache = nullptr;
 
-	if (LevelPath != nullptr)
+	if (!LevelPath.empty())
 	{
-		xr_strconcat(LevelName, "level_cache\\", LevelPath, "cform.cache"); 
+		xr_strconcat(LevelName, "level_cache\\", LevelPath.xstring().c_str(), "cform.cache"); 
 		pReaderCache = CDB::GetModelCache(LevelName, crc);
 	}
 

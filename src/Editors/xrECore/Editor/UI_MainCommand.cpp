@@ -707,15 +707,19 @@ CCommandVar 	CommandRunMacro(CCommandVar p1, CCommandVar p2)
 }
 CCommandVar 	CommandAssignMacro(CCommandVar p1, CCommandVar p2)
 {
-	xr_string fn 		= p2.IsString()?xr_string(p2):xr_string(""); 
+	xr_string fn = p2.IsString()?xr_string(p2):xr_string(""); 
 	if (p2.IsString()){
-		if (0==fn.find(FS.get_path(_import_)->m_Path))
-			fn 			= xr_string(fn.c_str()+xr_strlen(FS.get_path(_import_)->m_Path));
+		if (0==fn.find(FS.get_path(_import_)->m_Path.xstring().c_str()))
+		{
+			fn = xr_string(fn.c_str()+FS.get_path(_import_)->m_Path.xstring().size());
+		}
 		ECommands[COMMAND_RUN_MACRO]->sub_commands[p1]->p0 = fn;
 		return 			TRUE;
 	}else{
 		if (EFS.GetOpenName(_import_,fn,false,NULL,2))
-			return 		ExecCommand	(COMMAND_ASSIGN_MACRO,p1,fn);
+		{
+			return ExecCommand(COMMAND_ASSIGN_MACRO,p1,fn);
+		}
 	}
 	return FALSE;
 }

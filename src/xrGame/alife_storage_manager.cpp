@@ -47,7 +47,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, boo
 		return;
 	}*/
 	
-	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path;
+	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path.xstring().c_str();
 
 	string_path					save_name;
 	strncpy_s					(save_name, sizeof(save_name), save_name_no_check, sizeof(save_name)-5-xr_strlen(IXRAY_DEF_SAVE_EXTENSION)-xr_strlen(game_saves_path));
@@ -203,7 +203,7 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 
 bool CALifeStorageManager::load(LPCSTR save_name_no_check)
 {
-	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path;
+	LPCSTR game_saves_path		= FS.get_path("$game_saves$")->m_Path.xstring().c_str();
 
 	string_path					save_name;
 	strncpy_s					(save_name, sizeof(save_name), save_name_no_check, sizeof(save_name)-5-xr_strlen(IXRAY_DEF_SAVE_EXTENSION)-xr_strlen(game_saves_path));

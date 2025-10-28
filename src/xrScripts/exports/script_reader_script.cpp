@@ -58,7 +58,7 @@ static void w_file_from_string(const char* path, const char* buffer)
 		return;
 	}
 
-	shared_str newPath = fileIter->wrap ? fileIter->wrap : fileIter->name;
+	shared_str newPath = !fileIter->wrap.empty() ? fileIter->wrap.xstring().c_str() : fileIter->name.xstring().c_str();
 	IWriter* writer = FS.w_open(*newPath);
 	writer->w(buffer, xr_strlen(buffer));
 	FS.w_close(writer);

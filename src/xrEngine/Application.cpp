@@ -382,16 +382,16 @@ int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 
 	bool arch_res = false;
 
-	for (CLocatorAPI::archive& Arch : FS.m_archives)
+	for (auto Arch : FS.m_archives)
 	{
-		if (Arch.hSrcFile == nullptr)
+		if (Arch->hSrcFile == nullptr)
 		{
-			LPCSTR ln = Arch.header->r_string("header", "level_name");
-			LPCSTR lv = Arch.header->r_string("header", "level_ver");
+			LPCSTR ln = Arch->header->r_string("header", "level_name");
+			LPCSTR lv = Arch->header->r_string("header", "level_ver");
 
 			if (0 == _stricmp(ln, name) && 0 == _stricmp(lv, ver))
 			{
-				FS.LoadArchive(Arch);
+				FS.LoadArchive(*Arch);
 				arch_res = true;
 			}
 		}
@@ -422,14 +422,14 @@ int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 
 CInifile* CApplication::GetArchiveHeader(LPCSTR name, LPCSTR ver)
 {
-	for (CLocatorAPI::archive& Arch : FS.m_archives)
+	for (auto Arch : FS.m_archives)
 	{
-		LPCSTR ln = Arch.header->r_string("header", "level_name");
-		LPCSTR lv = Arch.header->r_string("header", "level_ver");
+		LPCSTR ln = Arch->header->r_string("header", "level_name");
+		LPCSTR lv = Arch->header->r_string("header", "level_ver");
 
 		if (0 == _stricmp(ln, name) && 0 == _stricmp(lv, ver))
 		{
-			return Arch.header;
+			return Arch->header;
 		}
 	}
 	return nullptr;

@@ -161,7 +161,7 @@ void CScriptEngine::setup_auto_load		()
 		_splitpath((*fit).name.c_str(), 0, fn1, fn2, 0);
 
 		FS.update_path(fn1, "$game_scripts$", fn1);
-		xr_strconcat(fn1, fn1, fn2, ".script");
+		xr_strconcat(fn1, fn1, "\\", fn2, ".script");
 
 		if (!xray_scripts.contains(xr_string(fn2)))
 		{

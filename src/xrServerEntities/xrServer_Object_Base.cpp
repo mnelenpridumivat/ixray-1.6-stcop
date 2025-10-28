@@ -196,7 +196,7 @@ CInifile &CSE_Abstract::spawn_ini			()
 
 		m_ini_file = new CInifile(
 			&temp,
-			FS.get_path("$game_config$")->m_Path
+			FS.get_path("$game_config$")->m_Path.xstring().c_str()
 		);
 	}
 #pragma warning(push)

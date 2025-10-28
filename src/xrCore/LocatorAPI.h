@@ -19,8 +19,8 @@ class XRCORE_API CLocatorAPI
 public:
 	struct file
 	{
-		LPCSTR					name;			// low-case name
-		LPCSTR					wrap = nullptr;	// addons real path
+		xr_path					name;			// low-case name
+		xr_path					wrap = "";	// addons real path
 		u32						vfs;			// 0xffffffff - standart file
 		u32						crc;			// contents CRC
 		u32						ptr;			// pointer inside vfs
@@ -57,7 +57,8 @@ private:
 	struct file_pred 
 	{
 		IC bool operator()	(const file& x, const file& y) const
-		{	return xr_strcmp(x.name,y.name)<0;	}
+		{return x.name < y.name;}
+		//{	return xr_strcmp(x.name,y.name)<0;	}
 	};
 
 	using files_set = xr_set<file, file_pred>;
@@ -92,10 +93,13 @@ private:
 		
 		xr_vector<CLocatorAPIScanner*> subscanners = {};
 	public:
+#ifdef DEBUG
+		xr_path ScannedDir = "";
+#endif
 		archives_vec m_archives;
 		files_vec m_files;
-		void ScanDirectory(LPCSTR path, bool NoRecurse = false);
-		void MakeFileData(file& out, LPCSTR name, u32 vfs, u32 crc, u32 ptr, u32 size_real, u32 size_compressed, time_t modif);
+		void ScanDirectory(xr_path path, bool NoRecurse = false);
+		void MakeFileData(file& out, xr_path name, u32 vfs, u32 crc, u32 ptr, u32 size_real, u32 size_compressed, time_t modif);
 	};
 
 	class CLocatorAPIArchiveLoader
@@ -174,7 +178,10 @@ public:
 
 	CStreamReader*				rs_open				(LPCSTR initial, LPCSTR N);
 	IReader*					r_open				(LPCSTR initial, LPCSTR N);
-	IC IReader*					r_open				(LPCSTR N){return r_open(0,N);}
+	IC IReader*					r_open				(LPCSTR N)
+	{
+		return r_open(0,N);
+	}
 	void						r_close				(IReader* &S);
 	void						r_close				(CStreamReader* &fs);
 

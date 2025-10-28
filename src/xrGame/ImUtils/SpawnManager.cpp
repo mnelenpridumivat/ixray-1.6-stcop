@@ -143,10 +143,10 @@ void InitSections()
 
 			if (visual.find(".ogf") == xr_string_view::npos)
 			{
-				full_path.printf("%s%s%s", FS.get_path("$game_meshes$")->m_Path, visual.data(), ".ogf");
+				full_path.printf("%s%s%s", FS.get_path("$game_meshes$")->m_Path.xstring().c_str(), visual.data(), ".ogf");
 			}
 			else {
-				full_path.printf("%s%s", FS.get_path("$game_meshes$")->m_Path, visual.data());
+				full_path.printf("%s%s", FS.get_path("$game_meshes$")->m_Path.xstring().c_str(), visual.data());
 			}
 			if (!FS.exist(full_path.c_str()))
 			{

@@ -22,67 +22,79 @@ void FS_File::set(xr_string nm, long sz, time_t modif,unsigned attr)
 //////////////////////////////////////////////////////////////////////
 // FS_Path
 //////////////////////////////////////////////////////////////////////
-FS_Path::FS_Path	(LPCSTR _Root, LPCSTR _Add, LPCSTR _DefExt, LPCSTR _FilterCaption, u32 flags)
+FS_Path::FS_Path	(xr_path _Root, xr_path _Add, LPCSTR _DefExt, LPCSTR _FilterCaption, u32 flags)
 {
-//	VERIFY			(_Root&&_Root[0]);
-	string_path		temp;
-    xr_strcpy		(temp,sizeof(temp),_Root); 
-    if (_Add) 		xr_strcat(temp,_Add);
-	if (temp[0] && temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
-	m_Path			= xr_strlwr(xr_strdup(temp));
+	m_Root = _Root;
+	m_Add = _Add;
+	m_Path = (_Root / _Add).lexically_normal();
+	
+	//string_path		temp;
+    //xr_strcpy		(temp,sizeof(temp),_Root); 
+    //if (_Add) 		xr_strcat(temp,_Add);
+	//if (temp[0] && temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
+	//m_Path			= xr_strlwr(xr_strdup(temp));
 	m_DefExt		= _DefExt?xr_strlwr(xr_strdup(_DefExt)):0;
 	m_FilterCaption	= _FilterCaption?xr_strlwr(xr_strdup(_FilterCaption)):0;
-	m_Add			= _Add?xr_strlwr(xr_strdup(_Add)):0;
-	m_Root			= _Root?xr_strlwr(xr_strdup(_Root)):0;
+	//m_Add			= _Add?xr_strlwr(xr_strdup(_Add)):0;
+	//m_Root			= _Root?xr_strlwr(xr_strdup(_Root)):0;
     m_Flags.assign	(flags);
 }
 
 FS_Path::~FS_Path	()
 {
-	xr_free	(m_Root);
-	xr_free	(m_Path);
-	xr_free	(m_Add);
+	//xr_free	(m_Root);
+	//xr_free	(m_Path);
+	//xr_free	(m_Add);
 	xr_free	(m_DefExt);
 	xr_free	(m_FilterCaption);
 }
 
-void	FS_Path::_set	(LPCSTR add)
+void	FS_Path::_set	(xr_path add)
 {
 	// m_Add
-	R_ASSERT		(add);
-	xr_free			(m_Add);
-	m_Add			= xr_strlwr(xr_strdup(add));
+	//R_ASSERT		(add);
+	//xr_free			(m_Add);
+	m_Add = add;
+	m_Path = m_Root / add;
+	//m_Add			= xr_strlwr(xr_strdup(add));
 
 	// m_Path
-	string_path		temp;
-	xr_strconcat(temp,m_Root,m_Add);
-	if (temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
-	xr_free			(m_Path);
-	m_Path			= xr_strlwr(xr_strdup(temp));
+	//string_path		temp;
+	//xr_strconcat(temp,m_Root,m_Add);
+	//if (temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
+	//xr_free			(m_Path);
+	//m_Path			= xr_strlwr(xr_strdup(temp));
 }
 
-void	FS_Path::_set_root	(LPCSTR root)
+void	FS_Path::_set_root	(xr_path root)
 {
-	string_path		temp;
-	xr_strcpy		( temp, root );
-	if (m_Root[0] && m_Root[xr_strlen(m_Root)-1]!='\\') xr_strcat(temp,"\\");
-	xr_free			(m_Root);
-	m_Root			= xr_strlwr(xr_strdup(temp));
+	m_Root = root;
+	m_Path = root / m_Add;
+	
+	//string_path		temp;
+	//xr_strcpy		( temp, root );
+	//if (m_Root[0] && m_Root[xr_strlen(m_Root)-1]!='\\') xr_strcat(temp,"\\");
+	//xr_free			(m_Root);
+	//m_Root			= xr_strlwr(xr_strdup(temp));
 
 	// m_Path
-	xr_strconcat(temp,m_Root,m_Add ? m_Add : "");
-	if (*temp && temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
-	xr_free			(m_Path);
-	m_Path			= xr_strlwr(xr_strdup(temp));
+	//xr_strconcat(temp,m_Root,m_Add ? m_Add : "");
+	//if (*temp && temp[xr_strlen(temp)-1]!='\\') xr_strcat(temp,"\\");
+	//xr_free			(m_Path);
+	//m_Path			= xr_strlwr(xr_strdup(temp));
 }
 
 LPCSTR FS_Path::_update(string_path& dest, LPCSTR src)const
 {
 	R_ASSERT			(dest);
     R_ASSERT			(src);
-	string_path			temp;
-	xr_strcpy			(temp, sizeof(temp), src);
-	xr_strconcat(dest, m_Path, temp);
+	xr_path temp_path = (m_Path / src).lexically_normal();
+	xr_strcpy(dest, temp_path.xstring().c_str());
+	auto len = xr_strlen(dest);
+	if (dest[len - 1] == '\\' || dest[len - 1] == '/')
+	{
+		dest[len-1] = '\0';
+	}
 	return xr_strlwr	(dest);
 }
 

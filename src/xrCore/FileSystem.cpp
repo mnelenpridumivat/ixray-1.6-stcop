@@ -146,7 +146,7 @@ bool EFS_Utils::GetOpenNameInternal(LPCSTR initial, LPSTR buffer, int sz_buf, bo
 	ofn.nFilterIndex = start_flt_ext + 2;
 	ofn.lpstrTitle = "Open a File";
 	string512 path;
-	xr_strcpy(path, (offset && offset[0]) ? offset : P.m_Path);
+	xr_strcpy(path, (offset && offset[0]) ? offset : P.m_Path.xstring().c_str());
 	ofn.lpstrInitialDir = path;
 
 	ofn.Flags = OFN_PATHMUSTEXIST |
@@ -240,7 +240,7 @@ bool EFS_Utils::GetSaveName(LPCSTR initial, string_path& buffer, LPCSTR offset, 
 	ofn.nMaxFile = sizeof(buffer);
 	ofn.nFilterIndex = start_flt_ext + 2;
 	ofn.lpstrTitle = "Save a File";
-	string512 path; xr_strcpy(path, (offset && offset[0]) ? offset : P.m_Path);
+	string512 path; xr_strcpy(path, (offset && offset[0]) ? offset : P.m_Path.xstring().c_str());
 	ofn.lpstrInitialDir = path;
 	ofn.Flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR | OFN_EXPLORER;
 	ofn.FlagsEx = 0;

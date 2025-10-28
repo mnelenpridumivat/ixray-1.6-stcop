@@ -27,18 +27,18 @@ public:
     	flNeedRescan= (1<<2),
     };
 public:
-	LPSTR		m_Path;
-	LPSTR		m_Root;
-	LPSTR		m_Add;
+	xr_path	m_Path;
+	xr_path	m_Root;
+	xr_path	m_Add;
 	LPSTR		m_DefExt;
 	LPSTR		m_FilterCaption;
     Flags32		m_Flags;
 public:
-				FS_Path		(LPCSTR _Root, LPCSTR _Add, LPCSTR _DefExt=0, LPCSTR _FilterString=0, u32 flags=0);
+				FS_Path		(xr_path _Root, xr_path _Add, LPCSTR _DefExt=0, LPCSTR _FilterString=0, u32 flags=0);
 				~FS_Path	();
 	LPCSTR		_update		(string_path& dest, LPCSTR src) const;
-	void		_set		(LPCSTR add);
-	void		_set_root	(LPCSTR root);
+	void		_set		(xr_path add);
+	void		_set_root	(xr_path root);
 
     void  rescan_path_cb	();
 };

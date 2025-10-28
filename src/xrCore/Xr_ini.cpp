@@ -530,7 +530,7 @@ bool CInifile::save_as	(LPCSTR new_fname)
 		return (true);
 	}
 
-	shared_str newPath = fileIter->wrap ? fileIter->wrap : fileIter->name;
+	shared_str newPath = !fileIter->wrap.empty() ? fileIter->wrap.xstring().c_str() : fileIter->name.xstring().c_str();
 	IWriter* F = FS.w_open_ex(newPath.c_str());
 	if (!F)
 		return false;

@@ -32,7 +32,7 @@ void CSE_ALifeObject::spawn_supplies(LPCSTR ini_string)
 	);
 
 	CInifile ini(&temp,
-		FS.get_path("$game_config$")->m_Path
+		FS.get_path("$game_config$")->m_Path.xstring().c_str()
 	);
 #pragma warning(pop)
 

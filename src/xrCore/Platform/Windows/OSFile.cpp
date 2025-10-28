@@ -30,7 +30,7 @@ bool Platform::OpenFileWnd(char* buffer, size_t sz_buf, FS_Path* P, int start_fl
 	ofn.lpstrTitle = L"Open a File";
 
 	string512 path;
-	xr_strcpy(path, (offset && offset[0]) ? offset : P->m_Path);
+	xr_strcpy(path, (offset && offset[0]) ? offset : P->m_Path.xstring().c_str());
 	ofn.lpstrInitialDir = xr_strdup(ANSI_TO_TCHAR(path));
 	ofn.Flags = OFN_PATHMUSTEXIST |
 		OFN_FILEMUSTEXIST |

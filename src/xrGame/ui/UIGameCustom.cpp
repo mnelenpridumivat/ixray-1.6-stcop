@@ -581,12 +581,12 @@ void CMapListHelper::Load()
 
 	for(;it!=it_e;++it)
 	{
-		CLocatorAPI::archive& A		= *it;
-		if(A.hSrcFile)				continue;
+		CLocatorAPI::archive* A		= *it;
+		if(A->hSrcFile)				continue;
 
-		LPCSTR ln					= A.header->r_string("header", "level_name");
-		LPCSTR lv					= A.header->r_string("header", "level_ver");
-		FS.LoadArchive				(A, tmp_entrypoint);
+		LPCSTR ln					= A->header->r_string("header", "level_name");
+		LPCSTR lv					= A->header->r_string("header", "level_ver");
+		FS.LoadArchive				(*A, tmp_entrypoint);
 
 		string_path					map_cfg_fn;
 		FS.update_path				(map_cfg_fn, "$game_levels$", ln);
@@ -594,7 +594,7 @@ void CMapListHelper::Load()
 		
 		xr_strcat					(map_cfg_fn,"\\level.ltx");
 		LoadMapInfo					(map_cfg_fn, ln, lv);
-		FS.unload_archive			(A);
+		FS.unload_archive			(*A);
 	}
 	game_levels->_set_root			(prev_root.c_str());
 

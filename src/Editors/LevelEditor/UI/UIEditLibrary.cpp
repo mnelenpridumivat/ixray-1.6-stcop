@@ -920,7 +920,7 @@ void UIEditLibrary::ImportClick()
 			FS.TryLoad(*it);
 			if (O->Load(it->c_str()))
 			{
-				save_nm = xr_string(FS.get_path(_objects_)->m_Path) + folder.c_str() + EFS.ChangeFileExt(nm, ".object");
+				save_nm = xr_string(FS.get_path(_objects_)->m_Path.xstring().c_str()) + folder.c_str() + EFS.ChangeFileExt(nm, ".object");
 
 				if (FS.exist(save_nm.c_str()))
 				{
@@ -942,7 +942,7 @@ void UIEditLibrary::ImportClick()
 
 			xr_delete(O);
 
-			LPCSTR p = FS.get_path(_objects_)->m_Path;
+			LPCSTR p = FS.get_path(_objects_)->m_Path.xstring().c_str();
 			if (folder.Contains(p))
 			{
 				m_LastSelection = xr_string(folder.c_str() + strlen(p)) + nm;

@@ -1125,7 +1125,7 @@ void EScene::CopySelection( ObjClassID classfilter )
 	SceneClipData *sceneclipdata = (SceneClipData *)GlobalLock(hmem);
 
 	sceneclipdata->m_ClassFilter = classfilter;
-	GetTempFileNameA( FS.get_path(_temp_)->m_Path, "clip", 0, sceneclipdata->m_FileName );
+	GetTempFileNameA( FS.get_path(_temp_)->m_Path.xstring().c_str(), "clip", 0, sceneclipdata->m_FileName );
 	SaveSelection( classfilter, sceneclipdata->m_FileName );
 
 	GlobalUnlock( hmem );
@@ -1167,7 +1167,7 @@ void EScene::DuplicateSelection(ObjClassID classfilter)
 	SceneClipData *sceneclipdata = (SceneClipData *)GlobalLock(hmem);
 
 	sceneclipdata->m_ClassFilter = classfilter;
-	GetTempFileNameA( FS.get_path(_temp_)->m_Path, "clip", 0, sceneclipdata->m_FileName );
+	GetTempFileNameA( FS.get_path(_temp_)->m_Path.xstring().c_str(), "clip", 0, sceneclipdata->m_FileName );
 	SaveSelection( classfilter, sceneclipdata->m_FileName );
 
 	if( OpenClipboard( 0 ) ){

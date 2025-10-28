@@ -52,7 +52,7 @@ CCommandVar CActorTools::CommandImport(CCommandVar p1, CCommandVar p2)
 	{
 		FS_Path* pp = FS.get_path(_import_);
 
-		if (temp_fn.npos != temp_fn.find(pp->m_Path))
+		if (temp_fn.npos != temp_fn.find(pp->m_Path.xstring().c_str()))
 		{
 			xr_strlwr(temp_fn);
 			temp_fn = FS.fix_path(temp_fn);

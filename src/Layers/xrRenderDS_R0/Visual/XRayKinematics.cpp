@@ -120,7 +120,7 @@ void CDS0_Kinematics::Load(const char* N, IReader* data, u32 dwFlags)
 #ifndef _EDITOR    
 	// User data
 	IReader* UD = data->open_chunk(OGF_S_USERDATA);
-	pUserData = UD ? new CInifile(UD, FS.get_path("$game_config$")->m_Path) : 0;
+	pUserData = UD ? new CInifile(UD, FS.get_path("$game_config$")->m_Path.xstring().c_str()) : 0;
 	if (UD)			UD->close();
 #endif
 

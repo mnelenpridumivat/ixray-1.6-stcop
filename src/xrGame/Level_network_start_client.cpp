@@ -70,7 +70,7 @@ bool	CLevel::net_start_client2				()
 void rescan_mp_archives()
 {
 	FS_Path* mp_archs_path = FS.get_path("$game_arch_mp$");
-	FS.rescan_path(mp_archs_path->m_Path,
+	FS.rescan_path(mp_archs_path->m_Path.xstring().c_str(),
 		mp_archs_path->m_Flags.is(FS_Path::flRecurse)
 	);
 }

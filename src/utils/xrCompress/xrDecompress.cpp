@@ -173,8 +173,10 @@ void xrDecompressor::Decompress()
 
 	FS.file_list_close(files);
 
-	for (auto& Arch : FS.m_archives)
-		FS.unload_archive(Arch);
+	for (auto Arch : FS.m_archives)
+	{
+		FS.unload_archive(*Arch);
+	}
 
 	xrLogger::RemoveLogCallback(LogCallback);
 }

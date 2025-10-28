@@ -1813,10 +1813,10 @@ static bool isValidSection(std::string_view section)
 
 	if (visual.find(".ogf") == xr_string::npos)
 	{
-		full_path.printf("%s%s%s", FS.get_path("$game_meshes$")->m_Path, visual.data(), ".ogf");
+		full_path.printf("%s%s%s", FS.get_path("$game_meshes$")->m_Path.xstring().c_str(), visual.data(), ".ogf");
 	}
 	else {
-		full_path.printf("%s%s", FS.get_path("$game_meshes$")->m_Path, visual.data());
+		full_path.printf("%s%s", FS.get_path("$game_meshes$")->m_Path.xstring().c_str(), visual.data());
 	}
 
 	xr_strlwr(full_path);

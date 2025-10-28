@@ -44,8 +44,10 @@ void CLocatorAPI::auth_runtime(void* params)
 		// test for skip
 		BOOL	bSkip = FALSE;
 		for (u32 s = 0; s < _o->ignore.size(); s++) {
-			if (strstr(f.name, _o->ignore[s].c_str()))
+			if (strstr(f.name.xstring().c_str(), _o->ignore[s].c_str()))
+			{
 				bSkip = TRUE;
+			}
 		}
 
 		if (bSkip)
@@ -53,9 +55,9 @@ void CLocatorAPI::auth_runtime(void* params)
 
 		// test for important
 		for (u32 s = 0; s < _o->important.size(); s++) {
-			if ((f.size_real != 0) && strstr(f.name, _o->important[s].c_str())) {
+			if ((f.size_real != 0) && strstr(f.name.xstring().c_str(), _o->important[s].c_str())) {
 				// crc for file				
-				IReader* r = FS.r_open(f.name);
+				IReader* r = FS.r_open(f.name.xstring().c_str());
 				if (!r) {
 					do_break = true;
 					break;
