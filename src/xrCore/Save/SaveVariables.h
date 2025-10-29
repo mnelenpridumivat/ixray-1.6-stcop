@@ -55,6 +55,7 @@ class XRCORE_API ISaveable{
 protected:
 	virtual void* GetValue() = 0;
 public:
+	virtual ~ISaveable() = default;
 	virtual ESaveVariableType GetVariableType() = 0;
 	//virtual bool IsArray() = 0;
 	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) = 0;

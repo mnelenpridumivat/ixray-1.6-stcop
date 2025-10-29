@@ -14,6 +14,7 @@ public:
 
 class XRCORE_API ISaveObject {
 public:
+	virtual ~ISaveObject() = default;
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) = 0;
 	virtual void EndChunk(ISaveObjectStackHandler handler) = 0;
 	virtual void BeginArray() = 0;

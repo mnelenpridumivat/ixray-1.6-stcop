@@ -32,7 +32,8 @@ using CEncyclopediaRegistry = CALifeAbstractRegistry<u16, ARTICLE_VECTOR>;
 class CALifeRegistryContainer
 {
 public:
-    CInfoPortionRegistry       m_info_portions;
+	virtual ~CALifeRegistryContainer() = default;
+	CInfoPortionRegistry       m_info_portions;
     CRelationRegistry          m_character_relations;
     CGameNewsRegistry          m_game_news;
     CSpecificCharacterRegistry m_specific_characters;

@@ -699,7 +699,7 @@ bool CSector::Validate(bool bMsg)
 	bool bRenderableFound	= false;    
 	for (SItemIt it=sector_items.begin();it!=sector_items.end();it++){
 		for (SurfFacesPairIt sf_it=it->mesh->m_SurfFaces.begin(); sf_it!=it->mesh->m_SurfFaces.end(); sf_it++){
-			CSurface* surf 		= sf_it->first;
+			auto surf 		= sf_it->first;
 			Shader_xrLC* c_sh	= EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
 			if (!c_sh)
 			{

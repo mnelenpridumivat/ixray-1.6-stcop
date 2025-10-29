@@ -4,7 +4,7 @@
 
 class CMemoryBuffer;
 
-class XRCORE_API CSaveChunk: public ISaveable {
+class XRCORE_API CSaveChunk final: public ISaveable {
 
 	shared_str _chunkName;
 	xr_map<shared_str, CSaveChunk*> _subchunks;

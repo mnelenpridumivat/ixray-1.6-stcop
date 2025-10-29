@@ -485,6 +485,8 @@ public:
 			bool				IsItemUsedAdditionalDescription();
 
 			u32					GetAmmoElapsed		();
+			u32					GetAmmoElapsedWithChamber(); // FFx0001 ++
+			bool				IsWeaponUseChamber(); // FFx0001 ++
 			void				SetAmmoElapsed		(int ammo_elapsed);
 			u32					GetSuitableAmmoTotal		() const;
 			void				SetQueueSize		(u32 queue_size);

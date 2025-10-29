@@ -57,6 +57,7 @@ public:
 
 	CUIStatic* UIStaticDiskIO;
 	CUITextWnd* UIStaticQuickHelp;
+	CUITextWnd* UIStaticQuickHelp2;
 	CUIMotionIcon* UIMotionIcon;
 	CUIZoneMap* UIZoneMap;
 

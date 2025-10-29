@@ -324,14 +324,7 @@ void CHudItem::OnAnimationEnd(u32 state)
 	}
 	case ePrepareDetector:
 	{
-		if (m_eAnimationsFlags.test(af_prepare_detector_end))
-		{
-			SwitchState(ePrepareDetectorEnd);
-		}
-		else
-		{
-			SwitchState(eIdle);
-		}
+		SwitchState(eIdle);
 		break;
 	}
 	};
@@ -487,7 +480,6 @@ void CHudItem::on_a_hud_attach()
 	m_eAnimationsFlags.set(EAnimationsFlags::af_nvg, m_eAnimationsFlags.test(EAnimationsFlags::af_torch));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_clear_mask, HudAnimationExist("anm_gasmask"));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_prepare_detector, HudAnimationExist("anm_prepare_detector"));
-	m_eAnimationsFlags.set(EAnimationsFlags::af_prepare_detector_end, HudAnimationExist("anm_draw_detector"));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_finish_detector, HudAnimationExist("anm_finish_detector"));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_det_hand_draw, HudAnimationExist("anm_hand_draw"));
 	m_eAnimationsFlags.set(EAnimationsFlags::af_det_hand_hide, HudAnimationExist("anm_hand_hide"));

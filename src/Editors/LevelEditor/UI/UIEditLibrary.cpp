@@ -20,8 +20,8 @@ UIEditLibrary::UIEditLibrary()
 {
 	m_ObjectList = new UIItemListForm();
 	InitObjects();
-	m_ObjectList->SetOnItemFocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemFocused));
-	m_ObjectList->SetOnItemUnfocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemUnfocused));
+	m_ObjectList->SetOnItemFocusedEvent({this, &UIEditLibrary::OnItemFocused});
+	m_ObjectList->SetOnItemUnfocusedEvent({this, &UIEditLibrary::OnItemUnfocused});
 	m_ObjectList->m_Flags.set(UIItemListForm::fMultiSelect, true);
 
 	InternalProps = new UIPropertiesForm();
@@ -34,8 +34,8 @@ UIEditLibrary::UIEditLibrary()
 
 	View.OnFocusCallback = ViewportFocusCallback;
 
-	SearchList.SetOnItemFocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemFocused));
-	SearchList.SetOnItemUnfocusedEvent(TOnILItemFocused(this, &UIEditLibrary::OnItemUnfocused));
+	SearchList.SetOnItemFocusedEvent({this, &UIEditLibrary::OnItemFocused});
+	SearchList.SetOnItemUnfocusedEvent({this, &UIEditLibrary::OnItemUnfocused});
 }
 
 void UIEditLibrary::OnItemFocused(ListItem* item)
@@ -692,6 +692,70 @@ void UIEditLibrary::ExportObj()
 		UI->ProgressEnd(pb);
 	}
 	ELog.DlgMsg(mtInformation, "Done.");
+}
+
+void UIEditLibrary::ValidateOne(CEditableObject* O)
+{
+	if (O)
+	{
+		if(!O->Validate())
+		{
+			Msg("[General] Object %s is invalid!", O->GetName());
+		}
+		bool HasFixes = false;
+		bool SurfaceValidation = O->ValidateSurf(true, &HasFixes);
+		if(!SurfaceValidation)
+		{
+			if(HasFixes)
+			{
+				Msg("[Surfaces] Object %s is invalid, but has some surfaces fixed!", O->GetName());
+				OnModified();
+			} else
+			{
+				Msg("[Surfaces] Object %s is invalid!", O->GetName());
+			}
+		} else if (HasFixes)
+		{
+			Msg("[Surfaces] Object %s has some surfaces fixed and now is valid!", O->GetName());
+			OnModified();
+		}
+	}
+}
+
+void UIEditLibrary::Validate()
+{
+	if (!m_Preview)
+	{
+		
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Expotring to OBJ");
+		CSceneObject* SO = new CSceneObject((LPVOID)0, (LPSTR)0);
+
+		for (ListItem* item : ActualItemList().m_SelectedItems)
+		{
+			pb->Inc(item->Key());
+			SO->SetReference(item->Key());
+			CEditableObject* NE = SO->GetReference();
+			ValidateOne(NE);
+		}
+
+		if (UI->NeedAbort())
+			xr_delete(SO);
+
+		UI->ProgressEnd(pb);
+	} else
+	{
+		SPBItem* pb = UI->ProgressStart(m_pEditObjects.size(), "Validating");
+		for (CSceneObject* SO : m_pEditObjects)
+		{
+			CEditableObject* O = SO->GetReference();
+			pb->Inc(O->GetName());
+			ValidateOne(O);
+
+			if (UI->NeedAbort())
+				break;
+		}
+		UI->ProgressEnd(pb);
+	}
 }
 
 UIPropertiesForm* UIEditLibrary::GetPropertyWnd()

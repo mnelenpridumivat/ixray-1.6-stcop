@@ -114,15 +114,15 @@ void CEditableObject::FillSurfaceList(LPCSTR pref, ListItemsVec& items, int mode
 	{
 		LHelper().CreateItem(items, pref, modeID, ListItem::flSorted);
 	}
-	xr_map<xr_string, CSurface*> s_map;
-	std::ranges::for_each(s_lst, [&](CSurface* s)
+	xr_map<xr_string, xr_shared_ptr<CSurface>> s_map;
+	std::ranges::for_each(s_lst, [&](auto s)
 	{
 		R_ASSERT(s_map.find(s->_Name()) == s_map.end());
 		s_map[s->_Name()] = s;
 	});
 	for (auto elem : s_map)
     {
-        LHelper().CreateItem(items, PrepareKey(pref, elem.first.c_str()).c_str(), modeID, 0, elem.second);
+        LHelper().CreateItem(items, PrepareKey(pref, elem.first.c_str()).c_str(), modeID, 0, elem.second.get());
     }
 }
 //---------------------------------------------------------------------------
