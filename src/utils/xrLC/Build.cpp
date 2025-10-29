@@ -298,17 +298,50 @@ void CBuild::RunAfterLight(IWriter* fs)
 	Phase("Converting MU-models to OGFs...");
 	mem_Compact();
 	{
+		constexpr size_t CriticalFacesNum = 50000;
+		auto Copy = mu_models();
+		std::ranges::sort(Copy, [](xrMU_Model* A, xrMU_Model* B) { return A->m_faces.size() > B->m_faces.size(); });
 		u32 m;
 		Status("MU : Models...");
-		for (m = 0; m < mu_models().size(); m++) {
-			Status("MU : Model %u/%u", m+1, mu_models().size());
-			calc_ogf(*mu_models()[m]);
-			export_geometry(*mu_models()[m]);
+		xr_task_group tg;
+		xr_atomic_u32 ProcessedNum = 0;
+		for (m = 0; m < Copy.size(); m++) {
+			Status("MU : Model %u/%u", m+1, Copy.size());
+			if (Copy[m]->m_faces.size() > CriticalFacesNum)
+			{
+				tg.run(
+					[this, &model = *Copy[m], m, num = Copy.size(), &ProcessedNum]()
+					{
+						u32 LocProcessedNum = ProcessedNum;
+						Status("MU : Start process model %u/%u (already processed %u)", m+1, num, LocProcessedNum);
+						calc_ogf(model);
+						export_geometry(model);
+						LocProcessedNum = ++ProcessedNum;
+						Status("MU : End process model %u/%u (processed %u)", m+1, num, LocProcessedNum);
+					}
+				);
+			} else
+			{
+				u32 LocProcessedNum = ProcessedNum;
+				Status("MU : Start process model %u/%u (already processed %u)", m+1, Copy.size(), LocProcessedNum);
+				calc_ogf(*Copy[m]);
+				export_geometry(*Copy[m]);
+				LocProcessedNum = ++ProcessedNum;
+				Status("MU : End process model %u/%u (processed %u)", m+1, Copy.size(), LocProcessedNum);
+			}
 		}
+		{
+			u32 LocProcessedNum = ProcessedNum;
+			Status("MU : Sync processed %u models, wait for async", LocProcessedNum);
+		}
+		tg.wait();
+		VERIFY(ProcessedNum == Copy.size());
 
 		Status("MU : References...");
 		for (m = 0; m < mu_refs().size(); m++)
+		{
 			export_ogf(*mu_refs()[m]);
+		}
 	}
 
 	Status("MU : References...");

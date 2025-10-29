@@ -135,8 +135,15 @@ void OGF::Stripify()
 			data.vertices[i] = temp_list[permute[i]];
 	}
 	catch (...) {
-		clMsg("ERROR: [slow-vert] Stripifying failed. Dump below.");
-		DumpFaces();
+		constexpr bool make_dump = false;
+		if constexpr (make_dump)
+		{
+			clMsg("ERROR: [slow-vert] Stripifying failed. Dump below.");
+			DumpFaces();
+		} else
+		{
+			clMsg("ERROR: [slow-vert] Stripifying failed.");
+		}
 	}
 }
 
