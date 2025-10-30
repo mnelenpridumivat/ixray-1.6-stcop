@@ -30,6 +30,7 @@ namespace MemorySpace
 
 	struct SObjectParams
 	{
+		virtual ~SObjectParams() = default;
 		u32		m_level_vertex_id;
 		Fvector	m_position;
 #ifdef USE_ORIENTATION
@@ -58,6 +59,7 @@ namespace MemorySpace
 
 	struct SMemoryObject
 	{
+		virtual ~SMemoryObject() = default;
 		u32  m_level_time;
 		u32  m_last_level_time;
 		bool m_enabled;
