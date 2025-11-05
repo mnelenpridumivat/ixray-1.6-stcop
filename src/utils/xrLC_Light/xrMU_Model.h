@@ -72,8 +72,13 @@ public:
 
  
 
+	
+	void					export_cform_game	( CDB::CollectorPacked& CL);
+	void					export_cform_rcast	( CDB::CollectorPacked& CL);
 	void					export_cform_rcast	( CDB::CollectorPacked& CL, Fmatrix& xform );
 	void					export_cform_rcast_new (xr_vector<FaceDataIntel>& faces, Fmatrix& xform);
+	void					export_cform_rcast_new (GeomLightingContainer& container);
+	void					export_cform_rcast_new (GeomShadowContainer& container);
  
 	u32						find				( const _vertex *v )const;
 	u32						find				( const _face *v )const;

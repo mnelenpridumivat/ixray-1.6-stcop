@@ -1657,9 +1657,9 @@ void CLocatorAPI::file_delete(LPCSTR path, LPCSTR nm)
 	{
 		// remove file
 		Platform::Unlink(I->name);
-		char* str = LPSTR(I->name);
-		xr_free(str);
-		m_files.erase(I);
+		//char* str = LPSTR(I->name);
+		//xr_free(str);
+		//m_files.erase(I);
 	}
 }
 

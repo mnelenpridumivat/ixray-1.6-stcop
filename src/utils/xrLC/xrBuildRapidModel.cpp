@@ -145,8 +145,12 @@ void CBuild::BuildRapid		(BOOL bSaveForOtherCompilers)
 		MFS->open_chunk			(0);
 
 		// Header
+		if (IsDebuggerPresent())
+		{
+			DebugBreak();
+		}
 		hdrCFORM hdr;
-		hdr.version				= CFORM_CURRENT_VERSION;
+		hdr.version				= CFORM_Versions::VANILLA;
 		hdr.vertcount			= (u32)CL.getVS();
 		hdr.facecount			= (u32)CL.getTS();
 		hdr.aabb				= scene_bb;

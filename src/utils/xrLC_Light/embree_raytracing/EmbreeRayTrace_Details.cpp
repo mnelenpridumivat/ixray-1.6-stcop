@@ -124,7 +124,13 @@ void  EmbreeData::ConsturctGeometry()
 	EmbreeData::BuildRaytraceModel_2();
 
 	CTimer t; t.Start();
-	LoadGeomBuffer(IntelGeometryOpacue, static_geom);
+	FATAL("IMPLEMENT ASAP!");
+	if (IsDebuggerPresent())
+	{
+		DebugBreak();
+		exit(0);
+	}
+	//LoadGeomBuffer(IntelGeometryOpacue, static_geom); // Uncomment and fix
 	rtcAttachGeometryByID(IntelSceneDetails, IntelGeometryOpacue, 0);
 	rtcCommitScene(IntelSceneDetails);
 

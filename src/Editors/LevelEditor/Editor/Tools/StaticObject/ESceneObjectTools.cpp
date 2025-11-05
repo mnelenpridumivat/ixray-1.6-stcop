@@ -47,8 +47,8 @@ bool ESceneObjectTool::Validate(bool full_test)
                 {
                     if (A->GetPosition().similar(B->GetPosition(), EPS_L))
                     {
-                        bRes = false;
-                        ELog.Msg(mtError, "Duplicate object position '%s'-'%s' with reference '%s'.", A->GetName(), B->GetName(), A->RefName());
+                        //bRes = false;
+                        ELog.Msg(mtWarning, "Duplicate object position '%s'-'%s' with reference '%s'.", A->GetName(), B->GetName(), A->RefName());
                     }
                 }
             }

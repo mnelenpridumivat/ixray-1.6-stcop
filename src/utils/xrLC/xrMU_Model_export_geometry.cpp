@@ -38,21 +38,28 @@ void	export_geometry		( xrMU_Model &	mu_model )
 	BB.getcenter	(frac_low);		frac_low.y	= BB.min.y;
 	frac_Ysize		= BB.max.y - BB.min.y;
 
+	//xr_vector<VBContainerDecl> decls;
+	//decls.resize(mu_model.m_subdivs.size());
+	
 	// Begin building
 	for (xrMU_Model::v_subdivs_it it=mu_model.m_subdivs.begin(); it!=mu_model.m_subdivs.end(); it++)
 	{
 		Status("MU : Model building %u/%u", it-mu_model.m_subdivs.begin()+1, mu_model.m_subdivs.size());
 		// Vertices
 		{
-			g_VB.Begin		(D);
+			VBContainerDecl decl;
+			decl.Begin(D);
+			//g_VB.Begin		(D);
 
 			vecOGF_V&	verts	= it->ogf->data.vertices;
+			VERIFY(!verts.empty());
 			for (u32 v_it=0; v_it<verts.size(); v_it++)
 			{
 				OGF_Vertex&		oV	= verts[v_it];
 
 				// Position
-				g_VB.Add	(&oV.P,3*sizeof(float));
+				decl.Add(&oV.P,3*sizeof(float));
+				//g_VB.Add	(&oV.P,3*sizeof(float));
 
 				// Normal
 				{
@@ -65,45 +72,55 @@ void	export_geometry		( xrMU_Model &	mu_model )
 					s32 nz		= iFloor(N.z);				clamp(nz,0,255);
 					s32 cc		= iFloor(oV_c.hemi*255.f);	clamp(cc,0,255);
 					u32	uN		= color_rgba(nx,ny,nz,cc);
-					g_VB.Add	(&uN,4);
+					decl.Add(&uN,4);
+					//g_VB.Add	(&uN,4);
 				}
 
 				// Tangent
 				{
 					u32	uT		= color_rgba(oV.T.x,oV.T.y,oV.T.z,0);
-					g_VB.Add	(&uT,4);
+					decl.Add(&uT,4);
+					//g_VB.Add	(&uT,4);
 				}
 
 				// Binormal
 				{
 					u32	uB		= color_rgba(oV.B.x,oV.B.y,oV.B.z,0);
-					g_VB.Add	(&uB,4);
+					decl.Add(&uB,4);
+					//g_VB.Add	(&uB,4);
 				}
 
 				// TC
 				s16	tu,tv,frac,dummy;
 				tu			= QC(oV.UV.begin()->x);
 				tv			= QC(oV.UV.begin()->y);
-				g_VB.Add	(&tu,2);
-				g_VB.Add	(&tv,2);
+				decl.Add(&tu,2);
+				decl.Add(&tv,2);
+				//g_VB.Add	(&tu,2);
+				//g_VB.Add	(&tv,2);
 
 				// frac
 				float	f1	= (oV.P.y - frac_low.y)		/frac_Ysize;
 				float	f2	= oV.P.distance_to(frac_low)/frac_Ysize;
 				frac		= QC((f1+f2)/2.f);
 				dummy		= 0;
-				g_VB.Add	(&frac,	2);
-				g_VB.Add	(&dummy,2);
+				decl.Add(&frac,2);
+				decl.Add(&dummy,2);
+				//g_VB.Add	(&frac,	2);
+				//g_VB.Add	(&dummy,2);
 			}
-
-			g_VB.End		(&it->vb_id,&it->vb_start);
+			decl.End();
+			g_VB.AddResult(decl, it->vb_id,it->vb_start);
+			//g_VB.End		(&it->vb_id,&it->vb_start);
 		}
 
 		// Indices
-		g_IB.Register	(LPWORD(&*it->ogf->data.faces.begin()),LPWORD(&*it->ogf->data.faces.end()),&it->ib_id,&it->ib_start);
+		g_IB.Register	(LPWORD(&*it->ogf->data.faces.begin()),LPWORD(&*it->ogf->data.faces.end()),it->ib_id,it->ib_start);
 
 		// SW
 		if (it->ogf->progressive_test())
-			g_SWI.Register	(&it->sw_id,&it->ogf->data.m_SWI);
+		{
+			g_SWI.Register	(it->sw_id,&it->ogf->data.m_SWI);
+		}
 	}
 }

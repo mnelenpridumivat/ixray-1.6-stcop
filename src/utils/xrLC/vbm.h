@@ -4,23 +4,61 @@
 #include "../../xrCore/FS.h"
 
 static const	u32								c_VB_maxSize			= 4096*1024;	// bytes
+
+struct VBContainerDecl
+{
+	VDeclarator R_DCL;
+	xr_vector<BYTE> R_DATA;
+
+	// Methods
+	bool is_empty() const {return R_DCL .empty() && R_DATA.empty() ;}
+	void Begin(u32	dwFVF)
+	{
+		R_ASSERT(R_DCL.empty());
+		R_ASSERT(R_DATA.empty());
+		R_DCL.set(dwFVF);
+	}
+	void Begin(const VDeclarator& D)
+	{
+		R_ASSERT(R_DCL.empty());
+		R_ASSERT(R_DATA.empty());
+		R_DCL.set(D);
+	}
+	void Add(void* PTR, u32 cnt)
+	{
+		R_ASSERT(R_DCL.size());
+		BYTE* P = (BYTE*) PTR;
+		R_DATA.insert(R_DATA.end(),P,P+cnt);
+	}
+	void End()
+	{
+		R_ASSERT(!R_DCL.empty());
+		R_ASSERT(!R_DATA.empty());
+		
+		u32 dwSize = R_DCL.vertex();
+		R_ASSERT(R_DATA.size()%dwSize == 0);
+	}
+};
+
 // Vertex containers
 class VBContainer 
 {
 	xr_vector<VDeclarator>		vDcl;
 	xr_vector<xr_vector<BYTE> >	vContainers;
 
+	xrCriticalSection	vContainerMutex;
+	
 	// Recording
-	VDeclarator					R_DCL;
-	xr_vector<BYTE>				R_DATA;
+	//VDeclarator					R_DCL;
+	//xr_vector<BYTE>				R_DATA;
 
 public:
 	// Constructor & destructor
-	VBContainer()			{	R_DCL.clear();	}
+	//VBContainer()			{	R_DCL.clear();	}
 
 	// Methods
-	bool	is_empty		() const {return vDcl.empty() && vContainers.empty() && R_DCL .empty() && R_DATA.empty() ;}
-	void	Begin			(u32	dwFVF)
+	bool	is_empty		() const {return vDcl.empty() && vContainers.empty();}
+	/*void	Begin			(u32	dwFVF)
 	{
 		R_ASSERT		(R_DCL.empty());
 		R_ASSERT		(R_DATA.empty());
@@ -73,11 +111,49 @@ public:
 		*dwIndexStart			= 0;
 		vDcl.push_back			(R_DCL);	R_DCL.clear();
 		vContainers.push_back	(R_DATA);	R_DATA.clear();
+	}*/
+	void AddResult(VBContainerDecl& decl, u32& dwContainerID, u32& dwIndexStart)
+	{
+		xrCriticalSectionGuard guard(vContainerMutex);
+		
+		R_ASSERT(!decl.R_DCL.empty());
+		R_ASSERT(!decl.R_DATA.empty());
+		
+		u32 dwSize  = decl.R_DCL.vertex();
+		R_ASSERT(decl.R_DATA.size()%dwSize == 0);
+
+		// Search for container capable of handling data
+		u32 bytes_collected	= (u32)decl.R_DATA.size();
+		u32 vertices_collected= bytes_collected/dwSize;
+		for (u32 CID = 0; CID<vDcl.size(); CID++)
+		{
+			if (!vDcl[CID].equal(decl.R_DCL))	continue;
+			
+			u32 bytes_already	= (u32)vContainers[CID].size();
+			if ((bytes_already+bytes_collected)>c_VB_maxSize) continue;
+			u32 vertices_already = bytes_already/dwSize;
+			if ((vertices_already+vertices_collected)>c_VB_maxVertices) continue;
+			
+			// If we get here - container CID can take the data
+			dwContainerID			= CID;
+			dwIndexStart			= vertices_already;
+			vContainers[CID].insert	(vContainers[CID].end(),decl.R_DATA.begin(),decl.R_DATA.end());
+			decl.R_DCL.clear	();
+			decl.R_DATA.clear();
+			return;
+		}
+		
+		// No such format found
+		// Simple add it and register
+		dwContainerID			= (u32)vDcl.size();
+		dwIndexStart			= 0;
+		vDcl.push_back			(decl.R_DCL);	decl.R_DCL.clear();
+		vContainers.push_back	(decl.R_DATA);	decl.R_DATA.clear();
 	}
 	void	Save	(IWriter &fs)
 	{
-		R_ASSERT		(R_DCL.empty());
-		R_ASSERT		(R_DATA.empty());
+		//R_ASSERT		(R_DCL.empty());
+		//R_ASSERT		(R_DATA.empty());
 		fs.w_u32		((u32)vDcl.size());
 		for (u32 i=0; i<vDcl.size(); i++)
 		{
@@ -99,6 +175,7 @@ public:
 class IBContainer
 {
 	xr_vector<xr_vector<u16> >	data;
+	xrCriticalSection	iContainerMutex;
 	enum {
 		LIMIT = 1024ul * 1024ul
 	};
@@ -107,8 +184,9 @@ public:
 	{
 		return data.empty();
 	}
-	void	Register		(u16* begin, u16* end, u32* dwContainerID, u32 *dwStart)
+	void	Register		(u16* begin, u16* end, u32& dwContainerID, u32& dwStart)
 	{
+		xrCriticalSectionGuard guard(iContainerMutex);
 		u32 size				= (u32)(end-begin);
 
 		// 
@@ -116,16 +194,16 @@ public:
 		{
 			if ((data[ID].size()+size) < LIMIT)	
 			{
-				*dwContainerID	= ID;
-				*dwStart		= (u32)data[ID].size();
+				dwContainerID	= ID;
+				dwStart		= (u32)data[ID].size();
 				data[ID].insert	(data[ID].end(),begin,end);
 				return;
 			}
 		}
 
 		// Can't find suitable container - register new
-		*dwContainerID		= (u32)data.size();
-		*dwStart			= 0;
+		dwContainerID		= (u32)data.size();
+		dwStart			= 0;
 		data.push_back		(xr_vector<u16> ());
 		data.back().assign	(begin,end);
 	}
@@ -144,15 +222,17 @@ public:
 class SWIContainer
 {
 	xr_vector<FSlideWindowItem*>	data;
+	xrCriticalSection	swContainerMutex;
 public:
 	bool	is_empty	() const
 	{ 
 		return data.empty(); 
 	}
-	void	Register	(u32* id, FSlideWindowItem* item)
+	void	Register	(u32& id, FSlideWindowItem* item)
 	{
+		xrCriticalSectionGuard guard(swContainerMutex);
 		data.push_back	(item);
-		*id				= (u32)data.size()-1;
+		id				= (u32)data.size()-1;
 	}
 	void	Save		(IWriter &fs)
 	{

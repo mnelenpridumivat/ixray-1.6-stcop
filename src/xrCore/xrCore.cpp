@@ -81,7 +81,7 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, xrLogger::LogCallback cb, BOO
 		g_Discord.Init();
 	}
 
-	PROF_START_CAPTURE()
+	//PROF_START_CAPTURE()
 
 	if (init_fs)
 	{
@@ -106,8 +106,8 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, xrLogger::LogCallback cb, BOO
 #endif // DEBUG
 	}
 
-	PROF_STOP_CAPTURE()
-	PROF_SAVE_CAPTURE("FS_optimize")
+	//PROF_STOP_CAPTURE()
+	//PROF_SAVE_CAPTURE("FS_optimize")
 	
 	xrLogger::AddLogCallback(cb);
 	init_counter++;

@@ -15,7 +15,7 @@ void SaveAsSMF(LPCSTR fname, CDB::CollectorPacked& CL)
 	// vertices
 	for (u32 v_idx = 0; v_idx < CL.getVS(); v_idx++) 
 	{
-		Fvector* v = CL.getV() + v_idx;
+		const Fvector* v = CL.getV() + v_idx;
 		xr_sprintf(tmp, "v %f %f %f", v->x, v->y, -v->z);
 		W->w_string(tmp);
 	}

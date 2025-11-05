@@ -69,27 +69,48 @@ void calc_ogf( xrMU_Model &	mu_model )
 			clMsg("* ERROR: MU2OGF, 1st part, model %s",*(mu_model.m_name));
 		}
 
+		auto verts_count_before_Optimize = pOGF->data.vertices.size();
 		try {
 			clMsg("Optimize...");
 			pOGF->Optimize			();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [optimize], model %s",*(mu_model.m_name)); }
+		auto verts_count_before_CalcBounds = pOGF->data.vertices.size();
 		try {
 			clMsg("CalcBounds...");
 			pOGF->CalcBounds		();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [bounds], model %s",*(mu_model.m_name)); }
+		auto verts_count_before_CalculateTB = pOGF->data.vertices.size();
 		try {
 			clMsg("CalculateTB...");
 			pOGF->CalculateTB		();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [calc_tb], model %s",*(mu_model.m_name)); }
+		auto verts_count_before_MakeProgressive = pOGF->data.vertices.size();
 		try {
 			clMsg("MakeProgressive...");
 			pOGF->MakeProgressive	(c_PM_MetricLimit_mu);
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [progressive], model %s",*(mu_model.m_name)); }
+		auto verts_count_before_Stripify = pOGF->data.vertices.size();
 		try {
 			clMsg("Stripify...");
 			pOGF->Stripify			();
 		} catch (...)	{ clMsg	("* ERROR: MU2OGF, [stripify], model %s",*(mu_model.m_name)); }
+		auto verts_count_final = pOGF->data.vertices.size();
 
+		if (!IVERIFY(!pOGF->data.vertices.empty()))
+		{
+			clMsg("* ERROR: after calc ogf for model [%s] and subdiv [%d], there is no vertices left!",*(mu_model.m_name), it-mu_model.m_subdivs.begin()+1);
+			clMsg("	Verts count before Optimize: %d", verts_count_before_Optimize);
+			clMsg("	Verts count before CalcBounds: %d", verts_count_before_CalcBounds);
+			clMsg("	Verts count before CalculateTB: %d", verts_count_before_CalculateTB);
+			clMsg("	Verts count before MakeProgressive: %d", verts_count_before_MakeProgressive);
+			clMsg("	Verts count before Stripify: %d", verts_count_before_Stripify);
+			clMsg("	Verts count final: %d", verts_count_final);
+			if (IsDebuggerPresent())
+			{
+				DebugBreak();
+			}
+		}
+		
 		it->ogf		=	pOGF;
 	}
 }

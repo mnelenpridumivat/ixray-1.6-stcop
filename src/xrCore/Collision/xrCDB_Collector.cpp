@@ -237,6 +237,32 @@ namespace CDB
 			vec.second.clear();
 	}
 
+	CollectorPacked* CollisionPacked::GetMUObjectData(void* Key)
+	{
+		auto It = MUObjectsData.find(Key);
+		if (It != MUObjectsData.end())
+		{
+			return &It->second;
+		}
+		return nullptr;
+	}
+
+	CollectorPacked* CollisionPacked::CreateMUObjectData(void* Key, const Fbox& bb, int apx_vertices, int apx_faces)
+	{
+		return &MUObjectsData.emplace(
+			std::piecewise_construct,
+			std::forward_as_tuple(Key),
+			std::forward_as_tuple(bb, apx_vertices, apx_faces)
+        ).first->second;
+		//return &MUObjectsData.try_emplace(Key, std::move(CollectorPacked(bb, apx_vertices, apx_faces))).first->second;
+	}
+
+	void CollisionPacked::AddMUInstance(void* Key, const MUInstanceData& Transform)
+	{
+		auto It = MUInstancesData.try_emplace(Key).first;
+		It->second.push_back(Transform);
+	}
+
 	void	CollectorPacked::add_face(
 		const Fvector& v0, const Fvector& v1, const Fvector& v2,	// vertices
 		u16 material, u16 sector, u32 _flags									// misc

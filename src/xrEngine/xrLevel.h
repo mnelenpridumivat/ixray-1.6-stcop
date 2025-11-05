@@ -3,6 +3,8 @@
 #pragma warning(disable: 4715)
 #include "../xrCore/guid.h"
 
+enum class CFORM_Versions : u32;
+
 enum fsL_Chunks
 {
 	fsL_HEADER = 1,
@@ -62,7 +64,7 @@ struct hdrLEVEL
 
 struct hdrCFORM
 {
-	u32 version;
+	CFORM_Versions version;
 	u32 vertcount;
 	u32 facecount;
 	Fbox aabb;
@@ -366,7 +368,25 @@ struct SNodePositionOld
 
 constexpr u32 XRCL_CURRENT_VERSION = 18; //17;	// input
 constexpr u32 XRCL_PRODUCTION_VERSION = 14; // output 
-constexpr u32 CFORM_CURRENT_VERSION = 4;
+//constexpr u32 CFORM_CURRENT_VERSION = 4;
+enum class CFORM_Versions : u32
+{
+	VANILLA = 4,
+	WITH_INSTANCING = 5
+};
+
+enum class CFORM_Chunks : u32
+{
+	Header = 0,
+	
+	// Only in original
+	Arr_b_rc_face = 1,
+
+	// Instancing version
+	StaticGeom = 2,
+	Instances = 3,
+	InstanceRefs = 4
+};
 
 #ifdef IXRAY_AI_OLD_FORMAT
 const u32 MAX_NODE_BIT_COUNT = 23;

@@ -43,7 +43,7 @@ void ImplicitThread::Execute()
 }
 
 // 2 : Mainthread + UI thread
-int ThreadTaskID_Implication = 0;
+xr_atomic_s32 ThreadTaskID_Implication = 0;
 CTimer tImplicit;
 
 xrCriticalSection csLockImplicit;
@@ -89,14 +89,14 @@ void ImplicitExecute::Execute()
 	{
 		csLockImplicit.Enter();
 		int V = ThreadTaskID_Implication;
-		if (ThreadTaskID_Implication >= defl.Height())
+		if (V >= defl.Height())
 		{
 			csLockImplicit.Leave();
 			break;
 		}
 		ThreadTaskID_Implication++;
 
-		Progress(float(V) / float(defl.Height()));
+		Progress(float(ThreadTaskID_Implication) / float(defl.Height()));
 		csLockImplicit.Leave();
 
 		for (u32 U = 0; U < defl.Width(); U++)
@@ -238,7 +238,7 @@ void RunTaskGPU()
 		AditionalData("Current: %u", V);
 	};
 
-	// Остаток доработать 
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 	GPUTaskinSystem.LightPointPackedRun();
 
 	CTimer tColors; tColors.Start();

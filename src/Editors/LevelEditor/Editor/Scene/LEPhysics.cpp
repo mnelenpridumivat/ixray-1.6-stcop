@@ -137,10 +137,14 @@ bool CScenePhysics::CreateObjectSpace	(bool b_selected_only)
 		}
 	}
 	VERIFY(!m_object_space)  ;
+	if (IsDebuggerPresent())
+	{
+		DebugBreak();
+	}
 	hdrCFORM H;
 	H.vertcount = build_data.l_vert_cnt;
 	H.facecount = build_data.l_face_cnt;
-	H.version	= CFORM_CURRENT_VERSION;
+	H.version	= CFORM_Versions::VANILLA;
 	GetBox( H.aabb,  build_data.l_verts, build_data.l_vert_cnt );
 	VERIFY(!m_object_space);
 	m_object_space = mesh_create_object_space(build_data.l_verts , build_data.l_faces , H, 0);
@@ -169,55 +173,59 @@ void CScenePhysics::DestroyObjectSpace	()
 
   }
 
- void CScenePhysics::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
- {
+void CScenePhysics::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
+{
+	bool bResult = true;
 
-	 bool bResult = true;
-
-	 mesh_build_data build_data;
+	mesh_build_data build_data;
 
 
-	 SceneToolsMapPairIt t_it = Scene->FirstTool();
-	 SceneToolsMapPairIt t_end = Scene->LastTool();
-	 for (; t_it != t_end; ++t_it)
-	 {
-		 ESceneToolBase* mt = t_it->second;
-		 if (mt)
-			 mt->GetStaticDesc(build_data.l_vert_cnt, build_data.l_face_cnt, false, true);
+	SceneToolsMapPairIt t_it = Scene->FirstTool();
+	SceneToolsMapPairIt t_end = Scene->LastTool();
+	for (; t_it != t_end; ++t_it)
+	{
+		ESceneToolBase* mt = t_it->second;
+		if (mt)
+		{
+			mt->GetStaticDesc(build_data.l_vert_cnt, build_data.l_face_cnt, false, true);
+		}
 
-		 // if (!mt->ExportStatic(this,b_selected_only))
-			 // {bResult = FALSE; break;}
-	 }
+		// if (!mt->ExportStatic(this,b_selected_only))
+			// {bResult = FALSE; break;}
+	}
 
-	 build_data.l_faces = xr_alloc<CDB::TRI>(build_data.l_face_cnt);
-	 build_data.l_verts = xr_alloc<Fvector>(build_data.l_vert_cnt);
+	build_data.l_faces = xr_alloc<CDB::TRI>(build_data.l_face_cnt);
+	build_data.l_verts = xr_alloc<Fvector>(build_data.l_vert_cnt);
 
-	  t_it = Scene->FirstTool();
-	  t_end = Scene->LastTool();
-	 for (; t_it != t_end; ++t_it)
-	 {
-		 ESceneToolBase* mt = t_it->second;
-		 if (mt)
-			 if (!mt->GetStaticCformData(build_data, false))
-			 {
-				 bResult = false; break;
-			 }
-	 }
-	 VERIFY(!m_object_space);
-	 hdrCFORM H;
-	 H.vertcount = build_data.l_vert_it;
-	 H.facecount = build_data.l_face_it;
-	 H.version = CFORM_CURRENT_VERSION;
-	 GetBox(H.aabb, build_data.l_verts, build_data.l_vert_it);
-	 VERIFY(!m_object_space);
-	 To->Create(build_data.l_verts, build_data.l_faces, H, cb, nullptr, false);
+	t_it = Scene->FirstTool();
+	t_end = Scene->LastTool();
+	for (; t_it != t_end; ++t_it)
+	{
+		ESceneToolBase* mt = t_it->second;
+		if (mt)
+		{
+			if (!mt->GetStaticCformData(build_data, false))
+			{
+				bResult = false;
+				break;
+			}
+		}
+	}
+	VERIFY(!m_object_space);
+	
+	hdrCFORM H;
+	H.vertcount = build_data.l_vert_it;
+	H.facecount = build_data.l_face_it;
+	H.version = CFORM_Versions::VANILLA;
+	GetBox(H.aabb, build_data.l_verts, build_data.l_vert_it);
+	VERIFY(!m_object_space);
+	To->Create(build_data.l_verts, build_data.l_faces, H, cb, nullptr, false);
 
-	 xr_free(build_data.l_faces);
-	 xr_free(build_data.l_verts);
+	xr_free(build_data.l_faces);
+	xr_free(build_data.l_verts);
 
-	 b_update_level_collision = false;
-
- }
+	b_update_level_collision = false;
+}
 
  void  CScenePhysics::CreateWorld			()
 {

@@ -125,13 +125,25 @@ void CObjectSpace::Load(IReader* F, CDB::build_callback build_callback)
 
 void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB::build_callback build_callback, void* pRW, bool RWMode)
 {
-	R_ASSERT(CFORM_CURRENT_VERSION == H.version);
-	Static.build(verts, H.vertcount, tris, H.facecount, build_callback, nullptr, pRW, RWMode);
+	switch (H.version)
+	{
+	case CFORM_Versions::VANILLA:
+		{
+			Static.build(verts, H.vertcount, tris, H.facecount, build_callback, nullptr, pRW, RWMode);
 
-	m_BoundingVolume.set(H.aabb);
+			m_BoundingVolume.set(H.aabb);
 
-	g_SpatialSpace->initialize(m_BoundingVolume);
-	g_SpatialSpacePhysic->initialize(m_BoundingVolume);
+			g_SpatialSpace->initialize(m_BoundingVolume);
+			g_SpatialSpacePhysic->initialize(m_BoundingVolume);
+			break;
+		}
+	case CFORM_Versions::WITH_INSTANCING:
+		{
+			
+			break;
+		}
+	default: NODEFAULT;
+	}
 }
 
 //----------------------------------------------------------------------

@@ -144,7 +144,7 @@ void OGF::Optimize()
 {
 	if (data.vertices.size() == 0)
 	{
-		//Msg("* ERROR Optimize OGF: %d Verts: data.vertices.size() == 0");
+		Msg("* ERROR Optimize OGF: %d Verts: data.vertices.size() == 0");
 		return;
 	}
 

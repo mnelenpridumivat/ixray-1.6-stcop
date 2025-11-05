@@ -42,7 +42,7 @@ void global_claculation_data::xrLoad()
 		R_ASSERT			(fs->find_chunk(0));
 		hdrCFORM			H;
 		fs->r				(&H,sizeof(hdrCFORM));
-		R_ASSERT			(CFORM_CURRENT_VERSION==H.version);
+		R_ASSERT			(CFORM_Versions::WITH_INSTANCING==H.version);
 		
 		Fvector*	verts	= (Fvector*) fs->pointer();
 		CDB::TRI*	tris	= (CDB::TRI*)(verts+H.vertcount);

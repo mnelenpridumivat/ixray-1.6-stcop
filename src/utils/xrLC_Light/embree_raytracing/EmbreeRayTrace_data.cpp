@@ -70,8 +70,7 @@ IC bool	FaceEqual__(Face& F1, Face& F2)
   
 void EmbreeData::BuildRaytraceModel( )
 {
-	static_geom.ClearAll();
-	static_geom_transp.ClearAll();
+	Data.ClearAll();
  	
 	CTimer t;	t.Start();
 	Status("[RcastModel] Capturing Faces...");
@@ -83,35 +82,31 @@ void EmbreeData::BuildRaytraceModel( )
 		b_material& M = inlc_global_data()->materials()[F->dwMaterial];
 		b_texture& T = inlc_global_data()->textures()[M.surfidx];
  		if (F->flags.bOpaque || !T.pSurface || !T.bHasAlpha)
-  			static_geom.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+ 		{
+ 			Data.StaticGeom.geom.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+ 		}
  		else
- 			static_geom_transp.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+ 		{
+ 			Data.StaticGeom.geom_transp.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+ 		}
  	}
 
  
 	for (auto ref : lc_global_data()->mu_refs())
 	{
-		xr_vector<FaceDataIntel> temp_buffer;
-  		ref->export_cform_rcast_new(temp_buffer);
-		for (auto& FaceIntel : temp_buffer)
+		auto MU_data = Data.InstancesContainer.find(ref->model);
+		if (MU_data == Data.InstancesContainer.end())
 		{
- 			Face* F = (Face*) FaceIntel.ptr;
- 			b_material& M = inlc_global_data()->materials()[F->dwMaterial];
-			b_texture& T = inlc_global_data()->textures()[M.surfidx];
-			if (F->flags.bOpaque || !T.pSurface || !T.bHasAlpha)
-				static_geom.AddFace(F, FaceIntel.v1, FaceIntel.v2, FaceIntel.v3);
-			else
-				static_geom_transp.AddFace(F, FaceIntel.v1, FaceIntel.v2, FaceIntel.v3);
+			MU_data = Data.InstancesContainer.insert(xr_pair<void*, GeomLightingContainer>(ref->model, GeomLightingContainer())).first;
+			ref->export_cform_rcast_new(MU_data->second);
 		}
-			
+		auto MU_ref = Data.InstancesMatrices.try_emplace(ref->model, xr_vector<Fmatrix>());
+		MU_ref.first->second.push_back(ref->xform);
  	}
 	Status("[RcastModel] Capturing Faces [%u ms]", t.GetElapsed_ms());
 
- 	static_geom.RemoveDublicates();
-	static_geom_transp.RemoveDublicates();
-
-	static_geom.RemoveDublicatesFaces();
-	static_geom_transp.RemoveDublicatesFaces();
+	Data.RemoveDublicates();
+	Data.RemoveDublicatesFaces();
 
 }
 
@@ -123,10 +118,17 @@ void EmbreeData::BuildRaytraceModel_2()
 {
 	CTimer t; t.Start();
 	// Тут уже будет отфильтровано 
-	static_geom.ClearAll();
- 	static_geom.verts_v.swap(build_data.build_verts);
-	static_geom.faces_v.resize(build_data.build_fcnt);
-	static_geom.dummy.resize(build_data.build_fcnt);
+	FATAL("IMPLEMENT ASAP!");
+	if (IsDebuggerPresent())
+	{
+		DebugBreak();
+		exit(0);
+	}
+	
+	//static_geom.ClearAll(); // Uncomment and fix
+ 	//static_geom.verts_v.swap(build_data.build_verts); // Uncomment and fix
+	//static_geom.faces_v.resize(build_data.build_fcnt); // Uncomment and fix
+	//static_geom.dummy.resize(build_data.build_fcnt); // Uncomment and fix
 
  	for (auto Fid = 0; Fid < build_data.build_faces.size(); Fid++ )
 	{
@@ -135,9 +137,9 @@ void EmbreeData::BuildRaytraceModel_2()
 		 
 		
 
-		static_geom.faces_v[Fid].point1 = FCDB.verts[0];
-		static_geom.faces_v[Fid].point2 = FCDB.verts[1];
-		static_geom.faces_v[Fid].point3 = FCDB.verts[2];
+		//static_geom.faces_v[Fid].point1 = FCDB.verts[0]; // Uncomment and fix
+		//static_geom.faces_v[Fid].point2 = FCDB.verts[1]; // Uncomment and fix
+		//static_geom.faces_v[Fid].point3 = FCDB.verts[2]; // Uncomment and fix
  	}
 
 	// Чистим вектора
@@ -157,27 +159,31 @@ void EmbreeData::BuildRcast()
 	Status("Start Export Build.cform");
 
    
-	TriangleContainer container;
+	ShadowSceneContainer container;
  
 	CTimer t;	t.Start();
 	Status("[RcastModel] Capturing Faces...");
 	for (auto F : lc_global_data()->g_faces())
 	{
 		const Shader_xrLC& SH = F->Shader();
-		if (!SH.flags.bLIGHT_CastShadow)	continue;
-  		container.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
+		if (!SH.flags.bLIGHT_CastShadow)
+		{
+			continue;
+		}
+  		container.StaticGeom.geom.AddFace(F, F->v[0]->P, F->v[1]->P, F->v[2]->P);
 	}
 
 
 	for (auto ref : lc_global_data()->mu_refs())
 	{
-		xr_vector<FaceDataIntel> temp_buffer;
-		ref->export_cform_rcast_new(temp_buffer);
-		for (auto& FaceIntel : temp_buffer)
+		auto MU_data = container.InstancesContainer.find(ref->model);
+		if (MU_data == container.InstancesContainer.end())
 		{
-			Face* F = (Face*)FaceIntel.ptr;
-			container.AddFace(F, FaceIntel.v1, FaceIntel.v2, FaceIntel.v3);
+			MU_data = container.InstancesContainer.insert(xr_pair<void*, GeomShadowContainer>(ref->model, GeomShadowContainer())).first;
+			ref->export_cform_rcast_new(MU_data->second);
 		}
+		auto MU_ref = container.InstancesMatrices.try_emplace(ref->model, xr_vector<Fmatrix>());
+		MU_ref.first->second.push_back(ref->xform);
  	}
 	Status("[RcastModel] Capturing Faces [%u ms]", t.GetElapsed_ms());
  
@@ -189,7 +195,9 @@ void EmbreeData::BuildRcast()
 
 	string_path				fn;
 	IWriter* MFS = FS.w_open(xr_strconcat(fn, pBuild->path, "build.cform"));
-	xr_vector<b_rc_face>	rc_faces;
+
+	
+	/*xr_vector<b_rc_face>	rc_faces;
 	rc_faces.resize(container.faces_cnt());
 	
 	// Prepare faces
@@ -205,20 +213,22 @@ void EmbreeData::BuildRcast()
 		cf.t[0].set(cuv[0]);
 		cf.t[1].set(cuv[1]);
 		cf.t[2].set(cuv[2]);
-	}
- 	MFS->open_chunk(0);
+	}*/
+
+	
+ 	MFS->open_chunk(CFORM_Chunks::Header);
 
 	// Header
 	hdrCFORM hdr;
-	hdr.version		= CFORM_CURRENT_VERSION;
-	hdr.vertcount	= (u32) container.vertex_cnt();
-	hdr.facecount	= (u32) container.faces_cnt();
+	hdr.version		= CFORM_Versions::WITH_INSTANCING;
+	//hdr.vertcount	= (u32) container.StaticGeom.geom.vertex_cnt(); // No need
+	//hdr.facecount	= (u32) container.StaticGeom.geom.faces_cnt(); // No need
 	hdr.aabb		= pBuild->scene_bb;
 		
 	MFS->w(&hdr, sizeof(hdr));
 
 	// Data
-	for (auto Vert : container.vertex())
+	/*for (auto Vert : container.vertex())
 	{
  		MFS->w(&Vert, sizeof(Vert));
 	}
@@ -227,11 +237,11 @@ void EmbreeData::BuildRcast()
 	{
 		auto TRI = T.Get();
 		MFS->w(&TRI, sizeof(TRI));
-	}
+	}*/
 	 
 	MFS->close_chunk();
 
-	MFS->open_chunk(1);
+	/*MFS->open_chunk(1);
 	MFS->w(&*rc_faces.begin(), size_t(rc_faces.size() * sizeof(b_rc_face)) );
 	MFS->close_chunk();
 
@@ -241,7 +251,76 @@ void EmbreeData::BuildRcast()
 	Msg("Memory Vertex need: %u mb", u32(vertex_mem / 1024 / 1024));
 	Msg("Memory Faces need: %u mb", faces_mem / 1024 / 1024);
  	Msg("Memory RC_Face need: %u mb", rqfaces_mem / 1024 / 1024);
-	Msg("File Saved Size: %u mb", MFS->tell() / 1024 / 1024);
+	Msg("File Saved Size: %u mb", MFS->tell() / 1024 / 1024);*/
+
+	auto ObjSerializationFunc = [&](TriangleContainer& container)
+	{
+
+		MFS->w_u64(container.vertex_cnt());
+		MFS->w_u64(container.faces_cnt());
+
+		for (auto& Vertex : container.vertex())
+		{
+			MFS->w(&Vertex, sizeof(Vertex));
+		}
+
+		for (u32 k = 0; k < container.faces_cnt(); k++)
+		{
+			auto TRI = container.faces()[k].Get();
+			auto data = container.dummy[k];
+			MFS->w(&TRI, sizeof(TRI));
+			MFS->w_u16(data->dwMaterial);
+			MFS->w_u16(data->dwMaterialGame);
+			MFS->w(data->getTC0(), sizeof(Fvector2));
+		}
+		
+	};
+
+	{
+		MFS->open_chunk(CFORM_Chunks::StaticGeom);
+		auto OffsetStart = MFS->tell();
+
+		ObjSerializationFunc(container.StaticGeom.geom);
+
+		MFS->close_chunk();
+		
+		Msg("Memory StaticGeom need: %u mb", u32((MFS->tell()-OffsetStart) / 1024 / 1024));
+	}
+	
+	{
+		MFS->open_chunk(CFORM_Chunks::Instances);
+		auto OffsetStart = MFS->tell();
+
+		MFS->w_u32(container.InstancesContainer.size());
+
+		for (auto& Instance : container.InstancesContainer)
+		{
+			ObjSerializationFunc(Instance.second.geom);
+		}
+
+		MFS->close_chunk();
+		Msg("Memory Instances need: %u mb", u32((MFS->tell()-OffsetStart) / 1024 / 1024));
+	}
+	{
+		MFS->open_chunk(CFORM_Chunks::InstanceRefs);
+		auto OffsetStart = MFS->tell();
+
+		// amount of refs containers in container.InstancesMatrices equal to size of container.InstancesContainer
+
+		for (auto& InstanceRefs : container.InstancesMatrices)
+		{
+			MFS->w_u32(InstanceRefs.second.size());
+			for (auto& InstanceRef : InstanceRefs.second)
+			{
+				MFS->w(&InstanceRef, sizeof(InstanceRef));
+			}
+		}
+
+		MFS->close_chunk();
+		Msg("Memory InstancesRefs need: %u mb", u32((MFS->tell()-OffsetStart) / 1024 / 1024));
+	}
+	
+	Msg("Memory total need: %u mb", u32(MFS->tell() / 1024 / 1024));
 
 	FS.w_close(MFS);
 

@@ -114,11 +114,13 @@ void UIImageEditorForm::Draw()
 				auto* baseTexture = ::RImplementation.texture_load("ed\\ed_nodata", mem);
 				if (baseTexture)
 				{
+					m_Texture.create("ed\\ed_nodata");
 					m_Texture->surface_set(GRHI->CreateTextureFromMemory(baseTexture, 0, {}));
 					baseTexture->Release();
 				}
 			}
-			ImGui::Image(m_Texture->get_SRView()->GetRawSRV(), ImVec2(128, 128));
+			ImGui::Image(nullptr, ImVec2(128, 128));
+			//ImGui::Image(m_Texture->get_SRView()->GetRawSRV(), ImVec2(128, 128));
 			m_ItemProps->Draw();
 
 			if (!IsDocked)
@@ -419,10 +421,11 @@ void UIImageEditorForm::OnItemsFocused(ListItemsVec& item)
 			B->OnBtnClickEvent.bind(this, &UIImageEditorForm::OnCubeMapBtnClick);
 		}
 
-		IRHISurface* Surf = nullptr;
-		thm->Update(Surf);
-		m_Texture->surface_set(Surf);
-		Surf->Release();
+		m_Texture.create(EFS.ChangeFileExt(thm->Name(), ".dds").c_str());
+		//IRHISurface* Surf = nullptr;
+		//thm->Update(Surf);
+		//m_Texture->surface_set(Surf);
+		//Surf->Release();
 	}
 
 	m_ItemProps->AssignItems(props);

@@ -298,7 +298,7 @@ void CBuild::RunAfterLight(IWriter* fs)
 	Phase("Converting MU-models to OGFs...");
 	mem_Compact();
 	{
-		constexpr size_t CriticalFacesNum = 50000;
+		constexpr size_t CriticalFacesNum = 10000;
 		auto Copy = mu_models();
 		std::ranges::sort(Copy, [](xrMU_Model* A, xrMU_Model* B) { return A->m_faces.size() > B->m_faces.size(); });
 		u32 m;
@@ -340,16 +340,18 @@ void CBuild::RunAfterLight(IWriter* fs)
 		Status("MU : References...");
 		for (m = 0; m < mu_refs().size(); m++)
 		{
+			Progress(m / mu_refs().size());
+			Status("MU : Model export %u/%u", m+1, mu_refs().size());
 			export_ogf(*mu_refs()[m]);
 		}
 	}
 
-	Status("MU : References...");
+	/*Status("MU : References...");
 	for (auto mRID = 0; mRID < (mu_refs().size()); mRID++)
 	{
 		Progress(mRID / mu_refs().size());
 		export_ogf(*mu_refs()[mRID]);
-	}
+	}*/
 
 	//****************************************** Build sectors
 	Phase("Building sectors...");

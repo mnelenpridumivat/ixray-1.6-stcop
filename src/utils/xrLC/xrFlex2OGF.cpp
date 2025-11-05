@@ -76,13 +76,13 @@ void CBuild::Flex2OGF()
 	// for (auto SV  = 0 ; SV< g_XSplit.size(); SV++)
 	xrCriticalSection cs;
 
-	int ProgressID = 0;
+	xr_atomic_s32 ProgressID = 0;
 
 	xr_parallel_for(size_t(0), size_t(g_XSplit.size()), [&] ( size_t SV )
 	{
 		auto& faces = g_XSplit[SV];
 
-		Progress( float (SV) / float(g_XSplit.size()) );
+		//Progress( float (SV) / float(g_XSplit.size()) );
 
 		OGF*		pOGF	= new OGF ();
 		Face*		F		= (* faces->begin() );			// first face
@@ -173,8 +173,11 @@ void CBuild::Flex2OGF()
 		ProgressID++;
 		Progress(float(ProgressID) / float(g_XSplit.size()));
 
-		if (ProgressID % 256 == 0)
-			clMsg("Progress: %u/%u", ProgressID, g_XSplit.size());
+		//if (ProgressID % 256 == 0)
+		//{
+		int temp = ProgressID;
+		clMsg("Progress: %u/%u", temp, g_XSplit.size());
+		//}
 		cs.Leave();
 	}
 	);
@@ -182,7 +185,9 @@ void CBuild::Flex2OGF()
 	for (auto it : g_XSplit)
 	{
 		if (it != nullptr)
+		{
 			xr_delete(it);
+		}
 	}
 	g_XSplit.clear	();
 }

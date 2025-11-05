@@ -23,8 +23,8 @@ RTCBuildQuality scene_quality = RTC_BUILD_QUALITY_LOW;
 RTCDevice device	= 0;
 RTCScene IntelScene = 0;
  
-RTCGeometry IntelGeometryNormal = 0;
-RTCGeometry IntelGeometryTransp = 0;
+//RTCGeometry IntelGeometryNormal = 0;
+//RTCGeometry IntelGeometryTransp = 0;
  
 EmbreeData EmbreeMain;
  
@@ -137,8 +137,9 @@ void FilterRayTraceOpaque(const struct RTCFilterFunctionNArguments* args)
 {
 	RayQueryContext* ctxt = (RayQueryContext*)args->context;
 	RTCHit* hit = (RTCHit*)args->hit;
+	TriangleContainer* CurrentContainer = (TriangleContainer*)args->geometryUserPtr;
 
-	Face* F = EmbreeMain.static_geom.dummy[hit->primID];
+	Face* F = CurrentContainer->dummy[hit->primID];
 	if (F == ctxt->skip)
 	{
 		args->valid[0] = 0;  return;
@@ -151,14 +152,16 @@ void FilterRaytraceTransparent(const struct RTCFilterFunctionNArguments* args)
 {
 	RayQueryContext* ctxt = (RayQueryContext*)args->context;
 	RTCHit* hit = (RTCHit*)args->hit;
+	TriangleContainer* CurrentContainer = (TriangleContainer*)args->geometryUserPtr;
 
 	// Собрать все
-	Face* F = EmbreeMain.static_geom_transp.dummy[hit->primID]; 
+	Face* F = CurrentContainer->dummy[hit->primID]; 
 	 
  	if (F != ctxt->skip && !CalculateEnergy(ctxt, hit, F, ctxt->B))
 	{
  		ctxt->energy = 0;
-		args->valid[0] = -1; 		return;
+		args->valid[0] = -1;
+ 		return;
 	}
 
  	args->valid[0] = 0;
@@ -204,10 +207,15 @@ void LoadGeomBuffer(RTCGeometry& geom, RTCBuildQuality& quality, bool FilterTran
 	geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 	rtcSetGeometryBuildQuality(geom, quality);
 
+	rtcSetGeometryUserData(geom, &geom_buffer);
 	if (FilterTransp)
+	{
 		rtcSetGeometryOccludedFilterFunction(geom, &FilterRaytraceTransparent);
+	}
 	else
+	{
 		rtcSetGeometryOccludedFilterFunction(geom, &FilterRayTraceOpaque);
+	}
 
 	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, geom_buffer.vertex().data(), 0, sizeof(Fvector), geom_buffer.vertex().size());
 	rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, geom_buffer.faces().data(), 0, sizeof(Triangle), geom_buffer.faces().size());
@@ -218,17 +226,72 @@ void LoadGeomBuffer(RTCGeometry& geom, RTCBuildQuality& quality, bool FilterTran
 void EmbreeData::InitializeGeometry()
 {
  	// Конструктор модели
- 	EmbreeData::BuildRaytraceModel();
-   	LoadGeomBuffer(IntelGeometryNormal, scene_quality, false, static_geom);
-   	LoadGeomBuffer(IntelGeometryTransp, scene_quality, true, static_geom_transp);
- 
+	EmbreeData::BuildRaytraceModel();
+	
 	IntelScene = rtcNewScene(device);
 	rtcSetSceneFlags(IntelScene, scene_flags);
 
- 	rtcAttachGeometryByID(IntelScene, IntelGeometryNormal, 0);
-	rtcAttachGeometryByID(IntelScene, IntelGeometryTransp, 1);
+	LoadGeomBuffer(Data.StaticGeom.IntelGeometryNormal, scene_quality, false, Data.StaticGeom.geom);
+	LoadGeomBuffer(Data.StaticGeom.IntelGeometryTransp, scene_quality, false, Data.StaticGeom.geom_transp);
+
+	for (auto& elem : Data.InstancesContainer)
+	{
+		auto& Cont = elem.second;
+		LoadGeomBuffer(Cont.IntelGeometryNormal, scene_quality, false, Cont.geom);
+		LoadGeomBuffer(Cont.IntelGeometryTransp, scene_quality, false, Cont.geom_transp);
+
+		Cont.IntelGeometryScene = rtcNewScene(device);
+		rtcAttachGeometry(Cont.IntelGeometryScene, Cont.IntelGeometryNormal);
+		rtcAttachGeometry(Cont.IntelGeometryScene, Cont.IntelGeometryTransp);
+		rtcReleaseGeometry(Cont.IntelGeometryNormal);
+		rtcReleaseGeometry(Cont.IntelGeometryTransp);
+		rtcCommitScene(Cont.IntelGeometryScene);
+	}
+ 
+	rtcAttachGeometryByID(IntelScene, Data.StaticGeom.IntelGeometryNormal, 0);
+	rtcAttachGeometryByID(IntelScene, Data.StaticGeom.IntelGeometryTransp, 1);
+
+	u32 Counter = 0;
+	float matrix[12];
+	for (auto& elem : Data.InstancesMatrices)
+	{
+		auto& Cont = elem.second;
+		auto& Geom = Data.InstancesContainer[elem.first];
+		for (auto& trans : Cont)
+		{
+			matrix[0] = trans.i.x;
+			matrix[1] = trans.i.y;
+			matrix[2] = trans.i.z;
+			matrix[3] = trans.j.x;
+			matrix[4] = trans.j.y;
+			matrix[5] = trans.j.z;
+			matrix[6] = trans.k.x;
+			matrix[7] = trans.k.y;
+			matrix[8] = trans.k.z;
+			matrix[9] = trans.c.x;
+			matrix[10] = trans.c.y;
+			matrix[11] = trans.c.z;
+			auto instance = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_INSTANCE);
+			rtcSetGeometryInstancedScene(instance, Geom.IntelGeometryScene);
+			rtcSetGeometryTransform(instance, 0, RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &matrix);
+			rtcCommitGeometry(instance);
+			rtcAttachGeometryByID(IntelScene, instance, 2 + Counter++);
+			//rtcReleaseGeometry(instance);
+		}
+	}
 
 	rtcCommitScene(IntelScene);
+
+	//rtcReleaseGeometry(Data.StaticGeom.IntelGeometryNormal);
+	//rtcReleaseGeometry(Data.StaticGeom.IntelGeometryTransp);
+
+	/*for (auto& elem : Data.InstancesContainer)
+	{
+		auto& Cont = elem.second;
+		rtcReleaseGeometry(Cont.IntelGeometryNormal);
+		rtcReleaseGeometry(Cont.IntelGeometryTransp);
+		rtcReleaseScene(Cont.IntelGeometryScene);
+	}*/
 }
 
 void EmbreeData::RemoveGeometry(bool isDealloc)
@@ -236,8 +299,8 @@ void EmbreeData::RemoveGeometry(bool isDealloc)
  	if (isDealloc)
 	{
  		rtcReleaseScene(IntelScene);
-  		static_geom.ClearAll();
-		static_geom_transp.ClearAll();
+
+ 		Data.ClearAll();
 	}
 	else
 	{

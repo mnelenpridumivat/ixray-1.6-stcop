@@ -759,7 +759,9 @@ void MeshMender::SetUpData(
 
 	//initialize the mapping
 	for(i = 0 ; i < theVerts.size() ; ++i)
+	{
 		mappingNewToOldVert.push_back(i);
+	}
 
 	m_originalNumVerts = theVerts.size();
 
@@ -1144,14 +1146,22 @@ void MeshMender::AppendToMapping(	const size_t oldIndex,
 		// so we can just use the mapping
 	
 		//that is to say, just keep the same mapping for this new one.
+		if (!I_ASSERT(oldIndex < mappingNewToOldVert.size()) && IsDebuggerPresent())
+		{
+			DebugBreak();
+		}
 		unsigned int originalVertIndex = mappingNewToOldVert[oldIndex];
-		assert( originalVertIndex < originalNumVerts );
+		R_ASSERT( originalVertIndex < originalNumVerts );
 		
 		mappingNewToOldVert.push_back( originalVertIndex ); 
 	}
 	else
 	{
 		//this is mapping to an original vertex
+		if (!I_ASSERT(oldIndex < originalNumVerts) && IsDebuggerPresent())
+		{
+			DebugBreak();
+		}
 		mappingNewToOldVert.push_back((u32)oldIndex );
 	}
 }

@@ -13,7 +13,7 @@ void TriangleContainer::RemoveDublicates()
     CTimer tStats;
     tStats.Start();
     //----------------------
-    // 1. Собираем все вершины
+    // 1. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     //----------------------
     size_t totalVerts = raw_faces.size() * 3;
 
@@ -34,7 +34,7 @@ void TriangleContainer::RemoveDublicates()
         }
     }
     //----------------------
-    // 2. Сортируем вершины
+    // 2. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     //----------------------
     std::sort(std::execution::par, temp.begin(), temp.end(), [](const IndexedVertex& a, const IndexedVertex& b)
         {
@@ -43,7 +43,7 @@ void TriangleContainer::RemoveDublicates()
             return a.v.z < b.v.z;
         });
     //----------------------
-    // 3. Убираем дубликаты
+    // 3. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     //----------------------
     xr_vector<uint32_t> remap(totalVerts);
     xr_vector<Fvector> unique_vertices;
@@ -63,11 +63,11 @@ void TriangleContainer::RemoveDublicates()
         remap[temp[i].originalIndex] = newIndex;
     }
 
-    // Сожмать до реального размера
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     unique_vertices.shrink_to_fit();
 
     //----------------------
-    // 4. Перестраиваем треугольники
+    // 4. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     //----------------------
     verts_v.swap(unique_vertices);
 
@@ -104,7 +104,7 @@ void TriangleContainer::RemoveDublicates()
     }
 
     //----------------------
-    // 5. Чистим временные данные
+    // 5. пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     //----------------------
     raw_faces.clear();
     raw_faces.shrink_to_fit();
@@ -123,7 +123,7 @@ void TriangleContainer::RemoveDublicatesFaces()
     CTimer t; 
     t.Start();
 
-    // 1. Убираем дубликаты треугольников через сортировку
+    // 1. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     xr_vector<IndexedTri> temp;
     temp.reserve(faces_v.size());
 
@@ -134,13 +134,13 @@ void TriangleContainer::RemoveDublicatesFaces()
 
     std::sort(std::execution::par, temp.begin(), temp.end());
 
-    // создаём новые массивы
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     xr_vector<Triangle> new_faces;
     xr_vector<decltype(dummy)::value_type> new_dummy;
     new_faces.reserve(faces_v.size());
     new_dummy.reserve(dummy.size());
 
-    // первый всегда берём
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     new_faces.push_back(faces_v[temp[0].originalIndex]);
     new_dummy.push_back(dummy[temp[0].originalIndex]);
 
@@ -158,7 +158,7 @@ void TriangleContainer::RemoveDublicatesFaces()
     new_faces.shrink_to_fit();
     new_dummy.shrink_to_fit();
 
-    // меняем местами
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     faces_v.swap(new_faces);
     dummy.swap(new_dummy);
 
@@ -210,5 +210,38 @@ void TriangleContainer::ClearAll()
     faces_v.shrink_to_fit();
     verts_v.shrink_to_fit();
     dummy.shrink_to_fit();
+}
+
+void GeomLightingContainer::ClearAll()
+{
+    geom.ClearAll();
+    geom_transp.ClearAll();
+}
+
+void GeomLightingContainer::RemoveDublicates()
+{
+    geom.RemoveDublicates();
+    geom_transp.RemoveDublicates();
+}
+
+void GeomLightingContainer::RemoveDublicatesFaces()
+{
+    geom.RemoveDublicatesFaces();
+    geom_transp.RemoveDublicatesFaces();
+}
+
+void GeomShadowContainer::ClearAll()
+{
+    geom.ClearAll();
+}
+
+void GeomShadowContainer::RemoveDublicates()
+{
+    geom.RemoveDublicates();
+}
+
+void GeomShadowContainer::RemoveDublicatesFaces()
+{
+    geom.RemoveDublicatesFaces();
 }
 

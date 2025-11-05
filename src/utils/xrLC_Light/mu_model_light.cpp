@@ -56,6 +56,9 @@ public:
 			csMUMAPS_LOCKS.Leave();
 
 			// Light references
+//#ifndef DEBUG
+//			FATAL("You forget to turn on lighting calculations in MU models!")
+//#endif
 			inlc_global_data()->mu_refs()[ID]->calc_lighting	();
 			u32 LocMUModelsProcessed = ++MUModelsProcessed;
 			Status("Processed %u/%u models", LocMUModelsProcessed, inlc_global_data()->mu_refs().size());
@@ -91,12 +94,14 @@ public:
  			ThreadTaskID++;
 			// Light references
 			mu_sorted[ID]->calc_materials();
-			thProgress = (float(ID) / float(mu_sorted.size()));
+			thProgress = (float(ThreadTaskID) / float(mu_sorted.size()));
 			//if (ID%512 == 0)
 			Status("Models %d/%d", ID, mu_sorted.size());
 			csMUMAPS_LOCKS.Leave();
  
-			
+//#ifndef DEBUG
+//			FATAL("You forget to turn on lighting calculations in MU models!")
+//#endif
 			mu_sorted[ID]->calc_lighting();
 			u32 LocMUModelsProcessed = ++MUModelsProcessed;
 			Status("Processed %u/%u models", LocMUModelsProcessed, mu_sorted.size());

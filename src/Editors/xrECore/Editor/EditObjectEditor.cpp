@@ -437,6 +437,8 @@ bool CEditableObject::CheckShaderCompatible()
 			if (!BE(B->canBeLMAPped(),!C->flags.bLIGHT_Vertex)){
 				ELog.Msg	(mtError,"Object '%s', material '%s': engine shader '%s' non compatible with compiler shader '%s'", GetName(),
 					(*s_it)->_Name(), (*s_it)->_ShaderName(), (*s_it)->_ShaderXRLCName());
+				ELog.Msg(mtInformation, "Engine shader %s can have vertex lighting - %s", *(*s_it)->m_ShaderName, B->canBeLMAPped() ? "false" : "true");
+				ELog.Msg(mtInformation, "Compile shader %s can have vertex lighting - %s", *(*s_it)->m_ShaderXRLCName, C->flags.bLIGHT_Vertex ? "true" : "false");
 				
 				bRes 		= false;
 			}

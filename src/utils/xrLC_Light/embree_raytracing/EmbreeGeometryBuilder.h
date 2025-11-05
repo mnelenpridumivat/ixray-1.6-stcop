@@ -1,5 +1,7 @@
 #pragma once
 
+#include <embree4/rtcore_geometry.h>
+
 #include "../../../xrCore/Collision/xrCDB.h"
 #include "xrFace.h"
  
@@ -125,3 +127,81 @@ struct TriangleContainer
 	void RemoveDublicates();
 	void RemoveDublicatesFaces();
 };
+
+struct GeomLightingContainer
+{
+	TriangleContainer geom;
+	TriangleContainer geom_transp;
+
+	RTCGeometry IntelGeometryNormal = nullptr;
+	RTCGeometry IntelGeometryTransp = nullptr;
+
+	RTCScene IntelGeometryScene = nullptr;
+	
+	void ClearAll();
+	
+	void RemoveDublicates();
+	void RemoveDublicatesFaces();
+};
+
+struct GeomShadowContainer
+{
+	TriangleContainer geom;
+
+	void ClearAll();
+	
+	void RemoveDublicates();
+	void RemoveDublicatesFaces();
+};
+
+template<typename T>
+concept IsGeomContainer = requires(T container)
+{
+	{ container.ClearAll() } -> std::same_as<void>;
+	{ container.RemoveDublicates() } -> std::same_as<void>;
+	{ container.RemoveDublicatesFaces() } -> std::same_as<void>;
+};
+
+template<IsGeomContainer T>
+struct SceneContainer
+{
+	/** NORMAL GEOM **/
+	T StaticGeom;
+
+	xr_map<void*, T> InstancesContainer;
+	xr_map<void*, xr_vector<Fmatrix>> InstancesMatrices;
+
+	void ClearAll()
+	{
+		StaticGeom.ClearAll();
+
+		for (auto& elem : InstancesContainer)
+		{
+			elem.second.ClearAll();
+		}
+
+		InstancesContainer.clear();
+		InstancesMatrices.clear();
+	}
+	
+	void RemoveDublicates()
+	{
+		StaticGeom.RemoveDublicates();
+		for (auto& elem : InstancesContainer)
+		{
+			elem.second.RemoveDublicates();
+		}
+	}
+	
+	void RemoveDublicatesFaces()
+	{
+		StaticGeom.RemoveDublicatesFaces();
+		for (auto& elem : InstancesContainer)
+		{
+			elem.second.RemoveDublicatesFaces();
+		}
+	}
+};
+
+using LightingSceneContainer = SceneContainer<GeomLightingContainer>;
+using ShadowSceneContainer = SceneContainer<GeomShadowContainer>;

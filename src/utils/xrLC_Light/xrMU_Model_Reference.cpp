@@ -94,7 +94,17 @@ void xrMU_Reference::export_cform_rcast_new(xr_vector<FaceDataIntel>& faces)
 {
 	model->export_cform_rcast_new(faces, xform);
 }
- 
+
+void xrMU_Reference::export_cform_rcast_new(GeomLightingContainer& container)
+{
+	model->export_cform_rcast_new(container);
+}
+
+void xrMU_Reference::export_cform_rcast_new(GeomShadowContainer& container)
+{
+	model->export_cform_rcast_new(container);
+}
+
 // Collision Building 
 void xrMU_Reference::export_cform_game_new(xr_vector<FaceDataIntel>& faces)
 {

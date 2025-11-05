@@ -54,7 +54,7 @@ MODEL::~MODEL()
 	verts_count = 0;
 }
 
-void MODEL::build(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
+void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
 {
 	R_ASSERT(S_INIT == status);
 	R_ASSERT((Vcnt >= 4) && (Tcnt >= 2));
@@ -80,7 +80,7 @@ void MODEL::build(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* 
 	status = S_READY;
 }
 
-void MODEL::build_internal(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
+void MODEL::build_internal(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
 {
 	// verts
 	verts_count = (u32)Vcnt;

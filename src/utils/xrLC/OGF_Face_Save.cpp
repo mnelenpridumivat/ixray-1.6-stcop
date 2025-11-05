@@ -252,42 +252,54 @@ void	OGF::PreSave		(u32 tree_id)
 
 		VDeclarator		x_D;
 		x_D.set			(x_decl_vert);
-		x_VB.Begin		(x_D);
+		VBContainerDecl decl;
+		decl.Begin(x_D);
+		//x_VB.Begin		(x_D);
 		for (itXV V=fast_path_data.vertices.begin(); V!=fast_path_data.vertices.end(); V++)
 		{
-			x_vert		v	(V->P);
-			x_VB.Add		(&v,sizeof(v));
+			x_vert v(V->P);
+			decl.Add(&v,sizeof(v));
+			//x_VB.Add		(&v,sizeof(v));
 		}
-		x_VB.End		(&fast_path_data.vb_id,&fast_path_data.vb_start);
-		x_IB.Register	(LPWORD(&*fast_path_data.faces.begin()),LPWORD(&*fast_path_data.faces.end()),&fast_path_data.ib_id,&fast_path_data.ib_start);
+		//x_VB.End		(&fast_path_data.vb_id,&fast_path_data.vb_start);
+		decl.End();
+		x_IB.Register	(LPWORD(&*fast_path_data.faces.begin()),LPWORD(&*fast_path_data.faces.end()),fast_path_data.ib_id,fast_path_data.ib_start);
 	}
 
 	// Vertices
 	VDeclarator		D;
+	VBContainerDecl decl;
 	if	(bVertexColored){
 		// vertex-colored
 		D.set			(r1_decl_vert);
-		g_VB.Begin		(D);
+		decl.Begin(D);
+		//g_VB.Begin		(D);
 		for (itOGF_V V=data.vertices.begin(); V!=data.vertices.end(); V++)
 		{
 			r1v_vert	v	(V->P,V->N,V->T,V->B,V->Color,V->UV[0]);
-			g_VB.Add		(&v,sizeof(v));
+			decl.Add(&v,sizeof(v));
+			//g_VB.Add		(&v,sizeof(v));
 		}
-		g_VB.End		(&data.vb_id,&data.vb_start);
+		//g_VB.End		(&data.vb_id,&data.vb_start);
+		decl.End();
 	}else{
 		// lmap-colored
 		D.set			(r1_decl_lmap);
-		g_VB.Begin		(D);
+		decl.Begin(D);
+		//g_VB.Begin		(D);
 		for (itOGF_V V=data.vertices.begin(); V!=data.vertices.end(); V++)
 		{
 			r1v_lmap	v	(V->P,V->N,V->T,V->B,V->Color,V->UV[0],V->UV[1]);
-			g_VB.Add		(&v,sizeof(v));
+			decl.Add(&v,sizeof(v));
+			//g_VB.Add		(&v,sizeof(v));
 		}
-		g_VB.End		(&data.vb_id,&data.vb_start);
+		//g_VB.End		(&data.vb_id,&data.vb_start);
+		decl.End();
 	}
+	g_VB.AddResult(decl, data.vb_id, data.vb_start);
 
 	// Faces
-	g_IB.Register		(LPWORD(&*data.faces.begin()),LPWORD(&*data.faces.end()),&data.ib_id,&data.ib_start);
+	g_IB.Register		(LPWORD(&*data.faces.begin()),LPWORD(&*data.faces.end()),data.ib_id,data.ib_start);
 }
 
 template<typename ogf_data_type>

@@ -15,6 +15,9 @@
 
 // Функция фильтрации 
 
+class xrLC_GlobalData;
+class xrMU_Reference;
+
 struct OpcodeArgs
 {
 	struct Hit
@@ -131,8 +134,8 @@ namespace CDB
 		}
 
 		void					CreateNewTree	(IWriter* CacheWriter);
-		void					build_internal	(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
-		void					build			(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		void					build_internal	(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		void					build			(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
 		u32						memory			();
 	};
 
@@ -272,14 +275,41 @@ namespace CDB
 		void				add_face_D	( const Fvector& v0, const Fvector& v1, const Fvector& v2, u32 dummy , u32 flags );
 
 		xr_vector<Fvector>& getV_Vec()			{ return verts;				}
-		Fvector*			getV()				{ return &*verts.begin();	}
-		size_t				getVS()				{ return verts.size();		}
-		TRI*				getT()				{ return &*faces.begin();	}
-		u32					getfFlags(u32 index){ return flags[index];		}	
+		const Fvector*		getV() const				{ return &*verts.begin();	}
+		size_t				getVS() const { return verts.size();		}
+		const TRI*			getT() const { return &*faces.begin();	}
+		u32					getfFlags(u32 index) const { return flags[index];		}	
 IC		TRI&				getT(u32 index)		{ return faces[index];		}
-		size_t				getTS()				{ return faces.size();		}
+		size_t				getTS() const { return faces.size();		}
 		void				clear();
 	};
+
+	class XRCORE_API CollisionPacked :
+		public non_copyable
+	{
+	public:
+		struct MUInstanceData
+		{
+			Fmatrix transform;
+			u16 sector;
+		};
+	private:
+		CollectorPacked StaticData;
+		xr_map<void*, CollectorPacked> MUObjectsData;
+		xr_map<void*, xr_vector<MUInstanceData>> MUInstancesData;
+		
+	public:
+		CollisionPacked(const Fbox &bb, int apx_vertices=5000, int apx_faces=5000) : StaticData(bb, apx_vertices, apx_faces){}
+
+		CollectorPacked& GetStaticData() { return StaticData; }
+		CollectorPacked* GetMUObjectData(void* Key);
+		CollectorPacked* CreateMUObjectData(void* Key, const Fbox &bb, int apx_vertices, int apx_faces);
+		void AddMUInstance(void* Key, const MUInstanceData& Transform);
+
+		const xr_map<void*, CollectorPacked>& GetMUObjectsDataRaw() { return MUObjectsData; }
+		const xr_map<void*, xr_vector<MUInstanceData>>& GetMUInstancesDataRaw() { return MUInstancesData; }
+	};
+	
 #pragma warning(pop)
 };
 

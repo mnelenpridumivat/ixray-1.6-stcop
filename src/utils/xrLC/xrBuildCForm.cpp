@@ -83,11 +83,15 @@ void CBuild::BuildCForm	()
 
 		Status("Collecting vertices...");
 		cfVertices->reserve(lc_global_data()->g_vertices().size());
-		std::sort(cfFaces->begin(), cfFaces->end());
+		std::ranges::sort(*cfFaces);
 
 		for (u32 V = 0; V < lc_global_data()->g_vertices().size(); V++)
+		{
 			if (cfVertexMarks[V])
+			{
 				cfVertices->push_back(lc_global_data()->g_vertices()[V]);
+			}
+		}
 	}
 
 	float	p_total = 0;
@@ -95,7 +99,9 @@ void CBuild::BuildCForm	()
 
 	Fbox BB; BB.invalidate();
 	for (vecVertexIt it = cfVertices->begin(); it != cfVertices->end(); it++)
+	{
 		BB.modify((*it)->P);
+	}
 
 	// CForm
 	Status("Items to process: %d", cfFaces->size());
@@ -104,25 +110,34 @@ void CBuild::BuildCForm	()
 	p_cost = 1.f / (cfFaces->size());
 
 	// Collect faces
-	CDB::CollectorPacked CL(BB, (int)cfVertices->size(), (int)cfFaces->size());
-	for (vecFaceIt F = cfFaces->begin(); F != cfFaces->end(); F++)
+	CDB::CollisionPacked CL(BB, (int)cfVertices->size(), (int)cfFaces->size());
+	//CDB::CollectorPacked CL(BB, (int)cfVertices->size(), (int)cfFaces->size());
 	{
-		Face* T = *F;
+		auto& StaticCL = CL.GetStaticData();
+		for (vecFaceIt F = cfFaces->begin(); F != cfFaces->end(); F++)
+		{
+			Face* T = *F;
 
-		TestEdge(T->v[0], T->v[1], T);
-		TestEdge(T->v[1], T->v[2], T);
-		TestEdge(T->v[2], T->v[0], T);
+			TestEdge(T->v[0], T->v[1], T);
+			TestEdge(T->v[1], T->v[2], T);
+			TestEdge(T->v[2], T->v[0], T);
 
-		CL.add_face(
-			T->v[0]->P, T->v[1]->P, T->v[2]->P,
-			T->dwMaterialGame, materials()[T->dwMaterial].sector, T->sm_group
-		);
-		Progress(p_total += p_cost);		// progress
-	}
+			StaticCL.add_face(
+				T->v[0]->P, T->v[1]->P, T->v[2]->P,
+				T->dwMaterialGame, materials()[T->dwMaterial].sector, T->sm_group
+			);
+			Progress(p_total += p_cost);		// progress
+		}
 
-	if (bCriticalErrCnt) {
-		err_save();
-		clMsg("MultipleEdges: %d faces", bCriticalErrCnt);
+		if (bCriticalErrCnt) {
+			err_save();
+			clMsg("MultipleEdges: %d faces", bCriticalErrCnt);
+		}
+		
+		if (g_params().m_quality != ebqDraft)
+		{
+			SimplifyCFORM(StaticCL);
+		}
 	}
 	xr_delete(cfFaces);
 	xr_delete(cfVertices);
@@ -132,17 +147,33 @@ void CBuild::BuildCForm	()
 	for (u32 ref = 0; ref < mu_refs().size(); ref++)
 	{
 		Progress(float(ref) / float(mu_refs().size()));
-		mu_refs()[ref]->export_cform_game(CL);
+		auto MURef = mu_refs()[ref];
+		auto MUObjData = CL.GetMUObjectData(MURef->model);
+		if (!MUObjData)
+		{
+			Fbox MUBB; MUBB.invalidate();
+			for (auto v : MURef->model->m_vertices)
+			{
+				MUBB.modify(v->P);
+			}
+			MUObjData = CL.CreateMUObjectData(
+				MURef->model,
+				MUBB,
+				MURef->model->m_vertices.size(),
+				MURef->model->m_faces.size());
+			MURef->model->export_cform_game(*MUObjData);
+			if (g_params().m_quality != ebqDraft)
+			{
+				SimplifyCFORM(*MUObjData);
+			}
+		}
+		CL.AddMUInstance(MURef->model, {MURef->xform, MURef->sector});
 	}
 
-	// Simplification
-	if (g_params().m_quality != ebqDraft)
-		SimplifyCFORM(CL);
-
 	// bb?
-	BB.invalidate();
-	for (size_t it = 0; it < CL.getVS(); it++)
-		BB.modify(CL.getV()[it]);
+	//BB.invalidate();
+	//for (size_t it = 0; it < CL.getVS(); it++)
+	//	BB.modify(CL.getV()[it]);
 
 	// Saving
 	string_path		fn;
@@ -151,87 +182,75 @@ void CBuild::BuildCForm	()
 
 	// Header
 	hdrCFORM hdr;
-	hdr.version = CFORM_CURRENT_VERSION;
-	hdr.vertcount = (u32)CL.getVS();
-	hdr.facecount = (u32)CL.getTS();
+	hdr.version = CFORM_Versions::WITH_INSTANCING;
+	//hdr.vertcount = (u32)CL.getVS(); // No need
+	//hdr.facecount = (u32)CL.getTS(); // No need
 	hdr.aabb = BB;
-	MFS->w(&hdr, sizeof(hdr));
-	Msg("CFORM Saving HDR: %u", MFS->tell());
-
-	// Data
-	MFS->w(CL.getV(), (u32)CL.getVS() * sizeof(Fvector));
-	Msg("CFORM Saving Verts: %u", MFS->tell());
-
-	MFS->w(CL.getT(), (u32)CL.getTS() * sizeof(CDB::TRI));
-	Msg("CFORM Saving FACES: %u", MFS->tell());
-
-	// Clear pDeflector (it is stored in the same memory space with dwMaterialGame)
-	for (vecFaceIt I = lc_global_data()->g_faces().begin(); I != lc_global_data()->g_faces().end(); I++)
 	{
-		Face* F = *I;
-		F->pDeflector = NULL;
+		MFS->open_chunk(CFORM_Chunks::Header);
+		MFS->w(&hdr, sizeof(hdr));
+		MFS->close_chunk();
+		Msg("CFORM Saving HDR: %u", MFS->tell());
 	}
-	FS.w_close(MFS);
-
-	/*
- 	// Заполняем faces*
-	TriangleContainer container;
-  	for (auto TRI : lc_global_data()->g_faces())
 	{
-		if (TRI->Shader().flags.bCollision)
- 			container.AddFaceMaterial(TRI, 
-				TRI->v[0]->P, TRI->v[1]->P, TRI->v[2]->P,
-				TRI->dwMaterialGame, materials()[TRI->dwMaterial].sector);
+		MFS->open_chunk(CFORM_Chunks::StaticGeom);
+		auto& StaticGeom = CL.GetStaticData();
+		
+		R_ASSERT(StaticGeom.getVS() <= std::numeric_limits<u32>::max(), "Too many vertices in static geom, collision is invalid!");
+		MFS->w_u32(StaticGeom.getVS());
+		MFS->w(StaticGeom.getV(), StaticGeom.getVS() * sizeof(Fvector));
+		
+		R_ASSERT(StaticGeom.getTS() <= std::numeric_limits<u32>::max(), "Too many faces in static geom, collision is invalid!");
+		MFS->w_u32(StaticGeom.getTS());
+		MFS->w(StaticGeom.getT(), StaticGeom.getTS() * sizeof(CDB::TRI));
+		
+		MFS->close_chunk();
 	}
- 	for (auto& ref : mu_refs())
 	{
-		xr_vector<FaceDataIntel> temp_buffer;
-		ref->export_cform_game_new(temp_buffer);
-		for (auto& FaceIntel : temp_buffer)
+		MFS->open_chunk(CFORM_Chunks::Instances);
+
+		auto& MUObjects = CL.GetMUObjectsDataRaw();
+		MFS->w_u32(MUObjects.size());
+		for (auto& Obj : MUObjects)
 		{
-			Face* F = (Face*)FaceIntel.ptr;
-			container.AddFaceMaterial(F, FaceIntel.v1, FaceIntel.v2, FaceIntel.v3, F->dwMaterialGame, materials()[F->dwMaterial].sector);
+			auto& Geom = Obj.second;
+		
+			R_ASSERT(Geom.getVS() <= std::numeric_limits<u32>::max(), "Too many vertices in MU object geom, collision is invalid!");
+			MFS->w_u32(Geom.getVS());
+			MFS->w(Geom.getV(), Geom.getVS() * sizeof(Fvector));
+		
+			R_ASSERT(Geom.getTS() <= std::numeric_limits<u32>::max(), "Too many faces in MU object geom, collision is invalid!");
+			MFS->w_u32(Geom.getTS());
+			MFS->w(Geom.getT(), Geom.getTS() * sizeof(CDB::TRI));
+			
 		}
+
+		MFS->close_chunk();
+	}
+	{
+		MFS->open_chunk(CFORM_Chunks::InstanceRefs);
+
+		auto& MUInstances = CL.GetMUInstancesDataRaw();
+		//MFS->w_u32(MUInstances.size()); // amount of elements in this map are same to MUObjects
+		for (auto& group : MUInstances)
+		{
+			MFS->w_u32(group.second.size());
+			for (auto& instance : group.second)
+			{
+				MFS->w(&instance.transform, sizeof(instance.transform));
+				MFS->w_u16(instance.sector);
+			}
+		}
+
+		MFS->close_chunk();
 	}
 
-	container.RemoveDublicates();
-	container.RemoveDublicatesFaces();
-
-	// Расщитуем BBox Уровня
-	Fbox BB;
-	BB.invalidate	();
-	for (auto V : container.verts_v)
-		BB.modify( V );
-
-	// Saving
-	string_path		fn;
-	IWriter*		MFS	= FS.w_open	(xr_strconcat(fn,pBuild->path,"level.cform"));
-	Status			("Saving...");
-
-	// Header
-	hdrCFORM hdr;
-	hdr.version		= CFORM_CURRENT_VERSION;
-	hdr.vertcount	= (u32)container.vertex_cnt();
-	hdr.facecount	= (u32)container.faces_cnt();
-	hdr.aabb		= BB;
-	MFS->w			(&hdr,sizeof(hdr));
- 
-	// Data
-	MFS->w			(container.vertex().data(), (u32)container.vertex_cnt() * sizeof(Fvector));
-	for (u32 TRI_INDEX = 0; TRI_INDEX < container.faces_cnt(); TRI_INDEX++)
+	// Clear pDeflector (it is stored in the same memory space with dwMaterialGame)
+	for (auto face : lc_global_data()->g_faces())
 	{
-		CDB::TRI T = container.GetCDBMaterial(TRI_INDEX);
- 		MFS->w(&T, sizeof(CDB::TRI));
+		face->pDeflector = nullptr;
 	}
 	FS.w_close(MFS);
- 
-	// Clear pDeflector (it is stored in the same memory space with dwMaterialGame)
-	for (vecFaceIt I=lc_global_data()->g_faces().begin(); I != lc_global_data()->g_faces().end(); I++)
-	{
-		Face* F			= *I;
-		F->pDeflector	= NULL;
-	}
-	*/
 }
 
 void CBuild::BuildPortals(IWriter& fs)

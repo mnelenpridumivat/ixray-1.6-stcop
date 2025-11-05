@@ -3,6 +3,8 @@
 #include "base_color.h"
 #include "mu_model_face.h"
 
+struct GeomShadowContainer;
+struct GeomLightingContainer;
 class xrMU_Model;
 struct FaceDataIntel;
 
@@ -38,6 +40,8 @@ public:
 	void					export_cform_rcast	(CDB::CollectorPacked& CL); 
 
 	void					export_cform_rcast_new(xr_vector<FaceDataIntel>& faces);
+	void					export_cform_rcast_new(GeomLightingContainer& container);
+	void					export_cform_rcast_new(GeomShadowContainer& container);
 	void					export_cform_game_new(xr_vector<FaceDataIntel>& faces);
 
 };

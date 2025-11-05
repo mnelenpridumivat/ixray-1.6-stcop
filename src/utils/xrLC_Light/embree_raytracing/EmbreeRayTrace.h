@@ -35,9 +35,11 @@ class EmbreeData
 public:
 	BuildData  build_data;
 
+	LightingSceneContainer Data;
+
 	/** NORMAL GEOM **/
-	TriangleContainer			static_geom;
-	TriangleContainer			static_geom_transp;
+	//TriangleContainer			static_geom;
+	//TriangleContainer			static_geom_transp;
  
 	void BuildRaytraceModel_2	();
  	void BuildRaytraceModel		();
