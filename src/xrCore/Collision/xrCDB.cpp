@@ -54,11 +54,9 @@ MODEL::~MODEL()
 	verts_count = 0;
 }
 
-void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
+bool MODEL::verify_collsion(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
 {
-	R_ASSERT(S_INIT == status);
-	R_ASSERT((Vcnt >= 4) && (Tcnt >= 2));
-	if (Vcnt < 4 || Tcnt < 2)
+	if (!I_ASSERT((Vcnt >= 4) && (Tcnt >= 2)))
 	{
 		if (Vcnt)
 		{
@@ -74,27 +72,65 @@ void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, buil
 			// Never know what could happen...
 			Msg("Invalid collision face: somehow there is %d faces with 0 vertices", Tcnt);
 		}
+		return false;
 	}
-
-	build_internal(V, Vcnt, T, Tcnt, bc, bcp, pRW, RWMode);
-	status = S_READY;
+	return true;
 }
 
-void MODEL::build_internal(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
+void MODEL::build_static_geom(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
+{
+	R_ASSERT(S_INIT == status);
+	verify_collsion(V, Vcnt, T, Tcnt);
+
+	build_internal(StaticGeom, V, Vcnt, T, Tcnt);
+	
+}
+
+void MODEL::build_mu_model(u32 id, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
+{
+	auto It = MUModels.find(id);
+	if (!I_ASSERT(It == MUModels.end()))
+	{
+		return;
+	}
+	It = MUModels.emplace(id, raw_geom{}).first;
+
+	build_internal(It->second, V, Vcnt, T, Tcnt);
+}
+
+void MODEL::add_instance(u32 id, const Fmatrix& Transform)
+{
+	auto It = MUInstances.try_emplace(id).first;
+	It->second.push_back(Transform);
+}
+
+void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
+{
+	R_ASSERT(S_INIT == status);
+	verify_collsion(V, Vcnt, T, Tcnt);
+
+	build_internal(StaticGeom, V, Vcnt, T, Tcnt, bc, bcp, pRW, RWMode);
+}
+
+void MODEL::build_internal(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
 {
 	// verts
-	verts_count = (u32)Vcnt;
-	verts = xr_alloc<Fvector>(verts_count);
-	CopyMemory(verts, V, verts_count * sizeof(Fvector));
+	GeomStorage.verts_count = (u32)Vcnt;
+	GeomStorage.verts = xr_alloc<Fvector>(GeomStorage.verts_count);
+	CopyMemory(GeomStorage.verts, V, GeomStorage.verts_count * sizeof(Fvector));
 
 	// tris
-	tris_count = (u32)Tcnt;
-	tris = xr_alloc<TRI>(tris_count);
-	CopyMemory(tris, T, tris_count * sizeof(TRI));
+	GeomStorage.tris_count = (u32)Tcnt;
+	GeomStorage.tris = xr_alloc<TRI>(GeomStorage.tris_count);
+	CopyMemory(GeomStorage.tris, T, GeomStorage.tris_count * sizeof(TRI));
 
+	// TODO: Remove all below to finish_building
+	
 	// callback
-	if (bc)		
-		bc(verts, Vcnt, tris, Tcnt, bcp);
+	if (bc)
+	{
+		bc(GeomStorage.verts, Vcnt, GeomStorage.tris, Tcnt, bcp);
+	}
 
 	if (pRW != nullptr && RWMode)
 	{
@@ -114,6 +150,37 @@ void MODEL::build_internal(const Fvector* V, size_t Vcnt, const TRI* T, size_t T
 	}
 
 	CreateNewTree(RWMode ? nullptr : (IWriter*)pRW);
+}
+
+void MODEL::finish_building(build_callback* bc, void* bcp, void* pRW, bool RWMode)
+{
+	// TODO: Update build_callback
+	
+	// callback
+	if (bc)
+	{
+		bc(GeomStorage.verts, Vcnt, GeomStorage.tris, Tcnt, bcp);
+	}
+
+	if (pRW != nullptr && RWMode)
+	{
+		IReader* pReader = (IReader*)(pRW);
+		tree = new CDB_Model();
+
+		if (tree->Restore(pReader))
+		{
+			Msg("* Level collision DB cache found...");
+			return;
+		}
+		else
+		{
+			xr_delete(tree);
+			Msg("* Level collision DB cache missing, rebuilding...");
+		}
+	}
+
+	CreateNewTree(RWMode ? nullptr : (IWriter*)pRW);
+	status = S_READY;
 }
 
 

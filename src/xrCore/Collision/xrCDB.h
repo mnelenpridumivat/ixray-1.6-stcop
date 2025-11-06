@@ -102,16 +102,28 @@ namespace CDB
 			S_BUILD				= 2,
 			S_forcedword		= u32(-1)
 		};
+
+		struct raw_geom
+		{
+			TRI* tris = nullptr;
+			u32 tris_count = 0;
+			Fvector* verts = nullptr;
+			u32 verts_count = 0;
+		};
 	private:
 		xrCriticalSection		cs;
-		CDB_Model*	tree;
+		
+		CDB_Model*	tree = nullptr;
+		
 		u32						status;		// 0=ready, 1=init, 2=building
 
 		// tris
-		TRI*					tris;
-		u32						tris_count;
-		Fvector*				verts;
-		u32					verts_count;
+		raw_geom StaticGeom;
+		xr_map<u32, raw_geom> MUModels = {};
+		xr_map<u32, xr_vector<Fmatrix>> MUInstances = {};
+
+		bool verify_collsion(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
+		
 	public:
 		MODEL();
 		~MODEL();
@@ -134,8 +146,14 @@ namespace CDB
 		}
 
 		void					CreateNewTree	(IWriter* CacheWriter);
-		void					build_internal	(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		void					build_internal	(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
 		void					build			(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+
+		void build_static_geom(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
+		void build_mu_model(u32 id, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
+		void add_instance(u32 id, const Fmatrix& Transform);
+		void finish_building(build_callback* bc, void* bcp, void* pRW, bool RWMode);
+
 		u32						memory			();
 	};
 
