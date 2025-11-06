@@ -64,8 +64,8 @@ public:
 	int									GetNearest			( xr_vector<CObject*>&	q_nearest, const Fvector &point, float range, CObject* ignore_object );
 	int									GetNearest			( xr_vector<ISpatialShared>& q_spatial, xr_vector<CObject*>&	q_nearest, const Fvector &point, float range, CObject* ignore_object );
 
-	CDB::TRI*							GetStaticTris		() { return Static.get_tris();	}
-	Fvector*							GetStaticVerts		() { return Static.get_verts(); }
+	//CDB::TRI*							GetStaticTris		() { return Static.get_tris();	}
+	//Fvector*							GetStaticVerts		() { return Static.get_verts(); }
 	CDB::MODEL*							GetStaticModel		() { return &Static;			}
 
 	const Fbox&							GetBoundingVolume	() { return m_BoundingVolume;}

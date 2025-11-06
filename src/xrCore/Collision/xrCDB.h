@@ -113,14 +113,15 @@ namespace CDB
 	private:
 		xrCriticalSection		cs;
 		
-		CDB_Model*	tree = nullptr;
+		xr_unique_ptr<CDB_Model> StaticTree = nullptr;
+		xr_vector<xr_unique_ptr<CDB_Model>>	MUModelTrees;
 		
 		u32						status;		// 0=ready, 1=init, 2=building
 
 		// tris
 		raw_geom StaticGeom;
-		xr_map<u32, raw_geom> MUModels = {};
-		xr_map<u32, xr_vector<Fmatrix>> MUInstances = {};
+		xr_vector<raw_geom> MUModels = {};
+		xr_vector<xr_vector<Fmatrix>> MUInstances = {};
 
 		bool verify_collsion(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
 		
@@ -128,12 +129,12 @@ namespace CDB
 		MODEL();
 		~MODEL();
 
-		IC Fvector*				get_verts		()			{ return verts;		}
-		IC const Fvector*		get_verts		()	const	{ return verts;		}
-		IC int					get_verts_count	()	const	{ return verts_count;}
-		IC const TRI*			get_tris		()	const 	{ return tris;		}
-		IC TRI*					get_tris		()			{ return tris;		}
-		IC int					get_tris_count	()	const	{ return tris_count;}
+		//IC Fvector*				get_verts		()			{ return verts;		}
+		//IC const Fvector*		get_verts		()	const	{ return verts;		}
+		//IC int					get_verts_count	()	const	{ return verts_count;}
+		//IC const TRI*			get_tris		()	const 	{ return tris;		}
+		//IC TRI*					get_tris		()			{ return tris;		}
+		//IC int					get_tris_count	()	const	{ return tris_count;}
 		IC void					syncronize		()	const
 		{
 			if (S_READY!=status)
@@ -145,14 +146,14 @@ namespace CDB
 			}
 		}
 
-		void					CreateNewTree	(IWriter* CacheWriter);
-		void					build_internal	(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
-		void					build			(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		CDB_Model* CreateNewTree(raw_geom& GeomStorage);
+		void build_internal(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		void build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
 
-		void build_static_geom(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
-		void build_mu_model(u32 id, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt);
+		void build_static_geom(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt);
+		void build_mu_model(u32 id, Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt);
 		void add_instance(u32 id, const Fmatrix& Transform);
-		void finish_building(build_callback* bc, void* bcp, void* pRW, bool RWMode);
+		void finish_building(build_callback* bc = nullptr, void* bcp = nullptr, void* pRW = nullptr, bool RWMode = false);
 
 		u32						memory			();
 	};
@@ -238,10 +239,12 @@ namespace CDB
         void			remove_duplicate_T	( );
 		void			calc_adjacency		( xr_vector<u32>& dest		);
 
-		Fvector*		getV			()	{ return &*verts.begin();		}
-		size_t			getVS			() 	{ return verts.size();			}
-		TRI*			getT			()	{ return &*faces.begin();		}
-		size_t			getTS			()	{ return faces.size();			}
+		const Fvector*		getV			() const { return &*verts.begin();		}
+		Fvector*		getV			() { return &*verts.begin();		}
+		size_t			getVS			() const { return verts.size();			}
+		const TRI*			getT			() const { return &*faces.begin();		}
+		TRI*			getT			() { return &*faces.begin();		}
+		size_t			getTS			() const { return faces.size();			}
 		void			clear			()	{ verts.clear(); faces.clear();	}
 	};
 
@@ -250,6 +253,65 @@ namespace CDB
 	private:
 						non_copyable	(const non_copyable &) {}
 						non_copyable& operator=		(const non_copyable&) { return *this; }
+	};
+
+	class XRCORE_API Collision :
+		public non_copyable
+	{
+	public:
+		struct MUInstanceData
+		{
+			Fmatrix transform;
+			u16 sector;
+		};
+
+		struct MUListIt
+		{
+		private:
+			friend class Collision;
+			xr_map<void*, Collector>::iterator ProtKey;
+			xr_map<void*, xr_vector<MUInstanceData>>::iterator InsKey;
+		public:
+			Collector& GetPrototypeData() const {return ProtKey->second;};
+			xr_vector<MUInstanceData>& GetInstancesData() const {return InsKey->second;};
+			
+			bool operator==(const MUListIt& other)
+			{
+				VERIFY(ProtKey->first == InsKey->first);
+				VERIFY(other.ProtKey->first == other.InsKey->first);
+				return ProtKey == other.ProtKey && InsKey == other.InsKey;
+			}
+
+			bool operator!=(const MUListIt& other)
+			{
+				return !(*this == other);
+			}
+
+			MUListIt operator++(int)
+			{
+				++ProtKey;
+				++InsKey;
+				return *this;
+			}
+		};
+	private:
+		Collector StaticData;
+		xr_map<void*, Collector> MUObjectsData;
+		xr_map<void* const, xr_vector<MUInstanceData>> MUInstancesData;
+		
+	public:
+		Collision() = default;
+
+		Collector& GetStaticData() { return StaticData; }
+		Collector* GetMUObjectData(void* Key);
+		Collector* CreateMUObjectData(void* Key);
+		void AddMUInstance(void* Key, const MUInstanceData& Transform);
+
+		MUListIt begin();
+		MUListIt end();
+
+		const xr_map<void*, Collector>& GetMUObjectsDataRaw() { return MUObjectsData; }
+		const xr_map<void* const, xr_vector<MUInstanceData>>& GetMUInstancesDataRaw() { return MUInstancesData; }
 	};
 
 #pragma warning(push)

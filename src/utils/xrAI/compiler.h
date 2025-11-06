@@ -151,7 +151,7 @@ extern xr_vector<b_material>		g_materials		;
 extern xr_vector<b_shader>			g_shader_render	;
 extern xr_vector<b_shader>			g_shader_compile;
 extern xr_vector<b_BuildTexture>	g_textures		;
-extern xr_vector<b_rc_face>			g_rc_faces		;
+//extern xr_vector<b_rc_face>			g_rc_faces		;
 
 // phases
 void	xrLoad			(LPCSTR name, bool draft_mode);

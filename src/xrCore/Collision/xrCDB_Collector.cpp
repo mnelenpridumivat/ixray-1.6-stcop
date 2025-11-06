@@ -237,6 +237,16 @@ namespace CDB
 			vec.second.clear();
 	}
 
+	Collector* Collision::GetMUObjectData(void* Key)
+	{
+		auto It = MUObjectsData.find(Key);
+		if (It != MUObjectsData.end())
+		{
+			return &It->second;
+		}
+		return nullptr;
+	}
+
 	CollectorPacked* CollisionPacked::GetMUObjectData(void* Key)
 	{
 		auto It = MUObjectsData.find(Key);
@@ -247,6 +257,11 @@ namespace CDB
 		return nullptr;
 	}
 
+	Collector* Collision::CreateMUObjectData(void* Key)
+	{
+		return &MUObjectsData.emplace(Key, Collector()).first->second;
+	}
+
 	CollectorPacked* CollisionPacked::CreateMUObjectData(void* Key, const Fbox& bb, int apx_vertices, int apx_faces)
 	{
 		return &MUObjectsData.emplace(
@@ -254,7 +269,28 @@ namespace CDB
 			std::forward_as_tuple(Key),
 			std::forward_as_tuple(bb, apx_vertices, apx_faces)
         ).first->second;
-		//return &MUObjectsData.try_emplace(Key, std::move(CollectorPacked(bb, apx_vertices, apx_faces))).first->second;
+	}
+
+	void Collision::AddMUInstance(void* Key, const MUInstanceData& Transform)
+	{
+		auto It = MUInstancesData.try_emplace(Key).first;
+		It->second.push_back(Transform);
+	}
+
+	Collision::MUListIt Collision::begin()
+	{
+		MUListIt It;
+		It.ProtKey = MUObjectsData.begin();
+		It.InsKey = MUInstancesData.begin();
+		return It;
+	}
+
+	Collision::MUListIt Collision::end()
+	{
+		MUListIt It;
+		It.ProtKey = MUObjectsData.end();
+		It.InsKey = MUInstancesData.end();
+		return It;
 	}
 
 	void CollisionPacked::AddMUInstance(void* Key, const MUInstanceData& Transform)

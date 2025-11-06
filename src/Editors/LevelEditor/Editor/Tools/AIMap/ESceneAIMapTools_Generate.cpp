@@ -599,7 +599,7 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
 
 			SPBItem* pb = UI->ProgressStart(mesh_cnt, "Prepare collision model...");
 
-			CDB::Collector CL;
+			CDB::Collision CL;
 			Fvector verts[3];
 			for (ObjectIt o_it = m_SnapObjects.begin(); o_it != m_SnapObjects.end(); o_it++)
 			{
@@ -614,42 +614,53 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
 				}
 				VERIFY(E);
 
-				EditMeshVec& _meshes = E->Meshes();
-				for (EditMeshIt m_it = _meshes.begin(); m_it != _meshes.end(); m_it++)
+				auto InstanceColl = CL.GetMUObjectData(E);
+				if (!InstanceColl)
 				{
-					string512 Data = {};
-					sprintf(Data, "%s [%s]", (*o_it)->GetName(), (*m_it)->Name().c_str());
-					pb->Inc(Data);
-
-					const SurfFaces& _sfaces = (*m_it)->GetSurfFaces();
-					for (SurfFaces::const_iterator sp_it = _sfaces.begin(); sp_it != _sfaces.end(); sp_it++)
+					InstanceColl = CL.CreateMUObjectData(E);
+				
+					EditMeshVec& _meshes = E->Meshes();
+					for (EditMeshIt m_it = _meshes.begin(); m_it != _meshes.end(); m_it++)
 					{
-						const xr_shared_ptr<CSurface>& surf = sp_it->first;
-						// test passable
+						string512 Data = {};
+						sprintf(Data, "%s [%s]", (*o_it)->GetName(), (*m_it)->Name().c_str());
+						pb->Inc(Data);
 
-						u16 mtl_id = surf->_GameMtl();// ->material;
-
-						if (std::find(m_ignored_materials.begin(), m_ignored_materials.end(), mtl_id) != m_ignored_materials.end())
+						const SurfFaces& _sfaces = (*m_it)->GetSurfFaces();
+						for (SurfFaces::const_iterator sp_it = _sfaces.begin(); sp_it != _sfaces.end(); sp_it++)
 						{
-							continue;
-						}
+							const xr_shared_ptr<CSurface>& surf = sp_it->first;
+							// test passable
 
-						Shader_xrLC* c_sh = EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
-						if (!c_sh->flags.bCollision)
-							continue;
-
-						// collect tris
-						const IntVec& face_lst = sp_it->second;
-						for (IntVec::const_iterator it = face_lst.begin(); it != face_lst.end(); it++)
-						{
-							E->GetFaceWorld((*o_it)->_Transform(), *m_it, *it, verts);
-
-							CL.add_face_D(verts[0], verts[1], verts[2], surf->_GameMtl() /* *it */);
-							if (surf->m_Flags.is(CSurface::sf2Sided))
-								CL.add_face_D(verts[2], verts[1], verts[0], surf->_GameMtl() /* *it */);
+							u16 mtl_id = surf->_GameMtl();// ->material;
+	
+							if (std::find(m_ignored_materials.begin(), m_ignored_materials.end(), mtl_id) != m_ignored_materials.end())
+							{
+								continue;
+							}
+	
+							Shader_xrLC* c_sh = EDevice->ShaderXRLC.Get(surf->_ShaderXRLCName());
+							if (!c_sh->flags.bCollision)
+							{
+								continue;
+							}
+	
+							// collect tris
+							const IntVec& face_lst = sp_it->second;
+							for (IntVec::const_iterator it = face_lst.begin(); it != face_lst.end(); it++)
+							{
+								E->GetFaceWorld((*o_it)->_Transform(), *m_it, *it, verts);
+	
+								InstanceColl->add_face_D(verts[0], verts[1], verts[2], surf->_GameMtl() /* *it */);
+								if (surf->m_Flags.is(CSurface::sf2Sided))
+								{
+									InstanceColl->add_face_D(verts[2], verts[1], verts[0], surf->_GameMtl() /* *it */);
+								}
+							}
 						}
 					}
 				}
+				CL.AddMUInstance(E, {.transform= (*o_it)->_Transform(), .sector= 0});
 			}
 
 			UI->ProgressEnd(pb);
@@ -657,7 +668,17 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
 			UI->SetStatus("Building collision model...");
 
 			m_CFModel = new CDB::MODEL();
-			m_CFModel->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
+			u32 id = 0;
+			for (auto It = CL.begin(); It != CL.end(); ++It)
+			{
+				auto& ProtData = It.GetPrototypeData();
+				auto& InsData = It.GetInstancesData();
+				m_CFModel->build_mu_model(id, ProtData.getV(), ProtData.getVS(), ProtData.getT(), ProtData.getTS());
+				for (auto& Instance : InsData)
+				{
+					m_CFModel->add_instance(id, Instance.transform);
+				}
+			}
 		}
 
 		// building

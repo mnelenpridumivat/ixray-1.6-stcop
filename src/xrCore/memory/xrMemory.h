@@ -48,6 +48,16 @@ IC void		xr_free		(T* &P)					{	if (P) { Memory.mem_free((void*)P); P=NULL;	};	}
 IC void*	xr_malloc	(size_t size)			{	return	Memory.mem_alloc(size);					}
 IC void*	xr_realloc	(void* P, size_t size)	{	return Memory.mem_realloc(P,size);				}
 
+template <class T>
+struct xr_c_alloc_guard
+{
+private:
+	T** var;
+public:
+	xr_c_alloc_guard(T*& var) : var(&var) {}
+	~xr_c_alloc_guard()	{ if (*var) { xr_free(*var); *var = nullptr; } }
+};
+
 XRCORE_API	char* 	xr_strdup	(const char* string);
 XRCORE_API	wchar_t* 	xr_strdup	(const wchar_t* string);
 

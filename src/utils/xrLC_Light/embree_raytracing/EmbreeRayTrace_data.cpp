@@ -271,7 +271,7 @@ void EmbreeData::BuildRcast()
 			MFS->w(&TRI, sizeof(TRI));
 			MFS->w_u16(data->dwMaterial);
 			MFS->w_u16(data->dwMaterialGame);
-			MFS->w(data->getTC0(), sizeof(Fvector2));
+			MFS->w(data->getTC0(), sizeof(Fvector2)*3);
 		}
 		
 	};

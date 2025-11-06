@@ -33,11 +33,6 @@ XRCORE_API IReader* CDB::GetModelCache(string_path LevelName, u32 crc)
 // Model building
 MODEL::MODEL()
 {
-	tree		= 0;
-	tris		= 0;
-	tris_count	= 0;
-	verts		= 0;
-	verts_count	= 0;
 	status		= S_INIT;
 }
 
@@ -45,13 +40,15 @@ MODEL::~MODEL()
 {
 	syncronize();		// maybe model still in building
 	status = S_INIT;
-	xr_delete(tree);
 
-	xr_free(tris);
-	tris_count = 0;
+	xr_free(StaticGeom.tris);
+	xr_free(StaticGeom.verts);
 
-	xr_free(verts);
-	verts_count = 0;
+	for (auto& MU : MUModels)
+	{
+		xr_free(MU.verts);
+		xr_free(MU.tris);
+	}
 }
 
 bool MODEL::verify_collsion(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
@@ -77,7 +74,7 @@ bool MODEL::verify_collsion(const Fvector* V, size_t Vcnt, const TRI* T, size_t 
 	return true;
 }
 
-void MODEL::build_static_geom(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
+void MODEL::build_static_geom(Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt)
 {
 	R_ASSERT(S_INIT == status);
 	verify_collsion(V, Vcnt, T, Tcnt);
@@ -86,22 +83,36 @@ void MODEL::build_static_geom(const Fvector* V, size_t Vcnt, const TRI* T, size_
 	
 }
 
-void MODEL::build_mu_model(u32 id, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt)
+void MODEL::build_mu_model(u32 id, Fvector* V, size_t Vcnt, TRI* T, size_t Tcnt)
 {
-	auto It = MUModels.find(id);
-	if (!I_ASSERT(It == MUModels.end()))
+	if (!IVERIFY(id == MUModels.size()))
 	{
+		if (id > MUModels.size())
+		{
+			FATAL("MU model id out of range");
+			return;
+		}
 		return;
 	}
-	It = MUModels.emplace(id, raw_geom{}).first;
+	MUModels.emplace_back(T, Tcnt, V, Vcnt);
+	auto& MU = MUModels.back();
 
-	build_internal(It->second, V, Vcnt, T, Tcnt);
+	build_internal(MU, V, Vcnt, T, Tcnt);
 }
 
 void MODEL::add_instance(u32 id, const Fmatrix& Transform)
 {
-	auto It = MUInstances.try_emplace(id).first;
-	It->second.push_back(Transform);
+	if (id > MUModels.size())
+	{
+		FATAL("MU model id out of range");
+		return;
+	}
+	if (id == MUModels.size())
+	{
+		MUModels.push_back({});	
+	}
+	auto& cont = MUInstances[id];
+	cont.push_back(Transform);
 }
 
 void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
@@ -110,6 +121,8 @@ void MODEL::build(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, buil
 	verify_collsion(V, Vcnt, T, Tcnt);
 
 	build_internal(StaticGeom, V, Vcnt, T, Tcnt, bc, bcp, pRW, RWMode);
+
+	finish_building(bc, bcp, pRW, RWMode);
 }
 
 void MODEL::build_internal(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc, void* bcp, void* pRW, bool RWMode)
@@ -127,7 +140,7 @@ void MODEL::build_internal(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt,
 	// TODO: Remove all below to finish_building
 	
 	// callback
-	if (bc)
+	/*if (bc)
 	{
 		bc(GeomStorage.verts, Vcnt, GeomStorage.tris, Tcnt, bcp);
 	}
@@ -149,7 +162,7 @@ void MODEL::build_internal(raw_geom& GeomStorage, const Fvector* V, size_t Vcnt,
 		}
 	}
 
-	CreateNewTree(RWMode ? nullptr : (IWriter*)pRW);
+	CreateNewTree(RWMode ? nullptr : (IWriter*)pRW);*/
 }
 
 void MODEL::finish_building(build_callback* bc, void* bcp, void* pRW, bool RWMode)
@@ -162,87 +175,142 @@ void MODEL::finish_building(build_callback* bc, void* bcp, void* pRW, bool RWMod
 		bc(GeomStorage.verts, Vcnt, GeomStorage.tris, Tcnt, bcp);
 	}
 
+	bool NeedBuilding = false;
+
 	if (pRW != nullptr && RWMode)
 	{
 		IReader* pReader = (IReader*)(pRW);
-		tree = new CDB_Model();
-
-		if (tree->Restore(pReader))
+		
+		StaticTree = xr_make_unique<CDB_Model>();
+		if (StaticTree->Restore(pReader))
 		{
-			Msg("* Level collision DB cache found...");
-			return;
+			MUModelTrees.resize(MUModels.size());
+			for (auto& Tree : MUModelTrees)
+			{
+				Tree = xr_make_unique<CDB_Model>();
+				if (!Tree->Restore(pReader))
+				{
+					NeedBuilding = true;
+					break;
+				}
+			}
 		}
-		else
-		{
-			xr_delete(tree);
-			Msg("* Level collision DB cache missing, rebuilding...");
-		}
+	} else
+	{
+		NeedBuilding = true;
 	}
 
-	CreateNewTree(RWMode ? nullptr : (IWriter*)pRW);
+	if (NeedBuilding)
+	{
+		StaticTree.reset(CreateNewTree(StaticGeom));
+		MUModelTrees.resize(MUModels.size());
+		for (u32 i = 0; i < MUModels.size(); ++i)
+		{
+			auto& geom = MUModels[i];
+			auto& Tree = MUModelTrees[i];
+			Tree.reset(CreateNewTree(geom));
+		}
+
+		IWriter* pWritter = (IWriter*)(pRW);
+		
+		StaticTree->Store(pWritter);
+		for (const auto& Tree : MUModelTrees)
+		{
+			Tree->Store(pWritter);
+		}
+		
+		FS.w_close(pWritter);
+		
+	}
+	
 	status = S_READY;
 }
 
 
-void CDB::MODEL::CreateNewTree(IWriter* pCache)
+CDB_Model* CDB::MODEL::CreateNewTree(raw_geom& GeomStorage)
 {
 	// Release data pointers
 	status = S_BUILD;
 
 	// Allocate temporary "OPCODE" tris + convert tris to 'pointer' form
-	u32* temp_tris = xr_alloc<u32>(tris_count * 3);
+	u32* temp_tris = xr_alloc<u32>(GeomStorage.tris_count * 3);
 	if (0 == temp_tris) {
-		xr_free(verts);
-		xr_free(tris);
-		return;
+		xr_free(GeomStorage.verts);
+		xr_free(GeomStorage.tris);
+		return nullptr;
 	}
+	xr_c_alloc_guard<u32> temp_tris_guard(temp_tris);
 	u32* temp_ptr = temp_tris;
-	for (size_t i = 0; i < tris_count; i++)
+	for (size_t i = 0; i < GeomStorage.tris_count; i++)
 	{
-		*temp_ptr++ = tris[i].verts[0];
-		*temp_ptr++ = tris[i].verts[1];
-		*temp_ptr++ = tris[i].verts[2];
+		*temp_ptr++ = GeomStorage.tris[i].verts[0];
+		*temp_ptr++ = GeomStorage.tris[i].verts[1];
+		*temp_ptr++ = GeomStorage.tris[i].verts[2];
 	}
 
 	// Build a non quantized no-leaf tree
 	OPCODECREATE OPCC;
 
 	OPCC.mIMesh = new MeshInterface();
-	OPCC.mIMesh->SetNbTriangles(tris_count);
-	OPCC.mIMesh->SetNbVertices(verts_count);
-	OPCC.mIMesh->SetPointers((IceMaths::IndexedTriangle*)temp_tris, (IceMaths::Point*)verts);
+	OPCC.mIMesh->SetNbTriangles(GeomStorage.tris_count);
+	OPCC.mIMesh->SetNbVertices(GeomStorage.verts_count);
+	OPCC.mIMesh->SetPointers((IceMaths::IndexedTriangle*)temp_tris, (IceMaths::Point*)GeomStorage.verts);
 	OPCC.mSettings.mRules = SplittingRules::SPLIT_SPLATTER_POINTS | SplittingRules::SPLIT_GEOM_CENTER;
 	OPCC.mNoLeaf = true;
 	OPCC.mQuantized = false;
 
-	tree = new CDB_Model(); // Sometimes, there is Opcode::Model instead CDB_Model, sometimes this object is NULL, but passes all asserts. WTF!?
+	auto tree = new CDB_Model(); // Sometimes, there is Opcode::Model instead CDB_Model, sometimes this object is NULL, but passes all asserts. WTF!?
 	LPCSTR debug_type_name = typeid(*tree).name();
 	if (IVERIFY(tree) && IVERIFY(tree->GetTree()) && !tree->Build(OPCC))
 	{
-		xr_free(verts);
-		xr_free(tris);
-		xr_free(temp_tris);
-		return;
-	};
+		xr_free(GeomStorage.verts);
+		xr_free(GeomStorage.tris);
+		xr_delete(tree);
+		return nullptr;
+	}
+	return tree;
 
 	// Write cache
-	if (pCache)
+	/*if (pCache)
 	{
 		IWriter* pWritter = (IWriter*)(pCache);
 		tree->Store(pWritter);
 		FS.w_close(pWritter);
-	}
-
-	// Free temporary tris
-	xr_free(temp_tris);
+	}*/
 }
 
 u32 MODEL::memory	()
 {
-	if (S_BUILD==status)	{ Msg	("! xrCDB: model still isn't ready"); return 0; }
-	u32 V					= verts_count*sizeof(Fvector);
-	u32 T					= tris_count *sizeof(TRI);
-	return tree->GetUsedBytes()+V+T+sizeof(*this)+sizeof(*tree);
+	if (S_BUILD==status)
+	{
+		Msg	("! xrCDB: model still isn't ready");
+		return 0;
+	}
+
+	u64 VertexMem = StaticGeom.verts_count*sizeof(Fvector);
+	u64 TrisMem = StaticGeom.tris_count*sizeof(TRI);
+	u64 TreeMem = 0;
+	u64 SingleTreeObjMem = sizeof(*StaticTree);
+	if (IVERIFY(StaticTree))
+	{
+		TreeMem += StaticTree->GetUsedBytes() + SingleTreeObjMem;
+	}
+
+	for (const auto& MU : MUModels)
+	{
+		VertexMem += MU.verts_count * sizeof(Fvector);
+		TrisMem += MU.tris_count * sizeof(TRI);
+	}
+	for (const auto& MU : MUModelTrees)
+	{
+		TreeMem += SingleTreeObjMem;
+		if (IVERIFY(MU))
+		{
+			TreeMem += MU->GetUsedBytes();
+		}
+	}
+	
+	return TreeMem+VertexMem+TrisMem+sizeof(*this);
 }
 
 // This is the constructor of a class that has been exported.

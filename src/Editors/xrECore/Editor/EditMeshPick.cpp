@@ -27,11 +27,13 @@ void CEditableMesh::GenerateCFModel()
 			st_Face& F = m_Faces[*it];
 			CL.add_face_D(m_Vertices[F.pv[0].pindex], m_Vertices[F.pv[1].pindex], m_Vertices[F.pv[2].pindex], *it);
 			if (sp_it->first->m_Flags.is(CSurface::sf2Sided))
+			{
 				CL.add_face_D(m_Vertices[F.pv[2].pindex], m_Vertices[F.pv[1].pindex], m_Vertices[F.pv[0].pindex], *it);
+			}
 		}
 	}
 	m_CFModel = new CDB::MODEL();
-	m_CFModel->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
+	m_CFModel->build_static_geom(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
 }
 
 void CEditableMesh::RayQuery(SPickQuery& pinf)

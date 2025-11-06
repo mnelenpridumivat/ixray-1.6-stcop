@@ -4,8 +4,9 @@
 #include "levelgamedef.h"
 #include "level_graph.h"
 #include "AIMapExport.h"
+#include "../xrLC_Light/embree_raytracing/EmbreeGeometryBuilder.h"
 
-IC	const Fvector vertex_position(const NodePosition& Psrc, const Fbox& bb, const SAIParams& params)
+IC const Fvector vertex_position(const NodePosition& Psrc, const Fbox& bb, const SAIParams& params)
 {
 	Fvector Pdest;
 	int	x, z, row_length;
@@ -62,23 +63,99 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			xr_strconcat(N__, name, "build.cform");
 			IReader* fs = FS.r_open(N__);
 			R_ASSERT2(fs, "You need to have compiled geometry before make non-draft ai map!");
-			R_ASSERT(fs->find_chunk(0));
+			{
+				auto HeaderChunk = fs->open_chunk(CFORM_Chunks::Header);
+				
+				hdrCFORM			H;
+				fs->r(&H, sizeof(hdrCFORM));
+				R_ASSERT(CFORM_Versions::WITH_INSTANCING == H.version);
+				LevelBB.set(H.aabb);
+				
+				HeaderChunk->close();
+			}
+			auto ObjSerializationFunc = [&](IReader* Chunk, TriangleContainer& container)
+			{
+				container.ClearAll();
+				container.verts_v.resize(Chunk->r_u64());
+				container.faces_v.resize(Chunk->r_u64());
+				container.dummy.resize(container.faces_v.size());
+				for (auto& Vertex : container.verts_v)
+				{
+					Chunk->r(&Vertex, sizeof(Vertex));
+				}
+				for (u32 k = 0; k < container.faces_v.size(); ++k)
+				{
+					auto& face = container.faces_v[k];
+					auto& data = container.dummy[k];
+					data = new Face();
+					CDB::TRI tri;
+					Chunk->r(&tri, sizeof(tri));
+					face.Set(tri);
+					data->dwMaterial = Chunk->r_u16();
+					data->dwMaterialGame = Chunk->r_u16();
+					Chunk->r(data->getTC0(), sizeof(Fvector2)*3);
+				}
+			};
+			{
+				auto StaticGeomChunk = fs->open_chunk(CFORM_Chunks::StaticGeom);
 
-			hdrCFORM			H;
-			fs->r(&H, sizeof(hdrCFORM));
-			R_ASSERT(CFORM_Versions::WITH_INSTANCING == H.version);
+				TriangleContainer StaticGeom;
+				ObjSerializationFunc(StaticGeomChunk, StaticGeom);
+				xr_vector<CDB::TRI>	tris = {};
+				for (auto& face : StaticGeom.faces_v)
+				{
+					tris.push_back(face.Get());
+				}
+				// TODO: StaticGeom.dummy is not processed!
+				LevelPtr->build_static_geom(StaticGeom.verts_v.data(), StaticGeom.vertex_cnt(), tris.data(), StaticGeom.faces_cnt());
+				
+				StaticGeomChunk->close();
+			}
+			{
+				u32 PrototypesNum = 0;
+				{
+					auto PrototypesChunk = fs->open_chunk(CFORM_Chunks::Instances);
 
-			Fvector* verts = (Fvector*)fs->pointer();
-			CDB::TRI* tris = (CDB::TRI*)(verts + H.vertcount);
-			LevelPtr->build(verts, H.vertcount, tris, H.facecount);
+					//xr_vector<TriangleContainer> Prototypes;
+					PrototypesNum = PrototypesChunk->r_u32();
+					for (u32 i = 0; i < PrototypesNum; ++i)
+					{
+						TriangleContainer PrototypeData;
+						ObjSerializationFunc(PrototypesChunk, PrototypeData);
+						xr_vector<CDB::TRI>	tris = {};
+						for (auto& face : PrototypeData.faces_v)
+						{
+							tris.push_back(face.Get());
+						}
+						// TODO: StaticGeom.dummy is not processed!
+						LevelPtr->build_mu_model(i, PrototypeData.verts_v.data(), PrototypeData.vertex_cnt(), tris.data(), PrototypeData.faces_cnt());
+					}
+				
+					PrototypesChunk->close();
+				}
+				{
+					auto InstancesChunk = fs->open_chunk(CFORM_Chunks::InstanceRefs);
+
+					for (u32 i = 0; i < PrototypesNum; ++i)
+					{
+						u32 Num = InstancesChunk->r_u32();
+						for (u32 j = 0; j < Num; ++j)
+						{
+							Fmatrix transform;
+							InstancesChunk->r(&transform, sizeof(Fmatrix));
+							LevelPtr->add_instance(i, transform);
+						}
+					}
+				
+					InstancesChunk->close();
+				}
+			}
+
+			LevelPtr->finish_building();
 			LevelPtr->syncronize();
+			
 			Msg("* Level CFORM: %dK", LevelPtr->memory() / 1024);
-
-			g_rc_faces.resize(H.facecount);
-			R_ASSERT(fs->find_chunk(1));
-			fs->r(&*g_rc_faces.begin(), g_rc_faces.size() * sizeof(b_rc_face));
-
-			LevelBB.set(H.aabb);
+			
 			FS.r_close(fs);
 		}
 

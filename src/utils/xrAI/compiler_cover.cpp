@@ -13,7 +13,7 @@ xr_vector<b_material>			g_materials		;
 xr_vector<b_shader>				g_shader_render	;
 xr_vector<b_shader>				g_shader_compile;
 xr_vector<b_BuildTexture>		g_textures		;
-xr_vector<b_rc_face>			g_rc_faces		;
+//xr_vector<b_rc_face>			g_rc_faces		;
 
 typedef xr_vector<bool>			COVER_NODES;
 COVER_NODES						g_cover_nodes;
