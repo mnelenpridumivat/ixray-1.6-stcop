@@ -194,7 +194,11 @@ endif()
 
 # Linker list
 target_link_libraries(xrCore PUBLIC SDL3-shared)
-target_link_libraries(xrCore PRIVATE opcode-prosectors)
+if (IXRAY_USE_PHYSX)
+	target_link_libraries(xrCore PRIVATE opcode-prosectors)
+else()
+	target_link_libraries(xrCore PUBLIC xrPhysX)
+endif()
 
 if(WIN32)
 	if (NOT IXR_ARM_ENABLE)
