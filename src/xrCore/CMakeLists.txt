@@ -196,6 +196,42 @@ target_validate_pch(xrCore ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(xrCore PRIVATE XRCORE_EXPORTS)
 target_compile_definitions(xrCore PRIVATE _USRDLL)
 
+
+if (IXRAY_USE_PHYSX)
+	target_compile_definitions(xrCore PUBLIC "IXRAY_PHYSX")
+    target_include_directories(xrCore PUBLIC "${PHYSX_INCLUDE_LIBRARIES}")
+
+    set(PHYSX_LINK_LIBRARIES "${IXRAY_SDK_LIB}/$<CONFIG>")
+    set(PHYSX_BINARIES "${IXRAY_SDK_BIN}/$<CONFIG>")
+
+    add_custom_command(TARGET xrCore POST_BUILD
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/freeglut.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysX_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCommon_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCooking_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXFoundation_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    )
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/LowLevel_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/LowLevelAABB_static_64.lib")
+	target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/LowLevelDynamics_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/PhysXCharacterKinematic_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/PhysXExtensions_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/SimulationController_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/PhysXPvdSDK_static_64.lib")
+	target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/PhysXTask_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/PhysXVehicle2_static_64.lib")
+    target_link_libraries(xrCore PRIVATE "${PHYSX_LINK_LIBRARIES}/SceneQuery_static_64.lib")
+	target_compile_definitions(xrCore PRIVATE
+	    PX_PHYSX_STATIC_LIB
+	)
+	
+	#target_link_libraries(xrCore PUBLIC xrPhysX)
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCommon_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCooking_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXFoundation_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysX_64.lib")
+endif()
+
 # Profiler
 if (IXRAY_PROFILER)
 	target_include_directories(xrCore PUBLIC "${CORE_OPT}build/native/include/")
@@ -261,35 +297,4 @@ if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		BUILD_RPATH "$ORIGIN"
 	)
-endif()
-
-
-if (IXRAY_USE_PHYSX)
-	target_compile_definitions(xrCore PUBLIC "IXRAY_PHYSX")
-    target_include_directories(xrCore PUBLIC "${PHYSX_INCLUDE_LIBRARIES}")
-
-    set(PHYSX_LINK_LIBRARIES "${IXRAY_SDK_LIB}/$<CONFIG>")
-    set(PHYSX_BINARIES "${IXRAY_SDK_BIN}/$<CONFIG>")
-
-    add_custom_command(TARGET xrCore POST_BUILD
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/freeglut.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysX_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCommon_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCooking_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
-    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXFoundation_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
-    )
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevel_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevelAABB_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevelDynamics_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysX_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCharacterKinematic_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCommon_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCooking_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXExtensions_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXFoundation_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXPvdSDK_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXTask_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXVehicle2_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/SceneQuery_static_64.lib")
-    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/SimulationController_static_64.lib")
 endif()

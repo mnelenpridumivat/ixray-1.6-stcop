@@ -30,7 +30,7 @@ xrPhysX::CDB::CollisionInstance::CollisionInstance(const Fmatrix& transform, con
     shape->release();
 }
 
-void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<Fvector3>& vertices, const xr_span<CDB::TRI>& faces)
+void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<Fvector3>& vertices, const xr_span<::CDB::TRI>& faces)
 {
     physx::PxTriangleMeshDesc meshDesc;
     meshDesc.points.data = vertices.data();
@@ -38,7 +38,7 @@ void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<Fvector3>& vertices, const 
     meshDesc.points.stride = sizeof(Fvector3);
     meshDesc.triangles.data = faces.data();
     meshDesc.triangles.count = faces.size();
-    meshDesc.triangles.stride = sizeof(CDB::TRI);
+    meshDesc.triangles.stride = sizeof(::CDB::TRI);
 
     physx::PxTolerancesScale scale;
     physx::PxCookingParams params(scale);

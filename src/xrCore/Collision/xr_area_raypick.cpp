@@ -7,6 +7,7 @@
 #include "../../xrEngine/xr_collide_form.h"
 #include "../../xrEngine/xr_object.h"
 
+#ifndef IXRAY_PHYSX
 #ifdef	DEBUG
 static BOOL _cdb_bDebug = false;
 XRCORE_API BOOL *cdb_bDebug = &_cdb_bDebug;
@@ -551,3 +552,4 @@ IC int	CObjectSpace::GetNearest(xr_vector<CObject*>& q_nearest, const Fvector& p
 		ignore_object
 	);
 }
+#endif

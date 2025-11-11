@@ -272,7 +272,14 @@ xrPhysX::PhysXInstance::PhysXInstance()
     PVD->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
 #endif
 
-    Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *Foundation, physx::PxTolerancesScale(), true, PVD);
+    Physics = PxCreatePhysics(
+        PX_PHYSICS_VERSION, *Foundation, physx::PxTolerancesScale(), true,
+#ifdef DEBUG
+        PVD
+#else
+        nullptr
+#endif
+        );
     
     Dispatcher = physx::PxDefaultCpuDispatcherCreate(1); // TODO: pass multiple threads num
 }
