@@ -3,6 +3,8 @@
 // Author : ForserX
 //////////////////////////////////////////////////////////
 #pragma once
+
+#ifndef IXRAY_PHYSX
 #include <Opcode.h>
 
 class CDB_OptimizeTree : public Opcode::AABBNoLeafTree
@@ -16,3 +18,5 @@ public:
 
 	bool Build(Opcode::AABBTree* tree);
 };
+
+#endif

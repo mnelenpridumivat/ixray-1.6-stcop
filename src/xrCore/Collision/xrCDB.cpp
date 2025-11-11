@@ -2,6 +2,7 @@
 
 
 #include "xrCDB.h"
+#ifndef IXRAY_PHYSX
 #include "override/Model.h"
 
 namespace Opcode 
@@ -203,3 +204,4 @@ void COLLIDER::r_free	()
 {
 	rd.clear();
 }
+#endif

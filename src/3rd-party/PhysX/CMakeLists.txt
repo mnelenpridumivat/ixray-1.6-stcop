@@ -7,6 +7,11 @@ file(GLOB_RECURSE PHYSX_SOURCE_ALL_FILES
     "*.h"
 )
 
+file(GLOB_RECURSE PHYSX_SOURCE_COLLISION_FILES
+    "Collision/*.cpp"
+    "Collision/*.h"
+)
+
 file(GLOB_RECURSE PHYSX_SOURCE_INCLUDE_FILES
     "${PHYSX_INCLUDE_LIBRARIES}/*.*"
 )
@@ -146,6 +151,7 @@ list(APPEND PHYSX_SRC_FILES	"${PHYSX_SOURCE_INCLUDE_FILES}")
 add_library(xrPhysX SHARED ${PHYSX_SRC_FILES})
 
 source_group("" FILES ${PHYSX_SOURCE_ALL_FILES})
+source_group("Collision" FILES ${PHYSX_SOURCE_COLLISION_FILES})
 
 #function(group_include_files)
 #    foreach(file ${PHYSX_SOURCE_INCLUDE_ALL_FILES})
@@ -266,6 +272,8 @@ source_group("include\\vehicle2\\wheel" FILES ${PHYSX_SOURCE_INCLUDE_VEHICLE2_WH
 
 target_include_directories(xrPhysX PUBLIC "${PHYSX_INCLUDE_LIBRARIES}")
 target_include_directories(xrPhysX PUBLIC "${IXRAY_SRC_DIR}/xrCore")
+target_include_directories(xrPhysX PUBLIC "${IXRAY_SDK_INC}")
+target_include_directories(xrPhysX PUBLIC "${CMAKE_BINARY_DIR}/_deps/sdl3-src/include")
 
 set(PHYSX_LINK_LIBRARIES "${IXRAY_SDK_LIB}/$<CONFIG>")
 set(PHYSX_BINARIES "${IXRAY_SDK_BIN}/$<CONFIG>")

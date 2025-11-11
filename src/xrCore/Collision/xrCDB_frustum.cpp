@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 
+#ifndef IXRAY_PHYSX
 #include "xrCDB.h"
 #include "override/Model.h"
 
@@ -121,3 +122,4 @@ void COLLIDER::frustum_query(const MODEL* m_def, const CFrustum& F)
 	BC._init(this, m_def->verts, m_def->tris, &F);
 	BC.Stab(pNodes, mask);
 }
+#endif

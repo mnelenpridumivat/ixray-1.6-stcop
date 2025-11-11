@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Model.h"
+
+#ifndef IXRAY_PHYSX
 #include <OPC_TreeBuilders.h>
 #include <Opcode.h>
 
@@ -85,3 +87,4 @@ void CDB_Model::Release()
 {
 	xr_delete(pTree);
 }
+#endif

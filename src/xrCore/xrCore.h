@@ -10,6 +10,12 @@
 #	define XRCORE_API __declspec(dllimport)
 #endif
 
+#ifdef DEBUG
+#	define _DEBUG
+#else
+#	define NDEBUG
+#endif
+
 #define IC inline
 
 #define _inline			inline

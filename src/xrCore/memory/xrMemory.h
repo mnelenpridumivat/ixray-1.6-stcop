@@ -41,6 +41,7 @@ extern XRCORE_API xrMemory Memory;
 #include "xrMemory_subst_msvc.h"
 
 // generic "C"-like allocations/deallocations
+IC void*	xr_alloc	(size_t count)			{	return  Memory.mem_alloc(count);	}
 template <class T>
 IC T*		xr_alloc	(size_t count)			{	return  (T*)Memory.mem_alloc(count*sizeof(T));	}
 template <class T>

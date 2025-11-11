@@ -33,7 +33,7 @@ xr_string	ShortcutValue::GetDrawText		(TOnDrawTextEvent )
 xr_string GameTypeValue::GetDrawText(TOnDrawTextEvent)
 {
 	string512 str;
-    xr_sprintf(str,sizeof(str),"%s%s%s%s%s",
+    xr_sprintf(str,"%s%s%s%s%s",
 	GetValue().MatchType(eGameIDSingle)?"Single ":"",
 	GetValue().MatchType(eGameIDDeathmatch)?"DM ":"",
 	GetValue().MatchType(eGameIDTeamDeathmatch)?"TDM ":"",

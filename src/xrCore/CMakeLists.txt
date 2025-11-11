@@ -93,6 +93,18 @@ file(GLOB_RECURSE CORE_SOURCE_MEMORY_P3_FILES "ptmalloc3/*.*")
 file(GLOB_RECURSE CORE_NATVIS_FILES "../ixray.natvis")
 file(GLOB_RECURSE CORE_NUGET_FILES "Packages.config")
 
+set(PHYSX_INCLUDE_LIBRARIES "${IXRAY_SDK_INC}/PhysX")
+file(GLOB_RECURSE CORE_SOURCE_PHYSX_FILES
+    "PhysX/*.*"
+)
+file(GLOB_RECURSE CORE_PHYSX_SOURCE_COLLISION_FILES
+    "PhysX/Collision/*.cpp"
+    "PhysX/Collision/*.h"
+)
+file(GLOB_RECURSE CORE_PHYSX_SOURCE_INCLUDE_FILES
+    "${PHYSX_INCLUDE_LIBRARIES}/*.*"
+)
+
 source_group("ungrouped" FILES ${CORE_SOURCE_ALL_FILES})
 source_group("core/api" FILES ${CORE_SOURCE_XR_API_FILES})
 source_group("core/math" FILES ${CORE_SOURCE_MATH_FILES})
@@ -119,6 +131,9 @@ source_group("discord" FILES ${CORE_SOURCE_DISCORD_FILES})
 source_group("discord/api" FILES ${CORE_SOURCE_DISCORD_API_FILES})
 source_group("Save" FILES ${CORE_SOURCE_SAVE_FILES})
 source_group("AnimNotify" FILES ${CORE_SOURCE_ANIM_NOTIFY_FILES})
+source_group("PhysX" FILES ${CORE_SOURCE_PHYSX_FILES})
+source_group("PhysX/Collision" FILES ${CORE_PHYSX_SOURCE_COLLISION_FILES})
+source_group("PhysX/include" FILES ${CORE_PHYSX_SOURCE_INCLUDE_FILES})
 
 # Apply list
 list(APPEND CORE_SRC_FILES ${CORE_SOURCE_ALL_FILES})
@@ -194,10 +209,8 @@ endif()
 
 # Linker list
 target_link_libraries(xrCore PUBLIC SDL3-shared)
-if (IXRAY_USE_PHYSX)
+if (NOT IXRAY_USE_PHYSX)
 	target_link_libraries(xrCore PRIVATE opcode-prosectors)
-else()
-	target_link_libraries(xrCore PUBLIC xrPhysX)
 endif()
 
 if(WIN32)
@@ -248,4 +261,35 @@ if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		BUILD_RPATH "$ORIGIN"
 	)
+endif()
+
+
+if (IXRAY_USE_PHYSX)
+	target_compile_definitions(xrCore PUBLIC "IXRAY_PHYSX")
+    target_include_directories(xrCore PUBLIC "${PHYSX_INCLUDE_LIBRARIES}")
+
+    set(PHYSX_LINK_LIBRARIES "${IXRAY_SDK_LIB}/$<CONFIG>")
+    set(PHYSX_BINARIES "${IXRAY_SDK_BIN}/$<CONFIG>")
+
+    add_custom_command(TARGET xrCore POST_BUILD
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/freeglut.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysX_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCommon_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXCooking_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PHYSX_BINARIES}/PhysXFoundation_64.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/
+    )
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevel_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevelAABB_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/LowLevelDynamics_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysX_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCharacterKinematic_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCommon_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXCooking_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXExtensions_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXFoundation_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXPvdSDK_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXTask_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/PhysXVehicle2_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/SceneQuery_static_64.lib")
+    target_link_libraries(xrCore PUBLIC "${PHYSX_LINK_LIBRARIES}/SimulationController_static_64.lib")
 endif()

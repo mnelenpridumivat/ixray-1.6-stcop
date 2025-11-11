@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "Tree.h"
 
+#ifndef IXRAY_PHYSX
 class CDB_Model : public Opcode::Model
 {
 public:
@@ -32,3 +33,4 @@ protected:
 		OPC_SINGLE_NODE = (1 << 2)	//!< Special case for 1-node models
 	};
 };
+#endif

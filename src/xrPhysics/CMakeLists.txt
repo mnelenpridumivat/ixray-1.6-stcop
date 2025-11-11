@@ -58,10 +58,8 @@ target_compile_definitions(xrPhysics PRIVATE _USRDLL)
 
 # Linker list
 target_link_libraries(xrPhysics PUBLIC xrCore)
-if (IXRAY_USE_PHYSX)
+if (NOT IXRAY_USE_PHYSX)
     target_link_libraries(xrPhysics PUBLIC ODE)
-else()
-    target_link_libraries(xrPhysics PUBLIC xrPhysX)
 endif()
 target_link_libraries(xrPhysics PUBLIC xrEngineCore)
 

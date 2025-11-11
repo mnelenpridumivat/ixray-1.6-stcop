@@ -5,6 +5,7 @@
 #include "override/Model.h"
 #include "sse_intersect.h"
 
+#ifndef IXRAY_PHYSX
 using namespace		CDB;
 using namespace		Opcode;
 
@@ -296,3 +297,4 @@ bool XRay::Collision::TestRayTriA(const Fvector& C, const Fvector& D, Fvector** 
 	}
 	return true;
 }
+#endif

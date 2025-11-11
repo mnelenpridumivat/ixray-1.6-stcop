@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <limits>
+#include <cstdlib>
 
 // Type defs
 using s8 = std::int8_t;

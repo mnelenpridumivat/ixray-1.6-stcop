@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "xrXRC.h"
 
+#ifndef IXRAY_PHYSX
 XRCORE_API xrXRC XRC;
 
 //////////////////////////////////////////////////////////////////////
@@ -28,3 +29,4 @@ xrXRC::~xrXRC()
 {
 
 }
+#endif

@@ -2,6 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 #pragma once
+
+#ifndef IXRAY_PHYSX
 #include "xrCDB.h"
 
 #ifdef	DEBUG
@@ -105,3 +107,4 @@ public:
 };
 
 XRCORE_API extern xrXRC XRC;
+#endif

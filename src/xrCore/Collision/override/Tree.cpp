@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Tree.h"
 
+#ifndef IXRAY_PHYSX
 #include <OPC_TreeBuilders.h>
 #include <Opcode.h>
 
@@ -102,3 +103,4 @@ bool CDB_OptimizeTree::Build(Opcode::AABBTree* tree)
 
 	return true;
 }
+#endif

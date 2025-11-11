@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 
+#ifndef IXRAY_PHYSX
 #include "xrCDB.h"
 #include "override/Model.h"
 
@@ -309,3 +310,4 @@ void COLLIDER::obb_query(const MODEL* m_def, const Fobb& obb)
 	obb_collider OC{ this, m_def->tris, m_def->verts, obb, !!(box_mode & OPT_FULL_TEST), !!(box_mode & OPT_ONLYFIRST) };
 	OC._stab(N);
 }
+#endif

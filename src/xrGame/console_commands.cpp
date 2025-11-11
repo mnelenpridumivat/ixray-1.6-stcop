@@ -270,7 +270,7 @@ public:
 		if (!g_pGameLevel)	return;
 
 		float v = Level().GetGameTimeFactor();
-		xr_sprintf(S, sizeof(S), "%3.5f", v);
+		xr_sprintf(S, "%3.5f", v);
 		while (xr_strlen(S) && ('0' == S[xr_strlen(S) - 1]))	S[xr_strlen(S) - 1] = 0;
 	}
 	virtual void	Info(TInfo& I)

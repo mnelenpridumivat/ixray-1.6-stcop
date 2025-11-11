@@ -331,7 +331,7 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 			if(nullptr==ec)
 			{
 				string_path			eff_name;
-				xr_sprintf			(eff_name, sizeof(eff_name), "%s.anm", state_anm);
+				xr_sprintf			(eff_name, "%s.anm", state_anm);
 				string_path			ce_path;
 				string_path			anm_name;
 				xr_strconcat(anm_name, "camera_effects\\actor_move\\", eff_name);

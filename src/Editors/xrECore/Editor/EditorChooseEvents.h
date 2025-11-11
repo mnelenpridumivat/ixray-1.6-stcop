@@ -217,12 +217,12 @@ namespace ChoseEvents
             for (u32 X = 0; X < THUMB_WIDTH; ++X)
             {
                 u32 Color = Item->CalculateRGB(EDevice->fTimeGlobal, Frame);
-                Color = subst_alpha(Color, 0xFF); // фиксируем альфу
+                Color = subst_alpha(Color, 0xFF); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                 Pixels[Y * THUMB_WIDTH + X] = Color;
             }
         }
 
-        // Подготовка подресурса
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         RHISubResource SubResource{};
         SubResource.Width = THUMB_WIDTH;
         SubResource.Height = THUMB_HEIGHT;
@@ -299,7 +299,7 @@ namespace ChoseEvents
             {
                 if ((*pe_it)->m_EffectName == item->name)
                 {
-                    xr_sprintf(str, sizeof(str), "%d", ++i);
+                    xr_sprintf(str, "%d", ++i);
                     PHelper().CreateCaption(info_items, str, def->m_Name);
                 }
             }
@@ -320,7 +320,7 @@ namespace ChoseEvents
                 PS::CPGDef::EffectIt pe_it_e = def->m_Effects.end();
                 for (; pe_it != pe_it_e; ++pe_it)
                 {
-                    xr_sprintf(str, sizeof(str), "%d", ++i);
+                    xr_sprintf(str, "%d", ++i);
                     PHelper().CreateCaption(info_items, str, (*pe_it)->m_EffectName);
                 }
                 break;
