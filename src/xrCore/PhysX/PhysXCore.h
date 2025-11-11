@@ -9,21 +9,24 @@
 
 namespace xrPhysX
 {
-    physx::PxQuat Conv_MatrixToPxQuat(const Fmatrix& transform);
-    void Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transform);
+    struct XRCORE_API PhysXMathHelper
+    {
+        static physx::PxQuat Conv_MatrixToPxQuat(const Fmatrix& transform);
+        static void Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transform);
     
-    physx::PxQuat Conv_MatrixToPxQuatNoScale(const Fmatrix& transform);
-    void Conv_MatrixToPxQuatNoScale(physx::PxQuat& target, const Fmatrix& transform);
+        static physx::PxQuat Conv_MatrixToPxQuatNoScale(const Fmatrix& transform);
+        static void Conv_MatrixToPxQuatNoScale(physx::PxQuat& target, const Fmatrix& transform);
     
-    physx::PxVec3 Conv_MatrixToPxScale(const Fmatrix& transform);
-    void Conv_MatrixToPxScale(physx::PxVec3& target, const Fmatrix& transform);
+        static physx::PxVec3 Conv_MatrixToPxScale(const Fmatrix& transform);
+        static void Conv_MatrixToPxScale(physx::PxVec3& target, const Fmatrix& transform);
 
-    physx::PxTransform Conv_MatrixToPxTransform(const Fmatrix& transform);
-    void Conv_MatrixToPxTransform(physx::PxTransform& target, const Fmatrix& transform);
+        static physx::PxTransform Conv_MatrixToPxTransform(const Fmatrix& transform);
+        static void Conv_MatrixToPxTransform(physx::PxTransform& target, const Fmatrix& transform);
 
-    physx::PxTransform Conv_MatrixToPxTransformNoScale(const Fmatrix& transform);
-    void Conv_MatrixToPxTransformNoScale(physx::PxTransform& target, const Fmatrix& transform);
-    
+        static physx::PxTransform Conv_MatrixToPxTransformNoScale(const Fmatrix& transform);
+        static void Conv_MatrixToPxTransformNoScale(physx::PxTransform& target, const Fmatrix& transform);
+    };
+        
     class xrPhysXAllocator : public physx::PxAllocatorCallback
     {
     public:
@@ -37,7 +40,7 @@ namespace xrPhysX
         virtual void reportError(physx::PxErrorCode::Enum code, const char* message, const char* file, int line) override;
     };
 
-    class PhysXMaterialManager
+    class XRCORE_API PhysXMaterialManager
     {
         // TODO: will ne storage for multiple materials
         xr_hash_map<shared_str, physx::PxMaterial*> materials;
@@ -57,7 +60,7 @@ namespace xrPhysX
         physx::PxMaterial* GetDefaultMaterial();
     };
     
-    class PhysXInstance
+    class XRCORE_API PhysXInstance
     {
         xr_unique_ptr<xrPhysXAllocator> Allocator;
         xr_unique_ptr<xrPhysXErrorCallback> ErrorCallback;

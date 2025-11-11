@@ -247,13 +247,14 @@ void CBuild::Run(LPCSTR P)
 
 #ifdef LCCUDA_BUILD
 	if (gCompilerMode.CUDA)
- 		GPUTaskinSystem.InitializeGPU();
+	{
+		GPUTaskinSystem.InitializeGPU();
+	}
 	else
 #endif
-	if (gCompilerMode.Embree)
+	{
 		EmbreeMain.IntelEmbereLOAD();
-	else
-		BuildRapid(false);
+	}
 
 	// Hemi MT - Calculate
 	Phase("Adaptive HT lighting ...");

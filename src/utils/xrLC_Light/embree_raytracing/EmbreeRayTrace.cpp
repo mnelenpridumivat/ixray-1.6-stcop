@@ -359,9 +359,13 @@ void EmbreeData::IntelEmbereLOAD()
 
  	Msg("- Intel Embree Loading| Memory: %u mb", u32(GetMemory()/1024/1024) );
 	if (gCompilerMode.EmbreeBVHCompact)
+	{
 		scene_flags = scene_flags | RTC_SCENE_FLAG_COMPACT;
+	}
 	if (gCompilerMode.EmbreeBVHRobust)
+	{
 		scene_flags = scene_flags | RTC_SCENE_FLAG_ROBUST;
+	}
  	 
 	IntelScene = rtcNewScene(device);
 	rtcSetSceneFlags(IntelScene, scene_flags);

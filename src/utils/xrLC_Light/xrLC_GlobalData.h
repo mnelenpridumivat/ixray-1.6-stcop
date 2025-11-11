@@ -26,7 +26,6 @@ struct compilers_global_data
 	Shader_xrLC_LIB					_shaders;
 	b_params						_g_params;
 	base_lighting					_L_static;
-	CDB::MODEL* _RCAST_Model;
 };
 
 class XRLC_LIGHT_API xrLC_GlobalData
@@ -91,7 +90,6 @@ public:
 
 
 	base_lighting& L_static() { return _cl_globs._L_static; }
-	CDB::MODEL* RCAST_Model() { return _cl_globs._RCAST_Model; }
 	xr_vector<xrMU_Model*>& mu_models() { return _mu_models; }
 	xr_vector<xrMU_Reference*>& mu_refs() { return _mu_refs; }
 
@@ -107,9 +105,6 @@ public:
 
 		bool						gl_linear		()		{	return _gl_linear; }
 		void						initialize		()		;
-		void						destroy_rcmodel	()		;
-
-		void						create_rcmodel	(CDB::CollectorPacked& CL);
 
 		void						clear_build_textures_surface();
 		

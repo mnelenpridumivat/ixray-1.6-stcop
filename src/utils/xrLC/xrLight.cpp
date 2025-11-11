@@ -272,9 +272,7 @@ void CBuild::Light()
 	
 	//****************************************** Destroy RCast-model
  	Phase("Destroying ray-trace model...");
- 	lc_global_data()->destroy_rcmodel();
-	if (gCompilerMode.Embree)
-		EmbreeMain.IntelEmbereUNLOAD();
+	EmbreeMain.IntelEmbereUNLOAD();
 }
 
 void CBuild::LightVertex	()

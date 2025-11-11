@@ -8,14 +8,14 @@
 #include "memory/xrMemory.h"
 #include "pvd/PxPvdTransport.h"
 
-physx::PxQuat xrPhysX::Conv_MatrixToPxQuat(const Fmatrix& transform)
+physx::PxQuat xrPhysX::PhysXMathHelper::Conv_MatrixToPxQuat(const Fmatrix& transform)
 {
     physx::PxQuat quat;
     Conv_MatrixToPxQuat(quat, transform);
     return quat;
 }
 
-void xrPhysX::Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transform)
+void xrPhysX::PhysXMathHelper::Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transform)
 {
     Fmatrix m = transform;
     physx::PxVec3 PxScale;
@@ -35,7 +35,7 @@ void xrPhysX::Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transfor
     Conv_MatrixToPxQuatNoScale(target, m);
 }
 
-physx::PxQuat xrPhysX::Conv_MatrixToPxQuatNoScale(const Fmatrix& transform)
+physx::PxQuat xrPhysX::PhysXMathHelper::Conv_MatrixToPxQuatNoScale(const Fmatrix& transform)
 {
     physx::PxQuat quat;
     VERIFY(fabs(transform.i.magnitude() - 1) < EPS);
@@ -45,7 +45,7 @@ physx::PxQuat xrPhysX::Conv_MatrixToPxQuatNoScale(const Fmatrix& transform)
     return quat;
 }
 
-void xrPhysX::Conv_MatrixToPxQuatNoScale(physx::PxQuat& target, const Fmatrix& transform)
+void xrPhysX::PhysXMathHelper::Conv_MatrixToPxQuatNoScale(physx::PxQuat& target, const Fmatrix& transform)
 {
     VERIFY(fabs(transform.i.magnitude() - 1) < EPS);
     VERIFY(fabs(transform.j.magnitude() - 1) < EPS);
@@ -80,34 +80,34 @@ void xrPhysX::Conv_MatrixToPxQuatNoScale(physx::PxQuat& target, const Fmatrix& t
     }
 }
 
-physx::PxVec3 xrPhysX::Conv_MatrixToPxScale(const Fmatrix& transform)
+physx::PxVec3 xrPhysX::PhysXMathHelper::Conv_MatrixToPxScale(const Fmatrix& transform)
 {
     physx::PxVec3 pxScale;
     Conv_MatrixToPxScale(pxScale, transform);
     return pxScale;
 }
 
-void xrPhysX::Conv_MatrixToPxScale(physx::PxVec3& target, const Fmatrix& transform)
+void xrPhysX::PhysXMathHelper::Conv_MatrixToPxScale(physx::PxVec3& target, const Fmatrix& transform)
 {
     target.x = transform.i.magnitude();
     target.y = transform.j.magnitude();
     target.z = transform.k.magnitude();
 }
 
-physx::PxTransform xrPhysX::Conv_MatrixToPxTransform(const Fmatrix& transform)
+physx::PxTransform xrPhysX::PhysXMathHelper::Conv_MatrixToPxTransform(const Fmatrix& transform)
 {
     physx::PxTransform target;
     Conv_MatrixToPxTransform(target, transform);
     return target;
 }
 
-void xrPhysX::Conv_MatrixToPxTransform(physx::PxTransform& target, const Fmatrix& transform)
+void xrPhysX::PhysXMathHelper::Conv_MatrixToPxTransform(physx::PxTransform& target, const Fmatrix& transform)
 {
     target.p.x = transform.c.x; target.p.y = transform.c.y; target.p.z = transform.c.z;
     Conv_MatrixToPxQuat(target.q, transform);
 }
 
-physx::PxTransform xrPhysX::Conv_MatrixToPxTransformNoScale(const Fmatrix& transform)
+physx::PxTransform xrPhysX::PhysXMathHelper::Conv_MatrixToPxTransformNoScale(const Fmatrix& transform)
 {
     VERIFY(fabs(transform.i.magnitude() - 1) < EPS);
     VERIFY(fabs(transform.j.magnitude() - 1) < EPS);
@@ -117,7 +117,7 @@ physx::PxTransform xrPhysX::Conv_MatrixToPxTransformNoScale(const Fmatrix& trans
     return target;
 }
 
-void xrPhysX::Conv_MatrixToPxTransformNoScale(physx::PxTransform& target, const Fmatrix& transform)
+void xrPhysX::PhysXMathHelper::Conv_MatrixToPxTransformNoScale(physx::PxTransform& target, const Fmatrix& transform)
 {
     VERIFY(fabs(transform.i.magnitude() - 1) < EPS);
     VERIFY(fabs(transform.j.magnitude() - 1) < EPS);

@@ -7,6 +7,8 @@
 #include "b_build_texture.h"
 #include "global_slots_data.h"
 #include "../../xrCore/Collision/xrCDB.h"
+#include "../../xrCore/PhysX/PhysXCore.h"
+#include "../../xrCore/PhysX/Collision/xrCDB.h"
 
 class Shader_xrLC_LIB;
 //-----------------------------------------------------------------
@@ -17,7 +19,7 @@ struct global_claculation_data
 	b_params						g_params;//////////////////////lc
 	xr_vector<b_material>			g_materials;///////////////////lc
 	xr_vector<b_BuildTexture>		g_textures;////////////////////lc
-	CDB::MODEL						RCAST_Model;///////////////////lc
+	xrPhysX::CDB::MODEL				RCAST_Model;
 
 	Fbox							LevelBB;//-----------============
 	global_slots_data				slots_data;//-------=============

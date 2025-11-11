@@ -27,12 +27,12 @@ namespace xrPhysX::CDB
         xr_vector<CollisionInstance> m_instances;
         physx::PxScene* m_scene;
 
-        void AddPrototype(const xr_span<Fvector3>& vertices, const xr_span<::CDB::TRI>& faces);
         void AddInstances(physx::PxTriangleMesh* prototype, const xr_vector<Fmatrix>& instances);
     public:
         MODEL();
         ~MODEL();
 
+        void AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces);
 
         void Finalize();
         

@@ -41,12 +41,6 @@ xrLC_GlobalData::xrLC_GlobalData() :
 	_skipInvalid(false), _skipTesselate(false), _lmapRGBA(false),
 	_skipSubdivide(false)
 {
-	_cl_globs._RCAST_Model = 0;
-}
-
-void	xrLC_GlobalData	::destroy_rcmodel	()
-{
-	xr_delete		(_cl_globs._RCAST_Model);
 }
 
 void xrLC_GlobalData::clear_build_textures_surface()
@@ -75,13 +69,6 @@ void xrLC_GlobalData::clear_build_textures_surface( const xr_vector<u32> &exept 
 	}
 	Memory.mem_compact();
 	clMsg( "mem usage after clear build textures surface: %u", Memory.mem_usage() );
-}
-
-void	xrLC_GlobalData	::create_rcmodel	(CDB::CollectorPacked& CL)
-{
-	VERIFY(!_cl_globs._RCAST_Model);
-	_cl_globs._RCAST_Model				= new CDB::MODEL();
-	_cl_globs._RCAST_Model->build		(CL.getV(),(int)CL.getVS(),CL.getT(),(int)CL.getTS());
 }
 
 void		xrLC_GlobalData	::				initialize		()
@@ -209,8 +196,6 @@ void xrLC_GlobalData::clear() {
 
 	gl_mesh_clear();
 	vec_clear(_g_deflectors);
-
-	xr_delete(_cl_globs._RCAST_Model);
 }
 
 

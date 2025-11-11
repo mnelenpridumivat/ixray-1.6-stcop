@@ -43,7 +43,7 @@ void CDeflector::L_Direct_Edge (CDB::COLLIDER* DB, base_lighting* LightsSelected
 		Fvector			P;	P.mad(v1,vdir,time);
 		VERIFY(inlc_global_data());
 
-		LightPoint(DB, inlc_global_data()->RCAST_Model(), C, P, N, *LightsSelected, (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT, skip); //.
+		LightPoint(DB, C, P, N, *LightsSelected, (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT, skip); //.
 
 		C.mul		(.5f);
 		lm.surface	[_y*lm.width+_x]._set	(C);
@@ -117,7 +117,7 @@ void CDeflector::L_Direct	(CDB::COLLIDER* DB, base_lighting* LightsSelected, HAS
 								VERIFY(inlc_global_data());
 
 								u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_UseFaceDisable;
-								LightPoint	(DB, inlc_global_data()->RCAST_Model(), C, wP, wN, *LightsSelected, flags, F); 
+								LightPoint	(DB, C, wP, wN, *LightsSelected, flags, F); 
 
 								Fcount		+= 1;
 							} 

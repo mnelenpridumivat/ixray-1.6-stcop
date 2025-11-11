@@ -7,13 +7,19 @@
 
 #include "../../xrCore/Collision/xrCDB.h"
 #include <xrDeflectorLight_Packed.h>
+
+namespace xrPhysX::CDB
+{
+	class MODEL;
+}
+
 //-----------------------------------------------------------------------
 typedef	xr_multimap<float,vecVertex>	mapVert;
 typedef	mapVert::iterator				mapVertIt;
 mapVert* g_trans;
 xrCriticalSection g_trans_CS;
 
-extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
+extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
  
 void	g_trans_register_internal		(Vertex* V)
 {
@@ -132,7 +138,7 @@ public:
 				DB.ray_options	(0);
 
 				u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_dont_hemi;
-  				LightPoint			(&DB, lc_global_data()->RCAST_Model(), vC, V->P, V->N, lc_global_data()->L_static(), flags, 0);
+  				LightPoint			(&DB, vC, V->P, V->N, lc_global_data()->L_static(), flags, 0);
 
 				vC._tmp_			= v_trans;
 				vC.mul				(.5f);

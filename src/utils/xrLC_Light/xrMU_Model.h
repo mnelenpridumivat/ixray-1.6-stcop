@@ -4,7 +4,12 @@
 #include "mu_model_face.h"
 
 #include "embree_raytracing/EmbreeRayTrace.h"
- 
+
+namespace xrPhysX::CDB
+{
+	class MODEL;
+}
+
 namespace	CDB
 {
 	class	MODEL;
@@ -67,7 +72,7 @@ public:
  
 	void					calc_materials		();
 	void					calc_faceopacity	();
-	void					calc_lighting		( xr_vector<base_color>& dest, const Fmatrix& xform, CDB::MODEL* M, base_lighting& lights, u32 flags);
+	void					calc_lighting		( xr_vector<base_color>& dest, const Fmatrix& xform, base_lighting& lights, u32 flags);
 	void					calc_lighting		(  );
 
  

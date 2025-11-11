@@ -14,8 +14,8 @@
 xrPhysX::CDB::CollisionInstance::CollisionInstance(const Fmatrix& transform, const physx::PxTriangleMesh* prototype)
 {
     m_shared_mesh = const_cast<physx::PxTriangleMesh*>(prototype);
-    physx::PxTransform PxTransform = Conv_MatrixToPxTransform(transform);
-    physx::PxVec3 pxScale = Conv_MatrixToPxScale(transform);
+    physx::PxTransform PxTransform = PhysXMathHelper::Conv_MatrixToPxTransform(transform);
+    physx::PxVec3 pxScale = PhysXMathHelper::Conv_MatrixToPxScale(transform);
 
     physx::PxTriangleMeshGeometry geom(m_shared_mesh);
     geom.scale = pxScale;
@@ -30,7 +30,7 @@ xrPhysX::CDB::CollisionInstance::CollisionInstance(const Fmatrix& transform, con
     shape->release();
 }
 
-void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<Fvector3>& vertices, const xr_span<::CDB::TRI>& faces)
+void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces)
 {
     physx::PxTriangleMeshDesc meshDesc;
     meshDesc.points.data = vertices.data();

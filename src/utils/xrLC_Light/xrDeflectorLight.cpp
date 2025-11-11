@@ -9,6 +9,11 @@
 
 #include "../xrForms/CompilersUI.h" 
 
+namespace xrPhysX::CDB
+{
+	class MODEL;
+}
+
 void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 {
 	static Fvector2 Jitter1[1] = {
@@ -210,79 +215,6 @@ BOOL ApplyBorders( lm_layer &lm, u32 ref )
 	return NEW_ApplyBorders( lm, ref );
 }
 
-float getLastRP_Scale(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Face* skip)
-{
-	u32		tris_count	= DB->r_count();
-	float	scale		= 1.f;
-	Fvector B;
-
-	X_TRY 
-	{
-		for (u32 I=0; I<tris_count; I++)
-		{
-			CDB::RESULT& rpinf = DB->r_begin()[I];
-
-			// Access to texture
-			CDB::TRI& clT										= MDL->get_tris()[rpinf.id];
-
-			base_Face* F										= convert_nax(clT.dummy);
-
-			if (0==F)											continue;
-			if (skip==F)										continue;
-
-			const Shader_xrLC&	SH									= F->Shader();
-			if (!SH.flags.bLIGHT_CastShadow)					continue;
-
-			if (F->flags.bOpaque)	{
-				// Opaque poly - cache it
-				L.tri[0].set	(rpinf.verts[0]);
-				L.tri[1].set	(rpinf.verts[1]);
-				L.tri[2].set	(rpinf.verts[2]);
-				return 0;
-			}
-
-			b_material& M	= inlc_global_data()->materials()			[F->dwMaterial];
-			b_texture&	T	= inlc_global_data()->textures()			[M.surfidx];
-#ifdef		DEBUG
-			const b_BuildTexture	&build_texture  = inlc_global_data()->textures()			[M.surfidx];
-
-			VERIFY( !!(build_texture.HasSurface()) ==  !!(T.pSurface) );
-#endif
-			if (0==T.pSurface)	{
-				F->flags.bOpaque	= true;
-				clMsg			("* ERROR: RAY-TRACE: Strange face detected... Has alpha without texture...");
-				return 0;
-			}
-
-			// barycentric coords
-			// note: W,U,V order
-			B.set	(1.0f - rpinf.u - rpinf.v,rpinf.u,rpinf.v);
-
-			// calc UV
-			Fvector2*	cuv = F->getTC0					();
-			Fvector2	uv;
-			uv.x = cuv[0].x*B.x + cuv[1].x*B.y + cuv[2].x*B.z;
-			uv.y = cuv[0].y*B.x + cuv[1].y*B.y + cuv[2].y*B.z;
-
-			int U = iFloor(uv.x*float(T.dwWidth) + .5f);
-			int V = iFloor(uv.y*float(T.dwHeight)+ .5f);
-			U %= T.dwWidth;		if (U<0) U+=T.dwWidth;
-			V %= T.dwHeight;	if (V<0) V+=T.dwHeight;
-
-			u32 pixel		= T.pSurface[V*T.dwWidth+U];
-			u32 pixel_a		= color_get_A(pixel);
-			float opac		= 1.f - _sqr(float(pixel_a)/255.f);
-			scale			*= opac;
-		}
-	} 
-	X_CATCH
-	{
-		clMsg("* ERROR: getLastRP_Scale");
-	}
-
-	return scale;
-}
-
 // CDB RAY TRACE FILTER
 void CalculateEnergy(OpcodeArgs* context, base_Face* F)
 {
@@ -325,110 +257,16 @@ void CalculateEnergy(OpcodeArgs* context, base_Face* F)
 	if (context->energy < 0.1f)
 		context->valid = false;
 }
- 
-// NEW CDB_RAY
-void FilterIntersection(OpcodeArgs* context)
-{
-	CDB::MODEL* MDL = (CDB::MODEL*)context->MDL;
-
-	// Access to texture
-	CDB::TRI& clT = MDL->get_tris()[context->hit_struct.prim];
-	base_Face* F = (base_Face*) convert_nax( clT.dummy );
-
-	if (0 == F || context->skip == F)
-		return;
-
-	const Shader_xrLC& SH = F->Shader();
-	if (!SH.flags.bLIGHT_CastShadow)
-		return;
-
-	if (F->flags.bOpaque)
-	{
-		R_Light& light = (*((R_Light*)context->Light));
-
-		// Opaque poly - cache it
-		light.tri[0].set(MDL->get_verts()[clT.verts[0]]);
-		light.tri[1].set(MDL->get_verts()[clT.verts[1]]);
-		light.tri[2].set(MDL->get_verts()[clT.verts[2]]);
-
-		context->valid = false;
-		context->energy = 0;
-		return;
-	}
-	 
-	CalculateEnergy(context, F);
-};
-
-float rayTraceCheck(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
-{
-	R_ASSERT(DB);
-
-	// 1. Check cached polygon	 
-	float _u, _v, range;
-	bool res = CDB::TestRayTri(P, D, L.tri, _u, _v, range, false);
- 	if (res  && range > 0 && range < R)
- 		return 0;
- 
-	// 2. Polygon doesn't pick - real database query
-
-	OpcodeContext ctxt;
-	ctxt.r_dir = D;
-	ctxt.r_start = P;
-	ctxt.r_range = R;
-	
-	OpcodeArgs args;
-	args.energy = 1.0f;
-	args.Light = (void*)&L;
-	args.skip = (void*)skip;
-	args.MDL = (void*)MDL;
-	args.valid = true;
-	args.pos = P;
-
- 	ctxt.result = &args;
-
-	ctxt.filterIntersect = &FilterIntersection;
-
-	// Start RayTracing
-	DB->rayTrace1(&ctxt);
-	return ctxt.result->energy;
-}
-
-float rayTraceOriginal(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
-{
-	R_ASSERT(DB);
-
-	// 1. Check cached polygon	 
-	float _u, _v, range;
-	bool res = CDB::TestRayTri(P, D, L.tri, _u, _v, range, false);
-	if (res && range > 0 && range < R)
-		return 0;
-
-	// 2. Polygon doesn't pick - real database query
-	DB->ray_options(0);
- 	DB->ray_query(MDL, P, D, R);
-
-	if (DB->r_count() == 0)
-		return 1;
-  
-	return getLastRP_Scale(DB, MDL, L, skip);
-}
 
 // Embree
 
 
-float rayTrace	(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
+float rayTrace	(R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
 {
-	if (MDL)
-	{
-		return rayTraceOriginal(DB, MDL, L, P, D, R, skip);
-	}
-	else
-	{
-		return EmbreeMain.RaytraceEmbreeProcess(L, P, D, R, skip);
-	}
+	return EmbreeMain.RaytraceEmbreeProcess(L, P, D, R, skip);
 }
 
-void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P, Fvector& N, base_lighting& lights, u32 flags, Face* skip)
+void LightPoint(CDB::COLLIDER* DB, base_color_c& C, Fvector& P, Fvector& N, base_lighting& lights, u32 flags, Face* skip)
 {
 	auto processLight = [&]<typename T>(R_Light& L, T& accumulator, bool isSunOrHemi)
 	{
@@ -446,7 +284,7 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 				if (D <= 0)
 					return;
 
-				float trace = rayTrace(DB, MDL, L, Pnew, Ldir, 1000.f, skip);
+				float trace = rayTrace(L, Pnew, Ldir, 1000.f, skip);
 				att = isSunOrHemi ? L.energy * trace : D * L.energy * trace;
 				break;
 			}
@@ -462,7 +300,7 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 					return;
 
 				float R = _sqrt(sqD);
-				float trace = rayTrace(DB, MDL, L, Pnew, Ldir, R, skip);
+				float trace = rayTrace(L, Pnew, Ldir, R, skip);
 				float scale = D * L.energy * trace;
 
 				if (isSunOrHemi)
@@ -493,7 +331,7 @@ void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c& C, Fvector& P,
 					return;
 
 				float R = _sqrt(sqD);
-				float trace = rayTrace(DB, MDL, L, Pnew, Ldir, R, skip);
+				float trace = rayTrace(L, Pnew, Ldir, R, skip);
 				att = powf(D, 0.125f) * L.energy * trace * (1 - R / L.range);
 				break;
 			}

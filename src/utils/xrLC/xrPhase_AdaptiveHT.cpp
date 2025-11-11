@@ -80,7 +80,7 @@ virtual	void Execute()
  			Vertex*		V		= verts[ID];
 			
  			V->normalFromAdj	();
-			LightPoint			(&DB, lc_global_data()->RCAST_Model(), vC, V->P, V->N, pBuild->L_static(), LP_dont_rgb+LP_dont_sun,0);
+			LightPoint			(&DB, vC, V->P, V->N, pBuild->L_static(), LP_dont_rgb+LP_dont_sun,0);
 			vC.mul				(0.5f);
 			V->C._set			(vC);
 		}

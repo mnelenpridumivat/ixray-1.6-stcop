@@ -377,7 +377,6 @@ extern bool SaveCForm;
 void DrawCompilerConfig()
 {
 	ImGui::Checkbox("Silent mode", &gCompilerMode.Silent);
-	ImGui::Checkbox("Use Intel Embree", &gCompilerMode.Embree);
 #ifdef LCCUDA_BUILD
 	ImGui::Checkbox("Use Nvidia CUDA", &gCompilerMode.CUDA);
 #endif

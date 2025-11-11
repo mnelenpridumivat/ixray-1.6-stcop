@@ -80,10 +80,6 @@ public:
 
 	void	BuildCForm				();
 	void	BuildPortals			(IWriter &fs);
-
- 	void	BuildRapid				(BOOL bSave);
-
-	void	xrPhase_Radiosity		();
 		
 	void	IsolateVertices			(BOOL bProgress);
 	void	xrPhase_ResolveMaterials();

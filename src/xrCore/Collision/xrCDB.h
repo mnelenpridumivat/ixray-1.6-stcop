@@ -274,13 +274,16 @@ namespace CDB
 		void				add_face	( const Fvector& v0, const Fvector& v1, const Fvector& v2, u16 material, u16 sector, u32 flags );
 		void				add_face_D	( const Fvector& v0, const Fvector& v1, const Fvector& v2, u32 dummy , u32 flags );
 
-		xr_vector<Fvector>& getV_Vec()			{ return verts;				}
-		const Fvector*		getV() const				{ return &*verts.begin();	}
-		size_t				getVS() const { return verts.size();		}
-		const TRI*			getT() const { return &*faces.begin();	}
+		xr_span<const Fvector3> getVSpan() const {return verts;}
+		xr_span<const TRI> getTSpan() const {return faces;}
+		
+		//xr_vector<Fvector>& getV_Vec()			{ return verts;				}
+		//const Fvector*		getV() const				{ return &*verts.begin();	}
+		//size_t				getVS() const { return verts.size();		}
+		//const TRI*			getT() const { return &*faces.begin();	}
 		u32					getfFlags(u32 index) const { return flags[index];		}	
-IC		TRI&				getT(u32 index)		{ return faces[index];		}
-		size_t				getTS() const { return faces.size();		}
+IC		//TRI&				getT(u32 index)		{ return faces[index];		}
+		//size_t				getTS() const { return faces.size();		}
 		void				clear();
 	};
 

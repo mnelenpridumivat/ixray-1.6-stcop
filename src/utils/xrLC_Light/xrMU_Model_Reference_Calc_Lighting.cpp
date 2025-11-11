@@ -129,7 +129,7 @@ void o_test(int iA, int iB, int count, base_color* A, base_color* B, float& C, f
 void xrMU_Reference::calc_lighting()
 {
 	u32 flags =  (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT;
-	model->calc_lighting(color, xform, inlc_global_data()->RCAST_Model(), inlc_global_data()->L_static(), flags);
+	model->calc_lighting(color, xform, inlc_global_data()->L_static(), flags);
 
 	R_ASSERT(color.size() == model->color.size());
 
@@ -330,7 +330,7 @@ void xrMU_Reference::calc_lighting_cuda_2()
 
 	colors_cuda.clear();
 
-	// se7kills: Хотябы память убрать из юза
+	// se7kills: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ
 	SafeVertices.clear();
 	SafeVertices.shrink_to_fit();
 }

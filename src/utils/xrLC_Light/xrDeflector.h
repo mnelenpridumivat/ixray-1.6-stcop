@@ -10,6 +10,11 @@
 // se7kills: Packed Task pool
 #include "xrDeflectorLight_Packed.h"
 
+namespace xrPhysX::CDB
+{
+	class MODEL;
+}
+
 class  base_lighting;
 class CDeflector;
 extern EmbreeData EmbreeMain;
@@ -141,7 +146,7 @@ extern XRLC_LIGHT_API void		blit			(lm_layer& dst, u32 ds_x, u32 ds_y, lm_layer&
 extern void		blit_r			(u32* dest,		u32 ds_x, u32 ds_y, u32* src,		u32 ss_x, u32 ss_y, u32 px, u32 py, u32 aREF);
 extern XRLC_LIGHT_API void		blit_r			(lm_layer& dst, u32 ds_x, u32 ds_y, lm_layer& src,	u32 ss_x, u32 ss_y, u32 px, u32 py, u32 aREF);
 extern void		lblit			(lm_layer& dst, lm_layer& src, u32 px, u32 py, u32 aREF);
-extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
+extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
 extern XRLC_LIGHT_API BOOL		ApplyBorders	(lm_layer &lm, u32 ref);
 extern XRLC_LIGHT_API void		DumpDeflctor	( u32 id );
 extern XRLC_LIGHT_API void		DumpDeflctor	( const CDeflector &d );
