@@ -25,11 +25,19 @@ namespace xrPhysX::CDB
         void SetExtraData(const xr_span<const ::CDB::TRI>& data);
 
         auto GetPrototype() const { return Prototype; }
+        const auto& GetTriangeData(u32 triangleID) const
+        {
+            VERIFY(DataPerTriangle.size() > triangleID);
+            return DataPerTriangle[triangleID];
+        }
     };
+
+    class StableInstanceRef;
     
     class CollisionInstance {
         MODEL* CollisionModel;
         physx::PxRigidStatic* m_actor;
+        xr_unique_ptr<StableInstanceRef> stable_ref;
         u32 m_shared_mesh;
         u16 Sector = SectorInvalid;
     
@@ -37,6 +45,20 @@ namespace xrPhysX::CDB
         CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype);
 
         physx::PxRigidStatic& GetActor() const {return *m_actor;}
+        u32 GetID() const;
+        const CollisionPrototype& GetPrototype() const;
+        u16 GetSector() const { return Sector; }
+    };
+
+    class StableInstanceRef
+    {
+        MODEL* CollisionModel = nullptr;
+        u32 ID = u32(-1);
+    public:
+        StableInstanceRef(MODEL* CollisionModel, u32 ID) : CollisionModel(CollisionModel), ID(ID) {}
+
+        const CollisionInstance& GetCollisionInstance() const;
+        u32 GetID() const {return ID;}
     };
 
     enum class TraceOptions : u8
@@ -72,7 +94,7 @@ namespace xrPhysX::CDB
         float r_range = 10000.f;
     };
 
-    class xrRaycastBuffer : public physx::PxRaycastBuffer
+    /*class xrRaycastBuffer : public physx::PxRaycastBuffer
     {
         xrPhysX::CDB::TraceOptions options;
         physx::PxRaycastHit nearestHit;
@@ -90,7 +112,7 @@ namespace xrPhysX::CDB
     private:
 
         bool IsFrontFace(const physx::PxRaycastHit& hit) const;
-    };
+    };*/
     
     class RayTraceResult
     {
@@ -106,17 +128,23 @@ namespace xrPhysX::CDB
 
         void AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances);
         void AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces);
+
+        void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]);
+        void ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result);
     public:
         MODEL();
         ~MODEL();
 
         const CollisionPrototype& GetPrototype(u32 ID);
+        const CollisionInstance& GetInstance(u32 ID);
+        
         void AddUniqueStaticGeom(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces);
         void AddInstances(
             const xr_span<const Fvector3>& vertices,
             const xr_span<const ::CDB::TRI>& faces,
             const xr_vector<xr_pair<Fmatrix, u16>>& Instances
             );
+        u32 GetInstancesNum() const {return m_instances.size();}
 
         void Finalize();
 
