@@ -106,15 +106,6 @@ bool xrPhysX::CDB::xrRaycastBuffer::IsFrontFace(const physx::PxRaycastHit& hit) 
     return hit.normal.dot(Normal) < 0.0f;
 }
 
-physx::PxVec3 xrPhysX::CDB::xrRaycastBuffer::GetTriangleNormal(physx::PxShape* shape, uint32_t faceIndex) const
-{
-    physx::PxGeometryHolder geom = shape->getGeometry();
-    VERIFY(geom.getType() == physx::PxGeometryType::eTRIANGLEMESH);
-    auto mesh = geom.triangleMesh().triangleMesh;
-    physx::PxVec3 vertices[3];
-    auto transform = shape->getActor()->getGlobalPose();
-}
-
 void xrPhysX::CDB::MODEL::AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances)
 {
     m_instances.reserve(m_instances.size() + instances.size());
@@ -171,6 +162,24 @@ void xrPhysX::CDB::MODEL::Finalize()
 void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, RayTraceResult& result)
 {
     physx::PxRaycastBuffer buffer;
+    physx::PxHitFlags flags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;;
+    if(!(bool)(options.options & TraceOptions::cull))
+    {
+        flags |= physx::PxHitFlag::eMESH_BOTH_SIDES;
+    }
+    if((bool)(options.options & TraceOptions::full_test))
+    {
+        flags |= physx::PxHitFlag::eFACE_INDEX;
+        flags |= physx::PxHitFlag::ePRECISE_SWEEP;
+    }
+    if((bool)(options.options & TraceOptions::only_first))
+    {
+        flags |= physx::PxHitFlag::eANY_HIT;
+    }
+    /*else
+    {
+        flags |= physx::PxHitFlag::eNO_BLOCK;
+    }*/
     if (m_scene->raycast(options.GetStart(), options.GetDir(), options.r_range, buffer))
     {
         

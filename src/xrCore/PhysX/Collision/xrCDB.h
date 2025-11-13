@@ -90,7 +90,6 @@ namespace xrPhysX::CDB
     private:
 
         bool IsFrontFace(const physx::PxRaycastHit& hit) const;
-        physx::PxVec3 GetTriangleNormal(physx::PxShape* shape, uint32_t faceIndex) const;
     };
     
     class RayTraceResult
