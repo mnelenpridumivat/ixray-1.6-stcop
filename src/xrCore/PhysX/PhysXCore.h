@@ -84,5 +84,6 @@ namespace xrPhysX
         physx::PxDefaultCpuDispatcher* GetDefaultCpuDispatcher();
 
         static PhysXInstance& GetInstance();
+        static physx::PxPhysics& GetPhysicsStatic();
     };
 }

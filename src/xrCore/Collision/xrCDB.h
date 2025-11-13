@@ -66,11 +66,9 @@ class CDB_Model;
 #pragma pack(push,8)
 namespace CDB
 {
-	// Triangle
-	class XRCORE_API TRI						//*** 16 bytes total (was 32 :)
+	class XRCORE_API TRIExtra
 	{
 	public:
-		u32				verts	[3];		// 3*4 = 12b
 		union	
 		{
 			u32			dummy;				// 4b
@@ -82,6 +80,14 @@ namespace CDB
 				u32		sector:16;			// 
 			};
 		};
+	};
+	
+	// Triangle
+	class XRCORE_API TRI						//*** 16 bytes total (was 32 :)
+	{
+	public:
+		u32				verts	[3];		// 3*4 = 12b
+		TRIExtra		data;
 	public:
 		IC u32			IDvert	(u32 ID)		{ return verts[ID];	}
 	};
@@ -143,15 +149,7 @@ namespace CDB
 	struct XRCORE_API RESULT
 	{
 		Fvector			verts	[3];
-		union	{
-			u32			dummy;				// 4b
-			struct {
-				u32		material:14;		// 
-				u32		suppress_shadows:1;	// 
-				u32		suppress_wm:1;		// 
-				u32		sector:16;			// 
-			};
-		};
+		TRIExtra		data;
 		int				id;
 		float			range;
 		float			u,v;

@@ -315,3 +315,8 @@ xrPhysX::PhysXInstance& xrPhysX::PhysXInstance::GetInstance()
     static PhysXInstance instance;
     return instance;
 }
+
+physx::PxPhysics& xrPhysX::PhysXInstance::GetPhysicsStatic()
+{
+    return GetInstance().GetPhysics();
+}

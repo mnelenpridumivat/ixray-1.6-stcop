@@ -65,14 +65,62 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			R_ASSERT(fs->find_chunk(0));
 
 			hdrCFORM			H;
-			fs->r(&H, sizeof(hdrCFORM));
-			R_ASSERT(CFORM_Versions::WITH_INSTANCING == H.version);
+			{
+				auto fs_header = fs->open_chunk(CFORM_Chunks::Header);
+				fs_header->r(&H, sizeof(hdrCFORM));
+				R_ASSERT(CFORM_Versions::WITH_INSTANCING == H.version);
+				fs_header->close();
+			}
+			{
+				auto fs_static = fs->open_chunk(CFORM_Chunks::StaticGeom);
 
-			Fvector* verts = (Fvector*)fs->pointer();
-			CDB::TRI* tris = (CDB::TRI*)(verts + H.vertcount);
-			LevelPtr->build(verts, H.vertcount, tris, H.facecount);
-			LevelPtr->syncronize();
-			Msg("* Level CFORM: %dK", LevelPtr->memory() / 1024);
+				xr_vector<Fvector> vertices(fs_static->r_u32());
+				fs_static->r(vertices.data(), vertices.size());
+				
+				xr_vector<CDB::TRI> faces(fs_static->r_u32());
+				fs_static->r(faces.data(), faces.size());
+
+				LevelPtr->AddUniqueStaticGeom({vertices}, {faces});
+				
+				fs_static->close();
+			}
+			struct PrototypeData
+			{
+				xr_vector<Fvector> vertices;
+				xr_vector<CDB::TRI> faces;
+			};
+			xr_vector<PrototypeData> Prototypes;
+			{
+				auto fs_prototypes = fs->open_chunk(CFORM_Chunks::Instances);
+
+				Prototypes.resize(fs_prototypes->r_u32());
+
+				for (auto& p : Prototypes)
+				{
+					p.vertices.resize(fs_prototypes->r_u32());
+					fs_prototypes->r(p.vertices.data(), p.vertices.size());
+					p.faces.resize(fs_prototypes->r_u32());
+					fs_prototypes->r(p.faces.data(), p.faces.size());
+				}
+				
+				fs_prototypes->close();
+			}
+			{
+				auto fs_instances = fs->open_chunk(CFORM_Chunks::InstanceRefs);
+
+				for (auto& p : Prototypes)
+				{
+					xr_vector<xr_pair<Fmatrix, u16>> instances(fs_instances->r_u32());
+					for (auto& i : instances)
+					{
+						fs_instances->r(&i.first, sizeof(Fmatrix));
+						i.second = fs_instances->r_u16();
+					}	
+					LevelPtr->AddInstances(p.vertices, p.faces, instances);
+				}
+				
+				fs_instances->close();
+			}
 
 			g_rc_faces.resize(H.facecount);
 			R_ASSERT(fs->find_chunk(1));

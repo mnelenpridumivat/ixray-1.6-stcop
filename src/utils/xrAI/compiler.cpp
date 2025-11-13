@@ -3,7 +3,7 @@
 
 #include "cl_intersect.h"
 
-xr_unique_ptr<CDB::MODEL> LevelPtr;
+xr_unique_ptr<xrPhysX::CDB::MODEL> LevelPtr;
 
 CDB::COLLIDER IXRC;
 
@@ -63,7 +63,7 @@ void mem_Optimize()
 void xrCompiler(LPCSTR name, bool draft_mode, bool pure_covers, LPCSTR out_name)
 {
 	Phase("Loading level...");
-	LevelPtr = xr_make_unique<CDB::MODEL>();
+	LevelPtr = xr_make_unique<xrPhysX::CDB::MODEL>();
 
 	xrLoad(name, draft_mode);
 	mem_Optimize();

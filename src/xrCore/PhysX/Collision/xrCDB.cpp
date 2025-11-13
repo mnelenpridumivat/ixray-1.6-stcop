@@ -11,13 +11,24 @@
 #include "geometry/PxTriangleMesh.h"
 #include "PhysX/PhysXCore.h"
 
-xrPhysX::CDB::CollisionInstance::CollisionInstance(const Fmatrix& transform, const physx::PxTriangleMesh* prototype)
+void xrPhysX::CDB::CollisionPrototype::SetExtraData(const xr_span<const ::CDB::TRI>& data)
 {
-    m_shared_mesh = const_cast<physx::PxTriangleMesh*>(prototype);
+    DataPerTriangle.reserve(data.size());
+    for (auto& tri : data)
+    {
+       DataPerTriangle.emplace_back(tri.data); 
+    }
+}
+
+xrPhysX::CDB::CollisionInstance::CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype)
+{
+    CollisionModel = model;
+    Sector = sector;
+    m_shared_mesh = prototype;
     physx::PxTransform PxTransform = PhysXMathHelper::Conv_MatrixToPxTransform(transform);
     physx::PxVec3 pxScale = PhysXMathHelper::Conv_MatrixToPxScale(transform);
 
-    physx::PxTriangleMeshGeometry geom(m_shared_mesh);
+    physx::PxTriangleMeshGeometry geom(CollisionModel->GetPrototype(m_shared_mesh).GetPrototype());
     geom.scale = pxScale;
 
     auto& physics = PhysXInstance::GetInstance().GetPhysics();
@@ -47,16 +58,69 @@ void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<const Fvector3>& vertices, 
     PxValidateTriangleMesh(params, meshDesc);
 #endif
     
-    m_prototypes.emplace_back(PxCreateTriangleMesh(params, meshDesc,
-        PhysXInstance::GetInstance().GetPhysics().getPhysicsInsertionCallback()));
+    m_prototypes.emplace_back(
+        PxCreateTriangleMesh(params, meshDesc,
+        PhysXInstance::GetInstance().GetPhysics().getPhysicsInsertionCallback())
+    );
+    auto& Prototype = m_prototypes.back();
+    Prototype.SetExtraData(faces);
 }
 
-void xrPhysX::CDB::MODEL::AddInstances(physx::PxTriangleMesh* prototype, const xr_vector<Fmatrix>& instances)
+physx::PxAgain xrPhysX::CDB::xrRaycastBuffer::processTouches(const physx::PxRaycastHit* buffer, physx::PxU32 nbHits)
+{
+    for (physx::PxU32 i = 0; i < nbHits; i++)
+    {
+        const auto& hit = buffer[i];
+
+        if ((bool)(options&TraceOptions::cull) && !IsFrontFace(hit))
+        {
+            continue;
+        }
+
+        if ((bool)(options&TraceOptions::full_test) && !IsValidTriangleHit(hit))
+        {
+            continue;
+        }
+
+        ProcessValidHit(hit);
+
+        if ((bool)(options&TraceOptions::only_first))
+        {
+            block = hit;
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool xrPhysX::CDB::xrRaycastBuffer::IsFrontFace(const physx::PxRaycastHit& hit) const
+{
+    if (!IVERIFY(hit.shape && hit.faceIndex == physx::PxU32(-1)))
+    {
+        return false;
+    }
+
+    physx::PxVec3 Normal = GetTriangleNormal(hit.shape, hit.faceIndex);
+
+    return hit.normal.dot(Normal) < 0.0f;
+}
+
+physx::PxVec3 xrPhysX::CDB::xrRaycastBuffer::GetTriangleNormal(physx::PxShape* shape, uint32_t faceIndex) const
+{
+    physx::PxGeometryHolder geom = shape->getGeometry();
+    VERIFY(geom.getType() == physx::PxGeometryType::eTRIANGLEMESH);
+    auto mesh = geom.triangleMesh().triangleMesh;
+    physx::PxVec3 vertices[3];
+    auto transform = shape->getActor()->getGlobalPose();
+}
+
+void xrPhysX::CDB::MODEL::AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances)
 {
     m_instances.reserve(m_instances.size() + instances.size());
     for (const auto& instance : instances)
     {
-        m_instances.emplace_back(instance, prototype);
+        m_instances.emplace_back(this, instance.first, instance.second, prototype);
     }
 }
 
@@ -76,6 +140,25 @@ xrPhysX::CDB::MODEL::~MODEL()
     m_scene->release();
 }
 
+const xrPhysX::CDB::CollisionPrototype& xrPhysX::CDB::MODEL::GetPrototype(u32 ID)
+{
+    return m_prototypes[ID];
+}
+
+void xrPhysX::CDB::MODEL::AddUniqueStaticGeom(const xr_span<const Fvector3>& vertices,
+                                              const xr_span<const ::CDB::TRI>& faces)
+{
+    AddPrototype(vertices, faces);
+    AddInstances(m_prototypes.size()-1, {{Fmatrix().identity(), SectorInvalid}});
+}
+
+void xrPhysX::CDB::MODEL::AddInstances(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces,
+    const xr_vector<xr_pair<Fmatrix, u16>>& Instances)
+{
+    AddPrototype(vertices, faces);
+    AddInstances(m_prototypes.size()-1, Instances);
+}
+
 void xrPhysX::CDB::MODEL::Finalize()
 {
     for (const auto& instance : m_instances)
@@ -83,4 +166,13 @@ void xrPhysX::CDB::MODEL::Finalize()
         m_scene->addActor(instance.GetActor());
     }
     m_scene->flushSimulation();
+}
+
+void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, RayTraceResult& result)
+{
+    physx::PxRaycastBuffer buffer;
+    if (m_scene->raycast(options.GetStart(), options.GetDir(), options.r_range, buffer))
+    {
+        
+    }
 }

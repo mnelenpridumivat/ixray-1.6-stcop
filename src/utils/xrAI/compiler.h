@@ -6,6 +6,8 @@
 #include "Shader_xrLC.h"
 #include "../../Include/Editors/communicate.h"
 #include "../../Layers/xrRender/ETextureParams.h"
+#include "PhysX/PhysXCore.h"
+#include "PhysX/Collision/xrCDB.h"
 
 // base patch used all the time up to merging
 
@@ -117,7 +119,7 @@ extern	Nodes				g_nodes;
 extern	xr_vector<SCover>	g_covers_palette;
 extern	Lights				g_lights;
 extern	SAIParams			g_params;
-extern	xr_unique_ptr<CDB::MODEL> LevelPtr;
+extern	xr_unique_ptr<xrPhysX::CDB::MODEL> LevelPtr;
 extern	CDB::COLLIDER		IXRC;
 extern	Fbox				LevelBB;
 //extern	Vectors				Emitters;
