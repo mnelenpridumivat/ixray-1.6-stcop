@@ -195,14 +195,18 @@ void CBuild::BuildCForm	()
 	{
 		MFS->open_chunk(CFORM_Chunks::StaticGeom);
 		auto& StaticGeom = CL.GetStaticData();
+
+		auto Vertices = StaticGeom.getVSpan();
 		
-		R_ASSERT(StaticGeom.getVS() <= std::numeric_limits<u32>::max(), "Too many vertices in static geom, collision is invalid!");
-		MFS->w_u32(StaticGeom.getVS());
-		MFS->w(StaticGeom.getV(), StaticGeom.getVS() * sizeof(Fvector));
+		R_ASSERT(Vertices.size() <= std::numeric_limits<u32>::max(), "Too many vertices in static geom, collision is invalid!");
+		MFS->w_u32(Vertices.size());
+		MFS->w(Vertices.data(), Vertices.size() * sizeof(Fvector));
+
+		auto Faces = StaticGeom.getTSpan();
 		
-		R_ASSERT(StaticGeom.getTS() <= std::numeric_limits<u32>::max(), "Too many faces in static geom, collision is invalid!");
-		MFS->w_u32(StaticGeom.getTS());
-		MFS->w(StaticGeom.getT(), StaticGeom.getTS() * sizeof(CDB::TRI));
+		R_ASSERT(Faces.size() <= std::numeric_limits<u32>::max(), "Too many faces in static geom, collision is invalid!");
+		MFS->w_u32(Faces.size());
+		MFS->w(Faces.data(), Faces.size() * sizeof(CDB::TRI));
 		
 		MFS->close_chunk();
 	}
@@ -214,14 +218,18 @@ void CBuild::BuildCForm	()
 		for (auto& Obj : MUObjects)
 		{
 			auto& Geom = Obj.second;
+
+			auto Vertices = Geom.getVSpan();
+			
+			R_ASSERT(Vertices.size() <= std::numeric_limits<u32>::max(), "Too many vertices in MU object geom, collision is invalid!");
+			MFS->w_u32(Vertices.size());
+			MFS->w(Vertices.data(), Vertices.size() * sizeof(Fvector));
 		
-			R_ASSERT(Geom.getVS() <= std::numeric_limits<u32>::max(), "Too many vertices in MU object geom, collision is invalid!");
-			MFS->w_u32(Geom.getVS());
-			MFS->w(Geom.getV(), Geom.getVS() * sizeof(Fvector));
+			auto Faces = Geom.getTSpan();
 		
-			R_ASSERT(Geom.getTS() <= std::numeric_limits<u32>::max(), "Too many faces in MU object geom, collision is invalid!");
-			MFS->w_u32(Geom.getTS());
-			MFS->w(Geom.getT(), Geom.getTS() * sizeof(CDB::TRI));
+			R_ASSERT(Faces.size() <= std::numeric_limits<u32>::max(), "Too many faces in MU object geom, collision is invalid!");
+			MFS->w_u32(Faces.size());
+			MFS->w(Faces.data(), Faces.size() * sizeof(CDB::TRI));
 			
 		}
 

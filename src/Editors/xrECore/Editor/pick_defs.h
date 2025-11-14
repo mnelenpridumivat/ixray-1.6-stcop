@@ -58,7 +58,7 @@ class CCustomObject;
                 u			= r->u;
                 v			= r->v;
                 range		= r->range;
-                tag			= r->dummy;
+                tag			= r->data.dummy;
                 e_obj		= obj;
                 e_mesh		= mesh;
             }
@@ -70,9 +70,21 @@ class CCustomObject;
                 u			= r->u;
                 v			= r->v;
                 range		= r->range;
-                tag			= r->dummy;
+                tag			= r->data.dummy;
                 e_obj		= obj;
                 e_mesh		= mesh;
+            }
+    		SResult			(const CDB::RESULT& r, CEditableObject* obj, CEditableMesh* mesh)
+            { 
+            	verts[0]	= r.verts[0];
+            	verts[1]	= r.verts[1];
+            	verts[2]	= r.verts[2];
+            	u			= r.u;
+            	v			= r.v;
+            	range		= r.range;
+            	tag			= r.data.dummy;
+            	e_obj		= obj;
+            	e_mesh		= mesh;
             }
         };
         using ResultVec = xr_vector<SResult>;
@@ -97,19 +109,48 @@ class CCustomObject;
         }
 		IC void append_mtx	(const Fmatrix& parent, CDB::RESULT* R, CEditableObject* obj, CEditableMesh* mesh)
         {
-            SResult	D		(parent, R, obj, mesh);
+            SResult	D(parent, R, obj, mesh);
             if (m_Flags.is(CDB::OPT_ONLYNEAREST)&&!results.empty()){
 	            SResult& S	= results.back();
-                if (D.range<S.range) S = D;
-            }else			results.push_back	(D);
+                if (D.range<S.range)
+                {
+	                S = D;
+                }
+            }
+        	else
+            {
+	            results.push_back	(D);
+            }
         }
-		IC void append		(CDB::RESULT* R, CEditableObject* obj, CEditableMesh* mesh)
+		IC void append(CDB::RESULT* R, CEditableObject* obj, CEditableMesh* mesh)
         {
-            SResult	D		(R,obj,mesh);
+            SResult	D(R,obj,mesh);
             if (m_Flags.is(CDB::OPT_ONLYNEAREST)&&!results.empty()){
 	            SResult& S	= results.back();
-                if (D.range<S.range) S = D;
-            }else			results.push_back	(D);
+                if (D.range<S.range)
+                {
+	                S = D;
+                }
+            }
+        	else
+            {
+	            results.push_back	(D);
+            }
+        }
+		IC void append(const CDB::RESULT& R, CEditableObject* obj, CEditableMesh* mesh)
+        {
+        	SResult	D(R,obj,mesh);
+        	if (m_Flags.is(CDB::OPT_ONLYNEAREST)&&!results.empty()){
+        		SResult& S	= results.back();
+        		if (D.range<S.range)
+        		{
+        			S = D;
+        		}
+        	}
+        	else
+        	{
+        		results.push_back	(D);
+        	}
         }
         IC int r_count		()
         {
@@ -151,7 +192,16 @@ class CCustomObject;
 
 		SRayPickInfo			(){ Reset(); visual_inf.bone_id = u16(-1); }
 		IC void Reset			(){ ZeroMemory(this,sizeof(SRayPickInfo));inf.range = 5000;}
-		IC void SetRESULT		(CDB::MODEL* M, CDB::RESULT* R){inf=*R;inf.id=(M->get_tris()+inf.id)->dummy;}
+		IC void SetRESULT		(CDB::MODEL* M, CDB::RESULT* R)
+		{
+			inf=*R;
+			inf.id=(M->get_tris()+inf.id)->data.dummy;
+		}
+		IC void SetRESULT(const CDB::RESULT& R)
+		{
+			inf=R;
+			inf.id=R.data.dummy;
+		}
 	};
     using BPInfVec = xr_vector<CDB::RESULT>;
     using BPInfIt = BPInfVec::iterator;
@@ -163,7 +213,16 @@ class CCustomObject;
 		CEditableMesh*		e_mesh;
 		SBoxPickInfo		(){Reset();}
 		IC void Reset		(){ZeroMemory(this,sizeof(SBoxPickInfo));}
-		IC void AddRESULT	(CDB::MODEL* M, CDB::RESULT* R){inf.push_back(*R); inf.back().id=(M->get_tris()+inf.back().id)->dummy;}
+		IC void AddRESULT	(CDB::MODEL* M, CDB::RESULT* R)
+		{
+			inf.push_back(*R);
+			inf.back().id=(M->get_tris()+inf.back().id)->data.dummy;
+		}
+		IC void AddRESULT	(const CDB::RESULT& R)
+		{
+			inf.push_back(R);
+			inf.back().id=R.data.dummy;
+		}
 	};
     using SBoxPickInfoVec = xr_vector<SBoxPickInfo>;
     using SBoxPickInfoIt = SBoxPickInfoVec::iterator;

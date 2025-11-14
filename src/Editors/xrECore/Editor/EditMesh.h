@@ -290,7 +290,7 @@ protected:
 	st_SVert*		m_SVertices;// | *3
 	SurfFaces	    m_SurfFaces;
 
-	CDB::MODEL*		m_CFModel;
+	xr_unique_ptr<xrPhysX::CDB::MODEL> m_CFModel;
 	RBMap*			m_RenderBuffers;
 
 	void 			FillRenderBuffer		(IntVec& face_lst, int start_face, int num_face, const xr_shared_ptr<CSurface> surf, LPBYTE& data);

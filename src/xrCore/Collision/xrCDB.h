@@ -218,10 +218,12 @@ namespace CDB
         void			remove_duplicate_T	( );
 		void			calc_adjacency		( xr_vector<u32>& dest		);
 
-		Fvector*		getV			()	{ return &*verts.begin();		}
+		xr_span<const Fvector> getVSpan() const {return verts;}
+		xr_span<const TRI> getTSpan() const {return faces;}
+		/*Fvector*		getV			()	{ return &*verts.begin();		}
 		size_t			getVS			() 	{ return verts.size();			}
 		TRI*			getT			()	{ return &*faces.begin();		}
-		size_t			getTS			()	{ return faces.size();			}
+		size_t			getTS			()	{ return faces.size();			}*/
 		void			clear			()	{ verts.clear(); faces.clear();	}
 	};
 

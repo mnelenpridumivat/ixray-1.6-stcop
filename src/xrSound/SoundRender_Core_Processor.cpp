@@ -200,7 +200,7 @@ float CSoundRender_Core::get_occlusion_to( const Fvector& hear_pt, const Fvector
 {
 	float occ_value			= 1.f;
 
-	if (0!=geom_SOM){
+	if (geom_SOM){
 		// Calculate RAY params
 		Fvector	pos,dir;
 		pos.random_dir			();
@@ -210,16 +210,17 @@ float CSoundRender_Core::get_occlusion_to( const Fvector& hear_pt, const Fvector
 		float range				= dir.magnitude	();
 		dir.div					(range);
 
-		geom_DB.ray_options		(CDB::OPT_CULL);
-		geom_DB.ray_query		(geom_SOM,hear_pt,dir,range);
-		u32 r_cnt				= geom_DB.r_count();
-		CDB::RESULT*	_B 		= geom_DB.r_begin();
+		xrPhysX::CDB::RayTraceOptions options;
+		options.SetStart(hear_pt);
+		options.SetDir(dir);
+		options.r_range = range;
+		options.options = xrPhysX::CDB::TraceOptions::cull;
+		xrPhysX::CDB::RayTraceResult result;
+		geom_SOM->RayTrace(options, result);
 
-		if (0!=r_cnt){
-			for (u32 k=0; k<r_cnt; k++){
-				CDB::RESULT* R	 = _B+k;
-				occ_value		*= *(float*)&R->dummy;
-			}
+		for (const auto& elem : result.results)
+		{
+			occ_value *= std::bit_cast<float>(elem.data.dummy);
 		}
 	}
 	return occ_value;
@@ -240,16 +241,39 @@ float CSoundRender_Core::get_occlusion(Fvector& P, float R, Fvector* occ)
 	range = dir.magnitude	();
 	dir.div					(range);
 
-	if (0!=geom_MODEL){
+	if (geom_MODEL){
 		bool bNeedFullTest	= true;
 		// 1. Check cached polygon
 		float _u,_v,_range;
 		if (CDB::TestRayTri(base,dir,occ,_u,_v,_range,true))
-			if (_range>0 && _range<range){occ_value=psSoundOcclusionScale; bNeedFullTest=false;}
+		{
+			if (_range>0 && _range<range)
+			{
+				occ_value=psSoundOcclusionScale;
+				bNeedFullTest=false;
+			}
+		}
 		// 2. Polygon doesn't picked up - real database query
 		if (bNeedFullTest)
 		{
-			geom_DB.ray_options		(CDB::OPT_ONLYNEAREST);
+			xrPhysX::CDB::RayTraceOptions options;
+			options.SetStart(base);
+			options.SetDir(dir);
+			options.r_range = range;
+			options.options = xrPhysX::CDB::TraceOptions::only_nearest;
+			xrPhysX::CDB::RayTraceResult result;
+			geom_MODEL->RayTrace(options, result);
+
+			if (!result.results.empty())
+			{
+				const auto& res = result.results[0];
+				occ[0].set(res.verts[0]);
+				occ[1].set(res.verts[1]);
+				occ[2].set(res.verts[2]);
+				occ_value = psSoundOcclusionScale;
+			}
+			
+			/*geom_DB.ray_options		(CDB::OPT_ONLYNEAREST);
 			geom_DB.ray_query		(geom_MODEL,base,dir,range);
 			if (0!=geom_DB.r_count())
 			{ 
@@ -261,21 +285,22 @@ float CSoundRender_Core::get_occlusion(Fvector& P, float R, Fvector* occ)
 				occ[1].set			(V[T.verts[1]]);
 				occ[2].set			(V[T.verts[2]]);
 				occ_value			= psSoundOcclusionScale;
-			}
+			}*/
 		}
 	}
-	if (0!=geom_SOM)
+	if (geom_SOM)
 	{
-		geom_DB.ray_options		(CDB::OPT_CULL);
-		geom_DB.ray_query		(geom_SOM,base,dir,range);
-		u32 r_cnt				= geom_DB.r_count();
-        CDB::RESULT*	_B 		= geom_DB.r_begin();
+		xrPhysX::CDB::RayTraceOptions options;
+		options.SetStart(base);
+		options.SetDir(dir);
+		options.r_range = range;
+		options.options = xrPhysX::CDB::TraceOptions::cull;
+		xrPhysX::CDB::RayTraceResult result;
+		geom_SOM->RayTrace(options, result);
 
-		if (0!=r_cnt){
-			for (u32 k=0; k<r_cnt; k++){
-				CDB::RESULT* R_	 = _B+k;
-				occ_value		*= *(float*)&R_->dummy;
-			}
+		for (const auto& elem : result.results)
+		{
+			occ_value *= std::bit_cast<float>(elem.data.dummy);
 		}
 	}
 	return occ_value;

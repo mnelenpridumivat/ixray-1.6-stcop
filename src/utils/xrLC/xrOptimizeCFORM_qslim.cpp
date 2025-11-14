@@ -9,6 +9,7 @@
 
 void SaveAsSMF(LPCSTR fname, CDB::CollectorPacked& CL)
 {
+#if 0
 	IWriter* W = FS.w_open(fname);
 	string256 tmp;
 
@@ -28,6 +29,7 @@ void SaveAsSMF(LPCSTR fname, CDB::CollectorPacked& CL)
 		W->w_string(tmp);
 	}
 	FS.w_close(W);
+#endif
 }
 
 bool SaveCForm = false;

@@ -38,8 +38,6 @@ CSoundRender_Core::CSoundRender_Core	()
 	bPresent					= FALSE;
 	bUserEnvironment			= FALSE;
 	geom_MODEL					= nullptr;
-	geom_ENV					= nullptr;
-	geom_SOM					= nullptr;
 	s_environment				= nullptr;
 	Handler						= nullptr;
 	s_targets_pu				= 0;
@@ -59,10 +57,7 @@ CSoundRender_Core::CSoundRender_Core	()
 }
 
 CSoundRender_Core::~CSoundRender_Core()
-{
-	xr_delete					(geom_ENV);
-	xr_delete					(geom_SOM);
-	
+{	
 #ifdef IXR_WINDOWS
 	xr_delete(pSysNotification);
 #endif
@@ -161,14 +156,13 @@ void CSoundRender_Core::set_handler(sound_event* E)
 	Handler			= E;
 }
 
-void CSoundRender_Core::set_geometry_occ(CDB::MODEL* M)
+void CSoundRender_Core::set_geometry_occ(xrPhysX::CDB::MODEL* M)
 {
 	geom_MODEL		= M;
 }
 
 void CSoundRender_Core::set_geometry_som(IReader* I)
 {
-	xr_delete				(geom_SOM);
 
 	if (0==I)		return;
 
@@ -197,16 +191,14 @@ void CSoundRender_Core::set_geometry_som(IReader* I)
 			CL.add_face_packed_D(P.v3,P.v2,P.v1,*(u32*)&P.occ,0.01f);
 	}
 
-	geom_SOM = new CDB::MODEL();
-	geom_SOM->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
+	geom_SOM = xr_make_unique<xrPhysX::CDB::MODEL>();
+	geom_SOM->AddUniqueStaticGeom(CL.getVSpan(),CL.getTSpan());
 
 	geom->close();
 }
 
 void CSoundRender_Core::set_geometry_env(IReader* I)
 {
-	xr_delete				(geom_ENV);
-
 	if (0==I)				return;
 	if (0==s_environment)	return;
 
@@ -239,15 +231,15 @@ void CSoundRender_Core::set_geometry_env(IReader* I)
 	for (u32 it=0; it<H.facecount; it++)
 	{
 		CDB::TRI*	T	= tris+it;
-		u16		id_front= (u16)((T->dummy&0x0000ffff)>>0);		//	front face
-		u16		id_back	= (u16)((T->dummy&0xffff0000)>>16);		//	back face
+		u16		id_front= (u16)((T->data.dummy&0x0000ffff)>>0);		//	front face
+		u16		id_back	= (u16)((T->data.dummy&0xffff0000)>>16);		//	back face
 		R_ASSERT		(id_front<(u16)ids.size());
 		R_ASSERT		(id_back<(u16)ids.size());
-		T->dummy		= u32(ids[id_back]<<16) | u32(ids[id_front]);
+		T->data.dummy		= u32(ids[id_back]<<16) | u32(ids[id_front]);
 	}
 
-	geom_ENV			= new CDB::MODEL();
-	geom_ENV->build		(verts, H.vertcount, tris, H.facecount);
+	geom_ENV = xr_make_unique<xrPhysX::CDB::MODEL>();
+	geom_ENV->AddUniqueStaticGeom({verts, H.vertcount}, {tris, H.facecount});
 
 	geom_ch->close			();
 	geom->close				();
@@ -410,41 +402,40 @@ CSoundRender_Environment* CSoundRender_Core::get_environment(const Fvector& P)
 	else if (geom_ENV)
 	{
 		Fvector	dir = { 0,-1,0 };
-		geom_DB.ray_options(CDB::OPT_ONLYNEAREST);
-		geom_DB.ray_query(geom_ENV, P, dir, 1000.f);
+		
+		xrPhysX::CDB::RayTraceOptions options;
+		options.SetStart(P);
+		options.SetDir(dir);
+		options.r_range = 1000.f;
+		options.options = xrPhysX::CDB::TraceOptions::only_nearest;
+		xrPhysX::CDB::RayTraceResult result;
+		geom_ENV->RayTrace(options, result);
 
-		if (geom_DB.r_count()) 
+		if (!result.results.empty())
 		{
-			CDB::RESULT* r = geom_DB.r_begin();
-			CDB::TRI* T = geom_ENV->get_tris() + r->id;
-			Fvector* V = geom_ENV->get_verts();
-
+			auto& res = result.results[0];
+			
 			Fvector tri_norm;
-			tri_norm.mknormal(V[T->verts[0]], V[T->verts[1]], V[T->verts[2]]);
+			tri_norm.mknormal(res.verts[0], res.verts[1], res.verts[2]);
 
 			float dot = dir.dotproduct(tri_norm);
 			if (dot < 0)
 			{
-				u16 id_front = (u16)((T->dummy & 0x0000ffff) >> 0);	//	front face
+				u16 id_front = (u16)((res.data.dummy & 0x0000ffff) >> 0);	//	front face
 				return s_environment->Get(id_front);
 			}
 			else
 			{
-				u16 id_back = (u16)((T->dummy & 0xffff0000) >> 16);	//	back face
+				u16 id_back = (u16)((res.data.dummy & 0xffff0000) >> 16);	//	back face
 				return s_environment->Get(id_back);
 			}
+			
 		}
-		else
-		{
-			identity.set_identity();
-			return &identity;
-		}
-	}
-	else
-	{
 		identity.set_identity();
 		return &identity;
 	}
+	identity.set_identity();
+	return &identity;
 }
 
 void CSoundRender_Core::env_apply		()

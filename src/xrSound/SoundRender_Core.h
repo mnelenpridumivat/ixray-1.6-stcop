@@ -3,6 +3,7 @@
 #include "SoundRender.h"
 #include "SoundRender_Environment.h"
 #include "SoundRender_Cache.h"
+#include "../xrCore/PhysX/Collision/xrCDB.h"
 
 class CNotificationClient;
 
@@ -35,10 +36,9 @@ public:
 	sound_event*						Handler;
 protected:
 	// Collider
-	CDB::COLLIDER						geom_DB;
-	CDB::MODEL*							geom_SOM;
-	CDB::MODEL*							geom_MODEL;
-	CDB::MODEL*							geom_ENV;
+	xr_unique_ptr<xrPhysX::CDB::MODEL>	geom_SOM;
+	xr_unique_ptr<xrPhysX::CDB::MODEL>	geom_ENV;
+	xrPhysX::CDB::MODEL*				geom_MODEL;
 
 	// Containers
 	xr_vector<CSoundRender_Source*>		s_sources;
@@ -81,7 +81,7 @@ public:
 	virtual void						set_master_volume		( float			f )=0;
 	virtual void						set_geometry_env		( IReader*		I );
 	virtual void						set_geometry_som		( IReader*		I );
-	virtual void						set_geometry_occ		( CDB::MODEL*	M );
+	virtual void						set_geometry_occ		( xrPhysX::CDB::MODEL*	M );
 	virtual void						set_handler				( sound_event*	E );
 
 	virtual void						update					( const Fvector& P, const Fvector& D, const Fvector& N );

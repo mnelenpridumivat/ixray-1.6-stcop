@@ -117,7 +117,6 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	g_pGamePersistent->SetLoadStageTitle("st_loading_cform");
 	g_pGamePersistent->LoadTitle	();
 	ObjectSpace.Load			( build_callback );
-	//Sound->set_geometry_occ		( &Static );
 	Sound->set_geometry_occ		(ObjectSpace.GetStaticModel	());
 	Sound->set_handler			( _sound_event );
 

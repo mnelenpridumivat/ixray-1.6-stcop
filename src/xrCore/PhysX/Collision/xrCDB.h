@@ -16,7 +16,7 @@ namespace xrPhysX::CDB
     class MODEL;
     constexpr u16 SectorInvalid = u16(-1);
     
-    class CollisionPrototype
+    class XRCORE_API CollisionPrototype
     {
         physx::PxTriangleMesh* Prototype;
         xr_vector<::CDB::TRIExtra> DataPerTriangle = {};
@@ -34,7 +34,7 @@ namespace xrPhysX::CDB
 
     class StableInstanceRef;
     
-    class CollisionInstance {
+    class XRCORE_API CollisionInstance {
         MODEL* CollisionModel;
         physx::PxRigidStatic* m_actor;
         xr_unique_ptr<StableInstanceRef> stable_ref;
@@ -50,7 +50,7 @@ namespace xrPhysX::CDB
         u16 GetSector() const { return Sector; }
     };
 
-    class StableInstanceRef
+    class XRCORE_API StableInstanceRef
     {
         MODEL* CollisionModel = nullptr;
         u32 ID = u32(-1);
@@ -71,7 +71,7 @@ namespace xrPhysX::CDB
 
     ENUM_CLASS_FLAGS(TraceOptions)
 
-    class RayTraceOptions
+    class XRCORE_API RayTraceOptions
     {
         physx::PxVec3 r_start;
         physx::PxVec3 r_dir;
@@ -114,13 +114,13 @@ namespace xrPhysX::CDB
         bool IsFrontFace(const physx::PxRaycastHit& hit) const;
     };*/
     
-    class RayTraceResult
+    class XRCORE_API RayTraceResult
     {
     public:
         xr_vector<::CDB::RESULT> results;
     };
     
-    class MODEL
+    class XRCORE_API MODEL
     {
         xr_vector<CollisionPrototype> m_prototypes;
         xr_vector<CollisionInstance> m_instances;

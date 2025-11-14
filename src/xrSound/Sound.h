@@ -9,6 +9,11 @@
 #define SNDENV_FILENAME				"sEnvironment.xr"
 #define OGG_COMMENT_VERSION 		0x0003 
 
+namespace xrPhysX::CDB
+{
+	class MODEL;
+}
+
 // refs
 class	CObject;
 class	XRSOUND_API					CSound_params;
@@ -270,7 +275,7 @@ public:
 	virtual void					set_master_volume		( float f=1.f )																			= 0;
 	virtual void					set_geometry_env		( IReader* I )																			= 0;
 	virtual void					set_geometry_som		( IReader* I )																			= 0;
-	virtual void					set_geometry_occ		( CDB::MODEL* M )																		= 0;
+	virtual void					set_geometry_occ		( xrPhysX::CDB::MODEL* M )																		= 0;
 	virtual void					set_handler				( sound_event* E )																		= 0;
 
 	virtual void					update					( const Fvector& P, const Fvector& D, const Fvector& N)									= 0;

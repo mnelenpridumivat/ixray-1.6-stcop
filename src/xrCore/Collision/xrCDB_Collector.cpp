@@ -23,7 +23,7 @@ namespace CDB
 		T.verts		[0] = (u32)verts.size();
 		T.verts		[1] = (u32)verts.size()+1;
 		T.verts		[2] = (u32)verts.size()+2;  
-		T.dummy			= dummy;
+		T.data.dummy			= dummy;
 
 		verts.push_back(v0);
 		verts.push_back(v1);
@@ -37,8 +37,8 @@ namespace CDB
 		T.verts	[0]		= (u32)verts.size();
 		T.verts	[1]		= (u32)verts.size()+1;
 		T.verts	[2]		= (u32)verts.size()+2;
-		T.material		= material;
-		T.sector		= sector;
+		T.data.material		= material;
+		T.data.sector		= sector;
 
 		verts.push_back(v0);
 		verts.push_back(v1);
@@ -56,8 +56,8 @@ namespace CDB
 		T.verts	[0]		= VPack(v0,eps);
 		T.verts	[1]		= VPack(v1,eps);
 		T.verts	[2]		= VPack(v2,eps);
-		T.material		= material;
-		T.sector		= sector;
+		T.data.material		= material;
+		T.data.sector		= sector;
 		faces.push_back(T);
 	}
 
@@ -70,7 +70,7 @@ namespace CDB
 		T.verts	[0] = VPack(v0,eps);
 		T.verts	[1] = VPack(v1,eps);
 		T.verts	[2] = VPack(v2,eps);
-		T.dummy			= dummy;
+		T.data.dummy			= dummy;
 		faces.push_back(T);
 	}
 
@@ -146,12 +146,13 @@ namespace CDB
 
     IC BOOL similar(TRI& T1, TRI& T2)
     {
-        if ((T1.verts[0]==T2.verts[0]) && (T1.verts[1]==T2.verts[1]) && (T1.verts[2]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
-        if ((T1.verts[0]==T2.verts[0]) && (T1.verts[2]==T2.verts[1]) && (T1.verts[1]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
-        if ((T1.verts[2]==T2.verts[0]) && (T1.verts[0]==T2.verts[1]) && (T1.verts[1]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
-        if ((T1.verts[2]==T2.verts[0]) && (T1.verts[1]==T2.verts[1]) && (T1.verts[0]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
-        if ((T1.verts[1]==T2.verts[0]) && (T1.verts[0]==T2.verts[1]) && (T1.verts[2]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
-        if ((T1.verts[1]==T2.verts[0]) && (T1.verts[2]==T2.verts[1]) && (T1.verts[0]==T2.verts[2]) && (T1.dummy==T2.dummy)) return TRUE;
+		if (T1.data.dummy!=T2.data.dummy) return false;
+        if ((T1.verts[0]==T2.verts[0]) && (T1.verts[1]==T2.verts[1]) && (T1.verts[2]==T2.verts[2])) return TRUE;
+        if ((T1.verts[0]==T2.verts[0]) && (T1.verts[2]==T2.verts[1]) && (T1.verts[1]==T2.verts[2])) return TRUE;
+        if ((T1.verts[2]==T2.verts[0]) && (T1.verts[0]==T2.verts[1]) && (T1.verts[1]==T2.verts[2])) return TRUE;
+        if ((T1.verts[2]==T2.verts[0]) && (T1.verts[1]==T2.verts[1]) && (T1.verts[0]==T2.verts[2])) return TRUE;
+        if ((T1.verts[1]==T2.verts[0]) && (T1.verts[0]==T2.verts[1]) && (T1.verts[2]==T2.verts[2])) return TRUE;
+        if ((T1.verts[1]==T2.verts[0]) && (T1.verts[2]==T2.verts[1]) && (T1.verts[0]==T2.verts[2])) return TRUE;
         return FALSE;
     }
     void Collector::remove_duplicate_T( )
@@ -272,8 +273,8 @@ namespace CDB
 		T.verts	[0] = VPack(v0);
 		T.verts	[1] = VPack(v1);
 		T.verts	[2] = VPack(v2);
-		T.material		= material;
-		T.sector		= sector;
+		T.data.material		= material;
+		T.data.sector		= sector;
 		flags.push_back(_flags);
 		faces.push_back(T);
 
@@ -288,7 +289,7 @@ namespace CDB
 		T.verts	[0] = VPack(v0);
 		T.verts	[1] = VPack(v1);
 		T.verts	[2] = VPack(v2);
-		T.dummy		= dummy;
+		T.data.dummy		= dummy;
 		faces.push_back(T);
 		flags.push_back(_flags);
 	}

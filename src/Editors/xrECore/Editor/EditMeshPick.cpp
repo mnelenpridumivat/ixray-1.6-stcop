@@ -4,6 +4,7 @@
 #include "EditObject.h"
 #include "ui_main.h"
 #include "pick_defs.h"
+#include "PhysX/Collision/xrCDB.h"
 
 static IntVec		sml_processed;
 static Fvector		sml_normal;
@@ -30,30 +31,63 @@ void CEditableMesh::GenerateCFModel()
 				CL.add_face_D(m_Vertices[F.pv[2].pindex], m_Vertices[F.pv[1].pindex], m_Vertices[F.pv[0].pindex], *it);
 		}
 	}
-	m_CFModel = new CDB::MODEL();
-	m_CFModel->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
+	m_CFModel = xr_make_unique<xrPhysX::CDB::MODEL>();
+	m_CFModel->AddUniqueStaticGeom(CL.getVSpan(), CL.getTSpan());
 }
 
 void CEditableMesh::RayQuery(SPickQuery& pinf)
 {
-	if (!m_CFModel) GenerateCFModel();
+	if (!m_CFModel)
+	{
+		GenerateCFModel();
+	}
 
-	XRC.ray_query(m_CFModel, pinf.m_Start, pinf.m_Direction, pinf.m_Dist);
-	for (int r=0; r< XRC.r_count(); r++)
-		pinf.append		(XRC.r_begin()+r,m_Parent,this);
+	xrPhysX::CDB::RayTraceOptions options;
+	options.SetStart(pinf.m_Start);
+	options.SetDir(pinf.m_Direction);
+	options.r_range = pinf.m_Dist;
+	//options.options = xrPhysX::CDB::TraceOptions::cull;
+	xrPhysX::CDB::RayTraceResult result;
+	m_CFModel->RayTrace(options, result);
+
+	for (const auto& elem : result.results)
+	{
+		pinf.append(elem, m_Parent, this);
+	}
 }
 
 void CEditableMesh::RayQuery(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf)
 {
-	if (!m_CFModel) GenerateCFModel();
-	XRC.ray_query(inv_parent, m_CFModel, pinf.m_Start, pinf.m_Direction, pinf.m_Dist);
-	for (int r=0; r< XRC.r_count(); r++)
-		pinf.append_mtx(parent, XRC.r_begin()+r,m_Parent,this);
+	if (!m_CFModel)
+	{
+		GenerateCFModel();
+	}
+
+	xrPhysX::CDB::RayTraceOptions options;
+	{
+		Fvector S, D;
+		inv_parent.transform_tiny(S, pinf.m_Start);
+		inv_parent.transform_dir(D, pinf.m_Direction);
+		options.SetStart(S);
+		options.SetDir(D);
+	}
+	options.r_range = pinf.m_Dist;
+	//options.options = xrPhysX::CDB::TraceOptions::cull;
+	xrPhysX::CDB::RayTraceResult result;
+	m_CFModel->RayTrace(options, result);
+
+	for (const auto& elem : result.results)
+	{
+		pinf.append(elem, m_Parent, this);
+	}
 }
 
 void CEditableMesh::BoxQuery(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf)
 {
-	if (!m_CFModel) GenerateCFModel();
+	if (!m_CFModel)
+	{
+		GenerateCFModel();
+	}
 	XRC.box_query(inv_parent, m_CFModel, pinf.m_BB);
 	for (int r=0; r< XRC.r_count(); r++)
 		pinf.append_mtx(parent, XRC.r_begin()+r,m_Parent,this);
@@ -64,33 +98,50 @@ static const float _sqrt_flt_max = _sqrt(flt_max*0.5f);
 bool CEditableMesh::RayPick(float& distance, const Fvector& start, const Fvector& direction, const Fmatrix& inv_parent, SRayPickInfo* pinf)
 {
 	if (!m_Flags.is(flVisible))
+	{
 		return false;
+	}
 
 	if (!m_CFModel)
-		GenerateCFModel();
-
-	XRC.ray_options(CDB::OPT_ONLYNEAREST | CDB::OPT_CULL);
-	XRC.ray_query(inv_parent, m_CFModel, start, direction, _sqrt_flt_max);
-
-	if (XRC.r_count())
 	{
-		CDB::RESULT* I = XRC.r_begin();
-		if (I->range < distance)
-		{
-			if (pinf)
-			{
-				pinf->SetRESULT(m_CFModel, I);
-				pinf->e_obj = m_Parent;
-				pinf->e_mesh = this;
-				pinf->pt.mul(direction, pinf->inf.range);
-				pinf->pt.add(start);
-			}
-
-			distance = I->range;
-			return true;
-		}
+		GenerateCFModel();
 	}
-	return false;
+	
+	xrPhysX::CDB::RayTraceOptions options;
+	{
+		Fvector S, D;
+		inv_parent.transform_tiny(S, start);
+		inv_parent.transform_dir(D, direction);
+		options.SetStart(S);
+		options.SetDir(D);
+	}
+	options.r_range = _sqrt_flt_max;
+	options.options = xrPhysX::CDB::TraceOptions::cull & xrPhysX::CDB::TraceOptions::only_nearest;
+	xrPhysX::CDB::RayTraceResult result;
+	m_CFModel->RayTrace(options, result);
+
+	if (result.results.empty())
+	{
+		return false;
+	}
+
+	const auto& res = result.results[0];
+	if (res.range >= distance)
+	{
+		return false;
+	}
+
+	if (pinf)
+	{
+		pinf->SetRESULT(res);
+		pinf->e_obj = m_Parent;
+		pinf->e_mesh = this;
+		pinf->pt.mul(direction, pinf->inf.range);
+		pinf->pt.add(start);
+	}
+
+	distance = res.range;
+	return true;
 }
 
 bool CEditableMesh::CHullPickMesh(PlaneVec& pl, const Fmatrix& parent)
