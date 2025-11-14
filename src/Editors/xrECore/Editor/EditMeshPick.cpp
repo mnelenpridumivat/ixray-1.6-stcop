@@ -47,7 +47,7 @@ void CEditableMesh::RayQuery(SPickQuery& pinf)
 	options.SetDir(pinf.m_Direction);
 	options.r_range = pinf.m_Dist;
 	//options.options = xrPhysX::CDB::TraceOptions::cull;
-	xrPhysX::CDB::RayTraceResult result;
+	xrPhysX::CDB::TraceResult result;
 	m_CFModel->RayTrace(options, result);
 
 	for (const auto& elem : result.results)
@@ -73,7 +73,7 @@ void CEditableMesh::RayQuery(const Fmatrix& parent, const Fmatrix& inv_parent, S
 	}
 	options.r_range = pinf.m_Dist;
 	//options.options = xrPhysX::CDB::TraceOptions::cull;
-	xrPhysX::CDB::RayTraceResult result;
+	xrPhysX::CDB::TraceResult result;
 	m_CFModel->RayTrace(options, result);
 
 	for (const auto& elem : result.results)
@@ -88,6 +88,10 @@ void CEditableMesh::BoxQuery(const Fmatrix& parent, const Fmatrix& inv_parent, S
 	{
 		GenerateCFModel();
 	}
+	// Do we really need to get all poligons, even if we need only objects?
+
+	
+	
 	XRC.box_query(inv_parent, m_CFModel, pinf.m_BB);
 	for (int r=0; r< XRC.r_count(); r++)
 		pinf.append_mtx(parent, XRC.r_begin()+r,m_Parent,this);
@@ -117,7 +121,7 @@ bool CEditableMesh::RayPick(float& distance, const Fvector& start, const Fvector
 	}
 	options.r_range = _sqrt_flt_max;
 	options.options = xrPhysX::CDB::TraceOptions::cull & xrPhysX::CDB::TraceOptions::only_nearest;
-	xrPhysX::CDB::RayTraceResult result;
+	xrPhysX::CDB::TraceResult result;
 	m_CFModel->RayTrace(options, result);
 
 	if (result.results.empty())

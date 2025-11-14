@@ -1,9 +1,11 @@
 #pragma once
 #include <PxRigidStatic.h>
 
+#include "PxQueryFiltering.h"
 #include "PxQueryReport.h"
 #include "_stl_extensions.h"
 #include "Collision/xrCDB.h"
+#include "PhysX/PhysXCore.h"
 #include "pvd/PxPvd.h"
 
 namespace CDB
@@ -94,6 +96,49 @@ namespace xrPhysX::CDB
         float r_range = 10000.f;
     };
 
+    class XRCORE_API AABBBoxTraceOptions
+    {
+        physx::PxVec3 center;
+        physx::PxVec3 halfExtents;
+    public:
+        TraceOptions options;
+        void SetAABB(const Fbox& value)
+        {
+            Fvector xrCenter, xrExtents;
+            value.get_CD(xrCenter, xrExtents);
+            center.x = xrCenter.x;
+            center.y = xrCenter.y;
+            center.z = xrCenter.z;
+            halfExtents.x = xrExtents.x;
+            halfExtents.y = xrExtents.y;
+            halfExtents.z = xrExtents.z;
+        }
+        const physx::PxVec3& GetCenter() const { return center; }
+        const physx::PxVec3& GetExtents() const { return halfExtents; }
+    };
+
+    class XRCORE_API OBBBoxTraceOptions
+    {
+        physx::PxVec3 center;
+        physx::PxVec3 halfExtents;
+        physx::PxQuat rotation;
+    public:
+        TraceOptions options;
+        void SetOBB(const Fobb& value)
+        {
+            center.x = value.m_translate.x;
+            center.y = value.m_translate.y;
+            center.z = value.m_translate.z;
+            halfExtents.x = value.m_halfsize.x;
+            halfExtents.y = value.m_halfsize.y;
+            halfExtents.z = value.m_halfsize.z;
+            PhysXMathHelper::Conv_MatrixToPxQuatNoScale(rotation, value.m_rotate);
+        }
+        const physx::PxVec3& GetCenter() const { return center; }
+        const physx::PxVec3& GetExtents() const { return halfExtents; }
+        const physx::PxQuat& GetRot() const { return rotation; }
+    };
+
     /*class xrRaycastBuffer : public physx::PxRaycastBuffer
     {
         xrPhysX::CDB::TraceOptions options;
@@ -114,7 +159,7 @@ namespace xrPhysX::CDB
         bool IsFrontFace(const physx::PxRaycastHit& hit) const;
     };*/
     
-    class XRCORE_API RayTraceResult
+    class XRCORE_API TraceResult
     {
     public:
         xr_vector<::CDB::RESULT> results;
@@ -131,6 +176,13 @@ namespace xrPhysX::CDB
 
         void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]);
         void ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result);
+
+        void ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+        void GetIntersectingTriangles(const physx::PxOverlapHit& hit, const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+        
+        void ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+
+        void ExecuteBoxTrace(const physx::PxBoxGeometry& geom, const physx::PxTransform& transform, TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result);
     public:
         MODEL();
         ~MODEL();
@@ -148,6 +200,8 @@ namespace xrPhysX::CDB
 
         void Finalize();
 
-        void RayTrace(const RayTraceOptions& options, RayTraceResult& result);
+        void RayTrace(const RayTraceOptions& options, TraceResult& result);
+        void BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result);
+        void BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result);
     };
 }

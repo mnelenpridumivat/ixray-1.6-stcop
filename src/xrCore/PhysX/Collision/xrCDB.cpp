@@ -117,12 +117,6 @@ void xrPhysX::CDB::MODEL::ConvertHitToVertices(const physx::PxRaycastHit& hit, F
 
 void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result)
 {
-    auto shape = hit.shape;
-    physx::PxGeometryHolder geom = shape->getGeometry();
-    VERIFY(geom.getType() == physx::PxGeometryType::eTRIANGLEMESH);
-    auto mesh = geom.triangleMesh().triangleMesh;
-    auto transform = shape->getActor()->getGlobalPose();
-
     ConvertHitToVertices(hit, result.verts);
     
     result.u = hit.u;
@@ -143,6 +137,86 @@ void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::C
         RealSector = Triangle.sector;
     }
     result.data.sector = RealSector;
+}
+
+void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result)
+{
+    VERIFY(hit.actor && hit.shape);
+
+    auto shape = hit.shape;
+    physx::PxGeometryHolder geom = shape->getGeometry();
+    VERIFY(geom.getType() == physx::PxGeometryType::eTRIANGLEMESH);
+    auto& mesh_geom = geom.triangleMesh();
+    auto mesh = mesh_geom.triangleMesh;
+    
+    if ((bool)(options&TraceOptions::only_nearest))
+    {
+        GetIntersectingTriangles(hit, mesh, options, result);
+    } else
+    {
+        
+    }
+    
+    ::CDB::RESULT res;
+    res.id = ;
+    res.verts[0] = ;
+    res.verts[1] = ;
+    res.verts[2] = ;
+    res.data.dummy = ;
+}
+
+void xrPhysX::CDB::MODEL::GetIntersectingTriangles(const physx::PxOverlapHit& hit,
+    const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result)
+{
+    const physx::PxU32* indices = (const physx::PxU32*)(geom->getTriangles());
+    const physx::PxVec3* vertices = geom->getVertices();
+    physx::PxU32 triangleCount = geom->getNbTriangles();
+
+    VERIFY(indices && vertices);
+
+    
+    
+}
+
+void xrPhysX::CDB::MODEL::ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options,
+                                               xr_vector<::CDB::RESULT>& result)
+{
+    for (const auto& hit : hits)
+    {
+        if ((bool)(options&TraceOptions::full_test))
+        {
+            ConvertHitToResult(hit, options, result);
+        } else
+        {
+            FATAL("Not implemented");
+            //result.emplace_back();
+            //ConvertHitToResult(hit, options, result);
+        }
+        
+        if ((bool)(options&TraceOptions::only_nearest))
+        {
+            break;
+        }
+    }
+}
+
+void xrPhysX::CDB::MODEL::ExecuteBoxTrace(const physx::PxBoxGeometry& geom, const physx::PxTransform& transform,
+                                          TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result)
+{
+    physx::PxOverlapBuffer buffer;
+    bool hasAny = m_scene->overlap(geom, transform, buffer, 
+                                  physx::PxQueryFilterData(QueryFlags));
+    if (hasAny)
+    {
+        VERIFY(buffer.hasAnyHits());
+        if ((bool)(options&TraceOptions::only_first))
+        {
+            ConvertHitsToResults({buffer.touches, 1}, options, result.results);
+        } else if ((bool)(options&TraceOptions::only_nearest))
+        {
+            ConvertHitsToResults({buffer.touches, buffer.nbTouches}, options, result.results);
+        }
+    }
 }
 
 /*physx::PxAgain xrPhysX::CDB::xrRaycastBuffer::processTouches(const physx::PxRaycastHit* buffer, physx::PxU32 nbHits)
@@ -246,7 +320,7 @@ void xrPhysX::CDB::MODEL::Finalize()
     m_scene->flushSimulation();
 }
 
-void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, RayTraceResult& result)
+void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& result)
 {
     physx::PxHitFlags HitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC;
@@ -320,4 +394,32 @@ void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, RayTraceResul
         auto& res = result.results.emplace_back();
         ConvertHitToResult(hit, res);
     }
+}
+
+void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result)
+{
+    physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;
+    if ((bool)(options.options & TraceOptions::only_first))
+    {
+        QueryFlags |= physx::PxQueryFlag::eANY_HIT;
+    }
+
+    physx::PxBoxGeometry geom(options.GetExtents());
+    physx::PxTransform post(options.GetCenter());
+
+    ExecuteBoxTrace(geom, post, options.options, QueryFlags, result);
+}
+
+void xrPhysX::CDB::MODEL::BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result)
+{
+    physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;
+    if ((bool)(options.options & TraceOptions::only_first))
+    {
+        QueryFlags |= physx::PxQueryFlag::eANY_HIT;
+    }
+
+    physx::PxBoxGeometry geom(options.GetExtents());
+    physx::PxTransform post(options.GetCenter(), options.GetRot());
+    
+    ExecuteBoxTrace(geom, post, options.options, QueryFlags, result);
 }

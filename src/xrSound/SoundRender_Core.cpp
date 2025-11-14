@@ -408,7 +408,7 @@ CSoundRender_Environment* CSoundRender_Core::get_environment(const Fvector& P)
 		options.SetDir(dir);
 		options.r_range = 1000.f;
 		options.options = xrPhysX::CDB::TraceOptions::only_nearest;
-		xrPhysX::CDB::RayTraceResult result;
+		xrPhysX::CDB::TraceResult result;
 		geom_ENV->RayTrace(options, result);
 
 		if (!result.results.empty())

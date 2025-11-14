@@ -215,7 +215,7 @@ float CSoundRender_Core::get_occlusion_to( const Fvector& hear_pt, const Fvector
 		options.SetDir(dir);
 		options.r_range = range;
 		options.options = xrPhysX::CDB::TraceOptions::cull;
-		xrPhysX::CDB::RayTraceResult result;
+		xrPhysX::CDB::TraceResult result;
 		geom_SOM->RayTrace(options, result);
 
 		for (const auto& elem : result.results)
@@ -261,7 +261,7 @@ float CSoundRender_Core::get_occlusion(Fvector& P, float R, Fvector* occ)
 			options.SetDir(dir);
 			options.r_range = range;
 			options.options = xrPhysX::CDB::TraceOptions::only_nearest;
-			xrPhysX::CDB::RayTraceResult result;
+			xrPhysX::CDB::TraceResult result;
 			geom_MODEL->RayTrace(options, result);
 
 			if (!result.results.empty())
@@ -295,7 +295,7 @@ float CSoundRender_Core::get_occlusion(Fvector& P, float R, Fvector* occ)
 		options.SetDir(dir);
 		options.r_range = range;
 		options.options = xrPhysX::CDB::TraceOptions::cull;
-		xrPhysX::CDB::RayTraceResult result;
+		xrPhysX::CDB::TraceResult result;
 		geom_SOM->RayTrace(options, result);
 
 		for (const auto& elem : result.results)
