@@ -115,7 +115,7 @@ void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<const Fvector3>& vertices, 
     Prototype->SetExtraData(faces);
 }
 
-void xrPhysX::CDB::MODEL::ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3])
+void xrPhysX::CDB::MODEL::ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]) const
 {
     auto shape = hit.shape;
     physx::PxGeometryHolder geom = shape->getGeometry();
@@ -147,7 +147,7 @@ void xrPhysX::CDB::MODEL::ConvertHitToVertices(const physx::PxRaycastHit& hit, F
     
 }
 
-void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result)
+void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result) const
 {
     ConvertHitToVertices(hit, result.verts);
     
@@ -223,7 +223,7 @@ void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::C
 }*/
 
 void xrPhysX::CDB::MODEL::ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options,
-                                               xr_vector<::CDB::RESULT>& result)
+                                               xr_vector<::CDB::RESULT>& result) const
 {
     for (const auto& hit : hits)
     {
@@ -245,7 +245,7 @@ void xrPhysX::CDB::MODEL::ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits
 }
 
 void xrPhysX::CDB::MODEL::ExecuteBoxTrace(const physx::PxBoxGeometry& geom, const physx::PxTransform& transform,
-                                          TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result)
+                                          TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result) const
 {
     physx::PxOverlapBuffer buffer;
     bool hasAny = m_scene->overlap(geom, transform, buffer, 
@@ -365,7 +365,7 @@ void xrPhysX::CDB::MODEL::Finalize()
     ready = true;
 }
 
-void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& result)
+void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& result) const
 {
     VERIFY(ready);
     physx::PxHitFlags HitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;
@@ -442,7 +442,7 @@ void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& 
     }
 }
 
-void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result)
+void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result) const
 {
     VERIFY(ready);
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;
@@ -457,7 +457,7 @@ void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResu
     ExecuteBoxTrace(geom, post, options.options, QueryFlags, result);
 }
 
-void xrPhysX::CDB::MODEL::BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result)
+void xrPhysX::CDB::MODEL::BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result) const
 {
     VERIFY(ready);
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;

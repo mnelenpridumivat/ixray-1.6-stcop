@@ -96,14 +96,22 @@ void CWalmarkManager::StartWorkflow(const shared_str& sect, bool UseCamDir)
 	float				m_wallmark_size		= pSettings->r_float(sect,"size");
 	u32					max_wallmarks_count = pSettings->r_u32(sect,"max_count");
 
+    xrPhysX::CDB::AABBBoxTraceOptions options;
+    {
+        Fbox AABB;
+	    AABB.setb(m_pos, {m_trace_dist,m_trace_dist,m_trace_dist});
+	    options.SetAABB(AABB);
+    }
+    xrPhysX::CDB::TraceResult result;
+    Level().ObjectSpace.GetStaticModel().BoxTrace(options, result);
 
-	XRC.box_options							(0);
-	XRC.box_query							(Level().ObjectSpace.GetStaticModel(),m_pos,Fvector().set(m_trace_dist,m_trace_dist,m_trace_dist));
-
-	CDB::TRI*		T_array					= Level().ObjectSpace.GetStaticTris();
-	Fvector*		V_array					= Level().ObjectSpace.GetStaticVerts();
-	CDB::RESULT*	R_begin                 = XRC.r_begin();
-	CDB::RESULT*    R_end                   = XRC.r_end();
+	//XRC.box_options							(0);
+	//XRC.box_query							(Level().ObjectSpace.GetStaticModel(),m_pos,Fvector().set(m_trace_dist,m_trace_dist,m_trace_dist));
+    
+	//CDB::TRI*		T_array					= Level().ObjectSpace.GetStaticTris();
+	//Fvector*		V_array					= Level().ObjectSpace.GetStaticVerts();
+	//CDB::RESULT*	R_begin                 = XRC.r_begin();
+	//CDB::RESULT*    R_end                   = XRC.r_end();
 
 	u32				wm_count	= 0;
 
@@ -111,8 +119,60 @@ void CWalmarkManager::StartWorkflow(const shared_str& sect, bool UseCamDir)
 	u32 _ray_test		= 0;
 	u32 _tri_not_plane	= 0;
 	u32 _not_dist		= 0;
+    
+    for (const auto& res : result.results)
+    {
+        if(wm_count >= max_wallmarks_count)
+        {
+            break;
+        }
+        
+		
+        Fvector end_point;
+        Fvector pdir;
+        float pfSParam;
+        float pfTParam;
 
-	for (CDB::RESULT* Res=R_begin; Res!=R_end; ++Res)
+        Fvector _tri[3];
+        _tri[0] = res.verts[0];
+        _tri[1] = res.verts[1];
+        _tri[2] = res.verts[2];
+
+        //CDB::TRI*		_t			= T_array + Res->id;
+
+        //_tri[0]						= V_array[_t->verts[0]];
+        //_tri[1]						= V_array[_t->verts[1]];
+        //_tri[2]						= V_array[_t->verts[2]];
+
+        float dist					= Distance (m_pos, _tri, pfSParam, pfTParam, end_point, pdir);
+
+        float test					= dist-EPS_L;
+		
+        if(test>0.f)
+        {
+            if(Level().ObjectSpace.RayTest(m_pos, pdir, test, collide::rqtStatic, nullptr, m_owner))
+            {
+                ++_ray_test;
+                continue;
+            }
+        }
+        if( fis_zero(pfSParam) || fis_zero(pfTParam) || fsimilar(pfSParam,1.0f) || fsimilar(pfTParam,1.0f)  )
+        {
+            ++_tri_not_plane;
+            continue;
+        }
+
+        if(dist <= m_trace_dist )
+        {
+            ::Render->add_StaticWallmark(&*m_wallmarks, end_point, m_wallmark_size, _t, V_array, UseCamDir);
+            ++wm_count;
+        }else
+        {
+            ++_not_dist;
+        }
+    }
+
+	/*for (CDB::RESULT* Res=R_begin; Res!=R_end; ++Res)
 	{
 		if(wm_count >= max_wallmarks_count)
             break;
@@ -154,7 +214,7 @@ void CWalmarkManager::StartWorkflow(const shared_str& sect, bool UseCamDir)
 			++wm_count;
 		}else
 			++_not_dist;
-	}
+	}*/
 }
 
 void CWalmarkManager::Load (LPCSTR section)

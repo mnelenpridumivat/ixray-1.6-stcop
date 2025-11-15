@@ -249,8 +249,10 @@ CWallmarksEngine::static_wallmark* CWallmarksEngine::AddWallmark_internal(
 		xrc.box_options		(CDB::OPT_FULL_TEST);
 		xrc.box_query		(g_pGameLevel->ObjectSpace.GetStaticModel(),bbc,bbd);
 		u32	triCount		= xrc.r_count	();
-		if (0==triCount)	
+		if (0==triCount)
+		{
 			return nullptr;
+		}
 
 		CDB::TRI* tris		= g_pGameLevel->ObjectSpace.GetStaticTris();
 		sml_collector.clear	();

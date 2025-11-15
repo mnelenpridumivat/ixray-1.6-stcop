@@ -6,7 +6,7 @@
 #include "xrXRC.h"
 
 #ifndef IXRAY_PHYSX
-XRCORE_API xrXRC XRC;
+//XRCORE_API xrXRC XRC;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

@@ -232,7 +232,24 @@ bool CEditableMesh::BoxPick(const Fbox& box, const Fmatrix& inv_parent, SBoxPick
 		GenerateCFModel();
 	}
 
-	XRC.box_query(inv_parent, m_CFModel, box);
+	xrPhysX::CDB::AABBBoxTraceOptions options;
+	options.SetAABB(box);
+	xrPhysX::CDB::TraceResult result;
+	m_CFModel->BoxTrace(options, result);
+
+	if (!result.results.empty())
+	{
+		auto& elem = pinf.emplace_back();
+		elem.e_obj = m_Parent;
+		elem.e_mesh = this;
+		for (const auto& res : result.results)
+		{
+			elem.AddRESULT(res);
+		}
+		return true;
+	}
+
+	/*XRC.box_query(inv_parent, m_CFModel, box);
 	if (XRC.r_count())
 	{
 		pinf.push_back(SBoxPickInfo());
@@ -244,7 +261,7 @@ bool CEditableMesh::BoxPick(const Fbox& box, const Fmatrix& inv_parent, SBoxPick
 		}
 		
 		return true;
-	}
+	}*/
 
 	return false;
 }

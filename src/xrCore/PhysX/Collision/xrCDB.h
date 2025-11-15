@@ -184,15 +184,15 @@ namespace xrPhysX::CDB
         void AddInstances(u32 prototype, const xr_vector<CformInstance::InstanceData>& instances);
         void AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces);
 
-        void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]);
-        void ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result);
+        void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]) const;
+        void ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result) const;
 
         //void ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result);
         //void GetIntersectingTriangles(const physx::PxOverlapHit& hit, const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result);
         
-        void ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+        void ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options, xr_vector<::CDB::RESULT>& result) const;
 
-        void ExecuteBoxTrace(const physx::PxBoxGeometry& geom, const physx::PxTransform& transform, TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result);
+        void ExecuteBoxTrace(const physx::PxBoxGeometry& geom, const physx::PxTransform& transform, TraceOptions options, physx::PxQueryFlags QueryFlags, TraceResult& result) const;
     public:
         MODEL();
         ~MODEL();
@@ -216,8 +216,8 @@ namespace xrPhysX::CDB
 
         void Finalize();
 
-        void RayTrace(const RayTraceOptions& options, TraceResult& result);
-        void BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result);
-        void BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result);
+        void RayTrace(const RayTraceOptions& options, TraceResult& result) const;
+        void BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result) const;
+        void BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result) const;
     };
 }

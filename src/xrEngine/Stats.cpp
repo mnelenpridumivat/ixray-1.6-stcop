@@ -168,8 +168,8 @@ void CStats::Show()
 		//F.OutNext	("DIP/DP:      %d",			RCache.stat.calls);
 #ifdef _DEBUG
 		F.OutSkip	();
-		F.OutNext	("mapped:      %d",			g_file_mapped_memory);
-		F.OutSkip	();
+		//F.OutNext	("mapped:      %d",			g_file_mapped_memory);
+		//F.OutSkip	();
 		m_pRender->OutData2(F);
 #endif
 		m_pRender->OutData3(F);

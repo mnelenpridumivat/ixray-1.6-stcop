@@ -71,6 +71,7 @@ public:
 	//CDB::TRI*							GetStaticTris		() { return Static.get_tris();	}
 	//Fvector*							GetStaticVerts		() { return Static.get_verts(); }
 	const xrPhysX::CDB::MODEL&			GetStaticModel		() const { return Static; }
+	xrPhysX::CDB::MODEL&				GetStaticModel		() {return Static; }
 
 	const Fbox&							GetBoundingVolume	() { return m_BoundingVolume;}
 

@@ -69,9 +69,9 @@ void CRenderDevice::Create	()
 	Statistic			= new CStats();
 
 #ifdef	DEBUG
-	cdb_clRAY		= &Statistic->clRAY;				// total: ray-testing
-	cdb_clBOX		= &Statistic->clBOX;				// total: box query
-	cdb_clFRUSTUM	= &Statistic->clFRUSTUM;			// total: frustum query
+	//cdb_clRAY		= &Statistic->clRAY;				// total: ray-testing
+	//cdb_clBOX		= &Statistic->clBOX;				// total: box query
+	//cdb_clFRUSTUM	= &Statistic->clFRUSTUM;			// total: frustum query
 	cdb_bDebug		= &bDebug;
 #endif
 

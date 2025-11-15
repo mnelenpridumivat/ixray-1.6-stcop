@@ -177,7 +177,7 @@ void CEngineAPI::Destroy(void)
 	pCreate					= 0;
 	pDestroy				= 0;
 	g_pEventManager->Event._destroy	();
-	XRC.r_clear_compact		();
+	//XRC.r_clear_compact		();
 }
 
 void CEngineAPI::CreateRendererList()
