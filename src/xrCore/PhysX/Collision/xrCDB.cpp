@@ -2,6 +2,7 @@
 #include "xrCDB.h"
 #include "Collision/xrCDB.h"
 
+#include "CFormBuilder.h"
 #include "PxMaterial.h"
 #include "PxScene.h"
 #include "cooking/PxCooking.h"
@@ -302,12 +303,12 @@ bool xrPhysX::CDB::xrRaycastBuffer::IsFrontFace(const physx::PxRaycastHit& hit) 
     return hit.normal.dot(Normal) < 0.0f;
 }*/
 
-void xrPhysX::CDB::MODEL::AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances)
+void xrPhysX::CDB::MODEL::AddInstances(u32 prototype, const xr_vector<CformInstance::InstanceData>& instances)
 {
     m_instances.reserve(m_instances.size() + instances.size());
     for (const auto& instance : instances)
     {
-        m_instances.emplace_back(xr_make_unique<CollisionInstance>(this, instance.first, instance.second, prototype));
+        m_instances.emplace_back(xr_make_unique<CollisionInstance>(this, instance.transform, instance.sector, prototype));
         //VERIFY(m_instances.back()->GetID() == m_instances.size()-1);
     }
 }
@@ -348,7 +349,7 @@ void xrPhysX::CDB::MODEL::AddUniqueStaticGeom(const xr_span<const Fvector3>& ver
 }
 
 void xrPhysX::CDB::MODEL::AddInstances(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces,
-    const xr_vector<xr_pair<Fmatrix, u16>>& Instances)
+    const xr_vector<CformInstance::InstanceData>& Instances)
 {
     AddPrototype(vertices, faces);
     AddInstances(m_prototypes.size()-1, Instances);
@@ -361,10 +362,12 @@ void xrPhysX::CDB::MODEL::Finalize()
         m_scene->addActor(instance->GetActor());
     }
     m_scene->flushSimulation();
+    ready = true;
 }
 
 void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& result)
 {
+    VERIFY(ready);
     physx::PxHitFlags HitFlags = physx::PxHitFlag::ePOSITION | physx::PxHitFlag::eNORMAL;
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC;
     if(!(bool)(options.options & TraceOptions::cull))
@@ -441,6 +444,7 @@ void xrPhysX::CDB::MODEL::RayTrace(const RayTraceOptions& options, TraceResult& 
 
 void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result)
 {
+    VERIFY(ready);
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;
     if ((bool)(options.options & TraceOptions::only_first))
     {
@@ -455,6 +459,7 @@ void xrPhysX::CDB::MODEL::BoxTrace(const AABBBoxTraceOptions& options, TraceResu
 
 void xrPhysX::CDB::MODEL::BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result)
 {
+    VERIFY(ready);
     physx::PxQueryFlags QueryFlags = physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::eNO_BLOCK;
     if ((bool)(options.options & TraceOptions::only_first))
     {

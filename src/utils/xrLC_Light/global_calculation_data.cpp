@@ -38,9 +38,69 @@ void global_claculation_data::xrLoad()
 	{
 		FS.update_path			(N,"$level$","build.cform");
 		IReader*			fs = FS.r_open("$level$","build.cform");
+
+		xrPhysX::CformBuilder builder;
+		builder.LoadCFORM_build(*fs);
+
+		{
+			auto& StaticGeom = builder.GetStaticMesh();
+			auto view = StaticGeom.GetPureTriangles();
+			xr_vector<::CDB::TRI> tris(view.begin(), view.end());
+			RCAST_Model.AddUniqueStaticGeom(StaticGeom.GetVertices(), tris);
+			
+			auto& EmbreeStaticGeom = EmbreeMain.Data.StaticGeom.geom;
+			EmbreeStaticGeom.verts_v = StaticGeom.GetVertices();
+			EmbreeStaticGeom.faces_v.resize(tris.size());
+			for (u32 i = 0; i < tris.size(); i++)
+			{
+				EmbreeStaticGeom.faces_v[i].point1 = tris[i].verts[0];
+				EmbreeStaticGeom.faces_v[i].point2 = tris[i].verts[1];
+				EmbreeStaticGeom.faces_v[i].point3 = tris[i].verts[2];
+			}
+		}
+		{
+			auto& MUs = builder.GetMUSlots();
+			auto& EmbreePrototypes = EmbreeMain.Data.InstancesContainer;
+			auto& EmbreeInstances = EmbreeMain.Data.InstancesMatrices;
+			for (auto& MU : MUs)
+			{
+				auto& PrototypeData = MU.GetPrototypeData();
+				auto view = PrototypeData.GetPureTriangles();
+				xr_vector<::CDB::TRI> tris(view.begin(), view.end());
+				RCAST_Model.AddInstances(PrototypeData.GetVertices(), tris, MU.GetInstances());
+
+				void* Index = (void*)&MU;
+				auto& EmbreeProtSlot = EmbreePrototypes.try_emplace(Index).first->second;
+				auto& EmbreeInstancesSlot = EmbreeInstances.try_emplace(Index).first->second;
+
+			
+				EmbreeProtSlot.geom.verts_v = PrototypeData.GetVertices();
+				EmbreeProtSlot.geom.faces_v.resize(tris.size());
+				for (u32 i = 0; i < tris.size(); i++)
+				{
+					EmbreeProtSlot.geom.faces_v[i].point1 = tris[i].verts[0];
+					EmbreeProtSlot.geom.faces_v[i].point2 = tris[i].verts[1];
+					EmbreeProtSlot.geom.faces_v[i].point3 = tris[i].verts[2];
+				}
+
+				EmbreeInstancesSlot.reserve(MU.GetInstances().size());
+				for (auto& elem : MU.GetInstances())
+				{
+					EmbreeInstancesSlot.emplace_back(elem.transform);
+				}
+				
+			}
+		}
+		RCAST_Model.Finalize();
+		EmbreeMain.InitEmbreeDetails();
+
+		FS.r_close(fs);
+
+		LevelBB.set			(builder.GetAABB());
+		
 		
 		//R_ASSERT			(fs->find_chunk(0));
-		hdrCFORM			H;
+		/*hdrCFORM			H;
 		{
 			auto fs_header = fs->open_chunk(CFORM_Chunks::Header);
 			fs_header->r(&H,sizeof(hdrCFORM));
@@ -81,11 +141,7 @@ void global_claculation_data::xrLoad()
   
 		g_rc_faces.resize	(H.facecount);
 		R_ASSERT(fs->find_chunk(1));
-		fs->r				(&*g_rc_faces.begin(),g_rc_faces.size()*sizeof(b_rc_face));
-
-		LevelBB.set			(H.aabb);
-
-		FS.r_close(fs);
+		fs->r				(&*g_rc_faces.begin(),g_rc_faces.size()*sizeof(b_rc_face));*/
 	}
 
 	EmbreeMain.InitEmbreeDetails();

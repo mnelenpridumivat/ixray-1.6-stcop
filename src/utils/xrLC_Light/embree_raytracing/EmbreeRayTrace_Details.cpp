@@ -121,17 +121,59 @@ void LoadGeomBuffer(RTCGeometry& geom, TriangleContainer& geom_buffer)
 void  EmbreeData::ConsturctGeometry()
 {
 	// se7kills Rewrite
-	EmbreeData::BuildRaytraceModel_2();
+	//EmbreeData::BuildRaytraceModel_2();
 
 	CTimer t; t.Start();
-	FATAL("IMPLEMENT ASAP!");
+	/*FATAL("IMPLEMENT ASAP!");
 	if (IsDebuggerPresent())
 	{
 		DebugBreak();
 		exit(0);
+	}*/
+	LoadGeomBuffer(Data.StaticGeom.IntelGeometryNormal, Data.StaticGeom.geom);
+	
+	for (auto& elem : Data.InstancesContainer)
+	{
+		auto& Cont = elem.second;
+		LoadGeomBuffer(Cont.IntelGeometryNormal, Cont.geom);
+
+		Cont.IntelGeometryScene = rtcNewScene(DeviceDetails);
+		rtcAttachGeometry(Cont.IntelGeometryScene, Cont.IntelGeometryNormal);
+		rtcReleaseGeometry(Cont.IntelGeometryNormal);
+		rtcCommitScene(Cont.IntelGeometryScene);
 	}
-	//LoadGeomBuffer(IntelGeometryOpacue, static_geom); // Uncomment and fix
+	
 	rtcAttachGeometryByID(IntelSceneDetails, IntelGeometryOpacue, 0);
+
+	u32 Counter = 0;
+	float matrix[12];
+	for (auto& elem : Data.InstancesMatrices)
+	{
+		auto& Cont = elem.second;
+		auto& Geom = Data.InstancesContainer[elem.first];
+		for (auto& trans : Cont)
+		{
+			matrix[0] = trans.i.x;
+			matrix[1] = trans.i.y;
+			matrix[2] = trans.i.z;
+			matrix[3] = trans.j.x;
+			matrix[4] = trans.j.y;
+			matrix[5] = trans.j.z;
+			matrix[6] = trans.k.x;
+			matrix[7] = trans.k.y;
+			matrix[8] = trans.k.z;
+			matrix[9] = trans.c.x;
+			matrix[10] = trans.c.y;
+			matrix[11] = trans.c.z;
+			auto instance = rtcNewGeometry(DeviceDetails, RTC_GEOMETRY_TYPE_INSTANCE);
+			rtcSetGeometryInstancedScene(instance, Geom.IntelGeometryScene);
+			rtcSetGeometryTransform(instance, 0, RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR, &matrix);
+			rtcCommitGeometry(instance);
+			rtcAttachGeometryByID(IntelSceneDetails, instance, 2 + Counter++);
+			//rtcReleaseGeometry(instance);
+		}
+	}
+	
 	rtcCommitScene(IntelSceneDetails);
 
 	clMsg("$[Embree] Loading To Scene geometry : %u ms", t.GetElapsed_ms());

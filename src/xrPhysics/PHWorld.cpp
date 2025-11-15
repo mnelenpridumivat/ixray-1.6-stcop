@@ -49,7 +49,7 @@ CObjectSpace*  create_object_space()
 	CObjectSpace* os = new CObjectSpace();
 	g_SpatialSpace = new ISpatial_DB();
 	g_SpatialSpacePhysic = new ISpatial_DB();
-	os->Load(fr, 0);
+	os->Load(*fr, 0);
 
 	return os;
 }

@@ -4,8 +4,9 @@
 #include "levelgamedef.h"
 #include "level_graph.h"
 #include "AIMapExport.h"
+#include "PhysX/Collision/CFormBuilder.h"
 
-IC	const Fvector vertex_position(const NodePosition& Psrc, const Fbox& bb, const SAIParams& params)
+IC const Fvector vertex_position(const NodePosition& Psrc, const Fbox& bb, const SAIParams& params)
 {
 	Fvector Pdest;
 	int	x, z, row_length;
@@ -62,7 +63,28 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			xr_strconcat(N__, name, "build.cform");
 			IReader* fs = FS.r_open(N__);
 			R_ASSERT2(fs, "You need to have compiled geometry before make non-draft ai map!");
-			R_ASSERT(fs->find_chunk(0));
+
+			xrPhysX::CformBuilder builder;
+			builder.LoadCFORM_build(*fs);
+
+			{
+				xr_vector<auto>	faces = builder.GetStaticMesh().GetPureTriangles();
+				LevelPtr->AddUniqueStaticGeom(builder.GetStaticMesh().GetVertices(), faces);
+			}
+
+			auto& MUs = builder.GetMUSlots();
+			for (auto& MU : MUs)
+			{
+				auto& Prot = MU.GetPrototypeData();
+				xr_vector<auto>	faces = Prot.GetPureTriangles();
+				LevelPtr->AddInstances(Prot.GetVertices(), faces, MU.GetInstances());
+			}
+			
+			LevelPtr->Finalize();
+				
+			LevelBB.set(builder.GetAABB());
+			
+			/*R_ASSERT(fs->find_chunk(0));
 
 			hdrCFORM			H;
 			{
@@ -81,7 +103,6 @@ void xrLoad(LPCSTR name, bool draft_mode)
 				fs_static->r(faces.data(), faces.size());
 
 				LevelPtr->AddUniqueStaticGeom({vertices}, {faces});
-				LevelPtr->Finalize();
 				
 				fs_static->close();
 			}
@@ -121,13 +142,13 @@ void xrLoad(LPCSTR name, bool draft_mode)
 				}
 				
 				fs_instances->close();
-			}
+			}*/
 
-			g_rc_faces.resize(H.facecount);
-			R_ASSERT(fs->find_chunk(1));
-			fs->r(&*g_rc_faces.begin(), g_rc_faces.size() * sizeof(b_rc_face));
 
-			LevelBB.set(H.aabb);
+			//g_rc_faces.resize(H.facecount);
+			//R_ASSERT(fs->find_chunk(1));
+			//fs->r(&*g_rc_faces.begin(), g_rc_faces.size() * sizeof(b_rc_face));
+
 			FS.r_close(fs);
 		}
 

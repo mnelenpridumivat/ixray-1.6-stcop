@@ -8,6 +8,7 @@
 
 #include "../../xrCore/Collision/xrCDB.h"
 #include "../xrLC_Light/embree_raytracing/EmbreeGeometryBuilder.h"
+#include "PhysX/Collision/CFormBuilder.h"
 
 int GetVertexIndex(Vertex* F)
 {
@@ -180,78 +181,48 @@ void CBuild::BuildCForm	()
 	IWriter* MFS = FS.w_open(xr_strconcat(fn, pBuild->path, "level.cform"));
 	Status("Saving...");
 
-	// Header
-	hdrCFORM hdr;
-	hdr.version = CFORM_Versions::WITH_INSTANCING;
-	//hdr.vertcount = (u32)CL.getVS(); // No need
-	//hdr.facecount = (u32)CL.getTS(); // No need
-	hdr.aabb = BB;
-	{
-		MFS->open_chunk(CFORM_Chunks::Header);
-		MFS->w(&hdr, sizeof(hdr));
-		MFS->close_chunk();
-		Msg("CFORM Saving HDR: %u", MFS->tell());
-	}
-	{
-		MFS->open_chunk(CFORM_Chunks::StaticGeom);
-		auto& StaticGeom = CL.GetStaticData();
+	xrPhysX::CformBuilder builder;
+	builder.SetAABB(BB);
 
-		auto Vertices = StaticGeom.getVSpan();
-		
-		R_ASSERT(Vertices.size() <= std::numeric_limits<u32>::max(), "Too many vertices in static geom, collision is invalid!");
-		MFS->w_u32(Vertices.size());
-		MFS->w(Vertices.data(), Vertices.size() * sizeof(Fvector));
-
-		auto Faces = StaticGeom.getTSpan();
-		
-		R_ASSERT(Faces.size() <= std::numeric_limits<u32>::max(), "Too many faces in static geom, collision is invalid!");
-		MFS->w_u32(Faces.size());
-		MFS->w(Faces.data(), Faces.size() * sizeof(CDB::TRI));
-		
-		MFS->close_chunk();
-	}
 	{
-		MFS->open_chunk(CFORM_Chunks::Instances);
-
-		auto& MUObjects = CL.GetMUObjectsDataRaw();
-		MFS->w_u32(MUObjects.size());
-		for (auto& Obj : MUObjects)
+		auto& StaticGeom = builder.GetStaticMesh();
+		StaticGeom.InsertVertices(CL.GetStaticData().getVSpan());
+		const auto& Tris = CL.GetStaticData().getTSpan();
+		StaticGeom.ReallocateTriangles(Tris.size());
+		for (auto& t : Tris)
 		{
-			auto& Geom = Obj.second;
-
-			auto Vertices = Geom.getVSpan();
-			
-			R_ASSERT(Vertices.size() <= std::numeric_limits<u32>::max(), "Too many vertices in MU object geom, collision is invalid!");
-			MFS->w_u32(Vertices.size());
-			MFS->w(Vertices.data(), Vertices.size() * sizeof(Fvector));
-		
-			auto Faces = Geom.getTSpan();
-		
-			R_ASSERT(Faces.size() <= std::numeric_limits<u32>::max(), "Too many faces in MU object geom, collision is invalid!");
-			MFS->w_u32(Faces.size());
-			MFS->w(Faces.data(), Faces.size() * sizeof(CDB::TRI));
-			
+			StaticGeom.AddTriangle(t);
 		}
-
-		MFS->close_chunk();
 	}
 	{
-		MFS->open_chunk(CFORM_Chunks::InstanceRefs);
+		const auto& Prototypes = CL.GetMUObjectsDataRaw();
+		const auto& Instances = CL.GetMUInstancesDataRaw();
 
-		auto& MUInstances = CL.GetMUInstancesDataRaw();
-		//MFS->w_u32(MUInstances.size()); // amount of elements in this map are same to MUObjects
-		for (auto& group : MUInstances)
+		VERIFY(Prototypes.size() == Instances.size());
+
+		for (const auto& slot : Prototypes)
 		{
-			MFS->w_u32(group.second.size());
-			for (auto& instance : group.second)
+			auto& PrototypeObj = slot.second;
+			auto& InstancesData = Instances.at(slot.first);
+			auto& Slot = builder.AddMUSlot();
 			{
-				MFS->w(&instance.transform, sizeof(instance.transform));
-				MFS->w_u16(instance.sector);
+				auto& PrototypeData = Slot.GetPrototypeData();
+				PrototypeData.InsertVertices(PrototypeObj.getVSpan());
+				const auto& Tris = PrototypeObj.getTSpan();
+				PrototypeData.ReallocateTriangles(Tris.size());
+				for (auto& t : Tris)
+				{
+					PrototypeData.AddTriangle(t);
+				}
+			}
+			for (auto& t : InstancesData)
+			{
+				Slot.AddInstance(t.transform, t.sector);
 			}
 		}
-
-		MFS->close_chunk();
 	}
+
+	builder.SaveCFORM_level(*MFS);
 
 	// Clear pDeflector (it is stored in the same memory space with dwMaterialGame)
 	for (auto face : lc_global_data()->g_faces())

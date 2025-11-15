@@ -76,21 +76,50 @@ IC int CObjectSpace::GetNearest(xr_vector<CObject*>& q_nearest, ICollisionForm* 
 }
 
 //----------------------------------------------------------------------
-void CObjectSpace::Load(CDB::build_callback build_callback)
+/*void CObjectSpace::Load(CDB::build_callback build_callback)
 {
 	Load("$level$", "level.cform", build_callback);
 }
 
-void CObjectSpace::Load(LPCSTR path, LPCSTR fname, CDB::build_callback build_callback)
+void CObjectSpace::Load(LPCSTR path, LPCSTR fname, CDB::build_callback build_callback) // to remove
 {
 	IReader* F = FS.r_open(path, fname);
 	R_ASSERT(F);
 	Load(F, build_callback);
-}
+}*/
 
-void CObjectSpace::Load(IReader* F, CDB::build_callback build_callback)
+void CObjectSpace::Load(IReader& F, CDB::build_callback build_callback)
 {
-	hdrCFORM H;
+	string_path LevelName = {};
+	u32 crc = crc32(F.pointer(), F.length());
+	auto LevelPath = FS.get_path("$level$")->m_Add;
+	IReader* pReaderCache = nullptr;
+
+	if (LevelPath != nullptr)
+	{
+		xr_strconcat(LevelName, "level_cache\\", LevelPath, "cform.cache"); 
+		//pReaderCache = CDB::GetModelCache(LevelName, crc);
+	}
+
+	// TODO: Collision cache not implemented now
+	//if (pReaderCache)
+	//{
+	//	Restore(*pReaderCache);
+	//	FS.r_close(pReaderCache);
+	//} else
+	{
+		xrPhysX::CformBuilder builder;
+		builder.LoadCFORM_level(F);
+		Create(builder);
+	}
+
+	
+
+
+	
+	
+	
+	/*hdrCFORM H;
 
 	// Cache for cform
 	string_path LevelName = {};
@@ -120,10 +149,10 @@ void CObjectSpace::Load(IReader* F, CDB::build_callback build_callback)
 		Create(verts, tris, H, build_callback, pWriterCache, false);
 	}
 	
-	FS.r_close(F);
+	FS.r_close(F);*/
 }
 
-void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB::build_callback build_callback, void* pRW, bool RWMode)
+/*void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB::build_callback build_callback, void* pRW, bool RWMode)
 {
 	switch (H.version)
 	{
@@ -142,14 +171,39 @@ void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB
 		}
 	case CFORM_Versions::WITH_INSTANCING:
 		{
-
 			FATAL("Not implemented");
-			
 			break;
 		}
 	default: NODEFAULT;
 	}
+}*/
+
+void CObjectSpace::Create(const xrPhysX::CformBuilder& builder)
+{
+	{
+		auto& StaticGeom = builder.GetStaticMesh();
+		auto view = builder.GetStaticMesh().GetPureTriangles();
+		xr_vector<CDB::TRI>	faces(view.begin(), view.end());
+		Static.AddUniqueStaticGeom(StaticGeom.GetVertices(), faces);
+	}
+	{
+		auto& MUs = builder.GetMUSlots();
+		for (auto& MU : MUs)
+		{
+			auto& Prototype = MU.GetPrototypeData();
+			auto view = Prototype.GetPureTriangles();
+			xr_vector<CDB::TRI>	faces(view.begin(), view.end());
+			Static.AddInstances(Prototype.GetVertices(), faces, MU.GetInstances());
+		}
+	}
+	Static.Finalize();
 }
+
+void CObjectSpace::Restore(IReader& R)
+{
+	
+}
+
 
 //----------------------------------------------------------------------
 #ifdef DEBUG

@@ -66,14 +66,6 @@ public:
 				data[iz*bb_sx+ix] 	= color_rgba(v_s,v_mu,0,0);
 			}
 		}
-#if 0
-		xr_string image_name = xr_string(fn)+".tga";
-		CImage* I 	= new CImage();
-		I->Create	(sx,sz,data.data());
-		I->Vflip	();
-		I->SaveTGA	(image_name.c_str());
-		xr_delete	(I);
-#endif
 
 		// flush text
 		xr_string txt_name = xr_string(fn)+".txt";

@@ -114,9 +114,12 @@ void EmbreeData::BuildRaytraceModel( )
 #include "xrLC_GlobalData.h"
 extern global_claculation_data	gl_data;
 
-void EmbreeData::BuildRaytraceModel_2()
+/*void EmbreeData::BuildRaytraceModel_2()
 {
 	CTimer t; t.Start();
+
+	
+	
 	// Тут уже будет отфильтровано 
 	FATAL("IMPLEMENT ASAP!");
 	if (IsDebuggerPresent())
@@ -125,10 +128,10 @@ void EmbreeData::BuildRaytraceModel_2()
 		exit(0);
 	}
 	
-	//static_geom.ClearAll(); // Uncomment and fix
- 	//static_geom.verts_v.swap(build_data.build_verts); // Uncomment and fix
-	//static_geom.faces_v.resize(build_data.build_fcnt); // Uncomment and fix
-	//static_geom.dummy.resize(build_data.build_fcnt); // Uncomment and fix
+	static_geom.ClearAll(); // Uncomment and fix
+ 	static_geom.verts_v.swap(build_data.build_verts); // Uncomment and fix
+	static_geom.faces_v.resize(build_data.build_fcnt); // Uncomment and fix
+	static_geom.dummy.resize(build_data.build_fcnt); // Uncomment and fix
 
  	for (auto Fid = 0; Fid < build_data.build_faces.size(); Fid++ )
 	{
@@ -137,9 +140,9 @@ void EmbreeData::BuildRaytraceModel_2()
 		 
 		
 
-		//static_geom.faces_v[Fid].point1 = FCDB.verts[0]; // Uncomment and fix
-		//static_geom.faces_v[Fid].point2 = FCDB.verts[1]; // Uncomment and fix
-		//static_geom.faces_v[Fid].point3 = FCDB.verts[2]; // Uncomment and fix
+		static_geom.faces_v[Fid].point1 = FCDB.verts[0]; // Uncomment and fix
+		static_geom.faces_v[Fid].point2 = FCDB.verts[1]; // Uncomment and fix
+		static_geom.faces_v[Fid].point3 = FCDB.verts[2]; // Uncomment and fix
  	}
 
 	// Чистим вектора
@@ -149,7 +152,7 @@ void EmbreeData::BuildRaytraceModel_2()
 	build_data.build_vcnt = 0;
 
 	clMsg("$[Embree] Loading Geometry Time: %u ms", t.GetElapsed_ms());
-}
+}*/
 
 #include "../xrLC/Build.h"
 extern CBuild* pBuild;
@@ -195,7 +198,51 @@ void EmbreeData::BuildRcast()
 
 	string_path				fn;
 	IWriter* MFS = FS.w_open(xr_strconcat(fn, pBuild->path, "build.cform"));
+	
+	xrPhysX::CformBuilder builder;
+	builder.SetAABB(pBuild->scene_bb);
 
+	{
+		auto& StaticGeom = builder.GetStaticMesh();
+		StaticGeom.InsertVertices(container.StaticGeom.geom.vertex());
+
+		auto& geom_container = container.StaticGeom.geom;
+		StaticGeom.ReallocateTriangles(geom_container.faces_cnt());
+		for (u32 k = 0; k < geom_container.faces_cnt(); k++)
+		{
+			auto TRI = geom_container.faces()[k].Get();
+			auto face_data = geom_container.dummy[k];
+
+			StaticGeom.AddTriangle(TRI, face_data->dwMaterial, face_data->dwMaterialGame, face_data->tc[0].uv);
+		}
+	}
+	{
+		for (auto& elem : container.InstancesContainer)
+		{
+			auto& Prototype = elem.second;
+			auto& Instances = container.InstancesMatrices[elem.first];
+			auto& slot = builder.AddMUSlot();
+			auto& ProtData = slot.GetPrototypeData();
+
+			ProtData.InsertVertices(Prototype.geom.vertex());
+
+			auto& geom_container = Prototype.geom;
+			ProtData.ReallocateTriangles(geom_container.faces_cnt());
+			for (u32 k = 0; k < geom_container.faces_cnt(); k++)
+			{
+				auto TRI = geom_container.faces()[k].Get();
+				auto face_data = geom_container.dummy[k];
+
+				ProtData.AddTriangle(TRI, face_data->dwMaterial, face_data->dwMaterialGame, face_data->tc[0].uv);
+			}
+			for (auto& Instance : Instances)
+			{
+				slot.AddInstance(Instance, u16(-1));
+			}
+		}
+	}
+
+	builder.SaveCFORM_build(*MFS);
 	
 	/*xr_vector<b_rc_face>	rc_faces;
 	rc_faces.resize(container.faces_cnt());
@@ -216,7 +263,7 @@ void EmbreeData::BuildRcast()
 	}*/
 
 	
- 	MFS->open_chunk(CFORM_Chunks::Header);
+ 	/*MFS->open_chunk(CFORM_Chunks::Header);
 
 	// Header
 	hdrCFORM hdr;
@@ -225,7 +272,7 @@ void EmbreeData::BuildRcast()
 	//hdr.facecount	= (u32) container.StaticGeom.geom.faces_cnt(); // No need
 	hdr.aabb		= pBuild->scene_bb;
 		
-	MFS->w(&hdr, sizeof(hdr));
+	MFS->w(&hdr, sizeof(hdr));*/
 
 	// Data
 	/*for (auto Vert : container.vertex())
@@ -239,7 +286,7 @@ void EmbreeData::BuildRcast()
 		MFS->w(&TRI, sizeof(TRI));
 	}*/
 	 
-	MFS->close_chunk();
+	//MFS->close_chunk();
 
 	/*MFS->open_chunk(1);
 	MFS->w(&*rc_faces.begin(), size_t(rc_faces.size() * sizeof(b_rc_face)) );
@@ -253,7 +300,7 @@ void EmbreeData::BuildRcast()
  	Msg("Memory RC_Face need: %u mb", rqfaces_mem / 1024 / 1024);
 	Msg("File Saved Size: %u mb", MFS->tell() / 1024 / 1024);*/
 
-	auto ObjSerializationFunc = [&](TriangleContainer& container)
+	/*auto ObjSerializationFunc = [&](TriangleContainer& container)
 	{
 
 		MFS->w_u64(container.vertex_cnt());
@@ -318,7 +365,7 @@ void EmbreeData::BuildRcast()
 
 		MFS->close_chunk();
 		Msg("Memory InstancesRefs need: %u mb", u32((MFS->tell()-OffsetStart) / 1024 / 1024));
-	}
+	}*/
 	
 	Msg("Memory total need: %u mb", u32(MFS->tell() / 1024 / 1024));
 

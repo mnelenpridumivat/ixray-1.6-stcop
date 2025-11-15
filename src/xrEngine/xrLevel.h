@@ -384,8 +384,7 @@ enum class CFORM_Chunks : u32
 
 	// Instancing version
 	StaticGeom = 2,
-	Instances = 3,
-	InstanceRefs = 4
+	Instances = 3
 };
 
 #ifdef IXRAY_AI_OLD_FORMAT

@@ -116,8 +116,16 @@ BOOL IGame_Level::Load			(u32 dwNum)
 	// CForms
 	g_pGamePersistent->SetLoadStageTitle("st_loading_cform");
 	g_pGamePersistent->LoadTitle	();
-	ObjectSpace.Load			( build_callback );
-	Sound->set_geometry_occ		(ObjectSpace.GetStaticModel	());
+
+	{
+		IReader* F = FS.r_open("$level$", "level.cform");
+		R_ASSERT(F);
+		ObjectSpace.Load(*F, build_callback);
+		FS.r_close(F);
+	}
+	
+	//ObjectSpace.Load			( build_callback );
+	Sound->set_geometry_occ		(&ObjectSpace.GetStaticModel());
 	Sound->set_handler			( _sound_event );
 
 	pApp->LoadSwitch			();

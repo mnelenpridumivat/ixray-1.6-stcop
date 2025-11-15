@@ -33,7 +33,7 @@ struct BuildData
 class EmbreeData
 {
 public:
-	BuildData  build_data;
+	//BuildData  build_data;
 
 	LightingSceneContainer Data;
 
@@ -41,7 +41,7 @@ public:
 	//TriangleContainer			static_geom;
 	//TriangleContainer			static_geom_transp;
  
-	void BuildRaytraceModel_2	();
+	//void BuildRaytraceModel_2	();
  	void BuildRaytraceModel		();
 	void BuildRcast();
  	

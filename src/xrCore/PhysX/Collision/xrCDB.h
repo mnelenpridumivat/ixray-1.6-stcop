@@ -4,6 +4,7 @@
 #include "PxQueryFiltering.h"
 #include "PxQueryReport.h"
 //#include "_stl_extensions.h"
+#include "CFormBuilder.h"
 #include "Collision/xrCDB.h"
 #include "PhysX/PhysXCore.h"
 #include "pvd/PxPvd.h"
@@ -178,8 +179,9 @@ namespace xrPhysX::CDB
         xr_vector<xr_unique_ptr<CollisionInstance>> m_instances;
         ::std::vector<::std::unique_ptr<int>> test;
         physx::PxScene* m_scene;
+        bool ready = false;
 
-        void AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances);
+        void AddInstances(u32 prototype, const xr_vector<CformInstance::InstanceData>& instances);
         void AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces);
 
         void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]);
@@ -208,7 +210,7 @@ namespace xrPhysX::CDB
         void AddInstances(
             const xr_span<const Fvector3>& vertices,
             const xr_span<const ::CDB::TRI>& faces,
-            const xr_vector<xr_pair<Fmatrix, u16>>& Instances
+            const xr_vector<CformInstance::InstanceData>& Instances
             );
         u32 GetInstancesNum() const {return m_instances.size();}
 
