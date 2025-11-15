@@ -1,11 +1,8 @@
 #pragma once
 
 #include "R_light.h"
-#include "base_lighting.h"
-#include "base_color.h"
 #include "../../xrCore/Collision/xrCDB.h"
 
-#include "xrFace.h"
 #include <embree4/rtcore.h>
 
 #include "EmbreeGeometryBuilder.h"

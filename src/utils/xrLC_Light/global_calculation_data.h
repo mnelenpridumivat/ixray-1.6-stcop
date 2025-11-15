@@ -5,9 +5,6 @@
 #include "base_lighting.h"
 #include "global_slots_data.h"
 #include "b_build_texture.h"
-#include "global_slots_data.h"
-#include "../../xrCore/Collision/xrCDB.h"
-#include "../../xrCore/PhysX/PhysXCore.h"
 #include "../../xrCore/PhysX/Collision/xrCDB.h"
 
 class Shader_xrLC_LIB;
