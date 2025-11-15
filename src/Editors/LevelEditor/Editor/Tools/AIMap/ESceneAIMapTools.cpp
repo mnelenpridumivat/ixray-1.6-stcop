@@ -177,7 +177,6 @@ ESceneAIMapTool::ESceneAIMapTool():ESceneToolBase(OBJCLASS_AIMAP)
     m_VisRadius		= 30.f;
     m_SmoothHeight	= 0.5f;
     m_BrushSize	= 1;
-    m_CFModel	= 0;
 }
 
 

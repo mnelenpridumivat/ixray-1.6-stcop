@@ -3,7 +3,7 @@
 
 #include "PxQueryFiltering.h"
 #include "PxQueryReport.h"
-#include "_stl_extensions.h"
+//#include "_stl_extensions.h"
 #include "Collision/xrCDB.h"
 #include "PhysX/PhysXCore.h"
 #include "pvd/PxPvd.h"
@@ -34,25 +34,32 @@ namespace xrPhysX::CDB
         }
     };
 
-    class StableInstanceRef;
+    //class StableInstanceRef;
     
     class XRCORE_API CollisionInstance {
         MODEL* CollisionModel;
         physx::PxRigidStatic* m_actor;
-        xr_unique_ptr<StableInstanceRef> stable_ref;
+        //xr_unique_ptr<StableInstanceRef> stable_ref;
         u32 m_shared_mesh;
         u16 Sector = SectorInvalid;
     
     public:
-        CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype);
+        //CollisionInstance() noexcept = default;
+        CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype) noexcept;
+        ~CollisionInstance() = default;
+
+        //CollisionInstance(const CollisionInstance& other) noexcept = default;
+        //CollisionInstance(CollisionInstance&& other) noexcept = default;
+        //CollisionInstance& operator=(const CollisionInstance& other) noexcept = default;
+        //CollisionInstance& operator=(CollisionInstance&& other) noexcept = default;
 
         physx::PxRigidStatic& GetActor() const {return *m_actor;}
-        u32 GetID() const;
+        //u32 GetID() const;
         const CollisionPrototype& GetPrototype() const;
         u16 GetSector() const { return Sector; }
     };
 
-    class XRCORE_API StableInstanceRef
+    /*class XRCORE_API StableInstanceRef
     {
         MODEL* CollisionModel = nullptr;
         u32 ID = u32(-1);
@@ -61,7 +68,7 @@ namespace xrPhysX::CDB
 
         const CollisionInstance& GetCollisionInstance() const;
         u32 GetID() const {return ID;}
-    };
+    };*/
 
     enum class TraceOptions : u8
     {
@@ -167,8 +174,9 @@ namespace xrPhysX::CDB
     
     class XRCORE_API MODEL
     {
-        xr_vector<CollisionPrototype> m_prototypes;
-        xr_vector<CollisionInstance> m_instances;
+        xr_vector<xr_unique_ptr<CollisionPrototype>> m_prototypes;
+        xr_vector<xr_unique_ptr<CollisionInstance>> m_instances;
+        ::std::vector<::std::unique_ptr<int>> test;
         physx::PxScene* m_scene;
 
         void AddInstances(u32 prototype, const xr_vector<xr_pair<Fmatrix, u16>>& instances);
@@ -177,8 +185,8 @@ namespace xrPhysX::CDB
         void ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3]);
         void ConvertHitToResult(const physx::PxRaycastHit& hit, ::CDB::RESULT& result);
 
-        void ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result);
-        void GetIntersectingTriangles(const physx::PxOverlapHit& hit, const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+        //void ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result);
+        //void GetIntersectingTriangles(const physx::PxOverlapHit& hit, const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result);
         
         void ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options, xr_vector<::CDB::RESULT>& result);
 
@@ -186,6 +194,12 @@ namespace xrPhysX::CDB
     public:
         MODEL();
         ~MODEL();
+        
+        MODEL(const MODEL&) = delete;
+        MODEL& operator=(const MODEL&) = delete;
+    
+        MODEL(MODEL&&) = default;
+        MODEL& operator=(MODEL&&) = default;
 
         const CollisionPrototype& GetPrototype(u32 ID);
         const CollisionInstance& GetInstance(u32 ID);

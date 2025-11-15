@@ -119,8 +119,8 @@ namespace CDB
 		Fvector*				verts;
 		u32					verts_count;
 	public:
-		MODEL();
-		~MODEL();
+		//MODEL();
+		//~MODEL();
 
 		IC Fvector*				get_verts		()			{ return verts;		}
 		IC const Fvector*		get_verts		()	const	{ return verts;		}
@@ -139,10 +139,10 @@ namespace CDB
 			}
 		}
 
-		void					CreateNewTree	(IWriter* CacheWriter);
-		void					build_internal	(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
-		void					build			(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
-		u32						memory			();
+		//void					CreateNewTree	(IWriter* CacheWriter);
+		//void					build_internal	(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		//void					build			(const Fvector* V, size_t Vcnt, const TRI* T, size_t Tcnt, build_callback* bc=nullptr, void* bcp=nullptr, void* pRW = nullptr, bool RWMode = false);
+		//u32						memory			();
 	};
 
 	// Collider result

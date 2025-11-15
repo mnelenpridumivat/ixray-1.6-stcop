@@ -619,8 +619,8 @@ ESceneWallmarkTool::wm_slot* ESceneWallmarkTool::AppendSlot(shared_str sh_name, 
 void ESceneWallmarkTool::RecurseTri(u32 t, Fmatrix &mView, wallmark &W)
 {
 	CDB::TRI*	T			= sml_collector.getT()+t;
-	if (T->dummy)			return;
-	T->dummy				= 0xffffffff;
+	if (T->data.dummy)			return;
+	T->data.dummy				= 0xffffffff;
 	
 	// Some vars
 	u32*		v_ids		= T->verts;
@@ -730,7 +730,9 @@ BOOL ESceneWallmarkTool::AddWallmark_internal(const Fvector& start, const Fvecto
     // pick contact poly
     SPickQuery				PQ;
     sml_collector.clear		();
-    if (Scene->RayQuery(PQ,start,dir,dist,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,snap_list)){ 
+	PQ.m_Flags = xrPhysX::CDB::TraceOptions::only_nearest|xrPhysX::CDB::TraceOptions::cull;
+    //if (Scene->RayQuery(PQ,start,dir,dist,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,snap_list)){ 
+    if (Scene->RayQuery(PQ,start,dir,dist,snap_list)){ 
         contact_pt.mad		(PQ.m_Start,PQ.m_Direction,PQ.r_begin()->range); 
         sml_normal.mknormal	(PQ.r_begin()->verts[0],PQ.r_begin()->verts[1],PQ.r_begin()->verts[2]);
         sml_collector.add_face_packed_D	(PQ.r_begin()->verts[0],PQ.r_begin()->verts[1],PQ.r_begin()->verts[2],0);
@@ -741,7 +743,8 @@ BOOL ESceneWallmarkTool::AddWallmark_internal(const Fvector& start, const Fvecto
     bbox.set				(contact_pt,contact_pt);
     bbox.grow				(_max(height,width)*2);
     SPickQuery				BQ;
-    if (Scene->BoxQuery(BQ,bbox,CDB::OPT_FULL_TEST,snap_list)){ 
+    //if (Scene->BoxQuery(BQ,bbox,CDB::OPT_FULL_TEST,snap_list)){ 
+    if (Scene->BoxQuery(BQ,bbox,xrPhysX::CDB::TraceOptions::full_test,snap_list)){ 
     	for (u32 k=0; k<(u32)BQ.r_count(); k++){
         	SPickQuery::SResult* R = BQ.r_begin()+k;
 			Fvector test_normal;

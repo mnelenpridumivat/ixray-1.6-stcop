@@ -5,15 +5,15 @@
 #include "global_calculation_data.h"
 #include "mutex"
 
-xr_atomic_s32 atomic = 0;
-u32 MAX_SIZE = 0;
+//xr_atomic_s32 atomic = 0;
+//u32 MAX_SIZE = 0;
 // u32 MIN_SIZE = 0;
 
 #include "ppl.h"
  
 
 
-void LightThread::Execute()
+/*void LightThread::Execute()
 {
 	CDB::COLLIDER		DB;
 	DB.ray_options(CDB::OPT_CULL);
@@ -47,4 +47,4 @@ void LightThread::Execute()
 			break;
  
 	}	
-}
+}*/

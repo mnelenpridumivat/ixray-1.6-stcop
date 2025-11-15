@@ -218,19 +218,28 @@ bool CSceneObject::RayPick(float& dist, const Fvector& S, const Fvector& D, SRay
 
 void CSceneObject::RayQuery(SPickQuery& pinf)
 {
-	if (!m_pReference) return;
+	if (!m_pReference)
+	{
+		return;
+	}
 	m_pReference->RayQuery(_Transform(), _ITransform(), pinf);
 }
 
 void CSceneObject::BoxQuery(SPickQuery& pinf)
 {
-	if (!m_pReference) return;
+	if (!m_pReference)
+	{
+		return;
+	}
 	m_pReference->BoxQuery(_Transform(), _ITransform(), pinf);
 }
 
 bool CSceneObject::BoxPick(const Fbox& box, SBoxPickInfoVec& pinf)
 {
-	if (!m_pReference) return false;
+	if (!m_pReference)
+	{
+		return false;
+	}
 	return m_pReference->BoxPick(this, box, _ITransform(), pinf);
 }
 

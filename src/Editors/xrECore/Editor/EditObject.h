@@ -13,6 +13,7 @@
 
 #include "PhysicsShellHolderEditorBase.h"
 #include "Engine/GameMtlLib.h"
+#include "PhysX/Collision/xrCDB.h"
 
 //----------------------------------------------------
 struct 	SRayPickInfo;

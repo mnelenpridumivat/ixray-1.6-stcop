@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "../Terrain/ESceneTerrainTools.h"
 
-static SPickQuery	PQ;
-
 IC void SnapXZ	(Fvector&	V, float ps)
 {
 	V.x = snapto(V.x,ps);
@@ -13,11 +11,11 @@ struct tri	{
 	Fvector	N;
 };
 
-const int	RCAST_MaxTris	= (2*1024);
-const int	RCAST_Count		= 4;
-const int	RCAST_Total		= (2*RCAST_Count+1)*(2*RCAST_Count+1);
-const float	RCAST_Depth		= 1.f;
-const float RCAST_VALID 	= 0.55f;
+constexpr int	RCAST_MaxTris	= (2*1024);
+constexpr int	RCAST_Count		= 4;
+constexpr int	RCAST_Total		= (2*RCAST_Count+1)*(2*RCAST_Count+1);
+constexpr float	RCAST_Depth		= 1.f;
+constexpr float RCAST_VALID 	= 0.55f;
 
 BOOL ESceneAIMapTool::CreateNode(Fvector& vAt, SAINode& N, bool bIC)
 {
@@ -28,6 +26,9 @@ BOOL ESceneAIMapTool::CreateNode(Fvector& vAt, SAINode& N, bool bIC)
 	Fbox	BB;				BB.set	(PointUp,PointUp);		BB.grow(m_Params.fPatchSize/2);	// box 1
 	Fbox	B2;				B2.set	(PointDown,PointDown);	B2.grow(m_Params.fPatchSize/2);	// box 2
 	BB.merge				(B2);
+	
+	SPickQuery	PQ;
+	PQ.m_Flags = xrPhysX::CDB::TraceOptions::full_test;
 
 	if (m_CFModel)
 	{
@@ -39,9 +40,9 @@ BOOL ESceneAIMapTool::CreateNode(Fvector& vAt, SAINode& N, bool bIC)
 				Msg("non-default material");
 		}
 		*/
-		Scene->BoxQuery(PQ,BB,CDB::OPT_FULL_TEST,m_CFModel);
+		Scene->BoxQuery(PQ,BB,m_CFModel);
 	}else
-		Scene->BoxQuery(PQ,BB,CDB::OPT_FULL_TEST,GetSnapList());
+		Scene->BoxQuery(PQ,BB,GetSnapList());
 
 	DWORD	dwCount 		= PQ.r_count();
 	if (dwCount==0){
@@ -361,11 +362,19 @@ int ESceneAIMapTool::BuildNodes(const Fvector& pos, int sz, bool bIC)
 	Pos.y			+= 1;
 	Fvector			Dir; Dir.set(0,-1,0);
 
+	SPickQuery	PQ;
+	PQ.m_Flags = xrPhysX::CDB::TraceOptions::only_nearest|xrPhysX::CDB::TraceOptions::cull;
 	int cnt			= 0;		
 	if (m_CFModel)
-		cnt=Scene->RayQuery(PQ,Pos,Dir,3,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,m_CFModel);
+	{
+		//cnt=Scene->RayQuery(PQ,Pos,Dir,3,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,m_CFModel);
+		cnt=Scene->RayQuery(PQ,Pos,Dir,3, m_CFModel);
+	}
 	else
-		cnt=Scene->RayQuery(PQ,Pos,Dir,3,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,GetSnapList());
+	{
+		//cnt=Scene->RayQuery(PQ,Pos,Dir,3,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,GetSnapList());
+		cnt=Scene->RayQuery(PQ,Pos,Dir,3,GetSnapList());
+	}
 
 	if (0==cnt) {
 		ELog.Msg	(mtInformation,"Can't align position.");
@@ -656,8 +665,9 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
 
 			UI->SetStatus("Building collision model...");
 
-			m_CFModel = new CDB::MODEL();
-			m_CFModel->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS());
+			m_CFModel = xr_make_unique<xrPhysX::CDB::MODEL>();
+			m_CFModel->AddUniqueStaticGeom(CL.getVSpan(), CL.getTSpan());
+			m_CFModel->Finalize();
 		}
 
 		// building
@@ -672,7 +682,7 @@ bool ESceneAIMapTool::GenerateMap(bool bFromSelectedOnly)
 		Msg("-building time: %.3f", tm.GetElapsed_sec());
 
 		// unload CFModel
-		xr_delete(m_CFModel);
+		m_CFModel.reset();
 
 		Scene->UndoSave();
 		bRes = true;

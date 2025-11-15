@@ -1,4 +1,5 @@
 #pragma once
+#include "PhysX/Collision/xrCDB.h"
 
 class CSceneObject : 
 	public CCustomObject

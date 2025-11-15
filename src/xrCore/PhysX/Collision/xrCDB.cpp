@@ -20,8 +20,11 @@ void xrPhysX::CDB::CollisionPrototype::SetExtraData(const xr_span<const ::CDB::T
     }
 }
 
-xrPhysX::CDB::CollisionInstance::CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype)
+xrPhysX::CDB::CollisionInstance::CollisionInstance(MODEL* model, const Fmatrix& transform, u16 sector, u32 prototype) noexcept
 {
+    //static_assert(std::is_nothrow_constructible_v<xrPhysX::CDB::CollisionInstance>);
+    //static_assert(std::is_nothrow_assignable_v<CollisionInstance, CollisionInstance>);
+    
     CollisionModel = model;
     Sector = sector;
     m_shared_mesh = prototype;
@@ -38,25 +41,53 @@ xrPhysX::CDB::CollisionInstance::CollisionInstance(MODEL* model, const Fmatrix& 
     auto shape = physics.createShape(geom, *material);
     m_actor = physics.createRigidStatic(PxTransform);
     m_actor->attachShape(*shape);
-    stable_ref = xr_make_unique<StableInstanceRef>(CollisionModel, CollisionModel->GetInstancesNum());
-    m_actor->userData = stable_ref.get(); // if we just put a pointer to this, after vector reallocation in MODEL pointer in userData will become invalid
+    m_actor->userData = this; // no move or copy = no need for stable ref
+    //stable_ref = xr_make_unique<StableInstanceRef>(CollisionModel, CollisionModel->GetInstancesNum());
+    //m_actor->userData = stable_ref.get(); // if we just put a pointer to this, after vector reallocation in MODEL pointer in userData will become invalid
     shape->release();
 }
 
-u32 xrPhysX::CDB::CollisionInstance::GetID() const
+/*xrPhysX::CDB::CollisionInstance::CollisionInstance(CollisionInstance&& other) noexcept
+{
+    CollisionModel = other.CollisionModel;
+    m_actor = other.m_actor;
+    stable_ref = std::move(other.stable_ref);
+    m_shared_mesh = other.m_shared_mesh;
+    Sector = other.Sector;
+    other.CollisionModel = nullptr;
+    other.m_actor = nullptr;
+    other.m_shared_mesh = u32(-1);
+    other.Sector = SectorInvalid;
+}
+
+xrPhysX::CDB::CollisionInstance& xrPhysX::CDB::CollisionInstance::operator=(CollisionInstance&& other) noexcept
+{
+    CollisionModel = other.CollisionModel;
+    m_actor = other.m_actor;
+    stable_ref = std::move(other.stable_ref);
+    m_shared_mesh = other.m_shared_mesh;
+    Sector = other.Sector;
+    other.CollisionModel = nullptr;
+    other.m_actor = nullptr;
+    other.m_shared_mesh = u32(-1);
+    other.Sector = SectorInvalid;
+    return *this;
+}*/
+
+/*u32 xrPhysX::CDB::CollisionInstance::GetID() const
 {
     return stable_ref->GetID();
-}
+}*/
 
 const xrPhysX::CDB::CollisionPrototype& xrPhysX::CDB::CollisionInstance::GetPrototype() const
 {
     return CollisionModel->GetPrototype(m_shared_mesh);
 }
 
-const xrPhysX::CDB::CollisionInstance& xrPhysX::CDB::StableInstanceRef::GetCollisionInstance() const
+/*const xrPhysX::CDB::CollisionInstance& xrPhysX::CDB::StableInstanceRef::GetCollisionInstance() const
 {
     return CollisionModel->GetInstance(ID);
-}
+}*/
 
 void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<const Fvector3>& vertices, const xr_span<const ::CDB::TRI>& faces)
 {
@@ -75,12 +106,12 @@ void xrPhysX::CDB::MODEL::AddPrototype(const xr_span<const Fvector3>& vertices, 
     PxValidateTriangleMesh(params, meshDesc);
 #endif
     
-    m_prototypes.emplace_back(
+    m_prototypes.emplace_back(xr_make_unique<CollisionPrototype>(
         PxCreateTriangleMesh(params, meshDesc,
         PhysXInstance::GetInstance().GetPhysics().getPhysicsInsertionCallback())
-    );
+    ));
     auto& Prototype = m_prototypes.back();
-    Prototype.SetExtraData(faces);
+    Prototype->SetExtraData(faces);
 }
 
 void xrPhysX::CDB::MODEL::ConvertHitToVertices(const physx::PxRaycastHit& hit, Fvector vertices[3])
@@ -139,7 +170,7 @@ void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxRaycastHit& hit, ::C
     result.data.sector = RealSector;
 }
 
-void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result)
+/*void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxOverlapHit& hit, TraceOptions options, xr_vector<::CDB::RESULT>& result)
 {
     VERIFY(hit.actor && hit.shape);
 
@@ -163,9 +194,9 @@ void xrPhysX::CDB::MODEL::ConvertHitToResult(const physx::PxOverlapHit& hit, Tra
     res.verts[1] = ;
     res.verts[2] = ;
     res.data.dummy = ;
-}
+}*/
 
-void xrPhysX::CDB::MODEL::GetIntersectingTriangles(const physx::PxOverlapHit& hit,
+/*void xrPhysX::CDB::MODEL::GetIntersectingTriangles(const physx::PxOverlapHit& hit,
     const physx::PxTriangleMesh* geom, TraceOptions options, xr_vector<::CDB::RESULT>& result)
 {
     const physx::PxU32* indices = (const physx::PxU32*)(geom->getTriangles());
@@ -174,21 +205,33 @@ void xrPhysX::CDB::MODEL::GetIntersectingTriangles(const physx::PxOverlapHit& hi
 
     VERIFY(indices && vertices);
 
+    auto transform = hit.actor->getGlobalPose();
+
+    for (physx::PxU32 i = 0; i < triangleCount; ++i)
+    {
+        Fvector verts[3];
+        if (
+            GetTriangleGlobalVertices(vertices, indices, i, transform, geom, verts)
+            && IsTriangleIntersecting(verts, )
+            )
+        {
+            
+        }
+    }
     
-    
-}
+}*/
 
 void xrPhysX::CDB::MODEL::ConvertHitsToResults(xr_span<physx::PxOverlapHit> hits, TraceOptions options,
                                                xr_vector<::CDB::RESULT>& result)
 {
     for (const auto& hit : hits)
     {
+        FATAL("Not implemented");
         if ((bool)(options&TraceOptions::full_test))
         {
-            ConvertHitToResult(hit, options, result);
+            //ConvertHitToResult(hit, options, result);
         } else
         {
-            FATAL("Not implemented");
             //result.emplace_back();
             //ConvertHitToResult(hit, options, result);
         }
@@ -264,8 +307,8 @@ void xrPhysX::CDB::MODEL::AddInstances(u32 prototype, const xr_vector<xr_pair<Fm
     m_instances.reserve(m_instances.size() + instances.size());
     for (const auto& instance : instances)
     {
-        m_instances.emplace_back(this, instance.first, instance.second, prototype);
-        VERIFY(m_instances.back().GetID() == m_instances.size()-1);
+        m_instances.emplace_back(xr_make_unique<CollisionInstance>(this, instance.first, instance.second, prototype));
+        //VERIFY(m_instances.back()->GetID() == m_instances.size()-1);
     }
 }
 
@@ -288,13 +331,13 @@ xrPhysX::CDB::MODEL::~MODEL()
 const xrPhysX::CDB::CollisionPrototype& xrPhysX::CDB::MODEL::GetPrototype(u32 ID)
 {
     VERIFY(m_prototypes.size() > ID);
-    return m_prototypes[ID];
+    return *m_prototypes[ID];
 }
 
 const xrPhysX::CDB::CollisionInstance& xrPhysX::CDB::MODEL::GetInstance(u32 ID)
 {
     VERIFY(m_instances.size() > ID);
-    return m_instances[ID];
+    return *m_instances[ID];
 }
 
 void xrPhysX::CDB::MODEL::AddUniqueStaticGeom(const xr_span<const Fvector3>& vertices,
@@ -315,7 +358,7 @@ void xrPhysX::CDB::MODEL::Finalize()
 {
     for (const auto& instance : m_instances)
     {
-        m_scene->addActor(instance.GetActor());
+        m_scene->addActor(instance->GetActor());
     }
     m_scene->flushSimulation();
 }

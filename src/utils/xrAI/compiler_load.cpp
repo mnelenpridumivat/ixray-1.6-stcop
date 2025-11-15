@@ -66,6 +66,7 @@ void xrLoad(LPCSTR name, bool draft_mode)
 
 			hdrCFORM			H;
 			{
+				// TODO: Check reading of this, probably attempt to read af level.cform, not build.cform (encapsulate into func?)
 				auto fs_header = fs->open_chunk(CFORM_Chunks::Header);
 				fs_header->r(&H, sizeof(hdrCFORM));
 				R_ASSERT(CFORM_Versions::WITH_INSTANCING == H.version);
@@ -74,13 +75,13 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			{
 				auto fs_static = fs->open_chunk(CFORM_Chunks::StaticGeom);
 
-				xr_vector<Fvector> vertices(fs_static->r_u32());
+				xr_vector<Fvector> vertices(fs_static->r_u64());
+				xr_vector<CDB::TRI> faces(fs_static->r_u64());
 				fs_static->r(vertices.data(), vertices.size());
-				
-				xr_vector<CDB::TRI> faces(fs_static->r_u32());
 				fs_static->r(faces.data(), faces.size());
 
 				LevelPtr->AddUniqueStaticGeom({vertices}, {faces});
+				LevelPtr->Finalize();
 				
 				fs_static->close();
 			}

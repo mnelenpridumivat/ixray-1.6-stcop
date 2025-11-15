@@ -2,17 +2,6 @@
 
 
 #include "xrCDB.h"
-#ifndef IXRAY_PHYSX
-#include "override/Model.h"
-
-namespace Opcode 
-{
-#	include <OPC_TreeBuilders.h>
-#	include <OPC_Model.h>
-}
-
-using namespace CDB;
-using namespace Opcode;
 
 XRCORE_API IReader* CDB::GetModelCache(string_path LevelName, u32 crc)
 {
@@ -30,6 +19,18 @@ XRCORE_API IReader* CDB::GetModelCache(string_path LevelName, u32 crc)
 
 	return pReaderCache;
 }
+
+#ifndef IXRAY_PHYSX
+#include "override/Model.h"
+
+namespace Opcode 
+{
+#	include <OPC_TreeBuilders.h>
+#	include <OPC_Model.h>
+}
+
+using namespace CDB;
+using namespace Opcode;
 
 // Model building
 MODEL::MODEL()

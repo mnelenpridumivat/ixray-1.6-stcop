@@ -3,7 +3,8 @@
 #include "../xrForms/xrThread.h"
 #include "detail_slot_calculate.h"
 
-class	LightThread : public CThread
+// TODO: Remove this and .cpp if this class is really useless
+/*class	LightThread : public CThread
 {
  	DWORDVec	box_result;
 public:
@@ -13,4 +14,4 @@ public:
 	}
 	virtual void		Execute();
 
-};
+};*/

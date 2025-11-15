@@ -129,7 +129,10 @@ void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB
 	{
 	case CFORM_Versions::VANILLA:
 		{
-			Static.build(verts, H.vertcount, tris, H.facecount, build_callback, nullptr, pRW, RWMode);
+			Static.AddUniqueStaticGeom({verts, H.vertcount}, {tris, H.facecount});
+			Static.Finalize();
+			// TODO: Don't forget about other args!
+			//Static.build(verts, H.vertcount, tris, H.facecount, build_callback, nullptr, pRW, RWMode);
 
 			m_BoundingVolume.set(H.aabb);
 
@@ -139,6 +142,8 @@ void CObjectSpace::Create(Fvector* verts, CDB::TRI* tris, const hdrCFORM& H, CDB
 		}
 	case CFORM_Versions::WITH_INSTANCING:
 		{
+
+			FATAL("Not implemented");
 			
 			break;
 		}

@@ -78,7 +78,7 @@ class ESceneAIMapTool: public ESceneToolBase
 
 	ref_geom			m_RGeom;
     ref_shader			m_Shader;
-    CDB::MODEL*			m_CFModel;
+    xr_unique_ptr<xrPhysX::CDB::MODEL> m_CFModel;
 protected:
     void 				hash_FillFromNodes		();
     void 				hash_Initialize			();

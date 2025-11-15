@@ -39,21 +39,21 @@ int EScene::SpherePick( const Fvector& center, float radius, ObjClassID classfil
 	return count;
 }
 
-int EScene::RayQuery(SPickQuery& PQ, const Fvector& start, const Fvector& dir, float dist, u32 flags, ObjectList* snap_list)
+int EScene::RayQuery(SPickQuery& PQ, const Fvector& start, const Fvector& dir, float dist, ObjectList* snap_list)
 {
 	VERIFY			(snap_list);
-	PQ.prepare_rq	(start,dir,dist,flags);
-	XRC.ray_options	(flags);
+	PQ.prepare_rq	(start,dir,dist);
 	for(ObjectIt _F=snap_list->begin();_F!=snap_list->end();_F++)
+	{
 		((CSceneObject*)(*_F))->RayQuery(PQ);
+	}
 	return PQ.r_count();
 }
 
-int EScene::BoxQuery(SPickQuery& PQ, const Fbox& bb, u32 flags, ObjectList* snap_list)
+int EScene::BoxQuery(SPickQuery& PQ, const Fbox& bb, ObjectList* snap_list)
 {
 	VERIFY(snap_list);
-	PQ.prepare_bq(bb, flags);
-	XRC.box_options(flags);
+	PQ.prepare_bq(bb);
 	for (ObjectIt _F = snap_list->begin(); _F != snap_list->end(); _F++)
 	{
 		((*_F))->BoxQuery(PQ);
@@ -62,26 +62,44 @@ int EScene::BoxQuery(SPickQuery& PQ, const Fbox& bb, u32 flags, ObjectList* snap
 	return PQ.r_count();
 }
 
-int EScene::RayQuery(SPickQuery& PQ, const Fvector& start, const Fvector& dir, float dist, u32 flags, CDB::MODEL* model)
+int EScene::RayQuery(SPickQuery& PQ, const Fvector& start, const Fvector& dir, float dist, xrPhysX::CDB::MODEL* model)
 {
-	PQ.prepare_rq	(start,dir,dist,flags);
-	XRC.ray_options	(flags);
-	XRC.ray_query	(model,start,dir,dist);
-	for (int r=0; r<XRC.r_count(); r++)
-		PQ.append	(XRC.r_begin()+r,0,0);
+	PQ.prepare_rq	(start,dir,dist);
+	
+	xrPhysX::CDB::RayTraceOptions options;
+	options.SetStart(start);
+	options.SetDir(dir);
+	options.r_range = dist;
+	options.options = PQ.m_Flags;
+	xrPhysX::CDB::TraceResult result;
+	model->RayTrace(options, result);
+
+	for (const auto& elem : result)
+	{
+		PQ.append(elem, 0, 0);
+	}
+
 	return PQ.r_count();
 }
 
-int EScene::BoxQuery(SPickQuery& PQ, const Fbox& bb, u32 flags, CDB::MODEL* model)
+int EScene::BoxQuery(SPickQuery& PQ, const Fbox& bb, xrPhysX::CDB::MODEL* model)
 {
-	PQ.prepare_bq	(bb,flags);
-	XRC.box_options	(flags);
+	PQ.prepare_bq	(bb);
 	Fvector c,d;
 	bb.getcenter	(c);
 	bb.getradius	(d);
-	XRC.box_query	(model,c,d);
-	for (int r=0; r<XRC.r_count(); r++)
-		PQ.append	(XRC.r_begin()+r,0,0);
+
+	xrPhysX::CDB::AABBBoxTraceOptions options;
+	options.SetAABB(bb);
+	options.options = PQ.m_Flags;
+	xrPhysX::CDB::TraceResult result;
+	model->BoxTrace(options, result);
+
+	for (const auto& elem : result)
+	{
+		PQ.append(elem, 0, 0);
+	}
+	
 	return PQ.r_count();
 }
 

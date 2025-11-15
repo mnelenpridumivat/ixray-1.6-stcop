@@ -31,10 +31,16 @@ bool ESceneAIMapTool::PickObjects(Fvector& dest, const Fvector& start, const Fve
 {         	         
 	SPickQuery	PQ;
 	if (!GetSnapList()->empty()){
-        if (Scene->RayQuery(PQ,start,dir,dist,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,GetSnapList())){
-            dest.mad(start,dir,PQ.r_begin()->range);
-            return true;
-        }
+        //if (Scene->RayQuery(PQ,start,dir,dist,CDB::OPT_ONLYNEAREST|CDB::OPT_CULL,GetSnapList())){
+        //    dest.mad(start,dir,PQ.r_begin()->range);
+        //    return true;
+        //}
+	    if (Scene->RayQuery(PQ,start,dir,dist,
+	        xrPhysX::CDB::TraceOptions::only_nearest|xrPhysX::CDB::TraceOptions::cull,
+	        GetSnapList())){
+	        dest.mad(start,dir,PQ.r_begin()->range);
+	        return true;
+	    }
     }else{
     	ELog.DlgMsg(mtInformation,"Fill object list and try again.");
     }

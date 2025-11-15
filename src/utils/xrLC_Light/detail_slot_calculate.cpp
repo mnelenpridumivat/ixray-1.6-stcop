@@ -11,6 +11,7 @@
 #include "global_calculation_data.h"
 #include "../Shader_xrLC.h"
 #include "../../xrCore/Collision/cl_intersect.h"
+#include "embree_raytracing/EmbreeRayTrace.h"
 
 #undef LP_DEFAULT
 enum
@@ -53,125 +54,17 @@ public:
 
 
 //-----------------------------------------------------------------------------------------------------------------
-const int	LIGHT_Count				=	7;
-
-//-----------------------------------------------------------------
-__declspec(thread)		u64			t_start	= 0;
-__declspec(thread)		u64			t_time	= 0;
-__declspec(thread)		u64			t_count	= 0;
-
-
-
-IC bool RayPick(CDB::COLLIDER& DB, Fvector& P, Fvector& D, float r, R_Light& L)
-{
-	// 1. Check cached polygon
-	float _u,_v,range;
-	bool res = CDB::TestRayTri(P,D,L.tri,_u,_v,range,true);
-	if (res) {
-		if (range>0 && range<r) return true;
-	}
-
-	// 2. Polygon doesn't pick - real database query
-	t_start			= CPU::GetCLK();
-	DB.ray_query	( &gl_data.RCAST_Model, P, D,r );
-	t_time			+=	CPU::GetCLK()-t_start-CPU::GetTickCount();
-	t_count			+=	1;
-	
-	// 3. Analyze
-	if (0==DB.r_count()) {
-		return false;
-	} else {
-		// cache polygon
-		CDB::RESULT&	rpinf	= *DB.r_begin();
-		CDB::TRI&		T		= gl_data.RCAST_Model.get_tris()[rpinf.id];
-		L.tri[0].set	(rpinf.verts[0]);
-		L.tri[1].set	(rpinf.verts[1]);
-		L.tri[2].set	(rpinf.verts[2]);
-		return true;
-	}
-}
-
-float getLastRP_Scale(CDB::COLLIDER* DB, R_Light& L)//, Face* skip)
-{
-	u32	tris_count		= DB->r_count();
-	float	scale		= 1.f;
-	Fvector B;
-
-//	X_TRY 
-	{
-		for (u32 I=0; I<tris_count; I++)
-		{
-			CDB::RESULT& rpinf = DB->r_begin()[I];
-			// Access to texture
-			CDB::TRI& clT								= gl_data.RCAST_Model.get_tris()[rpinf.id];
-			b_rc_face& F								= gl_data.g_rc_faces[rpinf.id];
-//			if (0==F)									continue;
-//			if (skip==F)								continue;
-
-			b_material& M	= gl_data.g_materials				[F.dwMaterial];
-			b_texture&	T	= gl_data.g_textures				[M.surfidx];
-
-		
-			const Shader_xrLC& SH	= shader( F.dwMaterial, *(gl_data.g_shaders_xrlc), gl_data.g_materials );
-//			Shader_xrLCVec&	LIB = 		gl_data.g_shaders_xrlc->Library	();
-//			if (M.shader_xrlc>=LIB.size()) return		0;		//. hack - vy gonite rebyata - eto ne hack - eto sledy zamesti - shader_xrlc - index ne togo masiva !!
-//			Shader_xrLC& SH	= LIB						[M.shader_xrlc];
-
-			if (!SH.flags.bLIGHT_CastShadow)			continue;
-
-#ifdef		DEBUG
-			const b_BuildTexture	&build_texture  = gl_data.g_textures			[M.surfidx];
-
-			VERIFY( !!(build_texture.HasSurface()) ==  !!(T.pSurface) );
-#endif
-
-			if (0==T.pSurface)	T.bHasAlpha = FALSE;
-			if (!T.bHasAlpha)	{
-				// Opaque poly - cache it
-				L.tri[0].set	(rpinf.verts[0]);
-				L.tri[1].set	(rpinf.verts[1]);
-				L.tri[2].set	(rpinf.verts[2]);
-				return 0;
-			}
-
-			// barycentric coords
-			// note: W,U,V order
-			B.set	(1.0f - rpinf.u - rpinf.v,rpinf.u,rpinf.v);
-
-			// calc UV
-			Fvector2*	cuv = F.t;
-			Fvector2	uv;
-			uv.x = cuv[0].x*B.x + cuv[1].x*B.y + cuv[2].x*B.z;
-			uv.y = cuv[0].y*B.x + cuv[1].y*B.y + cuv[2].y*B.z;
-
-			int U = iFloor(uv.x*float(T.dwWidth) + .5f);
-			int V = iFloor(uv.y*float(T.dwHeight)+ .5f);
-			U %= T.dwWidth;		if (U<0) U+=T.dwWidth;
-			V %= T.dwHeight;	if (V<0) V+=T.dwHeight;
-
-			u32 pixel		= T.pSurface[V*T.dwWidth+U];
-			u32 pixel_a		= color_get_A(pixel);
-			float opac		= 1.f - float(pixel_a)/255.f;
-			scale			*= opac;
-		}
-	} 
-//	X_CATCH
-//	{
-//		clMsg("* ERROR: getLastRP_Scale");
-//	}
-
-	return scale;
-}
+constexpr int	LIGHT_Count				=	7;
 
 #include "../xrForms/CompilersUI.h"
 
 extern float RaytraceEmbreeDetails(R_Light& L, Fvector& P, Fvector& N, float range);
-float rayTrace	(CDB::COLLIDER* DB, R_Light& L, Fvector& P, Fvector& D, float R)//, Face* skip)
+float rayTrace	(R_Light& L, Fvector& P, Fvector& D, float R)//, Face* skip)
 {
 	return RaytraceEmbreeDetails(L, P, D, R);
 }
 
-void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags)
+void LightPoint(base_color& C, Fvector& P, Fvector& N, base_lighting& lights, u32 flags)
 {
 	Fvector		Ldir,Pnew;
 	Pnew.mad	(P,N,0.01f);
@@ -188,7 +81,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 				if( D <=0 ) continue;
 
 				// Trace Light
-				float scale	=	D*L->energy*rayTrace(DB,*L,Pnew,Ldir,1000.f);
+				float scale	=	D*L->energy*rayTrace(*L,Pnew,Ldir,1000.f);
 				C.rgb.x		+=	scale * L->diffuse.x; 
 				C.rgb.y		+=	scale * L->diffuse.y;
 				C.rgb.z		+=	scale * L->diffuse.z;
@@ -205,7 +98,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 
 				// Trace Light
 				float R		= _sqrt(sqD);
-				float scale = D*L->energy*rayTrace(DB,*L,Pnew,Ldir,R);
+				float scale = D*L->energy*rayTrace(*L,Pnew,Ldir,R);
 				float A		= scale / (L->attenuation0 + L->attenuation1*R + L->attenuation2*sqD);
 
 				C.rgb.x += A * L->diffuse.x;
@@ -226,7 +119,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 				if( D <=0 ) continue;
 
 				// Trace Light
-				float scale	=	L->energy*rayTrace(DB,*L,Pnew,Ldir,1000.f);
+				float scale	=	L->energy*rayTrace(*L,Pnew,Ldir,1000.f);
 				C.sun		+=	scale;
 			} else {
 				// Distance
@@ -241,7 +134,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 
 				// Trace Light
 				float R		=	_sqrt(sqD);
-				float scale =	D*L->energy*rayTrace(DB,*L,Pnew,Ldir,R);
+				float scale =	D*L->energy*rayTrace(*L,Pnew,Ldir,R);
 				float A		=	scale / (L->attenuation0 + L->attenuation1*R + L->attenuation2*sqD);
 
 				C.sun		+=	A;
@@ -261,7 +154,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 
 				// Trace Light
 				Fvector		PMoved;	PMoved.mad	(Pnew,Ldir,0.001f);
-				float scale	=	L->energy*rayTrace(DB,*L,PMoved,Ldir,1000.f);
+				float scale	=	L->energy*rayTrace(*L,PMoved,Ldir,1000.f);
 				C.hemi		+=	scale;
 			} else {
 				// Distance
@@ -276,7 +169,7 @@ void LightPoint(CDB::COLLIDER* DB, base_color &C, Fvector &P, Fvector &N, base_l
 
 				// Trace Light
 				float R		=	_sqrt(sqD);
-				float scale =	D*L->energy*rayTrace(DB,*L,Pnew,Ldir,R);
+				float scale =	D*L->energy*rayTrace(*L,Pnew,Ldir,R);
 				float A		=	scale / (L->attenuation0 + L->attenuation1*R + L->attenuation2*sqD);
 
 				C.hemi		+=	A;
@@ -297,7 +190,7 @@ bool detail_slot_process( u32 _x, u32 _z, DetailSlot&	DS )
 
 
 
-bool detail_slot_calculate( u32 _x, u32 _z, DetailSlot&	DS, DWORDVec& box_result, CDB::COLLIDER &DB, base_lighting	&Selected )
+bool detail_slot_calculate( u32 _x, u32 _z, DetailSlot&	DS, /*DWORDVec& box_result, CDB::COLLIDER &DB,*/ base_lighting	&Selected )
 {
 	///////////////////////////////////////////////////////////
 	// Build slot BB & sphere
@@ -310,16 +203,28 @@ bool detail_slot_calculate( u32 _x, u32 _z, DetailSlot&	DS, DWORDVec& box_result
 	// Select polygons
 	Fvector				bbC,bbD;
 	BB.get_CD			( bbC, bbD );	bbD.add( 0.01f );
-	DB.box_query		( &gl_data.RCAST_Model, bbC, bbD );
 
-	box_result.clear	();
-	for (CDB::RESULT* I=DB.r_begin(); I!=DB.r_end(); I++) box_result.push_back(I->id);
-	if (box_result.empty())	
-		return false; 
+	xrPhysX::CDB::AABBBoxTraceOptions options;
+	options.SetAABB(BB);
+	options.options = xrPhysX::CDB::TraceOptions::full_test;
+	xrPhysX::CDB::TraceResult	result;
+	gl_data.RCAST_Model.BoxTrace(options, result);
+	
+	//DB.box_query		( &gl_data.RCAST_Model, bbC, bbD );
+
+	/*box_result.clear	();
+	for (CDB::RESULT* I=DB.r_begin(); I!=DB.r_end(); I++)
+	{
+		box_result.push_back(I->id);
+	}
+	if (box_result.empty())
+	{
+		return false;
+	}*/
 		//continue;
 
-	CDB::TRI*	tris	= gl_data.RCAST_Model.get_tris();
-	Fvector*	verts	= gl_data.RCAST_Model.get_verts();
+	//CDB::TRI*	tris	= gl_data.RCAST_Model.get_tris();
+	//Fvector*	verts	= gl_data.RCAST_Model.get_verts();
 
 	// select lights
 	Selected.select		( gl_data.g_lights, S.P, S.R );
@@ -344,7 +249,20 @@ bool detail_slot_calculate( u32 _x, u32 _z, DetailSlot&	DS, DWORDVec& box_result
 			Fvector start;	start.set	(P.x,BB.max.y+EPS,P.z);
 			
 			float		r_u,r_v,r_range;
-			for (DWORDIt tit=box_result.begin(); tit!=box_result.end(); tit++)
+			for (const auto& elem : result.results)
+			{
+				if (CDB::TestRayTri(start,dir,elem.verts,r_u,r_v,r_range,TRUE))
+				{
+					if (r_range>=0.f)	{
+						float y_test	= start.y - r_range;
+						if (y_test>P.y)	{
+							P.y			= y_test+EPS;
+							t_n.mknormal(elem.verts[0],elem.verts[1],elem.verts[2]);
+						}
+					}
+				}
+			}
+			/*for (DWORDIt tit=box_result.begin(); tit!=box_result.end(); tit++)
 			{
 				CDB::TRI&	T		= tris	[*tit];
 				Fvector		V[3]	= { verts[T.verts[0]], verts[T.verts[1]], verts[T.verts[2]] };
@@ -358,11 +276,11 @@ bool detail_slot_calculate( u32 _x, u32 _z, DetailSlot&	DS, DWORDVec& box_result
 						}
 					}
 				}
-			}
+			}*/
 			if (P.y<BB.min.y) continue;
 			
 			// light point
-			LightPoint		(&DB,amount,P,t_n,Selected,0);
+			LightPoint		(amount,P,t_n,Selected,0);
 			count			+= 1;
 		}
 	}

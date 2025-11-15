@@ -39,10 +39,21 @@ void global_claculation_data::xrLoad()
 		FS.update_path			(N,"$level$","build.cform");
 		IReader*			fs = FS.r_open("$level$","build.cform");
 		
-		R_ASSERT			(fs->find_chunk(0));
+		//R_ASSERT			(fs->find_chunk(0));
 		hdrCFORM			H;
-		fs->r				(&H,sizeof(hdrCFORM));
-		R_ASSERT			(CFORM_Versions::WITH_INSTANCING==H.version);
+		{
+			auto fs_header = fs->open_chunk(CFORM_Chunks::Header);
+			fs_header->r(&H,sizeof(hdrCFORM));
+			R_ASSERT(CFORM_Versions::WITH_INSTANCING==H.version);
+			fs_header->close();
+		}
+		{
+			auto fs_static = fs->open_chunk(CFORM_Chunks::StaticGeom);
+
+			xr_vector<Fvector> vertices(fs_static->r_u64());
+			
+			fs_static->close();
+		}
 		
 		Fvector*	verts	= (Fvector*) fs->pointer();
 		CDB::TRI*	tris	= (CDB::TRI*)(verts+H.vertcount);
@@ -56,9 +67,13 @@ void global_claculation_data::xrLoad()
 		EmbreeMain.build_data.build_faces.resize(H.facecount);
 
 		for (u32 Vid = 0; Vid < H.vertcount; Vid++)
+		{
 			EmbreeMain.build_data.build_verts[Vid] = verts[Vid];
+		}
 		for (u32 Tid = 0; Tid < H.facecount; Tid++)
+		{
 			EmbreeMain.build_data.build_faces[Tid] = tris[Tid];
+		}
 		Phase("Loading RCast CDB...");
 
 		RCAST_Model.build(verts, H.vertcount, tris, H.facecount);

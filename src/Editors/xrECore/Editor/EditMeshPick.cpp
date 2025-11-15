@@ -33,6 +33,7 @@ void CEditableMesh::GenerateCFModel()
 	}
 	m_CFModel = xr_make_unique<xrPhysX::CDB::MODEL>();
 	m_CFModel->AddUniqueStaticGeom(CL.getVSpan(), CL.getTSpan());
+	m_CFModel->Finalize();
 }
 
 void CEditableMesh::RayQuery(SPickQuery& pinf)
@@ -72,7 +73,7 @@ void CEditableMesh::RayQuery(const Fmatrix& parent, const Fmatrix& inv_parent, S
 		options.SetDir(D);
 	}
 	options.r_range = pinf.m_Dist;
-	//options.options = xrPhysX::CDB::TraceOptions::cull;
+	options.options = pinf.m_Flags;
 	xrPhysX::CDB::TraceResult result;
 	m_CFModel->RayTrace(options, result);
 
@@ -89,12 +90,16 @@ void CEditableMesh::BoxQuery(const Fmatrix& parent, const Fmatrix& inv_parent, S
 		GenerateCFModel();
 	}
 	// Do we really need to get all poligons, even if we need only objects?
+	xrPhysX::CDB::AABBBoxTraceOptions options;
+	options.SetAABB(pinf.m_BB);
+	options.options = pinf.m_Flags;
+	xrPhysX::CDB::TraceResult result;
+	m_CFModel->BoxTrace(options, result);
 
-	
-	
-	XRC.box_query(inv_parent, m_CFModel, pinf.m_BB);
-	for (int r=0; r< XRC.r_count(); r++)
-		pinf.append_mtx(parent, XRC.r_begin()+r,m_Parent,this);
+	for (const auto& elem : result.results)
+	{
+		pinf.append_mtx(parent, elem, m_Parent, this);
+	}
 }
 
 static const float _sqrt_flt_max = _sqrt(flt_max*0.5f);

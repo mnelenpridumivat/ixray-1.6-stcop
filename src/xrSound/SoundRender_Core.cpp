@@ -193,6 +193,7 @@ void CSoundRender_Core::set_geometry_som(IReader* I)
 
 	geom_SOM = xr_make_unique<xrPhysX::CDB::MODEL>();
 	geom_SOM->AddUniqueStaticGeom(CL.getVSpan(),CL.getTSpan());
+	geom_SOM->Finalize();
 
 	geom->close();
 }
@@ -240,6 +241,7 @@ void CSoundRender_Core::set_geometry_env(IReader* I)
 
 	geom_ENV = xr_make_unique<xrPhysX::CDB::MODEL>();
 	geom_ENV->AddUniqueStaticGeom({verts, H.vertcount}, {tris, H.facecount});
+	geom_ENV->Finalize();
 
 	geom_ch->close			();
 	geom->close				();

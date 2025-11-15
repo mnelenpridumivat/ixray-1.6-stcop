@@ -3,7 +3,7 @@
 template <bool _is_pm, typename T>
 struct xr_special_free
 {
-	IC void operator()(T*& ptr)
+	IC void operator()(T*& ptr) noexcept
 	{
 		if (ptr == nullptr)
 		{
@@ -16,7 +16,7 @@ struct xr_special_free
 
 			if constexpr (std::is_polymorphic_v<T> && !std::is_final_v<T>)
 			{
-				// FX: Проблемы множественного наследования
+				// FX: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				_real_ptr = dynamic_cast<void*>(ptr);
 			}
 			else
@@ -33,6 +33,13 @@ struct xr_special_free
 			Memory.mem_free(ptr);
 		}
 	}
+	xr_special_free() noexcept = default;
+    
+	xr_special_free(xr_special_free&&) noexcept = default;
+	xr_special_free& operator=(xr_special_free&&) noexcept = default;
+    
+	xr_special_free(const xr_special_free&) noexcept = default;
+	xr_special_free& operator=(const xr_special_free&) noexcept = default;
 };
 
 

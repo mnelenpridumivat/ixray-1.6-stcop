@@ -90,8 +90,8 @@ struct TriangleContainer
 		tri.verts[1] = faces_v[IndexTriangle].point2;
 		tri.verts[2] = faces_v[IndexTriangle].point3;
 
-		tri.material = cform_data[IndexTriangle].MaterialID;
-		tri.sector   = cform_data[IndexTriangle].Sector;
+		tri.data.material = cform_data[IndexTriangle].MaterialID;
+		tri.data.sector   = cform_data[IndexTriangle].Sector;
 		return tri;
 	}
 

@@ -34,12 +34,12 @@ void xrLight_Details()
  // 3:15min, 4:03 ppl
 	u32 MAX_Z = gl_data.slots_data.size_z();
 	u32 MAX_X = gl_data.slots_data.size_x();
-	thread_local CDB::COLLIDER		DB;
-	DB.ray_options(CDB::OPT_CULL);
-	DB.box_options(CDB::OPT_FULL_TEST);
+	//thread_local CDB::COLLIDER		DB;
+	//DB.ray_options(CDB::OPT_CULL);
+	//DB.box_options(CDB::OPT_FULL_TEST);
 	thread_local base_lighting		Selected;
 
-	thread_local DWORDVec box_result;
+	//thread_local DWORDVec box_result;
  
 	xr_parallel_for
 	(
@@ -53,9 +53,13 @@ void xrLight_Details()
 
 				DetailSlot& DS = gl_data.slots_data.get_slot(X, Z);
 				if (!detail_slot_process(X, Z, DS))
+				{
 					continue;
-				if (!detail_slot_calculate(X, Z, DS, box_result, DB, Selected))
+				}
+				if (!detail_slot_calculate(X, Z, DS, Selected))
+				{
 					continue;
+				}
 				gl_data.slots_data.set_slot_calculated(X, Z);
 
 			}

@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/communicate.h"
+#include "PhysX/Collision/xrCDB.h"
 
 extern doug_lea_area_allocator	g_render_lua_allocator_area;
 
@@ -241,10 +242,10 @@ public:
 
 	virtual CCustomObject* RayPickObject(float dist, const Fvector& start, const Fvector& dir, ObjClassID classfilter, SRayPickInfo* pinf, ObjectList* from_list);
 	int 			BoxPickObjects(const Fbox& box, SBoxPickInfoVec& pinf, ObjectList* from_list);
-	int				RayQuery(SPickQuery& RQ, const Fvector& start, const Fvector& dir, float dist, u32 flags, ObjectList* snap_list);
-	int 			BoxQuery(SPickQuery& RQ, const Fbox& bb, u32 flags, ObjectList* snap_list);
-	int				RayQuery(SPickQuery& RQ, const Fvector& start, const Fvector& dir, float dist, u32 flags, CDB::MODEL* model);
-	int 			BoxQuery(SPickQuery& RQ, const Fbox& bb, u32 flags, CDB::MODEL* model);
+	int				RayQuery(SPickQuery& RQ, const Fvector& start, const Fvector& dir, float dist, ObjectList* snap_list);
+	int 			BoxQuery(SPickQuery& RQ, const Fbox& bb, ObjectList* snap_list);
+	int				RayQuery(SPickQuery& RQ, const Fvector& start, const Fvector& dir, float dist, xrPhysX::CDB::MODEL* model);
+	int 			BoxQuery(SPickQuery& RQ, const Fbox& bb, xrPhysX::CDB::MODEL* model);
 
 	int 			RaySelect(int flag, ObjClassID classfilter = OBJCLASS_DUMMY); // flag=0,1,-1 (-1 invert)
 	int 			FrustumSelect(int flag, ObjClassID classfilter = OBJCLASS_DUMMY);

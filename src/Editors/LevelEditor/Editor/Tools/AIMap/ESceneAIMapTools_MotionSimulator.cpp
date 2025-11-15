@@ -458,9 +458,16 @@ void ESceneAIMapTool::MotionSimulate(Fvector& result, Fvector& start, Fvector& e
 	// Collision query
 	Fvector			bbC,bbD;
 	bb.get_CD		(bbC,bbD);
-    static SPickQuery PQ;
-    if (m_CFModel)	Scene->BoxQuery(PQ,bb,CDB::OPT_FULL_TEST,m_CFModel);
-    else			Scene->BoxQuery(PQ,bb,CDB::OPT_FULL_TEST,GetSnapList());
+    static SPickQuery PQ; // maybe some problems if called in parallel
+	PQ.m_Flags = xrPhysX::CDB::TraceOptions::full_test;
+    if (m_CFModel)
+    {
+	    Scene->BoxQuery(PQ,bb,m_CFModel);
+    }
+    else
+    {
+	    Scene->BoxQuery(PQ,bb,GetSnapList());
+    }
 	
 	// XForm everything to ellipsoid space
 	Fvector			xf;

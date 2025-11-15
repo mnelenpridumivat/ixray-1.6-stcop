@@ -539,8 +539,15 @@ bool CObjectSpace::BoxQuery(Fvector const& box_center,
 	return !!CObjectSpaceThreadData::xrc.r_count();
 }
 
+#endif
 
 //----------------------------------------------------------------------
+
+namespace CObjectSpaceThreadData
+{
+	thread_local xr_vector<ISpatialShared> r_spatial;
+}
+
 IC int	CObjectSpace::GetNearest(xr_vector<CObject*>& q_nearest, const Fvector& point, float range, CObject* ignore_object)
 {
 	return GetNearest
@@ -552,4 +559,3 @@ IC int	CObjectSpace::GetNearest(xr_vector<CObject*>& q_nearest, const Fvector& p
 		ignore_object
 	);
 }
-#endif

@@ -1,5 +1,6 @@
 #pragma once
 #include "xr_collide_defs.h"
+#include "PhysX/Collision/xrCDB.h"
 
 // refs
 class ISpatial;
@@ -22,7 +23,7 @@ class	XRCORE_API						CObjectSpace
 {
 private:
 	// Debug
-	CDB::MODEL							Static;
+	xrPhysX::CDB::MODEL					Static;
 	Fbox								m_BoundingVolume;
 public:
 
@@ -64,9 +65,9 @@ public:
 	int									GetNearest			( xr_vector<CObject*>&	q_nearest, const Fvector &point, float range, CObject* ignore_object );
 	int									GetNearest			( xr_vector<ISpatialShared>& q_spatial, xr_vector<CObject*>&	q_nearest, const Fvector &point, float range, CObject* ignore_object );
 
-	CDB::TRI*							GetStaticTris		() { return Static.get_tris();	}
-	Fvector*							GetStaticVerts		() { return Static.get_verts(); }
-	CDB::MODEL*							GetStaticModel		() { return &Static;			}
+	//CDB::TRI*							GetStaticTris		() { return Static.get_tris();	}
+	//Fvector*							GetStaticVerts		() { return Static.get_verts(); }
+	const xrPhysX::CDB::MODEL&			GetStaticModel		() const { return Static; }
 
 	const Fbox&							GetBoundingVolume	() { return m_BoundingVolume;}
 
