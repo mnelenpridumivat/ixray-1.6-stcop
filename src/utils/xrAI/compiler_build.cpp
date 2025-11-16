@@ -9,7 +9,7 @@
 #include <freemagic/MgcAppr3DPlaneFit.h>
 #pragma warning(default:4995)
 
-IC void SnapXZ	(Fvector&	V)
+/*IC void SnapXZ	(Fvector&	V)
 {
 	V.x = snapto(V.x,g_params.fPatchSize);
 	V.z = snapto(V.z,g_params.fPatchSize);
@@ -22,7 +22,7 @@ IC void BoxQuery(Fbox& BB, bool exact)
 	Fvector			C,D;
 	BB.get_CD		(C,D);
 	IXRC.box_query	(LevelPtr.get(), C, D);
-}
+}*/
 
 struct tri {
 	Fvector v[3];
@@ -31,7 +31,7 @@ struct tri {
 };
 
 const float RCAST_VALID = 0.55f;
-BOOL CreateNode(Fvector& vAt, vertex& N)
+/*BOOL CreateNode(Fvector& vAt, vertex& N)
 {
 	// *** Query and cache polygons for ray-casting
 	Fvector	PointUp;		PointUp.set(vAt);	PointUp.y	+= RCAST_Depth;		SnapXZ	(PointUp);
@@ -205,7 +205,7 @@ BOOL CreateNode(Fvector& vAt, vertex& N)
 	// ???
 
 	return TRUE;
-}
+}*/
 
 const int		HDIM_X = 128;
 const int		HDIM_Z = 128;
@@ -213,9 +213,9 @@ const int		HDIM_Z = 128;
 using vecDW = xr_vector<u32>;
 using vecDW_it = vecDW::iterator;
 
-static vecDW*	HASH[HDIM_X+1][HDIM_Z+1];
+//static vecDW*	HASH[HDIM_X+1][HDIM_Z+1];
 
-void	hash_Initialize ()
+/*void	hash_Initialize ()
 {
 	for (int i=0; i<=HDIM_X; i++)
 	{
@@ -225,8 +225,8 @@ void	hash_Initialize ()
 			HASH[i][j]->reserve	(64);
 		}
 	}
-}
-void	hash_Destroy	()
+}*/
+/*void	hash_Destroy	()
 {
 	for (int i=0; i<=HDIM_X; i++)
 	{
@@ -235,9 +235,9 @@ void	hash_Destroy	()
 			xr_delete	(HASH[i][j]);
 		}
 	}
-}
+}*/
 
-vecDW&	HashMap	(Fvector& V)
+/*vecDW&	HashMap	(Fvector& V)
 {
 	// Calculate offset,scale,epsilon
 	Fvector				VMmin,	VMscale, VMeps, scale;
@@ -258,17 +258,17 @@ vecDW&	HashMap	(Fvector& V)
 	iz = iFloor((V.z-VMmin.z)*scale.z);
 	R_ASSERT(ix<=HDIM_X && iz<=HDIM_Z);
 	return *HASH[ix][iz];
-}
+}*/
 
-void	RegisterNode(vertex& N)
+/*void	RegisterNode(vertex& N)
 {
 	u32 ID = g_nodes.size();
 	g_nodes.push_back(N);
 
 	HashMap(N.Pos).push_back(ID);
-}
+}*/
 
-u32	FindNode(Fvector& vAt)
+/*u32	FindNode(Fvector& vAt)
 {
 	float eps	= 0.05f;
 	vecDW& V	= HashMap(vAt);
@@ -279,9 +279,9 @@ u32	FindNode(Fvector& vAt)
 		if (vAt.similar(N.Pos,eps)) return *I;
 	}
 	return InvalidNode;
-}
+}*/
  
-BOOL	CanTravel(Fvector& _from, Fvector& _at)
+/*BOOL	CanTravel(Fvector& _from, Fvector& _at)
 {
 	float eps	= 0.1f;
 	float eps_y = g_params.fPatchSize*1.5f; // * tan(56) = 1.5
@@ -298,9 +298,9 @@ BOOL	CanTravel(Fvector& _from, Fvector& _at)
 	if (b2) return TRUE;
 
 	return FALSE;
-}
+}*/
 
-u32 BuildNode(Fvector& vFrom, Fvector& vAt)	// return node's index
+/*u32 BuildNode(Fvector& vFrom, Fvector& vAt)	// return node's index
 {
 	// *** Test if we can travel this path
 	SnapXZ			(vAt);
@@ -324,4 +324,4 @@ u32 BuildNode(Fvector& vFrom, Fvector& vAt)	// return node's index
 			return old;
 		}
 	} else return InvalidNode;
-}
+}*/

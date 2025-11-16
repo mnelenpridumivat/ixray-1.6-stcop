@@ -30,14 +30,11 @@ struct SFeelParam {
 IC BOOL feel_vision_callback(collide::rq_result& result, LPVOID params)
 {
 	SFeelParam* fp = (SFeelParam*)params;
-	float vis = fp->parent->feel_vision_mtl_transp(result.O, result.element);
+	float vis = fp->parent->feel_vision_mtl_transp(result);
 	fp->vis *= vis;
-	if (nullptr == result.O && fis_zero(vis)) {
-		CDB::TRI* T = g_pGameLevel->ObjectSpace.GetStaticTris() + result.element;
-		Fvector* V = g_pGameLevel->ObjectSpace.GetStaticVerts();
-		fp->item->Cache.verts[0].set(V[T->verts[0]]);
-		fp->item->Cache.verts[1].set(V[T->verts[1]]);
-		fp->item->Cache.verts[2].set(V[T->verts[2]]);
+	if (!result.IsDynamic && fis_zero(vis))
+	{
+		result.CopyPoly(fp->item->Cache.verts);
 	}
 	return (fp->vis > fp->vis_threshold);
 }

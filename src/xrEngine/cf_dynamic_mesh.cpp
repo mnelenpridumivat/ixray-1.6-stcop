@@ -36,20 +36,13 @@ BOOL	CCF_DynamicMesh::_RayQuery( const collide::ray_defs& Q, collide::rq_results
 		 bool operator() ( collide::rq_result &r )
 		{
 			IKinematics::pick_result br;
-			VERIFY( r.O == &obj );
-			bool  res = K.PickBone( obj.XFORM(), br, Q.range, Q.start, Q.dir, (u16) r.element ) ;
+		 	VERIFY(r.IsDynamic);
+			VERIFY(r.object() == &obj );
+			bool  res = K.PickBone( obj.XFORM(), br, Q.range, Q.start, Q.dir, (u16) r.bone_id() ) ;
 			if(res)
 			{
 				r.range = br.dist;
 			}
-#if	0
-			if(res)
-			{
-				ph_debug_render->open_cashed_draw();
-				ph_debug_render->draw_tri(br.tri[0], br.tri[1], br.tri[2], color_argb(50, 255, 0, 0), 0);
-				ph_debug_render->close_cashed_draw(50000);
-			}
-#endif
 			return !res;
 		}
 		private:

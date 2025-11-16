@@ -68,7 +68,8 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			builder.LoadCFORM_build(*fs);
 
 			{
-				xr_vector<auto>	faces = builder.GetStaticMesh().GetPureTriangles();
+				auto view = builder.GetStaticMesh().GetPureTriangles();
+				xr_vector<CDB::TRI>	faces(view.begin(), view.end());
 				LevelPtr->AddUniqueStaticGeom(builder.GetStaticMesh().GetVertices(), faces);
 			}
 
@@ -76,7 +77,8 @@ void xrLoad(LPCSTR name, bool draft_mode)
 			for (auto& MU : MUs)
 			{
 				auto& Prot = MU.GetPrototypeData();
-				xr_vector<auto>	faces = Prot.GetPureTriangles();
+				auto view = Prot.GetPureTriangles();
+				xr_vector<CDB::TRI>	faces(view.begin(), view.end());
 				LevelPtr->AddInstances(Prot.GetVertices(), faces, MU.GetInstances());
 			}
 			

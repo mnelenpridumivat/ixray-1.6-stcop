@@ -1341,7 +1341,8 @@ u16 CPHSimpleCharacter::RetriveContactBone()
 	if (inl_ph_world().ObjectSpace().RayQuery(RQR, m_phys_ref_object->ObjectCollisionModel(), Q))
 	{
 		collide::rq_result* R = RQR.r_begin();
-		contact_bone = (u16)R->element;
+		VERIFY(R->IsDynamic);
+		contact_bone = (u16)R->data.d.bone_id;
 	}
 	else 
 	{
@@ -1818,20 +1819,20 @@ bool CPHSimpleCharacter::TouchRestrictor(ERestrictionType rttype)
 
 IC bool valide_res( u16& res_material_idx, const collide::rq_result	&R )
 {
-	if(!R.O)
+	if(!R.IsDynamic)
 	{
-		CDB::TRI	* tri	= inl_ph_world().ObjectSpace().GetStaticTris( ) + R.element;
-		VERIFY( tri );
-		res_material_idx	= tri->material;
+		res_material_idx	= R.tri().material;
 		return !ignore_material( res_material_idx );
 	}
 
-	IRenderVisual* V =R.O->Visual();
+	IRenderVisual* V =R.object()->Visual();
 	if (!V)
+	{
 		return false;
+	}
 
 	IKinematics *K = V->dcast_PKinematics();
-	CBoneData &bd = K->LL_GetData( (u16)R.element );
+	CBoneData &bd = K->LL_GetData( (u16)R.bone_id() );
 	res_material_idx= bd.game_mtl_idx;
 	return true;
 }

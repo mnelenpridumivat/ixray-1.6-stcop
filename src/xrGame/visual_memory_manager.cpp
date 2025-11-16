@@ -554,18 +554,20 @@ bool CVisualMemoryManager::visible(u32 _level_vertex_id, float yaw, float eye_fo
 		return(false);
 }
 
-float CVisualMemoryManager::feel_vision_mtl_transp(CObject* O, u32 element)
+float CVisualMemoryManager::feel_vision_mtl_transp(collide::rq_result& result)
 {
-	float vis				= 1.f;
-	if (O){
-		IKinematics* V		= PKinematics(O->Visual());
+	float vis = 1.f;
+	if (result.IsDynamic)
+	{
+		IKinematics* V = PKinematics(result.object()->Visual());
 		if (0!=V){
-			CBoneData& B	= V->LL_GetData((u16)element);
-			vis				= GMLib.GetMaterialByIdx(B.game_mtl_idx)->fVisTransparencyFactor;
+			CBoneData& B = V->LL_GetData(result.bone_id());
+			vis = GMLib.GetMaterialByIdx(B.game_mtl_idx)->fVisTransparencyFactor;
 		}
-	}else{
-		CDB::TRI* T			= Level().ObjectSpace.GetStaticTris()+element;
-		vis					= GMLib.GetMaterialByIdx(T->material)->fVisTransparencyFactor;
+	}
+	else
+	{
+		vis = GMLib.GetMaterialByIdx(result.tri().data.material)->fVisTransparencyFactor;
 	}
 	return vis;
 }

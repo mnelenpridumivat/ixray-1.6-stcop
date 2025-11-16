@@ -11,8 +11,10 @@ typedef	svector<R_Light_Fast*,1024>	LSelection;
 
 IC bool RayPick(CDB::COLLIDER& DB, Fvector& P, Fvector& D, float r, R_Light_Fast& L)
 {
+	FATAL("Disabled!");
+	return false;
 	// 1. Check cached polygon
-	float _u,_v,range;
+	/*float _u,_v,range;
 	bool res = CDB::TestRayTri(P,D,L.tri,_u,_v,range,true);
 	if (res) {
 		if (range>0 && range<r) return true;
@@ -31,7 +33,7 @@ IC bool RayPick(CDB::COLLIDER& DB, Fvector& P, Fvector& D, float r, R_Light_Fast
 		L.tri[1].set	(rpinf.verts[1]);
 		L.tri[2].set	(rpinf.verts[2]);
 		return true;
-	}
+	}*/
 }
 
 float LightPoint(CDB::COLLIDER& DB, Fvector &P, Fvector &N, LSelection& SEL)

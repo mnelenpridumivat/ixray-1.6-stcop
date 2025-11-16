@@ -92,7 +92,7 @@ public:
 	virtual	void	reinit					();
 	virtual	void	reload					(LPCSTR section);
 	virtual	void	update					(float time_delta);
-	virtual	float	feel_vision_mtl_transp	(CObject* O, u32 element);	
+	virtual	float	feel_vision_mtl_transp	(collide::rq_result& result);	
 			void	remove_links			(CObject *object);
 			void	remove					(const MemorySpace::CVisibleObject *visible_object);
 

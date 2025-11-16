@@ -49,7 +49,7 @@ public:
 	virtual bool					shedule_Needed			();
 
 public:
-	virtual	float					feel_vision_mtl_transp	(CObject *object, u32 element);
+	virtual	float					feel_vision_mtl_transp	(collide::rq_result& result) override;
 
 public:
 	virtual	BOOL					feel_vision_isRelevant	(CObject *object) = 0;

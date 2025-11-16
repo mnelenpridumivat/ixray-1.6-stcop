@@ -116,17 +116,16 @@ void CActor::UpdateLookAt()
 	collide::rq_result& RQ				= HUD().GetCurrentRayQuery();
 
 	LookAtData.PickPos = { 0.0f, 0.0f, 0.0f };
-	Fvector ActorPos;
-	ActorPos = Position();
+	Fvector ActorPos = Position();
 	ActorPos.y += ACTOR_HEIGHT * 0.5f;
 
 	LookAtData.PickPos.mad(Device.vCameraPosition, Device.vCameraDirection, RQ.range);
 	LookAtData.LookAtObject = nullptr;
-	if (RQ.O)
+	if (RQ.IsDynamic)
 	{
 		//PickPos = RQ.O->Position();
-		RQ.O->Center(LookAtData.PickPos);
-		LookAtData.LookAtObject = RQ.O->getVisible() ? RQ.O : nullptr;
+		RQ.object()->Center(LookAtData.PickPos);
+		LookAtData.LookAtObject = RQ.object()->getVisible() ? RQ.object() : nullptr;
 	}
 
 	LookAtData.IsNearEnoght = ActorPos.distance_to_sqr(LookAtData.PickPos) < 6.0f;
@@ -1693,9 +1692,8 @@ void CActor::CheckFlyhack()
 			if (l_pC)
 			{
 				collide::rq_result RQ;
-				Fvector result, dir;
-				dir = Fvector().set(0, -1, 0);
-				result = XFORM().c;
+				Fvector dir{0, -1, 0};
+				Fvector result = XFORM().c;
 
 				if (Level().ObjectSpace.RayPick(result, dir, 1000.f, collide::rqtBoth, RQ, this))
 				{

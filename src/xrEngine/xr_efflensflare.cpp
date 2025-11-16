@@ -212,22 +212,21 @@ struct STranspParam
 IC BOOL material_callback(collide::rq_result& result, LPVOID params)
 {
 	STranspParam* fp= (STranspParam*)params;
-	float vis		= 1.f;
-	if (result.O){
-		vis			= 0.f;
-		//CKinematics*K=PKinematics(result.O->renderable.visual);
-		IKinematics*K=PKinematics(result.O->renderable.visual);
-		if (K&&(result.element>0))
-			vis		= g_pGamePersistent->MtlTransparent(K->LL_GetData(u16(result.element)).game_mtl_idx);
-	}else{
-		CDB::TRI* T	= g_pGameLevel->ObjectSpace.GetStaticTris()+result.element;
-		vis			= g_pGamePersistent->MtlTransparent(T->material);
+	float vis = 1.f;
+	if (result.IsDynamic)
+	{
+		vis = 0.f;
+		IKinematics*K=PKinematics(result.object()->renderable.visual);
+		if (K&&(result.bone_id()>0))
+		{
+			vis = g_pGamePersistent->MtlTransparent(K->LL_GetData(u16(result.bone_id())).game_mtl_idx);
+		}
+	} else
+	{
+		vis = g_pGamePersistent->MtlTransparent(result.tri().material);
 		if (fis_zero(vis)){
-			Fvector* V	= g_pGameLevel->ObjectSpace.GetStaticVerts();
-			fp->pray_cache->set				(fp->P,fp->D,fp->f,TRUE);
-			fp->pray_cache->verts[0].set	(V[T->verts[0]]);
-			fp->pray_cache->verts[1].set	(V[T->verts[1]]);
-			fp->pray_cache->verts[2].set	(V[T->verts[2]]);
+			fp->pray_cache->set(fp->P,fp->D,fp->f,TRUE);
+			result.CopyPoly(fp->pray_cache->verts);
 		}
 	}
 	fp->vis			*=vis;

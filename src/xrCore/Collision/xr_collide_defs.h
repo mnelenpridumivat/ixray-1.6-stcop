@@ -88,20 +88,118 @@ namespace collide
 	};
 	struct			rq_result 
 	{
-		CObject*	O;				// if NULL - static
-		float		range;			// range to intersection
-		int			element;		// номер кости/номер треугольника
-		IC rq_result& set		(CObject* _O, float _range, int _element)
+		struct DynamicData
+		{
+			CObject* object;
+			int bone_id;
+		};
+		struct StaticData
+		{
+			Fvector poly[3];
+			CDB::TRIExtra tris;
+		};
+		bool IsDynamic = false;
+		float range = std::numeric_limits<float>::infinity();
+		union
+		{
+			DynamicData d;
+			StaticData s;
+		} data{};
+
+		IC CObject* object() const { R_ASSERT(IsDynamic); return data.d.object; }
+		IC int bone_id() const { R_ASSERT(IsDynamic); return data.d.bone_id; }
+		IC const CDB::TRIExtra& tri() const { R_ASSERT(!IsDynamic); return data.s.tris; }
+		IC const Fvector (&poly())[3] { R_ASSERT(!IsDynamic); return data.s.poly; }
+
+		IC void CopyPoly(Fvector (&other)[3])
+		{
+			R_ASSERT(!IsDynamic);
+			std::memcpy(&other, &data.s.poly, sizeof(data.s.poly));
+		}
+		
+		//CObject*	O;				// if NULL - static
+		//float		range;			// range to intersection
+		//int			element;		// номер кости/номер треугольника
+		IC rq_result& set(CObject& obj, float range, int bone_id)
+		{			
+			IsDynamic = true;
+			this->range = range;
+			data.d.object = &obj;
+			data.d.bone_id = bone_id;
+			return *this;
+		}
+		IC rq_result& set(const CDB::TRIExtra& tri, const Fvector (&poly)[3], float range)
+		{
+			IsDynamic = false;
+			this->range = range;
+			data.s.tris = tri;
+			memcpy(data.s.poly, poly, sizeof(data.s.poly));
+			return *this;
+		}
+		IC void Copy(const rq_result& src)
+		{
+			IsDynamic = src.IsDynamic;
+			range = src.range;
+			std::memcpy(&data, &src.data, sizeof(data));
+		}
+		/*IC rq_result& set		(CObject* _O, float _range, int _element)
 		{
 			O		= _O;
 			range	= _range;
 			element	= _element;
 			return	*this;
+		}*/
+		/*IC bool set_if_less(CDB::RESULT& other)
+		{
+			if (other.range < range)
+			{
+				IsDynamic = false;
+				range = other.range;
+				data.s.tris.data = other.data;
+				data.s.tris.verts = other.
+			}
+		}*/
+		IC bool set_if_less(const rq_result& other)
+		{
+			if (other.range < range)
+			{
+				Copy(other);
+				return true;
+			}
+			return false;
 		}
-		IC BOOL		set_if_less	(CDB::RESULT*	I){if (I->range<range){ set(0,I->range,I->id);			return TRUE;}else return FALSE;}
-		IC BOOL		set_if_less	(rq_result*		R){if (R->range<range){ set(R->O,R->range,R->element);	return TRUE;}else return FALSE;}
-		IC BOOL		set_if_less	(CObject* _who, float _range, int _element)	{ if (_range<range) { set(_who,_range,_element); return TRUE;}else return FALSE;}
-		IC BOOL		valid		() {return (element>=0);}
+		IC bool set_if_less(const CDB::TRIExtra& tri, const Fvector (&poly)[3], float range)
+		{
+			if (this->range > range)
+			{
+				IsDynamic = false;
+				this->range = range;
+				data.s.tris = tri;
+				std::memcpy(&data.s.poly, &poly, sizeof(data.s.poly));
+				return true;
+			}
+			return false;
+		}
+		IC bool set_if_less(CObject& obj, float range, int bone_id)
+		{
+			if (this->range > range)
+			{
+				IsDynamic = true;
+				this->range = range;
+				data.d.object = &obj;
+				data.d.bone_id = bone_id;
+				return true;
+			}
+			return false;
+		}
+		
+		//IC BOOL		set_if_less	(CDB::RESULT*	I){if (I->range<range){ set(0,I->range,I->id);			return TRUE;}else return FALSE;}
+		//IC BOOL		set_if_less	(rq_result*		R){if (R->range<range){ set(R->O,R->range,R->element);	return TRUE;}else return FALSE;}
+		//IC BOOL		set_if_less	(CObject* _who, float _range, int _element)	{ if (_range<range) { set(_who,_range,_element); return TRUE;}else return FALSE;}
+		/*IC BOOL		valid		()
+		{
+			return IsDynamic ? data.d.object ? true;
+		}*/
 	};
 
 	using rqVec = xr_vector<rq_result>;
@@ -113,28 +211,40 @@ namespace collide
 		rqVec		results;
 		static bool	r_sort_pred		(const rq_result& a, const rq_result& b)	{	return a.range<b.range;}
 	public:
-		IC BOOL		append_result	(CObject* _who, float _range, int _element, BOOL bNearest)
+		IC bool append_result(const CDB::TRIExtra& tri, const Fvector (&poly)[3], float range, bool bNearest)
+		{
+			if (bNearest&&!results.empty()){
+				rq_result& R		= results.back();
+				if (range<R.range){
+					R.set(tri, poly, range);
+					return true;
+				}
+				return false;
+			}
+			rq_result& rq = results.emplace_back();
+			rq.set(tri, poly, range);
+			return true;
+		}
+		IC bool append_result(CObject& _who, float _range, int _element, bool bNearest)
 		{
 			if (bNearest&&!results.empty()){
 				rq_result& R		= results.back();
 				if (_range<R.range){
-					R.O				=_who;
-					R.range			=_range;
-					R.element		=_element;
-					return			TRUE;
+					R.set(_who, _range, _element);
+					return true;
 				}
-				return				FALSE;
+				return false;
 			}
-			results.push_back		(rq_result());
-			rq_result& rq			= results.back();
-			rq.range	=_range;
-			rq.element	=_element;
-			rq.O		=_who;
-			return TRUE	;
+			rq_result& rq = results.emplace_back();
+			rq.set(_who, _range, _element);
+			return true;
 		}
-		IC void		append_result	(rq_result& res)
+		IC void		append_result	(const rq_result& res)
 		{
-			if (0==results.capacity())	results.reserve(8);
+			if (0==results.capacity())
+			{
+				results.reserve(8);
+			}
 			results.push_back			(res);
 		}
 		IC int			r_count			()	{ return (int)results.size();	}

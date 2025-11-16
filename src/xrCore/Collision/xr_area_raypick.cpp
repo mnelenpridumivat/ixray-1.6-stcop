@@ -8,14 +8,6 @@
 #include "../../xrEngine/xr_object.h"
 
 #ifndef IXRAY_PHYSX
-#ifdef	DEBUG
-static BOOL _cdb_bDebug = false;
-XRCORE_API BOOL *cdb_bDebug = &_cdb_bDebug;
-bool bDebug()
-{
-	return !!(*cdb_bDebug);
-}
-#endif
 using namespace	collide;
 
 namespace CObjectSpaceThreadData
@@ -543,19 +535,3 @@ bool CObjectSpace::BoxQuery(Fvector const& box_center,
 
 //----------------------------------------------------------------------
 
-namespace CObjectSpaceThreadData
-{
-	thread_local xr_vector<ISpatialShared> r_spatial;
-}
-
-IC int	CObjectSpace::GetNearest(xr_vector<CObject*>& q_nearest, const Fvector& point, float range, CObject* ignore_object)
-{
-	return GetNearest
-	(
-		CObjectSpaceThreadData::r_spatial,
-		q_nearest,
-		point,
-		range,
-		ignore_object
-	);
-}

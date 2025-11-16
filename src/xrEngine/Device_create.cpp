@@ -6,7 +6,7 @@
 #include "Render.h"
 #include "../xrCore/Collision/xrXRC.h"
 
-extern XRCORE_API BOOL *cdb_bDebug;
+extern XRCORE_API bool *cdb_bDebug;
 
 void	SetupGPU(IRenderDeviceRender *pRender)
 {
