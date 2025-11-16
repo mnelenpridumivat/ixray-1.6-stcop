@@ -139,14 +139,14 @@ bool CLevel::net_start_client4()
 
 		// Send physics to single or multithreaded mode
 
-		create_physics_world(!!psDeviceFlags.test(mtPhysics), &ObjectSpace, &Objects);
-		R_ASSERT(physics_world());
+		//create_physics_world(!!psDeviceFlags.test(mtPhysics), &ObjectSpace, &Objects);
+		//R_ASSERT(physics_world());
 
 		m_ph_commander_physics_worldstep = new CPHCommander();
-		physics_world()->set_update_callback(m_ph_commander_physics_worldstep);
+		//physics_world()->set_update_callback(m_ph_commander_physics_worldstep);
 
-		physics_world()->set_default_contact_shotmark(ContactShotMark);
-		physics_world()->set_default_character_contact_shotmark(CharacterContactShotMark);
+		//physics_world()->set_default_contact_shotmark(ContactShotMark);
+		//physics_world()->set_default_character_contact_shotmark(CharacterContactShotMark);
 
 		// Send network to single or multithreaded mode
 		// *note: release version always has "mt_*" enabled

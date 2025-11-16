@@ -67,7 +67,7 @@ public:
 
     // tools
     virtual bool		ExportGame         		(SExportStreams* F);
-    virtual void		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform);
+    //virtual void		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform);
 
     virtual CCustomObject* CreateObject			(LPVOID data, LPCSTR name);
 

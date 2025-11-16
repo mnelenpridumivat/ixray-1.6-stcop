@@ -5,7 +5,7 @@
 
 CFormBuilder::CFormBuilder()
 {
-	m_Box.invalidate();
+	//m_Box.invalidate();
 }
 
 CFormBuilder::~CFormBuilder()
@@ -14,6 +14,7 @@ CFormBuilder::~CFormBuilder()
 
 bool CFormBuilder::build()
 {
+	//FATAL("Build using mesh_build_data is deprecated!");
 	clear();
 	auto GetBox = [](Fbox& box, const Fvector* verts, u32 cnt)
 	{
@@ -22,7 +23,16 @@ bool CFormBuilder::build()
 			box.modify(verts[i]);
 	};
 
-	mesh_build_data build_data = {};
+	for (auto It = Scene->FirstTool(); It != Scene->LastTool(); ++It)
+	{
+		ESceneToolBase* mt = It->second;
+		if (mt)
+		{
+			mt->GetStaticCform(m_builder, false);
+		}
+	}
+
+	/*mesh_build_data build_data = {};
 	auto t_it = Scene->FirstTool();
 	auto t_end = Scene->LastTool();
 	for (; t_it != t_end; ++t_it)
@@ -56,20 +66,23 @@ bool CFormBuilder::build()
 	m_Box.invalidate();
 	GetBox(m_Box, build_data.l_verts, build_data.l_vert_it);
 	build_data.l_faces = 0;
-	build_data.l_verts = 0;
+	build_data.l_verts = 0;*/
 	return true;
 }
 
 bool CFormBuilder::empty() const
 {
-    return m_Faces.empty();
+	bool StaticEmpty = m_builder.GetStaticMesh().GetVertices().empty();
+	bool MUEmpty = m_builder.GetMUSlots().empty();
+    return StaticEmpty&&MUEmpty;
 }
 
 void CFormBuilder::clear()
 {
-	m_Box.invalidate();
-	m_Vertex.clear();
-	m_Faces.clear();
+	m_builder.Clear();
+	//m_Box.invalidate();
+	//m_Vertex.clear();
+	//m_Faces.clear();
 }
 
 void CFormBuilder::Load(CObjectSpace* To, CDB::build_callback cb)
@@ -78,10 +91,11 @@ void CFormBuilder::Load(CObjectSpace* To, CDB::build_callback cb)
 	{
 		DebugBreak();
 	}
-	hdrCFORM H = {};
+	To->Create(m_builder);
+	/*hdrCFORM H = {};
 	H.vertcount = m_Vertex.size();
 	H.facecount = m_Faces.size();
 	H.version = CFORM_Versions::VANILLA;
 	H.aabb = m_Box;
-	To->Create(m_Vertex.data(),m_Faces.data(), H, cb,nullptr,false);
+	To->Create(m_Vertex.data(),m_Faces.data(), H, cb,nullptr,false);*/
 }

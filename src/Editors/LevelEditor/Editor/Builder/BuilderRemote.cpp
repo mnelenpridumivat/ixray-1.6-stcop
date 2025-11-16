@@ -478,7 +478,117 @@ float CalcArea(const Fvector& v0, const Fvector& v1, const Fvector& v2)
 	return	_sqrt( p*(p-e1)*(p-e2)*(p-e3) );
 }
 
-BOOL GetStaticCformData(const Fmatrix& parent, CEditableMesh* mesh, CEditableObject* object, Fvector* verts, int& vert_cnt, int& vert_it, CDB::TRI* faces, int& face_cnt, int& face_it, CSceneObject* obj)
+bool GetStaticCform(xrPhysX::CformInstance& Slot, CEditableObject* O)
+{
+	if (O->IsDynamic())
+	{
+		return false;
+	}
+
+	auto result = true;
+	
+	auto& ProtData = Slot.GetPrototypeData();
+
+	xr_vector<Fvector> VertsAll;
+	xr_vector<CDB::TRI> FacesAll;
+
+	for (auto mesh : O->Meshes())
+	{
+		xr_span<Fvector> verts{mesh->Vertices(), mesh->GetVCount()};
+		VertsAll.append_range(verts);
+		for (const auto& surf : mesh->Surfaces())
+		{
+			
+			auto& face_lst = surf.second;
+			auto surfptr = surf.first.get();
+			/*for (size_t i = 0; i < mesh->Parent()->SurfaceCount(); i++)
+			{
+				if (obj != nullptr && mesh->Parent()->Surfaces()[i] == sp_it->first)
+				{
+					surf = obj->m_Surfaces[i].get();
+					break;
+				}
+			}*/
+			if (surfptr->m_GameMtlName == "materials\\occ")
+			{
+				continue;
+			}
+
+			if (!EDevice->ShaderXRLC.Get(surfptr->_ShaderXRLCName())->flags.bCollision)
+			{
+				continue;
+			}
+
+			u16 game_material_idx = GameMaterialLibraryEditors->GetMaterialIdx(surfptr->m_GameMtlName.c_str());
+
+			for (auto& face_id : face_lst)
+			{
+				st_Face& face = mesh->Faces()[face_id];
+				float _a = CalcArea(mesh->Vertices()[face.pv[0].pindex], mesh->Vertices()[face.pv[1].pindex], mesh->Vertices()[face.pv[2].pindex]);
+				if (!_valid(_a) || (_a < EPS))
+				{
+					continue;
+				}
+
+				auto& OutFace = FacesAll.emplace_back();
+				OutFace.data.material = game_material_idx;
+				OutFace.data.sector = u16(-1);
+				for (int k = 0; k < 3; ++k)
+				{
+					st_FaceVert& fv = face.pv[k];
+					OutFace.verts[k] = fv.pindex + VertsAll.size() - verts.size();
+				}
+				if (surfptr->m_Flags.is(CSurface::sf2Sided))
+				{
+					auto& OutFace2 = FacesAll.emplace_back();
+					OutFace2.data.material = game_material_idx;
+					OutFace2.data.sector = u16(-1);
+					for (int k = 0; k < 3; ++k)
+					{
+						st_FaceVert& fv = face.pv[k];
+						OutFace2.verts[k] = fv.pindex + VertsAll.size() - verts.size();
+					}
+				}
+				
+				/*CDB::TRI& first_face = faces[face_it];
+				{
+
+					first_face.material = (u16)game_material_idx;
+					first_face.sector = 0;
+
+					for (int k = 0; k < 3; ++k)
+					{
+						st_FaceVert& fv = face.pv[k];
+						// vertex index
+						R_ASSERT2((fv.pindex + point_offs) < vert_it, "Index out of range");
+						first_face.verts[k] = fv.pindex + point_offs;
+						// uv maps
+
+					}
+					++face_it;
+					if (surf->m_Flags.is(CSurface::sf2Sided))
+					{
+						R_ASSERT(face_it < face_cnt);
+						CDB::TRI& second_face = faces[face_it];
+						second_face.material = first_face.material;
+						for (int k = 0; k < 3; ++k)
+						{
+							st_FaceVert& fv = face.pv[2 - k];
+							// vertex index
+							second_face.verts[k] = fv.pindex + point_offs;
+							// uv maps
+						}
+						++face_it;
+					}
+				}*/
+			}
+		}
+	}
+
+	return result;
+}
+
+/*BOOL GetStaticCformData(const Fmatrix& parent, CEditableMesh* mesh, CEditableObject* object, Fvector* verts, int& vert_cnt, int& vert_it, CDB::TRI* faces, int& face_cnt, int& face_it, CSceneObject* obj)
 {
 	if (object->IsDynamic())
 		return FALSE;
@@ -556,7 +666,7 @@ BOOL GetStaticCformData(const Fmatrix& parent, CEditableMesh* mesh, CEditableObj
 		}
 	}
 	return bResult;
-}
+}*/
 
 BOOL SceneBuilder::BuildMesh(	const Fmatrix& parent,
 								CEditableObject* object,

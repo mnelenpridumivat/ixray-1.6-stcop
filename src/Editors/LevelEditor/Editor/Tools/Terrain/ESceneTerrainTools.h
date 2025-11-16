@@ -47,5 +47,5 @@ public:
 
 private:
 	virtual void OnDrawUI();
-	virtual void GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform) override;
+	//virtual void GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform) override;
 };

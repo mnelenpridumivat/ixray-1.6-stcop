@@ -132,12 +132,13 @@ public:
     virtual bool		ExportGame         		(SExportStreams* F){return true;}
 
     virtual bool		ExportStatic			(SceneBuilder* B, bool b_selected_only){return true;}
-    virtual void		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform){}
+	virtual bool		GetStaticCform			(xrPhysX::CformBuilder& builder, bool b_selected_only){ return true; }
+    //virtual void		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform){}
     virtual bool 		GetStaticCformData		( mesh_build_data &data, bool b_selected_only )
     {
-#ifdef	DEBUG
-    	int cnt_v = 0, cnt_f = 0;  GetStaticDesc(cnt_v,cnt_f,b_selected_only,true);VERIFY(cnt_v==0&&cnt_f==0) ;
-#endif
+//#ifdef	DEBUG
+//    	int cnt_v = 0, cnt_f = 0;  GetStaticDesc(cnt_v,cnt_f,b_selected_only,true);VERIFY(cnt_v==0&&cnt_f==0) ;
+//#endif
     	return true;
     }
     virtual void		CompileStaticStart		()	{};

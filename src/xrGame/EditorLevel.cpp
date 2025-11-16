@@ -104,14 +104,14 @@ BOOL CLevelEditor::net_Start(LPCSTR op_server, LPCSTR op_client)
 		g_pGamePersistent->LoadTitle();
 
 		// Send physics to single or multithreaded mode
-		create_physics_world(!!psDeviceFlags.test(mtPhysics), &ObjectSpace, &Objects);
+		//create_physics_world(!!psDeviceFlags.test(mtPhysics), &ObjectSpace, &Objects);
 
-		R_ASSERT(physics_world());
+		//R_ASSERT(physics_world());
 
 		m_ph_commander_physics_worldstep = new CPHCommander();
-		physics_world()->set_update_callback(m_ph_commander_physics_worldstep);
-		physics_world()->set_default_contact_shotmark(ContactShotMark);
-		physics_world()->set_default_character_contact_shotmark(CharacterContactShotMark);
+		//physics_world()->set_update_callback(m_ph_commander_physics_worldstep);
+		//physics_world()->set_default_contact_shotmark(ContactShotMark);
+		//physics_world()->set_default_character_contact_shotmark(CharacterContactShotMark);
 
 
 		// Send network to single or multithreaded mode

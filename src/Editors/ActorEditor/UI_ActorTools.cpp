@@ -1148,16 +1148,16 @@ CObjectSpace* os = 0;
 void CActorTools::CreatePhysicsWorld()
 {
 	VERIFY(!os);
-	VERIFY(!physics_world());
+	//VERIFY(!physics_world());
 	os = create_object_space();
 
-	create_physics_world(false, os, 0);
+	//create_physics_world(false, os, 0);
 }
 
 void CActorTools::DestroyPhysicsWorld()
 {
-	if (physics_world())
-		destroy_physics_world();
+	//if (physics_world())
+	//	destroy_physics_world();
 	destroy_object_space(os);
 }
 

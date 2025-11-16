@@ -158,7 +158,7 @@ bool ESceneObjectTool::ExportGame(SExportStreams* F)
 }
 
 
-void ESceneObjectTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform )
+/*void ESceneObjectTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform )
 {
 	for (ObjectIt it=m_Objects.begin(); it!=m_Objects.end(); it++){
     	CSceneObject* obj = (CSceneObject*)(*it);
@@ -172,4 +172,4 @@ void ESceneObjectTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_onl
     	    v_cnt	+= obj->GetVertexCount();
         }
     }
-}
+}*/

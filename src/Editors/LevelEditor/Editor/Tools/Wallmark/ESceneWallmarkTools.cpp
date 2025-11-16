@@ -928,7 +928,7 @@ bool ESceneWallmarkTool::Validate(bool)
 }
 
 
-void ESceneWallmarkTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform)
+/*void ESceneWallmarkTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform)
 {
     if(b_cform)
     		return;
@@ -946,7 +946,7 @@ void ESceneWallmarkTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_o
             f_cnt			+= W->verts.size()/3;
         }
     }
-}
+}*/
 
 
 bool ESceneWallmarkTool::ExportStatic(SceneBuilder* B, bool b_selected_only)

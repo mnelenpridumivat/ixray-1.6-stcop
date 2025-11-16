@@ -9,7 +9,8 @@ public:
 	void clear();
 	void	Load(CObjectSpace* To, CDB::build_callback cb);
 protected:
-	xr_vector<CDB::TRI> m_Faces;
+	xrPhysX::CformBuilder m_builder;
+	/*xr_vector<CDB::TRI> m_Faces;
 	xr_vector<Fvector> m_Vertex;
-	Fbox m_Box;
+	Fbox m_Box;*/
 };

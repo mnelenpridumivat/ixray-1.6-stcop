@@ -128,7 +128,7 @@ public:
     virtual void		SaveSelection      		(IWriter&);
     virtual bool   		Export          		(LPCSTR fn);
 	virtual bool 		ExportStatic			(SceneBuilder* B, bool b_selected_only);
-	virtual void 		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform);
+	//virtual void 		GetStaticDesc			(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform);
 
 	// device dependent funcs    
 	virtual void		OnDeviceCreate			();

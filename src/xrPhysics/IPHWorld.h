@@ -38,12 +38,12 @@ class IPHWorld:
 
 };
 
-extern "C" XRPHYSICS_API	IPHWorld *			physics_world();
+//extern "C" XRPHYSICS_API	IPHWorld *			physics_world();
 class CObjectSpace;
 class CObjectList;
 class CRenderDeviceBase;
-extern "C" XRPHYSICS_API	void				create_physics_world( bool mt, CObjectSpace* os, CObjectList *lo);
-extern "C" XRPHYSICS_API	void				destroy_physics_world();
+//extern "C" XRPHYSICS_API	void				create_physics_world( bool mt, CObjectSpace* os, CObjectList *lo);
+//extern "C" XRPHYSICS_API	void				destroy_physics_world();
 extern "C" XRPHYSICS_API	CObjectSpace*		create_object_space();
 struct hdrCFORM;
 extern "C" XRPHYSICS_API	CObjectSpace*		mesh_create_object_space(Fvector* verts, CDB::TRI* tris, const hdrCFORM &H, CDB::build_callback build_callback);

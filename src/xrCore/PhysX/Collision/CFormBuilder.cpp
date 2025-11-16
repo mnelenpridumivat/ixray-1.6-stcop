@@ -21,6 +21,14 @@ xrPhysX::CformMesh::CFormTRI::CFormTRI(const ::CDB::TRI& tri, u16 material, u16 
 	UV[2] = uv[2];
 }
 
+void xrPhysX::CformMesh::Clear()
+{
+	verts.clear();
+	verts.shrink_to_fit();
+	tris.clear();
+	tris.shrink_to_fit();
+}
+
 void xrPhysX::CformMesh::InsertVertices(const xr_span<const Fvector>& Vectors)
 {
 	verts.clear();
@@ -153,6 +161,13 @@ void xrPhysX::CformBuilder::LoadHeader(IReader& fs)
 xrPhysX::CformBuilder::CformBuilder()
 {
     hdr.version = CFORM_Versions::WITH_INSTANCING;
+}
+
+void xrPhysX::CformBuilder::Clear()
+{
+	static_mesh.Clear();
+	MU.clear();
+	MU.shrink_to_fit();
 }
 
 xrPhysX::CformInstance& xrPhysX::CformBuilder::AddMUSlot()

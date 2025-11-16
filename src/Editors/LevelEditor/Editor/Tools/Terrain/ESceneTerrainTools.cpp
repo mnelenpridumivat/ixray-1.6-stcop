@@ -105,7 +105,7 @@ void ESceneTerrainTool::OnDrawUI()
 	UITextForm::Update();
 }
 
-void ESceneTerrainTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform)
+/*void ESceneTerrainTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_only, bool b_cform)
 {
 	for (ObjectIt it = m_Objects.begin(); it != m_Objects.end(); it++)
 	{
@@ -117,4 +117,4 @@ void ESceneTerrainTool::GetStaticDesc(int& v_cnt, int& f_cnt, bool b_selected_on
 		f_cnt += obj->TerrainObject->GetFaceCount();
 		v_cnt += obj->TerrainObject->GetVertexCount();
 	}
-}
+}*/

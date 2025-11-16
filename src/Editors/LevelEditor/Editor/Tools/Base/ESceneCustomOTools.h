@@ -66,6 +66,7 @@ public:
 	virtual bool		Export          		(LPCSTR path);
 	virtual bool		ExportGame         		(SExportStreams* F);
 	virtual bool		ExportStatic			(SceneBuilder* B, bool b_selected_only);
+	virtual bool		GetStaticCform			(xrPhysX::CformBuilder& builder, bool b_selected_only) override;
 	virtual bool 		GetStaticCformData		( mesh_build_data &data, bool b_selected_only );
 	// properties
 	virtual void		FillPropObjects(LPCSTR pref, PropItemVec& items);

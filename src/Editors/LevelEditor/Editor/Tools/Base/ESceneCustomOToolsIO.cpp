@@ -180,10 +180,19 @@ bool ESceneCustomOTool::ExportStatic(SceneBuilder* B, bool b_selected_only)
 {
 	return B->ParseStaticObjects(m_Objects, NULL, b_selected_only);
 }
- BOOL GetStaticCformData   ( ObjectList& lst, mesh_build_data &data, bool b_selected_only );
+
+bool GetStaticCform(ObjectList& lst, xrPhysX::CformBuilder& builder, bool b_selected_only);
+bool ESceneCustomOTool::GetStaticCform(xrPhysX::CformBuilder& builder, bool b_selected_only)
+{
+	return ::GetStaticCform(m_Objects, builder, b_selected_only);
+}
+
+//BOOL GetStaticCformData   ( ObjectList& lst, mesh_build_data &data, bool b_selected_only );
 bool ESceneCustomOTool::GetStaticCformData( mesh_build_data &data, bool b_selected_only ) //b_vertex* verts, int& vert_cnt, int& vert_it,b_face* faces, int& face_cnt, int& face_it,
 {
-      return    ::GetStaticCformData(  m_Objects, data, b_selected_only );
+	FATAL("Removed");
+	return false;
+    //  return    ::GetStaticCformData(  m_Objects, data, b_selected_only );
 }
 
  

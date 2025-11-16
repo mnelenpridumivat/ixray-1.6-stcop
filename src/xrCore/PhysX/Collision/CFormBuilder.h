@@ -22,12 +22,14 @@ namespace xrPhysX
         xr_vector<Fvector> verts;
         xr_vector<CFormTRI> tris;
     public:
+        void Clear();
+        
         void InsertVertices(const xr_span<const Fvector>& Vectors);
         void ReallocateTriangles(size_t NewSize);
         void AddTriangle(const ::CDB::TRI& tri);
         void AddTriangle(const ::CDB::TRI& tri, u16 material, u16 materialGame, Fvector2 (&uv)[3]);
 
-        const xr_vector<Fvector> GetVertices() const {return verts;}
+        const xr_vector<Fvector>& GetVertices() const {return verts;}
         auto GetPureTriangles() const { return tris | std::views::transform([](const CFormTRI& elem){ return elem.PureTriangle;});}
 
         void SaveLevel(IWriter& fs) const;
@@ -74,6 +76,8 @@ namespace xrPhysX
         
     public:
         CformBuilder();
+
+        void Clear();
 
         IC void SetAABB(const Fbox& aabb) {hdr.aabb = aabb;}
         IC const Fbox& GetAABB() const {return hdr.aabb;}

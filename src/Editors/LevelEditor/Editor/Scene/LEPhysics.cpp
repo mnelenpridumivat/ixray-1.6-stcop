@@ -9,12 +9,49 @@ CScenePhysics g_scene_physics;
 
 bool CScenePhysics ::Simulating()
 {
-	return !!physics_world();
+	FATAL("Not implemented");
+	return false;
+	//return !!physics_world();
 }
 
-BOOL  GetStaticCformData(const Fmatrix& parent, CEditableMesh* mesh, CEditableObject* object, Fvector* verts, int& vert_cnt, int& vert_it, CDB::TRI* faces, int& face_cnt, int& face_it, CSceneObject* obj);
+bool GetStaticCform(xrPhysX::CformInstance& Slot, CEditableObject* O);
+//BOOL  GetStaticCformData(const Fmatrix& parent, CEditableMesh* mesh, CEditableObject* object, Fvector* verts, int& vert_cnt, int& vert_it, CDB::TRI* faces, int& face_cnt, int& face_it, CSceneObject* obj);
 
-template<class ObjectClass>
+xr_map<void*, xrPhysX::CformInstance*> InstancesPool;
+
+template<typename T>
+concept LEObjectInstance = requires(T obj)
+{
+	{ obj._Transform() } -> std::same_as<const Fmatrix&>;
+	{ obj.GetReference() } -> std::same_as<CEditableObject*>;
+};
+
+template<LEObjectInstance ObjectClass>
+bool GetStaticCform(ObjectClass* obj, xrPhysX::CformBuilder& builder)
+{
+	Fmatrix T = obj->_Transform();
+	CEditableObject* O = obj->GetReference();
+
+	auto Cache = InstancesPool.find(O);
+	if (Cache != InstancesPool.end())
+	{
+		Cache->second->AddInstance(T, u16(-1));
+	} else
+	{
+		auto& Slot = builder.AddMUSlot();
+
+		if (!::GetStaticCform(Slot, O))
+		{
+			return false;
+		}
+
+		Slot.AddInstance(T, u16(-1));
+		IVERIFY(InstancesPool.try_emplace(O, &Slot).second);
+	}
+	return true;
+}
+
+/*template<LEObjectInstance ObjectClass>
 BOOL GetStaticCformData(ObjectClass* obj, mesh_build_data& data, bool b_selected_only)
 {
 	Fmatrix T = obj->_Transform();
@@ -33,9 +70,46 @@ BOOL GetStaticCformData(ObjectClass* obj, mesh_build_data& data, bool b_selected
 	}
 
 	return FALSE;
+}*/
+
+
+bool GetStaticCform(ObjectList& lst, xrPhysX::CformBuilder& builder, bool b_selected_only)
+{
+	InstancesPool.clear(); // just in case
+	bool result = true;
+	
+	for (auto obj : lst)
+	{
+		if (b_selected_only && !obj->Selected())
+		{
+			continue;
+		}
+		switch (obj->FClassID)
+		{
+		case OBJCLASS_SCENEOBJECT:
+			{
+				CSceneObject* sobj = (CSceneObject*)obj;
+				if (sobj->IsStatic() || sobj->IsMUStatic())
+				{
+					result = ::GetStaticCform(sobj, builder);
+				}
+
+				break;
+			}
+		case OBJCLASS_TERRAIN:
+			{
+				CTerrain* tobj = (CTerrain*)obj;
+				result = ::GetStaticCform(tobj, builder);
+				break;
+			}
+		}
+	}
+
+	InstancesPool.clear(); // clean up
+	return result;
 }
 
-BOOL GetStaticCformData(ObjectList& lst, mesh_build_data& data, bool b_selected_only)
+/*BOOL GetStaticCformData(ObjectList& lst, mesh_build_data& data, bool b_selected_only)
 {
 	BOOL bResult = TRUE;
 
@@ -67,7 +141,7 @@ BOOL GetStaticCformData(ObjectList& lst, mesh_build_data& data, bool b_selected_
 	}
 
 	return bResult;
-}
+}*/
 
 void GetBox( Fbox& box, const Fvector *verts, u32 cnt )
 {
@@ -157,30 +231,49 @@ bool CScenePhysics::CreateObjectSpace	(bool b_selected_only)
 	return    bResult;
 }
 
-CScenePhysics::~CScenePhysics			()
+CScenePhysics::~CScenePhysics()
 {
 	R_ASSERT( !m_object_space );
  }
 
-void CScenePhysics::DestroyObjectSpace	()
+void CScenePhysics::DestroyObjectSpace()
 {
   destroy_object_space( m_object_space );
 }
- void  CScenePhysics::DestroyWorld			()
- {
-	if(physics_world())
-		destroy_physics_world();
 
-  }
+void  CScenePhysics::DestroyWorld()
+{
+	//if(physics_world())
+	//	destroy_physics_world();
+
+}
 
 void CScenePhysics::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
 {
 	bool bResult = true;
 
-	mesh_build_data build_data;
+	//mesh_build_data build_data;
+	xrPhysX::CformBuilder builder;
+
+	for (auto It = Scene->FirstTool(); It != Scene->LastTool(); ++It)
+	{
+		ESceneToolBase* mt = It->second;
+		if (mt)
+		{
+			if (!mt->GetStaticCform(builder, false))
+			{
+				bResult = false;
+				break;
+			}
+		}
+	}
+	
+	VERIFY(!m_object_space);
+	To->Create(builder);
+	b_update_level_collision = false;
 
 
-	SceneToolsMapPairIt t_it = Scene->FirstTool();
+	/*SceneToolsMapPairIt t_it = Scene->FirstTool();
 	SceneToolsMapPairIt t_end = Scene->LastTool();
 	for (; t_it != t_end; ++t_it)
 	{
@@ -211,7 +304,6 @@ void CScenePhysics::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
 			}
 		}
 	}
-	VERIFY(!m_object_space);
 	
 	hdrCFORM H;
 	H.vertcount = build_data.l_vert_it;
@@ -222,16 +314,15 @@ void CScenePhysics::GenerateCForm(CObjectSpace* To, CDB::build_callback cb)
 	To->Create(build_data.l_verts, build_data.l_faces, H, cb, nullptr, false);
 
 	xr_free(build_data.l_faces);
-	xr_free(build_data.l_verts);
+	xr_free(build_data.l_verts);*/
 
-	b_update_level_collision = false;
 }
 
  void  CScenePhysics::CreateWorld			()
 {
-	VERIFY(!physics_world());
+	//VERIFY(!physics_world());
 	VERIFY(m_object_space);
-	create_physics_world(false, m_object_space, 0);
+	//create_physics_world(false, m_object_space, 0);
 }
 
 void CreatePhysicsShellsSelected()
