@@ -1,7 +1,9 @@
 #ifndef PH_CONTACT_BODY_EFFECTOR_H
 #define PH_CONTACT_BODY_EFFECTOR_H
 #include "PHBaseBodyEffector.h"
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/include/ode/contact.h"
+#endif
 struct SGameMtl;
 class CPHContactBodyEffector : public CPHBaseBodyEffector
 {

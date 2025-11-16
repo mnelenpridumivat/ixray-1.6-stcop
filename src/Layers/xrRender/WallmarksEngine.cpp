@@ -182,17 +182,22 @@ void		CWallmarksEngine::static_wm_render		(CWallmarksEngine::static_wallmark*	W,
 //--------------------------------------------------------------------------------
 void CWallmarksEngine::RecurseTri(u32 t, Fmatrix &mView, CWallmarksEngine::static_wallmark	&W)
 {
-	CDB::TRI*	T			= sml_collector.getT()+t;
-	if (T->dummy)			return;
-	T->dummy				= 0xffffffff;
+	auto verts = sml_collector.getVSpan();
+	auto tris = sml_collector.getTSpan();
+	CDB::TRI& T = tris[t];
+	if (T.data.dummy)
+	{
+		return;
+	}
+	T.data.dummy = 0xffffffff;
 	
 	// Some vars
-	u32*		v_ids		= T->verts;
-	Fvector*	v_data		= sml_collector.getV();
+	//u32*		v_ids		= T->verts;
+	//Fvector*	v_data		= sml_collector.getV();
 	sml_poly_src.clear		();
-	sml_poly_src.push_back	(v_data[v_ids[0]]);
-	sml_poly_src.push_back	(v_data[v_ids[1]]);
-	sml_poly_src.push_back	(v_data[v_ids[2]]);
+	sml_poly_src.push_back	(verts[T.verts[0]]);
+	sml_poly_src.push_back	(verts[T.verts[1]]);
+	sml_poly_src.push_back	(verts[T.verts[2]]);
 	sml_poly_dest.clear		();
 	
 	sPoly* P = sml_clipper.ClipPoly	(sml_poly_src, sml_poly_dest);
@@ -225,15 +230,20 @@ void CWallmarksEngine::RecurseTri(u32 t, Fmatrix &mView, CWallmarksEngine::stati
 		for (int i=0; i<3; i++)
 		{
 			u32 adj					= sml_adjacency[3*t+i];
-			if (0xffffffff==adj)	continue;
-			CDB::TRI*	SML			= sml_collector.getT() + adj;
-			v_ids					= SML->verts;
+			if (0xffffffff==adj)
+			{
+				continue;
+			}
+			CDB::TRI& SML = tris[adj];
+			//v_ids					= SML->verts;
 
 			Fvector test_normal;
-			test_normal.mknormal	(v_data[v_ids[0]],v_data[v_ids[1]],v_data[v_ids[2]]);
-			float cosa				= test_normal.dotproduct(sml_normal);
-			if (cosa<0.034899f)		continue;	// cos(88)
-			RecurseTri				(adj,mView,W);
+			test_normal.mknormal(verts[SML.verts[0]],verts[SML.verts[1]],verts[SML.verts[2]]);
+			float cosa = test_normal.dotproduct(sml_normal);
+			if (cosa<0.034899f){
+				continue;	// cos(88)
+			}
+			RecurseTri(adj,mView,W);
 		}
 	}
 }
@@ -246,15 +256,36 @@ CWallmarksEngine::static_wallmark* CWallmarksEngine::AddWallmark_internal(
 	{		
 		Fvector				bbc,bbd;
 		matrix_builder.FindBoxCenterAndDim(bbc,bbd);
-		xrc.box_options		(CDB::OPT_FULL_TEST);
+
+		xrPhysX::CDB::AABBBoxTraceOptions options;
+		options.SetAABB(bbc,bbd);
+		options.options = xrPhysX::CDB::TraceOptions::full_test;
+		xrPhysX::CDB::TraceResult result;
+
+		g_pGameLevel->ObjectSpace.GetStaticModel().BoxTrace(options, result);
+
+		if (result.results.empty())
+		{
+			return nullptr;
+		}
+		
+		/*xrc.box_options		(CDB::OPT_FULL_TEST);
 		xrc.box_query		(g_pGameLevel->ObjectSpace.GetStaticModel(),bbc,bbd);
 		u32	triCount		= xrc.r_count	();
 		if (0==triCount)
 		{
 			return nullptr;
+		}*/
+
+		sml_collector.clear	();
+		sml_collector.add_face_packed_D	(pVerts[pTri->verts[0]],pVerts[pTri->verts[1]],pVerts[pTri->verts[2]],0);
+		for (const auto& elem : result.results)
+		{
+			// TODO: Verify duplicates
+			sml_collector.add_face_packed_D(elem.verts[0],elem.verts[1],elem.verts[2],0);
 		}
 
-		CDB::TRI* tris		= g_pGameLevel->ObjectSpace.GetStaticTris();
+		/*CDB::TRI* tris		= g_pGameLevel->ObjectSpace.GetStaticTris();
 		sml_collector.clear	();
 		sml_collector.add_face_packed_D	(pVerts[pTri->verts[0]],pVerts[pTri->verts[1]],pVerts[pTri->verts[2]],0);
 		for (u32 t=0; t<triCount; t++)	
@@ -262,7 +293,7 @@ CWallmarksEngine::static_wallmark* CWallmarksEngine::AddWallmark_internal(
 			CDB::TRI*	T	= tris+xrc.r_begin()[t].id;
 			if (T==pTri)	continue;
 			sml_collector.add_face_packed_D		(pVerts[T->verts[0]],pVerts[T->verts[1]],pVerts[T->verts[2]],0);
-		}
+		}*/
 		sml_collector.calc_adjacency	(sml_adjacency);
 	}
 
@@ -285,7 +316,7 @@ CWallmarksEngine::static_wallmark* CWallmarksEngine::AddWallmark_internal(
 	{ 
 		static_wm_destroy(W); 
 		return nullptr; 
-	}else 
+	} 
 	{
 		Fbox bb;	bb.invalidate();
 

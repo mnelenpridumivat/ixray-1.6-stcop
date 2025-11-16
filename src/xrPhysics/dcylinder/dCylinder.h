@@ -4,7 +4,9 @@
 
 
 
+#ifndef IXRAY_PHYSX
 #include "../../3rd-party/ode/include/ode/common.h"
+#endif
 
 struct dxCylinder;
 extern int dCylinderClassUser;

@@ -157,8 +157,10 @@ using BPVec = xr_vector<SBonePart>;
 using BPIt = BPVec::iterator;
 
 class ECORE_API CEditableObject:
-public IKinematics,
-public CPhysicsShellHolderEditorBase
+public IKinematics
+#ifndef IXRAY_PHYSX
+,public CPhysicsShellHolderEditorBase
+#endif
 {
 	friend class CSceneObject;
 	friend class CEditableMesh;
@@ -169,9 +171,7 @@ public CPhysicsShellHolderEditorBase
 	friend class TfrmEditLibrary;
 	friend class MeshExpUtility;
 
-#if 1
 	ref_geom 		vs_SkeletonGeom;
-#endif
 // desc
 	shared_str 		m_CreateName;
 	__time32_t			m_CreateTime;

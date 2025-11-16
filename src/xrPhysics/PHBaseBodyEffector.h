@@ -2,7 +2,9 @@
 #define PH_BASE_BODY_EFFECTOR_H
 
 //#include "ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/include/ode/common.h"
+#endif
 class CPHBaseBodyEffector 
 {
 protected:

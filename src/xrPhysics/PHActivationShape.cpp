@@ -11,7 +11,9 @@
 #include "../xrEngine/GameMtlLib.h"
 //#include "Level.h"
 #include "PHWorld.h"
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/ode/src/util.h"
+#endif
 
 #ifdef DEBUG
 #	include "debug_output.h"

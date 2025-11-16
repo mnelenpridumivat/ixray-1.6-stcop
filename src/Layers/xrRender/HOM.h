@@ -13,8 +13,8 @@ class CHOM
 #endif
 {
 private:
-	xrXRC					xrc;
-	CDB::MODEL*				m_pModel;
+	//xrXRC					xrc;
+	xr_unique_ptr<xrPhysX::CDB::MODEL> m_pModel;
 	occTri*					m_pTris;
 	BOOL					bEnabled;
 	Fmatrix					m_xform;

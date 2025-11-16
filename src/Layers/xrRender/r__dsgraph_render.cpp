@@ -355,13 +355,28 @@ void	R_dsgraph_structure::r_dsgraph_render_subspace	(IRender_Sector* _sector, CF
 		PROF_EVENT("precise_portals")
 		// Check if camera is too near to some portal - if so force DualRender
 		Fvector box_radius;		box_radius.set	(EPS_L*20,EPS_L*20,EPS_L*20);
-		RImplementation.Sectors_xrc.box_options	(CDB::OPT_FULL_TEST);
+
+		xrPhysX::CDB::AABBBoxTraceOptions options;
+		Fbox AABB;
+		AABB.setb(_cop, box_radius);
+		options.SetAABB(AABB);
+		options.options = xrPhysX::CDB::TraceOptions::full_test;
+		xrPhysX::CDB::TraceResult result;
+		RImplementation.rmPortals->BoxTrace(options,result);
+
+		for (const auto& elem : result.results)
+		{
+			CPortal* pPortal = (CPortal*)RImplementation.Portals[elem.data.dummy];
+			pPortal->bDualRender = TRUE;
+		}
+		
+		/*RImplementation.Sectors_xrc.box_options	(CDB::OPT_FULL_TEST);
 		RImplementation.Sectors_xrc.box_query	(RImplementation.rmPortals,_cop,box_radius);
 		for (int K=0; K<RImplementation.Sectors_xrc.r_count(); K++)
 		{
 			CPortal*	pPortal		= (CPortal*) RImplementation.Portals[RImplementation.rmPortals->get_tris()[RImplementation.Sectors_xrc.r_begin()[K].id].dummy];
 			pPortal->bDualRender	= TRUE;
-		}
+		}*/
 	}
 
 	// Traverse sector/portal structure

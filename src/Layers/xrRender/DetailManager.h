@@ -105,7 +105,7 @@ public:
 #ifndef _EDITOR    
 	using DetailIt = xr_vector<CDetail>::iterator;
 	xr_vector<CDetail>				objects;
-	xrXRC							xrc;
+	//xrXRC							xrc;
 #else
 	using DetailIt = xr_vector<CDetail*>::iterator;
 	xr_vector<CDetail*>				objects;

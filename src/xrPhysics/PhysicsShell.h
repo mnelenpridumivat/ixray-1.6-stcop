@@ -28,7 +28,9 @@ class IKinematics;
 typedef u32	CLClassBits;
 typedef u32	CLBits;
 
+#ifndef IXRAY_PHYSX
 struct dMass;
+#endif
 
 
 enum motion_history_state

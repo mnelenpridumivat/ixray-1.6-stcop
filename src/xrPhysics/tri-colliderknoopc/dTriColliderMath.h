@@ -2,7 +2,9 @@
 #define D_TRI_COLLIDER_MATH_H
 #include "__aabb_tri.h"
 //#include "../ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../../3rd-party/ode/include/ode/common.h"
+#endif
 #include "../MathUtilsOde.h"
 #include "dcTriangle.h"
 

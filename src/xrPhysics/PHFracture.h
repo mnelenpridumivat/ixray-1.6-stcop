@@ -6,8 +6,10 @@
 #include "PHDefs.h"
 #include "PHImpact.h"
 //#include "ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/include/ode/common.h"
 #include "../3rd-party/ode/include/ode/mass.h"
+#endif
 class CPHFracture;
 class CPHElement;
 

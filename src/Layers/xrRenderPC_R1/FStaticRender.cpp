@@ -348,16 +348,30 @@ void CRender::Calculate				()
 	}
 
 	// Check if camera is too near to some portal - if so force DualRender
-	if (rmPortals) 
+	if (rmPortals)
 	{
 		Fvector box_radius;		box_radius.set(EPS_L*2,EPS_L*2,EPS_L*2);
-		Sectors_xrc.box_options	(CDB::OPT_FULL_TEST);
+		Fbox AABB;
+		AABB.setb(Device.vCameraPosition, {EPS_L*2,EPS_L*2,EPS_L*2});
+		xrPhysX::CDB::AABBBoxTraceOptions options;
+		options.SetAABB(AABB);
+		options.options = xrPhysX::CDB::TraceOptions::full_test;
+		xrPhysX::CDB::TraceResult result;
+		rmPortals->BoxTrace(options, result);
+
+		for (const auto& elem : result.results)
+		{
+			CPortal* pPortal = (CPortal*) Portals[elem.data.dummy];
+			pPortal->bDualRender = TRUE;
+		}
+		
+		/*Sectors_xrc.box_options	(CDB::OPT_FULL_TEST);
 		Sectors_xrc.box_query	(rmPortals,Device.vCameraPosition,box_radius);
 		for (int K=0; K<Sectors_xrc.r_count(); K++)
 		{
 			CPortal*	pPortal		= (CPortal*) Portals[rmPortals->get_tris()[Sectors_xrc.r_begin()[K].id].dummy];
 			pPortal->bDualRender	= TRUE;
-		}
+		}*/
 	}
 	//
 	if (L_DB)

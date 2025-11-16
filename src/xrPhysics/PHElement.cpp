@@ -12,7 +12,9 @@
 //#include "../Include/xrRender/Kinematics.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "../Include/xrRender/KinematicsAnimated.h"
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/ode/src/util.h"
+#endif
 
 #ifdef DEBUG
 #	include "debug_output.h"
@@ -23,7 +25,9 @@
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
 
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/ode/src/collision_kernel.h"
+#endif
 
 
 #pragma warning(default:4267)

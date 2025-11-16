@@ -471,3 +471,8 @@ void xrPhysX::CDB::MODEL::BoxTrace(const OBBBoxTraceOptions& options, TraceResul
     
     ExecuteBoxTrace(geom, post, options.options, QueryFlags, result);
 }
+
+void xrPhysX::CDB::MODEL::FrustumTrace(const FrustumTraceOptions& options, TraceResult& result) const
+{
+    FATAL("Not implemented");
+}

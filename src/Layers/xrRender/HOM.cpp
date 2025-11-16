@@ -32,7 +32,6 @@ void CHOM::MT_RENDER()
 CHOM::CHOM()
 {
 	bEnabled		= FALSE;
-	m_pModel		= 0;
 	m_pTris			= 0;
 #ifdef DEBUG_DRAW
 	Device.seqRender.Add(this,REG_PRIORITY_LOW-1000);
@@ -54,7 +53,7 @@ struct HOM_poly
 };
 #pragma pack(pop)
 
-IC float	Area		(Fvector& v0, Fvector& v1, Fvector& v2)
+IC float	Area		(const Fvector& v0, const Fvector& v1, const Fvector& v2)
 {
 	float	e1 = v0.distance_to(v1);
 	float	e2 = v0.distance_to(v2);
@@ -96,20 +95,24 @@ void CHOM::Load()
 	CL.calc_adjacency(adjacency);
 
 	// Create RASTER-triangles
-	m_pTris = xr_alloc<occTri>(CL.getTS());
-	for (size_t it = 0; it < CL.getTS(); it++)
+
+	auto verts = CL.getVSpan();
+	auto tris = CL.getTSpan();
+	
+	m_pTris = xr_alloc<occTri>(tris.size());
+	for (size_t it = 0; it < tris.size(); it++)
 	{
-		CDB::TRI& clT = CL.getT()[it];
+		const CDB::TRI& clT = tris[it];
 		occTri& rT = m_pTris[it];
 
-		Fvector& v0 = CL.getV()[clT.verts[0]];
-		Fvector& v1 = CL.getV()[clT.verts[1]];
-		Fvector& v2 = CL.getV()[clT.verts[2]];
+		const Fvector& v0 = verts[clT.verts[0]];
+		const Fvector& v1 = verts[clT.verts[1]];
+		const Fvector& v2 = verts[clT.verts[2]];
 
 		rT.adjacent[0] = (0xffffffff == adjacency[3 * it + 0]) ? ((occTri*)(-1)) : (m_pTris + adjacency[3 * it + 0]);
 		rT.adjacent[1] = (0xffffffff == adjacency[3 * it + 1]) ? ((occTri*)(-1)) : (m_pTris + adjacency[3 * it + 1]);
 		rT.adjacent[2] = (0xffffffff == adjacency[3 * it + 2]) ? ((occTri*)(-1)) : (m_pTris + adjacency[3 * it + 2]);
-		rT.flags = clT.dummy;
+		rT.flags = clT.data.dummy;
 		rT.area = Area(v0, v1, v2);
 
 		if (rT.area < EPS_L) 
@@ -128,7 +131,12 @@ void CHOM::Load()
 	IReader* pReaderCache = CDB::GetModelCache(LevelName, crc);
 
 	// Create AABB-tree
-	m_pModel = new CDB::MODEL();
+	m_pModel = xr_make_unique<xrPhysX::CDB::MODEL>();
+	m_pModel->AddUniqueStaticGeom(verts, tris);
+	m_pModel->Finalize();
+
+	// TODO: Cache?
+	/*m_pModel = new CDB::MODEL();
 
 	if (pReaderCache != nullptr)
 	{
@@ -139,7 +147,7 @@ void CHOM::Load()
 		IWriter* pWriterCache = FS.w_open("$app_data_root$", LevelName);
 		pWriterCache->w_u32(crc);
 		m_pModel->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS(), nullptr, nullptr, pWriterCache, false);
-	}
+	}*/
 
 	bEnabled = TRUE;
 
@@ -158,7 +166,7 @@ void CHOM::Load()
 
 void CHOM::Unload()
 {
-	xr_delete(m_pModel);
+	//xr_delete(m_pModel);
 	xr_free(m_pTris);
 	bEnabled = FALSE;
 
@@ -206,17 +214,29 @@ void CHOM::Render_DB			(CFrustum& base)
 	m_xform_01.mul				(m_viewport_01,	Device.mFullTransform);
 
 	// Query DB
-	xrc.frustum_options			(0);
+	xrPhysX::CDB::FrustumTraceOptions options;
+	FATAL("Not implemented!");
+	xrPhysX::CDB::TraceResult result;
+	m_pModel->FrustumTrace(options, result);
+
+	if (result.results.empty())
+	{
+		return;
+	}
+	
+	/*xrc.frustum_options			(0);
 	xrc.frustum_query			(m_pModel,base);
-	if (0==xrc.r_count())		return;
+	if (0==xrc.r_count())		return;*/
 
 	// Prepare
-	CDB::RESULT*	it			= xrc.r_begin	();
-	CDB::RESULT*	end			= xrc.r_end		();
+	//CDB::RESULT*	it			= xrc.r_begin	();
+	//CDB::RESULT*	end			= xrc.r_end		();
 	
 	Fvector			COP			= Device.vCameraPosition;
-	end				= std::remove_if	(it,end,pred_fb(m_pTris));
-	std::sort		(it,end,pred_fb(m_pTris,COP));
+	std::erase_if(result.results, pred_fb(m_pTris));
+	std::ranges::sort(result.results, pred_fb(m_pTris,COP));
+	//end				= std::remove_if(it,end,pred_fb(m_pTris));
+	//std::sort		(it,end,pred_fb(m_pTris,COP));
 
 	// Build frustum with near plane only
 	CFrustum					clip;
@@ -224,44 +244,48 @@ void CHOM::Render_DB			(CFrustum& base)
 	sPoly						src,dst;
 	u32		_frame				= Device.dwFrame	;
 #ifdef DEBUG
-	tris_in_frame				= xrc.r_count();
+	tris_in_frame				= result.results.size();
 	tris_in_frame_visible		= 0;
 #endif
 
 	// Perfrom selection, sorting, culling
-	for (; it!=end; it++)
+	for (const auto& elem : result.results)
 	{
 		// Control skipping
-		occTri& T			= m_pTris	[it->id];
-		u32	next			= _frame + ::Random.randI(3,10);
+		occTri& T = m_pTris[elem.id];
+		u32	next = _frame + ::Random.randI(3,10);
 
 		// Test for good occluder - should be improved :)
 		if (!(T.flags || (T.plane.classify(COP)>0)))	
 		{ T.skip=next; continue; }
 
 		// Access to triangle vertices
-		CDB::TRI& t		= m_pModel->get_tris()	[it->id];
-		Fvector*  v		= m_pModel->get_verts();
 		src.clear		();	dst.clear	();
-		src.push_back	(v[t.verts[0]]);
-		src.push_back	(v[t.verts[1]]);
-		src.push_back	(v[t.verts[2]]);
-		sPoly* P =		clip.ClipPoly	(src,dst);
-		if (0==P)		{ T.skip=next; continue; }
+		src.push_back(elem.verts[0]);
+		src.push_back(elem.verts[1]);
+		src.push_back(elem.verts[2]);
+		sPoly* P = clip.ClipPoly(src,dst);
+		if (!P)
+		{
+			T.skip=next; continue;
+		}
 
 		// XForm and Rasterize
 #ifdef DEBUG
 		tris_in_frame_visible	++;
 #endif
-		u32		pixels			= 0;
-		int		limit			= int(P->size())-1;
+		u32 pixels = 0;
+		int limit = int(P->size())-1;
 		for (int v_=1; v_<limit; v_++)	{
-			m_xform.transform	(T.raster[0],(*P)[0]);
-			m_xform.transform	(T.raster[1],(*P)[v_+0]);
-			m_xform.transform	(T.raster[2],(*P)[v_+1]);
-			pixels	+=			Raster.rasterize(&T);
+			m_xform.transform(T.raster[0],(*P)[0]);
+			m_xform.transform(T.raster[1],(*P)[v_+0]);
+			m_xform.transform(T.raster[2],(*P)[v_+1]);
+			pixels += Raster.rasterize(&T);
 		}
-		if (0==pixels)	{ T.skip=next; continue; }
+		if (!pixels)
+		{
+			T.skip=next; continue;
+		}
 	}
 }
 
@@ -396,8 +420,8 @@ void CHOM::OnRender	()
 	Raster.on_dbg_render();
 
 	if (psDeviceFlags.is(rsOcclusionDraw)){
-
-		if (m_pModel) {
+		FATAL("Not implemented!");
+		/*if (m_pModel) {
 			xr_vector<u32> pairs;
 			pairs.resize(m_pModel->get_tris_count() * 6);
 			for (size_t i = 0; i < m_pModel->get_tris_count(); i++) {
@@ -415,49 +439,7 @@ void CHOM::OnRender	()
 				m_pModel->get_verts(), m_pModel->get_verts_count(),
 				pairs.data(), (u32)pairs.size() / 2, 0xFFFFFFFF
 			);
-#if 0 
-			using LVec = xr_vector<FVF::L>;
-			using LVecIt = LVec::iterator;
-
-			static LVec	poly;	poly.resize(m_pModel->get_tris_count() * 3);
-			static LVec	line;	line.resize(m_pModel->get_tris_count() * 6);
-			for (int it = 0; it < m_pModel->get_tris_count(); it++) {
-				CDB::TRI* T = m_pModel->get_tris() + it;
-				Fvector* verts = m_pModel->get_verts();
-				poly[it * 3 + 0].set(*(verts + T->verts[0]), 0x80FFFFFF);
-				poly[it * 3 + 1].set(*(verts + T->verts[1]), 0x80FFFFFF);
-				poly[it * 3 + 2].set(*(verts + T->verts[2]), 0x80FFFFFF);
-				line[it * 6 + 0].set(*(verts + T->verts[0]), 0xFFFFFFFF);
-				line[it * 6 + 1].set(*(verts + T->verts[1]), 0xFFFFFFFF);
-				line[it * 6 + 2].set(*(verts + T->verts[1]), 0xFFFFFFFF);
-				line[it * 6 + 3].set(*(verts + T->verts[2]), 0xFFFFFFFF);
-				line[it * 6 + 4].set(*(verts + T->verts[2]), 0xFFFFFFFF);
-				line[it * 6 + 5].set(*(verts + T->verts[0]), 0xFFFFFFFF);
-			}
-			RCache.set_xform_world(Fidentity);
-			// draw solid
-			Device.SetNearer(TRUE);
-			RCache.set_Shader(dxRenderDeviceRender::Instance().m_SelectionShader);
-			RCache.dbg_Draw(D3DPT_TRIANGLELIST, &*poly.begin(), (int)poly.size() / 3);
-			Device.SetNearer(FALSE);
-			// draw wire
-			if (bDebug) {
-				RImplementation.rmNear();
-			}
-			else {
-				Device.SetNearer(TRUE);
-			}
-			RCache.set_Shader(dxRenderDeviceRender::Instance().m_SelectionShader);
-			RCache.dbg_Draw(D3DPT_LINELIST, &*line.begin(), (int)line.size() / 2);
-			if (bDebug) {
-				RImplementation.rmNormal();
-			}
-			else {
-				Device.SetNearer(FALSE);
-			}
-		}
-#endif
-		}
+		}*/
 	}
 }
 #endif
@@ -470,7 +452,7 @@ void CHOM::stats()
 		F.OutNext			(" **** HOM-occ ****");
 		F.OutNext			("  visible:  %2d", tris_in_frame_visible);
 		F.OutNext			("  frustum:  %2d", tris_in_frame);
-		F.OutNext			("    total:  %2d", m_pModel->get_tris_count());
+		//F.OutNext			("    total:  %2d", m_pModel->get_tris_count());
 	}
 }
 #endif

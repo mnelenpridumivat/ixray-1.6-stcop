@@ -415,9 +415,9 @@ void  PLC_calc3_SSE(int& c0, int& c1, int& c2, CRenderDevice& Device_, Fvector* 
 void CLightShadows::render	()
 {
 	// Gain access to collision-DB
-	CDB::MODEL*		DB		= g_pGameLevel->ObjectSpace.GetStaticModel();
-	CDB::TRI*		TRIS	= DB->get_tris();
-	Fvector*		VERTS	= DB->get_verts();
+	const auto& DB = g_pGameLevel->ObjectSpace.GetStaticModel();
+	//CDB::TRI* TRIS = DB->get_tris();
+	//Fvector* VERTS = DB->get_verts();
 
 	int			slot_line	= S_rt_size/S_size;
 	
@@ -491,13 +491,72 @@ void CLightShadows::render	()
 			F.CreateFromMatrix		(S.M,FRUSTUM_P_ALL);
 
 			// Query
-			xrc.frustum_options		(0);
+			xrPhysX::CDB::FrustumTraceOptions options;
+			FATAL("Not Implemented!");
+			xrPhysX::CDB::TraceResult result;
+			DB.FrustumTrace(options, result);
+
+			if (result.results.empty())
+			{
+				return;
+			}
+			
+			/*xrc.frustum_options		(0);
 			xrc.frustum_query		(DB,F);
-			if (0==xrc.r_count())	continue;
+			if (0==xrc.r_count())	continue;*/
 
 			// Clip polys by frustum
 			tess.clear				();
-			for (CDB::RESULT* p = xrc.r_begin(); p!=xrc.r_end(); p++)
+			for (const auto& elem : result.results)
+			{
+				if (elem.data.suppress_shadows)
+				{
+					continue;
+				}
+				
+				sPoly A,B;
+				A.push_back(elem.verts[0]);
+				A.push_back(elem.verts[1]);
+				A.push_back(elem.verts[2]);
+
+				// Calc plane, throw away degenerate tris and invisible to light polygons
+				Fplane P;
+				float mag = 0;
+				Fvector t1,t2,n;
+				t1.sub(A[0],A[1]);
+				t2.sub(A[0],A[2]);
+				n.crossproduct(t1,t2);
+				mag	= n.square_magnitude();
+				if (mag<EPS_S)
+				{
+					continue;
+				}
+				n.mul(1.f/_sqrt(mag));
+				P.build_unit_normal(A[0],n);
+				float DOT_Fade = P.classify(S.L->position);
+				if (DOT_Fade<0)
+				{
+					continue;
+				}
+
+				// Clip polygon
+				sPoly* clip	= F.ClipPoly(A,B);
+				if (0==clip)
+				{
+					continue;
+				}
+
+				// Triangulate poly 
+				for (u32 v=2; v<clip->size(); v++)	{
+					tess.push_back	(tess_tri());
+					tess_tri& T		= tess.back();
+					T.v[0]			= (*clip)[0];
+					T.v[1]			= (*clip)[v-1];
+					T.v[2]			= (*clip)[v];
+					T.N				= P.n;
+				}
+			}
+			/*for (CDB::RESULT* p = xrc.r_begin(); p!=xrc.r_end(); p++)
 			{
 				VERIFY((p->id>=0)&&(p->id<DB->get_tris_count()));
 				// 
@@ -534,7 +593,7 @@ void CLightShadows::render	()
 					T.v[2]			= (*clip)[v];
 					T.N				= P.n;
 				}
-			}
+			}*/
 
 			// Remember params which builded cache item
 			CI->O					= S.O;

@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "xrPhysics.h"
 
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/include/ode/memory.h"
+#endif
 
 #ifdef _MANAGED
 #pragma managed(push, off)

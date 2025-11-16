@@ -219,7 +219,10 @@ namespace CDB
 		void			calc_adjacency		( xr_vector<u32>& dest		);
 
 		xr_span<const Fvector> getVSpan() const {return verts;}
+		xr_span<Fvector> getVSpan() {return verts;}
 		xr_span<const TRI> getTSpan() const {return faces;}
+		xr_span<TRI> getTSpan() {return faces;}
+		
 		/*Fvector*		getV			()	{ return &*verts.begin();		}
 		size_t			getVS			() 	{ return verts.size();			}
 		TRI*			getT			()	{ return &*faces.begin();		}

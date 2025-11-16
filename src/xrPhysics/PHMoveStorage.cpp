@@ -2,7 +2,9 @@
 #include "PHMoveStorage.h"
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/ode/src/collision_kernel.h"
+#endif
 #pragma warning(default:4995)
 #pragma warning(default:4267)
 struct dxGeomTransform : public dxGeom {

@@ -1,6 +1,8 @@
 //#include "stdafx.h"
 //#include "ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../../3rd-party/ode/include/ode/common.h"
+#endif
 
 /* Class ID */
 

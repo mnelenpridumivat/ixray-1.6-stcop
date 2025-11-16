@@ -117,7 +117,7 @@ void CRender::level_Unload		()
 
 	//*** Sectors
 	// 1.
-	xr_delete					(rmPortals);
+	rmPortals.reset();
 	pLastSector					= 0;
 	pOutdoorSector				= 0;
 	vLastCameraPos.set			(flt_max,flt_max,flt_max);
@@ -198,7 +198,7 @@ void CRender::LoadBuffers(CStreamReader* base_fs)
 		{
 			u32 iCount = fs->r_u32();
 
-			// Временный буфер для данных индексов
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			std::vector<u16> tmpData(iCount);
 			fs->r(tmpData.data(), iCount * sizeof(u16));
 
@@ -312,7 +312,7 @@ void CRender::LoadSectors(IReader* fs) {
 			}
 		}
 
-		if (CL.getTS() < 2)
+		if (CL.getTSpan().size() < 2)
 		{
 			Fvector					v1, v2, v3;
 			v1.set(-20000.f, -20000.f, -20000.f);
@@ -327,9 +327,12 @@ void CRender::LoadSectors(IReader* fs) {
 		IReader* pReaderCache = CDB::GetModelCache(LevelName, crc);
 
 		// build portal model
-		rmPortals = new CDB::MODEL();
+		rmPortals = xr_make_unique<xrPhysX::CDB::MODEL>();
+		rmPortals->AddUniqueStaticGeom(CL.getVSpan(), CL.getTSpan());
+		rmPortals->Finalize();
 
-		if (pReaderCache != nullptr)
+		// TODO: Cache?
+		/*if (pReaderCache != nullptr)
 		{
 			rmPortals->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS(), nullptr, nullptr, pReaderCache, true);
 		}
@@ -338,14 +341,14 @@ void CRender::LoadSectors(IReader* fs) {
 			IWriter* pWriterCache = FS.w_open("$app_data_root$", LevelName);
 			pWriterCache->w_u32(crc);
 			rmPortals->build(CL.getV(), CL.getVS(), CL.getT(), CL.getTS(), nullptr, nullptr, pWriterCache, false);
-		}
+		}*/
 	}
 	else
 	{
-		rmPortals = 0;
+		rmPortals.reset();
 	}
 
-	pLastSector = 0;
+	pLastSector = nullptr;
 
 	// Search for default sector - assume "default" or "outdoor" sector is the largest one
 	//. hack: need to know real outdoor sector

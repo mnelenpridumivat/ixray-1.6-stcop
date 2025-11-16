@@ -89,6 +89,10 @@ void		CDetailManager::cache_Decompress(Slot* S)
 	Fvector		bC,bD;
 	D.vis.box.get_CD	(bC,bD);
 
+	xrPhysX::CDB::AABBBoxTraceOptions options;
+	options.options = xrPhysX::CDB::TraceOptions::full_test;
+	xrPhysX::CDB::TraceResult result;
+
 #ifdef _EDITOR
 	XRC.box_options(CDB::OPT_FULL_TEST);
 	// Select polygons
@@ -96,14 +100,20 @@ void		CDetailManager::cache_Decompress(Slot* S)
     Scene->BoxPickObjects(D.vis.box,pinf,GetSnapList());
 	u32	triCount		= pinf.size();
 #else
-	xrc.box_options		(CDB::OPT_FULL_TEST); 
-	xrc.box_query		(g_pGameLevel->ObjectSpace.GetStaticModel(),bC,bD);
-	u32	triCount		= xrc.r_count	();
-	CDB::TRI*	tris	= g_pGameLevel->ObjectSpace.GetStaticTris();
-	Fvector*	verts	= g_pGameLevel->ObjectSpace.GetStaticVerts();
+	options.SetAABB(Fbox().setb(bC,bD));
+	g_pGameLevel->ObjectSpace.GetStaticModel().BoxTrace(options, result);
+	
+	//xrc.box_options		(CDB::OPT_FULL_TEST); 
+	//xrc.box_query		(g_pGameLevel->ObjectSpace.GetStaticModel(),bC,bD);
+	//u32	triCount		= xrc.r_count	();
+	//CDB::TRI*	tris	= g_pGameLevel->ObjectSpace.GetStaticTris();
+	//Fvector*	verts	= g_pGameLevel->ObjectSpace.GetStaticVerts();
 #endif
 
-	if (0==triCount)	return;
+	if (result.results.empty())
+	{
+		return;
+	}
 
 	// Build shading table
 	float		alpha255	[dm_obj_in_slot][4];
@@ -192,7 +202,8 @@ void		CDetailManager::cache_Decompress(Slot* S)
 			Fvector normal;normal.set(0,1,0);
 			float		r_u,r_v,r_range;
 			bool no_push = false;
-			for (u32 tid=0; tid<triCount; tid++)
+			for (const auto& elem : result.results)
+			//for (u32 tid=0; tid<triCount; tid++)
 			{
 #ifdef _EDITOR
 				Fvector verts[3];
@@ -211,16 +222,18 @@ RDEVICE.Statistic->TEST0.End		();
 					}
 				}
 #else
-				CDB::TRI&	T		= tris[xrc.r_begin()[tid].id];
-				SGameMtl* mtl		= GMLib.GetMaterialByIdx(T.material);
+				//CDB::TRI&	T		= tris[xrc.r_begin()[tid].id];
+				SGameMtl* mtl		= GMLib.GetMaterialByIdx(elem.data.material);
 
-				if(mtl->Flags.test(SGameMtl::flPassable))	
+				if(mtl->Flags.test(SGameMtl::flPassable))
+				{
 					continue;
+				}
 
 				//Detect sector
 				if(RImplementation.pOutdoorSector)
 				{
-					CSector* sector = (CSector*)RImplementation.getSector(T.sector);
+					CSector* sector = (CSector*)RImplementation.getSector(elem.data.sector);
 					if (sector != RImplementation.pOutdoorSector)
 					{
 						no_push = true;
@@ -228,14 +241,15 @@ RDEVICE.Statistic->TEST0.End		();
 					}
 				}
 
-				Fvector		Tv[3]	= { verts[T.verts[0]],verts[T.verts[1]],verts[T.verts[2]] };
+				Fvector Tv[3];
+				std::memcpy(Tv, elem.verts, sizeof(elem.verts));
 				if (CDB::TestRayTri(Item_P,dir,Tv,r_u,r_v,r_range,TRUE))
 				{
 					if (r_range>=0)	{
 						float y_test	= Item_P.y - r_range;
 						if (y_test>y)	y = y_test;
 					}
-					normal.mknormal(verts[T.verts[0]], verts[T.verts[1]], verts[T.verts[2]]);
+					normal.mknormal(Tv[0], Tv[1], Tv[2]);
 					break;
 				}
 #endif

@@ -18,7 +18,7 @@ static void SetBoneMaterials( IKinematics &K )
     }
 }
 
-
+#ifndef IXRAY_PHYSX
 void  CPhysicsShellHolderEditorBase::CreatePhysicsShell( Fmatrix*	obj_xform )
 {
     IKinematics* K = ObjectKinematics();
@@ -64,3 +64,4 @@ void  CPhysicsShellHolderEditorBase::UpdateObjectXform(Fmatrix &obj_xform)
  	VERIFY( m_physics_shell );
     m_physics_shell->applyGravityAccel( force );
  }
+#endif

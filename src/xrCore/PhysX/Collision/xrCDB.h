@@ -121,6 +121,15 @@ namespace xrPhysX::CDB
             halfExtents.y = xrExtents.y;
             halfExtents.z = xrExtents.z;
         }
+        void SetAABB(const Fvector& center, const Fvector& halfExtents)
+        {
+            this->center.x = center.x;
+            this->center.y = center.y;
+            this->center.z = center.z;
+            this->halfExtents.x = halfExtents.x;
+            this->halfExtents.y = halfExtents.y;
+            this->halfExtents.z = halfExtents.z;
+        }
         const physx::PxVec3& GetCenter() const { return center; }
         const physx::PxVec3& GetExtents() const { return halfExtents; }
     };
@@ -145,6 +154,12 @@ namespace xrPhysX::CDB
         const physx::PxVec3& GetCenter() const { return center; }
         const physx::PxVec3& GetExtents() const { return halfExtents; }
         const physx::PxQuat& GetRot() const { return rotation; }
+    };
+
+    class XRCORE_API FrustumTraceOptions
+    {
+    public:
+        TraceOptions options;
     };
 
     /*class xrRaycastBuffer : public physx::PxRaycastBuffer
@@ -219,5 +234,6 @@ namespace xrPhysX::CDB
         void RayTrace(const RayTraceOptions& options, TraceResult& result) const;
         void BoxTrace(const AABBBoxTraceOptions& options, TraceResult& result) const;
         void BoxTrace(const OBBBoxTraceOptions& options, TraceResult& result) const;
+        void FrustumTrace(const FrustumTraceOptions& options, TraceResult& result) const;
     };
 }

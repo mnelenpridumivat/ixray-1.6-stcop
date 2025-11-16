@@ -106,7 +106,7 @@ void CRender::add_Occluder(Fbox2& bb_screenspace)
 
 void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts, bool UseCameraDirection)
 {
-	if (T->suppress_wm)
+	if (T->data.suppress_wm)
 	{
 		return;
 	}
@@ -134,9 +134,8 @@ void CRender::add_StaticWallmark(const wm_shader& S, const Fvector& P, float s, 
 StaticWallmarkHandle::WallmarkHandlePtr CRender::add_DynamicWallmark(const wm_shader& S, const Fvector& P, float w,
 	float h, float r, CDB::TRI* T, Fvector* V)
 {
-	if (T->suppress_wm)
+	if (!I_ASSERT_M(T->data.suppress_wm, "Unable to add dynamic wallmark!"))
 	{
-		R_ASSERT(!T->suppress_wm, "Unable to add dynamic wallmark!");
 		return nullptr;
 	}
 	VERIFY(_valid(P), "Invalid dynamic wallmark position");

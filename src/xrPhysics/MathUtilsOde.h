@@ -2,6 +2,7 @@
 
 #pragma warning(disable:4995)
 #pragma warning(disable:4267)
+#ifndef IXRAY_PHYSX
 #include "../3rd-party/ode/include/ode/common.h"
 #include "../3rd-party/ode/include/ode/odemath.h"
 #include "../3rd-party/ode/include/ode/objects.h"
@@ -9,6 +10,7 @@
 #include "../3rd-party/ode/include/ode/compatibility.h"
 #include "../3rd-party/ode/include/ode/collision.h"
 #include "../3rd-party/ode/include/ode/matrix.h"
+#endif
 
 #include "MathUtils.h"
 #include "ode_redefine.h"
