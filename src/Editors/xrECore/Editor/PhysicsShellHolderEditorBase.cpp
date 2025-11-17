@@ -2,8 +2,10 @@
 
 
 #include "PhysicsShellHolderEditorBase.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrphysics/physicsshell.h"
-#	include "../xrEngine/GameMtlLib.h"
+#endif
+#include "../xrEngine/GameMtlLib.h"
 //CObjectList	 Objects;
 static void SetBoneMaterials( IKinematics &K )
 {
@@ -12,9 +14,13 @@ static void SetBoneMaterials( IKinematics &K )
     {
 		CBoneData& bd =  K.LL_GetData( i );
         if (*(bd.game_mtl_name))
-	        bd.game_mtl_idx = PGMLib->GetMaterialIdx( bd.game_mtl_name.c_str() );
+        {
+	        bd.game_mtl_idx = PGMLib->GetMaterialIdx(bd.game_mtl_name.c_str());
+        }
         else
-        	bd.game_mtl_idx = 0 ;
+        {
+	        bd.game_mtl_idx = 0;
+        }
     }
 }
 

@@ -776,8 +776,8 @@ void CActor::net_Destroy	()
 	character_physics_support()->movement()->DestroyCharacter();
 	if(m_pPhysicsShell)			{
 		m_pPhysicsShell->Deactivate();
-		xr_delete<CPhysicsShell>(m_pPhysicsShell);
-	};
+		xr_delete(m_pPhysicsShell);
+	}
 	m_pPhysics_support->in_NetDestroy	();
 
 	xr_delete		(m_sndShockEffector);
@@ -807,11 +807,10 @@ void CActor::net_Destroy	()
 	Engine.Sheduler.Unregister	(this);
 
 	if(	actor_camera_shell && 
-		actor_camera_shell->get_ElementByStoreOrder( 0 )->PhysicsRefObject() 
-			== 
-		this
-		) 
+		actor_camera_shell->get_ElementByStoreOrder( 0 )->PhysicsRefObject() == this)
+	{
 		destroy_physics_shell( actor_camera_shell );
+	}
 }
 
 void CActor::net_Relcase(CObject* O)
@@ -896,7 +895,7 @@ void CActor::ResetCallbacks()
 void CActor::OnChangeVisual()
 {
 	{
-		CPhysicsShell* tmp_shell = PPhysicsShell();
+		auto tmp_shell = PPhysicsShell();
 		SetPPhysicsShell(nullptr);
 		inherited::OnChangeVisual();
 		SetPPhysicsShell(tmp_shell);

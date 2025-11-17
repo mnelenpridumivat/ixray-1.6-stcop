@@ -80,13 +80,11 @@ void  OnCharacterContactInDeath(bool& do_colide,bool bo1,dContact& c,SGameMtl * 
 
 	surface.mu=l_character_physic_support->curr_skin_friction_in_death();
 }
-void	character_shell_control::	set_start_shell_params		(CPhysicsShell	* sh) const
+void character_shell_control::set_start_shell_params(xrPhysX::Wrappers::CPhysXShell* sh) const
 {
-	
 	sh->SetAirResistance(skel_airr_lin_factor,skel_airr_ang_factor);
 	sh->add_ObjectContactCallback(OnCharacterContactInDeath);
 	sh->set_CallbackData((void*)this);
-
 }
 
 void character_shell_control:: apply_start_velocity_factor	( CObject* who, Fvector &velocity ) const
@@ -110,24 +108,36 @@ void character_shell_control::TestForWounded(const Fmatrix& xform,  IKinematics*
 	
 	//IKinematics* CKA=smart_cast<IKinematics*>(m_EntityAlife.Visual());
 	CKA->CalculateBones( );
-	CBoneInstance CBI=CKA->LL_GetBoneInstance( CKA->LL_BoneID("bip01_pelvis") );
+	CBoneInstance CBI = CKA->LL_GetBoneInstance( CKA->LL_BoneID("bip01_pelvis") );
 	Fmatrix position_matrix;
 	position_matrix.mul( xform, CBI.mTransform );
+
+	xrPhysX::CDB::RayTraceOptions options;
+	options.SetStart(position_matrix.c);
+	options.SetDir(Fvector(0.0f, -1.0f, 0.0f));
+	options.r_range = pelvis_factor_low_pose_detect;
+	xrPhysX::CDB::TraceResult result;
+	Level().ObjectSpace.GetStaticModel().RayTrace(options, result);
+
+	if (!result.results.empty())
+	{
+		m_was_wounded = true;
+	}
 	
-	xrXRC						xrc;
+	/*xrXRC						xrc;
 	xrc.ray_options				(0);
-	xrc.ray_query(Level().ObjectSpace.GetStaticModel(),position_matrix.c,Fvector().set(0.0f,-1.0f,0.0f),pelvis_factor_low_pose_detect);
+	xrc.ray_query(Level().ObjectSpace.GetStaticModel(),position_matrix.c,Fvector().set(0.0f,-1.0f,0.0f),pelvis_factor_low_pose_detect);*/
 		
-	if (xrc.r_count())
+	/*if (xrc.r_count())
 	{
 		m_was_wounded=true;
-	}
+	}*/
+	
 #ifdef	DEBUG
-		if( death_anim_debug )
-		{
-			Msg( "death anim: test for wounded %s ", m_was_wounded ? "true" : "false" );
-			
-		}
+	if( death_anim_debug )
+	{
+		Msg( "death anim: test for wounded %s ", m_was_wounded ? "true" : "false" );
+	}
 #endif
 };
 
@@ -144,21 +154,21 @@ void character_shell_control::CalculateTimeDelta()
 	m_Pred_Time=Device.fTimeGlobal;
 };
 
-void character_shell_control::UpdateFrictionAndJointResistanse( CPhysicsShell	* sh )
+void character_shell_control::UpdateFrictionAndJointResistanse(xrPhysX::Wrappers::CPhysXShell* sh )
 {
 	//Преобразование skel_ddelay из кадров в секунды и линейное нарастание сопротивления в джоинтах со временем от момента смерти 
 
 	if(skel_remain_time!=0)
 	{
 		skel_remain_time-=m_time_delta;
-	};
+	}
+	
 	if (skel_remain_time<0)
 	{
 		skel_remain_time=0;
 	};
 			
-	float curr_joint_resistance=hinge_force_factor1-
-		(skel_remain_time*hinge_force_factor1)/skel_ddelay;
+	float curr_joint_resistance = hinge_force_factor1-(skel_remain_time*hinge_force_factor1)/skel_ddelay;
 	sh->set_JointResistance(curr_joint_resistance);
 
 
@@ -166,6 +176,7 @@ void character_shell_control::UpdateFrictionAndJointResistanse( CPhysicsShell	* 
 	{
 		skeleton_skin_remain_time-=m_time_delta;
 	}
+	
 	if (skeleton_skin_remain_time<0)
 	{
 		skeleton_skin_remain_time=0;
@@ -174,11 +185,12 @@ void character_shell_control::UpdateFrictionAndJointResistanse( CPhysicsShell	* 
 	if(skeleton_skin_remain_time_after_wound!=0)
 	{
 		skeleton_skin_remain_time_after_wound-=m_time_delta;
-	};
+	}
+	
 	if (skeleton_skin_remain_time_after_wound<0)
 	{
 		skeleton_skin_remain_time_after_wound=0;
-	};
+	}
 
 	float ddelay,remain;
 	if (m_was_wounded)
@@ -192,8 +204,7 @@ void character_shell_control::UpdateFrictionAndJointResistanse( CPhysicsShell	* 
 		remain=skeleton_skin_remain_time;
 	}
 
-	m_curr_skin_friction_in_death=skeleton_skin_friction_end+
-		(remain/ddelay)*(skeleton_skin_friction_start-skeleton_skin_friction_end);	
+	m_curr_skin_friction_in_death = skeleton_skin_friction_end+(remain/ddelay)*(skeleton_skin_friction_start-skeleton_skin_friction_end);	
 
 	
 };

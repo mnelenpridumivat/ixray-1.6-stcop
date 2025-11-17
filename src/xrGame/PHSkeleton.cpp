@@ -144,8 +144,8 @@ void CPHSkeleton::Load(LPCSTR section)
 
 void CPHSkeleton::Update(u32 dt)
 {
-	CPhysicsShellHolder* obj=PPhysicsShellHolder();
-	CPhysicsShell* pPhysicsShell=obj->PPhysicsShell();
+	CPhysicsShellHolder* obj = PPhysicsShellHolder();
+	auto pPhysicsShell = obj->PPhysicsShell();
 	if ( pPhysicsShell && pPhysicsShell->isFractured()) //!ai().get_alife() &&
 	{
 		PHSplit();
@@ -156,7 +156,10 @@ void CPHSkeleton::Update(u32 dt)
 		//(Device.dwTimeGlobal-m_unsplit_time)*phTimefactor>remove_time&&
 		m_unsplited_shels.empty()) 
 	{
-		if (obj->Local())	obj->DestroyObject	();
+		if (obj->Local())
+		{
+			obj->DestroyObject	();
+		}
 /*
 		NET_Packet			P;
 		obj->u_EventGen		(P,GE_DESTROY,obj->ID());
@@ -171,11 +174,12 @@ void CPHSkeleton::Update(u32 dt)
 }
 void CPHSkeleton::SaveNetState(NET_Packet& P)
 {
-	CPhysicsShellHolder* obj=PPhysicsShellHolder();
-	CPhysicsShell* pPhysicsShell=obj->PPhysicsShell();
-	IKinematics* K	=smart_cast<IKinematics*>(obj->Visual());
+	CPhysicsShellHolder* obj = PPhysicsShellHolder();
+	auto pPhysicsShell = obj->PPhysicsShell();
+	IKinematics* K = smart_cast<IKinematics*>(obj->Visual());
 
-	if(pPhysicsShell && pPhysicsShell->isActive()) {
+	if(pPhysicsShell && pPhysicsShell->isActive())
+	{
 		m_flags.set(CSE_PHSkeleton::flActive, pPhysicsShell->isEnabled());
 	}
 
@@ -363,20 +367,23 @@ void CPHSkeleton::PHSplit()
 void CPHSkeleton::UnsplitSingle(CPHSkeleton* SO)
 {
 	//Msg("%o,received has %d,",this,m_unsplited_shels.size());
-	if (0==m_unsplited_shels.size())	return;	//. hack
+	if (0==m_unsplited_shels.size())
+	{
+		return;	//. hack
+	}
 	CPhysicsShellHolder* obj = PPhysicsShellHolder();
 	CPhysicsShellHolder* O =SO->PPhysicsShellHolder();
 	VERIFY2(m_unsplited_shels.size(),"NO_SHELLS !!");
 	VERIFY2(!O->m_pPhysicsShell,"this has shell already!!!");
-	CPhysicsShell* newPhysicsShell=m_unsplited_shels.front().first;
-	O->m_pPhysicsShell=newPhysicsShell;
+	auto newPhysicsShell = m_unsplited_shels.front().first;
+	O->m_pPhysicsShell = newPhysicsShell;
 	VERIFY(_valid(newPhysicsShell->mXFORM));
 	IKinematics *newKinematics=smart_cast<IKinematics*>(O->Visual());
 	IKinematics *pKinematics  =smart_cast<IKinematics*>(obj->Visual());
 
 	VisMask mask0, mask1;
 
-	u16 split_bone=m_unsplited_shels.front().second;
+	u16 split_bone = m_unsplited_shels.front().second;
 	mask1 = pKinematics->LL_GetBonesVisible();//source bones mask
 	pKinematics->LL_SetBoneVisible(split_bone,FALSE,TRUE);
 
@@ -411,8 +418,8 @@ void CPHSkeleton::UnsplitSingle(CPHSkeleton* SO)
 	O->setEnabled(TRUE);
 
 
-	SO->CopySpawnInit		();
-	CopySpawnInit			();
+	SO->CopySpawnInit();
+	CopySpawnInit();
 	VERIFY3(CheckObjectSize(pKinematics),*(O->cNameVisual()),"Object unsplit whith no size");
 	VERIFY3(CheckObjectSize(newKinematics),*(O->cNameVisual()),"Object unsplit whith no size");
 

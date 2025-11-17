@@ -168,7 +168,7 @@ static void  door_ignore( bool& do_collide, bool bo1, dContact& c, SGameMtl * /*
 	if( !collide_obj || collide_obj->cast_actor()  )
 		return;
 
-	CPhysicsShell *ph_shell = collide_obj->PPhysicsShell();
+	auto ph_shell = collide_obj->PPhysicsShell();
 	if( !ph_shell )
 	{
 		do_collide = false;//? must be AI
@@ -177,7 +177,9 @@ static void  door_ignore( bool& do_collide, bool bo1, dContact& c, SGameMtl * /*
 	VERIFY( ph_shell );
 
 	if( ph_shell->HasTracedGeoms() )
+	{
 		return;
+	}
 
 	do_collide = false;
 
@@ -405,11 +407,11 @@ void CPhysicObject::PHObjectPositionUpdate	()
 
 }
 
-void CPhysicObject::AddElement(CPhysicsElement* root_e, int id)
+void CPhysicObject::AddElement(xrPhysX::Wrappers::CPhysXElement* root_e, int id)
 {
 	IKinematics* K		= smart_cast<IKinematics*>(Visual());
 
-	CPhysicsElement* E	= P_create_Element();
+	auto E	= P_create_Element();
 	CBoneInstance& B	= K->LL_GetBoneInstance(u16(id));
 	E->mXFORM.set		(K->LL_GetTransform(u16(id)));
 	Fobb bb			= K->LL_GetBox(u16(id));
@@ -426,8 +428,8 @@ void CPhysicObject::AddElement(CPhysicsElement* root_e, int id)
 	B.set_callback		(bctPhysics,m_pPhysicsShell->GetBonesCallback(),E);
 	m_pPhysicsShell->add_Element	(E);
 	if( !(m_type==epotFreeChain && root_e==0) )
-	{		
-		CPhysicsJoint* J= P_create_Joint(CPhysicsJoint::full_control,root_e,E);
+	{
+		auto J= P_create_Joint(CPhysicsJoint::full_control,root_e,E);
 		J->SetAnchorVsSecondElement	(0,0,0);
 		J->SetAxisDirVsSecondElement	(1,0,0,0);
 		J->SetAxisDirVsSecondElement	(0,1,0,2);
@@ -520,30 +522,6 @@ void	CPhysicObject::	set_collision_hit_callback	(ICollisionHitCallback *cc)
 	xr_delete( m_collision_hit_callback );
 	m_collision_hit_callback = cc;
 }
-
-//////////////////////////////////////////////////////////////////////////
-/*
-
-using JOINT_P_MAP =	xr_map<LPCSTR,	CPhysicsJoint*,	pred_str>;
-using JOINT_P_PAIR_IT = JOINT_P_MAP::iterator;
-
-JOINT_P_MAP			*l_tpJointMap = new JOINT_P_MAP();
-
-l_tpJointMap->insert(std::make_pair(bone_name,joint*));
-JOINT_P_PAIR_IT		I = l_tpJointMap->find(bone_name);
-if (l_tpJointMap->end()!=I){
-//bone_name is found and is an pair_iterator
-(*I).second
-}
-
-JOINT_P_PAIR_IT		I = l_tpJointMap->begin();
-JOINT_P_PAIR_IT		E = l_tpJointMap->end();
-for ( ; I != E; ++I) {
-(*I).second->joint_method();
-Msg("%s",(*I).first);
-}
-
-*/
 
 //////////////////////////////////////////////////////////////////////////
 bool CPhysicObject::is_ai_obstacle		() const

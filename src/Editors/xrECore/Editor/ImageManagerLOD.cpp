@@ -224,7 +224,7 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
                         start.set(X + dX, Y + dY, 0);
                         M.transform_tiny(start);
                         start.mad(M.k, -dR);
-                        PQ.prepare_rq(start, M.k, d2R, CDB::OPT_CULL);
+                        PQ.prepare_rq(start, M.k, d2R);
                         OBJECT->RayQuery(PQ);
 
                         if (PQ.r_count()) 
@@ -281,15 +281,15 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
                 TT.Start();
                 // light points
                 float res_transp = 0.f;
-                for (Fvector4It pt_it = sample_pt_vec.begin(); pt_it != sample_pt_vec.end(); pt_it++)
+                for (auto& pt_it : sample_pt_vec)
                 {
                     float avg_transp = 0.f;
-                    for (BLIt it = simple_hemi.begin(); it != simple_hemi.end(); it++) 
+                    for (auto& it : simple_hemi)
                     {
                         TT1.Start();
-                        Fvector 		start;
-                        start.mad(Fvector().set(pt_it->x, pt_it->y, pt_it->z), it->light.direction, -dR);
-                        PQ.prepare_rq(start, it->light.direction, dR, CDB::OPT_CULL);
+                        Fvector start;
+                        start.mad(Fvector().set(pt_it.x, pt_it.y, pt_it.z), it.light.direction, -dR);
+                        PQ.prepare_rq(start, it.light.direction, dR);
                         OBJECT->RayQuery(PQ);
                         tR += TT1.GetElapsed_sec();
                         float ray_transp = 1.f;
@@ -309,7 +309,7 @@ void CImageManager::CreateLODTexture(CEditableObject* OBJECT, U32Vec& lod_pixels
                         avg_transp += ray_transp;
                     }
                     avg_transp /= simple_hemi.size();
-                    res_transp = res_transp * (1.f - pt_it->w) + avg_transp * pt_it->w;
+                    res_transp = res_transp * (1.f - pt_it.w) + avg_transp * pt_it.w;
                 }
                 tH += TT.GetElapsed_sec();
                 u8 h = (u8)iFloor(res_transp * 255.f);

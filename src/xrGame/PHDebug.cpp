@@ -884,20 +884,24 @@ void	DBG_PhysBones(CObject& O)
 	CPhysicsShellHolder* sh = smart_cast<CPhysicsShellHolder*>(&O);
 	VERIFY(sh);
 
-	CPhysicsShell* shell = sh->PPhysicsShell();
+	auto shell = sh->PPhysicsShell();
 	if (!shell)
+	{
 		return;
+	}
 
 	u16 nb_elements = shell->get_ElementsNumber();
 
 	for (u16 i = 0; i < nb_elements; ++i)
 	{
-		CPhysicsElement* e = shell->get_ElementByStoreOrder(i);
+		auto e = shell->get_ElementByStoreOrder(i);
 
 		DBG_DrawMatrix(e->XFORM(), 0.1f);//Fmatrix().mul_43( O.XFORM(),e->XFORM())
-		CPhysicsElement* pE = (e)->parent_element();
+		auto pE = (e)->parent_element();
 		if (pE)
+		{
 			DBG_DrawLine(e->XFORM().c, pE->XFORM().c, color_xrgb(255, 100, 0));
+		}
 
 	}
 }

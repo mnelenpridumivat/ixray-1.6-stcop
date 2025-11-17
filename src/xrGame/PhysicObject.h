@@ -9,7 +9,6 @@
 #include "xrServer_Objects_ALife.h"
 
 class CSE_ALifeObjectPhysic;
-class CPhysicsElement;
 class moving_bones_snd_player;
 
 class CSE_ALifeObjectPhysic;
@@ -61,7 +60,7 @@ private:
 	//Creating
 			void	CreateBody			(CSE_ALifeObjectPhysic	*po)													;
 			void	CreateSkeleton		(CSE_ALifeObjectPhysic	*po)													;
-			void	AddElement			(CPhysicsElement* root_e, int id)												;
+			void	AddElement			(xrPhysX::Wrappers::CPhysXElement* root_e, int id)												;
 private:
 			void						run_anim_forward				();
 			void						run_anim_back					();

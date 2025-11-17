@@ -47,7 +47,7 @@ void CEditableMesh::RayQuery(SPickQuery& pinf)
 	options.SetStart(pinf.m_Start);
 	options.SetDir(pinf.m_Direction);
 	options.r_range = pinf.m_Dist;
-	//options.options = xrPhysX::CDB::TraceOptions::cull;
+	options.options = xrPhysX::CDB::TraceOptions::cull;
 	xrPhysX::CDB::TraceResult result;
 	m_CFModel->RayTrace(options, result);
 

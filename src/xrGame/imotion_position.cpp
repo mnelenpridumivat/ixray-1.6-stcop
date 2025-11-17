@@ -40,18 +40,20 @@ shell_motion_has_history( false )
 
 };
 
-static void interactive_motion_diag( LPCSTR message, const CBlend &b, CPhysicsShell *s, float time_left )
+static void interactive_motion_diag( LPCSTR message, const CBlend &b, xrPhysX::Wrappers::CPhysXShell* s, float time_left )
 {
 #ifdef	DEBUG
 	if(!death_anim_debug)
+	{
 		return;
+	}
 	const MotionID & m = b.motionID;
-	VERIFY( m.valid() );
-	VERIFY( s );
+	VERIFY(m.valid());
+	VERIFY(s);
 	IKinematicsAnimated* KA = smart_cast<IKinematicsAnimated*>( s->PKinematics( ) );
-	VERIFY( KA );
+	VERIFY(KA);
 	CPhysicsShellHolder* O = smart_cast<CPhysicsShellHolder*>(s->get_ElementByStoreOrder( 0 )->PhysicsRefObject());
-	VERIFY( O );
+	VERIFY(O);
 	LPCSTR motion_name = KA->LL_MotionDefName_dbg( m ).first;
 	Msg( "death anims - interactive_motion:- %s, motion: %s, blend time %f , total blend time %f , time left: %f , obj: %s, model:  %s ", message, motion_name, b.timeCurrent, b.timeTotal, time_left, O->cName().c_str(), O->cNameVisual().c_str());
 #endif
@@ -204,24 +206,25 @@ void imotion_position::state_start( )
 }
 
 #ifdef DEBUG
-static void dbg_draw_state_end( CPhysicsShell *shell )
+static void dbg_draw_state_end(xrPhysX::Wrappers::CPhysXShell* shell )
 {
-	VERIFY( shell );
-	if( dbg_imotion_draw_velocity )
+	VERIFY(shell);
+	if(dbg_imotion_draw_velocity)
 	{
 		DBG_OpenCashedDraw();
 		shell->dbg_draw_velocity(dbg_imotion_draw_velocity_scale, color_argb(100, 255, 0, 0));
 		//shell->dbg_draw_force( 0.01, color_xrgb( 0, 0, 255 ) );
 		DBG_ClosedCashedDraw( 50000 );
 	}
+
+#ifdef DEBUG
 	if(dbg_imotion_collide_debug)
 	{
-#ifdef DEBUG
-			DBG_OpenCashedDraw();
-			shell->dbg_draw_geometry(0.02f, color_argb(255, 255, 255, 255));
-			DBG_ClosedCashedDraw( 50000 );
-#endif
+		DBG_OpenCashedDraw();
+		shell->dbg_draw_geometry(0.02f, color_argb(255, 255, 255, 255));
+		DBG_ClosedCashedDraw( 50000 );
 	}
+#endif
 }
 #endif
 
@@ -381,52 +384,58 @@ float imotion_position::advance_animation( float dt, IKinematicsAnimated& KA )
 #ifdef	DEBUG
 void DBG_DrawBones( CObject &O );
 void DBG_PhysBones( CObject &O );
-void collide_anim_dbg_draw( CPhysicsShell	*shell, float dt )
+void collide_anim_dbg_draw(xrPhysX::Wrappers::CPhysXShell* shell, float dt )
 {
-	VERIFY( shell );
-	if( dbg_imotion_draw_velocity )
+	VERIFY(shell);
+	if(dbg_imotion_draw_velocity)
 	{
 		shell->AnimToVelocityState( dt, default_l_limit * 10, default_w_limit * 10 );
 		DBG_OpenCashedDraw();
 		shell->dbg_draw_velocity(dbg_imotion_draw_velocity_scale, color_xrgb(0, 255, 0));
 		DBG_ClosedCashedDraw( 50000 );
 	}
-	if( dbg_imotion_draw_skeleton )
+	if(dbg_imotion_draw_skeleton)
 	{
 		DBG_OpenCashedDraw();
-		CPhysicsShellHolder * sh = static_cast<CPhysicsShellHolder*>( shell->get_ElementByStoreOrder( 0 )->PhysicsRefObject() );
-		DBG_PhysBones( *sh );
-		DBG_ClosedCashedDraw( 50000 );
+		auto sh = static_cast<CPhysicsShellHolder*>(shell->get_ElementByStoreOrder(0)->PhysicsRefObject() );
+		DBG_PhysBones(*sh);
+		DBG_ClosedCashedDraw(50000);
 	}
 }
 #endif
 
 
-float imotion_position::collide_animation	( float dt, IKinematicsAnimated& k )
+float imotion_position::collide_animation(float dt, IKinematicsAnimated& k)
 {
-	advance_animation( dt, k );
+	advance_animation(dt, k);
 #ifdef	DEBUG
-	collide_anim_dbg_draw ( shell, dt );
+	collide_anim_dbg_draw(shell, dt);
 #endif
 	shell->ToAnimBonesPositions( shell_motion_has_history ? mh_not_clear : mh_unspecified );
 	depth = 0;
 #ifdef DEBUG
-	if( dbg_imotion_collide_debug )
+	if(dbg_imotion_collide_debug)
+	{
 		DBG_OpenCashedDraw();
+	}
 #endif
 	shell->CollideAll( );
 #ifdef DEBUG
-	if( dbg_imotion_collide_debug )
+	if(dbg_imotion_collide_debug)
+	{
 		DBG_ClosedCashedDraw(50000);
+	}
 #endif
 #ifdef DEBUG
-	if( dbg_imotion_collide_debug )
+	if(dbg_imotion_collide_debug)
+	{
 		interactive_motion_diagnostic( make_string<const char*>( " collide_animation: deppth= %f", depth ));
+	}
 #endif
 	return dt;
 }
 
-static u32	blends_num( IKinematicsAnimated& KA )
+static u32 blends_num(IKinematicsAnimated& KA)
 {
 	//u32 res = 0;
 	//for( u32 i = 0; i < MAX_PARTS; ++i  )
@@ -438,7 +447,7 @@ static u32	blends_num( IKinematicsAnimated& KA )
 	{
 		u32 count;
 		scbl(  ):count(){}
-		virtual	void	operator () ( CBlend &B ) 
+		virtual	void operator()(CBlend &B) 
 		{
 			++count;
 		}

@@ -1,7 +1,9 @@
 #pragma once
 #include "Entity.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/PHUpdateObject.h"
+#endif
 #include "script_entity.h"
 #include "CarLights.h"
 #include "InventoryOwner.h"
@@ -168,37 +170,38 @@ public:
 	public CDamagableHealthItem
 	{
 		typedef		CDamagableHealthItem inherited;
-		u16									bone_id				;
-		bool								inited				;
-		float								radius				;
-		CPhysicsJoint						*joint				;
-		CCar								*car				;
-		struct			SWheelCollisionParams
+		u16 bone_id;
+		bool inited;
+		float radius;
+		xrPhysX::Wrappers::CPhysXJoint* joint;
+		CCar* car;
+		struct SWheelCollisionParams
 		{
-			float							spring_factor		;
-			float							damping_factor		;
-			float							mu_factor			;
-			SWheelCollisionParams			();
-		}									collision_params	;
+			float spring_factor;
+			float damping_factor;
+			float mu_factor;
+			SWheelCollisionParams();
+		} collision_params;
 
-	IC	static	void			applywheelCollisionParams				(const dxGeomUserData *ud,bool& do_colide,dContact& c,SGameMtl* material_1,SGameMtl* material_2);
-		static	void			WheellCollisionCallback					(bool& do_colide,bool bo1,dContact& c,SGameMtl* material_1,SGameMtl* material_2)							;
-				
-				void 			Init									();//asumptions: bone_map is 1. ini parsed 2. filled in 3. bone_id is set 
-				void			Load									(LPCSTR section);
-				void 			RestoreNetState							(const CSE_ALifeCar::SWheelState& a_state)														;
-				void 			SaveNetState							(NET_Packet& P)																					;
-				void 			ApplyDriveAxisVel						(float vel)																						;
-				void 			ApplyDriveAxisTorque					(float torque)																					;
-				void 			ApplyDriveAxisVelTorque					(float vel,float torque)																		;
-				void 			ApplySteerAxisVel						(float vel)																						;
-				void 			ApplySteerAxisTorque					(float torque)																					;
-				void 			ApplySteerAxisVelTorque					(float vel,float torque)																		;
-				void 			SetSteerLoLimit							(float lo)																						;
-				void			SetSteerHiLimit							(float hi)																						;
-				void			SetSteerLimits							(float hi,float lo)																				;
-
-virtual void ApplyDamage			(u16 level);
+		IC static void applywheelCollisionParams(const dxGeomUserData *ud,bool& do_colide,dContact& c,SGameMtl* material_1,SGameMtl* material_2);
+		static void WheellCollisionCallback(bool& do_colide,bool bo1,dContact& c,SGameMtl* material_1,SGameMtl* material_2);
+					
+		void Init();//asumptions: bone_map is 1. ini parsed 2. filled in 3. bone_id is set 
+		void Load(LPCSTR section);
+		void RestoreNetState(const CSE_ALifeCar::SWheelState& a_state);
+		void SaveNetState(NET_Packet& P);
+		void ApplyDriveAxisVel(float vel);
+		void ApplyDriveAxisTorque(float torque);
+		void ApplyDriveAxisVelTorque(float vel,float torque);
+		void ApplySteerAxisVel(float vel);
+		void ApplySteerAxisTorque(float torque);
+		void ApplySteerAxisVelTorque(float vel,float torque);
+		void SetSteerLoLimit(float lo);
+		void SetSteerHiLimit(float hi);
+		void SetSteerLimits(float hi,float lo);
+	
+		virtual void ApplyDamage(u16 level);
+	
 		SWheel(CCar* acar)
 		{
 			bone_id=BI_NONE;
@@ -207,17 +210,18 @@ virtual void ApplyDamage			(u16 level);
 			inited=false;
 		}
 	};
+	
 	struct SWheelDrive  
 	{
 		SWheel* pwheel;
-		float	pos_fvd;
-		float	gear_factor;
-		void	Init		()						;
-		void	Drive		()						;
-		void	Neutral		()						;
-		void	UpdatePower	()						;
-		float	ASpeed		() const;
-		void	Load		(LPCSTR /*section*/){}	;
+		float pos_fvd;
+		float gear_factor;
+		void Init();
+		void Drive();
+		void Neutral();
+		void UpdatePower();
+		float ASpeed() const;
+		void Load(LPCSTR /*section*/){};
 	};
 	struct SWheelSteer 
 	{
@@ -230,13 +234,14 @@ virtual void ApplyDamage			(u16 level);
 		bool  limited;			//zero limited for idle steering drive
 		float GetSteerAngle();
 	
-		void	 Init		()						;
-		void	 SteerRight	()						;
-		void	 SteerLeft	()						;
-		void	 SteerIdle	()						;
-		void	 Limit		()						;
-		void	 Load		(LPCSTR /*section*/){}	;
+		void Init();
+		void SteerRight();
+		void SteerLeft();
+		void SteerIdle();
+		void Limit();
+		void Load(LPCSTR /*section*/){};
 	};
+	
 	struct SWheelBreak 
 	{
 		SWheel			*pwheel							;
@@ -255,7 +260,7 @@ virtual void ApplyDamage			(u16 level);
 		Fmatrix				transform;
 		//Fvector				velocity;
 		xr_shared_ptr<CParticlesObject>	p_pgobject;
-		CPhysicsElement*	pelement;
+		xrPhysX::Wrappers::CPhysXElement*	pelement;
 		CCar*				pcar;
 		void Init();
 		void Play();

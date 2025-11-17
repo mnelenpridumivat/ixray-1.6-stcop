@@ -56,8 +56,12 @@ public:
 	IC _matrix()
 	{
 		for (int row = 0; row < 4; ++row)
+		{
 			for (int col = 0; col < 4; ++col)
+			{
 				m[row][col] = static_cast<T>(0);
+			}
+		}
 	}
 	
 	IC _matrix(const std::initializer_list<T>& list)
@@ -65,8 +69,12 @@ public:
 		R_ASSERT2(list.size() == 16, "Initializer list must contain exactly 16 elements.");
 		auto it = list.begin();
 		for (auto row = 0; row < 4; ++row)
+		{
 			for (auto col = 0; col < 4; ++col)
+			{
 				m[row][col] = *it++;
+			}
+		}
 	}
 
 	// Class members
@@ -91,7 +99,9 @@ public:
 			_42==0&&
 			_43==0&&
 			_44==0)
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -116,7 +126,9 @@ public:
 			_42==0&&
 			_43==0&&
 			_44==1)
+		{
 			return true;
+		}
 
 		return false;
 	}

@@ -4,7 +4,9 @@
 
 #define dSINGLE
 #include "../../Include/xrRender/animation_blend.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/Physics.h"
+#endif
 #include "../xrECore/Editor/EditMesh.h"
 #include "../../Layers/xrRender/KinematicAnimatedDefs.h"
 #include "../../Layers/xrRender/SkeletonAnimated.h"
@@ -1128,9 +1130,13 @@ void CActorTools::PhysicsSimulate()
 	m_IsPhysics = true;
 	CreatePhysicsWorld();
 	if (MainForm->GetLeftBarForm()->GetRenderMode() != UILeftBarForm::Render_Editor)
+	{
 		m_RenderObject.CreatePhysicsShell(&m_AVTransform);
+	}
 	else
+	{
 		m_pEditObject->CreatePhysicsShell(&m_AVTransform);
+	}
 }
 
 void CActorTools::PhysicsStopSimulate()

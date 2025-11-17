@@ -184,9 +184,9 @@ u16 CScriptGameObject::get_bone_id(LPCSTR bone_name) const
 
 cphysics_shell_scripted* CScriptGameObject::get_physics_shell() const
 {
-	if (CPhysicsShellHolder* ph_shell_holder = object().cast_physics_shell_holder())
+	if (auto ph_shell_holder = object().cast_physics_shell_holder())
 	{
-		if (CPhysicsShell* ph_shell = ph_shell_holder->PPhysicsShell())
+		if (auto ph_shell = ph_shell_holder->PPhysicsShell())
 		{
 			return get_script_wrapper<cphysics_shell_scripted>(*ph_shell);
 		}

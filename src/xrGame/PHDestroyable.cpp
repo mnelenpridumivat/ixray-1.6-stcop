@@ -127,12 +127,12 @@ void CPHDestroyable::PhysicallyRemoveSelf()
 
 void CPHDestroyable::PhysicallyRemovePart(CPHDestroyableNotificate *dn)
 {
-	CPhysicsShellHolder		*sh		=	dn		->PPhysicsShellHolder		()		;	
-	CPhysicsShell			*s		=	sh		->PPhysicsShell				()		;
-							sh					->setVisible				(FALSE)	;
-							sh					->setEnabled				(FALSE)	;
-							s					->Disable					()		;
-							s					->DisableCollision			()		;
+	CPhysicsShellHolder* sh = dn->PPhysicsShellHolder();	
+	auto s = sh->PPhysicsShell();
+	sh->setVisible(FALSE);
+	sh->setEnabled(FALSE);
+	s->Disable();
+	s->DisableCollision();
 }
 
 void CPHDestroyable::Destroy(u16 source_id/*=u16(-1)*/,LPCSTR section/*="ph_skeleton_object"*/)
@@ -142,20 +142,27 @@ void CPHDestroyable::Destroy(u16 source_id/*=u16(-1)*/,LPCSTR section/*="ph_skel
 	m_notificate_objects.clear();
 	CPhysicsShellHolder	*obj	=PPhysicsShellHolder()		;
 	CPHSkeleton *phs= obj->PHSkeleton();
-	if(phs)phs->SetNotNeedSave();
-	if(obj->PPhysicsShell())	obj->PPhysicsShell()->Enable()	;
+	if(phs)
+	{
+		phs->SetNotNeedSave();
+	}
+	if(obj->PPhysicsShell())
+	{
+		obj->PPhysicsShell()->Enable();
+	}
 	obj->processing_activate();
 	if(source_id==obj->ID())
 	{
 		m_flags.set(fl_released,FALSE);
 	}
-	xr_vector<shared_str>::iterator i=m_destroyed_obj_visual_names.begin(),e=m_destroyed_obj_visual_names.end();
-
+	
 	if (IsGameTypeSingleCompatible())
 	{
-		for(;e!=i;i++)
-			GenSpawnReplace(source_id,section,*i);
-	};	
+		for (const auto& elem : m_destroyed_obj_visual_names)
+		{
+			GenSpawnReplace(source_id, section, elem);
+		}
+	}
 ///////////////////////////////////////////////////////////////////////////
 	m_flags.set(fl_destroyed,TRUE);
 	return;
@@ -223,39 +230,41 @@ void CPHDestroyable::SheduleUpdate(u32 dt)
 
 void CPHDestroyable::NotificatePart(CPHDestroyableNotificate *dn)
 {
-	CPhysicsShell	*own_shell=PPhysicsShellHolder()->PPhysicsShell()			;
-	CPhysicsShell	*new_shell=dn->PPhysicsShellHolder()->PPhysicsShell()		;
-	IKinematics		*own_K =smart_cast<IKinematics*>(PPhysicsShellHolder()->Visual());
-	IKinematics		*new_K =smart_cast<IKinematics*>(dn->PPhysicsShellHolder()->Visual())	;
-	VERIFY			(own_K&&new_K&&own_shell&&new_shell)						;
-	CInifile		*own_ini  =own_K->LL_UserData()								;
-	CInifile		*new_ini  =new_K->LL_UserData()								;
+	auto own_shell = PPhysicsShellHolder()->PPhysicsShell();
+	auto new_shell = dn->PPhysicsShellHolder()->PPhysicsShell();
+	IKinematics* own_K = smart_cast<IKinematics*>(PPhysicsShellHolder()->Visual());
+	IKinematics* new_K = smart_cast<IKinematics*>(dn->PPhysicsShellHolder()->Visual());
+	VERIFY(own_K&&new_K&&own_shell&&new_shell);
+	CInifile* own_ini = own_K->LL_UserData();
+	CInifile* new_ini = new_K->LL_UserData();
 	//////////////////////////////////////////////////////////////////////////////////	
-	Fmatrix			own_transform;
-	own_shell		->GetGlobalTransformDynamic		(&own_transform)			;
-	new_shell		->SetGlTransformDynamic			(own_transform)				;
+	Fmatrix own_transform;
+	own_shell->GetGlobalTransformDynamic(&own_transform);
+	new_shell->SetGlTransformDynamic(own_transform);
 	////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////////////
-	float						random_min										=1.f	;  
-	float						random_hit_imp									=1.f	;
+	float random_min = 1.f;  
+	float random_hit_imp = 1.f;
 	////////////////////////////////////////////////////////////////////////////////////
-	u16							ref_bone										=own_K->LL_GetBoneRoot();
+	u16 ref_bone = own_K->LL_GetBoneRoot();
 
-	float						imp_transition_factor							=1.f	;
-	float						lv_transition_factor							=1.f	;
-	float						av_transition_factor							=1.f	;
+	float imp_transition_factor = 1.f;
+	float lv_transition_factor = 1.f;
+	float av_transition_factor = 1.f;
 	////////////////////////////////////////////////////////////////////////////////////
 	if(own_ini&&own_ini->section_exist("impulse_transition_to_parts"))
 	{
-		random_min				=own_ini->r_float("impulse_transition_to_parts","random_min");
-		random_hit_imp			=own_ini->r_float("impulse_transition_to_parts","random_hit_imp");
+		random_min = own_ini->r_float("impulse_transition_to_parts","random_min");
+		random_hit_imp = own_ini->r_float("impulse_transition_to_parts","random_hit_imp");
 		////////////////////////////////////////////////////////
 		if(own_ini->line_exist("impulse_transition_to_parts","ref_bone"))
-			ref_bone				=own_K->LL_BoneID(own_ini->r_string("impulse_transition_to_parts","ref_bone"));
-		imp_transition_factor	=own_ini->r_float("impulse_transition_to_parts","imp_transition_factor");
-		lv_transition_factor	=own_ini->r_float("impulse_transition_to_parts","lv_transition_factor");
-		av_transition_factor	=own_ini->r_float("impulse_transition_to_parts","av_transition_factor");
+		{
+			ref_bone = own_K->LL_BoneID(own_ini->r_string("impulse_transition_to_parts","ref_bone"));
+		}
+		imp_transition_factor = own_ini->r_float("impulse_transition_to_parts","imp_transition_factor");
+		lv_transition_factor = own_ini->r_float("impulse_transition_to_parts","lv_transition_factor");
+		av_transition_factor = own_ini->r_float("impulse_transition_to_parts","av_transition_factor");
 
 		if(own_ini->section_exist("collide_parts"))
 		{
@@ -276,53 +285,52 @@ void CPHDestroyable::NotificatePart(CPHDestroyableNotificate *dn)
 		//random_hit_imp			=new_ini->r_float("impulse_transition_from_source_bone","random_hit_imp");
 		////////////////////////////////////////////////////////
 		if(new_ini->line_exist("impulse_transition_from_source_bone","ref_bone"))
-			ref_bone				=own_K->LL_BoneID(new_ini->r_string("impulse_transition_from_source_bone","ref_bone"));
-		imp_transition_factor	=new_ini->r_float("impulse_transition_from_source_bone","imp_transition_factor");
-		lv_transition_factor	=new_ini->r_float("impulse_transition_from_source_bone","lv_transition_factor");
-		av_transition_factor	=new_ini->r_float("impulse_transition_from_source_bone","av_transition_factor");
+		{
+			ref_bone = own_K->LL_BoneID(new_ini->r_string("impulse_transition_from_source_bone","ref_bone"));
+		}
+		imp_transition_factor = new_ini->r_float("impulse_transition_from_source_bone","imp_transition_factor");
+		lv_transition_factor = new_ini->r_float("impulse_transition_from_source_bone","lv_transition_factor");
+		av_transition_factor = new_ini->r_float("impulse_transition_from_source_bone","av_transition_factor");
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-		//dBodyID own_body=own_shell->get_Element(ref_bone)->get_body()			;
-		CPhysicsElement * own_element = own_shell->get_Element(ref_bone);
-		u16 new_el_number = new_shell->get_ElementsNumber()									;
+	//dBodyID own_body=own_shell->get_Element(ref_bone)->get_body()			;
+	auto own_element = own_shell->get_Element(ref_bone);
+	u16 new_el_number = new_shell->get_ElementsNumber()									;
 
-		for(u16 i=0;i<new_el_number;++i)
+	for(u16 i=0;i<new_el_number;++i)
+	{
+		auto e = new_shell->get_ElementByStoreOrder(i);
+		float random_hit = random_min*e->getMass();
+		if(m_fatal_hit.is_valide() && m_fatal_hit.bone()!=BI_NONE )
 		{
-			CPhysicsElement* e=new_shell->get_ElementByStoreOrder(i);
-			float random_hit=random_min*e->getMass();
-			if(m_fatal_hit.is_valide() && m_fatal_hit.bone()!=BI_NONE )
-			{
-				Fvector pos;
-				Fmatrix m;m.set(own_K->LL_GetTransform(m_fatal_hit.bone()));
-				m.mulA_43		(PPhysicsShellHolder()->XFORM());
-				m.transform_tiny(pos,m_fatal_hit.bone_space_position());
-				e->applyImpulseVsGF(pos,m_fatal_hit.direction(),m_fatal_hit.phys_impulse()*imp_transition_factor);
-				random_hit+=random_hit_imp*m_fatal_hit.phys_impulse();
-			}
-			Fvector rnd_dir;rnd_dir.random_dir();
-			e->applyImpulse(rnd_dir,random_hit);
-			Fvector mc; mc.set(e->mass_Center());
-
-			//dVector3 res_lvell;
-			//dBodyGetPointVel(own_body,mc.x,mc.y,mc.z,res_lvell);
-			Fvector res_lvell;
-			own_element->GetPointVel( res_lvell, mc );
-
-			res_lvell.mul(lv_transition_factor);
-			e->set_LinearVel(res_lvell);
-			
-			//Fvector res_avell;res_avell.set(cast_fv(dBodyGetAngularVel(own_body)));
-			Fvector res_avell;
-			own_element->get_AngularVel(res_avell);
-			res_avell.mul(av_transition_factor);
-			e->set_AngularVel(res_avell);
+			Fvector pos;
+			Fmatrix m;
+			m.set(own_K->LL_GetTransform(m_fatal_hit.bone()));
+			m.mulA_43(PPhysicsShellHolder()->XFORM());
+			m.transform_tiny(pos,m_fatal_hit.bone_space_position());
+			e->applyImpulseVsGF(pos,m_fatal_hit.direction(),m_fatal_hit.phys_impulse()*imp_transition_factor);
+			random_hit += random_hit_imp*m_fatal_hit.phys_impulse();
 		}
-	
+		Fvector rnd_dir;rnd_dir.random_dir();
+		e->applyImpulse(rnd_dir,random_hit);
+		Fvector mc; mc.set(e->mass_Center());
 
+		//dVector3 res_lvell;
+		//dBodyGetPointVel(own_body,mc.x,mc.y,mc.z,res_lvell);
+		Fvector res_lvell;
+		own_element->GetPointVel( res_lvell, mc );
 
-
+		res_lvell.mul(lv_transition_factor);
+		e->set_LinearVel(res_lvell);
+		
+		//Fvector res_avell;res_avell.set(cast_fv(dBodyGetAngularVel(own_body)));
+		Fvector res_avell;
+		own_element->get_AngularVel(res_avell);
+		res_avell.mul(av_transition_factor);
+		e->set_AngularVel(res_avell);
+	}
 
 	new_shell->Enable();
 	new_shell->EnableCollision();
@@ -330,11 +338,12 @@ void CPHDestroyable::NotificatePart(CPHDestroyableNotificate *dn)
 	dn->PPhysicsShellHolder()->setEnabled(TRUE);
 
 	if(own_shell->IsGroupObject())
+	{
 		new_shell->RegisterToCLGroup(own_shell->GetCLGroup());//CollideBits
-	CPHSkeleton* ps=dn->PPhysicsShellHolder()->PHSkeleton();
+	}
+	CPHSkeleton* ps = dn->PPhysicsShellHolder()->PHSkeleton();
 	if(ps)
 	{
-	
 		if(own_ini&&own_ini->section_exist("autoremove_parts"))
 		{
 			ps->SetAutoRemove(1000*(READ_IF_EXISTS(own_ini,r_u32,"autoremove_parts","time",ps->DefaultExitenceTime())));

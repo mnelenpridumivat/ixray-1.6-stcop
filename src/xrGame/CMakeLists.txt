@@ -232,7 +232,7 @@ target_compile_definitions(xrGame PRIVATE "$<$<CONFIG:Debug>:DEBUG>")
 
 # Linker list
 target_link_libraries(xrGame PUBLIC xrEngineCore)
-if (NOT IXRAY_PHYSX)
+if (NOT IXRAY_USE_PHYSX)
 	target_link_libraries(xrGame PUBLIC xrPhysics)
 endif()
 target_link_libraries(xrGame PUBLIC xrScripts)

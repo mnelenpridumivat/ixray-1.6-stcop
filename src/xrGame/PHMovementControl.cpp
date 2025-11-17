@@ -968,7 +968,7 @@ Fvector CPHMovementControl::PHCaptureGetNearestElemPos(const CPhysicsShellHolder
 {
 	R_ASSERT3((object->m_pPhysicsShell != nullptr), "NO Phisics Shell for object ", *object->cName());
 
-	CPhysicsElement *ph_elem =  object->m_pPhysicsShell->NearestToPoint(vPosition);
+	auto ph_elem =  object->m_pPhysicsShell->NearestToPoint(vPosition);
 
 	Fvector v;
 	ph_elem->GetGlobalPositionDynamic(&v);	
@@ -978,7 +978,7 @@ Fvector CPHMovementControl::PHCaptureGetNearestElemPos(const CPhysicsShellHolder
 
 Fmatrix CPHMovementControl::PHCaptureGetNearestElemTransform(CPhysicsShellHolder* object)
 {
-	CPhysicsElement *ph_elem =  object->m_pPhysicsShell->NearestToPoint(vPosition);
+	auto ph_elem =  object->m_pPhysicsShell->NearestToPoint(vPosition);
 
 	Fmatrix m;
 	ph_elem->GetGlobalTransformDynamic(&m);

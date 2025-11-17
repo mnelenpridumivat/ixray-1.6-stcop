@@ -1,19 +1,19 @@
-#ifndef EditObjectH
-#define EditObjectH
+#pragma once
 
 #include "../../xrEngine/Bone.h"
 #include "../../xrEngine/Motion.h"
-#if 1
+
 #	include "../../../Editors/Public/PropertiesListTypes.h"
 //	#include "PropertiesListHelper.h"
 #	include "..\Engine\XrGameMaterialLibraryEditors.h"
 #	include "pick_defs.h"
-#endif
+
 #	include "..\..\..\Include\xrRender\Kinematics.h"
 
 #include "PhysicsShellHolderEditorBase.h"
 #include "Engine/GameMtlLib.h"
 #include "PhysX/Collision/xrCDB.h"
+#include "PhysX/Wrappers/PhysXShell.h"
 
 //----------------------------------------------------
 struct 	SRayPickInfo;
@@ -171,36 +171,36 @@ public IKinematics
 	friend class TfrmEditLibrary;
 	friend class MeshExpUtility;
 
-	ref_geom 		vs_SkeletonGeom;
+	ref_geom vs_SkeletonGeom;
 // desc
-	shared_str 		m_CreateName;
-	__time32_t			m_CreateTime;
-	shared_str 		m_ModifName;
-	__time32_t			m_ModifTime;
+	shared_str m_CreateName;
+	__time32_t m_CreateTime;
+	shared_str m_ModifName;
+	__time32_t m_ModifTime;
 	
 // general
-	xr_string		m_ClassScript;
+	xr_string m_ClassScript;
 
-	EditMeshVec		m_Meshes;
+	EditMeshVec m_Meshes;
 
-	ref_shader		m_LODShader;
+	ref_shader m_LODShader;
 
 	// skeleton
-	BoneVec			m_Bones;
-	SMotionVec		m_SMotions;
-	BPVec			m_BoneParts;
-	CSMotion*		m_ActiveSMotion;
-	CPhysicsShell*	m_physics_shell;
-	Fmatrix*		m_object_xform;
+	BoneVec m_Bones;
+	SMotionVec m_SMotions;
+	BPVec m_BoneParts;
+	CSMotion* m_ActiveSMotion;
+	xrPhysX::Wrappers::CPhysXShell* m_physics_shell = nullptr;
+	Fmatrix* m_object_xform = nullptr;
 public:
 
-	SurfaceVec		m_Surfaces;
-	SAnimParams				m_SMParam;
-	xr_vector<shared_str>	m_SMotionRefs;
-	shared_str				m_LODs;
+	SurfaceVec m_Surfaces;
+	SAnimParams m_SMParam;
+	xr_vector<shared_str> m_SMotionRefs;
+	shared_str m_LODs;
 public:
 	// options
-	Flags32			m_objectFlags;
+	Flags32 m_objectFlags;
 	enum{
 		eoDynamic 	 	= (1<<0),			
 		eoProgressive 	= (1<<1),			
@@ -212,318 +212,317 @@ public:
 		eoSkipOpt       = (1<<7),           
 		eoFORCE32		= u32(-1)           
 	};
-	IC BOOL			IsDynamic				(){return m_objectFlags.is(eoDynamic);}
-	IC BOOL			IsStatic				(){return !m_objectFlags.is(eoSoundOccluder)&&!m_objectFlags.is(eoDynamic)&&!m_objectFlags.is(eoHOM)&&!m_objectFlags.is(eoMultipleUsage);}
-	IC BOOL			IsMUStatic				(){return !m_objectFlags.is(eoSoundOccluder)&&!m_objectFlags.is(eoDynamic)&&!m_objectFlags.is(eoHOM)&&m_objectFlags.is(eoMultipleUsage);}
+	IC BOOL IsDynamic() {return m_objectFlags.is(eoDynamic);}
+	IC BOOL IsStatic() {return !m_objectFlags.is(eoSoundOccluder)&&!m_objectFlags.is(eoDynamic)&&!m_objectFlags.is(eoHOM)&&!m_objectFlags.is(eoMultipleUsage);}
+	IC BOOL IsMUStatic() {return !m_objectFlags.is(eoSoundOccluder)&&!m_objectFlags.is(eoDynamic)&&!m_objectFlags.is(eoHOM)&&m_objectFlags.is(eoMultipleUsage);}
 private:
 	// bounding volume
-	Fbox 			m_BBox;
+	Fbox m_BBox;
 public:
 	// temp variable for actor
-	Fvector 		a_vPosition;
-	Fvector			a_vRotate;
+	Fvector a_vPosition;
+	Fvector a_vRotate;
 
 	// temp variables for transformation
-	Fvector 		t_vPosition;
-	Fvector			t_vScale;
-	Fvector			t_vRotate;
+	Fvector t_vPosition;
+	Fvector t_vScale;
+	Fvector t_vRotate;
    
-	bool			bOnModified;
-	IC bool			IsModified				(){return bOnModified;}
-	IC void 		Modified				(){bOnModified=true;}
+	bool bOnModified;
+	IC bool IsModified() {return bOnModified;}
+	IC void Modified() {bOnModified=true;}
 
-	xr_string		m_LoadName;
-	int				m_RefCount;
+	xr_string m_LoadName;
+	int m_RefCount;
 protected:
-	shared_str		AssignBoneName;
+	shared_str AssignBoneName;
 
-	int				m_ObjectVersion;
+	int m_ObjectVersion;
 
-	void 			ClearGeometry			();
+	void ClearGeometry();
 
-	void 			PrepareBones			();
-	void			DefferedLoadRP			();
-	void			DefferedUnloadRP		();
+	void PrepareBones();
+	void DefferedLoadRP();
+	void DefferedUnloadRP();
 
-	void   OnChangeTransform		(PropValue* prop);
-	void  	OnChangeShader			(PropValue* prop);
+	void OnChangeTransform(PropValue* prop);
+	void OnChangeShader(PropValue* prop);
 public:
 	enum{
 		LS_RBUFFERS	= (1<<0),
 	};
-	Flags32			m_LoadState;
+	Flags32 m_LoadState;
 
-	xr_string		m_LibName;
+	xr_string m_LibName;
 public:
 	// constructor/destructor methods
-					CEditableObject			(LPCSTR name);
-	virtual 		~CEditableObject		();
+	CEditableObject(LPCSTR name);
+	virtual ~CEditableObject();
 
-	LPCSTR			GetName					(){ return m_LibName.c_str();}
+	LPCSTR GetName () {return m_LibName.c_str();}
 
-	void			SetVersionToCurrent		(BOOL bCreate, BOOL bModif);
+	void SetVersionToCurrent(BOOL bCreate, BOOL bModif);
 
-	void			Optimize				();
+	void Optimize();
 
-	IC EditMeshIt	FirstMesh				()	{return m_Meshes.begin();}
-	IC EditMeshIt	LastMesh				()	{return m_Meshes.end();}
-	IC EditMeshVec& Meshes					()	{return m_Meshes; }
-	IC int			MeshCount				()	{return m_Meshes.size();}
-	IC void			AppendMesh				(CEditableMesh* M){m_Meshes.push_back(M);}
-	IC SurfaceVec&	Surfaces				()	{return m_Surfaces;}
-	IC SurfaceIt	FirstSurface			()	{return m_Surfaces.begin();}
-	IC SurfaceIt	LastSurface				()	{return m_Surfaces.end();}
-	IC int			SurfaceCount			()	{return m_Surfaces.size();}
-	IC int 			Version 				() 	{return m_ObjectVersion;}
+	IC EditMeshIt FirstMesh() {return m_Meshes.begin();}
+	IC EditMeshIt LastMesh() {return m_Meshes.end();}
+	IC EditMeshVec& Meshes() {return m_Meshes; }
+	IC int MeshCount() {return m_Meshes.size();}
+	IC void AppendMesh(CEditableMesh* M) {m_Meshes.push_back(M);}
+	IC SurfaceVec& Surfaces() {return m_Surfaces;}
+	IC SurfaceIt FirstSurface() {return m_Surfaces.begin();}
+	IC SurfaceIt LastSurface() {return m_Surfaces.end();}
+	IC int SurfaceCount() {return m_Surfaces.size();}
+	IC int Version() {return m_ObjectVersion;}
 
 	// LOD
-	xr_string		GetLODTextureName		();
-	LPCSTR			GetLODShaderName		(){return LOD_SHADER_NAME;}
-	void			GetLODFrame				(int frame, Fvector p[4], Fvector2 t[4], const Fmatrix* parent=0);
+	xr_string GetLODTextureName();
+	LPCSTR GetLODShaderName() {return LOD_SHADER_NAME;}
+	void GetLODFrame(int frame, Fvector p[4], Fvector2 t[4], const Fmatrix* parent=0);
 
 	// skeleton
-	IC BPIt			FirstBonePart			()	{return m_BoneParts.begin();}
-	IC BPIt			LastBonePart			()	{return m_BoneParts.end();}
-	IC BPVec&		BoneParts				()	{return m_BoneParts;}
-	IC int			BonePartCount			()	{return m_BoneParts.size();}
-	IC BPIt			BonePart				(CBone* B);
+	IC BPIt FirstBonePart() {return m_BoneParts.begin();}
+	IC BPIt LastBonePart() {return m_BoneParts.end();}
+	IC BPVec& BoneParts() {return m_BoneParts;}
+	IC int BonePartCount() {return m_BoneParts.size();}
+	IC BPIt BonePart(CBone* B);
 
-	IC BoneIt		FirstBone				()	{return m_Bones.begin();}
-	IC BoneIt		LastBone				()	{return m_Bones.end();}
-	IC BoneVec&		Bones					()	{return m_Bones;}
-	IC int			BoneCount				()const	{return m_Bones.size();}
-	shared_str		BoneNameByID			(int id);
-	int				GetRootBoneID			();
-	int				PartIDByName			(LPCSTR name);
-	IC CBone*		GetBone					(u32 idx){VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
-	IC const CBone*	GetBone					(u32 idx)const{VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
-	void			GetBoneWorldTransform	(u32 bone_idx, float t, CSMotion* motion, Fmatrix& matrix);
-	IC SMotionIt	FirstSMotion			()	{return m_SMotions.begin();}
-	IC SMotionIt	LastSMotion				()	{return m_SMotions.end();}
-	SMotionVec&		SMotions				()	{return m_SMotions;}
-	IC int			SMotionCount 			()	{return m_SMotions.size();}
-	IC bool			IsAnimated	 			()	{return SMotionCount() || m_SMotionRefs.size();}
-	IC void			SkeletonPlay 			()	{m_SMParam.Play();}
-	IC void			SkeletonStop 			()	{m_SMParam.Stop();}
-	IC void			SkeletonPause 			(bool val)	{m_SMParam.Pause(val);}
+	IC BoneIt FirstBone()	{return m_Bones.begin();}
+	IC BoneIt LastBone()	{return m_Bones.end();}
+	IC BoneVec& Bones()	{return m_Bones;}
+	IC int BoneCount() const	{return m_Bones.size();}
+	shared_str BoneNameByID(int id);
+	int GetRootBoneID();
+	int PartIDByName(LPCSTR name);
+	IC CBone* GetBone(u32 idx) {VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
+	IC const CBone* GetBone(u32 idx) const {VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
+	void GetBoneWorldTransform(u32 bone_idx, float t, CSMotion* motion, Fmatrix& matrix);
+	IC SMotionIt FirstSMotion() {return m_SMotions.begin();}
+	IC SMotionIt LastSMotion() {return m_SMotions.end();}
+	SMotionVec& SMotions() {return m_SMotions;}
+	IC int SMotionCount() {return m_SMotions.size();}
+	IC bool IsAnimated() {return SMotionCount() || m_SMotionRefs.size();}
+	IC void SkeletonPlay() {m_SMParam.Play();}
+	IC void SkeletonStop() {m_SMParam.Stop();}
+	IC void SkeletonPause(bool val)	{m_SMParam.Pause(val);}
 
 	// get object properties methods
 
-	IC xr_string&	GetClassScript			()	{return m_ClassScript;}
+	IC xr_string& GetClassScript() {return m_ClassScript;}
 
-	IC const Fbox&	_BCL GetBox				() const 	{return m_BBox;}
+	IC const Fbox& GetBox() const {return m_BBox;}
 
-	IC LPCSTR		GetLODs					()	{return m_LODs.c_str();}
+	IC LPCSTR GetLODs() {return m_LODs.c_str();}
 
 	// animation
-	IC bool			IsSkeleton				()	{return !!m_Bones.size();}
-	IC bool			IsSMotionActive			()	{return IsSkeleton()&&m_ActiveSMotion; }
-	CSMotion*		GetActiveSMotion		()	{return m_ActiveSMotion; }
-	void			SetActiveSMotion		(CSMotion* mot);
-	bool 			CheckBoneCompliance		(CSMotion* M);
-	bool			VerifyBoneParts			();
-	void			OptimizeSMotions		();
+	IC bool IsSkeleton() {return !!m_Bones.size();}
+	IC bool IsSMotionActive() {return IsSkeleton()&&m_ActiveSMotion; }
+	CSMotion* GetActiveSMotion() {return m_ActiveSMotion; }
+	void SetActiveSMotion(CSMotion* mot);
+	bool CheckBoneCompliance(CSMotion* M);
+	bool VerifyBoneParts();
+	void OptimizeSMotions();
 
-	u16				BoneIDByName			(shared_str name);
+	u16 BoneIDByName(shared_str name);
 
-	bool 			LoadBoneData			(IReader& F);
-	void 			SaveBoneData			(IWriter& F);
-	void			ResetBones				();
-	CSMotion*		ResetSAnimation			(bool bGotoBindPose=true);
-	void			CalculateAnimation		(CSMotion* motion);
-	void			CalculateBindPose		();
-	void			GotoBindPose			();
-	void			OnBindTransformChange	();
+	bool LoadBoneData(IReader& F);
+	void SaveBoneData(IWriter& F);
+	void ResetBones();
+	CSMotion* ResetSAnimation(bool bGotoBindPose=true);
+	void CalculateAnimation(CSMotion* motion);
+	void CalculateBindPose();
+	void GotoBindPose();
+	void OnBindTransformChange();
 
 	// statistics methods
-	void 			GetFaceWorld			(const Fmatrix& parent, CEditableMesh* M, int idx, Fvector* verts);
-	int 			GetFaceCount			(bool bMatch2Sided=true, bool bIgnoreOCC=true);
-	int 			GetVertexCount			();
-	int 			GetSurfFaceCount		(LPCSTR surf_name);
+	void GetFaceWorld(const Fmatrix& parent, CEditableMesh* M, int idx, Fvector* verts);
+	int GetFaceCount(bool bMatch2Sided=true, bool bIgnoreOCC=true);
+	int GetVertexCount();
+	int GetSurfFaceCount(LPCSTR surf_name);
 
 	// render methods
-	void 			Render					(const Fmatrix& parent, int priority, bool strictB2F,SurfaceVec * surfaces=nullptr);
-	void 			RenderSelection			(const Fmatrix& parent, CEditableMesh* m=0, xr_shared_ptr<CSurface> s=0, u32 c=0x40E64646);
-	void 			RenderEdge				(const Fmatrix& parent, CEditableMesh* m=0, xr_shared_ptr<CSurface> s=0, u32 c=0xFFC0C0C0);
-	void 			RenderBones				(const Fmatrix& parent);
-	void 			RenderAnimation			(const Fmatrix& parent);
-	void 			RenderSingle			(const Fmatrix& parent);
-	void 			RenderSkeletonSingle	(const Fmatrix& parent);
-	void 			RenderLOD				(const Fmatrix& parent);
+	void Render(const Fmatrix& parent, int priority, bool strictB2F,SurfaceVec * surfaces=nullptr);
+	void RenderSelection(const Fmatrix& parent, CEditableMesh* m=0, xr_shared_ptr<CSurface> s=0, u32 c=0x40E64646);
+	void RenderEdge(const Fmatrix& parent, CEditableMesh* m=0, xr_shared_ptr<CSurface> s=0, u32 c=0xFFC0C0C0);
+	void RenderBones(const Fmatrix& parent);
+	void RenderAnimation(const Fmatrix& parent);
+	void RenderSingle(const Fmatrix& parent);
+	void RenderSkeletonSingle(const Fmatrix& parent);
+	void RenderLOD(const Fmatrix& parent);
 
 	// update methods
-	void 			OnFrame					();
-	void 			UpdateBox				();
-	void		    EvictObject				();
+	void OnFrame();
+	void UpdateBox();
+	void EvictObject();
 
 	// pick methods
-	bool 			RayPick					(float& dist, const Fvector& S, const Fvector& D, const Fmatrix& inv_parent, SRayPickInfo* pinf=0);
+	bool RayPick(float& dist, const Fvector& S, const Fvector& D, const Fmatrix& inv_parent, SRayPickInfo* pinf=0);
 
-	void			CreateBone				(shared_str Name);
-	void			AddBone					(CBone* parent_bone);
-	void			DeleteBone				(CBone* bone);
-	void			RenameBone				(CBone* bone, LPCSTR new_name);
+	void CreateBone(shared_str Name);
+	void AddBone(CBone* parent_bone);
+	void DeleteBone(CBone* bone);
+	void RenameBone(CBone* bone, LPCSTR new_name);
 
-	void 			RayQuery				(SPickQuery& pinf);
-	void 			RayQuery				(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf);
-	void 			BoxQuery				(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf);
-	bool 			BoxPick					(CCustomObject* obj, const Fbox& box, const Fmatrix& inv_parent, SBoxPickInfoVec& pinf);
-	bool 			FrustumPick				(const CFrustum& frustum, const Fmatrix& parent);
-	bool 			SpherePick				(const Fvector& center, float radius, const Fmatrix& parent);
+	void RayQuery(SPickQuery& pinf);
+	void RayQuery(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf);
+	void BoxQuery(const Fmatrix& parent, const Fmatrix& inv_parent, SPickQuery& pinf);
+	bool BoxPick(CCustomObject* obj, const Fbox& box, const Fmatrix& inv_parent, SBoxPickInfoVec& pinf);
+	bool FrustumPick(const CFrustum& frustum, const Fmatrix& parent);
+	bool SpherePick(const Fvector& center, float radius, const Fmatrix& parent);
 
 	// bone
-	CBone* 			PickBone				(const Fvector& S, const Fvector& D, const Fmatrix& parent);
-	void 			SelectBones				(bool bVal);
-	void 			SelectBone				(CBone* b, bool bVal);
-	void			ClampByLimits			(bool bSelOnly);
+	CBone* PickBone(const Fvector& S, const Fvector& D, const Fmatrix& parent);
+	void SelectBones(bool bVal);
+	void SelectBone(CBone* b, bool bVal);
+	void ClampByLimits(bool bSelOnly);
 
 	// change position/orientation methods
-	void 			TranslateToWorld		(const Fmatrix& parent);
+	void TranslateToWorld(const Fmatrix& parent);
 
 	// clone/copy methods
-	void			RemoveMesh				(CEditableMesh* mesh);
+	void RemoveMesh(CEditableMesh* mesh);
 
-	bool			RemoveSMotion			(LPCSTR name);
-	bool			RenameSMotion			(LPCSTR old_name, LPCSTR new_name);
-	bool			AppendSMotion			(LPCSTR fname, SMotionVec* inserted=0);
-	void			ClearSMotions			();
-	bool			SaveSMotions			(LPCSTR fname);
+	bool RemoveSMotion(LPCSTR name);
+	bool RenameSMotion(LPCSTR old_name, LPCSTR new_name);
+	bool AppendSMotion(LPCSTR fname, SMotionVec* inserted=0);
+	void ClearSMotions();
+	bool SaveSMotions(LPCSTR fname);
 
 	// load/save methods
-	bool 			Reload					();
-	bool 			Load					(LPCSTR fname);
-	bool 			Save					(LPCSTR fname);
-	bool 			Load					(IReader&);
-	void 			Save					(IWriter&);
-#if 1
-	void 			FillMotionList			(LPCSTR pref, ListItemsVec& items, int modeID);
-	void 			FillBoneList			(LPCSTR pref, ListItemsVec& items, int modeID);
-	void			FillSurfaceList			(LPCSTR pref, ListItemsVec& items, int modeID);
-	void			FillSurfaceProps		(CSurface* surf, LPCSTR pref, PropItemVec& items);
-	void 			FillBasicProps			(LPCSTR pref, PropItemVec& items);
-	void 			FillSummaryProps		(LPCSTR pref, PropItemVec& items);
-	bool			CheckShaderCompatible	();
-#endif
+	bool Reload();
+	bool Load(LPCSTR fname);
+	bool Save(LPCSTR fname);
+	bool Load(IReader&);
+	void Save(IWriter&);
+
+	void FillMotionList(LPCSTR pref, ListItemsVec& items, int modeID);
+	void FillBoneList(LPCSTR pref, ListItemsVec& items, int modeID);
+	void FillSurfaceList(LPCSTR pref, ListItemsVec& items, int modeID);
+	void FillSurfaceProps(CSurface* surf, LPCSTR pref, PropItemVec& items);
+	void FillBasicProps(LPCSTR pref, PropItemVec& items);
+	void FillSummaryProps(LPCSTR pref, PropItemVec& items);
+	bool CheckShaderCompatible();
 
 	// contains methods
-	CEditableMesh* 	FindMeshByName			(LPCSTR name, CEditableMesh* Ignore=0);
-	void			VerifyMeshNames			();
-	bool 			ContainsMesh			(const CEditableMesh* m);
+	CEditableMesh* FindMeshByName(LPCSTR name, CEditableMesh* Ignore=0);
+	void VerifyMeshNames();
+	bool ContainsMesh(const CEditableMesh* m);
 	xr_shared_ptr<CSurface>	FindSurfaceByName(LPCSTR surf_name, int* s_id=0);
-	int				FindBoneByNameIdx		(LPCSTR name);
-	BoneIt			FindBoneByNameIt		(LPCSTR name);
-	CBone*			FindBoneByName			(LPCSTR name);
-	int				GetSelectedBones		(BoneVec& sel_bones);
-	u16				GetBoneIndexByWMap		(LPCSTR wm_name);
-	CSMotion* 		FindSMotionByName		(LPCSTR name, const CSMotion* Ignore=0);
-	void			GenerateSMotionName		(char* buffer, LPCSTR start_name, const CSMotion* M);
-	bool			GenerateBoneShape		(bool bSelOnly);
+	int FindBoneByNameIdx(LPCSTR name);
+	BoneIt FindBoneByNameIt(LPCSTR name);
+	CBone* FindBoneByName(LPCSTR name);
+	int GetSelectedBones(BoneVec& sel_bones);
+	u16 GetBoneIndexByWMap(LPCSTR wm_name);
+	CSMotion* FindSMotionByName(LPCSTR name, const CSMotion* Ignore=0);
+	void GenerateSMotionName(char* buffer, LPCSTR start_name, const CSMotion* M);
+	bool GenerateBoneShape(bool bSelOnly);
 
 	// device dependent routine
-	void 			OnDeviceCreate 			();
-	void 			OnDeviceDestroy			();
+	void OnDeviceCreate();
+	void OnDeviceDestroy();
 
 	// utils
-	void			PrepareOGFDesc			(ogf_desc& desc);
+	void PrepareOGFDesc(ogf_desc& desc);
 	// skeleton
-	bool			PrepareSVGeometry		(IWriter& F, u8 infl);
-	bool			PrepareSVKeys			(IWriter& F);
-	bool			PrepareSVDefs			(IWriter& F);
-	bool			PrepareSkeletonOGF		(IWriter& F, u8 infl);
+	bool PrepareSVGeometry(IWriter& F, u8 infl);
+	bool PrepareSVKeys(IWriter& F);
+	bool PrepareSVDefs(IWriter& F);
+	bool PrepareSkeletonOGF(IWriter& F, u8 infl);
 	// rigid
-	bool			PrepareRigidOGF			(IWriter& F, bool gen_tb, CEditableMesh* mesh);
+	bool PrepareRigidOGF(IWriter& F, bool gen_tb, CEditableMesh* mesh);
 	// ogf
-	bool			PrepareOGF				(IWriter& F, u8 infl, bool gen_tb, CEditableMesh* mesh);
-	bool			ExportOGF				(LPCSTR fname, u8 skl_infl);
+	bool PrepareOGF(IWriter& F, u8 infl, bool gen_tb, CEditableMesh* mesh);
+	bool ExportOGF(LPCSTR fname, u8 skl_infl);
 	// omf
-	bool			PrepareOMF				(IWriter& F);
-	bool			ExportOMF				(LPCSTR fname);
+	bool PrepareOMF(IWriter& F);
+	bool ExportOMF(LPCSTR fname);
 	// obj
-	bool			ExportOBJ				(LPCSTR name);
+	bool ExportOBJ(LPCSTR name);
 
-	LPCSTR			GenerateSurfaceName		(LPCSTR base_name);
+	LPCSTR GenerateSurfaceName(LPCSTR base_name);
 #ifdef _MAYA_EXPORT
-	BOOL			ParseMAMaterial			(CSurface* dest, SXRShaderData& d);
-	CSurface*		CreateSurface			(LPCSTR m_name, SXRShaderData& d);
-	CSurface*		CreateSurface			(MObject shader);
+	BOOL ParseMAMaterial(CSurface* dest, SXRShaderData& d);
+	CSurface* CreateSurface(LPCSTR m_name, SXRShaderData& d);
+	CSurface* CreateSurface(MObject shader);
 #endif
-	bool			ExportLWO				(LPCSTR fname);
-	bool			Validate				();
-	bool			ValidateSurf			(bool TryToFix = false, bool* HasFixes = nullptr);
+	bool ExportLWO(LPCSTR fname);
+	bool Validate();
+	bool ValidateSurf(bool TryToFix = false, bool* HasFixes = nullptr);
 private:
-	float 			GetBonesBottom			();
+	float GetBonesBottom();
 public:
-	void 			CalculateRootObjectAnimation(const Fmatrix &anchor);
-	void 			GetAnchorForRootObjectAnimation( Fmatrix &anchor );
-	bool 			AnimateRootObject(CSMotion* motion);
+	void CalculateRootObjectAnimation(const Fmatrix &anchor);
+	void GetAnchorForRootObjectAnimation( Fmatrix &anchor );
+	bool AnimateRootObject(CSMotion* motion);
 private:
-	virtual		void			Bone_Calculate		(CBoneData* bd, Fmatrix* parent) 									{ VERIFY(false); }
-	virtual		void			Bone_GetAnimPos(Fmatrix& pos,u16 id, u8 channel_mask, bool ignore_callbacks) 			{ VERIFY(false); }
+	virtual void Bone_Calculate(CBoneData* bd, Fmatrix* parent) { VERIFY(false); }
+	virtual void Bone_GetAnimPos(Fmatrix& pos,u16 id, u8 channel_mask, bool ignore_callbacks) { VERIFY(false); }
 
-	virtual		bool			PickBone			(const Fmatrix &parent_xform, pick_result &r, float dist, const Fvector& start, const Fvector& dir, u16 bone_id) { VERIFY(false); return false;}
-	virtual		void			EnumBoneVertices	(SEnumVerticesCallback &C, u16 bone_id) 							{ VERIFY(false); }
+	virtual bool PickBone(const Fmatrix &parent_xform, pick_result &r, float dist, const Fvector& start, const Fvector& dir, u16 bone_id) { VERIFY(false); return false;}
+	virtual void EnumBoneVertices(SEnumVerticesCallback &C, u16 bone_id) { VERIFY(false); }
 
 	// Low level interface
-	virtual u16			_BCL	LL_BoneID(LPCSTR  B)																   	{ int id = FindBoneByNameIdx( B ); VERIFY(id<u16(-1)); return (u16)id; }
-	virtual u16			_BCL	LL_BoneID(const shared_str& B)                                                          { return LL_BoneID( B.c_str() ); }
-	virtual LPCSTR		_BCL	LL_BoneName_dbg(u16 ID) 																;
+	virtual u16 LL_BoneID(LPCSTR  B)																   	{ int id = FindBoneByNameIdx( B ); VERIFY(id<u16(-1)); return (u16)id; }
+	virtual u16 LL_BoneID(const shared_str& B)                                                          { return LL_BoneID( B.c_str() ); }
+	virtual LPCSTR LL_BoneName_dbg(u16 ID) 																;
 
-	virtual CInifile*	_BCL	LL_UserData() 																			{ return 0; }
-	virtual accel*				LL_Bones() 																				{ VERIFY(false); return 0; }
+	virtual CInifile* LL_UserData() 																			{ return 0; }
+	virtual accel* LL_Bones() 																				{ VERIFY(false); return 0; }
 
-	virtual  CBoneInstance&	_BCL LL_GetBoneInstance(u16 bone_id);
+	virtual CBoneInstance& LL_GetBoneInstance(u16 bone_id);
 
-	virtual CBoneData&	_BCL	LL_GetData(u16 bone_id);
+	virtual CBoneData& LL_GetData(u16 bone_id);
 
-virtual	const IBoneData&_BCL	GetBoneData(u16 bone_id) const 															{ return *GetBone( bone_id ); }
+	virtual	const IBoneData& GetBoneData(u16 bone_id) const { return *GetBone( bone_id ); }
 
-	virtual u16			_BCL	LL_BoneCount()const 																	{ return (u16)BoneCount(); }
-	virtual u16					LL_VisibleBoneCount() 																	{ VERIFY(false); return 0; }
-	virtual ICF Fmatrix& _BCL	LL_GetTransform(u16 bone_id) 															{ return GetBone( bone_id )->_LTransform(); }
-	virtual ICF const Fmatrix& _BCL	LL_GetTransform(u16 bone_id) const 													{ return GetBone( bone_id )->_LTransform(); }
-	virtual ICF Fmatrix&		LL_GetTransform_R(u16 bone_id);
-	virtual Fobb&				LL_GetBox(u16 bone_id);
-	virtual void				LL_GetBindTransform(xr_vector<Fmatrix>& matrices) 										{ VERIFY(false); }
-	virtual int 				LL_GetBoneGroups(xr_vector<xr_vector<u16> >& groups) 									{ VERIFY(false); return 0; }
+	virtual u16 LL_BoneCount() const { return (u16)BoneCount(); }
+	virtual u16 LL_VisibleBoneCount() { VERIFY(false); return 0; }
+	virtual ICF Fmatrix& LL_GetTransform(u16 bone_id) { return GetBone( bone_id )->_LTransform(); }
+	virtual ICF const Fmatrix& LL_GetTransform(u16 bone_id) const { return GetBone( bone_id )->_LTransform(); }
+	virtual ICF Fmatrix& LL_GetTransform_R(u16 bone_id);
+	virtual Fobb& LL_GetBox(u16 bone_id);
+	virtual void LL_GetBindTransform(xr_vector<Fmatrix>& matrices) { VERIFY(false); }
+	virtual int LL_GetBoneGroups(xr_vector<xr_vector<u16> >& groups) { VERIFY(false); return 0; }
 
-	virtual u16			_BCL	LL_GetBoneRoot() 																		{ u16 root_id = (u16)GetRootBoneID(); VERIFY( root_id < u16(-1) ); return root_id; }
-	virtual void				LL_SetBoneRoot(u16 bone_id) 															{ VERIFY(false); }
+	virtual u16 LL_GetBoneRoot() { u16 root_id = (u16)GetRootBoneID(); VERIFY( root_id < u16(-1) ); return root_id; }
+	virtual void LL_SetBoneRoot(u16 bone_id) { VERIFY(false); }
 
-	virtual BOOL		_BCL	LL_GetBoneVisible(u16 bone_id) 															{ return TRUE; }
-	virtual void				LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive) 								{ VERIFY(false); }
+	virtual BOOL LL_GetBoneVisible(u16 bone_id) { return TRUE; }
+	virtual void LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive) { VERIFY(false); }
 
 	virtual VisMask _BCL LL_GetBonesVisible() {
 		VisMask x; x.set_all(); return x;
 	}
 
-	virtual void				LL_SetBonesVisibleAll() {};
+	virtual void LL_SetBonesVisibleAll() {};
 
-	virtual void				LL_SetBonesVisible(VisMask mask) 														{ VERIFY(false); }
+	virtual void LL_SetBonesVisible(VisMask mask) { VERIFY(false); }
 
 	// Main functionality
-	virtual void				CalculateBones(BOOL bForceExact	= FALSE) 												{ } // Recalculate skeleton
-	virtual void				CalculateBones_Invalidate()																{ }
-	virtual void				Callback(UpdateCallback C, void* Param) 												{ VERIFY(false); }
+	virtual void CalculateBones(BOOL bForceExact = FALSE) {} // Recalculate skeleton
+	virtual void CalculateBones_Invalidate() {}
+	virtual void Callback(UpdateCallback C, void* Param) { VERIFY(false); }
 
 	//	Callback: data manipulation
-	virtual void				SetUpdateCallback(UpdateCallback pCallback) 											{ VERIFY(false); }
-	virtual void				SetUpdateCallbackParam(void* pCallbackParam)											{ VERIFY(false); }
+	virtual void SetUpdateCallback(UpdateCallback pCallback) { VERIFY(false); }
+	virtual void SetUpdateCallbackParam(void* pCallbackParam) { VERIFY(false); }
 
-	virtual UpdateCallback		GetUpdateCallback() 																	{ VERIFY(false); return 0; }
-	virtual void*				GetUpdateCallbackParam() 																{ VERIFY(false); return 0; }
+	virtual UpdateCallback GetUpdateCallback() { VERIFY(false); return 0; }
+	virtual void* GetUpdateCallbackParam() { VERIFY(false); return 0; }
 	//UpdateCallback				Update_Callback;
 	//void*						Update_Callback_Param;
-	virtual IRenderVisual* _BCL dcast_RenderVisual()																	{ 	return 0; }
-	virtual IKinematicsAnimated* dcast_PKinematicsAnimated() 															{ VERIFY(false); return 0; }
+	virtual IRenderVisual* dcast_RenderVisual() { return 0; }
+	virtual IKinematicsAnimated* dcast_PKinematicsAnimated() { VERIFY(false); return 0; }
 
 	// debug
 #ifdef DEBUG_DRAW
-	virtual void						DebugRender			(Fmatrix& XFORM) 											{VERIFY(false);}
+	virtual void DebugRender(Fmatrix& XFORM) {VERIFY(false);}
 #endif
-	virtual shared_str					getDebugName		() 															{return m_ModifName;}
+	virtual shared_str getDebugName() {return m_ModifName;}
 
 private:
-	virtual	IKinematics*	 	_BCL	ObjectKinematics		()				 										{ return this;}
+	virtual	IKinematics* ObjectKinematics() { return this;}
 	int m_FaceCount;
 	int m_VertexCount;
 
@@ -577,8 +576,6 @@ enum EOBJ_IDS {
 #define EOBJ_CHUNK_SMOTIONS3		0x0926*/
 //----------------------------------------------------
 
-
-#endif /*_INCDEF_EditObject_H_*/
 
 
 

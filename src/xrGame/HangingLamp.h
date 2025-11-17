@@ -2,8 +2,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef HangingLampH
-#define HangingLampH
 #pragma once
 
 #include "GameObject.h"
@@ -12,7 +10,6 @@
 #include "../xrScripts/script_export_space.h"
 // refs
 class CLAItem;
-class CPhysicsElement;
 class CSE_ALifeObjectHangingLamp;
 class CPHElement;
 class CHangingLamp: 
@@ -76,4 +73,3 @@ public:
 	virtual float	Radius			()				const;
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
-#endif //HangingLampH

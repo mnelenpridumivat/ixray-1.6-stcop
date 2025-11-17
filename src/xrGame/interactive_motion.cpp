@@ -9,61 +9,62 @@
 
 #include "game_object_space.h"
 
-void interactive_motion_diagnostic( LPCSTR message, const MotionID &m, CPhysicsShell *s )
+void interactive_motion_diagnostic(LPCSTR message, const MotionID &m, xrPhysX::Wrappers::CPhysXShell* s)
 {
 #ifdef	DEBUG
 	if(!death_anim_debug)
+	{
 		return;
-	VERIFY( m.valid() );
-	VERIFY( s );
-	IKinematicsAnimated* KA = smart_cast<IKinematicsAnimated*>( s->PKinematics( ) );
-	VERIFY( KA );
-	CPhysicsShellHolder* O = smart_cast<CPhysicsShellHolder*>(s->get_ElementByStoreOrder( 0 )->PhysicsRefObject());
-	VERIFY( O );
+	}
+	VERIFY(m.valid());
+	VERIFY(s);
+	auto KA = smart_cast<IKinematicsAnimated*>(s->PKinematics());
+	VERIFY(KA);
+	auto O = smart_cast<CPhysicsShellHolder*>(s->get_ElementByStoreOrder(0)->PhysicsRefObject());
+	VERIFY(O);
 	LPCSTR motion_name = KA->LL_MotionDefName_dbg( m ).first;
 	Msg( "death anims - interactive_motion:- %s, motion: %s, obj: %s, model:  %s ", message, motion_name, O->cName().c_str(), O->cNameVisual().c_str());
 #endif
 }
 
-interactive_motion::interactive_motion( )
+interactive_motion::interactive_motion()
 {
-	init( );
+	init();
 }
-interactive_motion::	~interactive_motion	( )
+interactive_motion::~interactive_motion	()
 {
-	VERIFY( flags.get() == 0 );
+	VERIFY(flags.get() == 0);
 }
-void interactive_motion::init( )
+void interactive_motion::init()
 {
-	flags.assign( 0 );
+	flags.assign(0);
 
 	shell = 0;
 	angle = 0;
 }
-void	interactive_motion::destroy	( )
+void interactive_motion::destroy()
 {
 	if( flags.test( fl_started ) )
 		state_end();
 	
 	flags.assign( 0 );
 }
-void interactive_motion::setup( LPCSTR m, CPhysicsShell *s, float angle_ )
+void interactive_motion::setup(LPCSTR m, xrPhysX::Wrappers::CPhysXShell* s, float angle_)
 {
-	VERIFY( m );
-	VERIFY( s );
-	IKinematicsAnimated* K = smart_cast<IKinematicsAnimated*>( s->PKinematics( ) );
-	VERIFY( K );
-	setup( K->LL_MotionID(m), s, angle_ );
+	VERIFY(m);
+	VERIFY(s);
+	auto K = smart_cast<IKinematicsAnimated*>(s->PKinematics());
+	VERIFY(K);
+	setup(K->LL_MotionID(m), s, angle_);
 }
 
-void interactive_motion::setup( const MotionID &m, CPhysicsShell *s, float _angle )
+void interactive_motion::setup(const MotionID &m, xrPhysX::Wrappers::CPhysXShell* s, float _angle)
 {
-	
-	VERIFY( s );
-	VERIFY( m.valid( ) );
+	VERIFY(s);
+	VERIFY(m.valid());
 #ifdef	DEBUG
-	IKinematicsAnimated *KA = smart_cast<IKinematicsAnimated*>( s->PKinematics() );
-	CMotionDef* MD = KA->LL_GetMotionDef(m);
+	auto KA = smart_cast<IKinematicsAnimated*>(s->PKinematics());
+	auto MD = KA->LL_GetMotionDef(m);
 	VERIFY2( MD->StopAtEnd(), 
 		make_string<const char*>( "can not use cyclic anim in death animth motion: %s",
 		KA->LL_MotionDefName_dbg( m ).first ) 
@@ -79,28 +80,28 @@ void interactive_motion::setup( const MotionID &m, CPhysicsShell *s, float _angl
 
 }
 
-void	interactive_motion::shell_setup				( )
+void interactive_motion::shell_setup()
 {
 
-	VERIFY( shell );
+	VERIFY(shell);
 	IKinematics	*K = shell->PKinematics();
-	VERIFY( K );
+	VERIFY(K);
 	
 }
 
 
 void interactive_motion::anim_callback( CBlend *B )
 {
-	VERIFY( B->CallbackParam );
-	( (interactive_motion*) ( B->CallbackParam ) )->flags.set( fl_switch_dm_toragdoll, TRUE );
+	VERIFY(B->CallbackParam);
+	((interactive_motion*)(B->CallbackParam))->flags.set(fl_switch_dm_toragdoll, TRUE);
 }
 
 void interactive_motion::play( )
 {
-	VERIFY( shell );
-	VERIFY( motion.valid() );
-	smart_cast<IKinematicsAnimated*>( shell->PKinematics( ) )->PlayCycle( motion, TRUE, anim_callback, this );
-	state_start( );
+	VERIFY(shell);
+	VERIFY(motion.valid());
+	smart_cast<IKinematicsAnimated*>(shell->PKinematics())->PlayCycle(motion, TRUE, anim_callback, this);
+	state_start();
 }
 
 

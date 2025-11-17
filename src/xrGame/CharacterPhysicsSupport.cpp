@@ -693,16 +693,18 @@ void CCharacterPhysicsSupport::in_UpdateCL()
 #endif
 }
 
-void CCharacterPhysicsSupport::CreateSkeleton(CPhysicsShell* &pShell)
+void CCharacterPhysicsSupport::CreateSkeleton(xrPhysX::Wrappers::CPhysXShell* &pShell)
 {
 
 	R_ASSERT2(!pShell,"pShell already initialized!!");
 	if (!m_EntityAlife.Visual())
+	{
 		return;
+	}
 #ifdef DEBUG
 	CTimer t;t.Start();
 #endif	
-	pShell		= P_create_Shell();
+	pShell = P_create_Shell();
 
 	IKinematics* k = smart_cast<IKinematics*>(m_EntityAlife.Visual());
 
@@ -802,53 +804,7 @@ void CCharacterPhysicsSupport::ForceTransform( const Fmatrix &m )
 	movement()->SetVelocity( 0, 0, 0 );
 
 }
-/*
-void reset_root_bone_start_pose( CPhysicsShell& shell )
-{
-	VERIFY( &shell );
-	CPhysicsElement * physics_root_element = shell.get_ElementByStoreOrder( 0 );
-	VERIFY( physics_root_element );
 
-	IKinematics * K = shell.PKinematics();
-	VERIFY( K );
-	
-	u16	animation_root_bone_id = K->LL_GetBoneRoot();
-
-	CODEGeom	*physics_root_bone_geom = physics_root_element->geometry( 0 );
-	VERIFY( physics_root_bone_geom );
-
-	u16 physics_root_bone_id = physics_root_bone_geom->bone_id();
-	VERIFY( physics_root_bone_id != BI_NONE );
-
-	if( animation_root_bone_id == physics_root_bone_id )
-		return ;
-
-	//u16 anim_bones_number = K->LL_BoneCount();
-
-	//buffer_vector<u32>	anim_bones_bind_positions( _alloca(anim_bones_number*sizeof(u32)),
-	//												anim_bones_number
-	//											);
-#pragma todo("LL_GetBindTransform shoud use buffer_vector")
-
-	xr_vector<Fmatrix> anim_bones_bind_positions;
-	K->LL_GetBindTransform( anim_bones_bind_positions );
-
-
-	const Fmatrix physics_root_to_anim_root_bind_transformation 
-		= Fmatrix().mul_43( Fmatrix().invert( anim_bones_bind_positions[ physics_root_bone_id ] ), 
-											  anim_bones_bind_positions[ animation_root_bone_id ] );
-
-	const Fmatrix &physics_root_bone_anim_transform = K->LL_GetTransform( physics_root_bone_id );
-
-	const Fmatrix physics_root_bone_corrected_pos = Fmatrix().mul_43( physics_root_bone_anim_transform ,
-																	  physics_root_to_anim_root_bind_transformation
-																	  );
-
-	physics_root_element->SetTransform( Fmatrix().mul_43( shell.mXFORM, physics_root_bone_corrected_pos ) );
-
-	//physics_root_element->TransformPosition( Fmatrix().mul_43( Fmatrix().invert( K->LL_GetTransform( animation_root_bone_id ) ), physics_root_bone_corrected_pos ) );
-}
-*/
 static const u32 physics_shell_animated_destroy_delay = 3000;
 void	CCharacterPhysicsSupport::	destroy_animation_collision		( )
 {
@@ -930,7 +886,7 @@ void	CCharacterPhysicsSupport::	RemoveActiveWeaponCollision		()
 	xr_vector<CODEGeom*>::iterator ii =m_weapon_geoms.begin(), ee = m_weapon_geoms.end();
 	Fmatrix m0;
 	(*ii)->get_xform( m0 );
-	CPhysicsElement* root = m_active_item_obj->PPhysicsShell()->get_ElementByStoreOrder( 0 );
+	auto root = m_active_item_obj->PPhysicsShell()->get_ElementByStoreOrder( 0 );
 	CODEGeom *rg = root->geometry( 0 );
 	VERIFY( rg );
 	Fmatrix m1;
@@ -1030,30 +986,32 @@ void	CCharacterPhysicsSupport::	AddActiveWeaponCollision		()
 
 	active_weapon_item->UpdateXForm();
 
-	CPhysicsShell *weapon_shell = P_build_Shell( &active_weapon_item->object(), true, (BONE_P_MAP*) (0), true );
+	auto weapon_shell = P_build_Shell( &active_weapon_item->object(), true, (BONE_P_MAP*) (0), true );
 
 	VERIFY(GetEntityAlife()->PPhysicsShell());
-	CPhysicsElement* weapon_attach_bone = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16)br );
+	auto weapon_attach_bone = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16)br );
 
 	bone_chain_disable( (u16)br, weapon_attach_bone->m_SelfID, *GetEntityAlife()->PPhysicsShell()->PKinematics() );
 	if(bl != br && bl!=-1 )
 	{
-		CPhysicsElement* p = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16) bl );
+		auto p = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16) bl );
 		VERIFY( p );
 		bone_chain_disable( (u16)bl, p->m_SelfID, *GetEntityAlife()->PPhysicsShell()->PKinematics() );
 	}
 	if(br2!=bl && br2 != br && br2!=-1 )
 	{
-		CPhysicsElement* p = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16) br2 );
+		auto p = GetEntityAlife()->PPhysicsShell()->get_PhysicsParrentElement( (u16) br2 );
 		VERIFY( p );
 		bone_chain_disable( (u16)br2, weapon_attach_bone->m_SelfID, *GetEntityAlife()->PPhysicsShell()->PKinematics() );
 	}
 
-	CPhysicsElement* weapon_element		= weapon_shell->get_ElementByStoreOrder( 0 );
+	auto weapon_element = weapon_shell->get_ElementByStoreOrder( 0 );
 
 	u16 geom_num = weapon_element->numberOfGeoms();
 	for( u16 i = 0; i< geom_num; ++i )
+	{
 		m_weapon_geoms.push_back(  weapon_element->geometry( i ) );
+	}
 	xr_vector<CODEGeom*>::iterator ii =m_weapon_geoms.begin(), ee = m_weapon_geoms.end();
 
 	for( ;ii!=ee; ++ii )

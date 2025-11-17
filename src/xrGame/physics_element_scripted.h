@@ -1,14 +1,16 @@
 #pragma once
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/iphysics_scripted.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "../xrScripts/script_export_space.h"
+#include "PhysX/Wrappers/PhysXElement.h"
 
-class CPhysicsElement;
 class cphysics_element_scripted:
-public cphysics_game_scripted<CPhysicsElement>
+public cphysics_game_scripted<xrPhysX::Wrappers::CPhysXElement>
 {
 public:
-	cphysics_element_scripted(CPhysicsElement* imp ):cphysics_game_scripted<CPhysicsElement>(imp){}
+	cphysics_element_scripted(xrPhysX::Wrappers::CPhysXElement* imp ):cphysics_game_scripted<xrPhysX::Wrappers::CPhysXElement>(imp){}
 
 	void	applyForce			( float x, float y, float z )	{ physics_impl().applyForce( x, y, z ); }
 	bool	isBreakable			( )								{ return physics_impl(). isBreakable( ); }

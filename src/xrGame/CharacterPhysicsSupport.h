@@ -1,6 +1,5 @@
 
-#ifndef CHARACTER_PHYSICS_SUPPORT
-#define CHARACTER_PHYSICS_SUPPORT
+#pragma once
 
 #include "alife_space.h"
 #include "PHSkeleton.h"
@@ -11,14 +10,14 @@
 #include "death_anims.h"
 #include "character_shell_control.h"
 #include "animation_utils.h"
-class CPhysicsShell;
+
+//class CPhysicsShell;
 class CPHMovementControl;
 class CIKLimbsController;
 class interactive_motion;
 class interactive_animation;
 class physics_shell_animated;
 class CODEGeom;
-class CPhysicsElement;
 class activating_character_delay;
 
 class CCharacterPhysicsSupport :
@@ -60,28 +59,28 @@ private:
 		animation_movement_state( )		{ init( ); }
 	}									anim_mov_state;
 
-	CEntityAlive						&m_EntityAlife																																		;
-	Fmatrix								&mXFORM																																					;
-	CPhysicsShell						*m_physics_skeleton																																	;
-	CPHMovementControl					*m_PhysicMovementControl																															;
-	CPHSoundPlayer						m_ph_sound_player																																	;
-	CIKLimbsController					*m_ik_controller																																	;
-	ICollisionHitCallback				*m_collision_hit_callback;
-	character_hit_animation_controller	m_hit_animations;
-	death_anims							m_death_anims;
-	float								m_BonceDamageFactor;
-	interactive_motion					*m_interactive_motion;
-	character_shell_control				m_character_shell_control;
-	interactive_animation				*m_interactive_animation;
-	physics_shell_animated				*m_physics_shell_animated;
-	activating_character_delay			*m_collision_activating_delay;
-	xr_vector<CODEGeom*>				m_weapon_geoms;
-	xr_vector<anim_bone_fix*>			m_weapon_bone_fixes;
-	CPhysicsElement						*m_weapon_attach_bone;
-	CPhysicsShellHolder					*m_active_item_obj;
-	SHit								m_sv_hit;
-	u32									m_hit_valide_time;
-	u32									m_physics_shell_animated_time_destroy;
+	CEntityAlive& m_EntityAlife																																		;
+	Fmatrix& mXFORM																																					;
+	xrPhysX::Wrappers::CPhysXShell* m_physics_skeleton																																	;
+	CPHMovementControl* m_PhysicMovementControl																															;
+	CPHSoundPlayer m_ph_sound_player																																	;
+	CIKLimbsController* m_ik_controller																																	;
+	ICollisionHitCallback* m_collision_hit_callback;
+	character_hit_animation_controller m_hit_animations;
+	death_anims m_death_anims;
+	float m_BonceDamageFactor;
+	interactive_motion* m_interactive_motion;
+	character_shell_control m_character_shell_control;
+	interactive_animation* m_interactive_animation;
+	physics_shell_animated* m_physics_shell_animated;
+	activating_character_delay* m_collision_activating_delay;
+	xr_vector<CODEGeom*> m_weapon_geoms;
+	xr_vector<anim_bone_fix*> m_weapon_bone_fixes;
+	xrPhysX::Wrappers::CPhysXElement* m_weapon_attach_bone;
+	CPhysicsShellHolder* m_active_item_obj;
+	SHit m_sv_hit;
+	u32 m_hit_valide_time;
+	u32 m_physics_shell_animated_time_destroy;
 public:
 EType Type( )
 	{
@@ -167,7 +166,7 @@ public:
 										CCharacterPhysicsSupport		( EType atype, CEntityAlive* aentity )																				;
 virtual									~CCharacterPhysicsSupport		( )																													;
 private:
-		void 							CreateSkeleton					( CPhysicsShell* &pShell )																							;
+		void 							CreateSkeleton					( xrPhysX::Wrappers::CPhysXShell* &pShell )																							;
 
 		void 							ActivateShell					( CObject* who )																									;
 		void							CreateShell						( CObject* who, Fvector& dp, Fvector & velocity  )																	;
@@ -188,4 +187,3 @@ IC		bool							DoCharacterShellCollide			( );
 		void							UpdateCollisionActivatingDellay ( );
 		void							SpawnCharacterCreate			( );
 };
-#endif  //CHARACTER_PHYSICS_SUPPORT

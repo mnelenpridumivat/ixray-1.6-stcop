@@ -49,15 +49,18 @@ bool CCar::WheelHit(float P,s16 element,ALife::EHitType hit_type)
 }
 void CCar::SWheel::Init()
 {
-	if(inited) return;
+	if(inited)
+	{
+		return;
+	}
 	BONE_P_PAIR_CIT bone= car->bone_map.find(bone_id);
 	R_ASSERT2(bone->second.element,"No Element was created for wheel. Check collision is set");
 	bone->second.element->set_DynamicLimits(default_l_limit,default_w_limit*100.f);
-	CPhysicsElement	*e=bone->second.element	;
-	CPhysicsJoint	*j=bone->second.joint	;
+	auto e = bone->second.element	;
+	auto j = bone->second.joint	;
 	radius=e->getRadius();
 	R_ASSERT2(j,"No wheel joint was set for a wheel");
-	joint=j;
+	joint = j;
 	joint->SetBackRef(&joint);
 
 	//R_ASSERT2(dJointGetType(joint->GetDJoint())==dJointTypeHinge2,"No wheel join was set for a wheel, only wheel-joint valid!!!");
@@ -222,9 +225,11 @@ void CCar::SWheelDrive::Neutral()
 
 float CCar::SWheelDrive::ASpeed() const
 {
-	CPhysicsJoint* J = pwheel->joint;
+	auto J = pwheel->joint;
 	if (!J)
+	{
 		return 0.f;
+	}
 
 	return (J->GetAxisAngleRate(1)) * pos_fvd;
 }
@@ -311,8 +316,11 @@ void CCar::SWheelSteer::SteerIdle()
 
 void CCar::SWheelSteer::Limit()
 {
-	CPhysicsJoint* J=pwheel->joint;
-	if(!J) return;
+	auto J=pwheel->joint;
+	if(!J)
+	{
+		return;
+	}
 	//dJointID joint=J->GetDJoint();
 	if(!limited)
 	{

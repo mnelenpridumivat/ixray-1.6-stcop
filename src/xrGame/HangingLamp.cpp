@@ -408,7 +408,7 @@ void CHangingLamp::CreateBody(CSE_ALifeObjectHangingLamp	*lamp)
 /////////////////////////////////////////////////////////////////////////////
 	BONE_P_PAIR_IT i=bone_map.begin(),e=bone_map.end();
 	for(;i!=e;i++){
-		CPhysicsElement* fixed_element=i->second.element;
+		auto fixed_element=i->second.element;
 		///R_ASSERT2(fixed_element,"fixed bone has no physics");
 		if(fixed_element)fixed_element->Fix();
 	}

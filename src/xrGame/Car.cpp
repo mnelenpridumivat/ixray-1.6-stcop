@@ -1653,16 +1653,21 @@ void CCar::PhTune(float step)
 {
 	for (u16 i = PPhysicsShell()->get_ElementsNumber(); i != 0; i--)
 	{
-		CPhysicsElement* e = PPhysicsShell()->get_ElementByStoreOrder(i - 1);
+		auto e = PPhysicsShell()->get_ElementByStoreOrder(i - 1);
 		if (e->isActive() && e->isEnabled())
+		{
 			e->applyForce(0, e->getMass() * AntiGravityAccel(), 0);
+		}
 	}
 }
 
 float CCar::EffectiveGravity()
 {
 	float g = physics_world()->Gravity();
-	if (CPHUpdateObject::IsActive())g *= 0.5f;
+	if (CPHUpdateObject::IsActive())
+	{
+		g *= 0.5f;
+	}
 	return g;
 }
 
@@ -2291,9 +2296,12 @@ void CCar::Die(CObject* who)
 
 Fvector	CCar::ExitVelocity()
 {
-	CPhysicsShell* P = PPhysicsShell();
-	if (!P || !P->isActive())return Fvector().set(0, 0, 0);
-	CPhysicsElement* E = P->get_ElementByStoreOrder(0);
+	auto P = PPhysicsShell();
+	if (!P || !P->isActive())
+	{
+		return Fvector().set(0, 0, 0);
+	}
+	auto E = P->get_ElementByStoreOrder(0);
 	Fvector v = ExitPosition();
 
 	E->GetPointVel(v, v);

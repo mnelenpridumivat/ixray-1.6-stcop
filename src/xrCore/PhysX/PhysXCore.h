@@ -31,6 +31,15 @@ namespace xrPhysX
 
         static physx::PxTransform Conv_MatrixToPxTransformNoScale(const Fmatrix& transform);
         static void Conv_MatrixToPxTransformNoScale(physx::PxTransform& target, const Fmatrix& transform);
+
+        static physx::PxTransform Conv_PosToPxTransform(const Fvector& pos);
+        static void Conv_PosToPxTransform(physx::PxTransform& target, const Fvector& pos);
+        
+        static physx::PxTransform Conv_PosAndRotToPxTransform(const Fvector& pos, const Fmatrix33& rot);
+        static void Conv_PosAndRotToPxTransform(physx::PxTransform& target, const Fvector& pos, const Fmatrix33& rot);
+
+        static physx::PxTransform Conv_PosAndRotToPxTransformNoScale(const Fvector& pos, const Fmatrix33& rot);
+        static void Conv_PosAndRotToPxTransformNoScale(physx::PxTransform& target, const Fvector& pos, const Fmatrix33& rot);
     };
         
     class xrPhysXAllocator : public physx::PxAllocatorCallback

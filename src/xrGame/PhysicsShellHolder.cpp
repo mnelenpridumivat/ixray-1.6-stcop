@@ -629,7 +629,7 @@ void CPhysicsShellHolder::ObjectSpatialMove()
 {
 	spatial_move();
 }
-CPhysicsShell* CPhysicsShellHolder::ObjectPPhysicsShell()
+xrPhysX::Wrappers::CPhysXShell* CPhysicsShellHolder::ObjectPPhysicsShell()
 {
 	return PPhysicsShell();
 }

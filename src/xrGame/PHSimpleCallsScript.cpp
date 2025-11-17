@@ -42,12 +42,8 @@ void CPHConstForceAction::script_register(lua_State *L)
 	module(L)
 		[
 			class_<CPHConstForceAction>("phaction_constforce")
-			.def(constructor<CPhysicsShell*,const Fvector&>())
+			.def(constructor<xrPhysX::Wrappers::CPhysXShell*,const Fvector&>())
 		];
 }
 
 SCRIPT_EXPORT1(CPHConstForceAction);
-
-//(CPhysicsJoint*(CPhysicsShell::*)(u16))(&CPhysicsShell::get_Joint))
-//.def("set_gravity",					&CPHWorld::SetGravity),
-//.def("add_call",					&CPHWorld::AddCall)

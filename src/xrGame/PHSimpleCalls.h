@@ -4,7 +4,8 @@
 #include "PHReqComparer.h"
 #include "alife_space.h"
 #include "../xrScripts/script_export_space.h"
-class CPhysicsShell;
+
+//class CPhysicsShell;
 class CPHCallOnStepCondition:
 	public CPHCondition
 {
@@ -41,37 +42,40 @@ class CPHShellBasedAction:
 	public	CPHAction
 {
 protected:
-				CPhysicsShell				*m_shell;
+	xrPhysX::Wrappers::CPhysXShell* m_shell;
 public:
-											CPHShellBasedAction		(CPhysicsShell	*shell)							;
+	CPHShellBasedAction(xrPhysX::Wrappers::CPhysXShell* shell)							;
 
 
-	virtual				bool				compare					(const	CPhysicsShell	* shl)			const	{return shl==m_shell;}
-	virtual				bool				obsolete				()										const	;
+	virtual bool compare(const	xrPhysX::Wrappers::CPhysXShell* shl) const
+	{
+		return shl==m_shell;
+	}
+	virtual bool obsolete()	const;
 };
 
 class CPHConstForceAction:
 	public CPHShellBasedAction
 {
 
-						Fvector				m_force;
+	Fvector m_force;
 public:
-											CPHConstForceAction		(CPhysicsShell	*shell,const Fvector &force)	;
-	virtual				void				run						()												;
+	CPHConstForceAction(xrPhysX::Wrappers::CPhysXShell* shell,const Fvector &force);
+	virtual void run();
 
-	virtual				bool				compare					(const CPHReqComparerV	* v)		const		{return v->compare(this);}
-	virtual				bool				compare					(const	CPhysicsShell	* shl)		const		{return CPHShellBasedAction::compare(shl);}
+	virtual bool compare(const CPHReqComparerV* v) const {return v->compare(this);}
+	virtual bool compare(const xrPhysX::Wrappers::CPhysXShell* shl) const {return CPHShellBasedAction::compare(shl);}
 #ifdef	DEBUG
-		const			Fvector				&force					()const  { return	m_force;	}
+	const Fvector& force() const { return m_force; }
 #endif
 DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 
-class CPHReqComparerHasShell	:
+class CPHReqComparerHasShell:
 	public CPHReqComparerV
 {
-											CPhysicsShell			*m_shell																		;
+	xrPhysX::Wrappers::CPhysXShell* m_shell;
 public:
-											CPHReqComparerHasShell	(CPhysicsShell		*shl)														;
-	virtual				bool				compare					(const	CPHConstForceAction* v)			const		{return v->compare(m_shell);}
+	CPHReqComparerHasShell(xrPhysX::Wrappers::CPhysXShell* shl);
+	virtual bool compare(const CPHConstForceAction* v) const {return v->compare(m_shell);}
 };

@@ -29,16 +29,16 @@ void CNoGravityZone::switchGravity(SZoneObjectInfo& io, bool val)
 	if(io.object->getDestroy()) return;
 	CPhysicsShellHolder* sh= smart_cast<CPhysicsShellHolder*>(io.object);
 	if(!sh)return;
-	CPhysicsShell* shell=sh->PPhysicsShell();
+	auto shell=sh->PPhysicsShell();
 	if(shell&&shell->isActive())
 	{
 		shell->set_ApplyByGravity(val);
 		if(!val&&shell->get_ApplyByGravity())
 		{
-			CPhysicsElement* e=shell->get_ElementByStoreOrder(u16(Random.randI(0,shell->get_ElementsNumber())));
-			if(e->isActive()){
+			auto e=shell->get_ElementByStoreOrder(u16(Random.randI(0,shell->get_ElementsNumber())));
+			if(e->isActive())
+			{
 				e->applyImpulseTrace(Fvector().random_point(e->getRadius()),Fvector().random_dir(),shell->getMass()*physics_world()->Gravity()*fixed_step,e->m_SelfID);
-
 			}
 
 		}

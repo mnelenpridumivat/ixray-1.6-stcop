@@ -11,7 +11,9 @@
 #include "../../Layers/xrRender/SkeletonAnimated.h"
 #include "../../xrEngine/Fmesh.h"
 #include "../xrEProps/FolderLib.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/PhysicsShell.h"
+#endif
 //---------------------------------------------------------------------------
 MotionID EngineModel::FindMotionID(LPCSTR name, u16 slot)
 {

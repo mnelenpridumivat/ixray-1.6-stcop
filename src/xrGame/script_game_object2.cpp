@@ -649,7 +649,7 @@ void CScriptGameObject::set_visual_name(LPCSTR visual, bool bForce)
 
 		stalker->ChangeVisual(visual);
 
-		CPhysicsShell* tmp_shell = stalker->PPhysicsShell();
+		auto tmp_shell = stalker->PPhysicsShell();
 		stalker->SetPPhysicsShell(nullptr);
 		stalker->OnChangeVisual();
 		stalker->SetPPhysicsShell(tmp_shell);

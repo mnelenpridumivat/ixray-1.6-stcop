@@ -13,7 +13,7 @@
 #include "game_object_space.h"
 #include "../xrCore/Save/SaveInterface.h"
 
-class CPhysicsShell;
+//class CPhysicsShell;
 class CSE_Abstract;
 class CPHSynchronize;
 class CScriptGameObject;

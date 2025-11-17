@@ -1,15 +1,17 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/iphysics_scripted.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "../xrScripts/script_export_space.h"
+#include "PhysX/Wrappers/PhysXJoint.h"
 class cphysics_element_scripted;
-class CPhysicsJoint;
 class cphysics_joint_scripted:
-public cphysics_game_scripted<CPhysicsJoint>
+public cphysics_game_scripted<xrPhysX::Wrappers::CPhysXJoint>
 {
 public:
-	cphysics_joint_scripted(CPhysicsJoint* imp ):cphysics_game_scripted<CPhysicsJoint>(imp){}
+	cphysics_joint_scripted(xrPhysX::Wrappers::CPhysXJoint* imp ):cphysics_game_scripted<xrPhysX::Wrappers::CPhysXJoint>(imp){}
 	
 
 

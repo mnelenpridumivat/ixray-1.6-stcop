@@ -1,9 +1,12 @@
 #pragma once
+#include "PhysX/Wrappers/PhysXShell.h"
 class CPHReqBase;
 class CPHReqComparerV;
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
-class CPhysicsShell;
+#endif
+//class CPhysicsShell;
 
 class CPHReqBase
 {
@@ -89,5 +92,5 @@ public:
 
 private:
 	virtual	void		update_step			()						{update();}
-	virtual	void		phys_shell_relcase	(CPhysicsShell* sh)		;
+	virtual	void		phys_shell_relcase	(xrPhysX::Wrappers::CPhysXShell* sh)		;
 };

@@ -212,6 +212,52 @@ void xrPhysX::PhysXMathHelper::Conv_MatrixToPxTransformNoScale(physx::PxTransfor
     Conv_MatrixToPxQuatNoScale(target.q, transform);
 }
 
+physx::PxTransform xrPhysX::PhysXMathHelper::Conv_PosToPxTransform(const Fvector& pos)
+{
+    physx::PxTransform target;
+    Conv_PosToPxTransform(target, pos);
+    return target;
+}
+
+void xrPhysX::PhysXMathHelper::Conv_PosToPxTransform(physx::PxTransform& target, const Fvector& pos)
+{
+    target.p.x = pos.x;
+    target.p.y = pos.y;
+    target.p.z = pos.z;
+}
+
+physx::PxTransform xrPhysX::PhysXMathHelper::Conv_PosAndRotToPxTransform(const Fvector& pos, const Fmatrix33& rot)
+{
+    physx::PxTransform target;
+    Conv_PosAndRotToPxTransform(target, pos, rot);
+    return target;
+}
+
+void xrPhysX::PhysXMathHelper::Conv_PosAndRotToPxTransform(physx::PxTransform& target, const Fvector& pos,
+    const Fmatrix33& rot)
+{
+    target.p.x = pos.x;
+    target.p.y = pos.y;
+    target.p.z = pos.z;
+    Conv_MatrixToPxQuat(target.q, rot);
+}
+
+physx::PxTransform xrPhysX::PhysXMathHelper::Conv_PosAndRotToPxTransformNoScale(const Fvector& pos, const Fmatrix33& rot)
+{
+    physx::PxTransform target;
+    Conv_PosAndRotToPxTransformNoScale(target, pos, rot);
+    return target;
+}
+
+void xrPhysX::PhysXMathHelper::Conv_PosAndRotToPxTransformNoScale(physx::PxTransform& target, const Fvector& pos,
+    const Fmatrix33& rot)
+{
+    target.p.x = pos.x;
+    target.p.y = pos.y;
+    target.p.z = pos.z;
+    Conv_MatrixToPxQuatNoScale(target.q, rot);
+}
+
 void* xrPhysX::xrPhysXAllocator::allocate(size_t size, const char* typeName, const char* filename, int line)
 {
     void* Ptr = xr_alloc(size);
@@ -343,6 +389,7 @@ physx::PxMaterial* xrPhysX::PhysXMaterialManager::GetMaterial(const shared_str& 
 
 physx::PxMaterial* xrPhysX::PhysXMaterialManager::GetDefaultMaterial()
 {
+    VERIFY(false, "Direct GetDefaultMaterial call!");
     return materials["default_static"];
 }
 

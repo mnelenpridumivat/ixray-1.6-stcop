@@ -34,43 +34,40 @@ void CSurface::RemoveImageData()
 }
 #endif
 
-CEditableObject::CEditableObject(LPCSTR name):
-	m_physics_shell(0),
-    m_object_xform(0)
+CEditableObject::CEditableObject(LPCSTR name)
 {
     m_FaceCount = -1;
     m_VertexCount = -1;
-	m_LibName		= name;
+	m_LibName = name;
 
-	m_objectFlags.zero	();
+	m_objectFlags.zero();
     m_ObjectVersion	= 0;
 
-#if 1
-    vs_SkeletonGeom	= 0;
-#endif
+    vs_SkeletonGeom	= nullptr;
+
 	m_BBox.invalidate();
 
     m_LoadState.zero();
 
     m_ActiveSMotion = 0;
 
-	t_vPosition.set	(0.f,0.f,0.f);
-    t_vScale.set   	(1.f,1.f,1.f);
-    t_vRotate.set  	(0.f,0.f,0.f);
+	t_vPosition.set(0.f,0.f,0.f);
+    t_vScale.set(1.f,1.f,1.f);
+    t_vRotate.set(0.f,0.f,0.f);
 
-	a_vPosition.set	(0.f,0.f,0.f);
-    a_vRotate.set  	(0.f,0.f,0.f);
+	a_vPosition.set(0.f,0.f,0.f);
+    a_vRotate.set(0.f,0.f,0.f);
 
-    bOnModified		= false;
+    bOnModified = false;
 
-    m_RefCount		= 0;
+    m_RefCount = 0;
 
-    m_LODShader		= 0;
+    m_LODShader = 0;
     
-    m_CreateName	= "unknown";
-    m_CreateTime	= 0;
-	m_ModifName		= "unknown";
-    m_ModifTime		= 0;
+    m_CreateName = "unknown";
+    m_CreateTime = 0;
+	m_ModifName = "unknown";
+    m_ModifTime = 0;
 }
 
 CEditableObject::~CEditableObject()
