@@ -120,7 +120,7 @@ extern	xr_vector<SCover>	g_covers_palette;
 extern	Lights				g_lights;
 extern	SAIParams			g_params;
 extern	xr_unique_ptr<xrPhysX::CDB::MODEL> LevelPtr;
-extern	CDB::COLLIDER		IXRC;
+//extern	CDB::COLLIDER		IXRC;
 extern	Fbox				LevelBB;
 //extern	Vectors				Emitters;
 

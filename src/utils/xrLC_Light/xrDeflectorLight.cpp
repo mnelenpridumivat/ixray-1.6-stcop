@@ -266,7 +266,7 @@ float rayTrace	(R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
 	return EmbreeMain.RaytraceEmbreeProcess(L, P, D, R, skip);
 }
 
-void LightPoint(CDB::COLLIDER* DB, base_color_c& C, Fvector& P, Fvector& N, base_lighting& lights, u32 flags, Face* skip)
+void LightPoint(/*CDB::COLLIDER* DB, */base_color_c& C, Fvector& P, Fvector& N, base_lighting& lights, u32 flags, Face* skip)
 {
 	auto processLight = [&]<typename T>(R_Light& L, T& accumulator, bool isSunOrHemi)
 	{
@@ -359,8 +359,8 @@ void LightPoint(CDB::COLLIDER* DB, base_color_c& C, Fvector& P, Fvector& N, base
 	// RGB Lights
 	if (!(flags & LP_dont_rgb))
 	{
-		if (DB != nullptr)
-			 DB->ray_options(0);
+		//if (DB != nullptr)
+		//	 DB->ray_options(0);
 		for (R_Light& L : lights.rgb)
 		{
 			processLight(L, C.rgb, false);
@@ -370,8 +370,8 @@ void LightPoint(CDB::COLLIDER* DB, base_color_c& C, Fvector& P, Fvector& N, base
 	// Sun Lights
 	if (!(flags & LP_dont_sun))
 	{
-		if (DB != nullptr)
-			DB->ray_options(0);
+		//if (DB != nullptr)
+		//	DB->ray_options(0);
 		for (R_Light& L : lights.sun)
 		{
 			processLight(L, C.sun, true);
@@ -381,8 +381,8 @@ void LightPoint(CDB::COLLIDER* DB, base_color_c& C, Fvector& P, Fvector& N, base
 	// Hemi Lights
 	if (!(flags & LP_dont_hemi))
 	{
-		if (DB != nullptr)
-			DB->ray_options(0);
+		//if (DB != nullptr)
+		//	DB->ray_options(0);
 		for (R_Light& L : lights.hemi)
 		{
 			processLight(L, C.hemi, true);
@@ -582,7 +582,7 @@ BOOL	compress_RMS		(lm_layer& lm, u32 rms, u32& w, u32& h)
 	return FALSE;
 }
 
-void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H)
+void CDeflector::Light(/*CDB::COLLIDER* DB, */base_lighting* LightsSelected, HASH& H)
 {
 	// Geometrical bounds
 	Fbox bb;		bb.invalidate	();
@@ -602,7 +602,7 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 	LightsSelected->select(inlc_global_data()->L_static(),Sphere.P,Sphere.R);
 
 	// Calculate and fill borders
-	L_Calculate			(DB,LightsSelected,H);
+	L_Calculate			(/*DB,*/LightsSelected,H);
  
 	for (u32 ref=254; ref>0; ref--) 
 	if (!ApplyBorders(layer,ref))
@@ -622,7 +622,7 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 		{
 				// Reacalculate lightmap at lower resolution
 				layer.create	(w,h);
-				L_Calculate		(DB,LightsSelected,H);
+				L_Calculate		(/*DB,*/LightsSelected,H);
  		}
 	} 
 	catch (...)

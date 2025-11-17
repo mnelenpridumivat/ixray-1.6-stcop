@@ -9,7 +9,7 @@ const int	LIGHT_Total			=(2*LIGHT_Count+1)*(2*LIGHT_Count+1);
 
 typedef	svector<R_Light_Fast*,1024>	LSelection;
 
-IC bool RayPick(CDB::COLLIDER& DB, Fvector& P, Fvector& D, float r, R_Light_Fast& L)
+IC bool RayPick(/*CDB::COLLIDER& DB, */Fvector& P, Fvector& D, float r, R_Light_Fast& L)
 {
 	FATAL("Disabled!");
 	return false;
@@ -36,7 +36,7 @@ IC bool RayPick(CDB::COLLIDER& DB, Fvector& P, Fvector& D, float r, R_Light_Fast
 	}*/
 }
 
-float LightPoint(CDB::COLLIDER& DB, Fvector &P, Fvector &N, LSelection& SEL)
+float LightPoint(/*CDB::COLLIDER& DB,*/ Fvector &P, Fvector &N, LSelection& SEL)
 {
 	Fvector		Ldir,Pnew;
 	Pnew.mad	(P,N,0.05f);
@@ -51,26 +51,40 @@ float LightPoint(CDB::COLLIDER& DB, Fvector &P, Fvector &N, LSelection& SEL)
 		{
 			// Cos
 			Ldir.invert	(L->direction);
-			float D		= Ldir.dotproduct( N );
-			if( D <=0 ) continue;
+			float D = Ldir.dotproduct( N );
+			if( D <=0 )
+			{
+				continue;
+			}
 
 			// Raypick
-			if (!RayPick(DB,Pnew,Ldir,1000.f,*L))	amount+=D*L->amount;
+			if (!RayPick(/*DB,*/Pnew,Ldir,1000.f,*L))
+			{
+				amount+=D*L->amount;
+			}
 		} else {
 			// Distance
-			float sqD	= P.distance_to_sqr(L->position);
-			if (sqD > L->range2) continue;
+			float sqD = P.distance_to_sqr(L->position);
+			if (sqD > L->range2)
+			{
+				continue;
+			}
 			
 			// Dir
-			Ldir.sub	(L->position,P);
+			Ldir.sub(L->position,P);
 			Ldir.normalize_safe();
-			float D		= Ldir.dotproduct( N );
-			if( D <=0 ) continue;
+			float D = Ldir.dotproduct( N );
+			if( D <=0 )
+			{
+				continue;
+			}
 			
 			// Raypick
 			float R		= _sqrt(sqD);
-			if (!RayPick(DB,Pnew,Ldir,R,*L))
+			if (!RayPick(/*DB,*/Pnew,Ldir,R,*L))
+			{
 				amount += (D*L->amount)/(L->attenuation0 + L->attenuation1*R + L->attenuation2*sqD);
+			}
 		}
 	}
 	return amount;
@@ -87,8 +101,8 @@ public:
 	}
 	virtual void		Execute()
 	{
-		CDB::COLLIDER DB;
-		DB.ray_options	(CDB::OPT_ONLYFIRST);
+		//CDB::COLLIDER DB;
+		//DB.ray_options	(CDB::OPT_ONLYFIRST);
 
 		xr_vector<R_Light_Fast>	Lights = g_lights;
 
@@ -130,7 +144,7 @@ public:
 					P.y = PLP.y;
 					
 					// light point
-					amount += LightPoint(DB,P,N.Plane.n,Selected);
+					amount += LightPoint(/*DB,*/P,N.Plane.n,Selected);
 				}
 			}
 			

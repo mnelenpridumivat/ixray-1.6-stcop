@@ -21,7 +21,7 @@ namespace xrPhysX::CDB
 
 extern CompilersMode gCompilerMode;
 
-void LightPoint(CDB::COLLIDER* DB, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
+void LightPoint(/*CDB::COLLIDER* DB, */base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
   
 //-----------------------------------------------------------------------
 void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xform, base_lighting& lights, u32 flags)
@@ -44,8 +44,8 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 	Rxform.invert				(tmp	);
 
 	// Perform lighting
-	CDB::COLLIDER				DB;
-	DB.ray_options				(0);
+	//CDB::COLLIDER				DB;
+	//DB.ray_options				(0);
 
 	// MT-Safe 
 	xr_vector<_vertex> SafeVertices(m_vertices.size());
@@ -73,7 +73,7 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 			Fvector				P, N;
 			N.random_dir(vN, deg2rad(30.f));
 			P.mad(vP, N, a);
-			LightPoint(&DB, vC, P, N, lights, flags, 0);
+			LightPoint(/*&DB, */vC, P, N, lights, flags, 0);
 		}
     
 		// Get ambient factor

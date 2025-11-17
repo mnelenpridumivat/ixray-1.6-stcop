@@ -16,7 +16,7 @@
 void CBuild::ProcessLMAPS_CPU()
 {
 	thread_local HASH			H;
-	thread_local CDB::COLLIDER	DB;
+	//thread_local CDB::COLLIDER	DB;
 	thread_local base_lighting	LightsSelected;
  
 	u32 CurrentIndex = 0;
@@ -46,7 +46,7 @@ void CBuild::ProcessLMAPS_CPU()
 				// Perform operation
 				try
 				{
-					D->Light(&DB, &LightsSelected, H);
+					D->Light(/*&DB, */&LightsSelected, H);
 				}
 				catch (...)
 				{

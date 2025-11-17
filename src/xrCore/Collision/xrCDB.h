@@ -164,7 +164,7 @@ namespace CDB
 	};
 
 	// Collider itself
-	class XRCORE_API COLLIDER
+	/*class XRCORE_API COLLIDER
 	{
 		// Ray data and methods
 		u32				ray_mode;
@@ -201,7 +201,7 @@ namespace CDB
 		ICF void		r_clear			()	{	rd.resize(0);		};
 		ICF void		r_clear_compact	()	{	rd.clear();		};
 		IC xr_vector<RESULT>& r_vec		()	{	return rd;		};
-	};
+	};*/
 
 	//
 	class XRCORE_API Collector

@@ -9,7 +9,7 @@
 
 extern void Jitter_Select	(Fvector2* &Jitter, u32& Jcount);
 
-void CDeflector::L_Direct_Edge (CDB::COLLIDER* DB, base_lighting* LightsSelected, Fvector2& p1, Fvector2& p2, Fvector& v1, Fvector& v2, Fvector& N, float texel_size, Face* skip)
+void CDeflector::L_Direct_Edge (/*CDB::COLLIDER* DB, */base_lighting* LightsSelected, Fvector2& p1, Fvector2& p2, Fvector& v1, Fvector& v2, Fvector& N, float texel_size, Face* skip)
 {
 	Fvector		vdir;
 	vdir.sub	(v2,v1);
@@ -43,7 +43,7 @@ void CDeflector::L_Direct_Edge (CDB::COLLIDER* DB, base_lighting* LightsSelected
 		Fvector			P;	P.mad(v1,vdir,time);
 		VERIFY(inlc_global_data());
 
-		LightPoint(DB, C, P, N, *LightsSelected, (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT, skip); //.
+		LightPoint(/*DB, */C, P, N, *LightsSelected, (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_DEFAULT, skip); //.
 
 		C.mul		(.5f);
 		lm.surface	[_y*lm.width+_x]._set	(C);
@@ -51,9 +51,9 @@ void CDeflector::L_Direct_Edge (CDB::COLLIDER* DB, base_lighting* LightsSelected
 	}
 }
 
-void CDeflector::L_Direct	(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H)
+void CDeflector::L_Direct	(/*CDB::COLLIDER* DB, */base_lighting* LightsSelected, HASH& H)
 {
-	R_ASSERT	(DB);
+	//R_ASSERT	(DB);
 	R_ASSERT	(LightsSelected);
 
 	lm_layer&	lm = layer;
@@ -72,7 +72,7 @@ void CDeflector::L_Direct	(CDB::COLLIDER* DB, base_lighting* LightsSelected, HAS
 	Jitter_Select(Jitter, Jcount);
 	
 	// Lighting itself
-	DB->ray_options	(0);
+	//DB->ray_options	(0);
 	
 	for (u32 V=0; V<lm.height; V++)
 	{
@@ -117,7 +117,7 @@ void CDeflector::L_Direct	(CDB::COLLIDER* DB, base_lighting* LightsSelected, HAS
 								VERIFY(inlc_global_data());
 
 								u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_UseFaceDisable;
-								LightPoint	(DB, C, wP, wN, *LightsSelected, flags, F); 
+								LightPoint	(/*DB, */C, wP, wN, *LightsSelected, flags, F); 
 
 								Fcount		+= 1;
 							} 
@@ -155,9 +155,9 @@ void CDeflector::L_Direct	(CDB::COLLIDER* DB, base_lighting* LightsSelected, HAS
 		Face*		F	= T.owner;
 		R_ASSERT	(F);
 		try {
-			L_Direct_Edge	(DB,LightsSelected, T.uv[0], T.uv[1], F->v[0]->P, F->v[1]->P, F->N, texel_size,F);
-			L_Direct_Edge	(DB,LightsSelected, T.uv[1], T.uv[2], F->v[1]->P, F->v[2]->P, F->N, texel_size,F);
-			L_Direct_Edge	(DB,LightsSelected, T.uv[2], T.uv[0], F->v[2]->P, F->v[0]->P, F->N, texel_size,F);
+			L_Direct_Edge	(/*DB,*/LightsSelected, T.uv[0], T.uv[1], F->v[0]->P, F->v[1]->P, F->N, texel_size,F);
+			L_Direct_Edge	(/*DB,*/LightsSelected, T.uv[1], T.uv[2], F->v[1]->P, F->v[2]->P, F->N, texel_size,F);
+			L_Direct_Edge	(/*DB,*/LightsSelected, T.uv[2], T.uv[0], F->v[2]->P, F->v[0]->P, F->N, texel_size,F);
 		} catch (...)
 		{
 			clMsg("* ERROR (Edge). Recovered. ");

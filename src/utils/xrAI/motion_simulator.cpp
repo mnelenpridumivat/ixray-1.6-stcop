@@ -464,7 +464,7 @@ void msimulator_Simulate( Fvector& result, Fvector& start, Fvector& end, float _
 	// Collision query
 	Fvector			bbC,bbD;
 	bb.get_CD		(bbC,bbD);
-	IXRC.box_options	(0);
+	//IXRC.box_options	(0);
 	FATAL("Disabled!");
 	//IXRC.box_query	(LevelPtr.get(), bbC, bbD);
 	
@@ -489,7 +489,8 @@ void msimulator_Simulate( Fvector& result, Fvector& start, Fvector& end, float _
 	cl_data.vLastSafePosition.set	(Lposition);
 
 	// Get the data for the triangles in question and scale to ellipsoid space
-	int tri_count			= IXRC.r_count();
+	FATAL("Disabled!");
+	/*int tri_count			= IXRC.r_count();
 	clContactedT.resize		(tri_count);
 	if (tri_count) {
 		Fvector vel_dir;
@@ -510,7 +511,7 @@ void msimulator_Simulate( Fvector& result, Fvector& start, Fvector& end, float _
 			T.e21.sub(T.p[2],T.p[1]); T.e21s = T.e21.magnitude(); T.e21.div(T.e21s);
 			T.e02.sub(T.p[0],T.p[2]); T.e02s = T.e02.magnitude(); T.e02.div(T.e02s);
 		}
-	}
+	}*/
 
 	// call the recursive collision response function	
 	Fvector POS;

@@ -210,7 +210,7 @@ void CDeflector::OA_Export()
 
 	layer.width  = dwWidth;
 	layer.height = dwHeight;
-	// Не алоцируем
+	// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 }
 
 BOOL CDeflector::OA_Place	(Face *owner)
@@ -316,7 +316,7 @@ void CDeflector::RemapUV(u32 base_u, u32 base_v, u32 size_u, u32 size_v, u32 lm_
 }
 
 
-void CDeflector::L_Calculate(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H)
+void CDeflector::L_Calculate(/*CDB::COLLIDER* DB, */base_lighting* LightsSelected, HASH& H)
 {
 	try
 	{
@@ -337,7 +337,7 @@ void CDeflector::L_Calculate(CDB::COLLIDER* DB, base_lighting* LightsSelected, H
 		R_ASSERT		(lm.width	<= (gCompilerMode.LC_sizeLmaps - 2 * BORDER));
 		R_ASSERT		(lm.height	<= (gCompilerMode.LC_sizeLmaps - 2 * BORDER));
   		lm.create		(lm.width, lm.height);
-		L_Direct		(DB,LightsSelected,H);
+		L_Direct		(/*DB,*/LightsSelected,H);
 	} catch (...)
 	{
 		clMsg("* ERROR: CDeflector::L_Calculate");

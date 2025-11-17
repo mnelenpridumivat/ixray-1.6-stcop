@@ -52,7 +52,7 @@ int ThreadWorkID_Adaptive = 0;
 class CPrecalcBaseHemiThread: 
 public CThread
 {
- 	CDB::COLLIDER	DB;
+ 	//CDB::COLLIDER	DB;
 	
 public:
 	CPrecalcBaseHemiThread(u32 ID ): CThread(ID)
@@ -60,7 +60,7 @@ public:
 	}
 virtual	void Execute()
 	{
-		DB.ray_options	(0);
+		//DB.ray_options	(0);
 		while (true)
 		{
 			csA.Enter();
@@ -80,7 +80,7 @@ virtual	void Execute()
  			Vertex*		V		= verts[ID];
 			
  			V->normalFromAdj	();
-			LightPoint			(&DB, vC, V->P, V->N, pBuild->L_static(), LP_dont_rgb+LP_dont_sun,0);
+			LightPoint			(/*&DB, */vC, V->P, V->N, pBuild->L_static(), LP_dont_rgb+LP_dont_sun,0);
 			vC.mul				(0.5f);
 			V->C._set			(vC);
 		}
@@ -91,8 +91,8 @@ CThreadManager	precalc_base_hemi;
 
 void CBuild::xrPhase_AdaptiveHT_tessalte()
 {
-	CDB::COLLIDER	DB;
-	DB.ray_options(0);
+	//CDB::COLLIDER	DB;
+	//DB.ray_options(0);
 
 	if (!lc_global_data()->GetSkipTesselate())
 	{

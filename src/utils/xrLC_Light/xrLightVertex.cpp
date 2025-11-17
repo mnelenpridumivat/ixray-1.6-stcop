@@ -19,7 +19,7 @@ typedef	mapVert::iterator				mapVertIt;
 mapVert* g_trans;
 xrCriticalSection g_trans_CS;
 
-extern XRLC_LIGHT_API void		LightPoint		(CDB::COLLIDER* DB, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
+extern XRLC_LIGHT_API void		LightPoint		(/*CDB::COLLIDER* DB, */base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip);
  
 void	g_trans_register_internal		(Vertex* V)
 {
@@ -134,11 +134,11 @@ public:
 				base_color_c		vC, old;
 				V->C._get			(old);
 
-				CDB::COLLIDER	DB;
-				DB.ray_options	(0);
+				//CDB::COLLIDER	DB;
+				//DB.ray_options	(0);
 
 				u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0) | LP_dont_hemi;
-  				LightPoint			(&DB, vC, V->P, V->N, lc_global_data()->L_static(), flags, 0);
+  				LightPoint			(/*&DB, */vC, V->P, V->N, lc_global_data()->L_static(), flags, 0);
 
 				vC._tmp_			= v_trans;
 				vC.mul				(.5f);

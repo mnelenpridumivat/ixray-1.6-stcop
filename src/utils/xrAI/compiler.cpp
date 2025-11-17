@@ -5,7 +5,7 @@
 
 xr_unique_ptr<xrPhysX::CDB::MODEL> LevelPtr;
 
-CDB::COLLIDER IXRC;
+//CDB::COLLIDER IXRC;
 
 Nodes g_nodes;
 xr_vector<SCover> g_covers_palette;

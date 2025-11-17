@@ -68,7 +68,7 @@ void RunImplicitMultithread(ImplicitDeflector& defl)
 void ImplicitExecute::Execute()
 {
 	ImplicitDeflector& defl = cl_globs.DATA();
-	CDB::COLLIDER DB;
+	//CDB::COLLIDER DB;
 
 	// Setup variables
 	Fvector2 dim, half;
@@ -83,7 +83,7 @@ void ImplicitExecute::Execute()
 	Jitter_Select(Jitter, Jcount);
 
 	// Lighting itself
-	DB.ray_options(0);
+	//DB.ray_options(0);
 
 	while (true)
 	{
@@ -130,7 +130,7 @@ void ImplicitExecute::Execute()
 							wN.normalize();
 
 							u32 flags = (gCompilerMode.LC_NoSun ? LP_dont_sun : 0);
-							LightPoint(&DB, C, wP, wN, inlc_global_data()->L_static(), flags, F);
+							LightPoint(/*&DB, */C, wP, wN, inlc_global_data()->L_static(), flags, F);
 							Fcount++;
 						}
 					}
