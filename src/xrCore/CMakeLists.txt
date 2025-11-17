@@ -276,7 +276,7 @@ if(WIN32)
 	target_include_directories(xrCore PUBLIC ${IXR_TBB_INC})
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/tbb12.dll ${IXRAY_OUTPUT}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${IXR_TBB_BIN} ${IXRAY_OUTPUT}
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/dep/discord_gamesdk/lib/${NUGET_PACKAGE_PLATFORM_EX}/discord_game_sdk.dll ${IXRAY_OUTPUT}
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LZO}/runtimes/win-${NUGET_PACKAGE_PLATFORM}/native/Release/lzo2.dll ${IXRAY_OUTPUT}
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${YAML_BIN} ${IXRAY_OUTPUT}/${YAML_LIB_NAME}

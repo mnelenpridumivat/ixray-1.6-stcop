@@ -54,10 +54,17 @@ set(FREEIMAGE ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.FreeImage.WinMerge.
 set(NVTT ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.Nvtt.Runtimes.win-x64.2024.6.1-open/)
 
 # TBB
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    set(IXR_TBB_DLL_NAME Debug/tbb12_debug.dll)
+#    set(IXR_TBB_LIB_NAME Debug/tbb12_debug.lib)
+#else()
+#    set(IXR_TBB_DLL_NAME Release/tbb12.dll)
+#    set(IXR_TBB_LIB_NAME Release/tbb12.lib)
+#endif()
 set(IXR_TBB_SDK ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.OneTbb.Runtimes.win7-${NUGET_PACKAGE_PLATFORM}.2021.11.0/)
 set(IXR_TBB_INC ${IXR_TBB_SDK}build/native/include/)
-set(IXR_TBB_BIN ${IXR_TBB_SDK}runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/${IXR_TBB_NAME})
-set(IXR_TBB_LIB ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/Release/tbb12.lib)
+set(IXR_TBB_BIN ${IXR_TBB_SDK}runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/$<IF:$<CONFIG:Debug>,Debug/tbb12_debug.dll,Release/tbb12.dll>)
+set(IXR_TBB_LIB ${IXR_TBB_SDK}/runtimes/win7-${NUGET_PACKAGE_PLATFORM}/native/$<IF:$<CONFIG:Debug>,Debug/tbb12_debug.lib,Release/tbb12.lib>)
 
 # AMD FidelityFX FSR2
 set(AMD_FSR2 ${CMAKE_BINARY_DIR}/packages/ImeSense.Packages.FidelityFX.FSR2.DirectX11.Runtimes.win-${NUGET_PACKAGE_PLATFORM}.2.2.1.1)
