@@ -13,9 +13,13 @@
 #include "game_object_space.h"
 #include "../xrScripts/script_callback_ex.h"
 #include "script_game_object.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #ifdef DEBUG
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 //#include "PHWorld.h"
 //extern CPHWorld			*ph_world;
 #endif

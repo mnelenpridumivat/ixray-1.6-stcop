@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "Grenade.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 //.#include "WeaponHUD.h"
 #include "Entity.h"
 #include "Actor.h"

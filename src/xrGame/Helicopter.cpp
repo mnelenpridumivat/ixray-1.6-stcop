@@ -2,7 +2,9 @@
 #include "pch_script.h"
 #include "helicopter.h"
 #include "xrServer_Objects_ALife.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "Level.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "../Include/xrRender/KinematicsAnimated.h"

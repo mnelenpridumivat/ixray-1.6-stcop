@@ -1,5 +1,5 @@
 #pragma once
-#include "PhysX/Wrappers/PhysXShell.h"
+#include "PhysX/Wrappers/Shell.h"
 class CPHReqBase;
 class CPHReqComparerV;
 
@@ -92,5 +92,5 @@ public:
 
 private:
 	virtual	void		update_step			()						{update();}
-	virtual	void		phys_shell_relcase	(xrPhysX::Wrappers::CPhysXShell* sh)		;
+	virtual	void		phys_shell_relcase	(xrPhysX::Wrappers::CShell* sh)		;
 };

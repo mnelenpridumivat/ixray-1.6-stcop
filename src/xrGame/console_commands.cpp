@@ -22,7 +22,9 @@
 #include "../xrScripts/script_process.h"
 #include "xrServer_Objects.h"
 #include "ui/UIMainIngameWnd.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "../xrEngine/string_table.h"
 #include "autosave_manager.h"
 #include "ai_space.h"
@@ -46,7 +48,9 @@
 #include "gamespy/GameSpy_Full.h"
 
 #include "ai_debug_variables.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/console_vars.h"
+#endif
 #ifdef DEBUG
 #	include "PHDebug.h"
 #	include "ui/UIDebugFonts.h" 

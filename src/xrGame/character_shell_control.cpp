@@ -6,8 +6,10 @@
 #include "../xrEngine/bone.h"
 
 //#include "Physics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/ExtendedGeom.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 //#include "Hit.h"
 #include "Level.h"
 #include "CustomZone.h"
@@ -80,7 +82,7 @@ void  OnCharacterContactInDeath(bool& do_colide,bool bo1,dContact& c,SGameMtl * 
 
 	surface.mu=l_character_physic_support->curr_skin_friction_in_death();
 }
-void character_shell_control::set_start_shell_params(xrPhysX::Wrappers::CPhysXShell* sh) const
+void character_shell_control::set_start_shell_params(xrPhysX::Wrappers::CShell* sh) const
 {
 	sh->SetAirResistance(skel_airr_lin_factor,skel_airr_ang_factor);
 	sh->add_ObjectContactCallback(OnCharacterContactInDeath);
@@ -154,7 +156,7 @@ void character_shell_control::CalculateTimeDelta()
 	m_Pred_Time=Device.fTimeGlobal;
 };
 
-void character_shell_control::UpdateFrictionAndJointResistanse(xrPhysX::Wrappers::CPhysXShell* sh )
+void character_shell_control::UpdateFrictionAndJointResistanse(xrPhysX::Wrappers::CShell* sh )
 {
 	//Преобразование skel_ddelay из кадров в секунды и линейное нарастание сопротивления в джоинтах со временем от момента смерти 
 

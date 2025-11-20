@@ -4,7 +4,9 @@
 #include "../states/state_move_to_point.h"
 #include "../states/state_hide_from_point.h"
 #include "../states/state_custom_action.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../../PHMovementControl.h"
 #include "../../../CharacterPhysicsSupport.h"
 #include "group_state_eat_drag.h"

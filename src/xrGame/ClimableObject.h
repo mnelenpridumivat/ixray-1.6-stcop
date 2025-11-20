@@ -1,6 +1,8 @@
 #pragma once
 #include "PhysicsShellHolder.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/iclimableobject.h"
+#endif
 class IPHStaticGeomShell;
 class CPHCharacter;
 struct dContact;
@@ -33,9 +35,9 @@ public:
 	virtual void	Center				(Fvector &C) const;
 	virtual float	Radius				() const;
 ////////////////////////////////////////////////////////////////////
-	virtual IPhysicsShellHolder			*cast_IPhysicsShellHolder	(){ return this; }
-	virtual CPhysicsShellHolder*		cast_physics_shell_holder() { return this; }
-	virtual CClimableObject*			cast_climable_object() { return this; }
+	virtual IShellHolder* cast_IPhysicsShellHolder() override { return this; }
+	virtual CPhysicsShellHolder* cast_physics_shell_holder() override { return this; }
+	virtual CClimableObject* cast_climable_object() override { return this; }
 
 #ifdef DEBUG_DRAW
 	virtual void	OnRender			();

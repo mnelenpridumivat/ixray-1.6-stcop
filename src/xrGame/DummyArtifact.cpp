@@ -5,7 +5,9 @@
 
 #include "StdAfx.h"
 #include "DummyArtifact.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CDummyArtefact::CDummyArtefact(void) 

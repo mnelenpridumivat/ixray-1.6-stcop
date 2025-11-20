@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/CycleConstStorage.h"
+#endif
 namespace extrapolation
 {
 

@@ -1,14 +1,14 @@
 #pragma once
-#include "PhysXBase.h"
+#include "Base.h"
 
 namespace xrPhysX::Wrappers
 {
-    class XRCORE_API CPhysXShell;
+    class XRCORE_API CShell;
 
-    class XRCORE_API CPhysXElement : public CPhysXBase
+    class XRCORE_API CElement : public CBase
     {
         physx::PxRigidActor* m_actor = nullptr;
-        CPhysXShell* m_shell = nullptr;
+        CShell* m_shell = nullptr;
         u16 m_SelfID = u16(-1);
         xr_vector<physx::PxShape*> m_Shapes;
 
@@ -17,8 +17,8 @@ namespace xrPhysX::Wrappers
         void UpdateDensity(float density);
 
     public:
-        CPhysXElement(physx::PxScene* scene);
-        virtual ~CPhysXElement();
+        CElement(physx::PxScene* scene);
+        virtual ~CElement();
 
         void AddSphere(const Fsphere& sphere, float density = 1.0f);
         void AddBox(const Fobb& box, float density = 1.0f);

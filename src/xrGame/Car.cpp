@@ -26,8 +26,10 @@
 
 #include "CharacterPhysicsSupport.h"
 #include "car_memory.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/IActivationShape.h"
+#endif
 #include "CharacterPhysicsSupport.h"
 #include "UIGameSP.h"
 

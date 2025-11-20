@@ -1388,7 +1388,9 @@ void CActor::MakeKick()
 }
 
 #ifndef MASTER_GOLD
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 collide::rq_result GetPickResult(Fvector pos, Fvector dir, float range, CObject* ignore);
 void CActor::NoClipFly(int cmd)
 {

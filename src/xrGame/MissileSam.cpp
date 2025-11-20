@@ -3,8 +3,10 @@
 #include "../xrCore/_vector3d_ext.h"
 #include "debug_renderer.h"
 #include "level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsCommon.h"
 #include "../xrphysics/PhysicsShell.h"
+#endif
 
 void CMissileSam::StartFlying()
 {

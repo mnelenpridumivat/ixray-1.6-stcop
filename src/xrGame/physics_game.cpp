@@ -2,15 +2,21 @@
 #include "../xrEngine/GameMtlLib.h"
 #include "Level.h"
 #include "GamePersistent.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/ExtendedGeom.h"
+#endif
 #include "PhysicsGamePars.h"
 //#include "PhysicsCommon.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsExternalCommon.h"
+#endif
 #include "PHSoundPlayer.h"
 #include "PhysicsShellHolder.h"
 #include "PHCommander.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/IPHWorld.h"
+#endif
 //#include "../xrPhysics/physicsshell.h"
 
 #include "PHReqComparer.h"

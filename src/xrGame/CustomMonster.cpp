@@ -52,7 +52,9 @@
 #include "../xrEngine/IGame_Level.h"
 #include "../xrCore/_vector3d_ext.h"
 #include "debug_text_tree.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 
 #ifdef DEBUG_DRAW
 #	include "debug_renderer.h"

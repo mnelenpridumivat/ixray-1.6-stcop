@@ -7,6 +7,8 @@
 #include "../xrPhysics/PhysicsExternalCommon.h"
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/MovementBoxDynamicActivate.h"
+#include "PhysX/Interfaces/ShellHolder.h"
+
 namespace ALife {
 	enum EHitType;
 };
@@ -23,7 +25,6 @@ class ICollisionDamageInfo;
 class IElevatorState;
 struct CPHCaptureBoneCallback;
 class CPhysicsShellHolder;
-class IPhysicsShellHolder;
 class CPHCapture;
 class IPHCapture;
 class CPHCharacter;
@@ -189,7 +190,7 @@ public:
 	void				SetVelocity					(const Fvector& v)	{vVelocity.set(v);SetCharacterVelocity(v);}
 	void				SetCharacterVelocity		(const Fvector& v)					;									
 	void				SetPhysicsRefObject			(CPhysicsShellHolder* ref_object)	;
-	IPhysicsShellHolder*PhysicsRefObject			();
+	xrPhysX::Interfaces::IShellHolder* PhysicsRefObject();
 	void				SetNonInteractive			(bool v);
 	void				CalcMaximumVelocity			(Fvector& /**dest/**/, Fvector& /**accel/**/, float /**friction/**/){};
 	void				CalcMaximumVelocity			(float& /**dest/**/, float /**accel/**/, float /**friction/**/){};

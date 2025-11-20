@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "HolderEntityObject.h"
 #include "../Include/xrRender/Kinematics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "object_broker.h"
 #include "Actor.h"
 #include "ActorEffector.h"

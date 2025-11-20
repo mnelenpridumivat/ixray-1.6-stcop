@@ -2,7 +2,9 @@
 #include "actor_mp_client.h"
 #include "CharacterPhysicsSupport.h"
 #include "Inventory.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/phvalide.h"
+#endif
 //#include "Physics.h"
 
 ///	DONE (111 bytes cut from 138 bytes = 27 bytes, total 511.11% or 19.56%)

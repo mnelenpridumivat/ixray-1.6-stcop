@@ -10,7 +10,9 @@
 
 #include "StdAfx.h"
 #include "Needles.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CNeedles::CNeedles(void) 

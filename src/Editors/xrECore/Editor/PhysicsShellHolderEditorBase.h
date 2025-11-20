@@ -2,55 +2,63 @@
 
 #ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/IPhysicsShellHolder.h"
+#endif
+#include "PhysX/PhysXCore.h"
+#include "PhysX/Interfaces/CollisionDamageReceiver.h"
+#include "PhysX/Interfaces/CollisionForm.h"
+#include "PhysX/Interfaces/CollisionHitCallback.h"
+#include "PhysX/Interfaces/DamageSource.h"
+#include "PhysX/Interfaces/PHCapture.h"
+#include "PhysX/Interfaces/PHSoundPlayer.h"
+#include "PhysX/Wrappers/Shell.h"
 
-class ECORE_API CPhysicsShellHolderEditorBase: public IPhysicsShellHolder
+class ECORE_API CPhysicsShellHolderEditorBase: public xrPhysX::Interfaces::IShellHolder
 {
 public:
-	void								CreatePhysicsShell	( Fmatrix*	obj_xform );
-    void								DeletePhysicsShell	();
-    void								UpdateObjectXform	( Fmatrix &obj_xform );
-    void								ApplyDragForce		( const Fvector &force );
+	void CreatePhysicsShell(Fmatrix* obj_xform);
+    void DeletePhysicsShell();
+    void UpdateObjectXform(Fmatrix &obj_xform);
+    void ApplyDragForce(const Fvector &force);
 protected:
-	CPhysicsShellHolderEditorBase(): m_physics_shell(0),m_object_xform(Fidentity){}
-	~CPhysicsShellHolderEditorBase()	{ /*DeletePhysicsShell	();*/ }
+	CPhysicsShellHolderEditorBase(): m_object_xform(Fidentity){}
+	~CPhysicsShellHolderEditorBase() { /*DeletePhysicsShell	();*/ }
 protected:
-	CPhysicsShell*						m_physics_shell;
-    Fmatrix								m_object_xform;
+	xrPhysX::Wrappers::CShell* m_physics_shell = nullptr;
+    Fmatrix m_object_xform;
 private:
-  	virtual	LPCSTR						_BCL	ObjectName							()		const	 { return "EditorActor"; }
-	virtual	LPCSTR						_BCL	ObjectNameVisual					()		const	 { return "unknown"; }
-	virtual	LPCSTR						_BCL	ObjectNameSect						()		const	 { return "unknown"; }
-	virtual	bool						_BCL	ObjectGetDestroy					()		const	 { return false; };
-	virtual ICollisionHitCallback*		_BCL	ObjectGetCollisionHitCallback		()				 { return 0;}
-	virtual	u16							_BCL	ObjectID							()		const	 { return u16(-1);}
-	virtual	ICollisionForm*				_BCL	ObjectCollisionModel				()				 { VERIFY(false);return 0; }
+  	virtual	LPCSTR ObjectName() const { return "EditorActor"; }
+	virtual	LPCSTR ObjectNameVisual() const { return "unknown"; }
+	virtual	LPCSTR ObjectNameSect() const { return "unknown"; }
+	virtual	bool ObjectGetDestroy() const { return false; };
+	virtual xrPhysX::Interfaces::ICollisionHitCallback* ObjectGetCollisionHitCallback() { return 0;}
+	virtual	u16 ObjectID() const { return u16(-1);}
+	virtual xrPhysX::Interfaces::ICollisionForm* ObjectCollisionModel() { VERIFY(false);return 0; }
 //	virtual	IRenderVisual*				_BCL	ObjectVisual						()				 { return m_pVisual;}
-	virtual IDamageSource*				_BCL	ObjectCastIDamageSource				()				 { return 0; }
-	virtual	void						_BCL	ObjectProcessingDeactivate			()				 {;}
-	virtual	void						_BCL	ObjectProcessingActivate			()				 {}
-	virtual	void						_BCL	ObjectSpatialMove					()				 {}
-    virtual	CPhysicsShell*				_BCL	ObjectPPhysicsShell					()				 { return m_physics_shell; }
-	virtual	void						_BCL	enable_notificate					()				 {}
-	virtual bool						_BCL	has_parent_object					()				 { return false; }
-	virtual	void						_BCL	on_physics_disable					()				 {}
-	virtual	IPHCapture*					_BCL	PHCapture							()				 { return 0;}
-	virtual	bool						_BCL	IsInventoryItem						()				 { return false; }
-	virtual	bool						_BCL	IsActor								()				 { return false; }
- 	virtual bool						_BCL	IsStalker							()				 { return false; }
+	virtual xrPhysX::Interfaces::IDamageSource* ObjectCastIDamageSource() { return 0; }
+	virtual	void ObjectProcessingDeactivate() {}
+	virtual	void ObjectProcessingActivate() {}
+	virtual	void ObjectSpatialMove() {}
+    virtual xrPhysX::Wrappers::CShell* ObjectPPhysicsShell() { return m_physics_shell; }
+	virtual	void enable_notificate() {}
+	virtual bool has_parent_object() { return false; }
+	virtual	void on_physics_disable() {}
+	virtual xrPhysX::Interfaces::IPHCapture* PHCapture() { return 0;}
+	virtual	bool IsInventoryItem() { return false; }
+	virtual	bool IsActor() { return false; }
+ 	virtual bool IsStalker() { return false; }
 	//virtual	void						SetWeaponHideState					( u16 State, bool bSet )=0;
-	virtual	void						_BCL	HideAllWeapons						( bool v )		 {}//(SetWeaponHideState(INV_STATE_BLOCK_ALL,true))
-	virtual	void						_BCL	MovementCollisionEnable				( bool enable )	 {}
-	virtual CPHSoundPlayer*				_BCL	ObjectPhSoundPlayer				()  			 	 { return 0; }
-	virtual	ICollisionDamageReceiver* 	_BCL	ObjectPhCollisionDamageReceiver	()				 	 { return 0; }
-	virtual	void					 	_BCL	BonceDamagerCallback			( float &damage_factor ){}
+	virtual	void HideAllWeapons(bool v) {}//(SetWeaponHideState(INV_STATE_BLOCK_ALL,true))
+	virtual	void MovementCollisionEnable(bool enable) {}
+	virtual xrPhysX::Interfaces::IPHSoundPlayer* ObjectPhSoundPlayer() { return 0; }
+	virtual xrPhysX::Interfaces::ICollisionDamageReceiver* ObjectPhCollisionDamageReceiver() { return 0; }
+	virtual	void BonceDamagerCallback(float &damage_factor){}
 public:
-    virtual	Fmatrix&					_BCL	ObjectXFORM				()														{  return m_object_xform;}
+    virtual	Fmatrix& ObjectXFORM() { return m_object_xform; }
 private:
-    virtual	Fvector&					_BCL	ObjectPosition			()														{  return m_object_xform.c;}
+    virtual	Fvector& ObjectPosition() { return m_object_xform.c; }
 
 #ifdef	DEBUG
-	virtual	xr_string					_BCL	dump							( EDumpType type )const  { VERIFY(false); return xr_string("ActorEditor!");}
+	virtual	xr_string dump(xrPhysX::EDumpType type) const { VERIFY(false); return xr_string("ActorEditor!");}
 #endif
 };
-#endif
  

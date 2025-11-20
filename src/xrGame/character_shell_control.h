@@ -1,5 +1,5 @@
 #pragma	once
-#include "PhysX/Wrappers/PhysXShell.h"
+#include "PhysX/Wrappers/Shell.h"
 
 struct	SHit;
 //class CPhysicsShell;
@@ -12,11 +12,11 @@ public:
 	float curr_skin_friction_in_death() { return m_curr_skin_friction_in_death; }
 	void set_kill_hit(SHit &H) const;
 	void set_fatal_impulse(SHit &H) const;
-	void set_start_shell_params(xrPhysX::Wrappers::CPhysXShell* sh) const;
+	void set_start_shell_params(xrPhysX::Wrappers::CShell* sh) const;
 	void apply_start_velocity_factor(CObject* who, Fvector &velocity ) const;
 	void Load(LPCSTR section);
 	void TestForWounded	(const Fmatrix& xform, IKinematics* CKA);
-	void UpdateFrictionAndJointResistanse(xrPhysX::Wrappers::CPhysXShell* sh);
+	void UpdateFrictionAndJointResistanse(xrPhysX::Wrappers::CShell* sh);
 	void CalculateTimeDelta();
 private:
 	//skeleton modell(!share?)

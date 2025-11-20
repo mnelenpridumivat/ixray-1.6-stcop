@@ -2,12 +2,13 @@
 #include "pch_script.h"
 #include "GameObject.h"
 #include "../Include/xrRender/RenderVisual.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "ai_space.h"
 #include "CustomMonster.h" 
 #include "PhysicObject.h"
 #include "HangingLamp.h"
-#include "../xrPhysics/PhysicsShell.h"
 #include "game_sv_single.h"
 #include "level_graph.h"
 #include "ph_shell_interface.h"
@@ -22,7 +23,9 @@
 #include "ai_debug.h"
 #include "../xrEngine/IGame_Level.h"
 #include "Level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "game_cl_base_weapon_usage_statistic.h"
 #include "game_cl_mp.h"
 #include "game_level_cross_table.h"

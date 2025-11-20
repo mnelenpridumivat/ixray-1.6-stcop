@@ -3,10 +3,14 @@
 #include "PhysicsShellHolder.h"
 #include "xrServer_Objects_ALife.h"
 #include "Level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHDefs.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "PHSynchronize.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "../Include/xrRender/Kinematics.h"
 //#include "PHObject.h"
 //#include "../xrPhysics/PHCollideValidator.h"

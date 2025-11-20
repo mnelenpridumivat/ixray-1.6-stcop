@@ -1,5 +1,4 @@
-#ifndef PHYSICSSHELL_HOLDER_H
-#define PHYSICSSHELL_HOLDER_H
+#pragma once
 
 #include "GameObject.h"
 #include "ParticlesPlayer.h"
@@ -7,9 +6,13 @@
 #ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPhysicsShellHolder.h"
 #endif
+#include "PHCollisionDamageReceiver.h"
 #include "../xrScripts/script_export_space.h"
 #include "../xrCore/Save/SaveObject.h"
-#include "PhysX/Wrappers/PhysXShell.h"
+#include "PhysX/Interfaces/CollisionDamageReceiver.h"
+#include "PhysX/Interfaces/CollisionHitCallback.h"
+#include "PhysX/Interfaces/PHCapture.h"
+#include "PhysX/Wrappers/Shell.h"
 
 class CPHDestroyable;
 class CPHCollisionDamageReceiver;
@@ -27,7 +30,7 @@ class CSaveObjectLoad;
 class CPhysicsShellHolder:  public CGameObject,
 							public CParticlesPlayer,
 							public IObjectPhysicsCollision,
-							public IPhysicsShellHolder
+							public xrPhysX::Interfaces::IShellHolder
 	
 {
 	bool				b_sheduled;
@@ -40,7 +43,7 @@ public:
 	typedef CGameObject inherited;
 
 
-	xrPhysX::Wrappers::CPhysXShell* m_pPhysicsShell = nullptr;
+	xrPhysX::Wrappers::CShell* m_pPhysicsShell = nullptr;
 
 
 			CPhysicsShellHolder							();
@@ -54,12 +57,12 @@ public:
 	virtual bool ActivationSpeedOverriden(Fvector& dest, bool clear_override);
 	virtual void SetActivationSpeedOverride(Fvector const& speed);
 
-	xrPhysX::Wrappers::CPhysXShell* PPhysicsShell				()		const
+	xrPhysX::Wrappers::CShell* PPhysicsShell				()		const
 	{
 		return m_pPhysicsShell;
 	}
 
-	void SetPPhysicsShell(xrPhysX::Wrappers::CPhysXShell* pp) { m_pPhysicsShell = pp; }
+	void SetPPhysicsShell(xrPhysX::Wrappers::CShell* pp) { m_pPhysicsShell = pp; }
 
 	IC CPhysicsShellHolder*	PhysicsShellHolder	()
 	{
@@ -70,7 +73,7 @@ public:
 	virtual IPhysicsShell* physics_shell();
 	virtual const IPhysicsElement* physics_character() const;
 	virtual CPHDestroyable* ph_destroyable() { return nullptr; }
-	virtual ICollisionDamageReceiver* PHCollisionDamageReceiver() { return nullptr; }
+	virtual xrPhysX::Interfaces::ICollisionDamageReceiver* PHCollisionDamageReceiver() { return nullptr; }
 	virtual CPHSkeleton* PHSkeleton() { return nullptr; }
 
 	virtual CPhysicsShellHolder* cast_physics_shell_holder() { return this; }
@@ -83,9 +86,9 @@ public:
 	virtual	CCharacterPhysicsSupport* character_physics_support() { return nullptr; }
 	virtual	const CCharacterPhysicsSupport* character_physics_support() const { return nullptr; }
 	virtual	CIKLimbsController* character_ik_controller() { return nullptr; }
-	virtual ICollisionHitCallback* get_collision_hit_callback() { return nullptr; }
+	virtual xrPhysX::Interfaces::ICollisionHitCallback* get_collision_hit_callback() { return nullptr; }
 
-	virtual void set_collision_hit_callback(ICollisionHitCallback* cc) {}
+	virtual void set_collision_hit_callback(xrPhysX::Interfaces::ICollisionHitCallback* cc) {}
 	virtual void _BCL enable_notificate() {}
 public:
 
@@ -97,7 +100,7 @@ public:
 	void PHLoadState(IReader &P);
 			//void			PHSaveState(CSaveObjectSave* Object) const;
 			//void			PHLoadState(CSaveObjectLoad* Object);
-	voidPHSerializeState(ISaveObject& Object);
+	void PHSerializeState(ISaveObject& Object);
 	virtual f32	GetMass();
 	virtual	void PHHit(SHit &H);
 	virtual	void Hit(SHit* pHDS);
@@ -144,7 +147,7 @@ private://IPhysicsShellHolder
 	virtual	LPCSTR ObjectNameVisual() const;
 	virtual	LPCSTR ObjectNameSect() const;
 	virtual	bool ObjectGetDestroy() const;
-	virtual ICollisionHitCallback* ObjectGetCollisionHitCallback();
+	virtual xrPhysX::Interfaces::ICollisionHitCallback* ObjectGetCollisionHitCallback();
 	virtual	u16 ObjectID() const;
 	virtual	ICollisionForm* ObjectCollisionModel();
 	//virtual	IRenderVisual*			_BCL					ObjectVisual						()						;
@@ -153,11 +156,11 @@ private://IPhysicsShellHolder
 	virtual	void ObjectProcessingDeactivate();
 	virtual	void ObjectProcessingActivate();				
 	virtual	void ObjectSpatialMove();
-	virtual	xrPhysX::Wrappers::CPhysXShell* ObjectPPhysicsShell();
+	virtual	xrPhysX::Wrappers::CShell* ObjectPPhysicsShell();
 //	virtual	void						enable_notificate					()						;
 	virtual bool has_parent_object();
 //	virtual	void						on_physics_disable					()						;
-	virtual	IPHCapture* PHCapture();
+	virtual xrPhysX::Interfaces::IPHCapture* PHCapture();
 	virtual	bool IsInventoryItem();
 	virtual	bool IsActor();
 	virtual bool IsStalker();
@@ -168,9 +171,7 @@ private://IPhysicsShellHolder
 	virtual	ICollisionDamageReceiver* ObjectPhCollisionDamageReceiver();
 	virtual	void BonceDamagerCallback(float &damage_factor);
 #ifdef	DEBUG
-	virtual	xr_string dump(EDumpType type) const;
+	virtual	xr_string dump(xrPhysX::EDumpType type) const;
 #endif
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
-
-#endif

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "base_monster.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../../Hit.h"
 #include "../../../PHDestroyable.h"
 #include "../../../CharacterPhysicsSupport.h"

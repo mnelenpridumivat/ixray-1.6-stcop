@@ -8,7 +8,9 @@
 #include "PHDestroyable.h"
 #include "Car.h"
 #include "../Include/xrRender/Kinematics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "game_object_space.h"
 
 CCarDoor::CCarDoor(CCar* acar)

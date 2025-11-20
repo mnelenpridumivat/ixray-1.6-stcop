@@ -1,7 +1,9 @@
 #pragma once
 
 //#include "../../../PHCharacter.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/IPHCapture.h"
+#endif
 
 #define TEMPLATE_SPECIALIZATION template <\
 	typename _Object\

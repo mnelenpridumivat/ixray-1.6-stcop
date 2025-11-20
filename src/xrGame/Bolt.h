@@ -1,6 +1,8 @@
 #pragma once
 #include "Missile.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/DamageSource.h"
+#endif
 
 class CBolt final : public CMissile,
 	public IDamageSource

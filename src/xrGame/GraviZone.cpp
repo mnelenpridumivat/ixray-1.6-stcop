@@ -2,7 +2,9 @@
 
 #include "GraviZone.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "entity_alive.h"
 #include "PHMovementControl.h"
 #include "xrMessages.h"

@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "PhysicsSkeletonObject.h"
 //#include "PhysicsShell.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "phsynchronize.h"
 #include "xrServer_Objects_ALife.h"
 #include "../Include/xrRender/Kinematics.h"

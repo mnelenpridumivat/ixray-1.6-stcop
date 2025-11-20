@@ -3,8 +3,10 @@
 #include "HangingLamp.h"
 #include "../xrEngine/LightAnimLibrary.h"
 #include "../xrEngine/xr_collide_form.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/MathUtils.h"
+#endif
 //#include "Physics.h"
 #include "xrServer_Objects_ALife.h"
 //#include "PHElement.h"

@@ -20,6 +20,7 @@
 #include "DelayedActionFuse.h"
 #include "CarDoors.h"
 
+struct SGameMtl;
 // refs
 class ENGINE_API			CBoneInstance;
 class						CActor;
@@ -173,7 +174,7 @@ public:
 		u16 bone_id;
 		bool inited;
 		float radius;
-		xrPhysX::Wrappers::CPhysXJoint* joint;
+		xrPhysX::Wrappers::CJoint* joint;
 		CCar* car;
 		struct SWheelCollisionParams
 		{
@@ -260,7 +261,7 @@ public:
 		Fmatrix				transform;
 		//Fvector				velocity;
 		xr_shared_ptr<CParticlesObject>	p_pgobject;
-		xrPhysX::Wrappers::CPhysXElement*	pelement;
+		xrPhysX::Wrappers::CElement*	pelement;
 		CCar*				pcar;
 		void Init();
 		void Play();

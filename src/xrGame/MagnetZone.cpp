@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "MagnetZone.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrphysics/PhysicsShell.h"
+#endif
 #include "entity_alive.h"
 #include "PhysicsShellHolder.h"
 #include "CharacterPhysicsSupport.h"
@@ -24,7 +26,7 @@ void CMagnetZone::Affect(SZoneObjectInfo* O)
 
 
 	//////////////////////////////////////////////////////////////////////////
-	//	затягиваем объет по направлению к центру зоны
+	//	пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 
 	Fvector					throw_in_dir;
 	Fvector					zone_center;

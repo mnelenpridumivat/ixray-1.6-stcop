@@ -5,16 +5,17 @@
 #include "../xrPhysics/PhysicsShell.h"
 #endif
 #include "../xrScripts/script_export_space.h"
-#include "PhysX/Wrappers/PhysXShell.h"
+#include "PhysX/Wrappers/scripted.h"
+#include "PhysX/Wrappers/Shell.h"
 
 class cphysics_element_scripted;
 class cphysics_joint_scripted;
 
 class cphysics_shell_scripted:
-	public cphysics_game_scripted<xrPhysX::Wrappers::CPhysXShell>
+	public xrPhysX::cphysics_game_scripted<xrPhysX::Wrappers::CShell>
 {
 public:
-	cphysics_shell_scripted(xrPhysX::Wrappers::CPhysXShell* imp ): cphysics_game_scripted<xrPhysX::Wrappers::CPhysXShell>(imp) {}
+	cphysics_shell_scripted(xrPhysX::Wrappers::CShell* imp ): cphysics_game_scripted<xrPhysX::Wrappers::CShell>(imp) {}
 	
 
 	void applyForce(float x, float y, float z)	{ physics_impl().applyForce( x, y, z ); }

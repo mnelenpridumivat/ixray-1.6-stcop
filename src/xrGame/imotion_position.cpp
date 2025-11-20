@@ -2,9 +2,11 @@
 
 #include "imotion_position.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/ExtendedGeom.h"
+#endif
 
 #include "../Include/xrRender/Kinematics.h"
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +42,7 @@ shell_motion_has_history( false )
 
 };
 
-static void interactive_motion_diag( LPCSTR message, const CBlend &b, xrPhysX::Wrappers::CPhysXShell* s, float time_left )
+static void interactive_motion_diag( LPCSTR message, const CBlend &b, xrPhysX::Wrappers::CShell* s, float time_left )
 {
 #ifdef	DEBUG
 	if(!death_anim_debug)
@@ -206,7 +208,7 @@ void imotion_position::state_start( )
 }
 
 #ifdef DEBUG
-static void dbg_draw_state_end(xrPhysX::Wrappers::CPhysXShell* shell )
+static void dbg_draw_state_end(xrPhysX::Wrappers::CShell* shell )
 {
 	VERIFY(shell);
 	if(dbg_imotion_draw_velocity)
@@ -384,7 +386,7 @@ float imotion_position::advance_animation( float dt, IKinematicsAnimated& KA )
 #ifdef	DEBUG
 void DBG_DrawBones( CObject &O );
 void DBG_PhysBones( CObject &O );
-void collide_anim_dbg_draw(xrPhysX::Wrappers::CPhysXShell* shell, float dt )
+void collide_anim_dbg_draw(xrPhysX::Wrappers::CShell* shell, float dt )
 {
 	VERIFY(shell);
 	if(dbg_imotion_draw_velocity)

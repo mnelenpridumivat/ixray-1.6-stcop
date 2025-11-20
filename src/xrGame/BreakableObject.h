@@ -8,7 +8,9 @@
 #pragma once
 
 #include "PhysicsShellHolder.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/icollisiondamagereceiver.h"
+#endif
 
 class	IPHStaticGeomShell;
 //struct	dContact;
@@ -16,7 +18,7 @@ class	IPHStaticGeomShell;
 
 class CBreakableObject: 
 	public CPhysicsShellHolder,
-	public ICollisionDamageReceiver
+	public xrPhysX::Interfaces::ICollisionDamageReceiver
 {
 	typedef	CPhysicsShellHolder		inherited;
 private:
@@ -30,7 +32,7 @@ static	float				m_immunity_factor;
 
 		float				fHealth;
 		IPHStaticGeomShell	*m_pUnbrokenObject;
-		xrPhysX::Wrappers::CPhysXShell* m_Shell;
+		xrPhysX::Wrappers::CShell* m_Shell;
 static	u32					m_remove_time;
 		u32					m_break_time;
 		bool				bRemoved;

@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 //#include "../../../PHInterpolation.h"
 //#include "../../../PHElement.h"
 

@@ -4,7 +4,9 @@
 #include "../xrParticles/ParticlesObject.h"
 #include "PolterAbility.h"
 #include "PolterInterface.h"
+#ifndef IXRAY_PHYSX
 #include "../xrphysics/PhysicsShell.h"
+#endif
 #include "level.h"
 #include "material_manager.h"
 #include "level_debug.h"
@@ -86,7 +88,7 @@ void CPolterSpecialAbility::on_hit(SHit* pHDS)
 	if (m_object->GetMonster()->g_Alive() && (pHDS->hit_type == ALife::eHitTypeFireWound) && (Device.dwFrame != m_last_hit_frame)) {
 		if(BI_NONE != pHDS->bone()) {
 
-			//вычислить координаты попадания
+			//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			IKinematics* V = smart_cast<IKinematics*>(m_object->GetMonster()->Visual());
 
 			Fvector start_pos = pHDS->bone_space_position();

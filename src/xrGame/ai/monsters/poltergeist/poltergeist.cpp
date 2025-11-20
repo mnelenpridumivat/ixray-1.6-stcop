@@ -13,7 +13,9 @@
 #include "../control_animation_base.h"
 #include "../control_movement_base.h"
 #include "../control_path_builder_base.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../../Actor.h"
 #include "../../../actor_memory.h"
 #include "../../../visual_memory_manager.h"

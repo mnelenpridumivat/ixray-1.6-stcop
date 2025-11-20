@@ -2,9 +2,11 @@
 
 #include	"interactive_animation.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include	"../xrPhysics/ExtendedGeom.h"
 #include "../xrPhysics/MathUtils.h"
+#endif
 //#include	"phobject.h"
 
 #include	"../Include/xrRender/KinematicsAnimated.h"

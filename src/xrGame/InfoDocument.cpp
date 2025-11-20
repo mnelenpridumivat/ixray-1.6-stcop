@@ -4,7 +4,9 @@
 ///////////////////////////////////////////////////////////////
 #include "StdAfx.h"
 #include "InfoDocument.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "PDA.h"
 #include "InventoryOwner.h"
 #include "xrServer_Objects_ALife_Items.h"

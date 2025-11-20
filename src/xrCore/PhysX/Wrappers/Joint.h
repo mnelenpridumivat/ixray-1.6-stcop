@@ -1,16 +1,16 @@
 #pragma once
 #include "extensions/PxJoint.h"
-#include "PhysXJointType.h"
+#include "JointType.h"
 
 namespace xrPhysX::Wrappers
 {    
-    class XRCORE_API CPhysXElement;
+    class XRCORE_API CElement;
 
-    class XRCORE_API CPhysXJoint
+    class XRCORE_API CJoint
     {
         physx::PxJoint* m_joint = nullptr;
-        CPhysXElement* m_element1 = nullptr;
-        CPhysXElement* m_element2 = nullptr;
+        CElement* m_element1 = nullptr;
+        CElement* m_element2 = nullptr;
 
     public:
 

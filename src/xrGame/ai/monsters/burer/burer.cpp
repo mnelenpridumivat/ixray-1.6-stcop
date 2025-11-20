@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "burer.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../../CharacterPhysicsSupport.h"
 #include "../../../Actor.h"
 #include "burer_state_manager.h"

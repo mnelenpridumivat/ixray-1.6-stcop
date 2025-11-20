@@ -2,7 +2,9 @@
 #include "actor_mp_server.h"
 //#include "Physics.h"
 //#include "mathutils.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/phvalide.h"
+#endif
 
 
 void CSE_ActorMP::fill_state	(actor_mp_state &state)

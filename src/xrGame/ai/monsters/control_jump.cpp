@@ -20,8 +20,10 @@
 #endif
 
 #include "../../trajectories.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/IPHWorld.h"
 #include "../../../xrPhysics/PHCharacter.h"
+#endif
 #include "../../../xrCore/_vector3d_ext.h"
 
 void CControlJump::reinit()

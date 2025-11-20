@@ -8,7 +8,9 @@
 #include "game_cl_base.h"
 #include "../xrEngine/x_ray.h"
 #include "../xrEngine/GameMtlLib.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsCommon.h"
+#endif
 #include "level_sounds.h"
 #include "GamePersistent.h"
 #include "../xrEngine/Rain.h"

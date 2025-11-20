@@ -9,8 +9,10 @@
 #include "../ik_anim_state.h"
 
 //#include "../ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/MathUtils.h"
 #include "../../xrPhysics/matrix_utils.h"
+#endif
 #include "../pose_extrapolation.h"
 #ifdef DEBUG
 #include "../PHDebug.h"

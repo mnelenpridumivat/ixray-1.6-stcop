@@ -12,7 +12,9 @@
 
 #include "../../../../xrPhysics/IPHWorld.h"
 #include "../../../PHMovementControl.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../../sound_player.h"
 
 using sync_flags = CSE_ALifeMonsterBase::sync_flags;

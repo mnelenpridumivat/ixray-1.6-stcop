@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "mesh_data.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/IPHWorld.h"
+#endif
 #include "../../xrCore/Collision/xr_area.h"
 
 CFormBuilder::CFormBuilder()

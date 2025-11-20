@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../../xrphysics/xrphysics.h"
+#endif
 
 class CObjectSpace;
 class CScenePhysics

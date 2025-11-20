@@ -7,7 +7,9 @@
 
 
 //#include "ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "../Include/xrRender/Kinematics.h"
 #include "../xrEngine/bone.h"
 #include "../xrEngine/EnnumerateVertices.h"

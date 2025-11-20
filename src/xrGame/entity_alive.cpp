@@ -3,8 +3,10 @@
 #include "entity_alive.h"
 #include "InventoryOwner.h"
 #include "Inventory.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrEngine/GameMtlLib.h"
+#endif
 #include "PHMovementControl.h"
 #include "Wound.h"
 #include "xrMessages.h"

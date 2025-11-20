@@ -18,7 +18,9 @@ void DBG_TextSetColor(u32 color);
 #ifdef DEBUG
 struct dContact;
 #include "../xrEngine/StatGraph.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/debug_output.h"
+#endif
 #define DRAW_CONTACTS
 
 

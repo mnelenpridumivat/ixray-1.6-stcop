@@ -6,7 +6,9 @@
 
 #include "Explosive.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "Entity.h"
 #include "../xrParticles/stdafx.h"
 #include "../xrParticles/ParticlesObject.h"
@@ -26,9 +28,11 @@
 #	include "PHDebug.h"
 #endif
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/IActivationShape.h"
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "game_base_space.h"
 
 #include "../Include/xrRender/Kinematics.h"

@@ -7,10 +7,12 @@
 #include "CustomRocket.h"
 #include "../xrParticles/stdafx.h"
 #include "../xrParticles/ParticlesObject.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/ExtendedGeom.h"
 #include "../xrPhysics/CalculateTriangle.h"
 #include "../xrPhysics/tri-colliderknoopc/dcTriangle.h"
+#endif
 
 #include "Level.h"
 #include "xrMessages.h"

@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 
 #include "EditorLevel.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "PHCommander.h"
 #include "physics_game.h"
 #include "game_cl_base.h"

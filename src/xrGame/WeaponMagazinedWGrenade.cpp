@@ -9,7 +9,9 @@
 #include "Level.h"
 #include "object_broker.h"
 #include "game_base_space.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "player_hud.h"
 #include "Actor_Flags.h"
 #include "Inventory.h"

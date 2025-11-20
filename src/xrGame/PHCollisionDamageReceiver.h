@@ -1,13 +1,16 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/icollisiondamagereceiver.h"
+#endif
+#include "PhysX/Interfaces/CollisionDamageReceiver.h"
 
 class CPhysicsShellHolder;
 //struct dContact;
 //struct SGameMtl;
 
 class CPHCollisionDamageReceiver:
-	public ICollisionDamageReceiver
+	public xrPhysX::Interfaces::ICollisionDamageReceiver
 {
 typedef std::pair<u16,float> SControledBone;
 

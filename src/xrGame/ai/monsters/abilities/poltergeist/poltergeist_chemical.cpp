@@ -3,7 +3,9 @@
 #include "../PhysicsShellHolder.h"
 #include "../level.h"
 #include "../actor.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/icolisiondamageinfo.h"
+#endif
 
 CPolterChem::CPolterChem(IPolterInterface* polter) : inherited(polter) {
 

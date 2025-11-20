@@ -1,7 +1,9 @@
 #pragma once
 #include "hud_item_object.h"
 #include "HudSound.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/ExtendedGeom.h"
+#endif
 
 struct dContact;
 struct SGameMtl;

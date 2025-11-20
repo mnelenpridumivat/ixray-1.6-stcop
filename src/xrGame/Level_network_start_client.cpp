@@ -11,8 +11,9 @@
 #include "file_transfer.h"
 #include "HUDManager.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
-
+#endif
 
 #include "PHCommander.h"
 #include "physics_game.h"

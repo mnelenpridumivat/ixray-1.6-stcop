@@ -1,7 +1,9 @@
 #pragma once
 
 #include "telekinetic_object.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/PHUpdateObject.h"
+#endif
 
 class CTelekinesis :
 	public CPHUpdateObject

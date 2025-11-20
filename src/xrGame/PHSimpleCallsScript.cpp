@@ -2,7 +2,9 @@
 #include "pch_script.h"
 
 #include "PHSimpleCalls.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 using namespace luabind;
@@ -42,7 +44,7 @@ void CPHConstForceAction::script_register(lua_State *L)
 	module(L)
 		[
 			class_<CPHConstForceAction>("phaction_constforce")
-			.def(constructor<xrPhysX::Wrappers::CPhysXShell*,const Fvector&>())
+			.def(constructor<xrPhysX::Wrappers::CShell*,const Fvector&>())
 		];
 }
 

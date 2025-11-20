@@ -6,13 +6,17 @@
 
 #include "StdAfx.h"
 #include "BlackGraviArtifact.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "entity_alive.h"
 #include "PHMovementControl.h"
 #include "xrMessages.h"
 #include "PhysicsShellHolder.h"
 #include "Explosive.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "CharacterPhysicsSupport.h"
 //extern CPHWorld*	ph_world;
 CBlackGraviArtefact::CBlackGraviArtefact(void) 

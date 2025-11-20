@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "WeaponStatMgun.h"
 #include "../Include/xrRender/Kinematics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "WeaponAmmo.h"
 #include "object_broker.h"
 #include "../xrSound/ai_sounds.h"

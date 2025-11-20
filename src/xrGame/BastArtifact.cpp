@@ -5,8 +5,10 @@
 
 #include "StdAfx.h"
 #include "BastArtifact.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/ExtendedGeom.h"
+#endif
 
 CBastArtefact::CBastArtefact(void) 
 {

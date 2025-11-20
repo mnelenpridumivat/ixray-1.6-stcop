@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "WeaponAmmo.h"
 #include "PHShellCreator.h"
 

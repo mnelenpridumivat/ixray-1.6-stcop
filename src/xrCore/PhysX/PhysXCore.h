@@ -9,6 +9,19 @@
 
 namespace xrPhysX
 {
+    
+#ifdef	DEBUG
+    enum class EDumpType : u8
+    {
+        base,
+        poses,
+        vis_geom,
+        props,
+        full,
+        full_capped
+    };
+#endif
+    
     struct XRCORE_API PhysXMathHelper
     {
         static physx::PxQuat Conv_MatrixToPxQuat(const Fmatrix& transform);

@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "Artefact.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "PhysicsShellHolder.h"
 #include "game_cl_base.h"
 
@@ -11,7 +13,9 @@
 #include "Level.h"
 #include "ai_object_location.h"
 #include "xrServer_Objects_ALife_Monsters.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "restriction_space.h"
 #include "../xrEngine/IGame_Persistent.h"
 

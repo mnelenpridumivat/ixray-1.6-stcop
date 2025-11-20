@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/IPHCapture.h"
+#endif
 #include "../../../CaptureBoneCallback.h"
 #include "../../../../Include/xrRender/Kinematics.h"
 

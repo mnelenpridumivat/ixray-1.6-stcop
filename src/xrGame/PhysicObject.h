@@ -60,7 +60,7 @@ private:
 	//Creating
 			void	CreateBody			(CSE_ALifeObjectPhysic	*po)													;
 			void	CreateSkeleton		(CSE_ALifeObjectPhysic	*po)													;
-			void	AddElement			(xrPhysX::Wrappers::CPhysXElement* root_e, int id)												;
+			void	AddElement			(xrPhysX::Wrappers::CElement* root_e, int id)												;
 private:
 			void						run_anim_forward				();
 			void						run_anim_back					();

@@ -1,40 +1,32 @@
 #pragma once
 
-#include "PhysXBase.h"
-#include "PhysXJointType.h"
+#include "Base.h"
+#include "JointType.h"
+#include "../Interfaces/ShellHolder.h"
 
 class IKinematics;
 
 namespace xrPhysX::Wrappers
 {
-    class XRCORE_API CPhysXShell;
-    class XRCORE_API CPhysXJoint;
-    class XRCORE_API CPhysXElement;
+    class XRCORE_API CShell;
+    class XRCORE_API CJoint;
+    class XRCORE_API CElement;
     
-    using shell_root = std::pair<CPhysXShell*,u16>;
+    using shell_root = std::pair<CShell*,u16>;
 
     struct physicsBone
     {
-        CPhysXJoint* joint = nullptr;
-        CPhysXElement* element = nullptr;
+        CJoint* joint = nullptr;
+        CElement* element = nullptr;
     };
 
-    class XRCORE_API IPhysXShellHolder
-    {
-    public:
-        virtual ~IPhysXShellHolder() = default;
-
-        virtual const CPhysXShell& GetShell() const = 0;
-        virtual CPhysXShell& GetShell() = 0;
-    };
-
-    class XRCORE_API CPhysXShell : public CPhysXBase
+    class XRCORE_API CShell : public CBase
     {
         physx::PxArticulationReducedCoordinate* m_articulation = nullptr;
-        xr_vector<CPhysXElement*> m_elements{};
-        xr_vector<CPhysXJoint*> m_joints{};
+        xr_vector<CElement*> m_elements{};
+        xr_vector<CJoint*> m_joints{};
         IKinematics* m_kinematics = nullptr;
-        IPhysXShellHolder* m_owner = nullptr;
+        Interfaces::IShellHolder* m_owner = nullptr;
 
         float m_LinearDamping = 0.f;
         float m_AngularDamping = 0.f;
@@ -46,9 +38,9 @@ namespace xrPhysX::Wrappers
         virtual ~CPhysXShell();
         
         void Activate(const Fmatrix& startTransform, bool disable = false);
-        void Activate(const Fmatrix& transform, const Fvector& linVel, const Fvector& angVel, bool disable = false);
+        void Activate(const Fmatrix& transform, const Fvector& linVel, const Fvector& angVel, bool disable = false);*/
         void Deactivate();
-        bool IsActive() const;
+        /*bool IsActive() const;
         
         void BuildFromKinematics(IKinematics* kinematics, xr_map<u16, physicsBone>* boneMap = nullptr);
         void BuildSimpleShell(float mass, bool notActiveState);

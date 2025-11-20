@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "pch_script.h"
 #include "PDA.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "Entity.h"
 #include "Actor.h"
 

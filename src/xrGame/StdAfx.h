@@ -24,7 +24,9 @@
 #include "../xrEngine/GameFont.h"
 #include "../xrEngine/xr_object.h"
 #include "../xrEngine/IGame_Level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/xrPhysics.h"
+#endif
 #else
 #include "../Editors/ActorEditor/stdafx.h"
 #endif

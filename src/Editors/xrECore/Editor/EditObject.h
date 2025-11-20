@@ -13,7 +13,7 @@
 #include "PhysicsShellHolderEditorBase.h"
 #include "Engine/GameMtlLib.h"
 #include "PhysX/Collision/xrCDB.h"
-#include "PhysX/Wrappers/PhysXShell.h"
+#include "PhysX/Wrappers/Shell.h"
 
 //----------------------------------------------------
 struct 	SRayPickInfo;
@@ -190,7 +190,7 @@ public IKinematics
 	SMotionVec m_SMotions;
 	BPVec m_BoneParts;
 	CSMotion* m_ActiveSMotion;
-	xrPhysX::Wrappers::CPhysXShell* m_physics_shell = nullptr;
+	xrPhysX::Wrappers::CShell* m_physics_shell = nullptr;
 	Fmatrix* m_object_xform = nullptr;
 public:
 

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "PhysXElement.h"
+#include "Element.h"
 
 #include <algorithm>
 
@@ -12,12 +12,12 @@
 using namespace physx;
 using namespace xrPhysX;
 
-Wrappers::CPhysXElement::CPhysXElement(PxScene* scene) : CPhysXBase()
+Wrappers::CElement::CElement(PxScene* scene) : CBase()
 {
     m_scene = scene;
 }
 
-Wrappers::CPhysXElement::~CPhysXElement()
+Wrappers::CElement::~CElement()
 {
     if (!m_Shapes.empty())
     {
@@ -47,7 +47,7 @@ Wrappers::CPhysXElement::~CPhysXElement()
     
 }
 
-void Wrappers::CPhysXElement::CreateShape(const physx::PxGeometry& geom, const physx::PxTransform& transform,
+void Wrappers::CElement::CreateShape(const physx::PxGeometry& geom, const physx::PxTransform& transform,
     float density)
 {
     if (!IVERIFY(m_actor))
@@ -82,7 +82,7 @@ void Wrappers::CPhysXElement::CreateShape(const physx::PxGeometry& geom, const p
     }
 }
 
-void Wrappers::CPhysXElement::UpdateDensity(float density)
+void Wrappers::CElement::UpdateDensity(float density)
 {
     if (IVERIFY(density > 0.0f) && IVERIFY(m_actor) && IVERIFY(m_actor->is<PxRigidDynamic>()))
     {
@@ -105,14 +105,14 @@ void Wrappers::CPhysXElement::UpdateDensity(float density)
     }
 }
 
-void Wrappers::CPhysXElement::AddSphere(const Fsphere& sphere, float density)
+void Wrappers::CElement::AddSphere(const Fsphere& sphere, float density)
 {
     PxSphereGeometry geom(sphere.R);
     PxTransform pos = PhysXMathHelper::Conv_PosToPxTransform(sphere.P);
     CreateShape(geom, pos, density);
 }
 
-void Wrappers::CPhysXElement::AddBox(const Fobb& box, float density)
+void Wrappers::CElement::AddBox(const Fobb& box, float density)
 {
     PxBoxGeometry geom(box.m_halfsize.x, box.m_halfsize.y, box.m_halfsize.z);
 
@@ -120,7 +120,7 @@ void Wrappers::CPhysXElement::AddBox(const Fobb& box, float density)
     CreateShape(geom, pose, density);
 }
 
-void Wrappers::CPhysXElement::AddCapsule(const Fcylinder& cylinder, float density)
+void Wrappers::CElement::AddCapsule(const Fcylinder& cylinder, float density)
 {
     float halfHeight = cylinder.m_height * 0.5f - cylinder.m_radius;
     halfHeight = std::max(halfHeight, 0.0f);
@@ -138,7 +138,7 @@ void Wrappers::CPhysXElement::AddCapsule(const Fcylinder& cylinder, float densit
     CreateShape(geom, pose, density);
 }
 
-void Wrappers::CPhysXElement::SetMass(float mass)
+void Wrappers::CElement::SetMass(float mass)
 {
     if (IVERIFY(mass >= 0) && IVERIFY(m_actor) && m_actor->is<PxRigidDynamic>())
     {
@@ -147,7 +147,7 @@ void Wrappers::CPhysXElement::SetMass(float mass)
     }
 }
 
-void Wrappers::CPhysXElement::SetDensity(float density)
+void Wrappers::CElement::SetDensity(float density)
 {
     UpdateDensity(density);
 }

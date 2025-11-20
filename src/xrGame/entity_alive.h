@@ -130,10 +130,10 @@ public:
 	virtual void							PHFreeze					()						;
 
 	virtual void							PHGetLinearVell				(Fvector& velocity)		;
-	virtual CPHSoundPlayer*					ph_sound_player				()						;
-	virtual	CIKLimbsController				*character_ik_controller	()						;
-	virtual ICollisionHitCallback			*get_collision_hit_callback	()						;
-	virtual void							set_collision_hit_callback	(ICollisionHitCallback *cc);
+	virtual CPHSoundPlayer* ph_sound_player				()						;
+	virtual	CIKLimbsController* character_ik_controller	()						;
+	virtual xrPhysX::Interfaces::ICollisionHitCallback* get_collision_hit_callback()						;
+	virtual void set_collision_hit_callback(xrPhysX::Interfaces::ICollisionHitCallback *cc);
 protected:
 	using WOUND_VECTOR = xr_vector<CWound*>;
 	using WOUND_VECTOR_IT = WOUND_VECTOR::iterator;

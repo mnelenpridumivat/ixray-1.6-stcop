@@ -5,7 +5,9 @@
 
 #include "StdAfx.h"
 #include "ElectricBall.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CElectricBall::CElectricBall(void) 

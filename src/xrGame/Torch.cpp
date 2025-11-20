@@ -3,7 +3,9 @@
 #include "Entity.h"
 #include "Actor.h"
 #include "../xrEngine/LightAnimLibrary.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "xrServer_Objects_ALife_Items.h"
 #include "../xrSound/ai_sounds.h"
 

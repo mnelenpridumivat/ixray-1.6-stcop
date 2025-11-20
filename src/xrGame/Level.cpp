@@ -52,8 +52,10 @@
 #include "DemoInfo.h"
 #include "CustomDetector.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/console_vars.h"
+#endif
 
 #include "ScriptsSubsystems/Condlist/CondlistGC.h"
 

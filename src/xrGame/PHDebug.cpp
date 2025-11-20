@@ -140,11 +140,13 @@ void _cdecl DBG_OutText(LPCSTR s, ...)
 #include "../xrEngine/StatGraph.h"
 #include "PHDebug.h"
 //#include "physics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
 //#include "PHObject.h"
 #include "../xrPhysics/ExtendedGeom.h"
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 #include "Level.h"

@@ -21,8 +21,10 @@
 #include "EffectorShot.h"
 
 #include "PHMovementControl.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IElevatorState.h"
 #include "../xrPhysics/ActorCameraCollision.h"
+#endif
 #include "IKLimbsController.h"
 #include "GamePersistent.h"
 

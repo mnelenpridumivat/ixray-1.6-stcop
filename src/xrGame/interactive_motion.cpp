@@ -2,14 +2,16 @@
 
 #include "interactive_motion.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "PhysicsShellHolder.h"
 
 #include "../Include/xrRender/Kinematics.h"
 
 #include "game_object_space.h"
 
-void interactive_motion_diagnostic(LPCSTR message, const MotionID &m, xrPhysX::Wrappers::CPhysXShell* s)
+void interactive_motion_diagnostic(LPCSTR message, const MotionID &m, xrPhysX::Wrappers::CShell* s)
 {
 #ifdef	DEBUG
 	if(!death_anim_debug)
@@ -49,7 +51,7 @@ void interactive_motion::destroy()
 	
 	flags.assign( 0 );
 }
-void interactive_motion::setup(LPCSTR m, xrPhysX::Wrappers::CPhysXShell* s, float angle_)
+void interactive_motion::setup(LPCSTR m, xrPhysX::Wrappers::CShell* s, float angle_)
 {
 	VERIFY(m);
 	VERIFY(s);
@@ -58,7 +60,7 @@ void interactive_motion::setup(LPCSTR m, xrPhysX::Wrappers::CPhysXShell* s, floa
 	setup(K->LL_MotionID(m), s, angle_);
 }
 
-void interactive_motion::setup(const MotionID &m, xrPhysX::Wrappers::CPhysXShell* s, float _angle)
+void interactive_motion::setup(const MotionID &m, xrPhysX::Wrappers::CShell* s, float _angle)
 {
 	VERIFY(s);
 	VERIFY(m.valid());

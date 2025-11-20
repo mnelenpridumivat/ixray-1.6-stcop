@@ -6,13 +6,8 @@
 #include "PHDestroyable.h"
 #include "PHMovementControl.h"
 #include "CustomMonster.h"
-
-
-
 #include "../Include/xrRender/KinematicsAnimated.h"
-
-
-
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/IActivationShape.h"
 //#include "../xrPhysics/Extendedgeom.h"
@@ -21,6 +16,7 @@
 #include "../xrPhysics/IPHCapture.h"
 //#include "../xrPhysics/ICollideValidator.h"
 #include "../xrPhysics/IPHWorld.h"
+#endif
 
 //#include "Physics.h"
 
@@ -693,7 +689,7 @@ void CCharacterPhysicsSupport::in_UpdateCL()
 #endif
 }
 
-void CCharacterPhysicsSupport::CreateSkeleton(xrPhysX::Wrappers::CPhysXShell* &pShell)
+void CCharacterPhysicsSupport::CreateSkeleton(xrPhysX::Wrappers::CShell* &pShell)
 {
 
 	R_ASSERT2(!pShell,"pShell already initialized!!");
@@ -1025,7 +1021,12 @@ void	CCharacterPhysicsSupport::	AddActiveWeaponCollision		()
 	m_active_item_obj	= &(active_weapon_item->object());
 
 
-	destroy_physics_shell( weapon_shell );
+	//destroy_physics_shell( weapon_shell );
+	if (weapon_shell)
+	{
+		weapon_shell->Deactivate();
+	}
+	xr_delete(weapon_shell);
 }
 
 void	CCharacterPhysicsSupport::	CreateShell						( CObject* who, Fvector& dp, Fvector & velocity  )

@@ -8,7 +8,9 @@
 
 #include "StdAfx.h"
 #include "physic_item.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "xrserver_objects.h"
 #include "../Include/xrRender/RenderVisual.h"
 #include "../Include/xrRender/KinematicsAnimated.h"

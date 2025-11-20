@@ -12,8 +12,10 @@
 
 #include "ActorEffector.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/ActorCameraCollision.h"
+#endif
 #include "Level.h"
 #include "game_cl_base.h"
 #include "InfoPortion.h"
@@ -49,7 +51,9 @@
 #include "actor_mp_client.h"
 #ifdef DEBUG
 #	include "debug_renderer.h"
+#ifndef IXRAY_PHYSX
 #	include "../xrPhysics/phvalide.h"
+#endif
 #endif
 #include "../xrCore/Save/SaveObject.h"
 

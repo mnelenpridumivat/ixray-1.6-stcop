@@ -26,7 +26,9 @@
 
 #include "../monster_aura.h"
 #include "../../../InventoryOwner.h"
+#ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PHCharacter.h"
+#endif
 
 #include "../xrServerEntities/xrServer_Objects_ALife_Monsters.h"
 

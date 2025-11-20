@@ -9,7 +9,9 @@
 #include "../Include/xrRender/Kinematics.h"
 //#include "PHWorld.h"
 //extern CPHWorld*	ph_world;
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 CCar::SCarSound::SCarSound(CCar* car)
 {
 	volume                 =1.f;

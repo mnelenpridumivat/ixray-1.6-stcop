@@ -11,7 +11,9 @@
 #include "game_cl_base.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "ai_object_location.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "object_broker.h"
 #include "player_hud.h"
 #include "GamePersistent.h"

@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHDefs.h"
+#endif
 #include "PHDestroyableNotificate.h"
 class CPhysicsShellHolder;
 class CSE_ALifePHSkeletonObject;

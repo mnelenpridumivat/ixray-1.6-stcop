@@ -8,8 +8,10 @@
 
 #include "stdafx.h"
 #include "pch_script.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/PhysicsShell.h"
 #include "../../../xrPhysics/phvalide.h"
+#endif
 #include "ai_crow.h"
 #include "../../Level.h"
 #include "../../../Include/xrRender/RenderVisual.h"

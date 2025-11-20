@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "trajectories.h"
 #include "Level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "ai_debug_variables.h"
 
 #include "../xrCore/_vector3d_ext.h"

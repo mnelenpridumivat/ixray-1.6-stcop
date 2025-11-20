@@ -42,12 +42,12 @@ class CPHShellBasedAction:
 	public	CPHAction
 {
 protected:
-	xrPhysX::Wrappers::CPhysXShell* m_shell;
+	xrPhysX::Wrappers::CShell* m_shell;
 public:
-	CPHShellBasedAction(xrPhysX::Wrappers::CPhysXShell* shell)							;
+	CPHShellBasedAction(xrPhysX::Wrappers::CShell* shell)							;
 
 
-	virtual bool compare(const	xrPhysX::Wrappers::CPhysXShell* shl) const
+	virtual bool compare(const	xrPhysX::Wrappers::CShell* shl) const
 	{
 		return shl==m_shell;
 	}
@@ -60,11 +60,11 @@ class CPHConstForceAction:
 
 	Fvector m_force;
 public:
-	CPHConstForceAction(xrPhysX::Wrappers::CPhysXShell* shell,const Fvector &force);
+	CPHConstForceAction(xrPhysX::Wrappers::CShell* shell,const Fvector &force);
 	virtual void run();
 
 	virtual bool compare(const CPHReqComparerV* v) const {return v->compare(this);}
-	virtual bool compare(const xrPhysX::Wrappers::CPhysXShell* shl) const {return CPHShellBasedAction::compare(shl);}
+	virtual bool compare(const xrPhysX::Wrappers::CShell* shl) const {return CPHShellBasedAction::compare(shl);}
 #ifdef	DEBUG
 	const Fvector& force() const { return m_force; }
 #endif
@@ -74,8 +74,8 @@ DECLARE_SCRIPT_REGISTER_FUNCTION
 class CPHReqComparerHasShell:
 	public CPHReqComparerV
 {
-	xrPhysX::Wrappers::CPhysXShell* m_shell;
+	xrPhysX::Wrappers::CShell* m_shell;
 public:
-	CPHReqComparerHasShell(xrPhysX::Wrappers::CPhysXShell* shl);
+	CPHReqComparerHasShell(xrPhysX::Wrappers::CShell* shl);
 	virtual bool compare(const CPHConstForceAction* v) const {return v->compare(m_shell);}
 };

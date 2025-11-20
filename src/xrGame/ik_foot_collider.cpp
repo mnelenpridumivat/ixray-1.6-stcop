@@ -10,7 +10,9 @@
 #include "entity_alive.h"
 
 //#include "ode_include.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 
 #include "ik_collide_data.h"
 

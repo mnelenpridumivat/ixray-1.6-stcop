@@ -1,7 +1,10 @@
 #include "StdAfx.h"
 #include "Level.h"
 #include "../xrCore/ppmd_compressor.h"
+
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "xrServer_updates_compressor.h"
 
 void CLevel::ProcessCompressedUpdate(NET_Packet& P, u8 const compress_type)

@@ -3,7 +3,9 @@
 #ifdef DEBUG
 
 #include "PHDebug.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #endif
 #include "alife_space.h"
 #include "Hit.h"

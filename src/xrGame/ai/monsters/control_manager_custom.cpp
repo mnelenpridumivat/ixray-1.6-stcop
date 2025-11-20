@@ -4,7 +4,9 @@
 #include "control_sequencer.h"
 #include "control_run_attack.h"
 #include "control_threaten.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/PhysicsShell.h"
+#endif
 #include "../../detail_path_manager.h"
 #include "../../Level.h"
 #include "control_animation_base.h"

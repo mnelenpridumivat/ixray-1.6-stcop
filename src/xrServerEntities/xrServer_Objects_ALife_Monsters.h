@@ -14,7 +14,9 @@
 #include "character_info_defs.h"
 #include "../xrCore/associative_vector.h"
 #include "alife_movement_manager_holder.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/net_physics_state.h"
+#endif
 #include "../xrGame/ai/stalker/ai_stalker_state_net.h"
 
 class CALifeMonsterBrain;

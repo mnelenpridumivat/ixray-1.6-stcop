@@ -17,7 +17,7 @@ public:
 	u32		open_time;
 
 	CCar*			pCar;
-	xrPhysX::Wrappers::CPhysXJoint*	Joint;
+	xrPhysX::Wrappers::CJoint*	Joint;
 	float saved_lo, saved_hi;
 	Fvector2		door_plane_ext;
 	Ivector2		door_plane_axes;

@@ -22,7 +22,9 @@
 #include "CustomOutfit.h"
 #include "ActorCondition.h"
 #include "UIGameCustom.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/matrix_utils.h"
+#endif
 #include "clsid_game.h"
 #include "game_cl_base_weapon_usage_statistic.h"
 #include "Grenade.h"
@@ -54,7 +56,9 @@
 #include "Artefact.h"
 #include "CharacterPhysicsSupport.h"
 #include "material_manager.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IColisiondamageInfo.h"
+#endif
 #include "ui/UIMainIngameWnd.h"
 #include "map_manager.h"
 #include "GametaskManager.h"

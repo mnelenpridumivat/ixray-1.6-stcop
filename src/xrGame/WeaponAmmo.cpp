@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "WeaponAmmo.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "xrServer_Objects_ALife_Items.h"
 #include "Actor_Flags.h"
 #include "Inventory.h"

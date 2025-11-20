@@ -6,7 +6,9 @@
 #include "game_cl_base.h"
 #include "../xrEngine/CameraBase.h"
 //#include "Physics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/phvalide.h"
+#endif
 
 void CActorMP::net_Import	( NET_Packet &P)
 {

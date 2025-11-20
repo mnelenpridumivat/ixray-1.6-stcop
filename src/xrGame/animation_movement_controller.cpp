@@ -3,7 +3,9 @@
 
 #include "../Include/xrRender/Kinematics.h"
 #include "game_object_space.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/matrix_utils.h"
+#endif
 #ifdef	 DEBUG
 #include "PHDebug.h"
 #endif

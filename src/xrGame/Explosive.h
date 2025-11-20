@@ -9,7 +9,9 @@
 #include "inventory_item.h"
 #include "../xrSound/ai_sounds.h"
 #include "../xrScripts/script_export_space.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/DamageSource.h"
+#endif
 #include "wallmark_manager.h"
 #include "HudSound.h"
 

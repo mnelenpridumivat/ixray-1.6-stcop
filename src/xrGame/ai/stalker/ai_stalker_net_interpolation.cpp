@@ -4,9 +4,11 @@
 #include "CharacterPhysicsSupport.h"
 #include "PHMovementControl.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/PhysicsCommon.h"
+#endif
 
 // ÈÍÒÅÐÏÎËßÖÈß
 extern int g_cl_InterpolationType;

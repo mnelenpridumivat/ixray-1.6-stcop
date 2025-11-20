@@ -4,14 +4,15 @@
 #include "../xrPhysics/iphysics_scripted.h"
 #include "../xrPhysics/PhysicsShell.h"
 #endif
+#include "physics_element_scripted.h"
 #include "../xrScripts/script_export_space.h"
-#include "PhysX/Wrappers/PhysXJoint.h"
+#include "PhysX/Wrappers/Joint.h"
 class cphysics_element_scripted;
 class cphysics_joint_scripted:
-public cphysics_game_scripted<xrPhysX::Wrappers::CPhysXJoint>
+public xrPhysX::cphysics_game_scripted<xrPhysX::Wrappers::CJoint>
 {
 public:
-	cphysics_joint_scripted(xrPhysX::Wrappers::CPhysXJoint* imp ):cphysics_game_scripted<xrPhysX::Wrappers::CPhysXJoint>(imp){}
+	cphysics_joint_scripted(xrPhysX::Wrappers::CJoint* imp ):cphysics_game_scripted<xrPhysX::Wrappers::CJoint>(imp){}
 	
 
 

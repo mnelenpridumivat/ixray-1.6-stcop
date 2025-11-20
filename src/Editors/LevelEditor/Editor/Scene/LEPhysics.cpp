@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "LEPhysics.h"
 #include "mesh_data.h"
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/iphworld.h"
+#endif
 #include "../../xrCore/Collision/xr_area.h"
 #include "../Entry/Terrain/Terrain.h"
 

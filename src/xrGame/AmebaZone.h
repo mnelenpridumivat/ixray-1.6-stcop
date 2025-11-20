@@ -3,7 +3,9 @@
 #include "CustomZone.h"
 #include "../Include/xrRender/KinematicsAnimated.h"
 #include "ZoneVisual.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrphysics/PHUpdateObject.h"
+#endif
 
 class CAmebaZone :
 	public CVisualZone,

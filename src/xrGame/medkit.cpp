@@ -6,7 +6,9 @@
 #include "StdAfx.h"
 
 #include "medkit.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 CMedkit::CMedkit() 
 {

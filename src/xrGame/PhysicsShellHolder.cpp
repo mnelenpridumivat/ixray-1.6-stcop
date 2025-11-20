@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "pch_script.h"
 #include "PhysicsShellHolder.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "xrMessages.h"
 #include "ph_shell_interface.h"
 #include "../Include/xrRender/Kinematics.h"
@@ -13,8 +15,10 @@
 #include "Grenade.h"
 
 //#include "phactivationshape.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
 #include "../xrPhysics/IActivationShape.h"
+#endif
 //#include "../xrPhysics/phvalide.h"
 #include "CharacterPhysicsSupport.h"
 #include "PHMovementControl.h"
@@ -35,7 +39,12 @@ CPhysicsShellHolder::	~CPhysicsShellHolder						()
 //#ifndef MASTER_GOLD
 	//R_ASSERT( !m_pPhysicsShell );
 //#endif
-	destroy_physics_shell( m_pPhysicsShell );
+	//destroy_physics_shell( m_pPhysicsShell );
+	if (m_pPhysicsShell)
+	{
+		m_pPhysicsShell->Deactivate();
+	}
+	xr_delete(m_pPhysicsShell);
 }
 const IObjectPhysicsCollision*CPhysicsShellHolder::physics_collision	()
 {
@@ -268,7 +277,12 @@ void CPhysicsShellHolder::setup_physic_shell	()
 
 void CPhysicsShellHolder::deactivate_physics_shell()
 {
-	destroy_physics_shell( m_pPhysicsShell );
+	if (m_pPhysicsShell)
+	{
+		m_pPhysicsShell->Deactivate();
+	}
+	xr_delete(m_pPhysicsShell);
+	//destroy_physics_shell( m_pPhysicsShell );
 }
 void CPhysicsShellHolder::PHSetMaterial(u16 m)
 {
@@ -279,7 +293,9 @@ void CPhysicsShellHolder::PHSetMaterial(u16 m)
 void CPhysicsShellHolder::PHSetMaterial(LPCSTR m)
 {
 	if(m_pPhysicsShell)
+	{
 		m_pPhysicsShell->SetMaterial(m);
+	}
 }
 
 void CPhysicsShellHolder::PHGetLinearVell		(Fvector& velocity)
@@ -310,24 +326,36 @@ f32 CPhysicsShellHolder::GetMass()
 
 u16	CPhysicsShellHolder::PHGetSyncItemsNumber() const
 {
-	if(m_pPhysicsShell)	return m_pPhysicsShell->get_ElementsNumber();
-	else				return 0;
+	if(m_pPhysicsShell)
+	{
+		return m_pPhysicsShell->get_ElementsNumber();
+	}
+	return 0;
 }
 
 CPHSynchronize*	CPhysicsShellHolder::PHGetSyncItem	(u16 item) const
 {
-	if(m_pPhysicsShell) return m_pPhysicsShell->get_ElementSync(item);
-	else				return 0;
+	if(m_pPhysicsShell)
+	{
+		return m_pPhysicsShell->get_ElementSync(item);
+	}
+	return nullptr;
 }
 void	CPhysicsShellHolder::PHUnFreeze	()
 {
-	if(m_pPhysicsShell) m_pPhysicsShell->UnFreeze();
+	if(m_pPhysicsShell)
+	{
+		m_pPhysicsShell->UnFreeze();
+	}
 }
 
 
 void	CPhysicsShellHolder::PHFreeze()
 {
-	if(m_pPhysicsShell) m_pPhysicsShell->Freeze();
+	if(m_pPhysicsShell)
+	{
+		m_pPhysicsShell->Freeze();
+	}
 }
 
 void CPhysicsShellHolder::OnChangeVisual()
@@ -629,7 +657,7 @@ void CPhysicsShellHolder::ObjectSpatialMove()
 {
 	spatial_move();
 }
-xrPhysX::Wrappers::CPhysXShell* CPhysicsShellHolder::ObjectPPhysicsShell()
+xrPhysX::Wrappers::CShell* CPhysicsShellHolder::ObjectPPhysicsShell()
 {
 	return PPhysicsShell();
 }

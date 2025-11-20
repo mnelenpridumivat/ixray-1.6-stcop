@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "FlamethrowerTraceCollision.h"
 #include "CustomMonster.h"
+#ifndef IXRAY_PHYSX
 #include "../xrphysics/iphworld.h"
+#endif
 #include "Flamethrower.h"
 #include "../xrEngine/xr_collide_form.h"
 #include "ai/stalker/ai_stalker.h"

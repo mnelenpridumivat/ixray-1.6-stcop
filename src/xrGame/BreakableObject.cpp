@@ -1,8 +1,10 @@
 #include "StdAfx.h"
 #include "BreakableObject.h"
 #include "xrServer_Objects_ALife.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHStaticGeomShell.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 //#include "../xrPhysics/extendedgeom.h"
 //#include "../xrPhysics/mathutilsode.h"
 //#include "Physics.h"

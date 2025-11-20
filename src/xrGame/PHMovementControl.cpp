@@ -3,6 +3,7 @@
 
 #include "../xrCore/Collision/cl_intersect.h"
 #include "../xrEngine/AI/alife_space.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHCharacter.h"
 #include "../xrPhysics/IPHCapture.h"
 #include "../xrPhysics/IPhysicsShellHolder.h"
@@ -12,6 +13,7 @@
 #include "../xrPhysics/phvalide.h"
 #include "../xrPhysics/PhysicsShell.h"
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "detail_path_manager.h"
 #include "../xrEngine/GameMtlLib.h"
 #include "../xrEngine/xr_object.h"
@@ -1622,7 +1624,7 @@ IPHCapture* CPHMovementControl::PHCapture()
 	return m_capture;
 }
 
-IPhysicsShellHolder* CPHMovementControl::PhysicsRefObject			()
+xrPhysX::Interfaces::IShellHolder* CPHMovementControl::PhysicsRefObject			()
 {
 	VERIFY( m_character );
 	return m_character->PhysicsRefObject();

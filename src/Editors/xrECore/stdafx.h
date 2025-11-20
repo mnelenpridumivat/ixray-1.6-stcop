@@ -68,7 +68,9 @@ using LPAStringIt = LPAStringVec::iterator;
 #include "Editor/ELog.h"
 #include "../../xrEngine/defines.h"
 
+#ifndef IXRAY_PHYSX
 #include "../../xrPhysics/xrPhysics.h"
+#endif
 #include "../../Layers/xrRender/FVF.h"
 
 struct str_pred 

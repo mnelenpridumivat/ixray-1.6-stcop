@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "PHShellCreator.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "GameObject.h"
 #include "PhysicsShellHolder.h"
 #include "../Include/xrRender/Kinematics.h"

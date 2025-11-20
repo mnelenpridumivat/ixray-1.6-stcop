@@ -6,7 +6,9 @@
 #include "../xrEngine/bone.h"
 
 #include "GameObject.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/matrix_utils.h"
+#endif
 #ifdef DEBUG
 #include "PHDebug.h"
 #endif

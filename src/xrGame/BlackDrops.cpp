@@ -5,7 +5,9 @@
 
 #include "StdAfx.h"
 #include "BlackDrops.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CBlackDrops::CBlackDrops(void) 

@@ -1,10 +1,14 @@
 #include "StdAfx.h"
 #include "PHCollisionDamageReceiver.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPhysicsShellHolder.h"
+#endif
 #include "../xrCore/xr_ini.h"
 #include "../Include/xrRender/Kinematics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/Geometry.h"
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 //#include "../xrEngine/gamemtllib.h"
 //#include "Physics.h"
 #include "xrMessages.h"

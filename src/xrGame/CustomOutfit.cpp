@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 
 #include "CustomOutfit.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "inventory_space.h"
 #include "Inventory.h"
 #include "Actor.h"

@@ -6,7 +6,9 @@
 
 #include "StdAfx.h"
 #include "MercuryBall.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CMercuryBall::CMercuryBall(void) 

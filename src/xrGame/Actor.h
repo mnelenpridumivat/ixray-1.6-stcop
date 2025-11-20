@@ -10,7 +10,9 @@
 #include "fire_disp_controller.h"
 #include "entity_alive.h"
 #include "PHMovementControl.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "InventoryOwner.h"
 #include "../xrEngine/StatGraph.h"
 #include "PhraseDialogManager.h"

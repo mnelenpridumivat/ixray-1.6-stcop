@@ -2,7 +2,9 @@
 #define TELE_WHIRLWIND
 #include "ai/monsters/telekinesis.h"
 #include "ai/monsters/telekinetic_object.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHImpact.h"
+#endif
 
 class CTeleWhirlwind;
 class CGameObject;

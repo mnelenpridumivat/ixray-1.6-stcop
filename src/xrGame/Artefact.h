@@ -2,7 +2,9 @@
 
 #include "hud_item_object.h"
 #include "hit_immunity.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHUpdateObject.h"
+#endif
 #include "../xrScripts/script_export_space.h"
 #include "patrol_path.h"
 

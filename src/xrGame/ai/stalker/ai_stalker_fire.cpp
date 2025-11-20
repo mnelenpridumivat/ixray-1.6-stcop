@@ -40,7 +40,9 @@
 #include "../../restricted_object.h"
 #include "../../ai_object_location.h"
 #include "../../Missile.h"
+#ifndef IXRAY_PHYSX
 #include "../../../xrPhysics/IPHWorld.h"
+#endif
 #include "../../stalker_animation_names.h"
 #include "../../agent_corpse_manager.h"
 #include "../../CharacterPhysicsSupport.h"

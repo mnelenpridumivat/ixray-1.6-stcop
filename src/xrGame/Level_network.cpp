@@ -23,7 +23,9 @@
 #include "Actor.h"
 #include "holder_custom.h"
 
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsCommon.h"
+#endif
 
 const int max_objects_size			= 2*1024;
 const int max_objects_size_in_save	= 8*1024;

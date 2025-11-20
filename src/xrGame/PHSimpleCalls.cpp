@@ -1,10 +1,14 @@
 #include "StdAfx.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "PHSimpleCalls.h"
 //#include	"phobject.h"
 //#include	"PHWorld.h"
 //extern		CPHWorld			*ph_world;
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 
 CPHCallOnStepCondition::CPHCallOnStepCondition()
 {
@@ -56,7 +60,7 @@ void CPHCallOnStepCondition::set_global_time(u32 time)
 	set_global_time(float(time)/1000.f);
 }
 
-CPHShellBasedAction::CPHShellBasedAction(xrPhysX::Wrappers::CPhysXShell* shell)
+CPHShellBasedAction::CPHShellBasedAction(xrPhysX::Wrappers::CShell* shell)
 {
 	VERIFY(shell&&shell->isActive());
 	m_shell=shell;
@@ -66,7 +70,7 @@ bool CPHShellBasedAction::obsolete() const
 	return !m_shell||!m_shell->isActive();
 }
 
-CPHConstForceAction::CPHConstForceAction(xrPhysX::Wrappers::CPhysXShell* shell, const Fvector &force)
+CPHConstForceAction::CPHConstForceAction(xrPhysX::Wrappers::CShell* shell, const Fvector &force)
 :CPHShellBasedAction(shell)
 {
 	m_force.set(force);
@@ -78,7 +82,7 @@ void CPHConstForceAction::run()
 	m_shell->applyForce(m_force.x,m_force.y,m_force.z);
 }
 
-CPHReqComparerHasShell::CPHReqComparerHasShell(xrPhysX::Wrappers::CPhysXShell* shell)
+CPHReqComparerHasShell::CPHReqComparerHasShell(xrPhysX::Wrappers::CShell* shell)
 {
 	VERIFY(shell);
 	m_shell=shell;

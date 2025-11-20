@@ -6,12 +6,16 @@
 
 #include "StdAfx.h"
 #include "GraviArtifact.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "Level.h"
 #include "xrMessages.h"
 #include "game_cl_base.h"
 #include "../Include/xrRender/Kinematics.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 //extern CPHWorld*	ph_world;
 #define CHOOSE_MAX(x,inst_x,y,inst_y,z,inst_z)\
 	if(x>y)\

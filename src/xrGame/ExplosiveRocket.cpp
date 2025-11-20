@@ -7,7 +7,9 @@
 #include "../Include/xrRender/Kinematics.h"
 #include "ExplosiveRocket.h"
 #include "PhysicsShellHolder.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 
 
 CExplosiveRocket::CExplosiveRocket() 

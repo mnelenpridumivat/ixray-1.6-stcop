@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "Bolt.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 #include "../xrEngine/xr_level_controller.h"
 
 void CBolt::OnH_A_Chield() 

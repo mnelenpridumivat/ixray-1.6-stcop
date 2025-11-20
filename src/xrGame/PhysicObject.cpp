@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "pch_script.h"
 #include "PhysicObject.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsShell.h"
+#endif
 //#include "Physics.h"
 #include "xrServer_Objects_ALife.h"
 #include "Level.h"
@@ -13,7 +15,9 @@
 #include "game_object_space.h"
 //#include "../xrPhysics/PhysicsShellAnimator.h"
 #include "moving_bones_snd_player.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/ExtendedGeom.h"
+#endif
 #include "script_game_object.h"
 #ifdef	DEBUG
 #include "PHDebug.h"
@@ -407,7 +411,7 @@ void CPhysicObject::PHObjectPositionUpdate	()
 
 }
 
-void CPhysicObject::AddElement(xrPhysX::Wrappers::CPhysXElement* root_e, int id)
+void CPhysicObject::AddElement(xrPhysX::Wrappers::CElement* root_e, int id)
 {
 	IKinematics* K		= smart_cast<IKinematics*>(Visual());
 

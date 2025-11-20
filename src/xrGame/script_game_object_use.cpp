@@ -15,7 +15,9 @@
 #include "PHCommander.h"
 #include "PHScriptCall.h"
 #include "PHSimpleCalls.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IPHWorld.h"
+#endif
 #include "doors_manager.h"
 #include "Legacy/StalkerPlanner/stalker_planner.h"
 
