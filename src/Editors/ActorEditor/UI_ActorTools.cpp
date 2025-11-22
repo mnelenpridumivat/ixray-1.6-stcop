@@ -1128,7 +1128,10 @@ bool CActorTools::BatchConvert(LPCSTR fn)
 
 void CActorTools::PhysicsSimulate()
 {
-	if (!m_pEditObject)return;
+	if (!m_pEditObject)
+	{
+		return;
+	}
 	m_IsPhysics = true;
 	CreatePhysicsWorld();
 	if (MainForm->GetLeftBarForm()->GetRenderMode() != UILeftBarForm::Render_Editor)

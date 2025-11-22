@@ -111,7 +111,7 @@ void UITopBarForm::Draw()
                 {
                     bool isPhysics = ATools->IsPhysics();
 
-                    if (isPhysics)
+                    if (!isPhysics)
                         ATools->PhysicsSimulate();
                     else
                         ATools->PhysicsStopSimulate();
