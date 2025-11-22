@@ -8,9 +8,11 @@
 #include "../../../PHDestroyable.h"
 #include "../../../CharacterPhysicsSupport.h"
 #include "../control_animation_base.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/net_physics_state.h"
 
 #include "../../../../xrPhysics/IPHWorld.h"
+#endif
 #include "../../../PHMovementControl.h"
 #ifndef IXRAY_PHYSX
 #include "../../../../xrPhysics/PhysicsShell.h"

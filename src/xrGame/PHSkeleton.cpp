@@ -351,7 +351,7 @@ void CPHSkeleton::SpawnCopy()
 		F_entity_Destroy	(D);
 	}
 }
-PHSHELL_PAIR_VECTOR new_shells;
+xr_vector<xrPhysX::Wrappers::shell_root> new_shells;
 void CPHSkeleton::PHSplit()
 {
 

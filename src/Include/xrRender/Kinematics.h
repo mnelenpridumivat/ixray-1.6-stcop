@@ -35,7 +35,7 @@ public:
 	// Low level interface
 	virtual u16					_BCL	LL_BoneID(LPCSTR  B) = 0;
 	virtual u16					_BCL	LL_BoneID(const shared_str& B) = 0;
-	virtual LPCSTR				_BCL	LL_BoneName_dbg(u16 ID) = 0;
+	virtual LPCSTR				_BCL	LL_BoneName_dbg(u16 ID) const = 0;
 
 	virtual CInifile*			_BCL	LL_UserData() = 0;
 	virtual accel*						LL_Bones() = 0;
@@ -58,10 +58,10 @@ virtual	const IBoneData&		_BCL	GetBoneData(u16 bone_id) const = 0;
 	virtual void						LL_GetBindTransform(xr_vector<Fmatrix>& matrices) = 0;
 	virtual int 						LL_GetBoneGroups(xr_vector<xr_vector<u16> >& groups) = 0;
 
-	virtual u16					_BCL	LL_GetBoneRoot() = 0;
-	virtual void						LL_SetBoneRoot(u16 bone_id) = 0;
+	virtual u16 LL_GetBoneRoot() const = 0;
+	virtual void LL_SetBoneRoot(u16 bone_id) = 0;
 
-	virtual BOOL				_BCL	LL_GetBoneVisible(u16 bone_id) = 0;
+	virtual BOOL LL_GetBoneVisible(u16 bone_id) const = 0;
 	virtual void						LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive) = 0;
 	virtual VisMask				_BCL	LL_GetBonesVisible() = 0;
 	virtual void						LL_SetBonesVisible(VisMask mask) = 0;

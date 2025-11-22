@@ -159,7 +159,7 @@ public:
 	// Low level interface
 				u16				_BCL	LL_BoneID			(LPCSTR  B);
 				u16				_BCL	LL_BoneID			(const shared_str& B);
-				LPCSTR			_BCL	LL_BoneName_dbg		(u16 ID);
+				LPCSTR			_BCL	LL_BoneName_dbg		(u16 ID) const;
 
 				CInifile*		_BCL	LL_UserData			()						{return pUserData;}
 				accel*					LL_Bones			()						{return bone_map_N;}
@@ -212,10 +212,10 @@ public:
 	void							LL_GetBindTransform (xr_vector<Fmatrix>& matrices);
     int 							LL_GetBoneGroups 	(xr_vector<xr_vector<u16> >& groups);
 
-	u16						_BCL	LL_GetBoneRoot		()					{	return iRoot;													}
+	virtual u16 LL_GetBoneRoot() const override {return iRoot;}
 	void							LL_SetBoneRoot		(u16 bone_id)		{ VERIFY2(bone_id < LL_BoneCount(), make_string<const char*>("visual_name: %s, bone_id: %d", dbg_name.c_str(), bone_id));	iRoot=bone_id;					}
 
-    BOOL					_BCL	LL_GetBoneVisible	(u16 bone_id)		{ 
+    BOOL					_BCL	LL_GetBoneVisible	(u16 bone_id) const		{ 
 		VERIFY2(bone_id < LL_BoneCount(), make_string<const char*>("visual_name: %s, bone: %s, bone_id: %d", dbg_name.c_str(), LL_BoneName_dbg(bone_id), bone_id));
 		return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id));	
 	}

@@ -338,9 +338,9 @@ bool CEditableObject::ValidateSurf(bool TryToFix, bool* HasFixes)
 //----------------------------------------------------------------------------
 //#ifdef DEBUG
 
-LPCSTR	CEditableObject::LL_BoneName_dbg(u16 ID)
+LPCSTR	CEditableObject::LL_BoneName_dbg(u16 ID) const
 {
-	return 	GetBone( ID )->Name().c_str();
+	return 	GetBone(ID)->Name().c_str();
 }
 
 //#endif

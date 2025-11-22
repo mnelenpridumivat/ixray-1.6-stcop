@@ -19,6 +19,11 @@
 #endif
 #include "../xrGame/ai/stalker/ai_stalker_state_net.h"
 
+namespace xrPhysX::Net
+{
+	class net_physics_state;
+}
+
 class CALifeMonsterBrain;
 class CALifeHumanBrain;
 class CALifeOnlineOfflineGroupBrain;
@@ -439,7 +444,7 @@ SERVER_ENTITY_DECLARE_BEGIN2(CSE_ALifeMonsterBase,CSE_ALifeMonsterAbstract,CSE_P
 	float f_health = 1.0f;
 	u16 u_motion_idx = u16(-1);
 	u16 u_motion_slot = u16(-1);
-	net_physics_state* physics_state = nullptr;
+	xrPhysX::Net::net_physics_state* physics_state = nullptr;
 	bool phSyncFlag = false;
 
 	Flags8 m_flags;

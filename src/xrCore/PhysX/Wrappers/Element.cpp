@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+#include "PxMaterial.h"
 #include "PxRigidActor.h"
 #include "PxRigidDynamic.h"
 #include "PxShape.h"
@@ -57,9 +58,9 @@ void Wrappers::CElement::CreateShape(const physx::PxGeometry& geom, const physx:
 
     auto& Physics = PhysXInstance::GetPhysicsStatic();
     auto& MaterialManager = PhysXMaterialManager::GetInstance();
-    auto material = MaterialManager.GetDefaultMaterial(); // TODO: add actual material get
+    auto& material = MaterialManager.GetDefaultMaterial(); // TODO: add actual material get
 
-    auto NewShape = Physics.createShape(geom, *material, true);
+    auto NewShape = Physics.createShape(geom, material, true);
     if (IVERIFY(NewShape))
     {
         NewShape->setLocalPose(transform);

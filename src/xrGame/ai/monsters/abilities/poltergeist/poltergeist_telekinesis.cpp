@@ -6,7 +6,9 @@
 #include "PhysicsShellHolder.h"
 #include "level.h"
 #include "actor.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/icolisiondamageinfo.h"
+#endif
 #include "ai/monsters/telekinesis.h"
 #include "ai/monsters/BaseMonster/base_monster.h"
 

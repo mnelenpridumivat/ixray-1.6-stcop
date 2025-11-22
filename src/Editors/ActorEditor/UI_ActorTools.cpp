@@ -7,9 +7,11 @@
 #ifndef IXRAY_PHYSX
 #include "../../xrPhysics/Physics.h"
 #endif
+#include "FS_internal.h"
 #include "../xrECore/Editor/EditMesh.h"
 #include "../../Layers/xrRender/KinematicAnimatedDefs.h"
 #include "../../Layers/xrRender/SkeletonAnimated.h"
+#include "Collision/xr_area.h"
 
 CActorTools*	ATools=(CActorTools*)Tools;
 //------------------------------------------------------------------------------
@@ -20,7 +22,7 @@ ECORE_API void ShapeMove(CBone& Bone, const Fvector& _amount);
 ECORE_API void BoneRotate(CBone& Bone, const Fvector& _axis, float angle);
 
 
-void EngineModel::DeleteVisual		()
+void EngineModel::DeleteVisual()
 {
 	DeletePhysicsShell	();
 	Render->model_Delete(m_pVisual);
@@ -28,7 +30,7 @@ void EngineModel::DeleteVisual		()
 	m_pBlend	= 0;
 }
 
-void	   EngineModel::		OnRender			()
+void EngineModel::OnRender()
 {
 	Fmatrix temp = Fmatrix();
 	UpdateObjectXform(temp);
@@ -1150,12 +1152,16 @@ void CActorTools::PhysicsStopSimulate()
 	}
 }
 
-CObjectSpace* os = 0;
+CObjectSpace* os = nullptr;
 void CActorTools::CreatePhysicsWorld()
 {
 	VERIFY(!os);
 	//VERIFY(!physics_world());
-	os = create_object_space();
+	CFileReader* fr = new CFileReader("ActorEditorLevel.cform");
+	os = new CObjectSpace();
+	g_SpatialSpace = new ISpatial_DB();
+	g_SpatialSpacePhysic = new ISpatial_DB();
+	os->Load(*fr, nullptr);
 
 	//create_physics_world(false, os, 0);
 }
@@ -1164,7 +1170,7 @@ void CActorTools::DestroyPhysicsWorld()
 {
 	//if (physics_world())
 	//	destroy_physics_world();
-	destroy_object_space(os);
+	xr_delete(os);
 }
 
 bool CActorTools::GetSelectionPosition(Fmatrix& result)

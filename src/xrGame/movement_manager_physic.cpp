@@ -12,7 +12,9 @@
 #include "detail_path_manager.h"
 #include "Level.h"
 #include "CustomMonster.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/IColisiondamageInfo.h"
+#endif
 
 // Lain: added 
 #include "steering_behaviour.h"

@@ -11,8 +11,8 @@
 class SArtefactActivation;
 struct SArtefactDetectorsSupport;
 
-class CArtefact : public CHudItemObject, 
-	public CPHUpdateObject 
+class CArtefact : public CHudItemObject
+	/*, public CPHUpdateObject*/
 {
 	using inherited = CHudItemObject;
 public:

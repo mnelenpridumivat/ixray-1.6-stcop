@@ -258,6 +258,61 @@ void xrPhysX::PhysXMathHelper::Conv_PosAndRotToPxTransformNoScale(physx::PxTrans
     Conv_MatrixToPxQuatNoScale(target.q, rot);
 }
 
+Fmatrix xrPhysX::PhysXMathHelper::Conv_PxTransformToMatrix(const physx::PxTransform& transform)
+{
+    Fmatrix m;
+    m.identity();
+    Conv_PxTransformToMatrix(m, transform);
+    return m;
+}
+
+void xrPhysX::PhysXMathHelper::Conv_PxTransformToMatrix(Fmatrix& target, const physx::PxTransform& transform)
+{
+    Conv_PxQuatToMatrix(target, transform.q);
+    target.c.x = transform.p.x;
+    target.c.y = transform.p.y;
+    target.c.z = transform.p.z;
+}
+
+Fmatrix xrPhysX::PhysXMathHelper::Conv_PxQuatToMatrix(const physx::PxQuat& quat)
+{
+    Fmatrix m;
+    m.identity();
+    Conv_PxQuatToMatrix(m, quat);
+    return m;
+}
+
+void xrPhysX::PhysXMathHelper::Conv_PxQuatToMatrix(Fmatrix& target, const physx::PxQuat& quat)
+{    
+    // Конвертируем кватернион в матрицу 3x3 (базисные векторы)
+    // Вычисляем базисные векторы из кватерниона
+    float x2 = quat.x + quat.x;
+    float y2 = quat.y + quat.y;
+    float z2 = quat.z + quat.z;
+    float xx = quat.x * x2;
+    float xy = quat.x * y2;
+    float xz = quat.x * z2;
+    float yy = quat.y * y2;
+    float yz = quat.y * z2;
+    float zz = quat.z * z2;
+    float wx = quat.w * x2;
+    float wy = quat.w * y2;
+    float wz = quat.w * z2;
+    
+    // Устанавливаем базисные векторы (i, j, k)
+    target.i.x = 1.0f - (yy + zz);  // _11
+    target.i.y = xy + wz;           // _12  
+    target.i.z = xz - wy;           // _13
+    
+    target.j.x = xy - wz;           // _21
+    target.j.y = 1.0f - (xx + zz);  // _22
+    target.j.z = yz + wx;           // _23
+    
+    target.k.x = xz + wy;           // _31
+    target.k.y = yz - wx;           // _32  
+    target.k.z = 1.0f - (xx + yy);  // _33
+}
+
 void* xrPhysX::xrPhysXAllocator::allocate(size_t size, const char* typeName, const char* filename, int line)
 {
     void* Ptr = xr_alloc(size);
@@ -377,20 +432,20 @@ xrPhysX::PhysXMaterialManager& xrPhysX::PhysXMaterialManager::GetInstance()
     return instance;
 }
 
-physx::PxMaterial* xrPhysX::PhysXMaterialManager::GetMaterial(const shared_str& materialName)
+physx::PxMaterial& xrPhysX::PhysXMaterialManager::GetMaterial(const shared_str& materialName)
 {
     auto it = materials.find(materialName);
     if (!I_ASSERT_M(it != materials.end(), "Physics data for material [%s] not found! Fallback to default.", materialName.c_str()))
     {
         return GetDefaultMaterial();
     }
-    return it->second;
+    return *it->second;
 }
 
-physx::PxMaterial* xrPhysX::PhysXMaterialManager::GetDefaultMaterial()
+physx::PxMaterial& xrPhysX::PhysXMaterialManager::GetDefaultMaterial()
 {
     VERIFY(false, "Direct GetDefaultMaterial call!");
-    return materials["default_static"];
+    return *materials["default_static"];
 }
 
 xrPhysX::PhysXInstance::PhysXInstance()

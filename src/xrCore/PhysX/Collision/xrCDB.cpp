@@ -37,9 +37,9 @@ xrPhysX::CDB::CollisionInstance::CollisionInstance(MODEL* model, const Fmatrix& 
 
     auto& physics = PhysXInstance::GetInstance().GetPhysics();
     
-    auto material = PhysXMaterialManager::GetInstance().GetDefaultMaterial(); // TODO: Make proper reading of material
+    auto& material = PhysXMaterialManager::GetInstance().GetDefaultMaterial(); // TODO: Make proper reading of material
 
-    auto shape = physics.createShape(geom, *material);
+    auto shape = physics.createShape(geom, material);
     m_actor = physics.createRigidStatic(PxTransform);
     m_actor->attachShape(*shape);
     m_actor->userData = this; // no move or copy = no need for stable ref

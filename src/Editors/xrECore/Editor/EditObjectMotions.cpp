@@ -497,10 +497,15 @@ CBone* CEditableObject::FindBoneByName(const char* name)
     return (b_it==m_Bones.end())?0:*b_it;
 }
 
-int CEditableObject::GetRootBoneID()
+int CEditableObject::GetRootBoneID() const
 {
-    for (BoneIt b_it=m_Bones.begin(); b_it!=m_Bones.end(); b_it++)
-    	if ((*b_it)->IsRoot()) return b_it-m_Bones.begin();
+    for (auto b_it=m_Bones.begin(); b_it!=m_Bones.end(); b_it++)
+    {
+	    if ((*b_it)->IsRoot())
+	    {
+		    return b_it-m_Bones.begin();
+	    }
+    }
     THROW;
     return -1;
 }
@@ -508,7 +513,12 @@ int CEditableObject::GetRootBoneID()
 int CEditableObject::PartIDByName(LPCSTR name)
 {
 	for (BPIt it=m_BoneParts.begin(); it!=m_BoneParts.end(); it++)
-    	if (it->alias==name) return it-m_BoneParts.begin();
+	{
+		if (it->alias==name)
+		{
+			return it-m_BoneParts.begin();
+		}
+	}
     return -1;
 } 
 

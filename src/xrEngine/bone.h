@@ -1,6 +1,8 @@
 //----------------------------------------------------
 #pragma once
 
+#include "EngineDefines.h"
+
 #ifdef _LW_EXPORT
 #include <lwrender.h>
 #include <lwhost.h>
@@ -302,21 +304,21 @@ class 	IBoneData
 {
 	public:
 
-	virtual			IBoneData&	_BCL	GetChild		( u16 id )			= 0;
-	virtual const	IBoneData&	_BCL	GetChild		( u16 id )	const	= 0;
-	virtual			u16			_BCL	GetSelfID		( )			const	= 0;
-	virtual			u16			_BCL	GetNumChildren	( )			const	= 0;
+	virtual IBoneData& GetChild(u16 id) = 0;
+	virtual const IBoneData& GetChild(u16 id) const	= 0;
+	virtual u16 GetSelfID() const = 0;
+	virtual u16 GetNumChildren() const = 0;
 
-	virtual const SJointIKData& _BCL	get_IK_data			( )const	= 0;
-	virtual const	Fmatrix&	_BCL	get_bind_transform	( )const	= 0;
-	virtual const	SBoneShape&	_BCL	get_shape			( )const	= 0;
-	virtual const	Fobb&		_BCL	get_obb				( )const	= 0;
-	virtual const	Fvector&	_BCL	get_center_of_mass	( )const	= 0;
-	virtual			float		_BCL	get_mass			( )const	= 0;
-	virtual			u16			_BCL	get_game_mtl_idx	( )const	= 0;
-	virtual			u16			_BCL	GetParentID			( ) const	= 0;
-	virtual			float		_BCL	lo_limit			( u8 k )	const	= 0;
-	virtual			float		_BCL	hi_limit			( u8 k )	const	= 0;
+	virtual const SJointIKData& get_IK_data() const = 0;
+	virtual const Fmatrix& get_bind_transform() const = 0;
+	virtual const SBoneShape& get_shape() const	= 0;
+	virtual const Fobb& get_obb() const	= 0;
+	virtual const Fvector& get_center_of_mass() const = 0;
+	virtual float get_mass() const = 0;
+	virtual u16 get_game_mtl_idx() const = 0;
+	virtual u16 GetParentID() const	= 0;
+	virtual float lo_limit(u8 k) const = 0;
+	virtual float hi_limit(u8 k) const = 0;
 	
 };
 
@@ -376,11 +378,11 @@ public:
 	void			    SetWMap			(const char* p){wmap		= p;}
 	void			    SetRestParams	(float length, const Fvector& offset, const Fvector& rotate){rest_offset.set(offset);rest_rotate.set(rotate);rest_length=length;};
 
-	shared_str		    Name			(){return name;}
-	shared_str		    ParentName		(){return parent_name;}
-	shared_str		    WMap			(){return wmap;}
-	IC CBone*		    Parent			(){return parent;}
-    IC BOOL			    IsRoot			(){return (parent==0);}
+	shared_str		    Name			() const {return name;}
+	shared_str		    ParentName		() const {return parent_name;}
+	shared_str		    WMap			() const {return wmap;}
+	IC CBone*		    Parent			() const {return parent;}
+    IC BOOL			    IsRoot			() const {return (parent==0);}
 	shared_str&		    NameRef			(){return name;}
 
     // transformation
@@ -444,26 +446,28 @@ IC	float	_BCL		editor_hi_limit ( u8 k ) const	{ return IK_data.limits[k].limit.y
     bool 			    ExportOGF		(IWriter& F);
 #endif
 private:
-				IBoneData&		_BCL	GetChild			( u16 id )			{return *children[id];}
-		const	IBoneData&		_BCL	GetChild			( u16 id )	const	{return *children[id];}
-        		u16				_BCL	GetSelfID			( )			const	{return (u16)SelfID;}
-				u16				_BCL	GetNumChildren		( )			const	{return u16( children.size() );}
-		const	SJointIKData&	_BCL	get_IK_data			( )			const	{return	IK_data;}
-		const	Fmatrix&		_BCL	get_bind_transform	( )			const	
+	virtual IBoneData& GetChild(u16 id) override {return *children[id];}
+	virtual const IBoneData& GetChild(u16 id) const override {return *children[id];}
+    virtual u16 GetSelfID() const override {return (u16)SelfID;}
+	virtual u16 GetNumChildren() const override {return u16( children.size());}
+	
+	virtual const SJointIKData& get_IK_data() const override {return IK_data;}
+	virtual const Fmatrix& get_bind_transform() const override {return local_rest_transform;}
+	virtual const SBoneShape& get_shape() const override {return shape;}
+	virtual const Fobb& get_obb() const override;
+	virtual const Fvector& get_center_of_mass() const override {return center_of_mass;}
+	virtual float get_mass() const override {return mass;}
+	virtual u16 get_game_mtl_idx() const override;
+	virtual u16 GetParentID() const override
+	{
+		if(parent)
 		{
-			
-				return	local_rest_transform;
-
+			return u16(parent->SelfID);
 		}
-		const	SBoneShape&		_BCL	get_shape			( )			const	{return shape;}
-
-		const	Fobb&			_BCL	get_obb				( )			const	;
-		const	Fvector&		_BCL	get_center_of_mass	( )			const	{return center_of_mass;}
-				float			_BCL	get_mass			( )			const	{return mass;}
-				u16				_BCL	get_game_mtl_idx	( )			const	;
-				u16				_BCL	GetParentID			( )			const	{if(parent) return u16(parent->SelfID); else return u16(-1);};
-				float			_BCL	lo_limit			( u8 k )	const	{ return engine_lo_limit(k); }
-				float			_BCL	hi_limit			( u8 k )	const	{ return engine_hi_limit(k); }
+		return u16(-1);
+	}
+	virtual float lo_limit(u8 k) const override {return engine_lo_limit(k);}
+	virtual float hi_limit(u8 k) const override {return engine_hi_limit(k);}
 };
 
 //*** Shared Bone Data ****************************************************************************

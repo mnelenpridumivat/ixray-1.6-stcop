@@ -100,14 +100,14 @@ public:
 	virtual void LL_GetBindTransform(xr_vector<Fmatrix>& matrices);
 	virtual int  LL_GetBoneGroups(xr_vector<xr_vector<u16>>& groups);
 
-	virtual u16  LL_GetBoneRoot() { return iRoot; }
+	virtual u16 LL_GetBoneRoot() const override { return iRoot; }
 	virtual void LL_SetBoneRoot(u16 bone_id)
 	{
 		VERIFY(bone_id < LL_BoneCount());
 		iRoot = bone_id;
 	}
 
-	BOOL LL_GetBoneVisible(u16 bone_id) { VERIFY(bone_id < LL_BoneCount()); return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id)); }
+	BOOL LL_GetBoneVisible(u16 bone_id) const { VERIFY(bone_id < LL_BoneCount()); return visimask.is(VisMask::GetBitMask(bone_id), VisMask::GetChunkNumber(bone_id)); }
 	virtual void LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive);
 	VisMask LL_GetBonesVisible() { return visimask; }
 	void LL_SetBonesVisible(VisMask mask);

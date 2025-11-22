@@ -168,7 +168,7 @@ private://IPhysicsShellHolder
 	virtual	void HideAllWeapons( bool v );//(SetWeaponHideState(INV_STATE_BLOCK_ALL,true))
 	virtual	void MovementCollisionEnable( bool enable )	;
 	virtual CPHSoundPlayer* ObjectPhSoundPlayer() {return ph_sound_player();}
-	virtual	ICollisionDamageReceiver* ObjectPhCollisionDamageReceiver();
+	virtual xrPhysX::Interfaces::ICollisionDamageReceiver* ObjectPhCollisionDamageReceiver();
 	virtual	void BonceDamagerCallback(float &damage_factor);
 #ifdef	DEBUG
 	virtual	xr_string dump(xrPhysX::EDumpType type) const;

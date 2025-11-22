@@ -4,6 +4,7 @@
 #include "JointType.h"
 #include "../Interfaces/ShellHolder.h"
 
+struct SBoneShape;
 class IKinematics;
 
 namespace xrPhysX::Wrappers
@@ -33,7 +34,17 @@ namespace xrPhysX::Wrappers
         bool m_active = false;
         bool m_animated = false;
 
-    public:
+#ifdef DEBUG
+        const Interfaces::IShellHolder* m_dbg_obj = nullptr;
+#endif
+        
+        CShell() = default;
+
+        void build_FromKinematics(IKinematics& kinematics);
+        void AddElementRecursive(CElement* root_e, u16 id, Fmatrix global_parent, u16 element_number, bool* vis_check);
+
+    public:        
+        static CShell* Create(const Interfaces::IShellHolder& holder, bool not_active_state);
         /*CPhysXShell(physx::PxScene* scene, IPhysXShellHolder* owner);
         virtual ~CPhysXShell();
         

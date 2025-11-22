@@ -744,28 +744,36 @@ void  CSpawnPoint::Move( Fvector& amount )
 {
 	inherited::Move( amount );
 	const float f_drag_factor = 200.f;
-	if (m_physics_shell)
+	if (m_articulation)
+	{
 		ApplyDragForce(Fvector().mul(amount, f_drag_factor));
+	}
 }
 
 void CSpawnPoint::SetPosition(const Fvector& pos)
 {
-	if(m_physics_shell)
+	if(m_articulation)
+	{
 		return;
+	}
 	inherited::SetPosition	(pos);
 	if (m_AttachedObject) m_AttachedObject->SetPosition( pos);
 }
 void CSpawnPoint::SetRotation(const Fvector& rot)
 {
-	if(m_physics_shell)
+	if(m_articulation)
+	{
 		return;
+	}
 	inherited::SetRotation	(rot);
 	if (m_AttachedObject) m_AttachedObject->SetRotation( rot);
 }
 void CSpawnPoint::SetScale(const Fvector& scale)
 {
-	if(m_physics_shell)
+	if(m_articulation)
+	{
 		return;
+	}
 	inherited::SetScale		(scale);
 	if (m_AttachedObject) m_AttachedObject->SetScale( scale);
 }
@@ -866,8 +874,10 @@ bool CSpawnPoint::GetBox( Fbox& box )
 			{
 				box.set		(m_SpawnData.m_Visual->visual->getVisData().box);
 				Fmatrix		transform = FTransformRP;
-				if(m_physics_shell)
-						UpdateObjectXform( transform );
+				if(m_articulation)
+				{
+					UpdateObjectXform( transform );
+				}
 					
 				box.xform	(transform);
 			}else{
@@ -930,7 +940,7 @@ void CSpawnPoint::OnFrame()
 	if (m_AttachedObject) 		m_AttachedObject->OnFrame	();
 	if (m_SpawnData.Valid())
 	{
-		if(m_physics_shell&&m_SpawnData.m_Data->m_editor_flags.is(CSE_Abstract::flVisualAnimationChange))
+		if(m_articulation&&m_SpawnData.m_Data->m_editor_flags.is(CSE_Abstract::flVisualAnimationChange))
 		{
 			DeletePhysicsShell			();
 			m_SpawnData.OnFrame			();
@@ -1002,7 +1012,7 @@ void CSpawnPoint::Render( int priority, bool strictB2F )
 
 	Fmatrix SaveTransform = FTransformRP;
 
-	if (m_physics_shell)
+	if (m_articulation)
 	{
 		UpdateObjectXform(FTransformRP);
 		RenderSimBox();

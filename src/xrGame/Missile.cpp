@@ -11,7 +11,9 @@
 #include "Level.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "ai_object_location.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "CharacterPhysicsSupport.h"
 #include "Inventory.h"
 #include "../xrEngine/IGame_Persistent.h"

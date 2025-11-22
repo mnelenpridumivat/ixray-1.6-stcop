@@ -158,9 +158,7 @@ using BPIt = BPVec::iterator;
 
 class ECORE_API CEditableObject:
 public IKinematics
-#ifndef IXRAY_PHYSX
 ,public CPhysicsShellHolderEditorBase
-#endif
 {
 	friend class CSceneObject;
 	friend class CEditableMesh;
@@ -190,8 +188,8 @@ public IKinematics
 	SMotionVec m_SMotions;
 	BPVec m_BoneParts;
 	CSMotion* m_ActiveSMotion;
-	xrPhysX::Wrappers::CShell* m_physics_shell = nullptr;
-	Fmatrix* m_object_xform = nullptr;
+	//xrPhysX::Wrappers::CShell* m_physics_shell = nullptr;
+	//Fmatrix* m_object_xform = nullptr;
 public:
 
 	SurfaceVec m_Surfaces;
@@ -293,7 +291,7 @@ public:
 	IC BoneVec& Bones()	{return m_Bones;}
 	IC int BoneCount() const	{return m_Bones.size();}
 	shared_str BoneNameByID(int id);
-	int GetRootBoneID();
+	int GetRootBoneID() const;
 	int PartIDByName(LPCSTR name);
 	IC CBone* GetBone(u32 idx) {VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
 	IC const CBone* GetBone(u32 idx) const {VERIFY(idx<m_Bones.size()); return m_Bones[idx];}
@@ -456,73 +454,80 @@ public:
 	void GetAnchorForRootObjectAnimation( Fmatrix &anchor );
 	bool AnimateRootObject(CSMotion* motion);
 private:
-	virtual void Bone_Calculate(CBoneData* bd, Fmatrix* parent) { VERIFY(false); }
-	virtual void Bone_GetAnimPos(Fmatrix& pos,u16 id, u8 channel_mask, bool ignore_callbacks) { VERIFY(false); }
+	virtual void Bone_Calculate(CBoneData* bd, Fmatrix* parent) override { VERIFY(false); }
+	virtual void Bone_GetAnimPos(Fmatrix& pos,u16 id, u8 channel_mask, bool ignore_callbacks) override { VERIFY(false); }
 
-	virtual bool PickBone(const Fmatrix &parent_xform, pick_result &r, float dist, const Fvector& start, const Fvector& dir, u16 bone_id) { VERIFY(false); return false;}
-	virtual void EnumBoneVertices(SEnumVerticesCallback &C, u16 bone_id) { VERIFY(false); }
+	virtual bool PickBone(const Fmatrix &parent_xform, pick_result &r, float dist, const Fvector& start, const Fvector& dir, u16 bone_id) override { VERIFY(false); return false;}
+	virtual void EnumBoneVertices(SEnumVerticesCallback &C, u16 bone_id) override { VERIFY(false); }
 
 	// Low level interface
-	virtual u16 LL_BoneID(LPCSTR  B)																   	{ int id = FindBoneByNameIdx( B ); VERIFY(id<u16(-1)); return (u16)id; }
-	virtual u16 LL_BoneID(const shared_str& B)                                                          { return LL_BoneID( B.c_str() ); }
-	virtual LPCSTR LL_BoneName_dbg(u16 ID) 																;
+	virtual u16 LL_BoneID(LPCSTR  B) override { int id = FindBoneByNameIdx( B ); VERIFY(id<u16(-1)); return (u16)id; }
+	virtual u16 LL_BoneID(const shared_str& B) override { return LL_BoneID( B.c_str() ); }
+	virtual LPCSTR LL_BoneName_dbg(u16 ID) const override;
 
-	virtual CInifile* LL_UserData() 																			{ return 0; }
-	virtual accel* LL_Bones() 																				{ VERIFY(false); return 0; }
+	virtual CInifile* LL_UserData() override { return nullptr; }
+	virtual accel* LL_Bones() override { VERIFY(false); return 0; }
 
-	virtual CBoneInstance& LL_GetBoneInstance(u16 bone_id);
+	virtual CBoneInstance& LL_GetBoneInstance(u16 bone_id) override;
 
-	virtual CBoneData& LL_GetData(u16 bone_id);
+	virtual CBoneData& LL_GetData(u16 bone_id) override;
 
-	virtual	const IBoneData& GetBoneData(u16 bone_id) const { return *GetBone( bone_id ); }
+	virtual	const IBoneData& GetBoneData(u16 bone_id) const override { return *GetBone( bone_id ); }
 
-	virtual u16 LL_BoneCount() const { return (u16)BoneCount(); }
-	virtual u16 LL_VisibleBoneCount() { VERIFY(false); return 0; }
-	virtual ICF Fmatrix& LL_GetTransform(u16 bone_id) { return GetBone( bone_id )->_LTransform(); }
-	virtual ICF const Fmatrix& LL_GetTransform(u16 bone_id) const { return GetBone( bone_id )->_LTransform(); }
-	virtual ICF Fmatrix& LL_GetTransform_R(u16 bone_id);
-	virtual Fobb& LL_GetBox(u16 bone_id);
-	virtual void LL_GetBindTransform(xr_vector<Fmatrix>& matrices) { VERIFY(false); }
-	virtual int LL_GetBoneGroups(xr_vector<xr_vector<u16> >& groups) { VERIFY(false); return 0; }
+	virtual u16 LL_BoneCount() const override { return (u16)BoneCount(); }
+	virtual u16 LL_VisibleBoneCount() override { VERIFY(false); return 0; }
+	virtual ICF Fmatrix& LL_GetTransform(u16 bone_id) override { return GetBone( bone_id )->_LTransform(); }
+	virtual ICF const Fmatrix& LL_GetTransform(u16 bone_id) const override { return GetBone( bone_id )->_LTransform(); }
+	virtual ICF Fmatrix& LL_GetTransform_R(u16 bone_id) override;
+	virtual Fobb& LL_GetBox(u16 bone_id) override ;
+	virtual void LL_GetBindTransform(xr_vector<Fmatrix>& matrices) override { VERIFY(false); }
+	virtual int LL_GetBoneGroups(xr_vector<xr_vector<u16> >& groups) override { VERIFY(false); return 0; }
 
-	virtual u16 LL_GetBoneRoot() { u16 root_id = (u16)GetRootBoneID(); VERIFY( root_id < u16(-1) ); return root_id; }
-	virtual void LL_SetBoneRoot(u16 bone_id) { VERIFY(false); }
+	virtual u16 LL_GetBoneRoot() const override { u16 root_id = (u16)GetRootBoneID(); VERIFY( root_id < u16(-1) ); return root_id; }
+	virtual void LL_SetBoneRoot(u16 bone_id) override { VERIFY(false); }
 
-	virtual BOOL LL_GetBoneVisible(u16 bone_id) { return TRUE; }
-	virtual void LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive) { VERIFY(false); }
+	virtual BOOL LL_GetBoneVisible(u16 bone_id) const override { return TRUE; }
+	virtual void LL_SetBoneVisible(u16 bone_id, BOOL val, BOOL bRecursive) override { VERIFY(false); }
 
-	virtual VisMask _BCL LL_GetBonesVisible() {
+	virtual VisMask _BCL LL_GetBonesVisible() override {
 		VisMask x; x.set_all(); return x;
 	}
 
-	virtual void LL_SetBonesVisibleAll() {};
+	virtual void LL_SetBonesVisibleAll() override {};
 
-	virtual void LL_SetBonesVisible(VisMask mask) { VERIFY(false); }
+	virtual void LL_SetBonesVisible(VisMask mask) override { VERIFY(false); }
 
 	// Main functionality
-	virtual void CalculateBones(BOOL bForceExact = FALSE) {} // Recalculate skeleton
-	virtual void CalculateBones_Invalidate() {}
-	virtual void Callback(UpdateCallback C, void* Param) { VERIFY(false); }
+	virtual void CalculateBones(BOOL bForceExact = FALSE) override {} // Recalculate skeleton
+	virtual void CalculateBones_Invalidate() override {}
+	virtual void Callback(UpdateCallback C, void* Param) override { VERIFY(false); }
 
 	//	Callback: data manipulation
-	virtual void SetUpdateCallback(UpdateCallback pCallback) { VERIFY(false); }
-	virtual void SetUpdateCallbackParam(void* pCallbackParam) { VERIFY(false); }
+	virtual void SetUpdateCallback(UpdateCallback pCallback) override { VERIFY(false); }
+	virtual void SetUpdateCallbackParam(void* pCallbackParam) override { VERIFY(false); }
 
-	virtual UpdateCallback GetUpdateCallback() { VERIFY(false); return 0; }
-	virtual void* GetUpdateCallbackParam() { VERIFY(false); return 0; }
+	virtual UpdateCallback GetUpdateCallback() override { VERIFY(false); return nullptr; }
+	virtual void* GetUpdateCallbackParam() override { VERIFY(false); return nullptr; }
 	//UpdateCallback				Update_Callback;
 	//void*						Update_Callback_Param;
-	virtual IRenderVisual* dcast_RenderVisual() { return 0; }
-	virtual IKinematicsAnimated* dcast_PKinematicsAnimated() { VERIFY(false); return 0; }
+	virtual IRenderVisual* dcast_RenderVisual() override { return nullptr; }
+	virtual IKinematicsAnimated* dcast_PKinematicsAnimated() override { VERIFY(false); return nullptr; }
 
 	// debug
 #ifdef DEBUG_DRAW
-	virtual void DebugRender(Fmatrix& XFORM) {VERIFY(false);}
+	virtual void DebugRender(Fmatrix& XFORM) override {VERIFY(false);}
 #endif
-	virtual shared_str getDebugName() {return m_ModifName;}
+	virtual shared_str getDebugName() override {return m_ModifName;}
 
 private:
-	virtual	IKinematics* ObjectKinematics() { return this;}
+	virtual const IKinematics* ObjectKinematics() const override { return this;}
+	virtual	IKinematics* ObjectKinematics() override { return this;}
+
+public:
+	//virtual IKinematics* ObjectKinematics() const override;
+	//virtual const Fmatrix& ObjectXFORM() const override;
+
+private:
 	int m_FaceCount;
 	int m_VertexCount;
 

@@ -3,6 +3,7 @@
 #ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHDefs.h"
 #endif
+#include "character_shell_control.h"
 #include "PHDestroyableNotificate.h"
 class CPhysicsShellHolder;
 class CSE_ALifePHSkeletonObject;
@@ -15,7 +16,7 @@ class CPHSkeleton :
 	bool				b_removing;
 	static u32			existence_time;
 	u32					m_remove_time;
-	PHSHELL_PAIR_VECTOR m_unsplited_shels;
+	xr_vector<xrPhysX::Wrappers::shell_root> m_unsplited_shels;
 
 	shared_str			m_startup_anim;
 	flags8				m_flags;

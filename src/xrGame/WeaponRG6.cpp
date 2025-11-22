@@ -3,7 +3,9 @@
 #include "Entity.h"
 #include "ExplosiveRocket.h"
 #include "Level.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/MathUtils.h"
+#endif
 #include "Actor.h"
 #include "UIGameCustom.h"
 #include "Inventory.h"

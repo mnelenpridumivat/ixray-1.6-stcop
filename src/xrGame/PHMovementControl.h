@@ -4,9 +4,11 @@
 
 //#include "../xrPhysics/PHCharacter.h"
 //#include "../xrPhysics/MathUtils.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PhysicsExternalCommon.h"
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/MovementBoxDynamicActivate.h"
+#endif
 #include "PhysX/Interfaces/ShellHolder.h"
 
 namespace ALife {

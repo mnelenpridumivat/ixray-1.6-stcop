@@ -24,6 +24,7 @@ namespace xrPhysX
     
     struct XRCORE_API PhysXMathHelper
     {
+        // from X-Ray to PhysX
         static physx::PxQuat Conv_MatrixToPxQuat(const Fmatrix& transform);
         static void Conv_MatrixToPxQuat(physx::PxQuat& target, const Fmatrix& transform);
         static physx::PxQuat Conv_MatrixToPxQuat(const Fmatrix33& transform);
@@ -53,6 +54,13 @@ namespace xrPhysX
 
         static physx::PxTransform Conv_PosAndRotToPxTransformNoScale(const Fvector& pos, const Fmatrix33& rot);
         static void Conv_PosAndRotToPxTransformNoScale(physx::PxTransform& target, const Fvector& pos, const Fmatrix33& rot);
+
+        // from PhysX to X-Ray
+        static Fmatrix Conv_PxTransformToMatrix(const physx::PxTransform& transform);
+        static void Conv_PxTransformToMatrix(Fmatrix& target, const physx::PxTransform& transform);
+
+        static Fmatrix Conv_PxQuatToMatrix(const physx::PxQuat& quat);
+        static void Conv_PxQuatToMatrix(Fmatrix& target, const physx::PxQuat& quat);
     };
         
     class xrPhysXAllocator : public physx::PxAllocatorCallback
@@ -84,8 +92,8 @@ namespace xrPhysX
 
         static PhysXMaterialManager& GetInstance();
         
-        physx::PxMaterial* GetMaterial(const shared_str& materialName);
-        physx::PxMaterial* GetDefaultMaterial();
+        physx::PxMaterial& GetMaterial(const shared_str& materialName);
+        physx::PxMaterial& GetDefaultMaterial();
     };
     
     class XRCORE_API PhysXInstance

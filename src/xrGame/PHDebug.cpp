@@ -2,7 +2,9 @@
 
 #ifdef DEBUG_DRAW
 #include "PHDebug.h"
+#ifndef IXRAY_PHYSX
 #include "../xrPhysics/PHWorld.h"
+#endif
 
 #include "../../xrUI/ui_base.h"
 float	dbg_text_height_scale = 1.f;

@@ -112,11 +112,11 @@ bool EngineModel::UpdateVisual(CEditableObject* source, bool bUpdGeom, bool bUpd
 {
 	bool bRes = true;
 	CMemoryWriter F;
-	if (m_physics_shell)
+	if (m_articulation)
 	{
-		m_physics_shell->Deactivate();
+		m_articulation->Deactivate();
 	}
-	xr_delete(m_physics_shell);
+	xr_delete(m_articulation);
 	//destroy_physics_shell( m_physics_shell );
 	if (source->IsSkeleton()){
 		if (bUpdGeom)	bRes = UpdateGeometryStream(source);

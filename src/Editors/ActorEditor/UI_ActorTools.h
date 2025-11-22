@@ -33,8 +33,10 @@ public CPhysicsShellHolderEditorBase
 	bool			UpdateMotionKeysStream	(CEditableObject* source);
 	bool			UpdateMotionDefsStream	(CEditableObject* source);
 public:
+	virtual ~EngineModel() = default;
 	float			m_fLOD;
 	IRenderVisual*	m_pVisual;
+	//xrPhysX::Wrappers::CArticulation* m_skeleton = nullptr;
 
 	//Fmatrix			m_pobject_matrix;
 	CBlend*			m_pBlend;
@@ -50,7 +52,7 @@ public:
 
 	void			Clear				()
 	{
-		DeletePhysicsShell		();
+		//DeletePhysicsShell		();
 		DeleteVisual			();
 		m_GeometryStream.clear	();
 		m_MotionKeysStream.clear();
@@ -73,7 +75,20 @@ private:
    //	virtual	Fmatrix&				   	_BCL	ObjectXFORM							()				 { return m_pobject_matrix; }
    //	virtual	Fvector&					_BCL	ObjectPosition						()				 { return m_pobject_matrix.c; }
 	//virtual	IRenderVisual*				_BCL	ObjectVisual						()				 { return m_pVisual;}
-	virtual	IKinematics*				_BCL	ObjectKinematics					()				 	{ if(!m_pVisual)return 0;return m_pVisual->dcast_PKinematics();}
+	virtual	const IKinematics* ObjectKinematics() const override {
+		if(!m_pVisual)
+		{
+			return nullptr;
+		}
+		return m_pVisual->dcast_PKinematics();
+	}
+	virtual	IKinematics* ObjectKinematics() override {
+		if(!m_pVisual)
+		{
+			return nullptr;
+		}
+		return m_pVisual->dcast_PKinematics();
+	}
 
 };
 
