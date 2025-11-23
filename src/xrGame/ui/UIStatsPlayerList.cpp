@@ -247,14 +247,14 @@ void CUIStatsPlayerList::Update()
 	{
 		game_cl_ArtefactHunt* game = static_cast<game_cl_ArtefactHunt*>(&Game());
 		pl_artefacts = game->teams[m_CurTeam - 1].score;
-        xr_sprintf(teaminfo, "%s: %u, %s: %u, %s: %d",*g_pStringTable->translate("mp_artefacts_upcase"),pl_artefacts, *g_pStringTable->translate("mp_players"), pl_count, *g_pStringTable->translate("mp_frags_upcase"),pl_frags );
+        xr_sprintf(teaminfo, "%s: %u, %s: %u, %s: %d",*CStringTable::GetInstance().translate("mp_artefacts_upcase"),pl_artefacts, *CStringTable::GetInstance().translate("mp_players"), pl_count, *g_pStringTable->translate("mp_frags_upcase"),pl_frags );
 		m_header_text->SetText(teaminfo);
 	}
 	else if (GameID() == eGameIDTeamDeathmatch && !m_bSpectator)
 	{
 		game_cl_TeamDeathmatch* game = static_cast<game_cl_TeamDeathmatch*>(&Game());
 		pl_frags = game->teams[m_CurTeam - 1].score;
-		xr_sprintf(teaminfo, "%s: %d, %s: %u", *g_pStringTable->translate("mp_frags_upcase"), pl_frags, *g_pStringTable->translate("mp_players"), pl_count);
+		xr_sprintf(teaminfo, "%s: %d, %s: %u", *CStringTable::GetInstance().translate("mp_frags_upcase"), pl_frags, *CStringTable::GetInstance().translate("mp_players"), pl_count);
 		m_header_text->SetText(teaminfo);
 	}	
 

@@ -719,7 +719,7 @@ LPCSTR CMapLocation::GetHint()
 	{
 		return nullptr;
 	}
-	return g_pStringTable->translate(m_hint).c_str();
+	return CStringTable::GetInstance().translate(m_hint).c_str();
 };
 
 CMapSpotPointer* CMapLocation::GetSpotPointer(CMapSpot* sp)

@@ -128,12 +128,12 @@ void game_cl_TeamDeathmatch::TranslateGameMessage	(u32 msg, NET_Packet& P)
 							"",//no color
 							PlayerName,
 							Color_Main,
-							*g_pStringTable->translate("mp_joined"),
+							*CStringTable::GetInstance().translate("mp_joined"),
 							CTeamInfo::GetTeam_color_tag(int(Team)),							
 							CTeamInfo::GetTeam_name(int(Team)));
 			if(CurrentGameUI()) CurrentGameUI()->CommonMessageOut(Text);
 			//---------------------------------------
-			Msg("%s %s %s", PlayerName, *g_pStringTable->translate("mp_joined"),
+			Msg("%s %s %s", PlayerName, *CStringTable::GetInstance().translate("mp_joined"),
 				CTeamInfo::GetTeam_name(int(Team)));
 		}break;
 
@@ -151,12 +151,12 @@ void game_cl_TeamDeathmatch::TranslateGameMessage	(u32 msg, NET_Packet& P)
 							CTeamInfo::GetTeam_color_tag(int(OldTeam)), 
 							pPlayer->getName(), 
 							Color_Main, 
-							*g_pStringTable->translate("mp_switched_to"),
+							*CStringTable::GetInstance().translate("mp_switched_to"),
 							CTeamInfo::GetTeam_color_tag(int(NewTeam)), 
 							CTeamInfo::GetTeam_name(int(NewTeam)));
 			if(CurrentGameUI()) CurrentGameUI()->CommonMessageOut(Text);
 			//---------------------------------------
-			Msg("%s *s %s", pPlayer->getName(), *g_pStringTable->translate("mp_switched_to"), CTeamInfo::GetTeam_name(int(NewTeam)));
+			Msg("%s *s %s", pPlayer->getName(), *CStringTable::GetInstance().translate("mp_switched_to"), CTeamInfo::GetTeam_name(int(NewTeam)));
 		}break;
 
 	default:
@@ -406,7 +406,7 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 	{
 	case GAME_PHASE_TEAM1_SCORES:
 		{
-			xr_sprintf(msg, g_pStringTable->translate("mp_team_wins").c_str(), CTeamInfo::GetTeam_name(1));
+			xr_sprintf(msg, CStringTable::GetInstance().translate("mp_team_wins").c_str(), CTeamInfo::GetTeam_name(1));
 			m_game_ui->SetRoundResultCaption(msg);
 			
 			m_game_ui->UpdateTeamPanels();
@@ -416,7 +416,7 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 		}break;
 	case GAME_PHASE_TEAM2_SCORES:
 		{
-			xr_sprintf(msg, g_pStringTable->translate("mp_team_wins").c_str(), CTeamInfo::GetTeam_name(2));
+			xr_sprintf(msg, CStringTable::GetInstance().translate("mp_team_wins").c_str(), CTeamInfo::GetTeam_name(2));
 			m_game_ui->SetRoundResultCaption(msg);
 			
 			m_game_ui->UpdateTeamPanels();
@@ -447,7 +447,7 @@ void game_cl_TeamDeathmatch::shedule_Update			(u32 dt)
 					!local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD))
 				{
 					string1024 msg_;
-					xr_sprintf(msg_, *g_pStringTable->translate("mp_press_to_buy"), "B");
+					xr_sprintf(msg_, *CStringTable::GetInstance().translate("mp_press_to_buy"), "B");
 					if(m_game_ui)
 						m_game_ui->SetBuyMsgCaption(msg_);
 					m_bBuyEnabled = true;

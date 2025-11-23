@@ -527,11 +527,11 @@ void game_cl_Deathmatch::shedule_Update			(u32 dt)
 					ConvertTime2String(&S, TimeRemains);
 					string1024 tmpStr = "";
 					if (TimeRemains > 10000)
-						xr_strconcat(tmpStr, *g_pStringTable->translate("mp_time2start"), " ", S);
+						xr_strconcat(tmpStr, *CStringTable::GetInstance().translate("mp_time2start"), " ", S);
 					else
 					{
 						if (TimeRemains < 1000)
-							xr_strconcat(tmpStr, *g_pStringTable->translate("mp_go"), "");
+							xr_strconcat(tmpStr, *CStringTable::GetInstance().translate("mp_go"), "");
 						else
 						{
 							static u32 dwLastTimeRemains = 10;
@@ -543,7 +543,7 @@ void game_cl_Deathmatch::shedule_Update			(u32 dt)
 							}
 							dwLastTimeRemains = dwCurTimeRemains;
 							_itoa(dwCurTimeRemains, S, 10);								
-							xr_strconcat(tmpStr, *g_pStringTable->translate("mp_ready"), "...", S);
+							xr_strconcat(tmpStr, *CStringTable::GetInstance().translate("mp_ready"), "...", S);
 						}
 					};
 					
@@ -600,7 +600,7 @@ void game_cl_Deathmatch::shedule_Update			(u32 dt)
 						if (ps->m_bCurrentVoteAgreed == 1) NumAgreed++;
 					}
 					
-					xr_sprintf	(VoteTimeResStr, g_pStringTable->translate("mp_timeleft").c_str(), MinitsLeft, SecsLeft, float(NumAgreed)/players.size());
+					xr_sprintf	(VoteTimeResStr, CStringTable::GetInstance().translate("mp_timeleft").c_str(), MinitsLeft, SecsLeft, float(NumAgreed)/players.size());
 					m_game_ui->SetVoteTimeResultMsg(VoteTimeResStr);
 				};
 
@@ -612,7 +612,7 @@ void game_cl_Deathmatch::shedule_Update			(u32 dt)
 					string64			S;
 					ConvertTime2String	(&S, Rest);
 					string128			FullS;
-					xr_sprintf				(FullS, "%s : %s", *g_pStringTable->translate("mp_time2respawn"), S);
+					xr_sprintf				(FullS, "%s : %s", *CStringTable::GetInstance().translate("mp_time2respawn"), S);
 
 					m_game_ui->SetForceRespawnTimeCaption(FullS);
 				};
@@ -644,7 +644,7 @@ void game_cl_Deathmatch::shedule_Update			(u32 dt)
 				break;
 
 			string128 resstring;
-			xr_sprintf(resstring, g_pStringTable->translate("mp_player_wins").c_str(), WinnerName);
+			xr_sprintf(resstring, CStringTable::GetInstance().translate("mp_player_wins").c_str(), WinnerName);
 			m_game_ui->SetRoundResultCaption(resstring);
 
 			SetScore();
@@ -861,19 +861,19 @@ void game_cl_Deathmatch::OnVoteStart(NET_Packet& P)
 		if (!xr_strcmp(CmdName, "restart"))
 		{
 			xr_sprintf(NewCmd, "%s", 
-				*g_pStringTable->translate("mp_restart")
+				*CStringTable::GetInstance().translate("mp_restart")
 				);
 		}
 		else if (!xr_strcmp(CmdName, "restart_fast"))
 		{
 			xr_sprintf(NewCmd, "%s", 
-				*g_pStringTable->translate("mp_restart_fast")
+				*CStringTable::GetInstance().translate("mp_restart_fast")
 				);
 		}
 		else if (!xr_strcmp(CmdName, "kick"))
 		{
 			xr_sprintf(NewCmd, "%s %s", 
-				*g_pStringTable->translate("mp_kick"), 
+				*CStringTable::GetInstance().translate("mp_kick"), 
 				CmdParams[0]
 				);
 			for (int i=1; i<MAX_VOTE_PARAMS; i++)
@@ -888,7 +888,7 @@ void game_cl_Deathmatch::OnVoteStart(NET_Packet& P)
 		else if (!xr_strcmp(CmdName, "ban"))
 		{
 			xr_sprintf(NewCmd, "%s %s", 
-				*g_pStringTable->translate("mp_ban"), 
+				*CStringTable::GetInstance().translate("mp_ban"), 
 				CmdParams[0]
 				);
 			for (int i=1; i<MAX_VOTE_PARAMS; i++)
@@ -903,21 +903,21 @@ void game_cl_Deathmatch::OnVoteStart(NET_Packet& P)
 		else if (!xr_strcmp(CmdName, "changemap"))
 		{
 			xr_sprintf(NewCmd, "%s %s", 
-				*g_pStringTable->translate("mp_change_map"), 
-				*g_pStringTable->translate(CmdParams[0])
+				*CStringTable::GetInstance().translate("mp_change_map"), 
+				*CStringTable::GetInstance().translate(CmdParams[0])
 				);
 		}
 		else if (!xr_strcmp(CmdName, "changeweather"))
 		{
 			xr_sprintf(NewCmd, "%s %s", 
-				*g_pStringTable->translate("mp_change_weather"), 
-				*g_pStringTable->translate(CmdParams[0])
+				*CStringTable::GetInstance().translate("mp_change_weather"), 
+				*CStringTable::GetInstance().translate(CmdParams[0])
 				);
 		}
 
 		
 		string1024 VoteStr;
-		xr_sprintf(VoteStr, *g_pStringTable->translate("mp_voting_started"), NewCmd, Player);		
+		xr_sprintf(VoteStr, *CStringTable::GetInstance().translate("mp_voting_started"), NewCmd, Player);		
 		
 
 

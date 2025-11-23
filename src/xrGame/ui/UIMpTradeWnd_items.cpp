@@ -567,7 +567,7 @@ void CUIMpTradeWnd::StorePreset(ETradePreset idx, bool bSilent, bool check_allow
 	{
 		string512						buff;
 		xr_sprintf							(buff,	"%s [%d]",
-			g_pStringTable->translate("ui_st_preset_stored_to").c_str(), idx);
+			CStringTable::GetInstance().translate("ui_st_preset_stored_to").c_str(), idx);
 		SetInfoString					(buff);
 	}
 	ITEMS_vec_cit it				= m_all_items.begin();

@@ -617,20 +617,20 @@ void CSpectator::GetSpectatorString		(string1024& pStr)
 	if (!pStr) return;
 	if (IsGameTypeSingle()) return;
 	
-	xr_string	SpectatorMsg;
+	xr_string SpectatorMsg;
 	switch (cam_active)
 	{
 	case eacFreeFly:
 		{
-			SpectatorMsg = *g_pStringTable->translate("mp_spectator");
+			SpectatorMsg = *CStringTable::GetInstance().translate("mp_spectator");
 			SpectatorMsg += " ";
-			SpectatorMsg += *g_pStringTable->translate("mp_free_fly");
+			SpectatorMsg += *CStringTable::GetInstance().translate("mp_free_fly");
 		}break;
 	case eacFirstEye:
 		{
-			SpectatorMsg = *g_pStringTable->translate("mp_spectator");
+			SpectatorMsg = *CStringTable::GetInstance().translate("mp_spectator");
 			SpectatorMsg += " ";
-			SpectatorMsg += *g_pStringTable->translate("mp_first_eye");
+			SpectatorMsg += *CStringTable::GetInstance().translate("mp_first_eye");
 			SpectatorMsg += " ";
 //			SpectatorMsg = "SPECTATOR (First-Eye): ";
 			SpectatorMsg += m_pActorToLookAt ? m_pActorToLookAt->Name() : "";
@@ -638,18 +638,18 @@ void CSpectator::GetSpectatorString		(string1024& pStr)
 		}break;
 	case eacFreeLook:
 		{
-			SpectatorMsg = *g_pStringTable->translate("mp_spectator");
+			SpectatorMsg = *CStringTable::GetInstance().translate("mp_spectator");
 			SpectatorMsg += " ";
-			SpectatorMsg += *g_pStringTable->translate("mp_free_look");
+			SpectatorMsg += *CStringTable::GetInstance().translate("mp_free_look");
 			SpectatorMsg += " ";
 //			SpectatorMsg = "SPECTATOR (Free-Look):";
 			SpectatorMsg += m_pActorToLookAt ? m_pActorToLookAt->Name() : "";
 		}break;
 	case eacLookAt:
 		{
-			SpectatorMsg = *g_pStringTable->translate("mp_spectator");
+			SpectatorMsg = *CStringTable::GetInstance().translate("mp_spectator");
 			SpectatorMsg += " ";
-			SpectatorMsg += *g_pStringTable->translate("mp_look_at");
+			SpectatorMsg += *CStringTable::GetInstance().translate("mp_look_at");
 			SpectatorMsg += " ";
 //			SpectatorMsg = "SPECTATOR (Look-At):";
 			SpectatorMsg += m_pActorToLookAt ? m_pActorToLookAt->Name() : "";

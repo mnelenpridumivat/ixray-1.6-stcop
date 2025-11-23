@@ -118,7 +118,7 @@ void RenderSearchManagerWindow()
 									if (pCasted && pObject)
 									{
 										xr_string_view cname = pObject->cName().c_str();
-										xr_string_view translate_name = Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str();
+										xr_string_view translate_name = Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(pCasted->Name()).c_str()).c_str();
 
 										if (cname.find(imgui_search_manager.search_string) == xr_string::npos && translate_name.find(imgui_search_manager.search_string) == xr_string::npos)
 										{
@@ -155,7 +155,7 @@ void RenderSearchManagerWindow()
 									{
 										name += " ";
 										name += "[";
-										name += Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str());
+										name += Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(pCasted->Name()).c_str());
 										name += "]";
 									}
 									name += "##InGame_SM_";
@@ -183,7 +183,7 @@ void RenderSearchManagerWindow()
 									{
 										ImGui::Text("system name: [%s]", pObject->cName().c_str());
 										ImGui::Text("section name: [%s]", pObject->cNameSect().c_str());
-										ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str());
+										ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(pCasted->Name()).c_str()).c_str());
 										ImGui::Text("position: %f %f %f", pObject->Position().x, pObject->Position().y, pObject->Position().z);
 
 										ImGui::EndTooltip();
@@ -249,7 +249,7 @@ void RenderSearchManagerWindow()
 										{
 											name += " ";
 											name += "[";
-											name += Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str());
+											name += Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(pCasted->Name()).c_str());
 											name += "]";
 										}
 										name += "##InGame_SM_";
@@ -277,7 +277,7 @@ void RenderSearchManagerWindow()
 										{
 											ImGui::Text("system name: [%s]", pObject->cName().c_str());
 											ImGui::Text("section name: [%s]", pObject->cNameSect().c_str());
-											ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pCasted->Name()).c_str()).c_str());
+											ImGui::Text("translated name: [%s]", Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(pCasted->Name()).c_str()).c_str());
 											ImGui::Text("position: %f %f %f", pObject->Position().x, pObject->Position().y, pObject->Position().z);
 
 											ImGui::EndTooltip();
@@ -336,7 +336,7 @@ void RenderSearchManagerWindow()
 										if (pServerObject->name_replace())
 										{
 											xr_string_view cname = pServerObject->name_replace();
-											const xr_string& translated_by_cname = Platform::ANSI_TO_UTF8(g_pStringTable->translate(cname.data()).c_str());
+											const xr_string& translated_by_cname = Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(cname.data()).c_str());
 											if (cname.find(imgui_search_manager.search_string) == xr_string_view::npos && translated_by_cname.find(imgui_search_manager.search_string) == xr_string::npos)
 											{
 												filter_by_cname = false;
@@ -351,7 +351,7 @@ void RenderSearchManagerWindow()
 										{
 											xr_string_view s_name = pAbstract->s_name.c_str();
 
-											const xr_string& translated_by_s_name = Platform::ANSI_TO_UTF8(g_pStringTable->translate(s_name.data()).c_str());
+											const xr_string& translated_by_s_name = Platform::ANSI_TO_UTF8(CStringTable::GetInstance().translate(s_name.data()).c_str());
 
 											if (s_name.find(imgui_search_manager.search_string) == xr_string_view::npos && translated_by_s_name.find(imgui_search_manager.search_string) == xr_string::npos)
 											{
@@ -367,7 +367,11 @@ void RenderSearchManagerWindow()
 									}
 
 									string128 button_name;
-									xr_sprintf(button_name, "%s [%s]", pServerObject->name_replace() ? pServerObject->name_replace() : "", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pAbstract->s_name).c_str()).c_str());
+									xr_sprintf(button_name, "%s [%s]",
+									           pServerObject->name_replace() ? pServerObject->name_replace() : "",
+									           Platform::ANSI_TO_UTF8(
+										           CStringTable::GetInstance().translate(pAbstract->s_name).c_str()).
+									           c_str());
 
 									if (passed_filter)
 									{
@@ -423,7 +427,11 @@ void RenderSearchManagerWindow()
 										CSE_Abstract* pAbstract = smart_cast<CSE_Abstract*>(pServerObject);
 
 										string128 button_name;
-										xr_sprintf(button_name, "%s [%s]", pServerObject->name_replace() ? pServerObject->name_replace() : "", Platform::ANSI_TO_UTF8(g_pStringTable->translate(pAbstract->s_name).c_str()).c_str());
+										xr_sprintf(button_name, "%s [%s]",
+										           pServerObject->name_replace() ? pServerObject->name_replace() : "",
+										           Platform::ANSI_TO_UTF8(
+											           CStringTable::GetInstance().translate(pAbstract->s_name).c_str())
+										           .c_str());
 
 										if (ImGui::Button(button_name))
 										{

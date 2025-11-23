@@ -72,7 +72,7 @@ void CUIOutfitImmunity::InitFromXml( CUIXml& xml_doc, LPCSTR base_str, u32 hit_t
 	m_magnitude = xml_doc.ReadAttribFlt( buf, 0, "magnitude", 1.0f );
 
 	LPCSTR unit_str = xml_doc.ReadAttrib(buf, 0, "unit_str", "");
-	m_unit_str._set(g_pStringTable->translate(unit_str));
+	m_unit_str._set(CStringTable::GetInstance().translate(unit_str));
 }
 
 void CUIOutfitImmunity::SetProgressValue(float cur, float comp)

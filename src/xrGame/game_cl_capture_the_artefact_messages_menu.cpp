@@ -27,7 +27,7 @@ void game_cl_CaptureTheArtefact::OnSpeechMessage(NET_Packet& P)
 	if (ps->team == local_player->team)
 	{
 		if (CurrentGameUI())
-			CurrentGameUI()->m_pMessagesWnd->AddChatMessage(*g_pStringTable->translate(*(pMMessage->pMessage)), ps->getName());
+			CurrentGameUI()->m_pMessagesWnd->AddChatMessage(*CStringTable::GetInstance().translate(*(pMMessage->pMessage)), ps->getName());
 
 		if (!Level().MapManager().HasMapLocation(FRIEND_RADION_LOCATION, ps->GameID))
 		{
@@ -53,7 +53,7 @@ void game_cl_CaptureTheArtefact::OnSpeechMessage(NET_Packet& P)
 		{
 			pMSound->mSound_Radio.play_at_pos(nullptr, Fvector().set(0,0,0), sm_2D, 0);
 		}
-		Msg("%s said: %s", ps->getName(), *g_pStringTable->translate(pMMessage->pMessage));
+		Msg("%s said: %s", ps->getName(), *CStringTable::GetInstance().translate(pMMessage->pMessage));
 	}
 	else
 	{

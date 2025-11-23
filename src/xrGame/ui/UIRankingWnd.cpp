@@ -187,7 +187,7 @@ void CUIRankingWnd::Init()
 	{
 		string256 buf;
 		xr_strcpy(buf, sizeof(buf), m_center_caption->GetText());
-		xr_strcat(buf, sizeof(buf), g_pStringTable->translate("ui_ranking_center_caption").c_str());
+		xr_strcat(buf, sizeof(buf), CStringTable::GetInstance().translate("ui_ranking_center_caption").c_str());
 		m_center_caption->SetText(buf);
 	}
 

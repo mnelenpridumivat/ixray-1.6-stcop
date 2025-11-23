@@ -64,7 +64,7 @@ void CRender::ScreenshotImpl(ScreenshotMode mode, LPCSTR name, CMemoryWriter* me
         xr_string lvl_name = "mainmenu";
         if (g_pGameLevel)
         {
-            lvl_name = g_pStringTable->translate(g_pGameLevel->name().c_str()).c_str();
+            lvl_name = CStringTable::GetInstance().translate(g_pGameLevel->name().c_str()).c_str();
         }
 
         if (ps_screenshot_format == 0) // jpg screenshots - default one

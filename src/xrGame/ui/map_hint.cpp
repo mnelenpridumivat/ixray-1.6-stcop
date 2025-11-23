@@ -123,7 +123,7 @@ void CUIMapLocationHint::SetInfoTask(CGameTask* task)
 		string512		buff, buff2;
 		InventoryUtilities::GetTimePeriodAsString(buff, sizeof(buff), Level().GetGameTime(), task->m_TimeToComplete);
 		
-		xr_strconcat(buff2, g_pStringTable->translate("ui_st_time_remains").c_str(), " ", buff);
+		xr_strconcat(buff2, CStringTable::GetInstance().translate("ui_st_time_remains").c_str(), " ", buff);
 		S->TextItemControl()->SetText		(buff2);
 	}
 	pos				= S->GetWndPos();

@@ -257,7 +257,7 @@ void CActor::IR_OnKeyboardPress(int cmd)
 				SDrawStaticStruct* _s = CurrentGameUI()->AddCustomStatic("item_used", true);
 				string1024 str = {};
 
-				xr_strconcat(str, *g_pStringTable->translate("st_item_used"), ": ", best_itm->NameItem());
+				xr_strconcat(str, *CStringTable::GetInstance().translate("st_item_used"), ": ", best_itm->NameItem());
 				_s->wnd()->TextItemControl()->SetText(str);
 
 				CurrentGameUI()->ActorMenu().m_pQuickSlot->ReloadReferences(this);

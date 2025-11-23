@@ -1956,38 +1956,38 @@ void game_sv_mp::RejectGameItem(CSE_Abstract* entity)
 #include "../xrEngine/string_table.h"
 void game_sv_mp::DumpOnlineStatistic()
 {
-	xrGameSpyServer* srv		= smart_cast<xrGameSpyServer*>(m_server);
+	xrGameSpyServer* srv = smart_cast<xrGameSpyServer*>(m_server);
 
-	string_path					fn;
-	FS.update_path				(fn,"$logs$","mp_stats\\");
-	xr_strcat					(fn, srv->HostName.c_str());
-	xr_strcat					(fn, "\\online_dump.ltx" );
+	string_path fn;
+	FS.update_path(fn,"$logs$","mp_stats\\");
+	xr_strcat(fn, srv->HostName.c_str());
+	xr_strcat(fn, "\\online_dump.ltx" );
 
-	string64					t_stamp;
-	timestamp					(t_stamp);
+	string64 t_stamp;
+	timestamp(t_stamp);
 
-	CInifile					ini(fn, FALSE, FALSE, TRUE);
-	shared_str					current_section = "global";
-	string256					str_buff;
+	CInifile ini(fn, FALSE, FALSE, TRUE);
+	shared_str current_section = "global";
+	string256 str_buff;
 
-	ini.w_string				(current_section.c_str(), "dump_time", t_stamp);
+	ini.w_string(current_section.c_str(), "dump_time", t_stamp);
 	
-	ini.w_u32					(current_section.c_str(), "players_total_cnt", m_server->GetClientsCount());
+	ini.w_u32(current_section.c_str(), "players_total_cnt", m_server->GetClientsCount());
 
-	xr_sprintf					(str_buff,"\"%s\"", g_pStringTable->translate(Level().name().c_str()).c_str());
-	ini.w_string				(current_section.c_str(), "current_map_name", str_buff);
+	xr_sprintf(str_buff,"\"%s\"", CStringTable::GetInstance().translate(Level().name().c_str()).c_str());
+	ini.w_string(current_section.c_str(), "current_map_name", str_buff);
 
-	xr_sprintf					(str_buff,"%s", g_pStringTable->translate(type_name()).c_str() );
-	ini.w_string				(current_section.c_str(), "game_mode", str_buff);
+	xr_sprintf(str_buff,"%s", CStringTable::GetInstance().translate(type_name()).c_str() );
+	ini.w_string(current_section.c_str(), "game_mode", str_buff);
 
-	auto it		= m_pMapRotation_List.begin();
-	auto it_e	= m_pMapRotation_List.end();
+	auto it = m_pMapRotation_List.begin();
+	auto it_e = m_pMapRotation_List.end();
 	for(u32 idx=0;it!=it_e;++it,++idx)
 	{
-		string16					num_buf;
-		xr_sprintf					(num_buf,"%d",idx);
-		xr_sprintf					(str_buff,"\"%s\"", g_pStringTable->translate((*it).map_name.c_str()).c_str());
-		ini.w_string				("map_rotation", num_buf, str_buff);
+		string16 num_buf;
+		xr_sprintf(num_buf,"%d",idx);
+		xr_sprintf(str_buff,"\"%s\"", CStringTable::GetInstance().translate((*it).map_name.c_str()).c_str());
+		ini.w_string("map_rotation", num_buf, str_buff);
 	}
 
 	struct player_stats_writer
@@ -1999,19 +1999,25 @@ void game_sv_mp::DumpOnlineStatistic()
 		
 		void operator()(IClient* client)
 		{
-			xrClientData *l_pC			= static_cast<xrClientData*>(client);
+			xrClientData *l_pC = static_cast<xrClientData*>(client);
 
 			if (!l_pC->ps)
+			{
 				return;
+			}
 		
-			if(m_server->GetServerClient()==l_pC && g_dedicated_server) 
+			if(m_server->GetServerClient()==l_pC && g_dedicated_server)
+			{
 				return;
+			}
 			
 			if(!l_pC->net_Ready)
+			{
 				return;
+			}
 
-			string16					num_buf;
-			xr_sprintf					(num_buf,"player_%d",player_index);
+			string16 num_buf;
+			xr_sprintf(num_buf,"player_%d",player_index);
 			++player_index;
 
 			m_owner->WritePlayerStats(*ini,num_buf,l_pC);
@@ -2023,43 +2029,43 @@ void game_sv_mp::DumpOnlineStatistic()
 	tmp_functor.ini = &ini;
 	tmp_functor.player_index = 0;
 	m_server->ForEachClientDo(tmp_functor);
-	WriteGameState				(ini, current_section.c_str(), false);
+	WriteGameState(ini, current_section.c_str(), false);
 }
 
 void game_sv_mp::WritePlayerStats(CInifile& ini, LPCSTR sect, xrClientData* pCl)
 {
-	ini.w_string(sect,"player_name",	pCl->ps->getName());
+	ini.w_string(sect,"player_name", pCl->ps->getName());
 	if (pCl->ps->m_account.is_online())
 	{
-		ini.w_u32(sect,"player_profile_id",	pCl->ps->m_account.profile_id());
+		ini.w_u32(sect,"player_profile_id", pCl->ps->m_account.profile_id());
 	}
-	ini.w_u32	(sect,"player_team",	pCl->ps->team);
-	ini.w_u32	(sect,"kills_rival",	pCl->ps->m_iRivalKills);
-	ini.w_u32	(sect,"kills_self",		pCl->ps->m_iSelfKills);
-	ini.w_u32	(sect,"team_kills",		pCl->ps->m_iTeamKills);
-	ini.w_u32	(sect,"deaths",			pCl->ps->m_iDeaths);
+	ini.w_u32(sect,"player_team", pCl->ps->team);
+	ini.w_u32(sect,"kills_rival", pCl->ps->m_iRivalKills);
+	ini.w_u32(sect,"kills_self", pCl->ps->m_iSelfKills);
+	ini.w_u32(sect,"team_kills", pCl->ps->m_iTeamKills);
+	ini.w_u32(sect,"deaths", pCl->ps->m_iDeaths);
 
-	ini.w_string(sect,"player_ip",		pCl->m_cAddress.to_string().c_str());
-	ini.w_string(sect,"player_unique_digest",	pCl->m_cdkey_digest.c_str());
-	ini.w_u32	(sect,"kills_in_row",	pCl->ps->m_iKillsInRowMax);
-	ini.w_u32	(sect,"rank",			pCl->ps->rank);
-	ini.w_u32	(sect,"artefacts",		pCl->ps->af_count);
-	ini.w_u32	(sect,"ping",			pCl->ps->ping);
-	ini.w_u32	(sect,"money",			pCl->ps->money_for_round);
-	ini.w_u32	(sect,"online_time_sec",(Level().timeServer()-pCl->ps->m_online_time)/1000);
+	ini.w_string(sect,"player_ip", pCl->m_cAddress.to_string().c_str());
+	ini.w_string(sect,"player_unique_digest", pCl->m_cdkey_digest.c_str());
+	ini.w_u32(sect,"kills_in_row", pCl->ps->m_iKillsInRowMax);
+	ini.w_u32(sect,"rank", pCl->ps->rank);
+	ini.w_u32(sect,"artefacts", pCl->ps->af_count);
+	ini.w_u32(sect,"ping", pCl->ps->ping);
+	ini.w_u32(sect,"money", pCl->ps->money_for_round);
+	ini.w_u32(sect,"online_time_sec", (Level().timeServer()-pCl->ps->m_online_time)/1000);
 
 	if(Game().m_WeaponUsageStatistic->CollectData())
 	{
-		Player_Statistic& plstats		= *(Game().m_WeaponUsageStatistic->FindPlayer(pCl->ps->getName()));
-		u32 hs		= plstats.m_dwSpecialKills[0];
-		u32 bks		= plstats.m_dwSpecialKills[1];
-		u32 knf		= plstats.m_dwSpecialKills[2];
-		u32 es		= plstats.m_dwSpecialKills[3];
+		Player_Statistic& plstats = *(Game().m_WeaponUsageStatistic->FindPlayer(pCl->ps->getName()));
+		u32 hs = plstats.m_dwSpecialKills[0];
+		u32 bks = plstats.m_dwSpecialKills[1];
+		u32 knf = plstats.m_dwSpecialKills[2];
+		u32 es = plstats.m_dwSpecialKills[3];
 
-		ini.w_u32	(sect,"headshots_kills",	hs);
-		ini.w_u32	(sect,"backstab_kills",		bks);
-		ini.w_u32	(sect,"knife_kills",		knf);
-		ini.w_u32	(sect,"eye_kills",			es);
+		ini.w_u32(sect,"headshots_kills", hs);
+		ini.w_u32(sect,"backstab_kills", bks);
+		ini.w_u32(sect,"knife_kills", knf);
+		ini.w_u32(sect,"eye_kills", es);
 	}
 }
 
@@ -2167,27 +2173,33 @@ void game_sv_mp::FinishToDumpStatistics	()
 
 void game_sv_mp::DumpRoundStatistics()
 {
-	if ( !g_sv_mp_iDumpStatsPeriod ) return;
-	if ( !xr_strlen(round_statistics_dump_fn) ) return;
+	if (!g_sv_mp_iDumpStatsPeriod)
+	{
+		return;
+	}
+	if (!xr_strlen(round_statistics_dump_fn))
+	{
+		return;
+	}
 
-	CInifile					ini(round_statistics_dump_fn, FALSE, FALSE, TRUE);
-	shared_str					current_section = "global";
-	string256					str_buff;
+	CInifile ini(round_statistics_dump_fn, FALSE, FALSE, TRUE);
+	shared_str current_section = "global";
+	string256 str_buff;
 
-	ini.w_string				(current_section.c_str(),"start_time", m_round_start_time_str);
+	ini.w_string(current_section.c_str(),"start_time", m_round_start_time_str);
 	
-	string64					str_current_time;
-	timestamp					(str_current_time);
-	ini.w_string				(current_section.c_str(),"end_time", str_current_time);
+	string64 str_current_time;
+	timestamp(str_current_time);
+	ini.w_string(current_section.c_str(),"end_time", str_current_time);
 
-	xr_sprintf					(str_buff,"%s", g_pStringTable->translate(type_name()).c_str() );
-	ini.w_string				(current_section.c_str(), "game_mode", str_buff);
+	xr_sprintf(str_buff,"%s", CStringTable::GetInstance().translate(type_name()).c_str() );
+	ini.w_string(current_section.c_str(), "game_mode", str_buff);
 
-	xr_sprintf					(str_buff,"\"%s\"", g_pStringTable->translate(Level().name().c_str()).c_str());
-	ini.w_string				(current_section.c_str(), "current_map_name", str_buff);
+	xr_sprintf(str_buff,"\"%s\"", CStringTable::GetInstance().translate(Level().name().c_str()).c_str());
+	ini.w_string(current_section.c_str(), "current_map_name", str_buff);
 
-	xr_sprintf					(str_buff,"\"%s\"",Level().name().c_str());
-	ini.w_string				(current_section.c_str(), "current_map_name_internal", str_buff);
+	xr_sprintf(str_buff,"\"%s\"",Level().name().c_str());
+	ini.w_string(current_section.c_str(), "current_map_name_internal", str_buff);
 
 	struct player_stats_writer
 	{
@@ -2198,17 +2210,23 @@ void game_sv_mp::DumpRoundStatistics()
 		
 		void operator()(IClient* client)
 		{
-			xrClientData *l_pC			= static_cast<xrClientData*>(client);
+			xrClientData *l_pC = static_cast<xrClientData*>(client);
 		
-			if(m_server->GetServerClient()==l_pC && g_dedicated_server) 
+			if(m_server->GetServerClient()==l_pC && g_dedicated_server)
+			{
 				return;
+			}
 			if (!l_pC->m_cdkey_digest.size())
+			{
 				return;
+			}
 			if (!l_pC->ps)
+			{
 				return;
+			}
 			
-			string16					num_buf;
-			xr_sprintf					(num_buf,"player_%d",player_index);
+			string16 num_buf;
+			xr_sprintf(num_buf,"player_%d",player_index);
 			++player_index;
 
 			m_owner->WritePlayerStats(*ini,num_buf,l_pC);
@@ -2221,7 +2239,7 @@ void game_sv_mp::DumpRoundStatistics()
 	tmp_functor.player_index = 0;
 	m_server->ForEachClientDo(tmp_functor);
 	
-	WriteGameState					(ini,current_section.c_str(), true);
+	WriteGameState(ini,current_section.c_str(), true);
 
 	Game().m_WeaponUsageStatistic->SaveDataLtx(ini);
 	//Game().m_WeaponUsageStatistic->Clear();

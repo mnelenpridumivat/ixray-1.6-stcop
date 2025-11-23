@@ -146,7 +146,7 @@ void UIPlayerItem::GetTextParamValue(game_PlayerState const * ps,
 	}else if (param_name.equal("mp_status"))
 	{
 		if (ps->testFlag(GAME_PLAYER_FLAG_READY))
-			xr_strcpy(dest.begin(), dest.size(), g_pStringTable->translate("st_mp_ready").c_str());
+			xr_strcpy(dest.begin(), dest.size(), CStringTable::GetInstance().translate("st_mp_ready").c_str());
 	} else if (param_name.equal("mp_ping"))
 	{
 		xr_sprintf(dest.begin(), dest.size(), "%d", ps->ping);

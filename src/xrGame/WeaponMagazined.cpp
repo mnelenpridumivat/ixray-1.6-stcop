@@ -2803,14 +2803,14 @@ bool CWeaponMagazined::GetBriefInfo( II_BriefInfo& info )
 	if ( ae != 0 && CurrVector.size() != 0 )
 	{
 		LPCSTR ammo_type = m_ammoTypes[CurrVector.back().m_LocalAmmoType].c_str();
-		info.name		= g_pStringTable->translate( pSettings->r_string(ammo_type, "inv_name_short") );
-		info.icon		= ammo_type;
+		info.name = CStringTable::GetInstance().translate( pSettings->r_string(ammo_type, "inv_name_short") );
+		info.icon = ammo_type;
 	}
 	else
 	{
-		LPCSTR ammo_type	= m_ammoTypes[CurrAmmoType].c_str();
-		info.name			= g_pStringTable->translate( pSettings->r_string(ammo_type, "inv_name_short") );
-		info.icon			= ammo_type;
+		LPCSTR ammo_type = m_ammoTypes[CurrAmmoType].c_str();
+		info.name = CStringTable::GetInstance().translate( pSettings->r_string(ammo_type, "inv_name_short") );
+		info.icon = ammo_type;
 	}
 	return true;
 }

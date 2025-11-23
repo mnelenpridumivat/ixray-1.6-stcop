@@ -90,7 +90,7 @@ void CUIAchievements::SetDescription(LPCSTR desc)
 
 void CUIAchievements::SetHint(LPCSTR hint)
 {
-	m_hint->set_text(g_pStringTable->translate(hint).c_str());
+	m_hint->set_text(CStringTable::GetInstance().translate(hint).c_str());
 }
 
 void CUIAchievements::SetIcon(LPCSTR icon)

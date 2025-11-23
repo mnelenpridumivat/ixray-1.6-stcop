@@ -37,9 +37,8 @@ bool	CLevel::net_start_client1				()
 	if (strchr(name_of_server,'/'))	*strchr(name_of_server,'/') = 0;
 
 	// Startup client
-	string256					temp;
-	xr_sprintf						(temp,"%s %s",
-								g_pStringTable->translate("st_client_connecting_to").c_str(), name_of_server);
+	string256 temp;
+	xr_sprintf(temp,"%s %s", CStringTable::GetInstance().translate("st_client_connecting_to").c_str(), name_of_server);
 
 	g_pGamePersistent->SetLoadStageTitle				(temp);
 

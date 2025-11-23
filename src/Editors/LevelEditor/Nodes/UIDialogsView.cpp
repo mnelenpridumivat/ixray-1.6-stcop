@@ -466,7 +466,7 @@ void CUIDialogView::SelectNodeEvent(INodeUnknown* Node)
 
 	if (LastClickedDialogNode->Text.size() > 0)
 	{
-		TranslateStr = Platform::ANSI_TO_UTF8(*g_pStringTable->translate(*LastClickedDialogNode->Text)).c_str();
+		TranslateStr = Platform::ANSI_TO_UTF8(*CStringTable::GetInstance().translate(*LastClickedDialogNode->Text)).c_str();
 		PHelper().CreateCaption(items, "Text\\Translated", TranslateStr);
 	}
 

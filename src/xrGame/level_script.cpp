@@ -56,6 +56,7 @@
 #include "ActorHelmet.h"
 #include "DynamicWallmarkZone.h"
 #include "PickupManager.h"
+#include "script_engine_export.h"
 #include "UIActorMenu.h"
 #include "Cutscenes/CutsceneItem.h"
 #include "Cutscenes/CutsceneManager.h"
@@ -615,7 +616,7 @@ void remove_calls_for_object(const luabind::object& lua_object)
 
 cphysics_world_scripted* physics_world_scripted()
 {
-	return	get_script_wrapper<cphysics_world_scripted>(*physics_world());
+	return xrPhysX::get_script_wrapper<cphysics_world_scripted>(*physics_world());
 }
 CEnvironment* environment()
 {
@@ -922,7 +923,7 @@ LPCSTR tutorial_name()
 
 LPCSTR translate_string(LPCSTR str)
 {
-	return *g_pStringTable->translate(str);
+	return *CStringTable::GetInstance().translate(str);
 }
 
 bool has_active_tutotial()
@@ -986,13 +987,15 @@ void spawn_section(LPCSTR sSection, Fvector3 vPosition, u32 LevelVertexID, u16 P
 CScriptGameObject* g_get_target_obj()
 {
 	collide::rq_result& RQ = HUD().GetCurrentRayQuery();
-	if (RQ.O)
+	if (RQ.IsDynamic)
 	{
-		CGameObject* game_object = static_cast<CGameObject*>(RQ.O);
+		CGameObject* game_object = static_cast<CGameObject*>(RQ.object());
 		if (game_object)
+		{
 			return game_object->lua_game_object();
+		}
 	}
-	return (0);
+	return nullptr;
 }
 
 float g_get_target_dist()
@@ -1006,9 +1009,9 @@ float g_get_target_dist()
 u32 g_get_target_element()
 {
 	collide::rq_result& RQ = HUD().GetCurrentRayQuery();
-	if (RQ.element)
+	if (RQ.IsDynamic)
 	{
-		return RQ.element;
+		return RQ.bone_id();
 	}
 	return (0);
 }
@@ -1116,7 +1119,7 @@ void patrol_path_remove(LPCSTR patrol_path)
 
 void ReloadLanguage(const char* lang)
 {
-	g_pStringTable->ReloadLanguage(lang);
+	CStringTable::GetInstance().ReloadLanguage(lang);
 }
 
 void RefreshNamesNPC()

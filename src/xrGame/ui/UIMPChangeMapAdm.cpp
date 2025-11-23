@@ -107,7 +107,7 @@ void CUIMpChangeMapAdm::FillUpList()
 	u32 cnt	= (u32)M.m_map_names.size();
 	for (u32 i=0; i<cnt; ++i)
 	{
-		CUIListBoxItem* itm = lst->AddTextItem(g_pStringTable->translate(M.m_map_names[i].map_name).c_str());
+		CUIListBoxItem* itm = lst->AddTextItem(CStringTable::GetInstance().translate(M.m_map_names[i].map_name).c_str());
 		itm->Enable(true);
 	}
 

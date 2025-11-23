@@ -73,7 +73,7 @@ void UITeamHeader::InitFieldsStatics	(CUIXml& uiXml)
 		tempField->SetAutoDelete(true);
 		CUIXmlInit::InitStatic(uiXml, FILED_NODE_NAME, i, tempField);
 		m_translated_strings.insert(std::make_pair(shared_str(tempFieldName),
-			g_pStringTable->translate(tempFieldName)));
+			CStringTable::GetInstance().translate(tempFieldName)));
 		m_field_fillers.insert(std::make_pair(shared_str(tempFieldName), tempField));
 	}
 }

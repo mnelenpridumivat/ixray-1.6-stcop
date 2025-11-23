@@ -1004,9 +1004,9 @@ void game_sv_GameState::MapRotation_ListMaps	()
 	{
 		SMapRot& R = m_pMapRotation_List[i];
 		if (i==0)
-			Msg("~   %d. %s (%s) (current)", i+1, g_pStringTable->translate(R.map_name).c_str(), R.map_name.c_str());
+			Msg("~   %d. %s (%s) (current)", i+1, CStringTable::GetInstance().translate(R.map_name).c_str(), R.map_name.c_str());
 		else
-			Msg("  %d. %s (%s)", i+1, g_pStringTable->translate(R.map_name).c_str(), R.map_name.c_str());
+			Msg("  %d. %s (%s)", i+1, CStringTable::GetInstance().translate(R.map_name).c_str(), R.map_name.c_str());
 	}
 	Msg("- --------------------------------");
 };

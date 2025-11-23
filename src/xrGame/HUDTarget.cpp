@@ -56,7 +56,7 @@ CHUDTarget::CHUDTarget	()
 	fuzzyShowInfo		= 0.f;
 	PP.RQ.range			= 0.f;
 
-	PP.RQ.set				(nullptr, 0.f, -1);
+	//PP.RQ.set(nullptr, 0.f, -1);
 
 	Load				();
 	m_bShowCrosshair	= false;
@@ -100,21 +100,21 @@ void CHUDTarget::ShowCrosshair(bool b)
 float fCurrentPickPower;
 ICF static BOOL pick_trace_callback(collide::rq_result& result, LPVOID params)
 {
-	SPickParam*	pp			= (SPickParam*)params;
+	SPickParam*	pp = (SPickParam*)params;
 //	collide::rq_result* RQ	= pp->RQ;
 	++pp->pass;
 
-	if(result.O)
+	if(result.IsDynamic)
 	{	
-		pp->RQ				= result;
+		pp->RQ = result;
 		return FALSE;
 	}else
 	{
 		//получить треугольник и узнать его материал
-		CDB::TRI* T		= Level().ObjectSpace.GetStaticTris()+result.element;
+		//CDB::TRI* T = Level().ObjectSpace.GetStaticTris()+result.element;
 		
-		SGameMtl* mtl = GMLib.GetMaterialByIdx(T->material);
-		pp->power		*= mtl->fVisTransparencyFactor;
+		SGameMtl* mtl = GMLib.GetMaterialByIdx(result.tri().material);
+		pp->power *= mtl->fVisTransparencyFactor;
 		if(pp->power>0.34f)
 		{
 			return TRUE;
@@ -122,8 +122,8 @@ ICF static BOOL pick_trace_callback(collide::rq_result& result, LPVOID params)
 //.		if (mtl->Flags.is(SGameMtl::flPassable)) 
 //.			return TRUE;
 	}
-	pp->RQ					= result;
-	return					FALSE;
+	pp->RQ = result;
+	return FALSE;
 }
 
 void CHUDTarget::CursorOnFrame ()
@@ -132,19 +132,21 @@ void CHUDTarget::CursorOnFrame ()
 	// Render cursor
 	if(Level().CurrentEntity())
 	{
-		PP.RQ.O			= 0; 
-		PP.RQ.range		= g_pGamePersistent->Environment().CurrentEnv->far_plane*0.99f;
-		PP.RQ.element		= -1;
+		//PP.RQ.O			= 0; 
+		PP.RQ.range = g_pGamePersistent->Environment().CurrentEnv->far_plane*0.99f;
+		//PP.RQ.element		= -1;
 		
-		collide::ray_defs	RD(Device.vCameraPosition, Device.vCameraDirection, PP.RQ.range, CDB::OPT_CULL, collide::rqtBoth);
-		RQR.r_clear			();
-		VERIFY				(!fis_zero(RD.dir.square_magnitude()));
+		collide::ray_defs RD(Device.vCameraPosition, Device.vCameraDirection, PP.RQ.range, CDB::OPT_CULL, collide::rqtBoth);
+		RQR.r_clear();
+		VERIFY(!fis_zero(RD.dir.square_magnitude()));
 		
-		PP.power			= 1.0f;
-		PP.pass				= 0;
+		PP.power = 1.0f;
+		PP.pass = 0;
 
 		if(Level().ObjectSpace.RayQuery(RQR,RD, pick_trace_callback, &PP, nullptr, Level().CurrentEntity()))
-			clamp			(PP.RQ.range, NEAR_LIM, PP.RQ.range);
+		{
+			clamp(PP.RQ.range, NEAR_LIM, PP.RQ.range);
+		}
 	}
 }
 
@@ -193,22 +195,24 @@ void CHUDTarget::Render()
 	pt.y = -pt.y;
 	float				di_size = C_SIZE/powf(pt.w,.2f);
 
-	targetFont->SetAligment		(CGameFont::alCenter);
-	targetFont->OutSetI			(0.f,0.05f);
+	targetFont->SetAligment(CGameFont::alCenter);
+	targetFont->OutSetI(0.f,0.05f);
 
 	if (psHUD_Flags.test(HUD_CROSSHAIR_DIST))
-		targetFont->OutSkip		();
+	{
+		targetFont->OutSkip();
+	}
 
 	if (psHUD_Flags.test(HUD_INFO))
 	{ 
-		bool const is_poltergeist	= PP.RQ.O && !!smart_cast<CPoltergeist*> (PP.RQ.O);
+		bool const is_poltergeist	= PP.RQ.IsDynamic && !!smart_cast<CPoltergeist*>(PP.RQ.object());
 
-		if ((PP.RQ.O && PP.RQ.O->getVisible()) || is_poltergeist)
+		if ((PP.RQ.IsDynamic && PP.RQ.object()->getVisible()) || is_poltergeist)
 		{
-			CEntityAlive* E_ = smart_cast<CEntityAlive*>(PP.RQ.O);
+			CEntityAlive* E_ = smart_cast<CEntityAlive*>(PP.RQ.object());
 			CEntityAlive* pCurEnt = smart_cast<CEntityAlive*>(Level().CurrentEntity());
-			PIItem l_pI = smart_cast<PIItem>(PP.RQ.O);
-			CActor* pActor = smart_cast<CActor*>	(PP.RQ.O);
+			PIItem l_pI = smart_cast<PIItem>(PP.RQ.object());
+			CActor* pActor = smart_cast<CActor*>(PP.RQ.object());
 			CInventoryOwner* our_inv_owner = smart_cast<CInventoryOwner*>(pCurEnt);
 
 			if (E_ && E_->g_Alive())
@@ -236,8 +240,8 @@ void CHUDTarget::Render()
 						if (fuzzyShowInfo > 0.5f)
 						{
 							targetFont->SetColor(subst_alpha(C, u8(iFloor(255.f * (fuzzyShowInfo - 0.5f) * 2.f))));
-							targetFont->OutNext("%s", *g_pStringTable->translate(others_inv_owner->Name()));
-							targetFont->OutNext("%s", *g_pStringTable->translate(others_inv_owner->CharacterInfo().Community().id()));
+							targetFont->OutNext("%s", *CStringTable::GetInstance().translate(others_inv_owner->Name()));
+							targetFont->OutNext("%s", *CStringTable::GetInstance().translate(others_inv_owner->CharacterInfo().Community().id()));
 						}
 					}
 				}
@@ -314,8 +318,10 @@ void CHUDTarget::Render()
 
 void CHUDTarget::net_Relcase(CObject* O)
 {
-	if(PP.RQ.O == O)
-		PP.RQ.O = nullptr;
+	if(PP.RQ.IsDynamic && PP.RQ.object() == O)
+	{
+		PP.RQ.IsDynamic = false;
+	}
 
 	RQR.r_clear	();
 }

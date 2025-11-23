@@ -402,8 +402,8 @@ void game_sv_TeamDeathmatch::OnPlayerKillPlayer(game_PlayerState* ps_killer, gam
 #ifdef DEBUG
 						Msg("--- Kicking player %s", tmp_client->ps->getName());
 #endif
-						string512	reason;
-						xr_strconcat(reason, g_pStringTable->translate("st_kicked_by_server").c_str() );
+						string512 reason;
+						xr_strconcat(reason, CStringTable::GetInstance().translate("st_kicked_by_server").c_str());
 						m_server->DisconnectClient( tmp_client, reason );
 					}
 				}

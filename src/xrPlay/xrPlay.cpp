@@ -172,7 +172,8 @@ int APIENTRY WinMain
 
 	EngineLoadStage5();
 
-	xr_delete(g_pStringTable);
+	CStringTable::GetInstance().Destroy();
+	//xr_delete(g_pStringTable);
 
 	Core._destroy();
 

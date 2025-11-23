@@ -1204,14 +1204,14 @@ void SpawnManager_HandleButtonPress(CInifile::Sect* section)
 		if (imgui_spawn_manager.legacyNewsMode)
 		{
 			text_news_final += "%c[255,160,160,160]";
-			text_news_final += g_pStringTable->translate("general_in_item").c_str();
+			text_news_final += CStringTable::GetInstance().translate("general_in_item").c_str();
 			text_news_final += "\\n%c[default]";
 		}
 
 		string128 text_news;
 		if (section->line_exist("inv_name"))
 		{
-			const char* name = g_pStringTable->translate(pSettings->r_string(section->Name.c_str(), "inv_name")).c_str();
+			const char* name = CStringTable::GetInstance().translate(pSettings->r_string(section->Name.c_str(), "inv_name")).c_str();
 			xr_sprintf(text_news, sizeof(text_news), "[%s] x [%d] (%s)", section->Name.c_str(), count, name);
 		}
 		else
@@ -1222,7 +1222,7 @@ void SpawnManager_HandleButtonPress(CInifile::Sect* section)
 
 		GAME_NEWS_DATA				news_data;
 		news_data.m_type = GAME_NEWS_DATA::eNewsType::eNews;
-		news_data.news_caption = g_pStringTable->translate("general_in_item");
+		news_data.news_caption = CStringTable::GetInstance().translate("general_in_item");
 		news_data.news_text = text_news_final.c_str();
 		news_data.show_time = 3000;
 		news_data.texture_name = "ui_ixray_spawn_icon";
@@ -1264,7 +1264,7 @@ void SpawnManager_RenderTooltip(CInifile::Sect* section)
 			const char* pTranslateSectionName = pSettings->r_string(section->Name.c_str(), "inv_name");
 			if (pTranslateSectionName != nullptr)
 			{
-				const auto& pTranslatedString = g_pStringTable->translate(pTranslateSectionName);
+				const auto& pTranslatedString = CStringTable::GetInstance().translate(pTranslateSectionName);
 				ImGui::Text("In game name: [%s]", Platform::ANSI_TO_UTF8(pTranslatedString.c_str()).c_str());
 			}
 		}
@@ -1348,7 +1348,7 @@ Section FilterSectionsWithSearch(const Section& sections, const char* searchBuff
 
 			const char* rawName = READ_IF_EXISTS(pSettings, r_string, sectionKey, "inv_name", sectionKey);
 
-			xr_string lowerTranslated = xr_strlwr_rus(g_pStringTable->translate(rawName).c_str());
+			xr_string lowerTranslated = xr_strlwr_rus(CStringTable::GetInstance().translate(rawName).c_str());
 
 			return lowerSectionName.find(searchStr) != xr_string::npos ||
 				lowerTranslated.find(searchStr) != xr_string::npos;

@@ -39,9 +39,11 @@ u32 CTeamInfo::GetTeam2_color(){
 
 shared_str	CTeamInfo::GetTeam1_name(){
 	if (flags.test(flTeam1_name))
+	{
 		return team1_name;
+	}
 
-	team1_name = g_pStringTable->translate(pSettings->r_string_wb("team1","name"));
+	team1_name = CStringTable::GetInstance().translate(pSettings->r_string_wb("team1","name"));
 	flags.set(flTeam1_name,true);
 
     return team1_name;
@@ -49,9 +51,11 @@ shared_str	CTeamInfo::GetTeam1_name(){
 
 shared_str	CTeamInfo::GetTeam2_name(){
 	if (flags.test(flTeam2_name))
+	{
 		return team2_name;
+	}
 
-	team2_name = g_pStringTable->translate(pSettings->r_string_wb("team2","name"));
+	team2_name = CStringTable::GetInstance().translate(pSettings->r_string_wb("team2","name"));
 	flags.set(flTeam2_name,true);
 
     return team2_name;

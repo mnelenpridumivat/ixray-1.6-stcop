@@ -2148,7 +2148,7 @@ void CActor::shedule_Update	(u32 DT)
 			}
 			else if (m_pUsableObject && m_pUsableObject->tip_text())
 			{
-				m_sDefaultObjAction = g_pStringTable->translate( m_pUsableObject->tip_text() );
+				m_sDefaultObjAction = CStringTable::GetInstance().translate( m_pUsableObject->tip_text() );
 			}
 			else
 			{

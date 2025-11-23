@@ -13,6 +13,7 @@
 #include "alife_human_brain.h"
 
 #include "../xrEngine/string_table.h"
+#include "PhysX/Net.h"
 
 
 #ifndef AI_COMPILER
@@ -25,22 +26,14 @@
 #include "ScriptsSubsystems/StoryID/StoryIDManager.h"
 #	include "alife_time_manager.h"
 #	include "ef_storage.h"
-#	include "game_graph.h"
-#	include "ai_space.h"
 #	include "alife_group_registry.h"
 #	include "alife_simulator.h"
 #	include "alife_registry_container.h"
-#	include "ef_primary.h"
-#	include "../xrEngine/string_table.h"
 #	include "alife_online_offline_group_brain.h"
-#	include "alife_simulator.h"
 #	include "alife_object_registry.h"
 #	include "../xrEngine/date_time.h"
 #	include "custommonster.h"
-#	include "movement_manager.h"
-#	include "location_manager.h"
 #	include "../xrGame/Level.h"
-#include "../xrGame/InventoryOwner.h"
 #endif
 
 void setup_location_types_section(GameGraph::TERRAIN_VECTOR &m_vertex_types, CInifile const * ini, LPCSTR section)
@@ -127,7 +120,7 @@ xr_string TranslateName(LPCSTR nameStr)
 	// Savegame (before this tweak) + custom npc compatibility
 	if (!strstr(nameStr, ":lname_"))
 	{
-		ret = g_pStringTable->translate(nameStr).c_str();
+		ret = CStringTable::GetInstance().translate(nameStr).c_str();
 		return ret;
 	}
 
@@ -140,9 +133,9 @@ xr_string TranslateName(LPCSTR nameStr)
 	string512 lname;
 	_GetItem(nameStr, 1, lname, ':');
 
-	ret = g_pStringTable->translate(name).c_str();
+	ret = CStringTable::GetInstance().translate(name).c_str();
 	ret += " ";
-	ret += g_pStringTable->translate(lname).c_str();
+	ret += CStringTable::GetInstance().translate(lname).c_str();
 
 	return ret;
 }

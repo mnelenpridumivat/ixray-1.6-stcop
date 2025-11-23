@@ -104,7 +104,7 @@ void CUIActorMenu::SetPartner(CInventoryOwner* io)
 				if (pSettings->line_exist(pCar->cNameSect(), "icon"))
 				{
 					Name = pSettings->r_string(pCar->cNameSect(), "name");
-					Name = g_pStringTable->translate(Name);
+					Name = CStringTable::GetInstance().translate(Name);
 				}
 
 				m_PartnerCharacterInfo->InitCharacter

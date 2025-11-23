@@ -118,12 +118,12 @@ void CUIDemoPlayControl::Init()
 void CUIDemoPlayControl::InitRewindTypeList	()
 {
 	m_rewind_type->InitPropertiesBox(Fvector2().set(0,0), Fvector2().set(100,200));
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_start").c_str(),		nullptr, eRewindUntilStart);
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_kill").c_str(),		nullptr, eRewindUntilKill);
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_die").c_str(),		nullptr, eRewindUntilDie);
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_arttake").c_str(),	nullptr, eRewindUntilArtTake);
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_artdrop").c_str(),	nullptr, eRewindUntilArtDrop);
-	m_rewind_type->AddItem(g_pStringTable->translate("mpd_rewind_until_artdeliver").c_str(),	nullptr, eRewindUntilArtDeliver);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_start").c_str(), nullptr, eRewindUntilStart);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_kill").c_str(), nullptr, eRewindUntilKill);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_die").c_str(), nullptr, eRewindUntilDie);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_arttake").c_str(), nullptr, eRewindUntilArtTake);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_artdrop").c_str(), nullptr, eRewindUntilArtDrop);
+	m_rewind_type->AddItem(CStringTable::GetInstance().translate("mpd_rewind_until_artdeliver").c_str(), nullptr, eRewindUntilArtDeliver);
 	m_rewind_type->AutoUpdateSize();
 	m_rewind_type->Hide();
 }
@@ -139,7 +139,7 @@ void CUIDemoPlayControl::InitAllPlayers		()
 	m_players					= new players_collection_t(m_players_store, players_count);
 
 	m_all_players->InitPropertiesBox(Fvector2().set(0,0), Fvector2().set(100,200));
-	m_all_players->AddItem(g_pStringTable->translate("mpd_any_player").c_str(), nullptr, 0);	//warning ! zero tag means Any player !
+	m_all_players->AddItem(CStringTable::GetInstance().translate("mpd_any_player").c_str(), nullptr, 0);	//warning ! zero tag means Any player !
 
 	m_players->clear();
 	for (u32 i = 0; i != players_count; ++i)
@@ -301,10 +301,10 @@ void CUIDemoPlayControl::Update()
 	
 	xr_strconcat(demo_play_string,
 		Device.Paused() ?
-			g_pStringTable->translate("mpdemoplay_paused").c_str() :
-			g_pStringTable->translate("mpdemoplay_active").c_str(),
+			CStringTable::GetInstance().translate("mpdemoplay_paused").c_str() :
+			CStringTable::GetInstance().translate("mpdemoplay_active").c_str(),
 		demo_pos,
-		g_pStringTable->translate("mpdemoplay_speed").c_str(),
+		CStringTable::GetInstance().translate("mpdemoplay_speed").c_str(),
 		demo_speed);
 	//m_game_ui->SetDemoPlayCaption(demo_play_string);
 	m_progress_bar->SetProgressPos(Level().GetDemoPlayPos());

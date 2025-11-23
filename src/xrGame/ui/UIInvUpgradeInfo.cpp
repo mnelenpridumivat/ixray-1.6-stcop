@@ -114,18 +114,18 @@ bool UIInvUpgradeInfo::init_upgrade( Upgrade_type* upgr, CInventoryItem* inv_ite
         {
             if (m_legacy_mode)
             {
-                xr_strcpy(str_res, g_pStringTable->translate(desc).c_str());
+                xr_strcpy(str_res, CStringTable::GetInstance().translate(desc).c_str());
             }
             else if (add)
             {
                 xr_sprintf(str_res, "%s\\n - %s", str_res,
-					g_pStringTable->translate(desc).c_str());
+					CStringTable::GetInstance().translate(desc).c_str());
             }
             else
             {
                 xr_sprintf(str_res, "%s:\\n - %s",
-					g_pStringTable->translate("st_upgr_disable").c_str(),
-					g_pStringTable->translate(desc).c_str());
+					CStringTable::GetInstance().translate("st_upgr_disable").c_str(),
+					CStringTable::GetInstance().translate(desc).c_str());
             }
         };
 
@@ -170,7 +170,7 @@ bool UIInvUpgradeInfo::init_upgrade( Upgrade_type* upgr, CInventoryItem* inv_ite
                 [[fallthrough]];
 
             default:
-                xr_strconcat(str_res, g_pStringTable->translate("st_upgr_disable").c_str(), ":\\n", m_upgrade->get_prerequisites());
+                xr_strconcat(str_res, CStringTable::GetInstance().translate("st_upgr_disable").c_str(), ":\\n", m_upgrade->get_prerequisites());
 
                 if (upg_res == inventory::upgrade::result_e_parents)
                     set_result_string("st_upgr_parents", true);

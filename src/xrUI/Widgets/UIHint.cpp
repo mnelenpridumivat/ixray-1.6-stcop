@@ -104,7 +104,7 @@ void UIHintWindow::set_hint_text( shared_str const& text )
 
 void UIHintWindow::set_hint_text_ST( shared_str const& text )
 {
-	set_hint_text(g_pStringTable->translate( text ) );
+	set_hint_text(CStringTable::GetInstance().translate( text ) );
 }
 
 void UIHintWindow::update_hint_text()

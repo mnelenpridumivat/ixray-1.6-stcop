@@ -9,6 +9,7 @@
 #include "../xrPhysics/MathUtils.h"
 #include "../xrPhysics/MovementBoxDynamicActivate.h"
 #endif
+#include "characterkinematic/PxController.h"
 #include "PhysX/Interfaces/ShellHolder.h"
 
 namespace ALife {
@@ -32,58 +33,63 @@ class IPHCapture;
 class CPHCharacter;
 class IPhysicsElement;
 
-
+class CPhysXMovementControl
+{
+	physx::PxController* m_controller;
+	
+	
+};
 
 class CPHMovementControl :
 	public IPHMovementControl
 {
 	collide::rq_results		storage;
 
-static const int path_few_point=10;
+	static const int path_few_point=10;
 
 public:
-CObject					*ParentObject		(){ return pObject; }
-IElevatorState			*ElevatorState		();
-void 					in_shedule_Update	( u32 DT );
-void					PHCaptureObject 	( CPhysicsShellHolder* object, CPHCaptureBoneCallback* cb =0 );
-void					PHCaptureObject 	( CPhysicsShellHolder* object, u16 element );
-IPHCapture*				PHCapture			( );
-CPHCharacter*			PHCharacter			( ){ return m_character; }
-const CPHCharacter*		PHCharacter			( )const{ return m_character; }
-const IPhysicsElement*	IElement			( )const;
-void					PHReleaseObject		( );
-Fvector					PHCaptureGetNearestElemPos( const CPhysicsShellHolder* object );
-Fmatrix					PHCaptureGetNearestElemTransform( CPhysicsShellHolder* object );
-void					SetMaterial( u16 material );
-void					SetAirControlParam( float param ){ fAirControlParam=param; }
-void					SetActorRestrictorRadius( ERestrictionType rt, float r );
-void					SetRestrictionType( ERestrictionType rt);
-void					SetActorMovable( bool v );
-void					SetForcedPhysicsControl( bool v );
-bool					ForcedPhysicsControl( );
-void					UpdateObjectBox( CPHCharacter *ach );
-void					VirtualMoveTo		( const Fvector	&in_pos, Fvector &out_pos );
-void					BlockDamageSet		( u64 steps_num );
-enum					JumpType 
-{
-						jtStrait, //end point before uppermost point
-						jtCurved, //end point after uppermost point
-						jtHigh	  //end point is uppermost point
-};
-void					JumpV( const Fvector &jump_velocity );
-void					Jump( const Fvector &start_point, const Fvector &end_point, float time );
-void					Jump( const Fvector &end_point, float time );
-float					Jump( const Fvector &end_point );
-bool					JumpState( );
-///
-bool					PhysicsOnlyMode( );
-void					GetJumpMinVelParam( Fvector &min_vel, float &time, JumpType &type, const Fvector &end_point );	//returns vector of velocity of jump with minimal start speed
-																													//in min_vel and correspondent jump time in time
-float					JumpMinVelTime( const Fvector &end_point ); // return time of jump with min start speed
-// input: end_point and time; return velocity and type of jump
-void					GetJumpParam( Fvector &velocity, JumpType &type, const Fvector &end_point, float time );
-bool					b_exect_position;
-int						in_dead_area_count;
+	CObject					*ParentObject		(){ return pObject; }
+	IElevatorState			*ElevatorState		();
+	void 					in_shedule_Update	( u32 DT );
+	void					PHCaptureObject 	( CPhysicsShellHolder* object, CPHCaptureBoneCallback* cb =0 );
+	void					PHCaptureObject 	( CPhysicsShellHolder* object, u16 element );
+	IPHCapture*				PHCapture			( );
+	CPHCharacter*			PHCharacter			( ){ return m_character; }
+	const CPHCharacter*		PHCharacter			( )const{ return m_character; }
+	const IPhysicsElement*	IElement			( )const;
+	void					PHReleaseObject		( );
+	Fvector					PHCaptureGetNearestElemPos( const CPhysicsShellHolder* object );
+	Fmatrix					PHCaptureGetNearestElemTransform( CPhysicsShellHolder* object );
+	void					SetMaterial( u16 material );
+	void					SetAirControlParam( float param ){ fAirControlParam=param; }
+	void					SetActorRestrictorRadius( ERestrictionType rt, float r );
+	void					SetRestrictionType( ERestrictionType rt);
+	void					SetActorMovable( bool v );
+	void					SetForcedPhysicsControl( bool v );
+	bool					ForcedPhysicsControl( );
+	void					UpdateObjectBox( CPHCharacter *ach );
+	void					VirtualMoveTo		( const Fvector	&in_pos, Fvector &out_pos );
+	void					BlockDamageSet		( u64 steps_num );
+	enum					JumpType 
+	{
+							jtStrait, //end point before uppermost point
+							jtCurved, //end point after uppermost point
+							jtHigh	  //end point is uppermost point
+	};
+	void					JumpV( const Fvector &jump_velocity );
+	void					Jump( const Fvector &start_point, const Fvector &end_point, float time );
+	void					Jump( const Fvector &end_point, float time );
+	float					Jump( const Fvector &end_point );
+	bool					JumpState( );
+	///
+	bool					PhysicsOnlyMode( );
+	void					GetJumpMinVelParam( Fvector &min_vel, float &time, JumpType &type, const Fvector &end_point );	//returns vector of velocity of jump with minimal start speed
+																														//in min_vel and correspondent jump time in time
+	float					JumpMinVelTime( const Fvector &end_point ); // return time of jump with min start speed
+	// input: end_point and time; return velocity and type of jump
+	void					GetJumpParam( Fvector &velocity, JumpType &type, const Fvector &end_point, float time );
+	bool					b_exect_position;
+	int						in_dead_area_count;
 public:
 
 	enum EEnvironment

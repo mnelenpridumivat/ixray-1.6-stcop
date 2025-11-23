@@ -24,7 +24,7 @@ extern LPCSTR alife_section;
 
 CAutosaveManager::CAutosaveManager			()
 {
-	save_str.printf("save %s - %s", Core.UserName, g_pStringTable->translate("autosave").c_str());
+	save_str.printf("save %s - %s", Core.UserName, CStringTable::GetInstance().translate("autosave").c_str());
 
 	u32							hours,minutes,seconds;
 	LPCSTR						section = alife_section;

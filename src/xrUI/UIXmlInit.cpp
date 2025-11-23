@@ -408,7 +408,7 @@ bool CUIXmlInit::InitText(CUIXml& xml_doc, LPCSTR path, int index, CUILines* pLi
 
 	shared_str text = xml_doc.Read(path, index, nullptr);
 	if (text.size())
-		pLines->SetText(g_pStringTable->translate(text).c_str());
+		pLines->SetText(CStringTable::GetInstance().translate(text).c_str());
 
 	return true;
 }
@@ -486,7 +486,7 @@ bool CUIXmlInit::Init3tButton(CUIXml& xml_doc, LPCSTR path, int index, CUI3tButt
 
 	LPCSTR text_hint		= xml_doc.ReadAttrib	(path, index, "hint", nullptr);
 	if(text_hint)
-		pWnd->m_hint_text	= g_pStringTable->translate(text_hint);
+		pWnd->m_hint_text	= CStringTable::GetInstance().translate(text_hint);
 
 	float shadowOffsetX = xml_doc.ReadAttribFlt(path, index, "shadow_offset_x", 0);
 	float shadowOffsetY = xml_doc.ReadAttribFlt(path, index, "shadow_offset_y", 0);

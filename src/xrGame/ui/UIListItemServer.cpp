@@ -107,15 +107,15 @@ void CUIListItemServer::SetParams(LIST_SRV_ITEM& params)
 {
 	string1024				buff;
 
-	LPCSTR _srv_name		= g_pStringTable->translate(params.info.server).c_str();
+	LPCSTR _srv_name		= CStringTable::GetInstance().translate(params.info.server).c_str();
 	cut_string_by_length	(m_map->GetFont(), _srv_name, buff, sizeof(buff), m_server->GetWidth());
 	m_server->SetText		(buff);
 
-	LPCSTR _map_name		= g_pStringTable->translate(params.info.map).c_str();
+	LPCSTR _map_name		= CStringTable::GetInstance().translate(params.info.map).c_str();
 	cut_string_by_length	(m_map->GetFont(), _map_name, buff, sizeof(buff), m_map->GetWidth());
 	m_map->SetText			(buff);
 
-	LPCSTR _game_name		= g_pStringTable->translate(params.info.game).c_str();
+	LPCSTR _game_name		= CStringTable::GetInstance().translate(params.info.game).c_str();
 	cut_string_by_length	(m_game->GetFont(), _game_name, buff, sizeof(buff), m_game->GetWidth());
 	m_game->SetText			(buff);
 

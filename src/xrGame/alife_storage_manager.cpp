@@ -255,7 +255,7 @@ bool CALifeStorageManager::load(LPCSTR save_name_no_check)
 	}
 
 	string512					temp;
-	xr_strconcat(temp, g_pStringTable->translate("st_loading_saved_game").c_str(), " \"", save_name, IXRAY_DEF_SAVE_EXTENSION, "\"");
+	xr_strconcat(temp, CStringTable::GetInstance().translate("st_loading_saved_game").c_str(), " \"", save_name, IXRAY_DEF_SAVE_EXTENSION, "\"");
 	g_pGamePersistent->SetLoadStageTitle(temp);
 	g_pGamePersistent->LoadTitle();
 

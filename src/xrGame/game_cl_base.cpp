@@ -249,7 +249,7 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 				players.insert(std::make_pair(newClientId, PS));
 				OnNewPlayerConnected(newClientId);
 			}
-			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PS->getName(),Color_Main,*g_pStringTable->translate("mp_connected"));
+			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PS->getName(),Color_Main,*CStringTable::GetInstance().translate("mp_connected"));
 			if(CurrentGameUI()) CurrentGameUI()->CommonMessageOut(Text);
 			//---------------------------------------
 			Msg("%s connected", PS->getName());
@@ -259,7 +259,7 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
 
-			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*g_pStringTable->translate("mp_disconnected"));
+			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*CStringTable::GetInstance().translate("mp_disconnected"));
 			if(CurrentGameUI()) CurrentGameUI()->CommonMessageOut(Text);
 			//---------------------------------------
 			Msg("%s disconnected", PlayerName);
@@ -269,7 +269,7 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
 
-			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*g_pStringTable->translate("mp_entered_game"));
+			xr_sprintf(Text, "%s%s %s%s",Color_Teams[0],PlayerName,Color_Main,*CStringTable::GetInstance().translate("mp_entered_game"));
 			if(CurrentGameUI()) CurrentGameUI()->CommonMessageOut(Text);
 		}break;
 	default:

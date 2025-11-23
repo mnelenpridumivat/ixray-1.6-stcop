@@ -4,7 +4,7 @@
 #include "../xrCore/FormatParsers/XML/xrXMLParser.h"
 #include "XR_IOConsole.h"
 
-ENGINE_API CStringTable* g_pStringTable = nullptr;
+//ENGINE_API CStringTable* g_pStringTable = nullptr;
 
 STRING_TABLE_DATA* CStringTable::pData = nullptr;
 xr_vector<xr_token> CStringTable::languages_token;
@@ -13,6 +13,12 @@ BOOL CStringTable::m_bWriteErrorsToLog = FALSE;
 CStringTable::CStringTable	()
 {
 	Init();
+}
+
+CStringTable& CStringTable::GetInstance()
+{
+	static CStringTable instance;
+	return instance;
 }
 
 void CStringTable::Destroy	()

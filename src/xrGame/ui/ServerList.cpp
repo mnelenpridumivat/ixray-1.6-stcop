@@ -232,7 +232,7 @@ void CServerList::FillUpDetailedServerInfo()
 
 				if (!t1)		// add header
 				{
-					xr_strconcat(_buff, g_pStringTable->translate("ui_st_team").c_str(),
+					xr_strconcat(_buff, CStringTable::GetInstance().translate("ui_st_team").c_str(),
 						"\"", CTeamInfo::GetTeam1_name().c_str(), "\"");
 
 					pItemAdv					= m_list[LST_PLAYERS].AddItem();
@@ -271,7 +271,7 @@ void CServerList::FillUpDetailedServerInfo()
 
 				if (!t2)
 				{
-					xr_strconcat(_buff, g_pStringTable->translate("ui_st_team").c_str(),
+					xr_strconcat(_buff, CStringTable::GetInstance().translate("ui_st_team").c_str(),
 						"\"", CTeamInfo::GetTeam2_name().c_str(), "\"");
 
 					m_list[LST_PLAYERS].AddTextItem	(_buff);
@@ -303,23 +303,23 @@ void CServerList::FillUpDetailedServerInfo()
 
 				if (!spect)
 				{
-					pItemAdv					= m_list[LST_PLAYERS].AddTextItem(g_pStringTable->translate("mp_spectator").c_str());
+					pItemAdv = m_list[LST_PLAYERS].AddTextItem(CStringTable::GetInstance().translate("mp_spectator").c_str());
 					spect = true;
 				}
 
-				pItemAdv						= m_list[LST_PLAYERS].AddItem();
+				pItemAdv = m_list[LST_PLAYERS].AddItem();
 
 				char buf[16];
-				pItemAdv->SetFont				(m_list[LST_PLAYERS].GetFont());
-				pItemAdv->SetTextColor			(m_list[LST_PLAYERS].GetTextColor());
-				pItemAdv->SetText				(pf.Name);
+				pItemAdv->SetFont(m_list[LST_PLAYERS].GetFont());
+				pItemAdv->SetTextColor(m_list[LST_PLAYERS].GetTextColor());
+				pItemAdv->SetText(pf.Name);
 				pItemAdv->GetTextItem()->SetWidth(m_header2[1].GetWidth());
 
-				xr_sprintf						(buf,sizeof(buf),"%d",pf.Frags);
-				pItemAdv->AddTextField			(buf, m_header2[2].GetWidth());
+				xr_sprintf(buf,sizeof(buf),"%d",pf.Frags);
+				pItemAdv->AddTextField(buf, m_header2[2].GetWidth());
 
-				xr_sprintf						(buf,sizeof(buf),"%d",pf.Deaths);
-				pItemAdv->AddTextField			(buf, m_header2[3].GetWidth());
+				xr_sprintf(buf,sizeof(buf),"%d",pf.Deaths);
+				pItemAdv->AddTextField(buf, m_header2[3].GetWidth());
 			}
 
 		}

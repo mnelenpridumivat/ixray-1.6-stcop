@@ -142,19 +142,19 @@ void CUIChangeMap::OnBtnOk()
 #include "../../xrEngine/string_table.h"
 void CUIChangeMap::FillUpList()
 {
-	lst->Clear				();
+	lst->Clear();
 
-	const SGameTypeMaps& M		= gMapListHelper.GetMapListFor( (EGameIDs)GameID() );
-	u32 cnt						= (u32)M.m_map_names.size();
+	const SGameTypeMaps& M = gMapListHelper.GetMapListFor( (EGameIDs)GameID() );
+	u32 cnt = (u32)M.m_map_names.size();
 	for (u32 i=0; i<cnt; ++i)
 	{
-		CUIListBoxItem* itm		= lst->AddTextItem(g_pStringTable->translate(M.m_map_names[i].map_name).c_str() );
-		itm->Enable				(true);//m_pExtraContentFilter->IsDataEnabled(M.m_map_names[i].map_name.c_str()));
+		CUIListBoxItem* itm = lst->AddTextItem(CStringTable::GetInstance().translate(M.m_map_names[i].map_name).c_str() );
+		itm->Enable(true);//m_pExtraContentFilter->IsDataEnabled(M.m_map_names[i].map_name.c_str()));
 	}
 
 }
 
 void CUIChangeMap::OnBtnCancel()
 {
-	HideDialog					();
+	HideDialog();
 }

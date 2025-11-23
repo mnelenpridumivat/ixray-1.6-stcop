@@ -564,33 +564,49 @@ void CUIActorMenu::UpdateButtonsLayout()
 	}
 
 	string32 tmp;
-	LPCSTR str = g_pStringTable->translate("quick_use_str_1").c_str();
+	LPCSTR str = CStringTable::GetInstance().translate("quick_use_str_1").c_str();
 	strncpy_s(tmp, sizeof(tmp), str, 3);
 	if(tmp[2]==',')
+	{
 		tmp[1] = '\0';
+	}
 	if (m_QuickSlot1)
+	{
 		m_QuickSlot1->SetTextST(tmp);
+	}
 
-	str = g_pStringTable->translate("quick_use_str_2").c_str();
+	str = CStringTable::GetInstance().translate("quick_use_str_2").c_str();
 	strncpy_s(tmp, sizeof(tmp), str, 3);
 	if(tmp[2]==',')
+	{
 		tmp[1] = '\0';
+	}
 	if (m_QuickSlot2)
+	{
 		m_QuickSlot2->SetTextST(tmp);
+	}
 
-	str = g_pStringTable->translate("quick_use_str_3").c_str();
+	str = CStringTable::GetInstance().translate("quick_use_str_3").c_str();
 	strncpy_s(tmp, sizeof(tmp), str, 3);
 	if(tmp[2]==',')
+	{
 		tmp[1] = '\0';
+	}
 	if (m_QuickSlot3)
+	{
 		m_QuickSlot3->SetTextST(tmp);
+	}
 
-	str = g_pStringTable->translate("quick_use_str_4").c_str();
+	str = CStringTable::GetInstance().translate("quick_use_str_4").c_str();
 	strncpy_s(tmp, sizeof(tmp), str, 3);
 	if(tmp[2]==',')
+	{
 		tmp[1] = '\0';
+	}
 	if (m_QuickSlot4)
+	{
 		m_QuickSlot4->SetTextST(tmp);
+	}
 
 	UpdateConditionProgressBars		();
 }

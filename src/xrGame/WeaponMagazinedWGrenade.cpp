@@ -1287,13 +1287,13 @@ bool CWeaponMagazinedWGrenade::GetBriefInfo(II_BriefInfo& info)
 	if (ae != 0 && CurrVector.size() != 0)
 	{
 		LPCSTR ammo_type = m_ammoTypes[CurrVector.back().m_LocalAmmoType].c_str();
-		info.name._set(g_pStringTable->translate(pSettings->r_string(ammo_type, "inv_name_short")));
+		info.name._set(CStringTable::GetInstance().translate(pSettings->r_string(ammo_type, "inv_name_short")));
 		info.icon._set(ammo_type);
 	}
 	else
 	{
 		LPCSTR ammo_type = m_ammoTypes[CurrAmmoType].c_str();
-		info.name._set(g_pStringTable->translate(pSettings->r_string(ammo_type, "inv_name_short")));
+		info.name._set(CStringTable::GetInstance().translate(pSettings->r_string(ammo_type, "inv_name_short")));
 		info.icon._set(ammo_type);
 	}
 

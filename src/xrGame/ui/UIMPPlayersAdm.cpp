@@ -191,7 +191,7 @@ void CUIMpPlayersAdm::SetMaxPingLimitText()
 {
 	int ping_limit = m_pPingLimitTrack->GetIValue();
 	string512 tmp_string;
-	xr_sprintf(tmp_string, "%s %d", g_pStringTable->translate("ui_mp_am_ping_limit").c_str(), ping_limit*10);
+	xr_sprintf(tmp_string, "%s %d", CStringTable::GetInstance().translate("ui_mp_am_ping_limit").c_str(), ping_limit*10);
 	m_pPingLimitText->SetText(tmp_string);
 }
 void CUIMpPlayersAdm::GetSelPlayerScreenshot()

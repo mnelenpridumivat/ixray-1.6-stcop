@@ -267,7 +267,7 @@ CCommandVar CommandInitialize(CCommandVar p1, CCommandVar p2)
 		FS.update_path(si_name, "$game_config$", "system.ltx");
 		pSettings = new CInifile(si_name, TRUE);// FALSE,TRUE,TRUE);
 
-		g_pStringTable = new CStringTable();
+		//g_pStringTable = new CStringTable();
 
 		string_path					fname;
 		FS.update_path(fname, "$game_config$", "game.ltx");

@@ -209,12 +209,12 @@ void CUITrackBar::UpdateText()
 			{
 				xr_token* tok = GetOptToken();
 				LPCSTR cur_val = get_token_name(tok, m_i_val - 1);
-				out_str = g_pStringTable->translate(cur_val).c_str();
+				out_str = CStringTable::GetInstance().translate(cur_val).c_str();
 			}
 			break;
 			case eTrackBarModeBool:
 			{
-				out_str = m_i_val == m_i_min ? g_pStringTable->translate("st_track_opt_off").c_str() : g_pStringTable->translate("st_track_opt_on").c_str();
+				out_str = m_i_val == m_i_min ? CStringTable::GetInstance().translate("st_track_opt_off").c_str() : CStringTable::GetInstance().translate("st_track_opt_on").c_str();
 			}
 			break;
 		}

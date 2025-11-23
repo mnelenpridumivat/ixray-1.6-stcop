@@ -136,7 +136,7 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow *pWnd, s16 msg, void* pData)
 
 			xr_string caption		= "# ";
 			caption					+= "/";
-			caption					+= g_pStringTable->translate(A->data()->group).c_str();
+			caption					+= CStringTable::GetInstance().translate(A->data()->group).c_str();
 
 			UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
 			UIArticleHeader->SetTextST(*(A->data()->group));
@@ -146,9 +146,9 @@ void CUIEncyclopediaWnd::SendMessage(CUIWindow *pWnd, s16 msg, void* pData)
 			CEncyclopediaArticle* A = m_ArticlesDB[pTVItem->GetValue()];
 			xr_string caption		= "# ";
 			caption					+= "/";
-			caption					+= g_pStringTable->translate(A->data()->group).c_str();
+			caption					+= CStringTable::GetInstance().translate(A->data()->group).c_str();
 			caption					+= "/";
-			caption					+= g_pStringTable->translate(A->data()->name).c_str();
+			caption					+= CStringTable::GetInstance().translate(A->data()->name).c_str();
 
 			UIEncyclopediaInfoHeader->UITitleText.SetText(caption.c_str());
 			SetCurrentArtice		(pTVItem);

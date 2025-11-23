@@ -202,7 +202,8 @@ void CImGuiGameSearchManager::init()
 					name[i] = '\0';
 				}
 			}
-			const char* pTranslatedName = g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
+			//const char* pTranslatedName = g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
+			const char* pTranslatedName = CStringTable::GetInstance().translate(name).c_str();
 
 			if (g_pClsidManager && g_pClsidManager->is_monster(id))
 			{
@@ -292,7 +293,8 @@ const char* CImGuiGameSearchManager::getTranslatedString(eSelectedType type)
 
 	const char* pResult = nullptr;
 
-	pResult = g_pStringTable ? g_pStringTable->translate(name).c_str() : getDefaultNameOfSelectedType(type);
+	//pResult = g_pStringTable ? g_pStringTable->translate(name).c_str() : getDefaultNameOfSelectedType(type);
+	pResult = CStringTable::GetInstance().translate(name).c_str();
 
 	return pResult;
 }
@@ -429,5 +431,6 @@ const char* clsid_manager::translateCLSID(CLASS_ID id) {
 			name[i] = '\0';
 		}
 	}
-	return g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
+	return CStringTable::GetInstance().translate(name).c_str();
+	//return g_pStringTable ? g_pStringTable->translate(name).c_str() : name;
 }

@@ -231,7 +231,7 @@ bool CALifeUpdateManager::change_level	(NET_Packet &net_packet)
 	}
 
 	string256						autosave_name;
-	xr_strconcat(autosave_name,Core.UserName," - ", g_pStringTable->translate("autosave").c_str());
+	xr_strconcat(autosave_name,Core.UserName," - ", CStringTable::GetInstance().translate("autosave").c_str());
 	LPCSTR							temp0 = strstr(**m_server_command_line,"/");
 	VERIFY							(temp0);
 	string256						temp;

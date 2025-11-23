@@ -161,15 +161,15 @@ EGameIDs CUIMapList::GetCurGameType()
 	if(combo_ms)
 	{
 		text = combo_ms->GetText();
-		if (0 == xr_strcmp(text, g_pStringTable->translate(get_token_name(g_GameModes,eGameIDDeathmatch))) )
+		if (0 == xr_strcmp(text, CStringTable::GetInstance().translate(get_token_name(g_GameModes,eGameIDDeathmatch))) )
 			return	eGameIDDeathmatch;
-		else if (0 == xr_strcmp(text, g_pStringTable->translate(get_token_name(g_GameModes,eGameIDTeamDeathmatch))) )
+		else if (0 == xr_strcmp(text, CStringTable::GetInstance().translate(get_token_name(g_GameModes,eGameIDTeamDeathmatch))) )
 			return	eGameIDTeamDeathmatch;
-		else if (0 == xr_strcmp(text, g_pStringTable->translate(get_token_name(g_GameModes,eGameIDArtefactHunt))) )
+		else if (0 == xr_strcmp(text, CStringTable::GetInstance().translate(get_token_name(g_GameModes,eGameIDArtefactHunt))) )
 			return	eGameIDArtefactHunt;
-		else if (0 == xr_strcmp(text, g_pStringTable->translate(get_token_name(g_GameModes,eGameIDCaptureTheArtefact))) )
+		else if (0 == xr_strcmp(text, CStringTable::GetInstance().translate(get_token_name(g_GameModes,eGameIDCaptureTheArtefact))) )
 			return	eGameIDCaptureTheArtefact;
-		else if (0 == xr_strcmp(text, g_pStringTable->translate(get_token_name(g_GameModes, eGameIDFreeMP))))
+		else if (0 == xr_strcmp(text, CStringTable::GetInstance().translate(get_token_name(g_GameModes, eGameIDFreeMP))))
 			return	eGameIDFreeMP;
 		else
 			NODEFAULT;
@@ -384,7 +384,7 @@ void CUIMapList::UpdateMapList(EGameIDs GameType)
 	u32 cnt						= (u32)M.m_map_names.size();
 	for (u32 i=0; i<cnt; ++i)
 	{
-		CUIListBoxItem* itm		= m_pList1->AddTextItem( g_pStringTable->translate(M.m_map_names[i].map_name).c_str() );
+		CUIListBoxItem* itm		= m_pList1->AddTextItem(CStringTable::GetInstance().translate(M.m_map_names[i].map_name).c_str());
 		itm->SetData			( (void*)(__int64)i );
 		itm->Enable				(true);
 	}

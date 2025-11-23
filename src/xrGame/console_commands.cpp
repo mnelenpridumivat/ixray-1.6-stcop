@@ -522,7 +522,7 @@ public:
 		if (!xr_strlen(S)) {
 
 			++m_iQuickSave;
-			xr_sprintf(S, "%s - %s [%i]", Core.UserName, g_pStringTable->translate("quicksave").c_str(), m_iQuickSave);
+			xr_sprintf(S, "%s - %s [%i]", Core.UserName, CStringTable::GetInstance().translate("quicksave").c_str(), m_iQuickSave);
 			if (m_iQuickSave >= m_iQuickSavesCount)
 			{
 				m_iQuickSave = 0;
@@ -554,7 +554,7 @@ public:
 		{
 			SDrawStaticStruct* _s = CurrentGameUI()->AddCustomStatic("game_saved", true, 3.0f);
 			string256 save_name;
-			xr_strconcat(save_name, g_pStringTable->translate("st_game_saved").c_str(), ": ", S);
+			xr_strconcat(save_name, CStringTable::GetInstance().translate("st_game_saved").c_str(), ": ", S);
 			_s->wnd()->TextItemControl()->SetText(save_name);
 		}
 
@@ -2311,12 +2311,12 @@ public:
 
 	virtual void Execute(LPCSTR args)
 	{
-		if (xr_strcmp(args, g_pStringTable->LangName().c_str()) == 0)
+		if (xr_strcmp(args, CStringTable::GetInstance().LangName().c_str()) == 0)
 		{
 			return;
 		}
 
-		auto it = std::find_if(g_pStringTable->languages_token.begin(), g_pStringTable->languages_token.end(),
+		auto it = std::find_if(CStringTable::GetInstance().languages_token.begin(), CStringTable::GetInstance().languages_token.end(),
 			[args](const xr_token& item)
 			{
 				if (item.name == nullptr)
@@ -2326,13 +2326,13 @@ public:
 				return !xr_strcmp(item.name, args);
 			});
 
-		if (it == g_pStringTable->languages_token.end())
+		if (it == CStringTable::GetInstance().languages_token.end())
 		{
 			return;
 		}
 		
 		// reload language
-		g_pStringTable->ReloadLanguage(args);
+		CStringTable::GetInstance().ReloadLanguage(args);
 
 		execute_console_command_deferred(Console, "ui_reload");
 		
@@ -2356,23 +2356,23 @@ public:
 
 	virtual void Status(TStatus& S) override
 	{
-		xr_sprintf(S, sizeof(S), "%s", g_pStringTable->LangName().c_str());
+		xr_sprintf(S, sizeof(S), "%s", CStringTable::GetInstance().LangName().c_str());
 	}
 
 	virtual xr_token* GetToken()
 	{
-		return g_pStringTable->languages_token.data();
+		return CStringTable::GetInstance().languages_token.data();
 	}
 
 	virtual void fill_tips(vecTips& tips, u32 mode) override {
 		TStatus  cur;
 		Status(cur);
 		
-		for (size_t i = 0; i < g_pStringTable->languages_token.size() - 1; i++)
+		for (size_t i = 0; i < CStringTable::GetInstance().languages_token.size() - 1; i++)
 		{
-			if (g_pStringTable->languages_token[i].name != nullptr || g_pStringTable->languages_token[i].name[0])
+			if (CStringTable::GetInstance().languages_token[i].name != nullptr || CStringTable::GetInstance().languages_token[i].name[0])
 			{
-				tips.push_back(g_pStringTable->languages_token[i].name);
+				tips.push_back(CStringTable::GetInstance().languages_token[i].name);
 			}
 		}
 		IConsole_Command::fill_tips(tips, mode);

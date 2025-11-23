@@ -24,13 +24,13 @@ void CUIMapInfo::InitMapInfo(Fvector2 pos, Fvector2 size)
 	m_view->SetFixedScrollBar(false);
 }
 
-#define ADD_TEXT(x,y,z)	text = *g_pStringTable->translate(x);										\
+#define ADD_TEXT(x,y,z)	text = *CStringTable::GetInstance().translate(x);										\
 						text += ": ";														\
 						text += txt_color_tag;												\
 						if (ltx.line_exist("map_info",y))									\
-							text += *g_pStringTable->translate(ltx.r_string_wb("map_info",y));		\
+							text += *CStringTable::GetInstance().translate(ltx.r_string_wb("map_info",y));		\
 						else																\
-							text += *g_pStringTable->translate(z);									\
+							text += *CStringTable::GetInstance().translate(z);									\
 						text += "%c[default]\\n";											\
 						st = new CUITextWnd();											\
 						st->SetTextComplexMode(true);										\
@@ -69,7 +69,7 @@ void CUIMapInfo::InitMap(LPCSTR map_name, LPCSTR map_ver)
 		st						= new CUITextWnd(); 
 		CUIXmlInit::InitTextWnd	(xml_doc,"map_name",0,st); 
 
-		xr_string S				= g_pStringTable->translate(map_name).c_str();
+		xr_string S				= CStringTable::GetInstance().translate(map_name).c_str();
 		if(map_ver)
 		{
 			S					+= "[";
@@ -98,25 +98,25 @@ void CUIMapInfo::InitMap(LPCSTR map_name, LPCSTR map_ver)
 
 		shared_str _modes = ltx.r_string_wb("map_info", "modes");
 
-			text = *g_pStringTable->translate("modes");
+			text = *CStringTable::GetInstance().translate("modes");
 			text += ": ";
 			text += txt_color_tag;
 			bool b_ = false;
 			if(strstr(_modes.c_str(),"st_deathmatch"))
 			{
-				text += *g_pStringTable->translate("st_deathmatch");
+				text += *CStringTable::GetInstance().translate("st_deathmatch");
 				b_ = true;
 			}
 			if(strstr(_modes.c_str(),"st_team_deathmatch"))
 			{
 				if(b_) text			+= ", ";
-				text				+= *g_pStringTable->translate("st_team_deathmatch");
+				text				+= *CStringTable::GetInstance().translate("st_team_deathmatch");
 				b_					= true;
 			}
 			if(strstr(_modes.c_str(),"st_artefacthunt"))
 			{
 				if(b_) text			+= ", ";
-				text				+= *g_pStringTable->translate("st_artefacthunt");
+				text				+= *CStringTable::GetInstance().translate("st_artefacthunt");
 			}
 
 			text += "%c[default]\\n";
@@ -134,7 +134,7 @@ void CUIMapInfo::InitMap(LPCSTR map_name, LPCSTR map_ver)
 		ADD_TEXT("mp_description",	"short_desc", "");
 
 		if (ltx.line_exist("map_info","large_desc"))
-			m_large_desc = g_pStringTable->translate(ltx.r_string_wb("map_info", "large_desc"));		
+			m_large_desc = CStringTable::GetInstance().translate(ltx.r_string_wb("map_info", "large_desc"));		
 	}
 	else
 	{

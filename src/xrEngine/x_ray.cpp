@@ -431,7 +431,7 @@ ENGINE_API void EngineLoadStage2()
 	InitEngine();
 	InitInput();
 
-	g_pStringTable = new CStringTable();
+	//g_pStringTable = new CStringTable();
 }
 
 ENGINE_API void EngineLoadStage3()

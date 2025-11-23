@@ -145,7 +145,7 @@ const char* CUIStatsPlayerInfo::GetInfoByID(const char* id)
 	else if (0 == xr_strcmp(id, "status"))
 	{
 		if (m_pPlayerInfo->testFlag(GAME_PLAYER_FLAG_READY))
-			xr_strcpy(ans,*g_pStringTable->translate("st_mp_ready"));
+			xr_strcpy(ans,*CStringTable::GetInstance().translate("st_mp_ready"));
 		else
 			xr_strcpy(ans,"");
 	}

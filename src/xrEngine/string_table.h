@@ -19,24 +19,32 @@ class ENGINE_API CStringTable
 {
 public:
 	static xr_vector<xr_token> languages_token;
+	
+	CStringTable();
 
 public:
-								CStringTable			();
 
-	static void					Destroy					();
+	CStringTable(const CStringTable& other) = delete;
+	CStringTable& operator=(const CStringTable& other) = delete;
+	CStringTable(CStringTable&& other) = delete;
+	CStringTable& operator=(CStringTable&& other) = delete;
+
+	static CStringTable& GetInstance();
+
+	static void Destroy();
 	
-	STRING_VALUE				translate				(const STRING_ID& str_id) const;
-			void				rescan					();
+	STRING_VALUE translate(const STRING_ID& str_id) const;
+	void rescan();
 
-	static	BOOL				m_bWriteErrorsToLog;
-	static	void				ReparseKeyBindings		();
-	static	xr_string			LangName				();
-			void				ReloadLanguage(const char* lang);
+	static BOOL m_bWriteErrorsToLog;
+	static void ReparseKeyBindings();
+	static xr_string LangName();
+	void ReloadLanguage(const char* lang);
 private:
-			void				Init					();
-			void				Load					(LPCSTR xml_file);
-	static STRING_VALUE			ParseLine				(LPCSTR str, LPCSTR key, bool bFirst);
-	static STRING_TABLE_DATA*	pData;
+	void Init();
+	void Load(LPCSTR xml_file);
+	static STRING_VALUE ParseLine(LPCSTR str, LPCSTR key, bool bFirst);
+	static STRING_TABLE_DATA* pData;
 };
 
-extern ENGINE_API CStringTable* g_pStringTable;
+//extern ENGINE_API CStringTable* g_pStringTable;
