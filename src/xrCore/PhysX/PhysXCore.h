@@ -82,8 +82,10 @@ namespace xrPhysX
         xr_hash_map<shared_str, physx::PxMaterial*> materials;
         
         PhysXMaterialManager();
+        
     public:
-        ~PhysXMaterialManager();
+        //~PhysXMaterialManager();
+        void Release();
 
         PhysXMaterialManager(const PhysXMaterialManager& other) = delete;
         PhysXMaterialManager& operator=(const PhysXMaterialManager& other) = delete;
@@ -97,7 +99,7 @@ namespace xrPhysX
     };
     
     class XRCORE_API PhysXInstance
-    {
+    {        
         xr_unique_ptr<xrPhysXAllocator> Allocator;
         xr_unique_ptr<xrPhysXErrorCallback> ErrorCallback;
         physx::PxFoundation* Foundation = nullptr;
@@ -108,13 +110,16 @@ namespace xrPhysX
 #endif
         
         PhysXInstance();
+
     public:
+        void Release();
+        
         PhysXInstance(const PhysXInstance& rhs) = delete;
         PhysXInstance(PhysXInstance&& rhs) = delete;
         PhysXInstance& operator=(const PhysXInstance& rhs) = delete;
         PhysXInstance& operator=(PhysXInstance&& rhs) = delete;
 
-        ~PhysXInstance();
+        //~PhysXInstance();
 
         physx::PxPhysics& GetPhysics();
         physx::PxDefaultCpuDispatcher* GetDefaultCpuDispatcher();

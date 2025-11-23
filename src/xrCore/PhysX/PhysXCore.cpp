@@ -418,13 +418,18 @@ xrPhysX::PhysXMaterialManager::PhysXMaterialManager()
     
 }
 
-xrPhysX::PhysXMaterialManager::~PhysXMaterialManager()
+void xrPhysX::PhysXMaterialManager::Release()
 {
     for (auto& material : materials)
     {
         material.second->release();
     }
+    materials.clear();
 }
+
+/*xrPhysX::PhysXMaterialManager::~PhysXMaterialManager()
+{
+}*/
 
 xrPhysX::PhysXMaterialManager& xrPhysX::PhysXMaterialManager::GetInstance()
 {
@@ -472,7 +477,7 @@ xrPhysX::PhysXInstance::PhysXInstance()
     Dispatcher = physx::PxDefaultCpuDispatcherCreate(1); // TODO: pass multiple threads num
 }
 
-xrPhysX::PhysXInstance::~PhysXInstance()
+void xrPhysX::PhysXInstance::Release()
 {
     Physics->release();
 #ifdef DEBUG
@@ -482,9 +487,13 @@ xrPhysX::PhysXInstance::~PhysXInstance()
         PVD->release();
     }
 #endif
-    Foundation->release();
     Dispatcher->release();
+    Foundation->release();
 }
+
+/*xrPhysX::PhysXInstance::~PhysXInstance()
+{
+}*/
 
 physx::PxPhysics& xrPhysX::PhysXInstance::GetPhysics()
 {

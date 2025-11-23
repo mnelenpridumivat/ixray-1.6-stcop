@@ -16,6 +16,7 @@
 #endif // DEBUG
 
 #include "stack_string.h"
+#include "PhysX/PhysXCore.h"
 
 XRCORE_API xrCore	Core;
 XRCORE_API u32		build_id;
@@ -132,6 +133,9 @@ void xrCore::_destroy		()
 		}
 
 		Memory._destroy		();
+
+		xrPhysX::PhysXMaterialManager::GetInstance().Release();
+		xrPhysX::PhysXInstance::GetInstance().Release();
 	}
 }
 
