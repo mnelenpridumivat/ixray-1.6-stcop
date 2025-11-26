@@ -1192,6 +1192,15 @@ void CPHMovementControl::MulFrictionFactor(float f)
 	m_character->FrictionFactor() *= f;
 }
 
+CPhysXMovementControl::CPhysXMovementControl(CObject* parent)
+{
+	pObject = parent;
+}
+
+CPhysXMovementControl::~CPhysXMovementControl()
+{
+}
+
 IElevatorState	*CPHMovementControl::ElevatorState()
 {
 	if(!m_character || !m_character->b_exist)

@@ -53,7 +53,7 @@ void CNoGravityZone::switchGravity(SZoneObjectInfo& io, bool val)
 	if(!io.nonalive_object)
 	{
 		CEntityAlive* ea=smart_cast<CEntityAlive*>(io.object);
-		CPHMovementControl*mc=ea->character_physics_support()->movement();
+		auto mc=ea->character_physics_support()->movement();
 		mc->SetApplyGravity(BOOL(val));
 		mc->SetForcedPhysicsControl(!val);
 		if(!val&&mc->Environment()==CPHMovementControl::peOnGround)

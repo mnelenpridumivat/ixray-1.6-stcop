@@ -36,7 +36,7 @@ void activating_character_delay::update()
 
 bool activating_character_delay::do_position_correct()
 {
-	CPHMovementControl *m = char_support.movement();
+	auto m = char_support.movement();
 	VERIFY( m );
 	
 	CObject *obj =	m->ParentObject();

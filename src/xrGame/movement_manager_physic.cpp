@@ -29,7 +29,7 @@
 
 #define DISTANCE_PHISICS_ENABLE_CHARACTERS 2.f
 
-float CMovementManager::speed				(CPHMovementControl *movement_control) const
+float CMovementManager::speed				(CPhysXMovementControl *movement_control) const
 {
 	VERIFY					(movement_control);
 	if (fis_zero(m_speed))
@@ -42,7 +42,7 @@ float CMovementManager::speed				(CPHMovementControl *movement_control) const
 }
 #ifdef	DEBUG
 BOOL dbg_dump_collision_hit =FALSE;
-void dump_collision_hit(CPHMovementControl *movement_control)
+void dump_collision_hit(CPhysXMovementControl *movement_control)
 {
 	if( !dbg_dump_collision_hit )
 		return;
@@ -61,7 +61,7 @@ void dump_collision_hit(CPHMovementControl *movement_control)
 	//di->
 }
 #endif
-void CMovementManager::apply_collision_hit	(CPHMovementControl *movement_control)
+void CMovementManager::apply_collision_hit	(CPhysXMovementControl *movement_control)
 {
 	VERIFY(movement_control);
 	if (object().g_Alive()&&!fsimilar(0.f,movement_control->gcontact_HealthLost))
@@ -201,7 +201,7 @@ Fvector CMovementManager::path_position	(const float &time_to_check)
 	);
 }
 
-void CMovementManager::move_along_path		(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta)
+void CMovementManager::move_along_path		(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta)
 {
 	PROF_EVENT("Build Path/Move Along Path")
 

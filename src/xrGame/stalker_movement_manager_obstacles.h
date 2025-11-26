@@ -26,7 +26,7 @@ private:
 public:
 						stalker_movement_manager_obstacles	(CAI_Stalker *object);
 	virtual				~stalker_movement_manager_obstacles	();
-	virtual	void				move_along_path				(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta);
+	virtual	void				move_along_path				(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta);
 	virtual	void				remove_links				(CObject *object);
 	virtual	void				Load						( LPCSTR section );
 			float				is_going_through			( Fmatrix const& matrix, Fvector const& vector, float max_distance ) const;
@@ -51,8 +51,8 @@ private:
 			void				move_along_path_no_changes	();
 			void				rebuild_path				();
 			void				process_query_impl			();
-			void				process_query				(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta);
-			void				move_along_path_impl		(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta);
+			void				process_query				(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta);
+			void				move_along_path_impl		(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta);
 
 public:
 			bool				can_build_restricted_path	(const obstacles_query &query);

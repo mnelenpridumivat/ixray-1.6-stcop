@@ -77,11 +77,10 @@ void CAmebaZone::PhTune(float step)
 		{
 			if (CEntityAlive* EA = info.object->cast_entity_alive())
 			{
-				CPHMovementControl* mc = EA->character_physics_support()->movement();
-				if (mc)
+				auto mc = EA->character_physics_support()->movement();
+				if (mc && distance_to_center(EA) < effective_radius(m_fEffectiveRadius))
 				{
-					if (distance_to_center(EA) < effective_radius(m_fEffectiveRadius))
-						mc->SetVelocityLimit(m_fVelocityLimit);
+					mc->SetVelocityLimit(m_fVelocityLimit);
 				}
 			}
 		}

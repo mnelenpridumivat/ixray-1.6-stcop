@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "poltergeist_movement.h"
+
+#include "PHMovementControl.h"
 #include "poltergeist.h"
 #include "../../../detail_path_manager.h"
 
-void CPoltergeisMovementManager::move_along_path(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta)
+void CPoltergeisMovementManager::move_along_path(CPhysXMovementControl* movement_control, Fvector &dest_position, float time_delta)
 {
 	if (!m_monster->is_hidden()) {
 		inherited::move_along_path(movement_control, dest_position, time_delta);

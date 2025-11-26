@@ -12,6 +12,8 @@
 #include "graph_engine_space.h"
 #include "game_graph_space.h"
 
+class CPhysXMovementControl;
+
 namespace MovementManager {
 	enum EPathType;
 };
@@ -186,7 +188,7 @@ private:
 #ifdef USE_FREE_IN_RESTRICTIONS
 			void	verify_detail_path		();
 #endif // USE_FREE_IN_RESTRICTIONS
-			void	apply_collision_hit		(CPHMovementControl *movement_control);
+			void	apply_collision_hit		(CPhysXMovementControl *movement_control);
 
 protected:
 	virtual void	teleport				(u32 game_vertex_id);
@@ -200,7 +202,7 @@ public:
 	virtual void	reload					(LPCSTR caSection);
 	virtual BOOL	net_Spawn				(CSE_Abstract* data);
 	virtual void	net_Destroy				();
-	virtual	void	on_frame				(CPHMovementControl *movement_control, Fvector &dest_position);
+	virtual	void	on_frame				(CPhysXMovementControl *movement_control, Fvector &dest_position);
 	IC		bool	actual					() const;
 			bool	actual_all				() const;
 	IC		void	set_path_type			(EPathType path_type);
@@ -219,10 +221,10 @@ public:
 	IC		void	set_body_orientation	(const MonsterSpace::SBoneRotation &orientation);
 	IC		const CBoneRotation &body_orientation() const;
 			void	update_path				();
-	virtual	void	move_along_path			(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta);
+	virtual	void	move_along_path			(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta);
 
 	IC		float	speed					() const;
-			float	speed					(CPHMovementControl *movement_control) const;
+			float	speed					(CPhysXMovementControl *movement_control) const;
 
 	virtual void	on_travel_point_change	(const u32 &previous_travel_point_index);
 	virtual void	on_build_path			() {}

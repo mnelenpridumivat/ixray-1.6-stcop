@@ -153,7 +153,7 @@ void stalker_movement_manager_smart_cover::on_animation_end				()
 	enter_smart_cover					();
 }
 
-void stalker_movement_manager_smart_cover::on_frame						(CPHMovementControl *movement_control, Fvector &dest_position)
+void stalker_movement_manager_smart_cover::on_frame						(CPhysXMovementControl *movement_control, Fvector &dest_position)
 {
 	inherited::on_frame					(movement_control, dest_position);
 }

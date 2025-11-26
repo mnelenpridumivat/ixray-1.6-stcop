@@ -20,13 +20,13 @@ private:
 	u16							m_my_material_idx;
 	ref_sound					m_step_sound[4];
 	CObject						*m_object;
-	CPHMovementControl			*m_movement_control;
+	CPhysXMovementControl			*m_movement_control;
 
 protected:
 	u16							m_last_material_idx;
 
 public:
-								CMaterialManager		(CObject *object, CPHMovementControl *movement_control);
+								CMaterialManager		(CObject *object, CPhysXMovementControl *movement_control);
 	virtual						~CMaterialManager		();
 	virtual void				Load					(LPCSTR section);
 	virtual void				reinit					();

@@ -11,6 +11,7 @@
 #include "character_shell_control.h"
 #include "animation_utils.h"
 
+class CPhysXMovementControl;
 //class CPhysicsShell;
 class CPHMovementControl;
 class CIKLimbsController;
@@ -62,7 +63,7 @@ private:
 	CEntityAlive& m_EntityAlife																																		;
 	Fmatrix& mXFORM																																					;
 	xrPhysX::Wrappers::CShell* m_physics_skeleton																																	;
-	CPHMovementControl* m_PhysicMovementControl																															;
+	CPhysXMovementControl* m_PhysicMovementControl																															;
 	CPHSoundPlayer m_ph_sound_player																																	;
 	CIKLimbsController* m_ik_controller																																	;
 	xrPhysX::Interfaces::ICollisionHitCallback* m_collision_hit_callback;
@@ -112,10 +113,10 @@ virtual CPhysicsShellHolder*			PPhysicsShellHolder				( )	{ return m_EntityAlife
 
 virtual bool							CanRemoveObject					( );
 public:
-IC		CPHMovementControl				*movement						( )	{ return m_PhysicMovementControl; }
-IC	const	CPHMovementControl			*movement						( ) const{ return m_PhysicMovementControl; }
-IC		CPHSoundPlayer					*ph_sound_player				( )	{ return &m_ph_sound_player; }
-IC		CIKLimbsController				*ik_controller					( )	{ return m_ik_controller; }
+	IC CPhysXMovementControl* movement() {return m_PhysicMovementControl;}
+	IC const CPhysXMovementControl* movement() const {return m_PhysicMovementControl;}
+	IC CPHSoundPlayer* ph_sound_player() {return &m_ph_sound_player;}
+	IC CIKLimbsController* ik_controller() {return m_ik_controller;}
 		bool							interactive_motion				( ) ;
 		bool							can_drop_active_weapon			( ) ;
 		void							SetRemoved						( );

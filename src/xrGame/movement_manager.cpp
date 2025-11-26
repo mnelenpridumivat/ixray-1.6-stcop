@@ -25,6 +25,7 @@
 #include "mt_config.h"
 
 // Lain: added 
+#include "PHMovementControl.h"
 #include "steering_behaviour.h"
 
 using namespace MovementManager;
@@ -345,7 +346,7 @@ bool CMovementManager::can_use_distributed_computations(u32 option) const
 	return							(!m_build_at_once && g_mt_config.test(option) && !object().getDestroy());
 }
 
-void CMovementManager::on_frame					(CPHMovementControl *movement_control, Fvector &dest_position)
+void CMovementManager::on_frame					(CPhysXMovementControl *movement_control, Fvector &dest_position)
 {
 	if	(
 			enabled() &&

@@ -36,8 +36,12 @@ class IPhysicsElement;
 class CPhysXMovementControl
 {
 	physx::PxController* m_controller;
-	
-	
+    physx::PxRigidDynamic* m_rigidDynamic;
+    CObject* pObject;
+
+public:
+	CPhysXMovementControl(CObject* parent);
+	~CPhysXMovementControl();
 };
 
 class CPHMovementControl :

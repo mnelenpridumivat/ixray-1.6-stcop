@@ -125,7 +125,7 @@ bool stalker_movement_manager_obstacles::can_build_restricted_path	(const obstac
 	return							(!m_failed_to_build_path);
 }
 
-void stalker_movement_manager_obstacles::move_along_path_impl				(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta)
+void stalker_movement_manager_obstacles::move_along_path_impl				(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta)
 {
 #ifndef MASTER_GOLD
 	if (psAI_Flags.test(aiObstaclesAvoidingStatic))
@@ -157,7 +157,7 @@ void stalker_movement_manager_obstacles::move_along_path_impl				(CPHMovementCon
 	inherited::move_along_path		(movement_control, dest_position, time_delta);
 }
 
-void stalker_movement_manager_obstacles::move_along_path					(CPHMovementControl *movement_control, Fvector &dest_position, float time_delta)
+void stalker_movement_manager_obstacles::move_along_path					(CPhysXMovementControl *movement_control, Fvector &dest_position, float time_delta)
 {
 	VERIFY							( m_doors_actor );
 

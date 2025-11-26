@@ -49,7 +49,7 @@ public:
 	virtual		 ~stalker_movement_manager_smart_cover	();
 	virtual	void				reinit					();
 	virtual	void				update					(u32 time_delta);
-	virtual	void				on_frame				(CPHMovementControl *movement_control, Fvector &dest_position);
+	virtual	void				on_frame				(CPhysXMovementControl *movement_control, Fvector &dest_position);
 	virtual	void				remove_links			(CObject *object);
 			void		cleanup_after_animation_selector();
 			bool				in_smart_cover			() const;

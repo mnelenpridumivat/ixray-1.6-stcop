@@ -24,8 +24,8 @@ void CControlMovement::update_frame()
 
 float CControlMovement::real_velocity()
 {
-	CPHMovementControl		*movement_control = m_object->character_physics_support()->movement();
-	VERIFY					(movement_control);
+	auto movement_control = m_object->character_physics_support()->movement();
+	VERIFY(movement_control);
 
 	if (movement_control->IsCharacterEnabled()){ 
 		float tmp			= 	movement_control->GetXZActVelInGoingDir();

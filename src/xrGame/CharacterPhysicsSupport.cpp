@@ -84,7 +84,7 @@ CCharacterPhysicsSupport::CCharacterPhysicsSupport(EType atype, CEntityAlive* ae
 	mXFORM(aentity->XFORM()),
 	m_ph_sound_player(aentity),
 	m_interactive_motion(0),
-	m_PhysicMovementControl(new CPHMovementControl(aentity)),
+	m_PhysicMovementControl(new CPhysXMovementControl(aentity)),
 	m_eType(atype),
 	m_eState(esAlive),
 	m_physics_skeleton(nullptr),

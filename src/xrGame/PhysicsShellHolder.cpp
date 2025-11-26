@@ -71,8 +71,10 @@ const IPhysicsElement* CPhysicsShellHolder::physics_character()  const
 {
 	const CCharacterPhysicsSupport	*char_support = character_physics_support();
 	if( !char_support )
-				return 0;
-	const CPHMovementControl		*mov		  = character_physics_support()->movement();
+	{
+		return 0;
+	}
+	const auto mov		  = character_physics_support()->movement();
 	VERIFY( mov );
 	return mov->IElement();
 }
@@ -677,10 +679,14 @@ IPHCapture*	CPhysicsShellHolder::PHCapture()
 {
 	CCharacterPhysicsSupport* ph_sup = character_physics_support();
 	if( !ph_sup )
+	{
 		return 0;
-	CPHMovementControl	*mov = ph_sup->movement();
+	}
+	auto mov = ph_sup->movement();
 	if( !mov )
+	{
 		return 0;
+	}
 	return mov->PHCapture();
 }
 bool CPhysicsShellHolder::IsInventoryItem()
