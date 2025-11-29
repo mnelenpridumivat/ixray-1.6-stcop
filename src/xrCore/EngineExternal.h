@@ -86,6 +86,12 @@ enum class EEngineExternalUIRenderingType : u8
 	Unknown = static_cast<u8>(-1)
 };
 
+enum class EEngineExternalSystem : u8
+{
+	AdvancedSerialization,
+	Unknown = static_cast<u8>(-1)
+};
+
 constexpr const char* kPlatformNameCOP = "cop";
 constexpr const char* kPlatformNameCS = "cs";
 constexpr const char* kPlatformNameSOC = "soc";
@@ -136,6 +142,7 @@ public:
 	bool operator[](const EEngineExternalEnvironment& ID) const;
 	bool operator[](const EEngineExternalPlatform& ID) const;
 	bool operator[](const EEngineExternalSound& ID) const;
+	bool operator[](const EEngineExternalSystem& ID) const;
 
 	xr_string_map<xr_string, xr_string> ShadersOptions;
 	Ivector2 gamesaveSize;
