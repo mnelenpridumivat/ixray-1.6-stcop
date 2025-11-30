@@ -6,15 +6,22 @@
 //	Description : Server entity wrapper
 ////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "server_entity_wrapper.h"
-#include "..\xrServerEntities\xrServer_Objects.h"
-#include "..\xrServerEntities\xrmessages.h"
+#include "xrServer_Objects.h"
+#include "xrMessages.h"
+
+#ifdef AI_COMPILER
+#	include "factory_api.h"
+#endif
 
 struct ISE_Abstract;
 
 CServerEntityWrapper::~CServerEntityWrapper	()
 {
+#ifndef _LEVEL_EDITOR
+	F_entity_Destroy		(m_object);
+#endif
 }
 
 void CServerEntityWrapper::save				(IWriter &stream)
@@ -48,8 +55,7 @@ void CServerEntityWrapper::save				(IWriter &stream)
 
 void CServerEntityWrapper::load				(IReader &stream)
 {
-	R_ASSERT(false);
-	/*
+#ifndef _LEVEL_EDITOR
 	NET_Packet				net_packet;
 	u16						ID;
 	IReader					*chunk;
@@ -81,7 +87,10 @@ void CServerEntityWrapper::load				(IReader &stream)
 
 	net_packet.r_begin		(ID);
 	R_ASSERT2				(M_UPDATE == ID,"Invalid packet ID (!= M_UPDATE)!");
-	m_object->UPDATE_Read	(net_packet);*/
+	m_object->UPDATE_Read	(net_packet);
+#else
+	R_ASSERT(false);
+#endif
 }
 
 void CServerEntityWrapper::save_update		(IWriter &stream)

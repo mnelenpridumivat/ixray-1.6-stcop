@@ -12,7 +12,7 @@
 #include "../../xrServerEntities/xrServer_Objects.h"
 #include "../../xrServerEntities/xrServer_Objects_Abstract.h"
 #include "../../xrServerEntities/xrServer_Objects_ALife_All.h"
-#include "server_entity_wrapper.h"
+#include "../../xrServerEntities/server_entity_wrapper.h"
 #include "graph_engine_editor.h"
 #include "patrol_path_storage.h"
 
