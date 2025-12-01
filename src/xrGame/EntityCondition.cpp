@@ -11,6 +11,7 @@
 #include "../Include/xrRender/Kinematics.h"
 #include "object_broker.h"
 #include "ActorHelmet.h"
+#include "../xrCore/Save/SaveObject.h"
 
 #define MAX_HEALTH 1.0f
 #define MIN_HEALTH -0.01f
@@ -619,6 +620,27 @@ void CEntityCondition::load	(IReader &input_packet)
 				pWound->load(input_packet);
 				m_WoundVector[i] = pWound;
 			}
+	}
+}
+
+void CEntityCondition::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CEntityCondition")
+	{
+		if (!Object.IsSave()) {
+			m_bTimeValid = false;
+		}
+
+		bool is_alive = GetHealth() > 0.f;
+		Object << is_alive;
+		if (is_alive)
+		{
+			Object << m_fPower << m_fRadiation << m_fEntityMorale << m_fPsyHealth;
+			if (!Object.IsSave()) {
+				ClearWounds();
+			}
+			Object << m_WoundVector;
+		}
 	}
 }
 

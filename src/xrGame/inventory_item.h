@@ -150,6 +150,7 @@ public:
 
 	virtual void save(NET_Packet& output_packet);
 	virtual void load(IReader& input_packet);
+	virtual void Serialize(ISaveObject& Object);
 	virtual BOOL net_SaveRelevant() { return TRUE; }
 
 	virtual void render_item_ui() {}; //when in slot & query return TRUE

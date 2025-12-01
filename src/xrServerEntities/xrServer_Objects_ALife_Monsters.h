@@ -6,8 +6,7 @@
 //	Description : Server objects monsters for ALife simulator
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef xrServer_Objects_ALife_MonstersH
-#define xrServer_Objects_ALife_MonstersH
+#pragma once
 
 #include "xrServer_Objects_ALife.h"
 #include "xrServer_Objects_ALife_Items.h"
@@ -25,7 +24,7 @@ xr_string TranslateName(LPCSTR nameStr);
 #pragma warning(push)
 #pragma warning(disable:4005)
 
-SERVER_ENTITY_DECLARE_BEGIN0(CSE_ALifeTraderAbstract)
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeTraderAbstract, IPureStateUpdateObject)
 	enum eTraderFlags {
 		eTraderFlagInfiniteAmmo		= u32(1) << 0,
 		eTraderFlagDummy			= u32(-1),
@@ -554,6 +553,7 @@ public:
 
 private:
 	MEMBERS							m_members;
+	void STATE_SerializePerElem(ISaveObject& Object, std::pair<ALife::_OBJECT_ID, MEMBER*>& Value);
 
 #ifdef XRGAME_EXPORTS
 
@@ -600,5 +600,3 @@ public:
 SERVER_ENTITY_DECLARE_END
 
 #pragma warning(pop)
-
-#endif

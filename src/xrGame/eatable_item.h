@@ -36,6 +36,7 @@ public:
 	virtual void Load(LPCSTR section) override;
 	virtual void load(IReader& packet) override;
 	virtual void save(NET_Packet& packet) override;
+	virtual void Serialize(ISaveObject& Object) override;
 	virtual bool Useful() const override;
 
 	virtual BOOL net_Spawn(CSE_Abstract* DC) override;

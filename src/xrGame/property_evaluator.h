@@ -39,6 +39,8 @@ public:
 	virtual	void				save				(NET_Packet &packet) {}
 	virtual	void				load				(IReader &packet) {}
 
+	virtual void Serialize(ISaveObject& Object) {};
+
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 typedef CPropertyEvaluator<CScriptGameObject> CScriptPropertyEvaluator;

@@ -201,9 +201,10 @@ public:
 	}
 	virtual	void				PitchCorrection			();
 
-	virtual void				save					(NET_Packet &output_packet);
-	virtual void				load					(IReader &input_packet);
-	virtual BOOL				net_SaveRelevant		()							{return inherited::net_SaveRelevant();}
+	virtual void				save					(NET_Packet &output_packet) override;
+	virtual void				load					(IReader &input_packet) override;
+	virtual void Serialize(ISaveObject& Object) override;
+	virtual BOOL				net_SaveRelevant		()	override						{return inherited::net_SaveRelevant();}
 	
 	virtual	const MonsterSpace::SBoneRotation &head_orientation	() const;
 	

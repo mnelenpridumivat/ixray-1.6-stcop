@@ -136,6 +136,8 @@ public:
 		o_fastmode			= FALSE	;
 		//processing_deactivate		();
 	}
+	
+	virtual void Serialize(ISaveObject& Object) override { inherited::Serialize(Object); };
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

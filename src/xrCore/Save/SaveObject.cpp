@@ -92,6 +92,26 @@ bool CSaveObject::HasChunk(shared_str ChunkName)
 	}
 }*/
 
+CSaveChunk* CSaveObjectLoad::ExtractCurrentChunkRaw()
+{
+	VERIFY(!_chunkStack.empty());
+	auto CurrentChunk = _chunkStack.top();
+
+	// need to detach Current chunk from parent to prevent destruction during whole tree clean-up process
+	_chunkStack.pop();
+	VERIFY(!_chunkStack.empty());
+	auto Parent = _chunkStack.top();
+	VERIFY(Parent->DetachSubchunk(*CurrentChunk));
+	_chunkStack.push(CurrentChunk);
+	
+	return CurrentChunk;
+}
+
+void CSaveObjectLoad::MergeSubchunk(CSaveChunk* Chunk)
+{
+	VERIFY(false, "Attempt to copy chunk into load object!");
+}
+
 u64 CSaveObjectLoad::ExtractCurrentChunk()
 {
 	auto CurrentChunk = _chunkStack.top();
@@ -131,6 +151,18 @@ ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 void CSaveObjectSave::BeginArray()
 {
 	GetCurrentChunk()->WriteArray();
+}
+
+CSaveChunk* CSaveObjectSave::ExtractCurrentChunkRaw()
+{
+	VERIFY(false, "Cannot extract chunk from saving object!");
+	return nullptr;
+}
+
+void CSaveObjectSave::MergeSubchunk(CSaveChunk* Chunk)
+{
+	auto CurrentChunk = GetCurrentChunk();
+	CurrentChunk->AttachSubchunk(Chunk);
 }
 
 u64 CSaveObjectSave::ExtractCurrentChunk()

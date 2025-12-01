@@ -307,6 +307,20 @@ void CSE_ALifeGraphPoint::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 }
 
+void CSE_ALifeGraphPoint::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeGraphPoint::STATE")
+	{
+		Object << m_caConnectionPointName << m_caConnectionLevelName << m_tLocations;
+	}
+}
+
+void CSE_ALifeGraphPoint::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeGraphPoint::UPDATE")
+	{}
+}
+
 #if !defined(XRGAME_EXPORTS)
 void CSE_ALifeGraphPoint::FillProps			(LPCSTR pref, PropItemVec& items)
 {
@@ -525,6 +539,29 @@ void CSE_ALifeObject::UPDATE_Read			(NET_Packet &tNetPacket)
 {
 };
 
+void CSE_ALifeObject::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObject::STATE")
+	{
+
+		BEGIN_CHUNK(Object, "CSE_Abstract::script_story_id")
+		{
+			Object << m_script_story_ID;
+		}
+		Object << m_tGraphID << m_fDistance << m_bDirectControl << m_tNodeID << m_flags
+			<< m_ini_string << m_story_id << m_spawn_story_id;
+		if(!Object.IsSave() && m_ini_file) {
+			xr_delete(m_ini_file);
+		}
+	}
+}
+
+void CSE_ALifeObject::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObject::UPDATE")
+	{}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeObject::FillProps				(LPCSTR pref, PropItemVec& items)
 {
@@ -683,6 +720,22 @@ void CSE_ALifeGroupAbstract::UPDATE_Write	(NET_Packet	&tNetPacket)
 	tNetPacket.w_u32			(m_bCreateSpawnPositions);
 };
 
+void CSE_ALifeGroupAbstract::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeGroupAbstract::STATE")
+	{
+		Object << m_bCreateSpawnPositions << m_wCount << m_tpMembers;
+	}
+}
+
+void CSE_ALifeGroupAbstract::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeGroupAbstract::UPDATE")
+	{
+		Object << m_bCreateSpawnPositions;
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeGroupAbstract::FillProps		(LPCSTR pref, PropItemVec& items)
 {
@@ -723,6 +776,22 @@ void CSE_ALifeDynamicObject::UPDATE_Read	(NET_Packet &tNetPacket)
 {
 	inherited::UPDATE_Read		(tNetPacket);
 };
+
+void CSE_ALifeDynamicObject::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicObject::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeDynamicObject::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicObject::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
 
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeDynamicObject::FillProps	(LPCSTR pref, PropItemVec& values)
@@ -771,6 +840,23 @@ void CSE_ALifeDynamicObjectVisual::UPDATE_Read(NET_Packet &tNetPacket)
 {
 	inherited1::UPDATE_Read		(tNetPacket);
 };
+
+void CSE_ALifeDynamicObjectVisual::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicObjectVisual::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		visual_serialize(Object);
+	}
+}
+
+void CSE_ALifeDynamicObjectVisual::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicObjectVisual::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+}
 
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeDynamicObjectVisual::FillProps	(LPCSTR pref, PropItemVec& items)
@@ -826,6 +912,24 @@ void CSE_ALifePHSkeletonObject::UPDATE_Read(NET_Packet &tNetPacket)
 	inherited1::UPDATE_Read		(tNetPacket);
 	inherited2::UPDATE_Read		(tNetPacket);
 };
+
+void CSE_ALifePHSkeletonObject::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifePHSkeletonObject::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifePHSkeletonObject::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifePHSkeletonObject::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
 
 bool CSE_ALifePHSkeletonObject::can_save			() const
 {
@@ -901,6 +1005,24 @@ void CSE_ALifeSpaceRestrictor::UPDATE_Write	(NET_Packet	&tNetPacket)
 	inherited1::UPDATE_Write	(tNetPacket);
 }
 
+void CSE_ALifeSpaceRestrictor::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeSpaceRestrictor::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		cform_serialize(Object);
+		Object << m_space_restrictor_type;
+	}
+}
+
+void CSE_ALifeSpaceRestrictor::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeSpaceRestrictor::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
+}
+
 xr_token defaul_retrictor_types[]={
 	{ "NOT A restrictor",			RestrictionSpace::eRestrictorTypeNone},
 	{ "NONE default restrictor",	RestrictionSpace::eDefaultRestrictorTypeNone},
@@ -958,6 +1080,23 @@ void CSE_ALifeDynamicWallmark::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeDynamicWallmark::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeDynamicWallmark::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicWallmark::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << shader << texture << w << h << r;
+	}
+}
+
+void CSE_ALifeDynamicWallmark::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeDynamicWallmark::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1045,6 +1184,24 @@ void CSE_ALifeLevelChanger::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeLevelChanger::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeLevelChanger::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeLevelChanger::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_tNextGraphID << m_dwNextNodeID << m_tNextPosition << m_tAngles
+			<< m_caLevelToChange << m_caLevelPointToChange << m_bSilentMode;
+	}
+}
+
+void CSE_ALifeLevelChanger::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeLevelChanger::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -1207,6 +1364,7 @@ void CSE_ALifeObjectPhysic::UPDATE_Read		(NET_Packet	&tNetPacket)
 	mask_num_items					num_items;
 	num_items.common				= m_u8NumItems;
 	m_u8NumItems					= num_items.num_items;
+	m_State.flags					= num_items.mask;
 
 	R_ASSERT2						(
 		m_u8NumItems < (u8(1) << 5),
@@ -1341,6 +1499,90 @@ void CSE_ALifeObjectPhysic::UPDATE_Write	(NET_Packet	&tNetPacket)
 	m_last_update_time			= Device.dwTimeGlobal;
 #endif
 #endif
+}
+
+void CSE_ALifeObjectPhysic::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_Temporary::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << type << mass << fixed_bones;
+		if (!Object.IsSave()) {
+			set_editor_flag(flVisualAnimationChange);
+		}
+	}
+}
+
+void CSE_ALifeObjectPhysic::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_Temporary::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+
+		//////////////////////////////////////////////////////////////////////////
+		Object << m_u8NumItems;
+		//Object->GetCurrentChunk()->r_u8(m_u8NumItems);
+		if (!m_u8NumItems) {
+			return;
+		}
+		Object << m_State;
+		State.enabled = m_State.test(inventory_item_state_enabled);
+		Object << State.force << State.torque << State.position << State.quaternion;
+		
+		BEGIN_CHUNK(Object,"CSE_Temporary::UPDATE::item_angular")
+		{
+			if (!m_State.test(inventory_item_angular_null)) {
+				Object << State.angular_vel;
+			}
+			else {
+				State.angular_vel.set(0.f, 0.f, 0.f);
+			}
+		}
+		
+		BEGIN_CHUNK(Object,"CSE_Temporary::UPDATE::item_linear")
+		{
+			if (!m_State.test(inventory_item_linear_null)) {
+				Object << State.linear_vel;
+			}
+			else {
+				State.linear_vel.set(0.f, 0.f, 0.f);
+			}
+		}
+		
+		if (Object.IsSave()) {
+			bool Value = true;
+			Object << Value;
+#ifdef XRGAME_EXPORTS
+#ifdef DEBUG
+			
+			m_last_update_time = Device.dwTimeGlobal;
+#endif
+#endif
+		}
+		else {
+			prev_freezed = freezed;
+			{
+				bool Value;
+				Object << Value;
+				if (Value)
+				{
+					freezed = false;
+				}
+				else {
+					if (!freezed) {
+#ifdef XRGAME_EXPORTS
+						m_freeze_time = Device.dwTimeGlobal;
+#else
+						m_freeze_time = 0;
+#endif
+					}
+					freezed = true;
+				}
+			}
+		}
+	}
 }
 
 
@@ -1539,6 +1781,35 @@ void CSE_ALifeObjectHangingLamp::UPDATE_Write(NET_Packet	&tNetPacket)
 
 }
 
+void CSE_ALifeObjectHangingLamp::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectHangingLamp::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << color << brightness << color_animator << range << flags << startup_animation << fixed_bones << m_health
+			<< m_virtual_size << m_ambient_radius << m_ambient_power << m_ambient_texture << light_texture << light_main_bone
+			<< spot_cone_angle << glow_texture << glow_radius << light_ambient_bone << m_volumetric_quality
+			<< m_volumetric_intensity << m_volumetric_distance;
+		if (Object.IsSave()) {
+			set_editor_flag(flVisualAnimationChange);
+		}
+		BEGIN_CHUNK(Object,"CSE_ALifeObjectHangingLamp::STATE::Activation")
+		{
+			Object << IsInited << IsSpawnActive;
+		}
+	}
+}
+
+void CSE_ALifeObjectHangingLamp::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectHangingLamp::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
+
 void CSE_ALifeObjectHangingLamp::load(NET_Packet &tNetPacket)
 {
 	inherited1::load(tNetPacket);
@@ -1567,6 +1838,7 @@ void CSE_ALifeObjectHangingLamp::FillProps	(LPCSTR pref, PropItemVec& values)
 	// 
 	P=PHelper().CreateFlag16	(values, PrepareKey(pref,*s_name,"Light\\Is Spot Light"),		&flags,				flTypeSpot, "Point", "Spot");
 	P->OnChangeEvent.bind		(this,&CSE_ALifeObjectHangingLamp::OnChangeFlag);
+	PHelper().CreateBool		(values, PrepareKey(pref,*s_name,"Light\\Active"), &IsSpawnActive);
 	PHelper().CreateColor		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color"),			&color);
 	PHelper().CreateFloat		(values, PrepareKey(pref,*s_name,"Light\\Main\\Brightness"),	&brightness,		0.1f, 5.f);
 	PHelper().CreateChoose		(values, PrepareKey(pref,*s_name,"Light\\Main\\Color Animator"),&color_animator, 	smLAnim);
@@ -1698,6 +1970,22 @@ void CSE_ALifeObjectProjector::UPDATE_Write(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeObjectProjector::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectProjector::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeObjectProjector::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectProjector::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeObjectProjector::FillProps			(LPCSTR pref, PropItemVec& values)
 {
@@ -1819,6 +2107,26 @@ void CSE_ALifeHelicopter::UPDATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write		(tNetPacket);
 	inherited3::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeHelicopter::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHelicopter::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		CSE_Motion::motion_serialize(Object);
+		inherited3::STATE_Serialize(Object);
+		Object << m_tNodeID;
+	}
+}
+
+void CSE_ALifeHelicopter::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeHelicopter::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited3::UPDATE_Serialize(Object);
+	}
 }
 
 void CSE_ALifeHelicopter::SyncRead(NET_Packet& Packet)
@@ -1968,6 +2276,28 @@ void CSE_ALifeCar::UPDATE_Write			(NET_Packet	&tNetPacket)
 	inherited2::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeCar::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCar::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+		inherited2::STATE_Serialize(Object);
+		Object << health;
+		if (health > 1.0f) {
+			health /= 100.0f;
+		}
+	}
+}
+
+void CSE_ALifeCar::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCar::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+		inherited2::UPDATE_Serialize(Object);
+	}
+}
+
 bool CSE_ALifeCar::used_ai_locations() const
 {
 	return						(false);
@@ -2036,6 +2366,32 @@ void CSE_ALifeCar::data_save(NET_Packet &tNetPacket)
 	}
 	tNetPacket.w_float(health);
 }
+
+void CSE_ALifeCar::data_serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeCar::data")
+	{
+		inherited2::data_serialize(Object);
+		Object << o_Position << o_Angle << health << door_states << wheel_states;
+	}
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SDoorState& Value) {
+	BEGIN_CHUNK(Object,"CSE_ALifeCar::SDoorState")
+	{
+		Object << Value.open_state << Value.health;
+	}
+	return Object;
+}
+
+ISaveObject& operator<<(ISaveObject& Object, CSE_ALifeCar::SWheelState& Value) {
+	BEGIN_CHUNK(Object,"CSE_ALifeCar::SWheelState")
+	{
+		Object << Value.health;
+	}
+	return Object;
+}
+
 void CSE_ALifeCar::SDoorState::read(NET_Packet& P)
 {
 	open_state=P.r_u8();health=P.r_float();
@@ -2097,6 +2453,22 @@ void CSE_ALifeObjectBreakable::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeObjectBreakable::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeObjectBreakable::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectBreakable::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeObjectBreakable::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectBreakable::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2170,6 +2542,23 @@ void CSE_ALifeObjectClimable::UPDATE_Write	(NET_Packet	&tNetPacket)
 	//inherited2::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeObjectClimable::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectClimable::STATE")
+	{
+		inherited2::STATE_Serialize(Object);
+		cform_serialize(Object);
+		Object << material;
+	}
+}
+
+void CSE_ALifeObjectClimable::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeObjectClimable::UPDATE")
+	{
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeObjectClimable::FillProps		(LPCSTR pref, PropItemVec& values)
 {
@@ -2226,6 +2615,22 @@ void CSE_ALifeMountedWeapon::UPDATE_Write		(NET_Packet	&tNetPacket)
 	inherited::UPDATE_Write		(tNetPacket);
 }
 
+void CSE_ALifeMountedWeapon::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMountedWeapon::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeMountedWeapon::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeMountedWeapon::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
 #ifndef XRGAME_EXPORTS
 void CSE_ALifeMountedWeapon::FillProps			(LPCSTR pref, PropItemVec& values)
 {
@@ -2262,6 +2667,23 @@ void CSE_ALifeStationaryMgun::STATE_Read			(NET_Packet	&tNetPacket, u16 size)
 void CSE_ALifeStationaryMgun::STATE_Write		(NET_Packet	&tNetPacket)
 {
 	inherited::STATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeStationaryMgun::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeStationaryMgun::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeStationaryMgun::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeStationaryMgun::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+		Object << m_bWorking << m_destEnemyDir;
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2303,6 +2725,23 @@ void CSE_ALifeTeamBaseZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeTeamBaseZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeTeamBaseZone::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTeamBaseZone::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_team;
+	}
+}
+
+void CSE_ALifeTeamBaseZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeTeamBaseZone::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2360,6 +2799,22 @@ void CSE_ALifeSmartZone::UPDATE_Read	(NET_Packet	&tNetPacket)
 void CSE_ALifeSmartZone::UPDATE_Write	(NET_Packet	&tNetPacket)
 {
 	inherited1::UPDATE_Write	(tNetPacket);
+}
+
+void CSE_ALifeSmartZone::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryBox::STATE")
+	{
+		inherited1::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeSmartZone::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryBox::UPDATE")
+	{
+		inherited1::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS
@@ -2427,6 +2882,23 @@ void CSE_ALifeInventoryBox::UPDATE_Read( NET_Packet &tNetPacket )
 void CSE_ALifeInventoryBox::UPDATE_Write( NET_Packet &tNetPacket )
 {
 	inherited::UPDATE_Write( tNetPacket );
+}
+
+void CSE_ALifeInventoryBox::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryBox::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+		Object << m_can_take << m_closed << m_tip_text;
+	}
+}
+
+void CSE_ALifeInventoryBox::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeInventoryBox::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
 }
 
 #ifndef XRGAME_EXPORTS

@@ -31,7 +31,10 @@ public:
 	virtual u64 GetSize() override { return 0; };
 
 	bool ContainsSubchunk(shared_str subchunkName);
-
+	
+	// this will detach subchunk from this, so detached won't be destroyed during this chunk destruction
+	bool DetachSubchunk(CSaveChunk& subchunk);
+	
 	void Write(CMemoryBuffer& Buffer, SSaveTask* Task);
 
 	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_chunk; }
@@ -56,8 +59,9 @@ public:
 	void w_u8(u8 a);
 	void w_s8(s8 a);
 	void w_string(shared_str S);
-
+	
 	void CopySubchunks(CSaveChunk* Chunk);
+	void AttachSubchunk(CSaveChunk* Chunk); // Make copy of chunk and attach copy as a subchunk
 
 	// reading - utilities
 	void r_bool(bool& A);

@@ -60,6 +60,10 @@ void CScriptBinderObject::load				(IReader	*input_packet)
 {
 }
 
+void CScriptBinderObject::Serialize(ISaveObject* Object)
+{
+}
+
 bool CScriptBinderObject::net_SaveRelevant	()
 {
 	return		(false);

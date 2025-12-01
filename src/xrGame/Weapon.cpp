@@ -1214,6 +1214,26 @@ void CWeapon::load(IReader &input_packet)
 	ProcessScope();
 }
 
+void CWeapon::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CWeapon")
+	{
+		inherited::Serialize(Object);
+		Object << iAmmoElapsed << m_cur_scope << m_flagsAddOnState << m_ammoType << m_zoom_params.m_bIsZoomModeNow;
+
+		if (!Object.IsSave()) {
+			UpdateAddonsVisibility();
+			if (m_zoom_params.m_bIsZoomModeNow) {
+				OnZoomIn();
+			}
+			else {
+				OnZoomOut();
+			}
+		}
+
+	}
+}
+
 void CWeapon::OnEvent(NET_Packet& P, u16 type) 
 {
 	switch (type)

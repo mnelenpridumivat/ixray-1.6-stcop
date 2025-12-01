@@ -70,11 +70,13 @@ public:
 public:
 
 	// Core events
-	virtual void			Load				(LPCSTR section);
-	virtual void			reinit				();
-	virtual void			reload				(LPCSTR section);
-	virtual BOOL			net_Spawn			(CSE_Abstract* DC);
-	virtual void			net_Destroy			();
+	virtual void Load(LPCSTR section) override;
+	virtual void reinit() override;
+	virtual void reload(LPCSTR section) override;
+	virtual BOOL net_Spawn(CSE_Abstract* DC) override;
+	virtual void net_Destroy() override;
+	
+	virtual void Serialize(ISaveObject& Object) override { inherited::Serialize(Object); };
 	
 	virtual void			shedule_Update		(u32 dt);
 

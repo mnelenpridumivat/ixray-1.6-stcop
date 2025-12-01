@@ -111,6 +111,16 @@ void CScriptBinderObjectWrapper::load_static			(CScriptBinderObject *script_bind
 	script_binder_object->CScriptBinderObject::load		(input_packet);
 }
 
+void CScriptBinderObjectWrapper::Serialize(ISaveObject* Object)
+{
+	luabind::call_member<void>(this, "Serialize", Object);
+}
+
+void CScriptBinderObjectWrapper::Serialize_static(CScriptBinderObject* script_binder_object, ISaveObject* Object)
+{
+	script_binder_object->CScriptBinderObject::Serialize(Object);
+}
+
 bool CScriptBinderObjectWrapper::net_SaveRelevant		()
 {
 	return							(luabind::call_member<bool>(this,"net_save_relevant"));

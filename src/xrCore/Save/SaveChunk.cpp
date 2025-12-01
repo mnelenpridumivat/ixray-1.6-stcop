@@ -44,6 +44,12 @@ bool CSaveChunk::ContainsSubchunk(shared_str subchunkName)
 	return false;
 }
 
+bool CSaveChunk::DetachSubchunk(CSaveChunk& subchunk)
+{
+	VERIFY(_currentArrayStack.empty());
+	return _subchunks.erase(subchunk._chunkName);
+}
+
 void CSaveChunk::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write((u8)ESaveVariableType::t_chunkStart);
@@ -251,6 +257,13 @@ void CSaveChunk::CopySubchunks(CSaveChunk* Chunk)
 		}
 		_subchunks[element.first] = (CSaveChunk*)element.second->MakeCopy();
 	}
+}
+
+void CSaveChunk::AttachSubchunk(CSaveChunk* Chunk)
+{
+	VERIFY(Chunk);
+	VERIFY(_subchunks.find(Chunk->_chunkName) == _subchunks.end(), "There is already a subchunk with name");
+	_subchunks[Chunk->_chunkName] = (CSaveChunk*)Chunk->MakeCopy();
 }
 
 void CSaveChunk::r_bool(bool& A)

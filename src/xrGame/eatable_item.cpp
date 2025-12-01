@@ -85,6 +85,14 @@ void CEatableItem::save(NET_Packet& packet)
 	packet.w_u8(m_iRemainingUses);
 }
 
+void CEatableItem::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CEatableItem")
+	{
+		inherited::Serialize(Object);
+	}
+}
+
 BOOL CEatableItem::net_Spawn(CSE_Abstract* DC)
 {
 	if (!inherited::net_Spawn(DC))

@@ -16,6 +16,7 @@
 #include "../../xrUI/ui_base.h"
 #include "../xrEngine/string_table.h"
 #include "ai_object_location.h"
+#include "Artefact.h"
 #include "object_broker.h"
 
 #ifdef DEBUG_DRAW
@@ -698,6 +699,52 @@ void CInventoryItem::load(IReader& packet)
 
 	object().PHLoadState(packet);
 	object().PPhysicsShell()->Disable();
+}
+
+void CInventoryItem::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CInventoryItem")
+	{
+		Object << m_ItemCurrPlace.value << m_fCondition << m_AdditionalDescription << m_IsUsedAdditionalDescription;
+
+		if (!Object.IsSave() && m_IsUsedAdditionalDescription)
+		{
+			SetAdditionalDescription(m_AdditionalDescription.c_str());
+		}
+
+		//--	load_data( m_upgrades, packet );
+		//--	install_loaded_upgrades();
+
+		/*if (Object.IsSave()) {
+			CArtefact* artefact = smart_cast<CArtefact*>(this);
+
+			if (artefact && artefact->IsInContainer())
+			{
+				u8 Value = 0;
+				Object << Value;
+				return;
+			}
+		}*/
+		u8 num_items;
+		if (Object.IsSave()) {
+			num_items = (u8)object().PHGetSyncItemsNumber();
+		}
+		Object << num_items;
+
+		if (!num_items) {
+			return;
+		}
+
+		if (!Object.IsSave()&&!object().PPhysicsShell()) {
+			object().setup_physic_shell();
+			object().PPhysicsShell()->Disable();
+		}
+
+		object().PHSerializeState(Object);
+		if (!Object.IsSave()) {
+			object().PPhysicsShell()->Disable();
+		}
+	}
 }
 
 ///////////////////////////////////////////////

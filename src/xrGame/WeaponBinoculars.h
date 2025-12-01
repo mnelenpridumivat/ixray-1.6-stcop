@@ -27,8 +27,9 @@ public:
 	virtual void	net_Destroy			();
 	virtual BOOL	net_Spawn			(CSE_Abstract* DC);
 	bool			can_kill			() const;
-	virtual void	save				(NET_Packet &output_packet);
-	virtual void	load				(IReader &input_packet);
+	virtual void	save				(NET_Packet &output_packet) override;
+	virtual void	load				(IReader &input_packet) override;
+	virtual void Serialize(ISaveObject& Object) override;
 
 	virtual bool	Action				(u16 cmd, u32 flags);
 	virtual void	UpdateCL			();

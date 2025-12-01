@@ -483,6 +483,26 @@ void CGameObject::load			(IReader &input_packet)
 {
 }
 
+void CGameObject::net_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CGameObject::net_Serialize")
+	{
+		auto ChunkDepth = Object.GetChunkStackDepth();
+		Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (client object)", Name());
+		CScriptBinder::Serialize(Object);
+		R_ASSERT4(ChunkDepth == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "Serialize (script binder)", Name());
+	}
+}
+
+void CGameObject::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CGameObject")
+	{
+
+	}
+}
+
 void CGameObject::spawn_supplies()
 {
 	if (!spawn_ini() || ai().get_alife())

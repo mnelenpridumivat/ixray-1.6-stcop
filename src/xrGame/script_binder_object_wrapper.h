@@ -35,6 +35,8 @@ public:
 	static	void		save_static					(CScriptBinderObject *script_binder_object, NET_Packet *output_packet);
 	virtual void		load						(IReader *input_packet);
 	static	void		load_static					(CScriptBinderObject *script_binder_object, IReader *input_packet);
+	virtual void Serialize(ISaveObject* Object);
+	virtual void Serialize_static(CScriptBinderObject* script_binder_object, ISaveObject* Object);
 	virtual bool		net_SaveRelevant			();
 	static  bool		net_SaveRelevant_static		(CScriptBinderObject *script_binder_object);
 	virtual void		net_Relcase					(CScriptGameObject *object);

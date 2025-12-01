@@ -1475,6 +1475,59 @@ void CActor::load(IReader &input_packet)
 	set_use_disabled(!!input_packet.r_u8());
 }
 
+void CActor::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CActor")
+	{
+		inherited::Serialize(Object);
+		CInventoryOwner::Serialize(Object);
+		Object << m_bOutBorder;
+
+		BEGIN_CHUNK(Object,"CActor::PDA")
+		{
+			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
+			bool Value;
+			if (Object.IsSave()) {
+
+				Value = task_wnd->IsTreasuresEnabled();
+				Object << Value;
+				Value = task_wnd->IsQuestNpcsEnabled();
+				Object << Value;
+				Value = task_wnd->IsSecondaryTasksEnabled();
+				Object << Value;
+				Value = task_wnd->IsPrimaryObjectsEnabled();
+				Object << Value;
+			}
+			else {
+				Object << Value;
+				task_wnd->TreasuresEnabled(Value);
+				Object << Value;
+				task_wnd->QuestNpcsEnabled(Value);
+				Object << Value;
+				task_wnd->SecondaryTasksEnabled(Value);
+				Object << Value;
+				task_wnd->PrimaryObjectsEnabled(Value);
+			}
+		}
+
+		BEGIN_CHUNK(Object,"CActor::Camera")
+		{
+			cam_Active()->Serialize(Object);
+			u8* Value = (u8*)&cam_active;
+			Object << *Value;
+			if (!Object.IsSave()) {
+				cam_Set(EActorCameras(*Value));
+			}
+		}
+
+
+		BEGIN_CHUNK(Object,"CActor::Quickslots")
+		{
+			Object << g_quick_use_slots;
+		}
+	}
+}
+
 #ifdef DEBUG
 
 extern	Flags32	dbg_net_Draw_Flags;

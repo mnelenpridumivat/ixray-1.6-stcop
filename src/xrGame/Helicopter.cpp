@@ -500,6 +500,21 @@ void CHelicopter::load(IReader &input_packet)
 	load_data		(m_syncronize_rocket, input_packet);
 }
 
+void CHelicopter::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CHelicopter")
+	{
+		inherited::Serialize(Object);
+		m_movement.Serialize(Object);
+		m_body.Serialize(Object);
+		m_enemy.Serialize(Object);
+		Object << renderable.xform << m_barrel_dir_tolerance << m_use_rocket_on_attack << m_use_mgun_on_attack
+			<< m_min_rocket_dist << m_max_rocket_dist << m_min_mgun_dist << m_max_mgun_dist
+			<< m_time_between_rocket_attack << m_syncronize_rocket;
+		UseFireTrail(m_enemy.bUseFireTrail);//force reload disp params
+	}
+}
+
 void CHelicopter::net_Relcase(CObject* O )
 {
 	CExplosive::net_Relcase(O);

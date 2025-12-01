@@ -87,6 +87,7 @@ public:
 	virtual void			PHSetMaterial		(u16 m);
 			void			PHSaveState			(NET_Packet &P);
 			void			PHLoadState			(IReader &P);
+			void			PHSerializeState(ISaveObject& Object);
 	virtual f32				GetMass				();
 	virtual	void			PHHit				(SHit &H);
 	virtual	void			Hit					(SHit* pHDS);
@@ -102,10 +103,11 @@ public:
 	virtual void			setup_physic_shell		();
 	virtual void			deactivate_physics_shell ();
 
-	virtual void			net_Destroy			();
-	virtual BOOL			net_Spawn			(CSE_Abstract*	DC);
-	virtual void			save				(NET_Packet &output_packet);
-	virtual void			load				(IReader &input_packet);
+	virtual void			net_Destroy			() override;
+	virtual BOOL			net_Spawn			(CSE_Abstract*	DC) override;
+	virtual void			save				(NET_Packet &output_packet) override;
+	virtual void			load				(IReader &input_packet) override;
+	virtual void Serialize(ISaveObject& Object) override;
 			void			init				();
 
 	virtual void			OnChangeVisual		();

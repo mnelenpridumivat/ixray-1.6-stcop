@@ -193,6 +193,18 @@ void CScriptBinder::load			(IReader &input_packet)
 	}
 }
 
+void CScriptBinder::Serialize(ISaveObject& Object)
+{
+	if (m_object) {
+		try {
+			m_object->Serialize(&Object);
+		}
+		catch (...) {
+			clear();
+		}
+	}
+}
+
 BOOL CScriptBinder::net_SaveRelevant()
 {
 	if (m_object) {

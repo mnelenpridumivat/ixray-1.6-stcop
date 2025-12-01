@@ -193,6 +193,23 @@ void CInventoryOwner::load(IReader& input_packet)
 	}
 }
 
+void CInventoryOwner::Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CInventoryOwner")
+	{
+		u8 active_slot = inventory().GetActiveSlot();
+		Object << active_slot;
+		if (active_slot == NO_ACTIVE_SLOT)
+		{
+			inventory().SetActiveSlot(NO_ACTIVE_SLOT);
+		}
+		m_tmp_active_slot_num = active_slot;
+		CharacterInfo().Serialize(Object);
+		Object << m_game_name << m_money;
+	}
+}
+
+
 void CInventoryOwner::UpdateInventoryOwner(u32 deltaT)
 {
 	PROF_EVENT("UpdateInvOwner");

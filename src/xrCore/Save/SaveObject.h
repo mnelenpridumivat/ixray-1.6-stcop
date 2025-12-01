@@ -37,7 +37,7 @@ public:
 	//void MarkDirty();
 	virtual u64 GetChunkStackDepth() override {return _chunkStack.size();}
 
-	template<typename Key, typename Mapped>
+	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value) {
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
@@ -110,7 +110,7 @@ public:
 		return *this;
 	}
 
-	template<typename T, size_t Size>
+	template<IsSaveObjectSerializable T, size_t Size>
 	ISaveObject& Serialize(svector<T, Size>& Value) {
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
@@ -142,7 +142,7 @@ public:
 		return *this;
 	}
 
-	template<typename Key, typename Mapped>
+	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
 		if (IsSave()) {
 			//GetCurrentChunk()->WriteArray(Value.size());
@@ -196,7 +196,7 @@ public:
 		return *this;
 	}
 
-	template<typename Key, typename Mapped>
+	template<typename  Key, typename  Mapped>
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value, fastdelegate::FastDelegate<void(ISaveObject&, typename std::pair<Key, Mapped>&)> PerElem) {
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
@@ -217,7 +217,7 @@ public:
 		return *this;
 	}
 
-	template<typename T, size_t Size>
+	template<IsSaveObjectSerializable T, size_t Size>
 	ISaveObject& Serialize(T (&Value)[Size]) {
 		if (IsSave()) {
 			GetCurrentChunk()->WriteArray();
@@ -248,7 +248,7 @@ public:
 		return *this;
 	}
 
-	template<typename T>
+	template<IsSaveObjectSerializable T>
 	ISaveObject& Serialize(xr_vector<T>& Value)
 	{
 		if (IsSave()) {
@@ -282,7 +282,7 @@ public:
 		return *this;
 	}
 
-	template<typename T>
+	template<IsSaveObjectSerializable T>
 	ISaveObject& Serialize(xr_vector<xr_shared_ptr<T>>& Value)
 	{
 		if (IsSave()) {
@@ -303,7 +303,7 @@ public:
 		return *this;
 	}
 
-	template<typename T>
+	template<IsSaveObjectSerializable T>
 	ISaveObject& Serialize(xr_vector<xr_unique_ptr<T>>& Value)
 	{
 		if (IsSave()) {
@@ -360,7 +360,7 @@ public:
 		return *this;
 	}
 	
-	template<typename T, typename H, typename Eq>
+	template<IsSaveObjectSerializable T, IsSaveObjectSerializable H, typename Eq>
 	ISaveObject& Serialize(xr_hash_set<T, H, Eq>& Value)
 	{
 		if (IsSave())
@@ -398,7 +398,7 @@ public:
 		return *this;
 	}
 
-	template<typename Key, typename Mapped>
+	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 	ISaveObject& Serialize(xr_hash_map<Key, Mapped>& Value) {
 		if (IsSave()) {
 			//GetCurrentChunk()->WriteArray(Value.size());
@@ -449,7 +449,7 @@ public:
 		return *this;
 	}
 
-	template<typename T>
+	template<IsSaveObjectSerializable T>
 	ISaveObject& Serialize(xr_deque<T>& Value)
 	{
 		if (IsSave()) {
@@ -491,42 +491,42 @@ ISaveObject& operator<<(ISaveObject& Object, T* Value) {
 	Object << *Value;
 }*/
 
-template<typename T>
+template<IsSaveObjectSerializable T>
 ISaveObject& operator<<(ISaveObject& Object, xr_vector<T>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename T, size_t Size>
+template<IsSaveObjectSerializable T, size_t Size>
 ISaveObject& operator<<(ISaveObject& Object, T (&Value)[Size]) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename Key, typename Mapped>
+template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 ISaveObject& operator<<(ISaveObject& Object, associative_vector<Key, Mapped>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename Key, typename Mapped>
+template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 ISaveObject& operator<<(ISaveObject& Object, xr_map<Key, Mapped>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename T, size_t Size>
+template<IsSaveObjectSerializable T, size_t Size>
 ISaveObject& operator<<(ISaveObject& Object, svector<T, Size>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename T, typename H, typename Eq>
+template<IsSaveObjectSerializable T, IsSaveObjectSerializable H, typename Eq>
 ISaveObject& operator<<(ISaveObject& Object, xr_hash_set<T, H, Eq>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename K, typename V, typename H, typename Eq>
+template<IsSaveObjectSerializable K, IsSaveObjectSerializable V, typename H, typename Eq>
 ISaveObject& operator<<(ISaveObject& Object, xr_hash_map<K, V, H, Eq>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
-template<typename T>
+template<IsSaveObjectSerializable T>
 ISaveObject& operator<<(ISaveObject& Object, xr_deque<T>& Value)
 {
 	return ((CSaveObject*)&Object)->Serialize(Value);
@@ -545,6 +545,8 @@ public:
 
 	virtual bool IsSave() override { return true; }
 	
+	virtual CSaveChunk* ExtractCurrentChunkRaw() override;
+	virtual void MergeSubchunk(CSaveChunk* Chunk) override;
 	virtual u64 ExtractCurrentChunk() override;
 	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 
@@ -573,7 +575,9 @@ public:
 	virtual void BeginArray() override;
 
 	virtual bool IsSave() override { return false; }
-	
+
+	virtual CSaveChunk* ExtractCurrentChunkRaw() override;
+	virtual void MergeSubchunk(CSaveChunk* Chunk) override;
 	virtual u64 ExtractCurrentChunk() override;
 	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 

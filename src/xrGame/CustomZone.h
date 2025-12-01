@@ -31,14 +31,15 @@ public:
 						CCustomZone						();
 	virtual				~CCustomZone					();
 
-	virtual		BOOL	net_Spawn						(CSE_Abstract* DC);
-	virtual		void	net_Import						(NET_Packet& P);
-	virtual		void	net_Export						(NET_Packet& P);
-	virtual		void	Load							(LPCSTR section);
-	virtual		void	net_Destroy						();
+	virtual BOOL net_Spawn(CSE_Abstract* DC) override;
+	virtual void net_Import(NET_Packet& P) override;
+	virtual void net_Export(NET_Packet& P) override;
+	virtual void Load(LPCSTR section) override;
+	virtual void net_Destroy() override;
 
-	virtual		void	save							(NET_Packet &output_packet);
-	virtual		void	load							(IReader &input_packet);
+	virtual void save(NET_Packet &output_packet) override;
+	virtual void load(IReader &input_packet) override;
+	virtual void Serialize(ISaveObject& Object) override;
 	
 	virtual		void	UpdateCL						();
 	virtual		void	UpdateWorkload					(u32 dt);
