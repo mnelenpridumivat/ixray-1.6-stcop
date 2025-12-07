@@ -439,38 +439,36 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 	{
 		BEGIN_CHUNK(Object,"CPlanner::m_evaluators")
 		{
-			auto I = this->m_evaluators.begin();
-			auto E = this->m_evaluators.end();
-			Object.BeginArray();
-			for (; I != E; ++I)
+			BEGIN_ARRAY(Object)
 			{
-				(*I).second->Serialize(Object);
+				for (auto& elem : this->m_evaluators)
+				{
+					elem.second->Serialize(Object);
+				}
 			}
-			Object.EndArray();
 		}
 
 		BEGIN_CHUNK(Object,"CPlanner::m_operators")
 		{
-			auto I = this->m_operators.begin();
-			auto E = this->m_operators.end();
-			Object.BeginArray();
-			for (; I != E; ++I) 
+			BEGIN_ARRAY(Object)
 			{
-				(*I).m_operator->Serialize(Object);
+				for (auto& elem : this->m_operators)
+				{
+					
+					elem.m_operator->Serialize(Object);
+				}
 			}
-			Object.EndArray();
 		}
 
 		BEGIN_CHUNK(Object,"CPlanner::m_storage")
 		{
-			auto I = this->m_storage.m_storage.begin();
-			auto E = this->m_storage.m_storage.end();
-			Object.BeginArray();
-			for (; I != E; ++I)
+			BEGIN_ARRAY(Object)
 			{
-				Object << I->m_condition << I->m_value;
+				for (auto& elem : this->m_storage.m_storage)
+				{
+					Object << elem.m_condition << elem.m_value;
+				}
 			}
-			Object.EndArray();
 		}
 		m_loaded = true;
 	}

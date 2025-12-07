@@ -234,11 +234,12 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object)
 			m_serializable_object_count = 0;
 			BEGIN_CHUNK(Object,"CALifeObjectRegistry::objects")
 			{
-				Object.BeginArray();
-				for (auto& elem : m_objects) {
-					SerializeElem(Object, elem.second);
+				BEGIN_ARRAY(Object)
+				{
+					for (auto& elem : m_objects) {
+						SerializeElem(Object, elem.second);
+					}
 				}
-				Object.EndArray();
 			}
 
 			BEGIN_CHUNK(Object,"CALifeObjectRegistry::object_count")
@@ -262,11 +263,12 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object)
 			
 			BEGIN_CHUNK(Object,"CALifeObjectRegistry::objects")
 			{
-				Object.BeginArray();
-				for (u64 i = 0; i < m_serializable_object_count; ++i) {
-					add(get_object(Object));
+				BEGIN_ARRAY(Object)
+				{
+					for (u64 i = 0; i < m_serializable_object_count; ++i) {
+						add(get_object(Object));
+					}
 				}
-				Object.EndArray();
 			}
 
 			Msg("* %d objects are successfully loaded", m_serializable_object_count);

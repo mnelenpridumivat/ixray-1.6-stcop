@@ -177,3 +177,7 @@ void CServerEntityWrapper::load_update		(IReader &stream)
 //	R_ASSERT2				(M_UPDATE == ID,"Invalid packet ID (!= M_UPDATE)!");
 //	m_object->load_update	(net_packet);
 }
+
+void CServerEntityWrapper::serialize_update(ISaveObject& Object)
+{
+}

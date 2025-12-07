@@ -12,9 +12,18 @@ struct INFO_DATA : public IPureSerializeObject<IReader, IWriter>
 	virtual void		save			(IWriter&);
 
     shared_str info_id;
-    //время получения нужно порции информации
+    //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     ALife::_TIME_ID receive_time;
 };
+
+inline ISaveObject& operator<<(ISaveObject& Object, INFO_DATA& Data)
+{
+	BEGIN_CHUNK(Object, "INFO_DATA")
+	{
+		Object << Data.info_id << Data.receive_time;
+	}
+	return Object;
+}
 
 class CFindByIDPred
 {

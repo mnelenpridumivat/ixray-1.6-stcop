@@ -82,6 +82,34 @@ void SLocationKey::destroy()
 	delete_data(location);
 }
 
+ISaveObject& operator<<(ISaveObject& Object, SLocationKey& Data)
+{
+	BEGIN_CHUNK(Object, "SLocationKey")
+	{
+		Object << Data.object_id << Data.spot_type;
+		if (Object.IsSave())
+		{
+			bool Value = Data.location->IsUserDefined();
+			Object << Value;
+		}
+		else
+		{
+			bool Value;
+			Object << Value;
+			if (Value)
+			{
+				Level().Server->PerformIDgen(Data.object_id);
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id, true);
+			} else
+			{
+				Data.location = new CMapLocation(*Data.spot_type, Data.object_id);
+			}
+		}
+		Data.location->serialize(Object);
+	}
+	return Object;
+}
+
 void CMapLocationRegistry::save(IWriter &stream)
 {
 	stream.w_u32			((u32)objects().size());

@@ -18,7 +18,12 @@ void CSaveManager::SetFlag(ESaveManagerFlagsGeneral Flag, bool Value)
 	ControlFlagsDefault.set((u8)Flag, Value);
 }
 
-bool CSaveManager::TestFlag(ESaveManagerFlagsGeneral Flag)
+Flags8 CSaveManager::GetFlags() const
+{
+	return ControlFlagsDefault;
+}
+
+bool CSaveManager::TestFlag(ESaveManagerFlagsGeneral Flag) const
 {
 	return ControlFlagsDefault.test((u8)Flag);
 }
@@ -69,7 +74,7 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 	return LoadData;
 }
 
-void CSaveManager::WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool async)
+void CSaveManager::WriteSavedData(const SGameInfoFast& GameInfo, CSaveObjectSave* SaveObj, const string_path& to_file, bool async)
 {
 	SSaveTask* task = new SSaveTask();
 	task->GameInfo = GameInfo;
@@ -93,7 +98,15 @@ void SSaveTask::WriteSavedDataImpl()
 	StringsHashesMap = xr_make_unique<xr_map<u32, xr_vector<shared_str>>>();
 	BoolQueue = xr_make_unique<xr_queue<bool>>();
 	CompileData(Obj.get());
-	CSaveManager::GetInstance().WriteHeader(Buffers.BufferHeader);
+	{
+		PROF_EVENT("CSaveManager::WriteHeader")
+		Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
+		Buffers.BufferHeader->Write(GameInfo.m_actor_health);
+		Buffers.BufferHeader->Write(GameInfo.m_game_time);
+		Buffers.BufferHeader->Write(GameInfo.m_level_id);
+		Buffers.BufferHeader->Write(GameInfo.m_level_name);
+		Buffers.BufferHeader->Write(CSaveManager::GetInstance().GetFlags());
+	}
 	Buffers.BufferHeader->Write(SaveWriter);
 	if (CSaveManager::GetInstance().TestFlag(CSaveManager::ESaveManagerFlagsGeneral::EUseStringOptimization))
 	{
@@ -222,12 +235,12 @@ void CSaveManager::SkipGameInfo(IReader* stream)
 	GetGameInfoFast(stream, data);
 }
 
-void CSaveManager::WriteGameInfo(const SGameInfoFast& data)
+/*void CSaveManager::WriteGameInfo(const SGameInfoFast& data)
 {
 	GameInfo = data;
-}
+}*/
 
-void CSaveManager::WriteHeader(CMemoryBuffer* buffer)
+/*void CSaveManager::WriteHeader(CMemoryBuffer* buffer)
 {
 	PROF_EVENT("CSaveManager::WriteHeader")
 	buffer->Write(ESaveVariableType::t_chunk);
@@ -236,7 +249,7 @@ void CSaveManager::WriteHeader(CMemoryBuffer* buffer)
 	buffer->Write(GameInfo.m_level_id);
 	buffer->Write(GameInfo.m_level_name);
 	buffer->Write(ControlFlagsDefault.flags);
-}
+}*/
 
 void SSaveTask::WriteStrings()
 {

@@ -24,6 +24,7 @@ public:
 	~CSaveChunk();
 
 	LPCSTR GetChunkName() const { return _chunkName.c_str(); }
+	u16 GetArrStackSize() const { return _currentArrayStack.size(); }
 
 	virtual ISaveable* GetCurrentElement() override { return nullptr; };
 	virtual void Next() override {};

@@ -725,6 +725,21 @@ void CGameTask::load(IReader& stream)
 	CreateMapLocation		(true);
 }
 
+void SGameTaskObjective::serialize_task(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object, "CGameTask")
+	{
+		Object << m_task_state << m_task_type << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish <<
+			m_Title << m_Description << m_icon_texture_name << m_map_hint << m_map_location << m_map_object_id <<
+			m_priority << m_pScriptHelper;
+		if (!Object.IsSave())
+		{
+			CommitScriptHelperContents();
+			CreateMapLocation(true);
+		}
+	}
+}
+
 void SGameTaskObjective::SetIconName_script(pcstr tex)
 {
 	m_icon_texture_name = tex;
@@ -803,6 +818,30 @@ void SScriptTaskHelper::init_functors(xr_vector<shared_str>& v_src, task_state_f
 	}
 }
 
+ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value)
+{
+	BEGIN_CHUNK(Object, "SScriptTaskHelper")
+	{
+		BEGIN_CHUNK(Object, "SScriptTaskHelper::complete_lua_functions")
+		{
+			Object << Value.m_s_complete_lua_functions;
+		}
+		BEGIN_CHUNK(Object, "SScriptTaskHelper::fail_lua_functions")
+		{
+			Object << Value.m_s_fail_lua_functions;
+		}
+		BEGIN_CHUNK(Object, "SScriptTaskHelper::lua_functions_on_complete")
+		{
+			Object << Value.m_s_lua_functions_on_complete;
+		}
+		BEGIN_CHUNK(Object, "SScriptTaskHelper::lua_functions_on_fail")
+		{
+			Object << Value.m_s_lua_functions_on_fail;
+		}
+	}
+	return Object;
+}
+
 void SScriptTaskHelper::load(IReader &stream)
 {
 		load_data(m_s_complete_lua_functions,		stream);
@@ -831,6 +870,20 @@ void SGameTaskKey::load(IReader &stream)
     task_id = game_task->m_ID;
 }
 
+void SGameTaskKey::serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object, "SGameTaskKey")
+	{
+		if (!game_task)
+		{
+			game_task = new CGameTask();
+		}
+		Object << task_id;
+		game_task->m_ID	= task_id;
+		game_task->serialize_task(Object);
+	}
+}
+
 void SGameTaskKey::destroy()
 {
 	delete_data(game_task);
@@ -842,4 +895,10 @@ CMapLocation* SGameTaskObjective::LinkedMapLocation()
 		return nullptr;
 
 	return Level().MapManager().GetMapLocation(m_map_location, m_map_object_id);
+}
+
+ISaveObject& operator<<(ISaveObject& Object, SGameTaskKey& Data)
+{
+	Data.serialize(Object);
+	return Object;
 }

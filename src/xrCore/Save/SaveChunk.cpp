@@ -53,7 +53,7 @@ bool CSaveChunk::DetachSubchunk(CSaveChunk& subchunk)
 void CSaveChunk::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
 {
 	Buffer.Write((u8)ESaveVariableType::t_chunkStart);
-	Task->ConditionalWriteString(_chunkName, Buffer);
+	Task->ConditionalWriteString(_chunkName, Buffer); // TODO: Optimize and store only hash?
 	for (const auto& elem : _subchunks) {
 		elem.second->Write(Buffer, Task);
 	}

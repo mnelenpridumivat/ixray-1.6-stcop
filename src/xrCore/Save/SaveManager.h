@@ -109,12 +109,12 @@ public:
 
 	bool GetGameInfoFast(IReader* stream, SGameInfoFast& data);
 	void SkipGameInfo(IReader* stream);
-	void WriteGameInfo(const SGameInfoFast& data);
+	//void WriteGameInfo(const SGameInfoFast& data);
 
 private:
 	Flags8 ControlFlagsDefault;
 	Flags8 ControlFlagsRead;
-	SGameInfoFast GameInfo;
+	//SGameInfoFast GameInfo;
 	void ReadHeader(IReader* stream);
 	void ReadStrings(IReader* stream);
 	void ReadBools(IReader* stream);
@@ -134,7 +134,8 @@ public:
 	};
 
 	void SetFlag(ESaveManagerFlagsGeneral Flag, bool Value);
-	bool TestFlag(ESaveManagerFlagsGeneral Flag);
+	bool TestFlag(ESaveManagerFlagsGeneral Flag) const;
+	Flags8 GetFlags() const;
 
 	CSaveManager(const CSaveManager& other) = delete;
 	CSaveManager(CSaveManager&& other) = delete;
@@ -146,12 +147,12 @@ public:
 	bool IsSaving();
 	CSaveObjectSave* BeginSave();
 	CSaveObjectLoad* BeginLoad(IReader* stream);
-	void WriteSavedData(CSaveObjectSave* SaveObj, const string_path& to_file, bool async = true);
+	void WriteSavedData(const SGameInfoFast& GameInfo, CSaveObjectSave* SaveObj, const string_path& to_file, bool async = true);
 
 	CSaveObjectSave* EditorBeginSave();
 	CSaveObjectLoad* EditorBeginLoad(IReader* stream);
 	
-	void WriteHeader(CMemoryBuffer* buffer);
+	//void WriteHeader(CMemoryBuffer* buffer);
 
 	void ConditionalReadString(IReader* stream, shared_str& Value);
 	void ConditionalReadBool(IReader* stream, bool& Value);

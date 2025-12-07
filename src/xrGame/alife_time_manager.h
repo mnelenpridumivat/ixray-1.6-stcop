@@ -11,7 +11,7 @@
 #include "object_interfaces.h"
 #include "alife_space.h"
 
-class CALifeTimeManager {
+class CALifeTimeManager final {
 private:
 	ALife::_TIME_ID					m_game_time;
 	float							m_time_factor;
@@ -23,9 +23,10 @@ private:
 
 public:
 									CALifeTimeManager		(LPCSTR		section);
-	virtual							~CALifeTimeManager		();
-	virtual void					save					(IWriter	&memory_stream);
-	virtual void					load					(IReader	&file_stream);
+								~CALifeTimeManager		();
+	void save(IWriter	&memory_stream);
+	void load(IReader	&file_stream);
+	void Serialize(ISaveObject& Object);
 			void					init					(LPCSTR		section);
 	IC		void					set_time_factor			(float		time_factor);
 	IC		ALife::_TIME_ID			start_game_time			() const;

@@ -31,6 +31,8 @@ public:
 			void			init_functors	(xr_vector<shared_str>& v_src, task_state_functors& v_dest);
 };
 
+ISaveObject& operator<<(ISaveObject& Object, SScriptTaskHelper& Value);
+
 class SGameTaskObjective : public IPureSerializeObject<IReader, IWriter>
 {
     friend struct SGameTaskKey;
@@ -175,6 +177,7 @@ public:
 
     void save(IWriter& stream) override;
     void load(IReader& stream) override;
+    void serialize(ISaveObject& Object);
 
     void ChangeStateCallback() override;
 

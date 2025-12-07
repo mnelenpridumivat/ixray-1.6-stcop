@@ -116,6 +116,7 @@ public:
 
 	virtual void			save							(IWriter &stream);
 	virtual void			load							(IReader &stream);
+	virtual void			serialize(ISaveObject& Object);
 
 	shared_str				m_owner_task_id;
 

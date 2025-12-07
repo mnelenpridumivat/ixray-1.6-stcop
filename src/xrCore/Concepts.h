@@ -13,9 +13,6 @@ namespace XRay::Concepts
     template <typename T>
     concept CharStr = CharPtr<T> || CharArray<T>;
 
-    template <typename T>
-    concept XRayString = std::same_as<std::remove_cvref_t<T>, xr_string> || std::same_as<std::remove_cvref_t<T>, shared_str>;
-
 	template <typename T>
 	concept Arithmetic = std::integral<T> || std::floating_point<T>;
 

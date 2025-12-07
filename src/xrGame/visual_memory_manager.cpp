@@ -879,76 +879,78 @@ void CVisualMemoryManager::Serialize(ISaveObject& Object)
 		{
 			auto ObjectsSize = m_objects->size();
 			Object << ObjectsSize;
-			Object.BeginArray();
-			for(auto& obj : *m_objects)
+			BEGIN_ARRAY(Object)
 			{
-				BEGIN_CHUNK(Object,"CHitObject")
+				for(auto& obj : *m_objects)
 				{
-					BEGIN_CHUNK(Object,"CHitObject::flags")
+					BEGIN_CHUNK(Object,"CHitObject")
 					{
-						Object << obj.m_visible.flags;
+						BEGIN_CHUNK(Object,"CHitObject::flags")
+						{
+							Object << obj.m_visible.flags;
+						}
+						VERIFY(obj.m_object);
+						BEGIN_CHUNK(Object,"CHitObject::ID")
+						{
+							u16 IDValue = u16(-1);
+							IDValue = obj.m_object->ID();
+							Object << IDValue;
+						}
+						obj.Serialize(Object);
 					}
-					VERIFY(obj.m_object);
-					BEGIN_CHUNK(Object,"CHitObject::ID")
-					{
-						u16 IDValue = u16(-1);
-						IDValue = obj.m_object->ID();
-						Object << IDValue;
-					}
-					obj.Serialize(Object);
 				}
 			}
-			Object.EndArray();
 		} else
 		{
 			size_t ObjectsSize;
 			Object << ObjectsSize;
-			Object.BeginArray();
-			for(size_t i = 0; i < ObjectsSize; ++i)
+			BEGIN_ARRAY(Object)
 			{
-				BEGIN_CHUNK(Object,"CHitObject")
+				for(size_t i = 0; i < ObjectsSize; ++i)
 				{
-					CDelayedVisibleObject			delayed_object;
-					BEGIN_CHUNK(Object,"CHitObject::ID")
+					BEGIN_CHUNK(Object,"CHitObject")
 					{
-						Object << delayed_object.m_object_id;
-					}
-					delayed_object.m_visible_object.Serialize(Object);
+						CDelayedVisibleObject			delayed_object;
+						BEGIN_CHUNK(Object,"CHitObject::ID")
+						{
+							Object << delayed_object.m_object_id;
+						}
+						delayed_object.m_visible_object.Serialize(Object);
 
-					CVisibleObject& object = delayed_object.m_visible_object;
-					object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
+						CVisibleObject& object = delayed_object.m_visible_object;
+						object.m_object = smart_cast<CEntityAlive*>(Level().Objects.net_Find(delayed_object.m_object_id));
 
-					BEGIN_CHUNK(Object,"CHitObject::flags")
-					{
-						Object << object.m_visible.flags;
-					}
-					//////////////////////////////////////////////////////////
+						BEGIN_CHUNK(Object,"CHitObject::flags")
+						{
+							Object << object.m_visible.flags;
+						}
+						//////////////////////////////////////////////////////////
 
-					if (object.m_object) {
-						add_visible_object(object);
-					}
-					else {
-						m_delayed_objects.push_back(delayed_object);
-						const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
-						if (!spawn_callback || !spawn_callback->m_object_callback) {
-							typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
-							CALLBACK_TYPE					callback;
-							callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
-							if (!g_dedicated_server) {
-								Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
-							}
-#ifdef DEBUG
-							else {
-								if (spawn_callback && spawn_callback->m_object_callback) {
-									VERIFY(spawn_callback->m_object_callback == callback);
+						if (object.m_object) {
+							add_visible_object(object);
+						}
+						else {
+							m_delayed_objects.push_back(delayed_object);
+							const CClientSpawnManager::CSpawnCallback* spawn_callback = Level().client_spawn_manager().callback(delayed_object.m_object_id, m_object->ID());
+							if (!spawn_callback || !spawn_callback->m_object_callback) {
+								typedef CClientSpawnManager::CALLBACK_TYPE	CALLBACK_TYPE;
+								CALLBACK_TYPE					callback;
+								callback.bind(&m_object->memory(), &CMemoryManager::on_requested_spawn);
+								if (!g_dedicated_server) {
+									Level().client_spawn_manager().add(delayed_object.m_object_id, m_object->ID(), callback);
 								}
-							}
+#ifdef DEBUG
+								else {
+									if (spawn_callback && spawn_callback->m_object_callback) {
+										VERIFY(spawn_callback->m_object_callback == callback);
+									}
+								}
 #endif // DEBUG
+							}
 						}
 					}
 				}
 			}
-			Object.EndArray();
 		}
 	}
 }

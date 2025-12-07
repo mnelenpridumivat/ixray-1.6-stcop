@@ -7,10 +7,20 @@ class shared_str;
 
 class XRCORE_API ISaveObjectStackHandler
 {
-	u64 depth = u64(-1);
+	u16 depth = u16(-1);
 public:
-	ISaveObjectStackHandler(u64 depth) : depth(depth){}
-	u64 GetDepth()const { return depth; }
+	ISaveObjectStackHandler(u16 depth) : depth(depth){}
+	u16 GetDepth()const { return depth; }
+};
+
+class XRCORE_API ISaveObjectArrayHandler
+{
+	u16 depth = u16(-1);
+	u16 arr_depth = u16(-1);
+public:
+	ISaveObjectArrayHandler(u16 depth, u16 arr_depth) : depth(depth), arr_depth(arr_depth){}
+	u16 GetDepth()const { return depth; }
+	u16 GetArrDepth()const { return arr_depth; }
 };
 
 class XRCORE_API ISaveObject {
@@ -18,8 +28,8 @@ public:
 	virtual ~ISaveObject() = default;
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) = 0;
 	virtual void EndChunk(ISaveObjectStackHandler handler) = 0;
-	virtual void BeginArray() = 0;
-	virtual void EndArray() = 0;
+	virtual ISaveObjectArrayHandler BeginArray() = 0;
+	virtual void EndArray(ISaveObjectArrayHandler handler) = 0;
 
 	virtual bool HasChunk(shared_str ChunkName) = 0;
 
@@ -58,6 +68,16 @@ public:
 	~ISaveObjectStackGuard(){ saveObject->EndChunk(handler); }
 };
 
+class XRCORE_API ISaveObjectArrayGuard
+{
+	ISaveObjectArrayHandler handler;
+	ISaveObject* saveObject = nullptr;
+public:
+	ISaveObjectArrayGuard(ISaveObject* saveObject, ISaveObjectArrayHandler handler) : handler(handler),
+		saveObject(saveObject) {}
+	~ISaveObjectArrayGuard(){ saveObject->EndArray(handler); }
+};
+
 template<typename T>
 concept IsSaveObjectSerializablePtr = requires(ISaveObject& Object, T Value)
 {
@@ -83,3 +103,4 @@ ISaveObject& operator<<(ISaveObject& Object, T& Value)
 }
 
 #define BEGIN_CHUNK(Obj, Name) if((Obj).IsSave() || (Obj).HasChunk(Name)) if(ISaveObjectStackGuard guard(&(Obj), (Obj).BeginChunk(Name)); true)
+#define BEGIN_ARRAY(Obj) if(ISaveObjectArrayGuard guard(&(Obj), (Obj).BeginArray()); true)

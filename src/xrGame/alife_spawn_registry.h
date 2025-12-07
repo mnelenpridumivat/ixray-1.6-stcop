@@ -18,7 +18,7 @@
 class CServerEntityWrapper;
 class IGameGraph;
 
-class CALifeSpawnRegistry : CRandom {
+class CALifeSpawnRegistry final : CRandom {
 public:
 	typedef IGameGraph::LEVEL_POINT_VECTOR											ARTEFACT_SPAWNS;
 	typedef CGraphAbstractSerialize<CServerEntityWrapper*,float,ALife::_SPAWN_ID>	SPAWN_GRAPH;
@@ -47,6 +47,7 @@ private:
 protected:
 			void							save_updates				(IWriter &stream);
 			void							load_updates				(IReader &stream);
+			void							serialize_updates			(ISaveObject& Object);
 			void							build_story_spawns			();
 			void							build_root_spawns			();
 			void							fill_new_spawns_single		(SPAWN_GRAPH::CVertex *vertex, xr_vector<ALife::_SPAWN_ID> &spawns, ALife::_TIME_ID game_time, xr_vector<ALife::_SPAWN_ID> &objects);
@@ -64,11 +65,12 @@ protected:
 
 public:
 											CALifeSpawnRegistry			(LPCSTR section);
-	virtual									~CALifeSpawnRegistry		();
-	virtual void							load						(IReader &file_stream, xrGUID *save_guid = 0);
-	virtual void							save						(IWriter &memory_stream);
-			void							load						(IReader &file_stream, LPCSTR game_name);
-			void							load						(LPCSTR spawn_name);
+										~CALifeSpawnRegistry		();
+	void load(IReader &file_stream, xrGUID *save_guid = 0);
+	void save(IWriter &memory_stream);
+	void load(IReader &file_stream, LPCSTR game_name);
+	void Serialize(ISaveObject& Object);
+	void load(LPCSTR spawn_name);
 			void							load_from_editor			();
 			void							fill_new_spawns				(xr_vector<ALife::_SPAWN_ID> &spawns, ALife::_TIME_ID game_time, xr_vector<ALife::_SPAWN_ID> &objects);
 	IC		const CALifeSpawnHeader			&header						() const;

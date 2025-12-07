@@ -31,7 +31,7 @@ public:
 	CSaveObject(CSaveChunk* Root);
 	~CSaveObject();
 	void EndChunk(ISaveObjectStackHandler handler) override;
-	void EndArray() override;
+	void EndArray(ISaveObjectArrayHandler handler) override;
 	bool HasChunk(shared_str ChunkName) override;
 
 	//void MarkDirty();
@@ -541,7 +541,7 @@ public:
 	CSaveObjectSave(CSaveChunk* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
-	virtual void BeginArray() override;
+	virtual ISaveObjectArrayHandler BeginArray() override;
 
 	virtual bool IsSave() override { return true; }
 	
@@ -572,7 +572,7 @@ public:
 	CSaveObjectLoad(ISaveChunkHandleInterface* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
-	virtual void BeginArray() override;
+	virtual ISaveObjectArrayHandler BeginArray() override;
 
 	virtual bool IsSave() override { return false; }
 

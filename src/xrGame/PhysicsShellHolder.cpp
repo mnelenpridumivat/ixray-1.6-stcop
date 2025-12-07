@@ -540,18 +540,19 @@ void CPhysicsShellHolder::PHSerializeState(ISaveObject& Object)
 
 		K->LL_SetBonesVisible(_vm);
 
-		Object.BeginArray();
-		for (u16 i = 0; i < bones_number; i++)
+		BEGIN_ARRAY(Object)
 		{
-			BEGIN_CHUNK(Object, "SPHNetState")
+			for (u16 i = 0; i < bones_number; i++)
 			{
-				SPHNetState state;
-				PHGetSyncItem(i)->get_State(state);
-				state.net_Serialize(Object, min, max);
-				PHGetSyncItem(i)->set_State(state);
+				BEGIN_CHUNK(Object, "SPHNetState")
+				{
+					SPHNetState state;
+					PHGetSyncItem(i)->get_State(state);
+					state.net_Serialize(Object, min, max);
+					PHGetSyncItem(i)->set_State(state);
+				}
 			}
 		}
-		Object.EndArray();
 	}
 }
 

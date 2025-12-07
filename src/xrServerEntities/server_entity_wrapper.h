@@ -23,6 +23,7 @@ public:
 	virtual	void			load					(IReader &stream);
 			void			save_update				(IWriter &stream);
 			void			load_update				(IReader &stream);
+	void serialize_update(ISaveObject& Object);
 	IC		CSE_Abstract	&object					() const;
 };
 

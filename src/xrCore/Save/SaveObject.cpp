@@ -54,7 +54,7 @@ void CSaveObject::PopDebugData()
 
 void CSaveObject::EndChunk(ISaveObjectStackHandler handler)
 {
-	VERIFY(handler.GetDepth() != u64(-1));
+	VERIFY(handler.GetDepth() != u16(-1));
 	VERIFY(!_chunkStack.empty());
 	xr_string chunk = _chunkStack.top()->GetChunkName();
 	_chunkStack.pop();
@@ -64,9 +64,14 @@ void CSaveObject::EndChunk(ISaveObjectStackHandler handler)
 #endif
 }
 
-void CSaveObject::EndArray()
+void CSaveObject::EndArray(ISaveObjectArrayHandler handler)
 {
+	VERIFY(handler.GetDepth() != u16(-1) && handler.GetArrDepth() != u16(-1));
+	VERIFY(!_chunkStack.empty());
+	xr_string chunk = _chunkStack.top()->GetChunkName();
 	GetCurrentChunk()->EndArray();
+	R_ASSERT(handler.GetDepth() == _chunkStack.size() && handler.GetArrDepth() == _chunkStack.top()->GetArrStackSize(),
+	          "Chunk has invalid array closing tags!", chunk.c_str(), std::to_string(handler.GetArrDepth()).c_str());
 }
 
 bool CSaveObject::HasChunk(shared_str ChunkName)
@@ -148,9 +153,10 @@ ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }
 
-void CSaveObjectSave::BeginArray()
+ISaveObjectArrayHandler CSaveObjectSave::BeginArray()
 {
 	GetCurrentChunk()->WriteArray();
+	return ISaveObjectArrayHandler(_chunkStack.size(), _chunkStack.top()->GetArrStackSize()-1);
 }
 
 CSaveChunk* CSaveObjectSave::ExtractCurrentChunkRaw()
@@ -278,10 +284,11 @@ ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 	return ISaveObjectStackHandler(_chunkStack.size()-1);
 }
 
-void CSaveObjectLoad::BeginArray()
+ISaveObjectArrayHandler CSaveObjectLoad::BeginArray()
 {
 	u64 ArrSize;
 	GetCurrentChunk()->ReadArray(ArrSize);
+	return ISaveObjectArrayHandler(_chunkStack.size(), _chunkStack.top()->GetArrStackSize()-1);
 }
 
 ISaveObject& CSaveObjectLoad::operator<<(float& Value)
