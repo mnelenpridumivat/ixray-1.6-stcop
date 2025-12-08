@@ -97,116 +97,138 @@ namespace CSaveChunk_script {
 
 namespace CSaveObject_script {
 
-ISaveObjectStackHandler BeginChunk(ISaveObject* Obj, LPCSTR Name){
-	VERIFY(Obj);
-	return Obj->BeginChunk(Name);
-}
-
-bool HasChunk(ISaveObject* Obj, LPCSTR Name){
-	VERIFY(Obj);
-	return Obj->HasChunk(Name);
-}
-
-void EndChunk(ISaveObject* Obj, ISaveObjectStackHandler handler){
-	VERIFY(handler.GetDepth() != u64(-1));
-	VERIFY(Obj);
-	Obj->EndChunk(handler);
-}
-
-void BeginArray(ISaveObject* Obj){
-	VERIFY(Obj);
-	Obj->BeginArray();
-}
-
-void EndArray(ISaveObject* Obj){
-	VERIFY(Obj);
-	Obj->EndArray();
-}
-
-Fvector s_vec3(ISaveObject* Obj, Fvector Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-float s_float(ISaveObject* Obj, double Value) {
-	VERIFY(Obj);
-	float Casted;
-	if (Obj->IsSave()) {
-		Casted = Value;
+	// Raw BeginChunk/EndChunk and BeginArray/EndArray is removed
+	// Use safe ForChunk and ForArray functions
+	/*ISaveObjectStackHandler BeginChunk(ISaveObject* Obj, LPCSTR Name){
+		VERIFY(Obj);
+		return Obj->BeginChunk(Name);
+	}*/
+	
+	bool HasChunk(ISaveObject* Obj, LPCSTR Name){
+		VERIFY(Obj);
+		return Obj->HasChunk(Name);
 	}
-	*Obj << Casted;
-	return Casted;
-}
-
-u64 s_u64(ISaveObject* Obj, u64 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-s64 s_s64(ISaveObject* Obj, s64 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-u32 s_u32(ISaveObject* Obj, u32 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-s32 s_s32(ISaveObject* Obj, s32 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-u16 s_u16(ISaveObject* Obj, u16 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-s16 s_s16(ISaveObject* Obj, s16 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-u8 s_u8(ISaveObject* Obj, u8 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-s8 s_s8(ISaveObject* Obj, s8 Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-bool s_bool(ISaveObject* Obj, bool Value) {
-	VERIFY(Obj);
-	*Obj << Value;
-	return Value;
-}
-
-LPCSTR s_stringZ(ISaveObject* Obj, LPCSTR Value) {
-	VERIFY(Obj);
-	shared_str Casted;
-	if (Obj->IsSave()) {
-		Casted = Value;
+	
+	/*void EndChunk(ISaveObject* Obj, ISaveObjectStackHandler handler){
+		VERIFY(handler.GetDepth() != u64(-1));
+		VERIFY(Obj);
+		Obj->EndChunk(handler);
 	}
-	*Obj << Casted;
-	return Casted.c_str();
-}
+	
+	void BeginArray(ISaveObject* Obj){
+		VERIFY(Obj);
+		Obj->BeginArray();
+	}
+	
+	void EndArray(ISaveObject* Obj){
+		VERIFY(Obj);
+		Obj->EndArray();
+	}*/
 
-bool IsSave(ISaveObject* Obj){
-	VERIFY(Obj);
-	return Obj->IsSave();
-}
+	void ForChunk(ISaveObject* Obj, LPCSTR Name, const luabind::object& func)
+	{
+		VERIFY(Obj);
+		VERIFY(func.type() == LUA_TFUNCTION);
+		BEGIN_CHUNK(*Obj, Name)
+		{
+			luabind::call_function<void>(func);
+		}
+	}
+
+	void ForArray(ISaveObject* Obj, luabind::object func)
+	{
+		VERIFY(Obj);
+		VERIFY(func.type() == LUA_TFUNCTION);
+		BEGIN_ARRAY(*Obj)
+		{
+			luabind::call_function<void>(func);
+		}
+	}
+	
+	Fvector s_vec3(ISaveObject* Obj, Fvector Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	float s_float(ISaveObject* Obj, double Value) {
+		VERIFY(Obj);
+		float Casted;
+		if (Obj->IsSave()) {
+			Casted = Value;
+		}
+		*Obj << Casted;
+		return Casted;
+	}
+	
+	u64 s_u64(ISaveObject* Obj, u64 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	s64 s_s64(ISaveObject* Obj, s64 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	u32 s_u32(ISaveObject* Obj, u32 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	s32 s_s32(ISaveObject* Obj, s32 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	u16 s_u16(ISaveObject* Obj, u16 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	s16 s_s16(ISaveObject* Obj, s16 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	u8 s_u8(ISaveObject* Obj, u8 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	s8 s_s8(ISaveObject* Obj, s8 Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	bool s_bool(ISaveObject* Obj, bool Value) {
+		VERIFY(Obj);
+		*Obj << Value;
+		return Value;
+	}
+	
+	LPCSTR s_stringZ(ISaveObject* Obj, LPCSTR Value) {
+		VERIFY(Obj);
+		shared_str Casted;
+		if (Obj->IsSave()) {
+			Casted = Value;
+		}
+		*Obj << Casted;
+		return Casted.c_str();
+	}
+	
+	bool IsSave(ISaveObject* Obj){
+		VERIFY(Obj);
+		return Obj->IsSave();
+	}
 
 }
 
@@ -218,11 +240,13 @@ void SaveSystemScript::script_register(lua_State* L)
 		[
 			class_<ISaveObjectStackHandler>("SaveObjectStackHandler"),
 			class_<ISaveObject>("SaveObject")
-				.def("BeginChunk", &CSaveObject_script::BeginChunk)
+				//.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("HasChunk", &CSaveObject_script::HasChunk)
-				.def("EndChunk", &CSaveObject_script::EndChunk)
-				.def("BeginArray", &CSaveObject_script::BeginArray)
-				.def("EndArray", &CSaveObject_script::EndArray)
+				//.def("EndChunk", &CSaveObject_script::EndChunk)
+				//.def("BeginArray", &CSaveObject_script::BeginArray)
+				//.def("EndArray", &CSaveObject_script::EndArray)
+				.def("ForChunk", &CSaveObject_script::ForChunk)
+				.def("ForArray", &CSaveObject_script::ForArray)
 				.def("s_vec3", &CSaveObject_script::s_vec3)
 				.def("s_float", &CSaveObject_script::s_float)
 				.def("s_u64", &CSaveObject_script::s_u64)

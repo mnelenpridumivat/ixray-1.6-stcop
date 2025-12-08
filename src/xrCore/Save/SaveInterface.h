@@ -1,6 +1,5 @@
 #pragma once
 #include "SaveChunkHandleInterface.h"
-#include "../xrCore/xrCore.h"
 #include "Concepts.h"
 
 class shared_str;

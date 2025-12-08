@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "SaveManager.h"
-
-#include <d3d9.h>
-
 #include "MemoryBuffer.h"
 
 CSaveManager::CSaveManager() 
