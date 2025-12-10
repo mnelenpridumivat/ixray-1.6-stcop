@@ -57,18 +57,18 @@ public:
 	{
 		return this;
 	}
-	virtual	const IObjectPhysicsCollision* physics_collision();
-	virtual	const IPhysicsShell* physics_shell() const;
-	virtual		  IPhysicsShell* physics_shell();
-	virtual const IPhysicsElement* physics_character() const;
+	virtual	const IObjectPhysicsCollision* physics_collision() override ;
+	virtual	const IPhysicsShell* physics_shell() const override ;
+	virtual		  IPhysicsShell* physics_shell() override ;
+	virtual const IPhysicsElement* physics_character() const override ;
 	virtual CPHDestroyable* ph_destroyable() { return nullptr; }
 	virtual ICollisionDamageReceiver* PHCollisionDamageReceiver() { return nullptr; }
 	virtual CPHSkeleton* PHSkeleton() { return nullptr; }
 
-	virtual CPhysicsShellHolder* cast_physics_shell_holder() { return this; }
-	virtual CPhysicItem* cast_physics_item() { return nullptr; }
-	virtual CParticlesPlayer* cast_particles_player() { return this; }
-	virtual CGameObject* cast_game_object() { return this; }
+	virtual CPhysicsShellHolder* cast_physics_shell_holder() override { return this; }
+	virtual CPhysicItem* cast_physics_item() override { return nullptr; }
+	virtual CParticlesPlayer* cast_particles_player() override { return this; }
+	virtual CGameObject* cast_game_object() override { return this; }
 	virtual IDamageSource* cast_IDamageSource() { return nullptr; }
 
 	virtual CPHSoundPlayer* ph_sound_player() { return nullptr; }

@@ -7,6 +7,7 @@
 #include "clsid_game.h"
 #include "WeaponMagazined.h"
 #include "Grenade.h"
+#include "RepackerInterface.h"
 #include "../xrScripts/script_callback_ex.h"
 
 using namespace InventoryUtilities;
@@ -158,6 +159,22 @@ void CInventory::Take(CGameObject* pObj, bool bNotActivate, bool strict_placemen
 				Ruck(pWeapon);
 			}
 		}
+	}
+
+	if (auto Repacker = pIItem->cast_repacker_interface())
+	{
+		for (auto& elem : m_all)
+		{
+			if (elem->m_section_id != pIItem->m_section_id)
+			{
+				continue;
+			}
+			if (!Repacker->Repack(elem))
+			{
+				return;
+			}
+		}
+
 	}
 
 	m_all.push_back(pIItem);
@@ -1127,6 +1144,29 @@ PIItem CInventory::item(CLASS_ID cls_id) const
 	}
 
 	return nullptr;
+}
+
+void CInventory::GetAll(LPCSTR name, xr_vector<PIItem>& Output) {
+	Output.clear();
+	for (TIItemContainer::const_iterator it = m_belt.begin(); m_belt.end() != it; ++it)
+	{
+		//PIItem pIItem = smart_cast<T*>(*it);
+		PIItem pIItem = *it;
+		if (pIItem
+			&& !xr_strcmp(pIItem->object().cNameSect(), name)
+			&& pIItem->Useful()) {
+			Output.push_back(pIItem);
+			}
+	}
+	for (TIItemContainer::const_iterator it = m_ruck.begin(); m_ruck.end() != it; ++it)
+	{
+		PIItem pIItem = *it;
+		if (pIItem
+			&& !xr_strcmp(pIItem->object().cNameSect(), name)
+			&& pIItem->Useful()) {
+			Output.push_back(pIItem);
+			}
+	}
 }
 
 float CInventory::TotalWeight() const

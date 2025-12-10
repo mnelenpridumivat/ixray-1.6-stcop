@@ -7,6 +7,7 @@
 #include "ICollidable.h"
 #include "EngineAPI.h"
 #include "device.h"
+class IRepackerInterface;
 // refs
 //class	ENGINE_API	IRender_Visual;
 class	ENGINE_API	IRender_Sector;

@@ -210,19 +210,19 @@ public:
 	virtual	CCharacterPhysicsSupport*	character_physics_support	()						{return m_pPhysics_support;}
 	virtual	const CCharacterPhysicsSupport*	character_physics_support() const 			{return m_pPhysics_support;}
 	virtual CPHDestroyable*				ph_destroyable				()						;
-	virtual CAttachmentOwner*			cast_attachment_owner		() override				{return this;}
-	virtual CInventoryOwner*			cast_inventory_owner		() override				{return this;}
-	virtual CEntityAlive*				cast_entity_alive			()						{return this;}
-	virtual CEntity*					cast_entity					()						{return this;}
-	virtual CGameObject*				cast_game_object			() override				{return this;}
-	virtual CPhysicsShellHolder*		cast_physics_shell_holder	()						{return this;}
-	virtual CParticlesPlayer*			cast_particles_player		()						{return this;}
-	virtual	Feel::Sound*				dcast_FeelSound				()						{return this;}
-	virtual CAI_Stalker*				cast_stalker				()						{return this;}
-	virtual CCustomMonster*				cast_custom_monster			()						{return this;}
-	virtual CScriptEntity*				cast_script_entity			()						{return this;}
-	virtual CPhraseDialogManager*		cast_phrase_dialog_manager	()						{return this;}
-	virtual CAI_PhraseDialogManager*	cast_ai_phrase_dialog_manager()						{return this;}
+	virtual CAttachmentOwner*			cast_attachment_owner		() override {return this;}
+	virtual CInventoryOwner*			cast_inventory_owner		() override {return this;}
+	virtual CEntityAlive*				cast_entity_alive			() override {return this;}
+	virtual CEntity*					cast_entity					() override {return this;}
+	virtual CGameObject*				cast_game_object			() override {return this;}
+	virtual CPhysicsShellHolder*		cast_physics_shell_holder	() override {return this;}
+	virtual CParticlesPlayer*			cast_particles_player		() override {return this;}
+	virtual	Feel::Sound*				dcast_FeelSound				() override {return this;}
+	virtual CAI_Stalker*				cast_stalker				() override {return this;}
+	virtual CCustomMonster*				cast_custom_monster			() override {return this;}
+	virtual CScriptEntity*				cast_script_entity			() override {return this;}
+	virtual CPhraseDialogManager*		cast_phrase_dialog_manager	() override {return this;}
+	virtual CAI_PhraseDialogManager*	cast_ai_phrase_dialog_manager() override {return this;}
 
 public:
 			void						init								();

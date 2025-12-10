@@ -8,6 +8,12 @@
 #include "WeaponAmmo.h"
 #include "Tracer.h"
 
+namespace FlamethrowerTrace
+{
+	class CManager;
+}
+
+
 //коэфициенты и параметры патрона
 struct SBullet_Hit 
 {
@@ -150,6 +156,17 @@ protected:
 
 	typedef xr_vector<Fvector>	BulletPoints;
 	BulletPoints			m_bullet_points;
+	
+	xr_vector<FlamethrowerTrace::CManager*> FlameManagersToDraw;
+
+	void DrawFlamethrowerTrace(FlamethrowerTrace::CManager* manager);
+
+public:
+
+	void MarkFlamethrowerTraceToDraw(FlamethrowerTrace::CManager* manager) {FlameManagersToDraw.push_back(manager);}
+	void UnmarkFlamethrowerTraceToDraw(FlamethrowerTrace::CManager* manager) {std::erase(FlameManagersToDraw, manager);}
+
+protected:
 #endif // #ifdef DEBUG
 
 	//отрисовка трассеров от пуль

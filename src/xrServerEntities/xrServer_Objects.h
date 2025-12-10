@@ -190,6 +190,20 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_Temporary,CSE_Abstract)
 	virtual							~CSE_Temporary	();
 SERVER_ENTITY_DECLARE_END
 
+SERVER_ENTITY_DECLARE_BEGIN(CSE_Conditional,CSE_Abstract)
+
+	enum class Conditions
+	{
+		LuaFunc
+	};
+
+	CSE_Conditional	(LPCSTR caSection);
+	virtual	~CSE_Conditional	();
+	shared_str m_section_meet_cond;
+	shared_str m_section_not_meet_cond;
+	Conditions m_condition;
+SERVER_ENTITY_DECLARE_END
+
 SERVER_ENTITY_DECLARE_BEGIN(CSE_PHSkeleton, IPureStateUpdateObject)
 								CSE_PHSkeleton(LPCSTR caSection);
 virtual							~CSE_PHSkeleton();

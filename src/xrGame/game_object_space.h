@@ -58,6 +58,10 @@ namespace GameObject {
 		eMouseMove,
 		eMouseWheel,
 
+		eShieldOn,
+		eShieldOff,
+		eJump,
+
 		eOnWeaponFired,
 		eOnWeaponJammed,
 		eOnWeaponZoomIn,

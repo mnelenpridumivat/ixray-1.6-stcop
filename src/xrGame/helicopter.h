@@ -308,10 +308,10 @@ public:
 	virtual const Fmatrix&			get_ParticlesXFORM			();
 	virtual const Fvector&			get_CurrentFirePoint		();
 
-	virtual CGameObject* cast_game_object() { return this; }
-	virtual CExplosive* cast_explosive() { return this; }
-	virtual CHelicopter* cast_helicopter() { return this; }
-	virtual CPHSkeleton* PHSkeleton() { return this; }
+	virtual CGameObject* cast_game_object() override { return this; }
+	virtual CExplosive* cast_explosive() override { return this; }
+	virtual CHelicopter* cast_helicopter() override { return this; }
+	virtual CPHSkeleton* PHSkeleton() override { return this; }
 	virtual CRocketLauncher* cast_rocket_launcher() override { return this; }
 
 public:

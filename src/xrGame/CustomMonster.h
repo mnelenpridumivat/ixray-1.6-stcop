@@ -210,10 +210,10 @@ public:
 	
 	virtual void				UpdatePositionAnimation	();
 	virtual void				set_ready_to_save		();
-	virtual CPhysicsShellHolder*cast_physics_shell_holder	()	{return this;}
-	virtual CParticlesPlayer*	cast_particles_player	()	{return this;}
-	virtual CCustomMonster*		cast_custom_monster		()	{return this;}
-	virtual CScriptEntity*		cast_script_entity		()	{return this;}
+	virtual CPhysicsShellHolder*cast_physics_shell_holder	() override {return this;}
+	virtual CParticlesPlayer*	cast_particles_player	() override {return this;}
+	virtual CCustomMonster*		cast_custom_monster		() override {return this;}
+	virtual CScriptEntity*		cast_script_entity		() override {return this;}
 	virtual CGameObject*		cast_game_object		() override	{return this;}
 
 			void				load_killer_clsids		(LPCSTR section);
