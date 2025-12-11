@@ -11,11 +11,11 @@
 #include "xrServer_Objects_ALife_Items.h"
 
 #include "object_broker.h"
+#include "clsid_game.h"
 #ifdef XRGAME_EXPORTS
 #include "alife_graph_registry.h"
 #include "alife_object_registry.h"
 #include "alife_simulator.h"
-#include "clsid_game.h"
 #include "xrServer.h"
 #endif
 
