@@ -164,8 +164,12 @@
 // 128	 CSE_ALifeObjectClimable		added can_fire in smart covers;
 // 129	 CSE_ALifeItemWeapon			added cur_scope
 //       CSE_AlifeCreatureActor         added IsWaunded and helicopter sync
+// 130	 New features and strong recommendation to retire old serialization system:
+//		 Add CSE_Conditional, CSE_ALifeItemArtefactCombiner, CSE_ALifeItemFlamethrower and CSE_ALifeItemFuel
+//		 Add m_script_story_ID in CSE_ALifeObject
+//		 
 //------------------------------------------------------------------------------
-#define SPAWN_VERSION	u16(129)
+#define SPAWN_VERSION	u16(130)
 
 SERVER_ENTITY_DECLARE_BEGIN2(CSE_Shape,ISE_Shape,CShapeData)
 public:
