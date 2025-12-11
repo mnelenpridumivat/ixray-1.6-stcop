@@ -39,8 +39,6 @@ CArtefact::CArtefact()
 	m_sParticlesBone			= nullptr;
 	m_pTrailLight				= nullptr;
 	m_activationObj				= nullptr;
-	m_detectorObj				= nullptr;
-	m_additional_weight			= 0.0f;
 	has_detector_visibling		= false;
 }
 
@@ -95,27 +93,29 @@ void CArtefact::Load(LPCSTR section)
 	}
 
 
-	m_fHealthRestoreSpeed = pSettings->r_float(section, "health_restore_speed");
-	m_fRadiationRestoreSpeed = pSettings->r_float(section, "radiation_restore_speed");
-	m_fSatietyRestoreSpeed = pSettings->r_float(section, "satiety_restore_speed");
-	m_fThirstRestoreSpeed = READ_IF_EXISTS(pSettings, r_float, section, "thirst_restore_speed", 0.0f);
-	m_fPowerRestoreSpeed = pSettings->r_float(section, "power_restore_speed");
-	m_fBleedingRestoreSpeed = pSettings->r_float(section, "bleeding_restore_speed");
+	Stats.m_fHealthRestoreSpeed = pSettings->r_float(section, "health_restore_speed");
+	Stats.m_fRadiationRestoreSpeed = pSettings->r_float(section, "radiation_restore_speed");
+	Stats.m_fSatietyRestoreSpeed = pSettings->r_float(section, "satiety_restore_speed");
+	Stats.m_fThirstRestoreSpeed = READ_IF_EXISTS(pSettings, r_float, section, "thirst_restore_speed", 0.0f);
+	Stats.m_fPowerRestoreSpeed = pSettings->r_float(section, "power_restore_speed");
+	Stats.m_fBleedingRestoreSpeed = pSettings->r_float(section, "bleeding_restore_speed");
 	
 	if(pSettings->section_exist(pSettings->r_string(section,"hit_absorbation_sect")))
 	{
-		m_ArtefactHitImmunities.LoadImmunities(pSettings->r_string(section,"hit_absorbation_sect"),pSettings);
+		Stats.m_ArtefactHitImmunities.LoadImmunities(pSettings->r_string(section,"hit_absorbation_sect"),pSettings);
 	}
 	m_bCanSpawnZone			= !!pSettings->line_exist("artefact_spawn_zones", section);
 	m_af_rank				= READ_IF_EXISTS(pSettings, r_u8, section, "af_rank", 0);
-	m_additional_weight		= READ_IF_EXISTS(pSettings, r_float, section,"additional_inventory_weight", 0.0f);
+	Stats.m_additional_weight		= READ_IF_EXISTS(pSettings, r_float, section,"additional_inventory_weight", 0.0f);
 	m_fDegradationRate		= READ_IF_EXISTS(pSettings, r_float, section, "degrade_rate", 0.0f);
 }
 
 BOOL CArtefact::net_Spawn(CSE_Abstract* DC) 
 {
-	if(READ_IF_EXISTS(pSettings, r_bool, cNameSect(),"can_be_controlled", false) )
-		m_detectorObj				= new SArtefactDetectorsSupport(this);
+	if(READ_IF_EXISTS(pSettings, r_bool, cNameSect(), "can_be_controlled", false) )
+	{
+		m_detectorObj = xr_make_unique<SArtefactDetectorsSupport>(this);
+	}
 
 	BOOL result						= inherited::net_Spawn(DC);
 	SwitchAfParticles				(true);
@@ -143,7 +143,7 @@ void CArtefact::net_Destroy()
 
 	CPHUpdateObject::Deactivate		();
 	xr_delete						(m_activationObj);
-	xr_delete						(m_detectorObj);
+	m_detectorObj.reset();
 }
 
 void CArtefact::OnH_A_Chield() 
@@ -540,6 +540,16 @@ void CArtefact::ForceTransform(const Fmatrix& m)
 	VERIFY( PPhysicsShell() );
 	XFORM().set(m);
 	PPhysicsShell()->SetGlTransformDynamic( m );// XFORM().set(m);
+}
+
+float CArtefact::GetImmunity(ALife::EHitType hit_type)
+{
+	return Stats.m_ArtefactHitImmunities.GetHitImmunity(hit_type);
+}
+
+float CArtefact::AffectHit(float Power, ALife::EHitType hit_type)
+{
+	return Stats.m_ArtefactHitImmunities.AffectHit(Power, hit_type);
 }
 
 void CArtefact::CreateArtefactActivation()

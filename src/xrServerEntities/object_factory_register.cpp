@@ -316,7 +316,7 @@ void CObjectFactory::register_classes	()
 	ADD(CGalantineArtefact		,CSE_ALifeItemArtefact			,CLSID_AF_GALANTINE				,"art_galantine");
 	ADD(CGraviArtefact			,CSE_ALifeItemArtefact			,CLSID_AF_GRAVI					,"art_gravi");
 	ADD(CGraviArtefact			,CSE_ALifeItemArtefact			,CLSID_ARTEFACT					,"artefact");
-	ADD(CArtCombiner			,CSE_ALifeItemArtefact			,CLSID_AF_COMBINER				,"art_combiner");
+	ADD(CArtCombiner			,CSE_ALifeItemArtefactCombiner	,CLSID_AF_COMBINER				,"art_combiner");
 	ADD(CtaGameArtefact			,CSE_ALifeItemArtefact			,CLSID_AF_CTA					,"art_cta");
 
 	//  [8/15/2006]

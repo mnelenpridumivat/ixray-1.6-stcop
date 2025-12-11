@@ -9,8 +9,15 @@
 #include "StdAfx.h"
 #include "xrMessages.h"
 #include "xrServer_Objects_ALife_Items.h"
-#include "clsid_game.h"
+
 #include "object_broker.h"
+#ifdef XRGAME_EXPORTS
+#include "alife_graph_registry.h"
+#include "alife_object_registry.h"
+#include "alife_simulator.h"
+#include "clsid_game.h"
+#include "xrServer.h"
+#endif
 
 #include "../xrEngine/bone.h"
 
@@ -1373,7 +1380,7 @@ void CSE_ALifeItemDetector::FillProps		(LPCSTR pref, PropItemVec& items)
 #endif // #ifndef XRGAME_EXPORTS
 
 ////////////////////////////////////////////////////////////////////////////
-// CSE_ALifeItemDetector
+// CSE_ALifeItemArtefact
 ////////////////////////////////////////////////////////////////////////////
 CSE_ALifeItemArtefact::CSE_ALifeItemArtefact(LPCSTR caSection) : CSE_ALifeItem(caSection)
 {
@@ -1435,6 +1442,141 @@ BOOL CSE_ALifeItemArtefact::Net_Relevant	()
 
 	return FALSE;
 }
+
+////////////////////////////////////////////////////////////////////////////
+// CSE_ALifeItemArtefactCombiner
+////////////////////////////////////////////////////////////////////////////
+CSE_ALifeItemArtefactCombiner::CSE_ALifeItemArtefactCombiner(LPCSTR caSection) : CSE_ALifeItem(caSection)
+{
+}
+
+CSE_ALifeItemArtefactCombiner::~CSE_ALifeItemArtefactCombiner()
+{
+}
+
+void CSE_ALifeItemArtefactCombiner::STATE_Read		(NET_Packet	&tNetPacket, u16 size)
+{
+	inherited::STATE_Read		(tNetPacket,size);
+}
+
+void CSE_ALifeItemArtefactCombiner::STATE_Write		(NET_Packet	&tNetPacket)
+{
+	inherited::STATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeItemArtefactCombiner::UPDATE_Read		(NET_Packet	&tNetPacket)
+{
+	inherited::UPDATE_Read		(tNetPacket);	
+}
+
+void CSE_ALifeItemArtefactCombiner::UPDATE_Write	(NET_Packet	&tNetPacket)
+{
+	inherited::UPDATE_Write		(tNetPacket);
+}
+
+void CSE_ALifeItemArtefactCombiner::STATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemArtefact::STATE")
+	{
+		inherited::STATE_Serialize(Object);
+	}
+}
+
+void CSE_ALifeItemArtefactCombiner::UPDATE_Serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object,"CSE_ALifeItemArtefact::UPDATE")
+	{
+		inherited::UPDATE_Serialize(Object);
+	}
+}
+
+#ifndef XRGAME_EXPORTS
+void CSE_ALifeItemArtefactCombiner::FillProps(LPCSTR pref, PropItemVec& items)
+{
+	inherited::FillProps(pref,items);
+}
+#endif // #ifndef XRGAME_EXPORTS
+
+#ifdef XRGAME_EXPORTS
+void CSE_ALifeItemArtefactCombiner::add_online	(const bool &update_registries)
+{
+	NET_Packet tNetPacket;
+	ClientID clientID;
+	clientID.set(alife().server().GetServerClient() ? alife().server().GetServerClient()->ID.value() : 0);
+
+	for (auto child : children)
+	{
+		auto l_tpALifeDynamicObject = ai().alife().objects().object(child);
+		auto l_tpALifeInventoryItem = smart_cast<CSE_ALifeInventoryItem*>(l_tpALifeDynamicObject);
+		R_ASSERT2(l_tpALifeInventoryItem,"Non inventory item object has parent?!");
+		l_tpALifeInventoryItem->base()->s_flags.bor(M_SPAWN_UPDATE);
+		auto l_tpAbstract = smart_cast<CSE_Abstract*>(l_tpALifeInventoryItem);
+		alife().server().entity_Destroy(l_tpAbstract);
+		
+#ifdef DEBUG
+		Msg(
+			"[LSS][%d] Going online [%d][%s][%d] with parent [%d][%s] on '%s'",
+			Device.dwFrame,
+			Device.dwTimeGlobal,
+			l_tpALifeInventoryItem->base()->name_replace(),
+			l_tpALifeInventoryItem->base()->ID,
+			ID,
+			name_replace(),
+			"*SERVER*"
+		);
+#endif
+		
+		l_tpALifeDynamicObject->o_Position = o_Position;
+		l_tpALifeDynamicObject->m_tNodeID = m_tNodeID;
+		alife().server().Process_spawn(tNetPacket,clientID,FALSE,l_tpALifeInventoryItem->base());
+		l_tpALifeDynamicObject->s_flags.band(u16(-1) ^ M_SPAWN_UPDATE);
+		l_tpALifeDynamicObject->m_bOnline = true;
+	}
+
+	inherited::add_online(update_registries);
+}
+
+void CSE_ALifeItemArtefactCombiner::add_offline	(const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries)
+{
+	for (u32 i=0, n=(u32)saved_children.size(); i<n; ++i) {
+		CSE_ALifeDynamicObject* child = smart_cast<CSE_ALifeDynamicObject*>(ai().alife().objects().object(saved_children[i],true));
+		R_ASSERT(child);
+		child->m_bOnline = false;
+
+		CSE_ALifeInventoryItem* inventory_item = smart_cast<CSE_ALifeInventoryItem*>(child);
+		VERIFY2(inventory_item,"Non inventory item object has parent?!");
+#ifdef DEBUG
+		Msg(
+			"[LSS][%d] Going offline [%d][%s][%d] with parent [%d][%s] on '%s'",
+			Device.dwFrame,
+			Device.dwTimeGlobal,
+			inventory_item->base()->name_replace(),
+			inventory_item->base()->ID,
+			ID,
+			name_replace(),
+			"*SERVER*"
+		);
+#endif
+		
+		ALife::_OBJECT_ID item_id = inventory_item->base()->ID;
+		inventory_item->base()->ID = alife().server().PerformIDgen(item_id);
+
+		if (!child->can_save()) {
+			alife().release(child);
+			--i;
+			--n;
+			continue;
+		}
+		child->clear_client_data();
+		alife().graph().add(child,child->m_tGraphID,false);
+		alife().graph().remove(child,child->m_tGraphID);
+		children.push_back(child->ID);
+		child->ID_Parent = ID;
+	}
+
+	inherited::add_offline(saved_children, update_registries);
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 // CSE_ALifeItemPDA

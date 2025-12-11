@@ -1,27 +1,27 @@
 #pragma once
 #include "ArtContainer.h"
 #include "Artefact.h"
-class CArtCombiner :
-    public CArtefact,
-	public CArtContainer
+class CArtCombiner final :
+    public CArtefact
 {
 	typedef CArtefact inherited;
 
+	xr_unique_ptr<CArtContainerComponent> Container;
+
 public:
+	CArtCombiner();
 
-	void			Load(LPCSTR section) override;
-	BOOL			net_Spawn(CSE_Abstract* DC) override;
+	void Load(LPCSTR section) override;
+	BOOL net_Spawn(CSE_Abstract* DC) override;
 
-	void			save(NET_Packet& output_packet) override;
-	void			load(IReader& input_packet) override;
+	virtual void save(NET_Packet& output_packet) override;
+	virtual void load(IReader& input_packet) override;
 	virtual void Serialize(ISaveObject& Object) override;
 
-	u32				Cost() const override;
-	float			Weight() const override;
+	u32 Cost() const override;
+	float Weight() const override;
 
-	virtual	bool CanStoreArt(CArtefact* art) override;
-
-	virtual bool CheckInventoryIconItemSimilarity(CInventoryItem* other) override;
+	//virtual bool CheckInventoryIconItemSimilarity(CInventoryItem* other) override; // Not in use yet
 
 	virtual float GetHealthPower() const override;
 	virtual float GetRadiationPower() const override;
@@ -34,7 +34,7 @@ public:
 
 	virtual float GetImmunity(ALife::EHitType hit_type) override;
 
-	virtual float ArtAffectHit(float power, ALife::EHitType hit_type) override;
+	virtual float AffectHit(float power, ALife::EHitType hit_type) override;
 
 };
 

@@ -261,6 +261,15 @@ SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemArtefact,CSE_ALifeItem)
 	virtual BOOL					Net_Relevant			();
 SERVER_ENTITY_DECLARE_END
 
+SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemArtefactCombiner,CSE_ALifeItem)
+	CSE_ALifeItemArtefactCombiner(LPCSTR caSection);
+	virtual ~CSE_ALifeItemArtefactCombiner();
+#ifdef XRGAME_EXPORTS
+	virtual void add_offline (const xr_vector<ALife::_OBJECT_ID> &saved_children, const bool &update_registries) override;
+	virtual void add_online (const bool &update_registries) override;
+#endif
+SERVER_ENTITY_DECLARE_END
+
 SERVER_ENTITY_DECLARE_BEGIN(CSE_ALifeItemPDA,CSE_ALifeItem)
 	u16								m_original_owner;
 	shared_str						m_specific_character;
