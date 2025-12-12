@@ -28,7 +28,7 @@ IC bool compare_safe(const luabind::object& o1, const luabind::object& o2)
 #endif
 
 
-#if defined(IXR_WINDOWS) and not defined(MASTER_GOLD)
+#if !defined(MASTER_GOLD) && defined(IXR_WINDOWS) && (defined(_MSC_VER) || (defined(__clang__) && defined(_MSC_EXTENSIONS)))
 #define ALLOW_SEH_EXCEPTIONS
 #include <windows.h> // for EXCEPTION_ACCESS_VIOLATION
 #include <excpt.h>
@@ -41,6 +41,26 @@ inline int lua_ex_filter(unsigned int code, struct _EXCEPTION_POINTERS *ep)
     }
     ProcessStackTrace(ep);
     return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// Универсальная обертка для SEH
+template<typename Func>
+auto SafeSEHCall(Func&& func) -> decltype(func())
+{
+    __try
+    {
+        return func();
+    }
+    __except(lua_ex_filter(GetExceptionCode(), GetExceptionInformation()))
+    {
+        FATAL("Unhandled exception in Lua callback!");
+        // Возвращаем значение по умолчанию для типа
+        using ReturnType = decltype(func());
+        if constexpr (!std::is_same_v<ReturnType, void>)
+        {
+            return ReturnType();
+        }
+    }
 }
 #endif
 
@@ -122,10 +142,8 @@ private:
     template<typename... Args>
     inline TResult LuaCallSEHEx(Args&&... args) const
     {
-#ifdef ALLOW_SEH_EXCEPTIONS
-        __try
+        auto func = [&]() -> TResult
         {
-#endif
             VERIFY(m_functor.is_valid());
             if (m_object.is_valid())
             {
@@ -133,12 +151,11 @@ private:
                 return TResult(m_functor(m_object, std::forward<Args>(args)...));
             }
             return TResult(m_functor(std::forward<Args>(args)...));
+        };
 #ifdef ALLOW_SEH_EXCEPTIONS
-        } __except(lua_ex_filter(GetExceptionCode(), GetExceptionInformation()))
-        {
-            FATAL("Unhandled exception in PreRenderThread!");
-        }
-        return TResult(0);
+        return SafeSEHCall(func);
+#else
+        return func();
 #endif
     }
 
@@ -184,10 +201,8 @@ template<>
 template<typename... Args>
 void CScriptCallbackEx<void>::LuaCallSEHEx(Args &&...args) const
 {
-#ifdef ALLOW_SEH_EXCEPTIONS
-    __try
+    auto func = [&]() -> void
     {
-#endif
         VERIFY(m_functor.is_valid());
         if (m_object.is_valid())
         {
@@ -198,11 +213,11 @@ void CScriptCallbackEx<void>::LuaCallSEHEx(Args &&...args) const
         {
             m_functor(std::forward<Args>(args)...);
         }
+    };
 #ifdef ALLOW_SEH_EXCEPTIONS
-    }__except(lua_ex_filter(GetExceptionCode(), GetExceptionInformation()))
-    {
-        FATAL("Unhandled exception in PreRenderThread!");
-    }
+    SafeSEHCall(func);
+#else
+    func();
 #endif
 }
 
