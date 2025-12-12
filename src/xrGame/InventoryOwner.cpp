@@ -617,6 +617,12 @@ LPCSTR CInventoryOwner::trade_section() const
 	return READ_IF_EXISTS(pSettings, r_string, game_object->cNameSect(), "trade_section", "trade");
 }
 
+LPCSTR CInventoryOwner::barter_section() const
+{
+	R_ASSERT(false, "Barter not implemented");
+	return nullptr;
+}
+
 float CInventoryOwner::deficit_factor(const shared_str& section) const
 {
 	if (m_purchase_list == nullptr)
@@ -635,6 +641,11 @@ void CInventoryOwner::buy_supplies(CInifile& ini_file, LPCSTR section)
 	}
 
 	m_purchase_list->process(ini_file, section, *this);
+}
+
+void CInventoryOwner::barter_buy_supplies(CInifile& ini_file, LPCSTR section)
+{
+	R_ASSERT(false, "Barter not implemented");
 }
 
 void CInventoryOwner::sell_useless_items()

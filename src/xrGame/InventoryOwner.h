@@ -251,7 +251,9 @@ public:
 
 private:
 	CTradeParameters* m_trade_parameters = nullptr;
+	CTradeParameters* m_barter_parameters = nullptr;
 	CPurchaseList* m_purchase_list = nullptr;
+	CPurchaseList* m_barter_purchase_list = nullptr;
 	bool m_need_osoznanie_mode = false;
 	bool m_isFocusingOnNpc = true;
 	bool m_deadbody_can_take = true;
@@ -263,10 +265,15 @@ public:
 		VERIFY(m_trade_parameters);
 		return *m_trade_parameters;
 	}
-
+	IC bool can_barter() const;
+	IC CTradeParameters* barter_parameters() const;
+	IC CPurchaseList& trade_purchase_list() const;
+	IC CPurchaseList& barter_purchase_list() const;
 	virtual	LPCSTR trade_section() const;
+	virtual	LPCSTR barter_section() const;
 	float deficit_factor(const shared_str& section) const;
 	void buy_supplies(CInifile& ini_file, LPCSTR section);
+	void barter_buy_supplies(CInifile& ini_file, LPCSTR section);
 	void sell_useless_items();
 	virtual	void on_before_sell(CInventoryItem* item) {}
 	virtual	void on_before_buy(CInventoryItem* item) {}
