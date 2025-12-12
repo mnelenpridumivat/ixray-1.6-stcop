@@ -269,13 +269,26 @@ void CSaveChunk::AttachSubchunk(CSaveChunk* Chunk)
 void CSaveChunk::r_bool(bool& A)
 {
 	if (_currentArrayStack.empty()) {
-		R_ASSERT3(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool, "Invalid variable type access in chunk", _chunkName.c_str());
-		A = SSaveVariableGetter::GetValue<bool, CSaveVariableBool>(_variables[_currentReadIndex++]);
+		// Fallback for legacy BOOL serialization type
+		if (!IVERIFY(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_bool, "Try to read bool in chunk [%s], got something other. Try fallback for BOOL", _chunkName.c_str()))
+		{
+			R_ASSERT(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_s32, "Invalid variable type access in chunk", _chunkName.c_str());
+			A = SSaveVariableGetter::GetValue<s32, CSaveVariableS32>(_variables[_currentReadIndex++]);	
+		} else
+		{
+			A = SSaveVariableGetter::GetValue<bool, CSaveVariableBool>(_variables[_currentReadIndex++]);
+		}
 	}
 	else {
 		auto CurrentArray = _currentArrayStack.top();
-		R_ASSERT3(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool, "Invalid variable type access in chunk", _chunkName.c_str());
-		A = SSaveVariableGetter::GetValue<bool, CSaveVariableBool>((CSaveVariableBool*)CurrentArray->GetCurrentElement());
+		if (!IVERIFY(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_bool, "Try to read bool in chunk [%s], got something other. Try fallback for BOOL", _chunkName.c_str()))
+		{
+			R_ASSERT(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_s32, "Invalid variable type access in chunk", _chunkName.c_str());
+			A = SSaveVariableGetter::GetValue<s32, CSaveVariableS32>(CurrentArray->GetCurrentElement());
+		} else
+		{
+			A = SSaveVariableGetter::GetValue<bool, CSaveVariableBool>(CurrentArray->GetCurrentElement());
+		}
 		CurrentArray->Next();
 	}
 }
