@@ -16,6 +16,7 @@
 #include "../../xrGame/game_level_cross_table.h"
 #include "xrCrossTable.h"
 #include "graph_engine.h"
+#include "../xrCore/Save/SaveManager.h"
 
 CGameGraphBuilder::CGameGraphBuilder		()
 {
@@ -208,16 +209,31 @@ void CGameGraphBuilder::load_graph_points	(const float &start, const float &amou
 	xr_strconcat(spawn_file_name,*m_level_name,"level.spawn");
 	IReader					*reader = FS.r_open(spawn_file_name);
 	u32						id;
-	NET_Packet				net_packet;
-	for	(
-			IReader *chunk = reader->open_chunk_iterator(id);
-			chunk;
-			chunk = reader->open_chunk_iterator(id,chunk)
-		)
+	if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
 	{
-		net_packet.B.count	= chunk->length();
-		chunk->r			(net_packet.B.data,net_packet.B.count);
-		load_graph_point	(net_packet);
+		for	(
+				IReader *chunk = reader->open_chunk_iterator(id);
+				chunk;
+				chunk = reader->open_chunk_iterator(id,chunk)
+			)
+		{
+			CSaveObjectLoad* Obj = CSaveManager::GetInstance().EditorBeginLoad(chunk);
+			load_graph_point	(*Obj);
+			xr_delete(Obj);
+		}
+	} else
+	{
+		NET_Packet				net_packet;
+		for	(
+				IReader *chunk = reader->open_chunk_iterator(id);
+				chunk;
+				chunk = reader->open_chunk_iterator(id,chunk)
+			)
+		{
+			net_packet.B.count	= chunk->length();
+			chunk->r			(net_packet.B.data,net_packet.B.count);
+			load_graph_point	(net_packet);
+		}
 	}
 	
 	FS.r_close				(reader);

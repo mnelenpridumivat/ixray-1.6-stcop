@@ -136,12 +136,12 @@ CSaveObjectSave::CSaveObjectSave()
 	//_chunkStack.push(_rootChunk);
 }
 
-CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
+/*CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
 {
 	//_rootChunk = Root;
 	//_isPartial = true;
 	//_chunkStack.push(_rootChunk);
-}
+}*/
 
 ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
@@ -263,16 +263,16 @@ void CSaveObjectSave::Write(CMemoryBuffer* buffer, SSaveTask* Task)
 
 CSaveObjectLoad::CSaveObjectLoad()
 {
-	_rootChunk = new CSaveChunk("Root");
-	_chunkStack.push(_rootChunk);
+	//_rootChunk = new CSaveChunk("Root");
+	//_chunkStack.push(_rootChunk);
 }
 
-CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
+/*CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
 {
 	_rootChunk = Root->GetChunk();
 	_isPartial = true;
 	_chunkStack.push(_rootChunk);
-}
+}*/
 
 ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 {

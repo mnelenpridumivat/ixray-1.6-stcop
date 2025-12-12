@@ -121,6 +121,7 @@ CSE_Abstract *CLevelSpawnConstructor::create_object(IReader *chunk)
 	{
 		VERIFY(Obj);
 		abstract->Spawn_Serialize(*Obj, true);
+		xr_delete(Obj);
 	} else
 	{
 		abstract->Spawn_Read(net_packet);

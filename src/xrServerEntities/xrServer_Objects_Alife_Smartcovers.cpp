@@ -208,8 +208,8 @@ void CSE_SmartCover::FillProps	(LPCSTR pref, PropItemVec& items)
 	PHelper().CreateFloat		(items, PrepareKey(pref,*s_name,"exit min enemy distance"),	&m_exit_min_enemy_distance,		0.f, 100.f);
 
 	if (is_combat_cover(m_description)) {
-		PHelper().CreateBOOL	(items, PrepareKey(pref, *s_name, "is combat cover"), &m_is_combat_cover);
-		PHelper().CreateBOOL	(items, PrepareKey(pref, *s_name, "can fire"), &m_can_fire);
+		PHelper().CreateBool	(items, PrepareKey(pref, *s_name, "is combat cover"), &m_is_combat_cover);
+		PHelper().CreateBool	(items, PrepareKey(pref, *s_name, "can fire"), &m_can_fire);
 	}
 #	endif // #ifdef XRSE_FACTORY_EXPORTS
 }

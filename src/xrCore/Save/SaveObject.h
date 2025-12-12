@@ -538,7 +538,7 @@ XRCORE_API ISaveObject& operator<<(ISaveObject& Object, LPSTR& Value);
 class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:
 	CSaveObjectSave();
-	CSaveObjectSave(CSaveChunk* Root);
+	//CSaveObjectSave(CSaveChunk* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
 	virtual ISaveObjectArrayHandler BeginArray() override;
@@ -569,7 +569,7 @@ public:
 class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
 	CSaveObjectLoad();
-	CSaveObjectLoad(ISaveChunkHandleInterface* Root);
+	//CSaveObjectLoad(ISaveChunkHandleInterface* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
 	virtual ISaveObjectArrayHandler BeginArray() override;

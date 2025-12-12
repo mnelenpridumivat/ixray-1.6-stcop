@@ -300,6 +300,6 @@ void export_classes	(lua_State *L)
 
 	// Ехидна Эдишен
 	ExportEELayer(L);
-	// CScriptStoryIDManager::script_register(L); -> Конфликт с оригинальные скриптами
+	CScriptStoryIDManager::script_register(L); //-> Конфликт с оригинальные скриптами
 #endif
 }

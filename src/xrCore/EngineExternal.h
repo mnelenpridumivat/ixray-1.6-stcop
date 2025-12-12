@@ -89,6 +89,7 @@ enum class EEngineExternalUIRenderingType : u8
 enum class EEngineExternalSystem : u8
 {
 	AdvancedSerialization,
+	EngineScriptStoryID,
 	Unknown = static_cast<u8>(-1)
 };
 

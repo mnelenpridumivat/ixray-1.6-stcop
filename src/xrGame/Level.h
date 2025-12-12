@@ -462,8 +462,8 @@ public:
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };
 
-IC CLevel&				Level()		{ return *((CLevel*) g_pGameLevel);			}
-IC game_cl_GameState&	Game()		{ return *Level().game;					}
+IC CLevel&				Level()		{ VERIFY(g_pGameLevel); return *((CLevel*) g_pGameLevel); }
+IC game_cl_GameState&	Game()		{ auto game = Level().game;	VERIFY(game); return *game;	}
 	u32					GameID();
 
 

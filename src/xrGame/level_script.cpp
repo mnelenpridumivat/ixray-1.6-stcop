@@ -310,9 +310,12 @@ float get_global_time_factor() { return (Device.time_factor()); }
 void set_game_difficulty(ESingleGameDifficulty dif)
 {
 	g_SingleGameDifficulty		= dif;
-	game_cl_Single* game		= Game().cast_game_cl_single();
-	VERIFY(game);
-	game->OnDifficultyChanged	();
+	if (g_pGameLevel)
+	{
+		game_cl_Single* game		= Game().cast_game_cl_single();
+		VERIFY(game);
+		game->OnDifficultyChanged	();
+	}
 }
 ESingleGameDifficulty get_game_difficulty()
 {
