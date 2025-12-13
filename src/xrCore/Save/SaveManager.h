@@ -86,8 +86,6 @@ class XRCORE_API CSaveManager
 
 	//CSaveObjectSave* SaveData = nullptr;
 
-	CSaveObjectLoad* LoadData = nullptr;
-	xr_hash_map<u64, ISaveChunkHandleInterface*> _handles = {};
 	bool _dirtyLoadData = false;
 
 	IWriter* SaveWriter = nullptr;
@@ -101,26 +99,15 @@ public:
 
 	SSaveTask* PopSaveTask();
 
-	u64 RegisterHandle(ISaveChunkHandleInterface* handle);
-	void UnregisterHandle(u64& ID);
-	ISaveChunkHandleInterface* GetHandle(u64 ID);
-	u64 GetHandlesNum();
-	void MarkLoadObjectDirty();
-
 	bool GetGameInfoFast(IReader* stream, SGameInfoFast& data);
 	void SkipGameInfo(IReader* stream);
-	//void WriteGameInfo(const SGameInfoFast& data);
 
 private:
 	Flags8 ControlFlagsDefault;
 	Flags8 ControlFlagsRead;
-	//SGameInfoFast GameInfo;
 	void ReadHeader(IReader* stream);
 	void ReadStrings(IReader* stream);
 	void ReadBools(IReader* stream);
-	//void ReadData(IReader* stream);
-
-	//void CompileData(CSaveObjectSave* Data);
 
 	shared_str ReadStringInternal(IReader* stream);
 
@@ -151,8 +138,6 @@ public:
 
 	CSaveObjectSave* EditorBeginSave();
 	CSaveObjectLoad* EditorBeginLoad(IReader* stream);
-	
-	//void WriteHeader(CMemoryBuffer* buffer);
 
 	void ConditionalReadString(IReader* stream, shared_str& Value);
 	void ConditionalReadBool(IReader* stream, bool& Value);

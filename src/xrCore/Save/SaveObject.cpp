@@ -80,23 +80,6 @@ bool CSaveObject::HasChunk(shared_str ChunkName)
 	return _chunkStack.top()->ContainsSubchunk(ChunkName);
 }
 
-/*void CSaveObject::MarkDirty() {
-	_dirty = true;
-	if (!_handles.size()) {
-		xr_delete(this);
-	}
-}*/
-
-/*void CSaveObject::NotifyHandleDestruction(ISaveChunkHandleInterface* handle)
-{
-	VERIFY(_handles.find(handle) != _handles.end());
-	_handles.erase(handle);
-	xr_delete(handle);
-	if (_dirty && !_handles.size()) {
-		xr_delete(this);
-	}
-}*/
-
 CSaveChunk* CSaveObjectLoad::ExtractCurrentChunkRaw()
 {
 	VERIFY(!_chunkStack.empty());
@@ -117,31 +100,11 @@ void CSaveObjectLoad::MergeSubchunk(CSaveChunk* Chunk)
 	VERIFY(false, "Attempt to copy chunk into load object!");
 }
 
-u64 CSaveObjectLoad::ExtractCurrentChunk()
-{
-	auto CurrentChunk = _chunkStack.top();
-	auto Result = new CSaveChunkHandle(this, CurrentChunk);
-	auto ID = CSaveManager::GetInstance().RegisterHandle(Result);
-	return ID;
-}
-
-void CSaveObjectLoad::MergeChunkByHandle(ISaveChunkHandleInterface* handle)
-{
-	VERIFY(false, "Attempt to copy chunk into load object!");
-}
-
 CSaveObjectSave::CSaveObjectSave()
 {
 	//_rootChunk = new CSaveChunk("Root");
 	//_chunkStack.push(_rootChunk);
 }
-
-/*CSaveObjectSave::CSaveObjectSave(CSaveChunk* Root)
-{
-	//_rootChunk = Root;
-	//_isPartial = true;
-	//_chunkStack.push(_rootChunk);
-}*/
 
 ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 {
@@ -150,13 +113,13 @@ ISaveObjectStackHandler CSaveObjectSave::BeginChunk(shared_str ChunkName)
 #ifndef MASTER_GOLD
 	_debugTopChunkNamesQueue.push(ChunkName);
 #endif
-	return ISaveObjectStackHandler(_chunkStack.size()-1);
+	return {(u16)(_chunkStack.size()-1)};
 }
 
 ISaveObjectArrayHandler CSaveObjectSave::BeginArray()
 {
 	GetCurrentChunk()->WriteArray();
-	return ISaveObjectArrayHandler(_chunkStack.size(), _chunkStack.top()->GetArrStackSize()-1);
+	return {(u16)(_chunkStack.size()), (u16)(_chunkStack.top()->GetArrStackSize()-1)};
 }
 
 CSaveChunk* CSaveObjectSave::ExtractCurrentChunkRaw()
@@ -169,19 +132,6 @@ void CSaveObjectSave::MergeSubchunk(CSaveChunk* Chunk)
 {
 	auto CurrentChunk = GetCurrentChunk();
 	CurrentChunk->AttachSubchunk(Chunk);
-}
-
-u64 CSaveObjectSave::ExtractCurrentChunk()
-{
-	VERIFY(false, "Cannot extract chunk from saving object!");
-	return u64(-1);
-}
-
-void CSaveObjectSave::MergeChunkByHandle(ISaveChunkHandleInterface* handle)
-{
-	auto InsertingChunk = handle->GetChunk();
-	auto CurrentChunk = GetCurrentChunk();
-	CurrentChunk->CopySubchunks(InsertingChunk);
 }
 
 ISaveObject& CSaveObjectSave::operator<<(float& Value)
@@ -279,13 +229,6 @@ CSaveObjectLoad::CSaveObjectLoad(CSaveChunk* Chunk)
 	_chunkStack.push(Chunk);
 }
 
-/*CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
-{
-	_rootChunk = Root->GetChunk();
-	_isPartial = true;
-	_chunkStack.push(_rootChunk);
-}*/
-
 ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 {
 	VERIFY(!_chunkStack.empty());
@@ -293,14 +236,14 @@ ISaveObjectStackHandler CSaveObjectLoad::BeginChunk(shared_str ChunkName)
 	_debugTopChunkNamesQueue.push(ChunkName);
 #endif
 	_chunkStack.push(_chunkStack.top()->FindChunk(ChunkName));
-	return ISaveObjectStackHandler(_chunkStack.size()-1);
+	return {(u16)(_chunkStack.size()-1)};
 }
 
 ISaveObjectArrayHandler CSaveObjectLoad::BeginArray()
 {
 	u64 ArrSize;
 	GetCurrentChunk()->ReadArray(ArrSize);
-	return ISaveObjectArrayHandler(_chunkStack.size(), _chunkStack.top()->GetArrStackSize()-1);
+	return {(u16)(_chunkStack.size()), (u16)(_chunkStack.top()->GetArrStackSize()-1)};
 }
 
 ISaveObject& CSaveObjectLoad::operator<<(float& Value)

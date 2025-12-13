@@ -34,7 +34,6 @@ public:
 	void EndArray(ISaveObjectArrayHandler handler) override;
 	bool HasChunk(shared_str ChunkName) override;
 
-	//void MarkDirty();
 	virtual u64 GetChunkStackDepth() override {return _chunkStack.size();}
 
 	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
@@ -90,7 +89,6 @@ public:
 	template<typename Key, typename Mapped>
 	ISaveObject& Serialize(xr_map<Key, Mapped>& Value, fastdelegate::FastDelegate<void(ISaveObject&, typename std::pair<Key, Mapped>&)> PerElem) {
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				std::pair<Key, Mapped> Elem = elem;
@@ -128,7 +126,6 @@ public:
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
 				if constexpr (std::is_pointer_v<T>) {
-					//CreateElem(Value);
 					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *(Value[i]);
 					Value[i] = Elem;
@@ -145,7 +142,6 @@ public:
 	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 	ISaveObject& Serialize(associative_vector<Key, Mapped>& Value) {
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
@@ -329,7 +325,6 @@ public:
 	{
 		VERIFY(!PerElem.empty());
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				if constexpr (std::is_pointer_v<T>) {
@@ -381,7 +376,6 @@ public:
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
 				if constexpr (std::is_pointer_v<T>) {
-					//CreateElem(Value);
 					T Elem = new std::remove_pointer_t<T>();
 					(*this) << *Elem;
 					Value.emplace(Elem);
@@ -401,7 +395,6 @@ public:
 	template<IsSaveObjectSerializable Key, IsSaveObjectSerializable Mapped>
 	ISaveObject& Serialize(xr_hash_map<Key, Mapped>& Value) {
 		if (IsSave()) {
-			//GetCurrentChunk()->WriteArray(Value.size());
 			GetCurrentChunk()->WriteArray();
 			for (auto& elem : Value) {
 				BEGIN_CHUNK((*this), "MapElem")
@@ -485,12 +478,6 @@ public:
 
 };
 
-/*template<typename T>
-ISaveObject& operator<<(ISaveObject& Object, T* Value) {
-	VERIFY(Value);
-	Object << *Value;
-}*/
-
 template<IsSaveObjectSerializable T>
 ISaveObject& operator<<(ISaveObject& Object, xr_vector<T>& Value) {
 	return ((CSaveObject*)&Object)->Serialize(Value);
@@ -544,7 +531,6 @@ XRCORE_API ISaveObject& operator<<(ISaveObject& Object, LPSTR& Value);
 class XRCORE_API CSaveObjectSave: public CSaveObject {
 public:
 	CSaveObjectSave();
-	//CSaveObjectSave(CSaveChunk* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
 	virtual ISaveObjectArrayHandler BeginArray() override;
@@ -553,8 +539,6 @@ public:
 	
 	virtual CSaveChunk* ExtractCurrentChunkRaw() override;
 	virtual void MergeSubchunk(CSaveChunk* Chunk) override;
-	virtual u64 ExtractCurrentChunk() override;
-	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 
 	virtual ISaveObject& operator<<(float& Value) override;
 	virtual ISaveObject& operator<<(double& Value) override;
@@ -576,7 +560,6 @@ class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
 	CSaveObjectLoad();
 	CSaveObjectLoad(CSaveChunk* Chunk);
-	//CSaveObjectLoad(ISaveChunkHandleInterface* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;
 	virtual ISaveObjectArrayHandler BeginArray() override;
@@ -585,8 +568,6 @@ public:
 
 	virtual CSaveChunk* ExtractCurrentChunkRaw() override;
 	virtual void MergeSubchunk(CSaveChunk* Chunk) override;
-	virtual u64 ExtractCurrentChunk() override;
-	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) override;
 
 	virtual ISaveObject& operator<<(float& Value) override;
 	virtual ISaveObject& operator<<(double& Value) override;

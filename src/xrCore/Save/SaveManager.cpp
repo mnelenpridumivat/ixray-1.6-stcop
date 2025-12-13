@@ -6,7 +6,6 @@ CSaveManager::CSaveManager()
 {
 	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, true);
 	SetFlag(ESaveManagerFlagsGeneral::EUseIntOptimization, true);
-	//SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, true);
 	SetFlag(ESaveManagerFlagsGeneral::EHasExtraControlFlags, false);
 }
 
@@ -38,23 +37,11 @@ bool CSaveManager::IsSaving()
 
 CSaveObjectSave* CSaveManager::BeginSave()
 {
-	//if (SaveData) {
-	//	xr_delete(SaveData);
-	//}
-	//SaveData = new CSaveObjectSave();
 	return new CSaveObjectSave();
 }
 
 CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 {
-	if (LoadData)
-	{
-		for (auto& elem : _handles)
-		{
-			xr_delete(elem.second);
-		}
-		xr_delete(LoadData);
-	}
 	ReadHeader(stream);
 	if (TestFlag(ESaveManagerFlagsGeneral::EUseStringOptimization))
 	{
@@ -66,7 +53,7 @@ CSaveObjectLoad* CSaveManager::BeginLoad(IReader* stream)
 	}
 	//VERIFY(!LoadData);
 	_dirtyLoadData = false;
-	LoadData = new CSaveObjectLoad();
+	auto LoadData = new CSaveObjectLoad();
 	LoadData->Parse(stream);
 	return LoadData;
 }
@@ -124,9 +111,6 @@ CSaveObjectSave* CSaveManager::EditorBeginSave()
 {
 	SetFlag(ESaveManagerFlagsGeneral::EUseStringOptimization, false);
 	SetFlag(ESaveManagerFlagsGeneral::EUseBoolOptimization, false);
-	//auto Obj = new CSaveObjectSave();
-	//auto Value = ESaveVariableType::t_chunk;
-	//(*Obj) << Value;
 	return new CSaveObjectSave();
 }
 
@@ -232,22 +216,6 @@ void CSaveManager::SkipGameInfo(IReader* stream)
 	GetGameInfoFast(stream, data);
 }
 
-/*void CSaveManager::WriteGameInfo(const SGameInfoFast& data)
-{
-	GameInfo = data;
-}*/
-
-/*void CSaveManager::WriteHeader(CMemoryBuffer* buffer)
-{
-	PROF_EVENT("CSaveManager::WriteHeader")
-	buffer->Write(ESaveVariableType::t_chunk);
-	buffer->Write(GameInfo.m_actor_health);
-	buffer->Write(GameInfo.m_game_time);
-	buffer->Write(GameInfo.m_level_id);
-	buffer->Write(GameInfo.m_level_name);
-	buffer->Write(ControlFlagsDefault.flags);
-}*/
-
 void SSaveTask::WriteStrings()
 {
 	PROF_EVENT("CSaveManager::WriteStrings")
@@ -350,11 +318,6 @@ void CSaveManager::ReadBools(IReader* stream)
 	}
 }
 
-/*void CSaveManager::ReadData(IReader* stream)
-{
-
-}*/
-
 void SSaveTask::CompileData(CSaveObjectSave* Data)
 {
 	PROF_EVENT("CSaveManager::CompileData")
@@ -364,10 +327,6 @@ void SSaveTask::CompileData(CSaveObjectSave* Data)
 
 shared_str CSaveManager::ReadStringInternal(IReader* stream)
 {
-	/*auto str_size = stream->r_u32();
-	VERIFY(str_size < 256);
-	string256 Str;
-	stream->r(Str, str_size);*/
 	shared_str buffer;
 	stream->r_stringZ(buffer);
 	return buffer;
@@ -397,53 +356,4 @@ SSaveTask* CSaveManager::PopSaveTask()
 		return task;
 	}
 	return nullptr;
-}
-
-u64 CSaveManager::RegisterHandle(ISaveChunkHandleInterface* handle)
-{
-	auto ID = GetHandlesNum();
-	while (_handles.find(ID) != _handles.end()) {
-		++ID;
-	}
-	VERIFY(ID != u64(-1));
-	_handles[ID] = handle;
-	return ID;
-}
-
-void CSaveManager::UnregisterHandle(u64& ID)
-{
-	auto HandleIt = _handles.find(ID);
-	VERIFY(HandleIt != _handles.end());
-	auto Handle = HandleIt->second;
-	_handles.erase(ID);
-	xr_delete(Handle);
-	ID = u64(-1);
-	if (_dirtyLoadData) {
-		MarkLoadObjectDirty();
-	}
-}
-
-ISaveChunkHandleInterface* CSaveManager::GetHandle(u64 ID)
-{
-	if (ID == u64(-1)) {
-		return nullptr;
-	}
-	auto It = _handles.find(ID);
-	if (It == _handles.end()) {
-		return nullptr;
-	}
-	return It->second;
-}
-
-u64 CSaveManager::GetHandlesNum()
-{
-	return _handles.size();
-}
-
-void CSaveManager::MarkLoadObjectDirty()
-{
-	_dirtyLoadData = true;
-	if (!_handles.size()) {
-		xr_delete(LoadData);
-	}
 }
