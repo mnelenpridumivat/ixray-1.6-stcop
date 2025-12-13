@@ -193,7 +193,13 @@ void CCutsceneManager::SaveAdjust()
 
 void CCutsceneManager::ResetAdjust()
 {
-	AdjustDeviation = pSettings->r_fvector3(AdjustCutsceneSection, "deviation");
+	if (pSettings->line_exist(AdjustCutsceneSection, "deviation"))
+	{
+		AdjustDeviation = pSettings->r_fvector3(AdjustCutsceneSection, "deviation");
+	} else
+	{
+		AdjustDeviation = m_pCurrentCutscene->GetPivotObject()->XFORM().c;
+	}
 }
 
 Fvector CCutsceneManager::GetAdjustDelta()
