@@ -151,7 +151,6 @@ CSE_Abstract::~CSE_Abstract					()
 {
 	xr_free						(s_name_replace);
 	xr_delete					(m_ini_file);
-	xr_delete(client_data_new);
 }
 
 CSE_Visual* CSE_Abstract::visual			()
@@ -508,7 +507,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				if (has_data)
 				{
 					if (Obj) {
-						xr_delete(client_data_new);
+						//xr_delete(client_data_new);
 						Obj->net_Serialize(Object);
 					} else
 					{
