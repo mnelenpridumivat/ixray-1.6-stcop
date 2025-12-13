@@ -55,7 +55,7 @@ IC bool IsValuableToRender(dxRender_Visual* pVisual, bool isStatic, bool sm, Fma
 
 	float adjusted_distance = GetDistFromCamera(pos);
 
-	// Настройки для статических и динамических объектов
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	static Fvector4 static_sizes[12] =
 	{
 		o_optimize_static_l1_size, o_optimize_static_l2_size, o_optimize_static_l3_size,
@@ -91,7 +91,7 @@ IC bool IsValuableToRender(dxRender_Visual* pVisual, bool isStatic, bool sm, Fma
 			float level_size = sz.x;
 			float level_dist = ds.x;
 
-			// Определяем компоненту по opt_level
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ opt_level
 			switch (opt_level)
 			{
 				case 2: level_size = sz.y; level_dist = ds.y; break;
@@ -141,7 +141,7 @@ ICF	float CalcSSA(float& distSQ, Fvector& C, float R)
 	return	R / distSQ;
 }
 
-void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fvector& Center)
+void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fvector& Center, bool Force)
 {
 	CRender&	RI			=	RImplementation;
 
@@ -155,7 +155,7 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 
 	float distSQ			;
 	float SSA				=	CalcSSA		(distSQ,Center,pVisual);
-	if (SSA<=r_ssaDISCARD)		return;
+	if (SSA<=r_ssaDISCARD && !Force)		return;
 
 	// Distortive geometry should be marked and R2 special-cases it
 	// a) Allow to optimize RT order
@@ -381,7 +381,7 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject)
+void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject, bool Force)
 {
 	if (0==pVisual)				return;
 
@@ -411,7 +411,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject)
 			FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
 			I = pV->children.begin	();
 			E = pV->children.end	();
-			for (; I!=E; I++)	add_leafs_Dynamic	(*I, IgnoreObject);
+			for (; I!=E; I++)	add_leafs_Dynamic	(*I, IgnoreObject, Force);
 		}
 		return;
 	case MT_SKELETON_ANIM:
@@ -429,7 +429,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject)
 			}
 			if (_use_lod)				
 			{
-				add_leafs_Dynamic			(pV->m_lod, IgnoreObject)		;
+				add_leafs_Dynamic			(pV->m_lod, IgnoreObject, Force)		;
 			} else {
 #if RENDER==R_R1
 				pV->CalculateBones			(TRUE);
@@ -437,7 +437,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject)
 #endif
 				I = pV->children.begin		();
 				E = pV->children.end		();
-				for (; I!=E; I++)	add_leafs_Dynamic	(*I, IgnoreObject);
+				for (; I!=E; I++)	add_leafs_Dynamic	(*I, IgnoreObject, Force);
 			}
 		}
 		return;
@@ -447,7 +447,7 @@ void CRender::add_leafs_Dynamic(dxRender_Visual *pVisual, bool IgnoreObject)
 			// Calculate distance to it's center
 			Fvector							Tpos;
 			val_pTransform->transform_tiny	(Tpos, pVisual->vis.sphere.P);
-			r_dsgraph_insert_dynamic		(pVisual,Tpos);
+			r_dsgraph_insert_dynamic		(pVisual,Tpos, Force);
 		}
 		return;
 	}
