@@ -42,6 +42,8 @@
 #include "ParticlesObject.h"
 #include "UIPdaWnd.h"
 #include "../xrUI/UICursor.h"
+#include "CustomTimer.h"
+#include "Cutscenes/CutsceneManager.h"
 
 using namespace luabind;
 
@@ -1582,6 +1584,8 @@ void CActor::UpdateCL()
 	}
 
 	UpdateInventoryOwner(Device.dwTimeDelta);
+
+	CBinderManager::GetInstance().Update();
 
 	if (m_feel_touch_characters > 0)
 	{
