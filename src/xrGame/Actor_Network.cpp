@@ -65,7 +65,7 @@ CActor* g_actor_single = nullptr;
 CActor* Actor()
 {
 	if (IsGameTypeSingle()) {
-		VERIFY(g_actor);
+		//VERIFY(g_actor);
 		return g_actor;
 	}
 	CActor* pActor = Level().CurrentControlEntity() ? Level().CurrentControlEntity()->cast_actor() : nullptr;

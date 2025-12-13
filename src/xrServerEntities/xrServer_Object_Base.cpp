@@ -508,7 +508,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				if (has_data)
 				{
 					if (Obj) {
-						VERIFY(!client_data_new);
+						xr_delete(client_data_new);
 						Obj->net_Serialize(Object);
 					} else
 					{

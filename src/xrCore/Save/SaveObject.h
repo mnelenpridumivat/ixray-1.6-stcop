@@ -575,6 +575,7 @@ public:
 class XRCORE_API CSaveObjectLoad: public CSaveObject {
 public:
 	CSaveObjectLoad();
+	CSaveObjectLoad(CSaveChunk* Chunk);
 	//CSaveObjectLoad(ISaveChunkHandleInterface* Root);
 
 	virtual ISaveObjectStackHandler BeginChunk(shared_str ChunkName) override;

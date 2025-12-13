@@ -152,6 +152,13 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 	if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
 	{
 		auto Obj = CSaveManager::GetInstance().BeginLoad(stream);
+		header().Serialize(*Obj);
+		time_manager().Serialize(*Obj);
+		spawns().Serialize(*Obj);
+		graph().on_load();
+		objects().Serialize(*Obj);
+		registry().Serialize(*Obj);
+		xr_delete(Obj);
 	} else
 	{
 		IReader& source = *stream;
@@ -165,20 +172,20 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 
 	VERIFY(can_register_objects());
 	can_register_objects(false);
-	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	B = objects().objects().begin();
-	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	E = objects().objects().end();
-	CALifeObjectRegistry::OBJECT_REGISTRY::iterator	I;
-	for (I = B; I != E; ++I) {
-		ALife::_OBJECT_ID id = (*I).second->ID;
-		(*I).second->ID = server().PerformIDgen(id);
-		VERIFY(id == (*I).second->ID);
-		register_object((*I).second, false);
+	auto& Objects = objects().objects();
+	for (auto& elem : Objects) {
+		ALife::_OBJECT_ID id = elem.second->ID;
+		elem.second->ID = server().PerformIDgen(id);
+		VERIFY(id == elem.second->ID);
+		register_object(elem.second, false);
 	}
 
 	can_register_objects(true);
 
-	for (I = B; I != E; ++I)
-		(*I).second->on_register();
+	for (auto& elem : Objects)
+	{
+		elem.second->on_register();
+	}
 
 	if (!g_pGameLevel)
 		return;
@@ -230,6 +237,7 @@ bool CALifeStorageManager::load(LPCSTR save_name_no_check)
 	constexpr pcstr mismatch = "Saved game version mismatch or saved game is corrupted";
 	const bool gameSaveIsValid = CSavedGameWrapper::valid_saved_game(*stream);
 	VERIFY3(gameSaveIsValid, mismatch, file_name);
+	stream->rewind();
 
 	if (!gameSaveIsValid)
 	{

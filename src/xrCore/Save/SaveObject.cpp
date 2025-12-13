@@ -267,6 +267,18 @@ CSaveObjectLoad::CSaveObjectLoad()
 	//_chunkStack.push(_rootChunk);
 }
 
+CSaveObjectLoad::CSaveObjectLoad(CSaveChunk* Chunk)
+{
+	if (_rootChunk)
+	{
+		xr_delete(_rootChunk);
+		_chunkStack.pop();
+	}
+	_isPartial = true;
+	_rootChunk = Chunk;
+	_chunkStack.push(Chunk);
+}
+
 /*CSaveObjectLoad::CSaveObjectLoad(ISaveChunkHandleInterface* Root)
 {
 	_rootChunk = Root->GetChunk();
