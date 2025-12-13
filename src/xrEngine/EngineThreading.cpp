@@ -10,7 +10,7 @@
 #include "../xrCore/Save/SaveManager.h"
 
 
-#if defined(IXR_WINDOWS) and not defined(MASTER_GOLD)
+#if !defined(MASTER_GOLD) && defined(IXR_WINDOWS) && (defined(_MSC_VER) || (defined(__clang__) && defined(_MSC_EXTENSIONS)))
 #define ALLOW_SEH_EXCEPTIONS
 #include <windows.h> // for EXCEPTION_ACCESS_VIOLATION
 #include <excpt.h>
