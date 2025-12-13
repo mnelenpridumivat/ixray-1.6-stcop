@@ -1,9 +1,9 @@
 #pragma once
-#include "SaveChunkHandleInterface.h"
 #include "Concepts.h"
 #include "memory/xrMemory_subst_msvc.h"
 
 class shared_str;
+class CSaveChunk;
 
 class XRCORE_API ISaveObjectStackHandler
 {
@@ -38,10 +38,7 @@ public:
 	// simple data chunk extraction - if need to store ALife online data for offline object
 	virtual CSaveChunk* ExtractCurrentChunkRaw() = 0;
 	virtual void MergeSubchunk(CSaveChunk* Chunk) = 0;
-	
-	// in case if mp support is required, and save data could possibly be on client - base for replication
-	virtual u64 ExtractCurrentChunk() = 0;
-	virtual void MergeChunkByHandle(ISaveChunkHandleInterface* handle) = 0;
+
 	virtual u64 GetChunkStackDepth() = 0;
 
 	virtual ISaveObject& operator<<(float& Value) = 0;

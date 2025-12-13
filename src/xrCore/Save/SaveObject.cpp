@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SaveObject.h"
 #include "SaveManager.h"
-#include "SaveChunkHandle.h"
 
 CSaveObject::CSaveObject()
 {
