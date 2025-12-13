@@ -57,6 +57,7 @@
 #include "material_manager.h"
 #include "Cutscenes/CutsceneItem.h"
 #include "Cutscenes/CutsceneManager.h"
+#include "CustomTimer.h"
 
 #include "ElectronicsProblemsManager.h"
 #include "SamZone.h"
@@ -1158,6 +1159,39 @@ void RefreshNames()
 	}
 }
 
+void bind_timer(LPCSTR function, luabind::object params, int start_value)
+{
+	CBinderParams ConvParams;
+	R_ASSERT(params.type() == LUA_TTABLE);
+	for (auto elem : params)
+	{
+		switch (elem.type())
+		{
+		case LUA_TNUMBER:
+			{
+				ConvParams.Add({luabind::object_cast<double>(elem)});
+				break;
+			}
+		case LUA_TSTRING:
+			{
+				ConvParams.Add({luabind::object_cast<LPCSTR>(elem)});
+				break;
+			}
+		case LUA_TBOOLEAN:
+			{
+				ConvParams.Add({luabind::object_cast<bool>(elem)});
+				break;
+			}
+		default:
+			{
+				R_ASSERT(false, "During timer binding got an invalid function parameter (not string, bool or number)", function);
+			}
+		}
+		
+	}
+	CBinderManager::GetInstance().CreateBinder(function, ConvParams, start_value);
+}
+
 void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
 {
 	if (OnClient()) {
@@ -1725,6 +1759,8 @@ void CLevel::script_register(lua_State *L)
 		def("get_parameter_upgraded_int", &GetParameterUpgradedInt),
 		def("valid_saved_game_int", &ValidSavedGameInt),
 		def("is_tactical_hud", &IsTacticalHud),
+
+		def("bind_timer", &bind_timer),
 
 		def("launch_sam", &launch_sam),
 		

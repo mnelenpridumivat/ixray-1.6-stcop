@@ -1,6 +1,7 @@
 #pragma once
 #include "SaveChunkHandleInterface.h"
 #include "Concepts.h"
+#include "memory/xrMemory_subst_msvc.h"
 
 class shared_str;
 
@@ -90,7 +91,23 @@ concept IsSaveObjectSerializableRef = requires(ISaveObject& Object, T& Value)
 };
 
 template<typename T>
-concept IsSaveObjectSerializable = IsSaveObjectSerializableRef<T> || (std::is_pointer_v<T> && IsSaveObjectSerializablePtr<T>);
+concept IsSaveObjectSerializableUPtr = requires(ISaveObject& Object, xr_unique_ptr<T>& Value)
+{
+	{Object << Value} -> std::same_as<ISaveObject&>;
+};
+
+template<typename T>
+concept IsSaveObjectSerializableSPtr = requires(ISaveObject& Object, xr_shared_ptr<T>& Value)
+{
+	{Object << Value} -> std::same_as<ISaveObject&>;
+};
+
+template<typename T>
+concept IsSaveObjectSerializable =
+	IsSaveObjectSerializablePtr<T> ||
+	IsSaveObjectSerializableRef<T> ||
+	IsSaveObjectSerializableUPtr<T> || 
+	IsSaveObjectSerializableSPtr<T>;
 
 template<XRay::Concepts::Enum T>
 ISaveObject& operator<<(ISaveObject& Object, T& Value)

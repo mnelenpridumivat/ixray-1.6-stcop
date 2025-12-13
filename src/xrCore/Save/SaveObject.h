@@ -532,6 +532,12 @@ ISaveObject& operator<<(ISaveObject& Object, xr_deque<T>& Value)
 	return ((CSaveObject*)&Object)->Serialize(Value);
 }
 
+template<IsSaveObjectSerializable T>
+ISaveObject& operator<<(ISaveObject& Object, xr_unique_ptr<T>& Value)
+{
+	return ((CSaveObject*)&Object)->Serialize(Value);
+}
+
 XRCORE_API ISaveObject& operator<<(ISaveObject& Object, char& Value);
 XRCORE_API ISaveObject& operator<<(ISaveObject& Object, LPSTR& Value);
 
