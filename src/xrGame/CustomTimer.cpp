@@ -272,62 +272,111 @@ ISaveObject& operator<<(ISaveObject& Object, CBinderParams& Value)
     return Object;
 }
 
+void CBinderHandler::save(IWriter& output_packet)
+{
+    save_data(m_timer_id, output_packet);
+}
+
+void CBinderHandler::load(IReader& input_packet)
+{
+    load_data(m_timer_id, input_packet);
+}
+
+void CBinderHandler::Serialize(ISaveObject& Object)
+{
+    BEGIN_CHUNK(Object,"CBinderHandler")
+    {
+        Object << m_timer_id;
+    }
+}
+
 void CBinder::OnTimerEnd()
 {
     m_bIsActive = false;
 
-    luabind::functor<void> funct;
-    if (ai().script_engine().functor(m_sFuncName.c_str(), funct)) {
-        luabind::object obj = luabind::newtable(ai().script_engine().lua());
-        for (int i = 0; i < m_params.Size(); ++i)
-        {
-            auto& elem = m_params.Get(i);
-            switch (elem.GetType())
+    switch (m_value.index())
+    {
+        case 0:
             {
-            case eBinderParamString:
-                {
-                    obj[i+1] = elem.GetString();
-                    break;
+                luabind::functor<void> funct;
+                if (ai().script_engine().functor(std::get<Func>(m_value).m_sFuncName.c_str(), funct)) {
+                    luabind::object obj = luabind::newtable(ai().script_engine().lua());
+                    for (int i = 0; i < std::get<Func>(m_value).m_params.Size(); ++i)
+                    {
+                        auto& elem = std::get<Func>(m_value).m_params.Get(i);
+                        switch (elem.GetType())
+                        {
+                        case eBinderParamString:
+                            {
+                                obj[i+1] = elem.GetString();
+                                break;
+                            }
+                        case eBinderParamBool:
+                            {
+                                obj[i+1] = elem.GetBool();
+                                break;
+                            }
+                        case eBinderParamDouble:
+                            {
+                                obj[i+1] = elem.GetDouble();
+                                break;
+                            }
+                        }
+                    }
+                    if (!m_expired)
+                    {
+                        funct(obj);
+                    }
+                    m_expired = true;
+                    return;
                 }
-            case eBinderParamBool:
-                {
-                    obj[i+1] = elem.GetBool();
-                    break;
-                }
-            case eBinderParamDouble:
-                {
-                    obj[i+1] = elem.GetDouble();
-                    break;
-                }
+                Msg("! Unable to process binder with name [%s]!", std::get<Func>(m_value).m_sFuncName.c_str());
+                break;
             }
-        }
-        funct(obj);
-        m_expired = true;
-        return;
+        case 1:
+            {
+                if (!m_expired)
+                {
+                    std::get<luabind::object>(m_value)();
+                }
+                m_expired = true;
+                break;
+            }
+        default: NODEFAULT;
     }
-    Msg("! Unable to process binder with name [%s]!", m_sFuncName.c_str());
+}
+
+bool CBinder::IsSaveable()
+{
+    return m_value.index() == 0;
 }
 
 void CBinder::save(IWriter& packet)
 {
+    VERIFY(IsSaveable());
+    save_data(m_id, packet);
     save_data(m_iTimerStartValue, packet);
     save_data(m_iTimerCurValue, packet);
     save_data(m_iStartTime, packet);
     save_data(m_bIsActive, packet);
-    save_data(m_sFuncName, packet);
+    save_data(std::get<Func>(m_value).m_sFuncName, packet);
     save_data(m_expired, packet);
-    m_params.save(packet);
+    save_data(m_looped, packet);
+    std::get<Func>(m_value).m_params.save(packet);
 }
 
 void CBinder::load(IReader& input_packet)
 {
+    m_value = Func();
+    load_data(m_id, input_packet);
     load_data(m_iTimerStartValue, input_packet);
     load_data(m_iTimerCurValue, input_packet);
     load_data(m_iStartTime, input_packet);
     load_data(m_bIsActive, input_packet);
-    load_data(m_sFuncName, input_packet);
+    load_data(std::get<Func>(m_value).m_sFuncName, input_packet);
     load_data(m_expired, input_packet);
-    m_params.load(input_packet);
+    load_data(m_looped, input_packet);
+    std::get<Func>(m_value).m_params.load(input_packet);
     m_bIsActive = true;
 }
 
@@ -335,8 +384,8 @@ void CBinder::Serialize(ISaveObject& Object)
 {
     BEGIN_CHUNK(Object,"CBinder")
     {
-        Object << m_sFuncName << m_expired << m_iTimerStartValue << m_iTimerCurValue << m_iStartTime << m_bIsActive;
-        m_params.Serialize(Object);
+        Object << m_id << std::get<Func>(m_value).m_sFuncName << m_expired << m_iTimerStartValue << m_iTimerCurValue << m_iStartTime << m_bIsActive;
+        std::get<Func>(m_value).m_params.Serialize(Object);
         if (!Object.IsSave()) {
             m_bIsActive = true;
         }
@@ -346,7 +395,9 @@ void CBinder::Serialize(ISaveObject& Object)
 void CBinder::Update()
 {
     if (!m_bIsActive)
+    {
         return;
+    }
 
     m_iTimerCurValue += Device.dwTimeDelta;
 
@@ -361,17 +412,86 @@ CBinderManager& CBinderManager::GetInstance()
     return instance;
 }
 
-void CBinderManager::CreateBinder(shared_str name, const CBinderParams& params, int value)
+CBinderHandler CBinderManager::CreateBinder(shared_str name, const CBinderParams& params, int value, bool looped)
 {
-    Binders.push_back(xr_make_unique<CBinder>(name, params, value));
+    auto id = m_id_gen++;
+    Binders.push_back(xr_make_unique<CBinder>(id, name, params, value, looped));
+    return id;
+}
+
+CBinderHandler CBinderManager::CreateBinder(luabind::object func, int value, bool looped)
+{
+    auto id = m_id_gen++;
+    Binders.push_back(xr_make_unique<CBinder>(id, func, value, looped));
+    return id;
+}
+
+bool CBinderManager::IsTimerValid(CBinderHandler handler)
+{
+    for (auto& elem : Binders)
+    {
+        if (elem->getId() == handler.GetID())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void CBinderManager::Pause(CBinderHandler handler)
+{
+    R_ASSERT(IsTimerValid(handler));
+    for (auto& elem : Binders)
+    {
+        if (elem->getId() == handler.GetID())
+        {
+            elem->Pause();
+            return;
+        }
+    }
+}
+
+void CBinderManager::Resume(CBinderHandler handler)
+{
+    R_ASSERT(IsTimerValid(handler));
+    for (auto& elem : Binders)
+    {
+        if (elem->getId() == handler.GetID())
+        {
+            elem->Resume();
+            return;
+        }
+    }
+}
+
+void CBinderManager::Stop(CBinderHandler handler)
+{
+    R_ASSERT(IsTimerValid(handler));
+    for (auto& elem : Binders)
+    {
+        if (elem->getId() == handler.GetID())
+        {
+            elem->Stop();
+            return;
+        }
+    }
 }
 
 void CBinderManager::save(IWriter& packet)
 {
-    u32 timer_count = static_cast<u32>(Binders.size());
+    save_data(m_id_gen, packet);
+    xr_vector<CBinder*> Copy;
+    for (auto& elem : Binders)
+    {
+        Copy.push_back(elem.get());
+    }
+
+    std::erase_if(Copy, [](CBinder* binder){return !binder->IsSaveable();});
+    
+    u32 timer_count = static_cast<u32>(Copy.size());
     save_data(timer_count, packet);
 
-    for (const auto& timer : Binders)
+    for (const auto& timer : Copy)
     {
         timer->save(packet);
     }
@@ -379,6 +499,7 @@ void CBinderManager::save(IWriter& packet)
 
 void CBinderManager::load(IReader& packet)
 {
+    load_data(m_id_gen, packet);
     u32 timer_count = 0;
     load_data(timer_count, packet);
 
@@ -395,7 +516,7 @@ void CBinderManager::Serialize(ISaveObject& Object)
 {
     BEGIN_CHUNK(Object,"CBinderManager")
     {
-        Object << Binders;
+        Object << m_id_gen << Binders;
     }
 }
 
@@ -418,20 +539,13 @@ void CBinderManager::Update()
     {
         return;
     }
-    // move all expired binders at the end of vector ...
-    int found_expired = 0;
-    for(int i = 0; i < Binders.size() - expired_num; ++i)
+    std::erase_if(Binders, [](const xr_unique_ptr<CBinder>& binder){return binder->getExpired() && !binder->getLooped();});
+    for (auto& binder : Binders)
     {
-        while(Binders[i]->getExpired())
+        if (binder->getExpired())
         {
-            std::swap(Binders[i], Binders[Binders.size() - 1 - found_expired]);
-            ++found_expired;
-        }
-        if(expired_num == found_expired)
-        {
-            break;
+            VERIFY(binder->getLooped());
+            binder->ResetTimer();
         }
     }
-    // ... and remove them
-    Binders.resize(Binders.size() - expired_num);
 }

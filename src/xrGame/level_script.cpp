@@ -1159,7 +1159,7 @@ void RefreshNames()
 	}
 }
 
-void bind_timer(LPCSTR function, luabind::object params, int start_value)
+CBinderHandler bind_timer(LPCSTR function, luabind::object params, int start_value)
 {
 	CBinderParams ConvParams;
 	R_ASSERT(params.type() == LUA_TTABLE);
@@ -1189,7 +1189,74 @@ void bind_timer(LPCSTR function, luabind::object params, int start_value)
 		}
 		
 	}
-	CBinderManager::GetInstance().CreateBinder(function, ConvParams, start_value);
+	return CBinderManager::GetInstance().CreateBinder(function, ConvParams, start_value);
+}
+
+CBinderHandler bind_timer_looped(LPCSTR function, luabind::object params, int start_value)
+{
+	CBinderParams ConvParams;
+	R_ASSERT(params.type() == LUA_TTABLE);
+	for (auto elem : params)
+	{
+		switch (elem.type())
+		{
+		case LUA_TNUMBER:
+			{
+				ConvParams.Add({luabind::object_cast<double>(elem)});
+				break;
+			}
+		case LUA_TSTRING:
+			{
+				ConvParams.Add({luabind::object_cast<LPCSTR>(elem)});
+				break;
+			}
+		case LUA_TBOOLEAN:
+			{
+				ConvParams.Add({luabind::object_cast<bool>(elem)});
+				break;
+			}
+		default:
+			{
+				R_ASSERT(false, "During timer binding got an invalid function parameter (not string, bool or number)", function);
+			}
+		}
+		
+	}
+	return CBinderManager::GetInstance().CreateBinder(function, ConvParams, start_value, true);
+}
+
+CBinderHandler bind_timer_func(luabind::object function, int start_value)
+{
+	CBinderParams ConvParams;
+	R_ASSERT(function.type() == LUA_TFUNCTION);
+	return CBinderManager::GetInstance().CreateBinder(function, start_value);
+}
+
+CBinderHandler bind_timer_func_looped(luabind::object function, int start_value)
+{
+	CBinderParams ConvParams;
+	R_ASSERT(function.type() == LUA_TFUNCTION);
+	return CBinderManager::GetInstance().CreateBinder(function, start_value, true);
+}
+
+bool is_timer_valid(CBinderHandler handler)
+{
+	return CBinderManager::GetInstance().IsTimerValid(handler);
+}
+
+void pause_timer(CBinderHandler handler)
+{
+	CBinderManager::GetInstance().Pause(handler);
+}
+
+void resume_timer(CBinderHandler handler)
+{
+	CBinderManager::GetInstance().Resume(handler);
+}
+
+void stop_timer(CBinderHandler handler)
+{
+	CBinderManager::GetInstance().Stop(handler);
 }
 
 void launch_sam(CScriptGameObject* launch_object, CScriptGameObject* target)
@@ -1760,8 +1827,18 @@ void CLevel::script_register(lua_State *L)
 		def("valid_saved_game_int", &ValidSavedGameInt),
 		def("is_tactical_hud", &IsTacticalHud),
 
+		// timers
+		class_<CBinderHandler>("CBinderHandler"),
 		def("bind_timer", &bind_timer),
+		def("bind_timer", &bind_timer_func),
+		def("bind_timer_looped", &bind_timer_looped),
+		def("bind_timer_looped", &bind_timer_func_looped),
+		def("is_timer_valid", &is_timer_valid),
+		def("pause_timer", &pause_timer),
+		def("resume_timer", &resume_timer),
+		def("stop_timer", &stop_timer),
 
+		// launch SAM
 		def("launch_sam", &launch_sam),
 		
 		// Dynamic wallmarks switch
