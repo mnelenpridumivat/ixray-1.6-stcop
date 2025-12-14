@@ -94,7 +94,7 @@ class CBinder : public IPureSerializeObject<IReader, IWriter>
     };
     std::variant<Func, luabind::object> m_value;
     bool m_expired = false;
-    bool m_bIsActive = false;
+    bool m_bIsActive = true;
     bool m_looped = false;
 
 protected:
@@ -105,12 +105,10 @@ public:
     CBinder(int id, shared_str name, const CBinderParams& params, int value, bool looped) : m_id(id), m_iTimerStartValue(value), m_looped(looped)
     {
         m_value = Func{name, params};
-        m_bIsActive = false;
     }
     CBinder(int id, luabind::object func, int value, bool looped) : m_id(id), m_iTimerStartValue(value), m_looped(looped)
     {
         m_value = func;
-        m_bIsActive = false;
     }
 
     bool IsSaveable();
