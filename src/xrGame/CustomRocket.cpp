@@ -415,6 +415,7 @@ void CCustomRocket::StartEngine()
 	if (m_flyingSound.handle())
 		m_flyingSound.play_at_pos(0, XFORM().c, sm_Looped);
 
+	m_pPhysicsShell->set_ApplyByGravity(m_affect_gravity);
 	StartLights();
 	StartParticles();
 

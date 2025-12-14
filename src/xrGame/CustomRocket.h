@@ -129,6 +129,7 @@ protected:
 	bool m_bLightsEnabled = false;
 	//флаг, что подсветка будет остановлена
 	//вместе с двигателем
+	bool m_affect_gravity = true;
 	bool m_bStopLightsWithEngine = true;
 	//подсветка во время полета и работы двигателя
 	ref_light m_pTrailLight = nullptr;

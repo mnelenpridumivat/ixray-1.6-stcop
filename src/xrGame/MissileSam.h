@@ -8,8 +8,8 @@ class CMissileSam final: public CExplosiveRocket
 	CGameObject* target = nullptr;
 
 public:
+	CMissileSam() : CExplosiveRocket(){ m_affect_gravity = false; }
 	void SetTarget(CGameObject* target) { this->target = target; }
-	virtual	void			StartFlying() override;
 
 	virtual	void			UpdateEnginePh() override;
 

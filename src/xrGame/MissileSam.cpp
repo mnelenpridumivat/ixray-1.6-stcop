@@ -6,12 +6,6 @@
 #include "../xrPhysics/PhysicsCommon.h"
 #include "../xrphysics/PhysicsShell.h"
 
-void CMissileSam::StartFlying()
-{
-	CExplosiveRocket::StartFlying();
-	m_pPhysicsShell->set_ApplyByGravity(false);
-}
-
 void CMissileSam::UpdateEnginePh()
 {
 	//return;
