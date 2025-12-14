@@ -697,18 +697,15 @@ void CFlamethrower::OnShot()
 
 	// Animation
 	PlayAnimShoot();
+	
+	StartFlameParticle();
 
 	// Shell Drop
 	Fvector vel;
 	PHGetLinearVell(vel);
-	OnShellDrop(get_LastSP(), vel);
-
-	// ����� �� ������
-	StartFlameParticles();
-
-	//��� �� ������
-	ForceUpdateFireParticles();
-	//StartSmokeParticles(get_LastFP(), vel);
+	
+	//StartShellParticle(vel);
+	//StartSmokeParticle(vel);
 
 	// ��������� ���� ����� ��������, ���� �� ����� �������� �� ����� ������ ��� ������ � ��� ����
 	if (m_sounds.FindSoundItem("sndPumpGun", false))
@@ -1161,9 +1158,7 @@ void CFlamethrower::InitAddons()
 	}
 
 	{
-		//m_sFlameParticlesCurrent = m_sFlameParticles;
-		m_sFlameParticlesCurrent = "";
-		m_sSmokeParticlesCurrent = m_sSmokeParticles;
+		CShootingObject::fire_mode = eDefaultFire;
 		m_sSndShotCurrent = "sndShot";
 
 		//��������� �� ��������

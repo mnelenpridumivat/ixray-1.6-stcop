@@ -8,7 +8,9 @@
 
 SCutsceneObjectElement::SCutsceneObjectElement(LPCSTR ObjectName)
 {
+#ifndef MASTER_GOLD
     ObjName = ObjectName;
+#endif
     HudModel = ::Render->model_Create(ObjectName);
     R_ASSERT3(HudModel, "Unable to find object", ObjectName);
     HudModelKinematics = smart_cast<IKinematics*>(HudModel);
@@ -71,25 +73,27 @@ void SCutsceneObjectElement::Activate()
     VERIFY(FirstBlend);
     FirstBlend->Callback = &SCutsceneObjectElement::OnFinishFunc;
     FirstBlend->CallbackParam = this;
-    if (parent)
-    {
-        start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
-    }
+    // TODO: Fix position for child objects
+    //if (parent)
+    //{
+    //    start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
+    //}
 }
 
 void SCutsceneObjectElement::Update(Fvector Deviation)
 {
     Fmatrix m_transform;
     m_transform.identity();
-    if (!parent)
-    {
+    // TODO: Fix position for child objects
+    //if (!parent)
+    //{
         m_transform.c = Deviation;
-    } else
-    {
-        auto trans = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
-        trans.c.add(start_parent_transform.c);
-        m_transform = trans;
-    }
+    //} else
+    //{
+    //    auto trans = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
+    //    trans.c.add(start_parent_transform.c);
+    //    m_transform = trans;
+    //}
     HudModelKinematics->CalculateBones(true);
     ::Render->set_Transform(&m_transform);
     ::Render->add_Visual(HudModel, true);
