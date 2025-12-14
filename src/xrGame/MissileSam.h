@@ -12,6 +12,8 @@ public:
 	void SetTarget(CGameObject* target) { this->target = target; }
 
 	virtual	void			UpdateEnginePh() override;
+	
+	virtual CMissileSam* cast_missile_sam() override {return this;}
 
 protected:
 
