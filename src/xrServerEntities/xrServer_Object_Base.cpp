@@ -502,7 +502,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal, bool Copyin
 			bool has_data = false;
 			if (Object.IsSave()) {
 				auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-				has_data = Obj || Copying;
+				has_data = Obj || (Copying && client_data_new);
 				Object << has_data;
 				if (has_data)
 				{

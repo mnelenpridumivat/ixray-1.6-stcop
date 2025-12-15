@@ -316,6 +316,7 @@ public:
 
 	void						cl_Process_Event		(u16 dest, u16 type, NET_Packet& P);
 	void						cl_Process_Spawn		(NET_Packet& P);
+	void						local_Process_Spawn		(NET_Packet& P);
 	void						ProcessGameEvents		( );
 	void						ProcessGameSpawns		( );
 	void						ProcessCompressedUpdate	(NET_Packet& P, u8 const compression_type);

@@ -20,6 +20,7 @@
 #include "map_manager.h"
 #include "UIGameSP.h"
 #include "ui/UITalkWnd.h"
+#include "SaveObjectHelpers.h"
 #include "../xrScripts/script_callback_ex.h"
 
 CInventoryOwner::CInventoryOwner()
@@ -431,7 +432,12 @@ void CInventoryOwner::spawn_supplies()
 		pda->m_original_owner = (u16)game_object->ID();
 
 		NET_Packet P;
-		abstract->Spawn_Write(P, TRUE);
+		if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+		{
+			SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *abstract);
+		} else {
+			abstract->Spawn_Write(P, TRUE);
+		}
 		Level().Send(P, net_flags(TRUE));
 		F_entity_Destroy(abstract);
 	}

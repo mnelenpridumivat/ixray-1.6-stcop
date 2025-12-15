@@ -18,6 +18,7 @@
 #include "ai_object_location.h"
 #include "Artefact.h"
 #include "object_broker.h"
+#include "SaveObjectHelpers.h"
 
 #ifdef DEBUG_DRAW
 #	include "debug_renderer.h"
@@ -406,8 +407,15 @@ bool CInventoryItem::Detach(const char* item_section_name, bool b_spawn_item)
 
 		// Send
 		NET_Packet P;
-		D->Spawn_Write(P, TRUE);
-		Level().Send(P, net_flags(TRUE));
+		if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+		{
+			SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *D);
+		}
+		else
+		{
+			D->Spawn_Write(P,TRUE);
+		}
+		Level().Send(P,net_flags(TRUE));
 		// Destroy
 		F_entity_Destroy(D);
 	}

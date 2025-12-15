@@ -20,6 +20,7 @@
 #include "../xrPhysics/IPHWorld.h"
 #endif
 
+#include "SaveObjectHelpers.h"
 #include "../Include/xrRender/Kinematics.h"
 /*
 [impulse_transition_to_parts]
@@ -66,7 +67,14 @@ void CPHDestroyable::GenSpawnReplace(u16 ref_id,LPCSTR section,shared_str visual
 	if (OnServer())
 	{
 		NET_Packet			P;
-		D->Spawn_Write		(P,TRUE);
+		if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+		{
+			SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *D);
+		}
+		else
+		{
+			D->Spawn_Write		(P,TRUE);
+		}
 		Level().Send		(P,net_flags(TRUE));
 		// Destroy
 		F_entity_Destroy	(D);

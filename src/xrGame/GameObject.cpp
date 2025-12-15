@@ -29,6 +29,7 @@
 #include "ai_obstacle.h"
 #include "magic_box3.h"
 #include "animation_movement_controller.h"
+#include "SaveObjectHelpers.h"
 #include "../xrEngine/xr_collide_form.h"
 #include "../xrScripts/script_callback_ex.h"
 
@@ -547,12 +548,13 @@ void CGameObject::spawn_supplies()
 
 		}
 		for (u32 i=0; i<j; ++i)
-			if (::Random.randF(1.f) < p){
+			if (::Random.randF(1.f) < p)
+			{
 				CSE_Abstract* A=Level().spawn_item	(N,Position(),ai_location().level_vertex_id(),ID(),true);
 
 				CSE_ALifeInventoryItem* pSE_InventoryItem = A->cast_inventory_item();
 				if(pSE_InventoryItem)
-						pSE_InventoryItem->m_fCondition = f_cond;
+					pSE_InventoryItem->m_fCondition = f_cond;
 
 				CSE_ALifeItemWeapon* W = A->cast_item_weapon();
 				if (W)
@@ -565,11 +567,17 @@ void CGameObject::spawn_supplies()
 						W->m_addon_flags.set(CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher, bLauncher);
 				}
 
-				NET_Packet					P;
-				A->Spawn_Write				(P,TRUE);
+				NET_Packet P;
+				if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+				{
+					SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *A);
+				} else {
+					NET_Packet					P;
+					A->Spawn_Write				(P,TRUE);
+				}
 				Level().Send				(P,net_flags(TRUE));
 				F_entity_Destroy			(A);
-		}
+			}
 	}
 }
 

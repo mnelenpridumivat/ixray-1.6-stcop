@@ -2121,6 +2121,10 @@ void CSE_ALifeHelicopter::STATE_Serialize(ISaveObject& Object)
 		inherited1::STATE_Serialize(Object);
 		CSE_Motion::motion_serialize(Object);
 		inherited3::STATE_Serialize(Object);
+		BEGIN_CHUNK(Object, "CSE_ALifeHelicopter::STATE::Sounds")
+		{
+			Object << startup_animation << engine_sound;
+		}
 		Object << m_tNodeID;
 	}
 }

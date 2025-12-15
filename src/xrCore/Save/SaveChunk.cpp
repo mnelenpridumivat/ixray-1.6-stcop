@@ -262,8 +262,12 @@ void CSaveChunk::CopySubchunks(CSaveChunk* Chunk)
 void CSaveChunk::AttachSubchunk(CSaveChunk* Chunk)
 {
 	VERIFY(Chunk);
-	VERIFY(_subchunks.find(Chunk->_chunkName) == _subchunks.end(), "There is already a subchunk with name");
-	_subchunks[Chunk->_chunkName] = (CSaveChunk*)Chunk->MakeCopy();
+	VERIFY(Chunk->_chunkName == _chunkName);
+	VERIFY(_subchunks.empty());
+	for (auto& element : Chunk->_subchunks)
+	{
+		_subchunks[element.first] = (CSaveChunk*)element.second->MakeCopy();
+	}
 }
 
 void CSaveChunk::r_bool(bool& A)

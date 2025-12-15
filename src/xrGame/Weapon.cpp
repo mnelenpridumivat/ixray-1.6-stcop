@@ -32,6 +32,8 @@
 
 #include <algorithm>
 
+#include "SaveObjectHelpers.h"
+
 #define WEAPON_REMOVE_TIME		60000
 #define ROTATION_TIME			0.25f
 
@@ -2074,13 +2076,24 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 		{
 			l_pA->a_elapsed			= (u16)(boxCurr > l_pA->m_boxSize ? l_pA->m_boxSize : boxCurr);
 			NET_Packet				P;
-			D->Spawn_Write			(P, TRUE);
+			if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+			{
+				SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *D);
+			}
+			else
+			{
+				D->Spawn_Write			(P, TRUE);
+			}
 			Level().Send			(P,net_flags(TRUE));
 
-			if(boxCurr > l_pA->m_boxSize) 
+			if(boxCurr > l_pA->m_boxSize)
+			{
 				boxCurr				-= l_pA->m_boxSize;
-			else 
+			}
+			else
+			{
 				boxCurr				= 0;
+			}
 		}
 	}
 	F_entity_Destroy				(D);

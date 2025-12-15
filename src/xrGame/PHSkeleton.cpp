@@ -14,6 +14,7 @@
 #include "ai_space.h"
 #include "game_graph.h"
 #include "PHDestroyable.h"
+#include "SaveObjectHelpers.h"
 
 #define F_MAX         3.402823466e+38F
 
@@ -325,7 +326,14 @@ void CPHSkeleton::SpawnCopy()
 		InitServerObject			(D);
 		// Send
 		NET_Packet			P;
-		D->Spawn_Write		(P,TRUE);
+		if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+		{
+			SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *D);
+		}
+		else
+		{
+			D->Spawn_Write		(P,TRUE);
+		}
 		Level().Send		(P,net_flags(TRUE));
 		// Destroy
 		F_entity_Destroy	(D);

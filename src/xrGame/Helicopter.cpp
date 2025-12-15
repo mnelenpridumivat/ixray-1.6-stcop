@@ -210,8 +210,11 @@ BOOL CHelicopter::net_Spawn(CSE_Abstract*	DC)
 		K->CalculateBones	(TRUE);
 	}
 
-	m_engineSound.create			(*heli->engine_sound,st_Effect,sg_SourceType);
-	m_engineSound.play_at_pos		(0,XFORM().c,sm_Looped);
+	if (I_ASSERT_M(heli->engine_sound.size(), "Heli object [%s] do not have engine sound!", heli->name_replace()))
+	{
+		m_engineSound.create			(*heli->engine_sound,st_Effect,sg_SourceType);
+		m_engineSound.play_at_pos		(0,XFORM().c,sm_Looped);
+	}
 	
 	CShootingObject::Light_Create	();
 

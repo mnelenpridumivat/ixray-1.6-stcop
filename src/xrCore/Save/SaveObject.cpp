@@ -88,7 +88,7 @@ CSaveChunk* CSaveObjectLoad::ExtractCurrentChunkRaw()
 	_chunkStack.pop();
 	VERIFY(!_chunkStack.empty());
 	auto Parent = _chunkStack.top();
-	VERIFY(Parent->DetachSubchunk(*CurrentChunk));
+	IVERIFY(Parent->DetachSubchunk(*CurrentChunk));
 	_chunkStack.push(CurrentChunk);
 	
 	return CurrentChunk;

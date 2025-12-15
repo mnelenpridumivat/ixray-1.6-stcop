@@ -61,6 +61,7 @@
 
 #include "ElectronicsProblemsManager.h"
 #include "SamZone.h"
+#include "SaveObjectHelpers.h"
 
 using namespace luabind;
 
@@ -793,7 +794,9 @@ void add_pp_effector(LPCSTR fn, int id, bool cyclic)
 {
 	CPostprocessAnimator* pp		= new CPostprocessAnimator(id, cyclic);
 	pp->Load						(fn);
-	Actor()->Cameras().AddPPEffector	(pp);
+	auto actor = Actor();
+	R_ASSERT(actor);
+	actor->Cameras().AddPPEffector	(pp);
 }
 
 void remove_pp_effector(int id)
@@ -1632,7 +1635,14 @@ void spawn_anomaly(LPCSTR str, int level_vertex_id, const Fvector& position, flo
 	AlifeZone->m_space_restrictor_type = RestrictionSpace::eRestrictorTypeNone;
 
 	NET_Packet					P;
-	object->Spawn_Write(P, TRUE);
+	if (EngineExternal()[EEngineExternalSystem::AdvancedSerialization])
+	{
+		SaveObjectNetPacketHelper::PrepareLocalSpawnPacket(P, *object);
+	}
+	else
+	{
+		object->Spawn_Write(P, TRUE);
+	}
 	Level().Send(P, net_flags(TRUE));
 	F_entity_Destroy(object);
 }
