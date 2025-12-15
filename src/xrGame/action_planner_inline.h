@@ -443,7 +443,10 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 			{
 				for (auto& elem : this->m_evaluators)
 				{
-					elem.second->Serialize(Object);
+					BEGIN_CHUNK(Object, "CPlanner::m_evaluator")
+					{
+						elem.second->Serialize(Object);
+					}
 				}
 			}
 		}
@@ -454,8 +457,10 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 			{
 				for (auto& elem : this->m_operators)
 				{
-					
-					elem.m_operator->Serialize(Object);
+					BEGIN_CHUNK(Object, "CPlanner::m_operator")
+					{
+						elem.m_operator->Serialize(Object);
+					}
 				}
 			}
 		}
@@ -466,7 +471,10 @@ IC	void CPlanner::Serialize(ISaveObject& Object)
 			{
 				for (auto& elem : this->m_storage.m_storage)
 				{
-					Object << elem.m_condition << elem.m_value;
+					BEGIN_CHUNK(Object, "CPlanner::m_storage_elem")
+					{
+						Object << elem.m_condition << elem.m_value;
+					}
 				}
 			}
 		}
