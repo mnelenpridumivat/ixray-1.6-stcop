@@ -113,7 +113,7 @@ public:
 
 	//client object custom data serialization
 	xr_vector<u8>					client_data;
-	CSaveChunk* client_data_new = nullptr;
+	xr_shared_ptr<CSaveChunk> client_data_new = nullptr;
 	virtual void					load					(NET_Packet	&tNetPacket);
 
 	//////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ public:
 	//
 	virtual void			Spawn_Write				(NET_Packet &tNetPacket, BOOL bLocal);
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket);
-	virtual bool Spawn_Serialize(ISaveObject& Object, bool bLocal = true);
+	virtual bool Spawn_Serialize(ISaveObject& Object, bool bLocal = true, bool Copying = false);
 	virtual LPCSTR			name					() const override;
 	virtual LPCSTR			name_replace			() const override;
 	virtual void			set_name				(LPCSTR s) override

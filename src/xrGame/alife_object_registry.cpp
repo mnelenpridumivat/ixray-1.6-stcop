@@ -73,7 +73,7 @@ void CALifeObjectRegistry::Serialize(ISaveObject& Object, CSE_ALifeDynamicObject
 
 		++object_count;
 
-		object->Spawn_Serialize(Object, TRUE);
+		object->Spawn_Serialize(Object, true);
 		object->UPDATE_Serialize(Object);
 		R_ASSERT4(ChunkDepth + 1 == Object.GetChunkStackDepth(), "Saving object result invalid chunk opening and closing tags!", "UPDATE_Serialize", object->name());
 

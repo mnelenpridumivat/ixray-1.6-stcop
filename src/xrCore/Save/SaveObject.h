@@ -7,10 +7,17 @@
 #include "../xrCore/shared_string.h"
 #include "../xrCore/associative_vector.h"
 
+class CSaveObjectSave;
+class CSaveObjectLoad;
+
 class XRCORE_API CSaveObject:
 	public ISaveObject
 {
 protected:
+	// I need this to be able to exchange data between save and load objects
+	friend class CSaveObjectSave;
+	friend class CSaveObjectLoad;
+	
 	CSaveChunk* _rootChunk;
 	xr_stack<CSaveChunk*> _chunkStack;
 	bool _isPartial = false;
@@ -583,4 +590,6 @@ public:
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
 	void Parse(IReader* stream);
+
+	void TransferSaveData(CSaveObject& ObjectSave);
 };

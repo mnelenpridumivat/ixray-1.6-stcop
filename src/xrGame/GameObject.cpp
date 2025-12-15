@@ -336,15 +336,14 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	if(!E->client_data.empty())
 	{	
 //		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
-		IReader			ireader = IReader(&*E->client_data.begin(), (int)E->client_data.size());
+		IReader			ireader = IReader(E->client_data.data(), (int)E->client_data.size());
 		net_Load		(ireader);
 	}
 	else if (E->client_data_new)
 	{
-		auto PartialObj = new CSaveObjectLoad(E->client_data_new);
+		auto PartialObj = new CSaveObjectLoad(E->client_data_new.get());
 		net_Serialize(*PartialObj);
 		xr_delete(PartialObj);
-		xr_delete(E->client_data_new);
 	}
 	else {
 //		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());

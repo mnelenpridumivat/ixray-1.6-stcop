@@ -335,6 +335,16 @@ void CSaveObjectLoad::Parse(IReader* stream)
 	GetCurrentChunk()->Parse(stream);
 }
 
+void CSaveObjectLoad::TransferSaveData(CSaveObject& ObjectSave)
+{
+	std::swap(_rootChunk, ObjectSave._rootChunk);
+	std::swap(_chunkStack, ObjectSave._chunkStack);
+	std::swap(_isPartial, ObjectSave._isPartial);
+#ifndef MASTER_GOLD
+	std::swap(_debugTopChunkNamesQueue, ObjectSave._debugTopChunkNamesQueue);
+#endif
+}
+
 ISaveObject& operator<<(ISaveObject& Object, char& Value) {
 	return Object << (s8&)Value;
 }

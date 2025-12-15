@@ -114,7 +114,7 @@ public:
 public:
 	virtual void			Spawn_Write				(NET_Packet &tNetPacket, BOOL bLocal) = 0;
 	virtual BOOL			Spawn_Read				(NET_Packet &tNetPacket) = 0;
-	virtual bool Spawn_Serialize(ISaveObject& Object, bool bLocal = true) = 0;
+	virtual bool Spawn_Serialize(ISaveObject& Object, bool bLocal = true, bool Copying = false) = 0;
 #if !defined(XRGAME_EXPORTS)
 	virtual void			FillProp				(LPCSTR pref, PropItemVec &items) = 0;
 	virtual void 			on_render				(CDUInterface* du, ISE_AbstractLEOwner* owner, bool bSelected, const Fmatrix& parent,int priority, bool strictB2F) = 0;

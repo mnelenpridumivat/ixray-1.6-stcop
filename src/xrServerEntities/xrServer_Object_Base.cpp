@@ -220,7 +220,7 @@ void CSE_Abstract::Spawn_Write				(NET_Packet	&tNetPacket, BOOL bLocal)
 	tNetPacket.w_u16			(client_data_size);
 //	Msg							("SERVER:saving:save:%d bytes:%d:%s",client_data_size,ID,s_name_replace ? s_name_replace : "");
 	if (client_data_size > 0) {
-		tNetPacket.w			(&*client_data.begin(),client_data_size);
+		tNetPacket.w			(client_data.data(),client_data_size);
 	}
 
 	tNetPacket.w_u16			(m_tSpawnID);
@@ -314,7 +314,7 @@ BOOL CSE_Abstract::Spawn_Read				(NET_Packet	&tNetPacket)
 		if (client_data_size > 0) {
 //			Msg					("SERVER:loading:load:%d bytes:%d:%s",client_data_size,ID,s_name_replace ? s_name_replace : "");
 			client_data.resize	(client_data_size);
-			tNetPacket.r		(&*client_data.begin(),client_data_size);
+			tNetPacket.r		(client_data.data(),client_data_size);
 		}
 		else
 			client_data.clear	();
@@ -363,7 +363,7 @@ void	CSE_Abstract::load			(NET_Packet	&tNetPacket)
 //		Msg						("SERVER:loading:load:%d bytes:%d:%s",client_data_size,ID,s_name_replace ? s_name_replace : "");
 #endif // DEBUG
 		client_data.resize		(client_data_size);
-		tNetPacket.r			(&*client_data.begin(),client_data_size);
+		tNetPacket.r			(client_data.data(),client_data_size);
 	}
 	else {
 #ifdef DEBUG
@@ -455,7 +455,7 @@ bool CSE_Abstract::validate					()
 	return						(true);
 }
 
-bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal) 
+bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal, bool Copying) 
 {
 	BEGIN_CHUNK(Object,"CSE_Abstract")
 	{
@@ -502,17 +502,16 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 			bool has_data = false;
 			if (Object.IsSave()) {
 				auto Obj = smart_cast<CGameObject*>(Level().Objects.net_Find(ID));
-				has_data = Obj || client_data_new;
+				has_data = Obj || Copying;
 				Object << has_data;
 				if (has_data)
 				{
-					if (Obj) {
-						//xr_delete(client_data_new);
-						Obj->net_Serialize(Object);
+					if (Copying)
+					{
+						Object.MergeSubchunk(client_data_new.get());
 					} else
 					{
-						//Object.MergeChunkByHandle(Handle);
-						Object.MergeSubchunk(client_data_new);
+						Obj->net_Serialize(Object);
 					}
 				}
 			}
@@ -520,7 +519,7 @@ bool CSE_Abstract::Spawn_Serialize(ISaveObject& Object, bool bLocal)
 				Object << has_data;
 				if(has_data)
 				{
-					client_data_new = Object.ExtractCurrentChunkRaw();
+					client_data_new.reset(Object.ExtractCurrentChunkRaw());
 				}
 			}
 		}
