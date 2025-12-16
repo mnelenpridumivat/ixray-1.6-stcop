@@ -84,7 +84,7 @@ void SSaveTask::WriteSavedDataImpl()
 	CompileData(Obj.get());
 	{
 		PROF_EVENT("CSaveManager::WriteHeader")
-		Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
+ 		Buffers.BufferHeader->Write(ESaveVariableType::t_chunk);
 		Buffers.BufferHeader->Write(GameInfo.m_actor_health);
 		Buffers.BufferHeader->Write(GameInfo.m_game_time);
 		Buffers.BufferHeader->Write(GameInfo.m_level_id);
@@ -196,6 +196,7 @@ void CSaveManager::ConditionalReadString(IReader* stream, shared_str& Value)
 
 bool CSaveManager::GetGameInfoFast(IReader* stream, SGameInfoFast& data)
 {
+	stream->rewind();
 	{
 		ESaveVariableType type;
 		stream->r(&type, sizeof(ESaveVariableType));
