@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #pragma once
-
+#include <fswatcher/filewatch.hpp>
 #include "LocatorAPI_defs.h"
 
 class XRCORE_API CStreamReader;
@@ -137,8 +137,13 @@ private:
 private:
 	// IXR: .xrignore
 	xr_vector<xr_string> IgnoreData;
-			void				ParseIgnoreList		();
-			bool				CheckSkip			(const xr_string& Path) const;
+	void ParseIgnoreList();
+	bool CheckSkip(const xr_string& Path) const;
+
+	filewatch::FileWatch<std::string>* WatcherPtr;
+	
+	void FileEventAdd(LPCSTR file);
+	void FileEventDel(LPCSTR file);
 
 public:
 								CLocatorAPI			();
