@@ -606,7 +606,8 @@ bool CLocatorAPI::Recurse(const char* path)
 				else
 				{
 					u32 fsize = chache.fsize;
-					Register(N, 0xffffffff, 0, 0, fsize, fsize, u32(chache.ftime / 10000000 - 11644473600LL));
+					Register(N, 0xffffffff, 0, 0, fsize, fsize, chache.ftime);
+					//Register(N, 0xffffffff, 0, 0, fsize, fsize, u32(chache.ftime / 10000000 - 11644473600LL));
 				}
 			}
 		}
