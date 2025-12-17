@@ -555,9 +555,12 @@ void CFlamethrower::UpdateCL()
 
 	UpdateSounds();
 
-	TraceManager->UpdatePoints(dt);
-	TraceManager->UpdateJoins(dt);
-	TraceManager->UpdateOverlaps(dt);
+	if (g_pGameLevel->bReady)
+	{
+		TraceManager->UpdatePoints(dt);
+		TraceManager->UpdateJoins(dt);
+		TraceManager->UpdateOverlaps(dt);
+	}
 }
 
 void CFlamethrower::UpdateSounds()
