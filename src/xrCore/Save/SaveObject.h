@@ -28,6 +28,140 @@ protected:
 
 	CSaveChunk* GetCurrentChunk();
 
+	template<typename Key, typename Mapped>
+	void EraseContainer(xr_map<Key, Mapped>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<Key>::value || std::is_pointer<Mapped>::value)
+			{
+				for (auto& elem : Value)
+				{
+					if constexpr (std::is_pointer<Key>::value)
+					{
+						xr_delete(elem.first);
+					}
+					if constexpr (std::is_pointer<Mapped>::value)
+					{
+						xr_delete(elem.second);
+					}
+				}
+			}
+			Value.clear();
+		}
+	}
+
+	template<typename T, size_t Size>
+	void EraseContainer(svector<T, Size>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<T>::value)
+			{
+				for (auto& elem : Value)
+				{
+					xr_delete(elem);
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+	template<typename Key, typename Mapped>
+	void EraseContainer(associative_vector<Key, Mapped>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<Key>::value || std::is_pointer<Mapped>::value)
+			{
+				for (auto& elem : Value)
+				{
+					if constexpr (std::is_pointer<Key>::value)
+					{
+						xr_delete(elem.first);
+					}
+					if constexpr (std::is_pointer<Mapped>::value)
+					{
+						xr_delete(elem.second);
+					}
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+	template<typename T>
+	void EraseContainer(xr_vector<T>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<T>::value)
+			{
+				for (auto& elem : Value)
+				{
+					xr_delete(elem);
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+	template<typename T, typename H, typename Eq>
+	void EraseContainer(xr_hash_set<T, H, Eq>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<T>::value)
+			{
+				for (auto& elem : Value)
+				{
+					xr_delete(elem);
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+	template<typename Key, typename Mapped>
+	void EraseContainer(xr_hash_map<Key, Mapped>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<Key>::value || std::is_pointer<Mapped>::value)
+			{
+				for (auto& elem : Value)
+				{
+					if constexpr (std::is_pointer<Key>::value)
+					{
+						xr_delete(elem.first);
+					}
+					if constexpr (std::is_pointer<Mapped>::value)
+					{
+						xr_delete(elem.second);
+					}
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+	template<typename T>
+	void EraseContainer(xr_deque<T>& Value)
+	{
+		if (!Value.empty())
+		{
+			if constexpr (std::is_pointer<T>::value)
+			{
+				for (auto& elem : Value)
+				{
+					xr_delete(elem);
+				}
+			}
+			Value.clear();
+		}
+	}
+	
+
 public:
 #ifndef MASTER_GOLD
 	void ClearDebugData();
@@ -67,6 +201,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -103,6 +238,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -169,6 +305,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -208,6 +345,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -266,6 +404,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -295,6 +434,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -316,6 +456,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -343,6 +484,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -379,6 +521,7 @@ public:
 			
 		} else
 		{
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -423,6 +566,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {
@@ -464,6 +608,7 @@ public:
 			}
 		}
 		else {
+			EraseContainer(Value);
 			u64 ArrSize;
 			GetCurrentChunk()->ReadArray(ArrSize);
 			for (u64 i = 0; i < ArrSize; ++i) {

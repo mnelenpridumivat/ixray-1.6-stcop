@@ -1585,7 +1585,7 @@ void CActor::UpdateCL()
 
 	UpdateInventoryOwner(Device.dwTimeDelta);
 
-	CBinderManager::GetInstance().Update();
+	CBinderManager::GetInstance().Update(); // I don't find more suitable place for this within xrGame module
 
 	if (m_feel_touch_characters > 0)
 	{

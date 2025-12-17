@@ -510,19 +510,28 @@ void CBinderManager::load(IReader& packet)
         Binders.push_back(xr_make_unique<CBinder>());
         Binders.back()->load(packet);
     }
+    LoadFinished = false;
 }
 
 void CBinderManager::Serialize(ISaveObject& Object)
 {
+    //if (!Object.IsSave())
+    //{
+    //    Binders.clear();
+    //}
     BEGIN_CHUNK(Object,"CBinderManager")
     {
         Object << m_id_gen << Binders;
+    }
+    if (!Object.IsSave())
+    {
+        LoadFinished = false;
     }
 }
 
 void CBinderManager::Update()
 {
-    if (g_pauseMngr.Paused()) {
+    if (g_pauseMngr.Paused() || !LoadFinished) {
         return;
     }
     int expired_num = 0;

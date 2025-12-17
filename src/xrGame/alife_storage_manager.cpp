@@ -24,6 +24,7 @@
 #include "saved_game_wrapper.h"
 #include "../xrEngine/IGame_Persistent.h"
 #include "autosave_manager.h"
+#include "CustomTimer.h"
 #include "../xrCore/Save/SaveManager.h"
 #include "../xrEngine/string_table.h"
 
@@ -85,6 +86,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, boo
 		spawns().Serialize(*SaveObj);
 		objects().Serialize(*SaveObj);
 		registry().Serialize(*SaveObj);
+		CBinderManager::GetInstance().Serialize(*SaveObj);
 		CSaveManager::GetInstance().WriteSavedData(info, SaveObj, temp, !non_async);
 	} else
 	{
@@ -98,7 +100,7 @@ void CALifeStorageManager::save(LPCSTR save_name_no_check, bool update_name, boo
 			spawns().save(stream);
 			objects().save(stream);
 			registry().save(stream);
-
+			CBinderManager::GetInstance().save(stream);
 			source_count = stream.tell();
 			void* source_data = stream.pointer();
 			dest_count = rtc_csize(source_count);
@@ -158,6 +160,7 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 		graph().on_load();
 		objects().Serialize(*Obj);
 		registry().Serialize(*Obj);
+		CBinderManager::GetInstance().Serialize(*Obj);
 		xr_delete(Obj);
 	} else
 	{
@@ -168,6 +171,7 @@ void CALifeStorageManager::load(IReader* stream, LPCSTR file_name)
 		graph().on_load();
 		objects().load(source);
 		registry().load(source);
+		CBinderManager::GetInstance().load(source);
 	}
 
 	VERIFY(can_register_objects());

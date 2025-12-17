@@ -136,6 +136,7 @@ class CBinderManager
 {
     xr_vector<xr_unique_ptr<CBinder>> Binders;
     xr_atomic_s32 m_id_gen = 0;
+    bool LoadFinished = false;
 
     CBinderManager(){}
 
@@ -160,4 +161,5 @@ public:
     virtual void Serialize(ISaveObject& Object);
 
     void Update();
+    IC void NotifyLoadFinished() {LoadFinished = true;}
 };

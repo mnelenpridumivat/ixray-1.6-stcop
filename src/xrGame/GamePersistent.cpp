@@ -36,6 +36,7 @@
 #endif // MASTER_GOLD
 
 #include "ai_debug.h"
+#include "CustomTimer.h"
 #include "../../xrUI/ui_base.h"
 #include "../xrCore/discord/discord.h"
 #include "../xrEngine/string_table.h"
@@ -582,16 +583,21 @@ void CGamePersistent::start_game_intro		()
 
 void CGamePersistent::update_game_intro()
 {
+	auto func = [&]()
+	{
+		m_intro_event = nullptr;
+		CBinderManager::GetInstance().NotifyLoadFinished();
+	};
 	if(m_intro && (false==m_intro->IsActive()))
 	{
 		xr_delete				(m_intro);
 		Msg("intro_delete ::update_game_intro");
-		m_intro_event			= 0;
+		func();
 	}
 	else
 	if(!m_intro)
 	{
-		m_intro_event			= 0;
+		func();
 	}
 }
 
