@@ -34,7 +34,25 @@ namespace FlamethrowerTrace
 		MAX
 	};
 
-	//DEFINE_DEQUE(CCollision*, FCollisionsDeque, FCollisionsDequeIt);
+	struct STraceConstants
+	{
+		CManager* Manager = nullptr;
+		float LifeTime = 0.0f;
+		float LifeTimeCollided = 0.0f;
+		float Velocity = 0.0f;
+		float GravityAcceleration = 0.0f;
+		float m_FlameFadeTime = 0.0f; 
+		float m_RadiusMin = 0.0f;
+		float m_RadiusMax = 0.0f;
+		float m_RadiusMaxTime = 0.0f;
+		float m_RadiusCollided = 0.0f;
+		float m_RadiusCollidedInterpTime = 0.0f;
+	};
+
+	class CTrace
+	{
+		
+	};
 	
 	class CPoint
 	{
@@ -45,16 +63,16 @@ namespace FlamethrowerTrace
 			bool Penetrate = false;
 		};
 
-		CManager* Manager = nullptr;
+		CManager* Manager = nullptr; //--
 		ETraceState State = ETraceState::MAX;
 		Fvector PointPosition{};
 		Fvector LastUpdatedPos{};
 		Fvector PointDirection{};
-		float LifeTime = 0.0f;
-		float LifeTimeCollided = 0.0f;
-		float Velocity = 0.0f;
+		float LifeTime = 0.0f; //--
+		float LifeTimeCollided = 0.0f; //--
+		float Velocity = 0.0f; //--
 		float GravityVelocity = 0.0f;
-		float GravityAcceleration = 0.0f;
+		float GravityAcceleration = 0.0f; //--
 		float CurrentTime = 0.0f;
 		float LastUpdateTime = 0.0f;
 		float TimeOnCollide = 0.0f;
@@ -95,27 +113,6 @@ namespace FlamethrowerTrace
 		bool IsCollided() const { return State == ETraceState::AirToGround || State == ETraceState::Ground; }
 	};
 
-	class CJoin
-	{
-		CManager* Manager = nullptr;
-		CPoint* Prev = nullptr;
-		CPoint* AfterPrev = nullptr;
-		CPoint* Next = nullptr;
-		xr_vector<CPoint*> IntermediatePoints;
-		float CollisionRadiusMax = 0.0f;
-
-	public:
-
-		CJoin(CManager* Manager);
-
-		void Update(float DeltaTime);
-		void SetBorders(CPoint* prev, CPoint* next);
-		void Deactivate();
-		bool IsActive() const { return Prev && Next && Prev->GetState() != ETraceState::Idle && Next->GetState() != ETraceState::Idle; }
-		bool HasCollidedPoints(xr_vector<CPoint*>& points);
-		xr_vector<CPoint*> GetAllPoints() const;
-	};
-
 	class CCollision :
 		public Feel::Touch
 	{
@@ -125,11 +122,6 @@ namespace FlamethrowerTrace
 		ETraceState m_State = ETraceState::Idle;
 		float m_current_time = 0.0f;
 		float m_time_on_collide = 0.0f;
-		//Fmatrix XFORM;
-		//Fmatrix invXFORM;
-		//Fvector m_LastUpdatedPos;
-		//Fvector m_position;
-		//Fvector m_direction;
 		float RadiusCurrent;
 		float RadiusOnCollide;
 
@@ -138,31 +130,20 @@ namespace FlamethrowerTrace
 
 		float m_last_update_time;
 
-		float m_LifeTime = 0.0f;
-		float m_LifeTimeCollidedMax = 0.0f;
-		float m_FlameFadeTime = 0.0f;
-		float m_RadiusMin = 0.0f;
-		float m_RadiusMax = 0.0f;
-		float m_RadiusMaxTime = 0.0f;
-		float m_RadiusCollided = 0.0f;
-		float m_RadiusCollidedInterpTime = 0.0f;
+		float m_LifeTime = 0.0f; //--!
+		float m_LifeTimeCollidedMax = 0.0f; //--!
+		float m_FlameFadeTime = 0.0f; //--
+		float m_RadiusMin = 0.0f; //--
+		float m_RadiusMax = 0.0f; //--
+		float m_RadiusMaxTime = 0.0f; //--
+		float m_RadiusCollided = 0.0f; //--
+		float m_RadiusCollidedInterpTime = 0.0f; //--
 		Fvector m_RadiusCollisionCoeff{};
 		Fvector m_RadiusCollisionCollidedCoeff{};
 		Fvector CollidedParticlePivot{};
-		//float m_Velocity = 0.0f;
-		//float m_GravityVelocity = 0.0f;
-		//float m_GravityAcceleration = 0.0f;
 
-		//xr_shared_ptr<CParticlesObject> m_particles = nullptr;
-		//xr_shared_ptr<CParticlesObject> m_particles_ground = nullptr;
-
-		//PAPI::Handle<float> m_particle_alpha_handle;
-		//PAPI::Handle<PAPI::pVector> m_particle_size_handle;
-
-		float* m_particle_alpha_ptr;
 		shared_str m_particle_alpha_air_PE_name;
 		shared_str m_particle_alpha_ground_PE_name;
-		Fvector* m_particle_size_ptr;
 		shared_str m_particle_size_air_PE_name;
 		shared_str m_particle_size_ground_PE_name;
 
@@ -170,22 +151,13 @@ namespace FlamethrowerTrace
 			CCollision* TracedObj = nullptr;
 			float HitDist;
 		};
-
-		//static BOOL	hit_callback(collide::rq_result& result, LPVOID params);
-		//static BOOL test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params);
-
-		//void UpdateParticles();
+		
 		void Update_Air(float DeltaTime);
 		void Update_AirToGround(float DeltaTime);
 		void Update_Ground(float DeltaTime);
 		void Update_End(float DeltaTime);
 
 	public:
-
-		//#ifdef DEBUG
-		//CCollision* Next = nullptr;
-		//CCollision* Prev = nullptr;
-		//#endif
 
 		CCollision(CManager* Manager);
 		virtual ~CCollision();
@@ -199,19 +171,13 @@ namespace FlamethrowerTrace
 		inline bool IsActive() const { return m_State != ETraceState::Idle; }
 		inline bool IsCollided() const { return m_State == ETraceState::AirToGround || m_State == ETraceState::Ground; }
 		bool IsReadyToUpdateCollisions();
-		//inline Fvector GetCurrentPosition() const { return m_position; }
 		float GetCurrentRadius();
-		//inline Fvector GetPosition() const { return m_position; }
-		//inline Fvector GetDirection() const { return m_direction; }
 		inline float GetCurrentLifeTime() const { return m_current_time; }
 		inline float GetLastUpdateTime() const { return m_last_update_time; }
-		//inline float GetGravityVelocity() const { return m_GravityVelocity; }
 		inline ETraceState GetTraceState() const { return m_State; }
 
-		//void SetTransform(const Fvector& StartPos, const Fvector& StartDir);
 		void SetCurrentLifeTime(const float Time);
 		void SetLastUpdateTime(const float Time) { m_last_update_time = Time; }
-		//void SetGravityVelocity(const float Value) { m_GravityVelocity = Value; }
 		void SetTraceState(const ETraceState State) { m_State = State; }
 
 		void	feel_touch_new(CObject* O) override;
@@ -222,7 +188,6 @@ namespace FlamethrowerTrace
 		void Deactivate();
 		void Update(float DeltaTime);
 
-		//bool VerifySpawnPosition(Fvector Pos, Fvector Dir, Fvector& HitPos);
 		Fvector GetPosition();
 	};
 	
@@ -250,15 +215,8 @@ namespace FlamethrowerTrace
 		xr_deque<CCollision*> ActiveCollisions;
 		xr_deque<CPoint*> InactivePoints;
 		xr_deque<CPoint*> ActivePoints;
-		xr_deque<CJoin*> InactiveJoins;
-		xr_deque<CJoin*> ActiveJoins;
-		//FCollisionsDeque CollisionsDeque;
 	
-		float LifeTime;
-		float LifeTimeGroundAddition;
 		float m_RadiusMax = 0.0f;
-
-		xr_vector<CJoin*> SplitJoin(CJoin* Join, const xr_vector<CPoint*>& CollidedPoints);
 	
 	public:
 	
@@ -278,12 +236,9 @@ namespace FlamethrowerTrace
 		void save(NET_Packet& output_packet);
 		void load(IReader& input_packet);
 
-		//virtual void Save(CSaveObjectSave* Object) const;
-		//virtual void Load(CSaveObjectLoad* Object);
-	
+		void Update(float DeltaTime);
 		void UpdateOverlaps(float DeltaTime);
 		void UpdatePoints(float DeltaTime);
-		void UpdateJoins(float DeltaTime);
 	
 		void RegisterOverlapped(CCustomMonster* enemy);
 		void UnregisterOverlapped(CCustomMonster* enemy);
@@ -296,7 +251,6 @@ namespace FlamethrowerTrace
 		CCollision* LaunchTrace(const Fvector& StartPos, const Fvector& StartDir, bool Force = false);
 		CPoint* LaunchPoint();
 		CCollision* LaunchCollision(CPoint* RootPoint);
-		CJoin* GetJoin(CPoint* Prev, CPoint* Next);
 	
 		//void ExpandCollisions(CCollision* First, CCollision* Second);
 		const shared_str& GetSection() { return CollisionSection; }
