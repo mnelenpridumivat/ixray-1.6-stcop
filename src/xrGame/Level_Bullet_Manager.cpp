@@ -965,7 +965,9 @@ void CBulletManager::Render	()
 			m_bullet_points.resize(0);
 	}
 	else
+	{
 		m_bullet_points.resize(0);
+	}
 
 	//0-рикошет
 	//1-застрявание пули в материале
@@ -977,13 +979,23 @@ void CBulletManager::Render	()
 		//RCache.set_xform_world(Fidentity);
 		DRender->CacheSetXformWorld(Fidentity);
 		for(int i=0; i<3; ++i)
+		{
 			for(it=g_hit[i].begin();it!=g_hit[i].end();++it){
 				Level().debug_renderer().draw_aabb(*it,0.01f,0.01f,0.01f,C[i]);
 			}
+		}
 	}
 #endif
+		
+	for(auto Manager : FlameManagersToDraw)
+	{
+		DrawFlamethrowerTrace(Manager);
+	}
 
-	if(m_Bullets.empty()) return;
+	if(m_Bullets.empty())
+	{
+		return;
+	}
 	xrCriticalSectionGuard guard(&m_Lock);
 	//u32	vOffset			=	0	;
 	u32 bullet_num		= (u32)m_Bullets.size();

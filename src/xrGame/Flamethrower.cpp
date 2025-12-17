@@ -692,6 +692,8 @@ void CFlamethrower::SetDefaults()
 
 void CFlamethrower::OnShot()
 {
+	TraceManager->LaunchTrace(m_vStartPos, m_vStartDir);
+	
 	// Camera	
 	AddShotEffector();
 
@@ -713,10 +715,6 @@ void CFlamethrower::OnShot()
 
 	if (ParentIsActor())
 	{
-		luabind::functor<void> funct;
-		if (ai().script_engine().functor("mfs_functions.on_actor_shoot", funct))
-			funct();
-
 		string128 sndName;
 		xr_strconcat(sndName, m_sSndShotCurrent.c_str(), "Actor");
 		if (m_sounds.FindSoundItem(sndName, false))
@@ -734,20 +732,6 @@ void CFlamethrower::OnShot()
 	}
 	else {
 		m_sounds.PlaySound(m_sSndShotCurrent.c_str(), get_LastFP(), H_Root(), !!GetHUDmode(), false, static_cast<u8>(-1));
-	}
-
-	TraceManager->LaunchTrace(m_vStartPos, m_vStartDir);
-
-	// ��� ��������
-	if (IsSilencerAttached() == false)
-	{
-		bool bIndoor = false;
-
-		if (bIndoor && m_sounds.FindSoundItem("sndReflect", false))
-		{
-			PlaySound("sndReflect", get_LastFP());
-			HUD_SOUND_ITEM::SetHudSndGlobalVolumeFactor(1.0f);
-		}
 	}
 
 	CGameObject* object = smart_cast<CGameObject*>(H_Parent());

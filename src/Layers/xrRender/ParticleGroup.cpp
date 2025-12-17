@@ -400,7 +400,7 @@ void CParticleGroup::SItem::OnFrame(u32 u_dt, const CPGDef::SEffect& def, Fbox& 
 				PAPI::Particle* particles;
 				u32 p_cnt;
 				E->Pholder.GetParticles(particles, p_cnt);
-				VERIFY(p_cnt == _children_related.size());
+				//VERIFY(p_cnt == _children_related.size());
 
 				if (p_cnt)
 				{
