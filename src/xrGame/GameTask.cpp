@@ -675,6 +675,17 @@ void SGameTaskObjective::load(IReader& stream)
 	load_data				(m_infos_on_fail,	stream);
 }
 
+void SGameTaskObjective::serialize(ISaveObject& Object)
+{
+	BEGIN_CHUNK(Object, "SGameTaskObjective")
+	{
+		Object << m_task_state << m_task_type << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish <<
+			m_idx << m_Title << m_Description << m_article_id << m_article_key << m_pScriptHelper << m_icon_rect <<
+			m_icon_texture_name << m_def_location_enabled << m_map_hint << m_map_location << m_map_object_id <<
+			m_completeInfos << m_failInfos << m_infos_on_complete << m_infos_on_fail;
+	}
+}
+
 void CGameTask::save(IWriter& stream)
 {
 	save_data(m_ID, stream);
@@ -725,13 +736,17 @@ void CGameTask::load(IReader& stream)
 	CreateMapLocation		(true);
 }
 
-void SGameTaskObjective::serialize_task(ISaveObject& Object)
+void CGameTask::serialize(ISaveObject& Object)
 {
+	R_ASSERT(!EngineExternal().ShadowOfChernobylMode());
 	BEGIN_CHUNK(Object, "CGameTask")
 	{
-		Object << m_task_state << m_task_type << m_ReceiveTime << m_FinishTime << m_TimeToComplete << m_timer_finish <<
-			m_Title << m_Description << m_icon_texture_name << m_map_hint << m_map_location << m_map_object_id <<
-			m_priority << m_pScriptHelper;
+		Object << m_ID << m_priority;
+		
+		SGameTaskObjective::serialize(Object);
+
+		Object << m_Objectives << m_active_objective;
+
 		if (!Object.IsSave())
 		{
 			CommitScriptHelperContents();
@@ -880,7 +895,7 @@ void SGameTaskKey::serialize(ISaveObject& Object)
 		}
 		Object << task_id;
 		game_task->m_ID	= task_id;
-		game_task->serialize_task(Object);
+		game_task->serialize(Object);
 	}
 }
 

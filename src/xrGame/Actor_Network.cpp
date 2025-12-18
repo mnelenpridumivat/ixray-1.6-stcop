@@ -1485,7 +1485,7 @@ void CActor::Serialize(ISaveObject& Object)
 
 		BEGIN_CHUNK(Object,"CActor::PDA")
 		{
-			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu().pUITaskWnd;
+			CUITaskWnd* task_wnd = HUD().GetGameUI()->PdaMenu()->pUITaskWnd;
 			bool Value;
 			if (Object.IsSave()) {
 

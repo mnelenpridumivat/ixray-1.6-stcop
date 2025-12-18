@@ -2885,7 +2885,7 @@ float CActor::HitArtefactsOnBeltLegacy(float hit_power, ALife::EHitType hit_type
 	{
 		if (CArtefact* artefact = item->cast_artefact())
 		{
-			res_hit_power_k += artefact->m_ArtefactHitImmunities.AffectHit(1.0f, hit_type);
+			res_hit_power_k += artefact->AffectHit(1.0f, hit_type);
 			_af_count += 1.0f;
 		}
 	}
