@@ -95,6 +95,12 @@ public:
 	}
 
 	template<>
+	bool Write(xr_string data) {
+		Write(data.c_str(), data.size()+1);
+		return true;
+	}
+
+	template<>
 	bool Write(IWriter* data) {
 		for (const auto& elem : Chunks) {
 			elem->Write(data);

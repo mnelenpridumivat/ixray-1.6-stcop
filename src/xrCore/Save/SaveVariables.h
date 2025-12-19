@@ -7,12 +7,11 @@ struct SSaveTask;
 class CMemoryBuffer;
 
 enum class XRCORE_API ESaveVariableType : u8 {
+	// C++ types
 	t_zero_flag,
 	t_bool,
 	t_float,
 	t_double,
-	//t_vec3,
-	//t_vec4,
 	t_u64,
 	t_u64_op32,
 	t_u64_op16,
@@ -33,21 +32,19 @@ enum class XRCORE_API ESaveVariableType : u8 {
 	t_s16_op8,
 	t_u8,
 	t_s8,
-	/*t_float_q16,
-	t_float_q8,
-	t_angle16,
-	t_angle8,
-	t_dir,
-	t_sdir,*/
 	t_string,
-	//t_matrix,
-	//t_clientID,
 	t_chunkStart,
 	t_chunkEnd,
 	t_array,
 	t_arrayUnspec,
 	t_arrayUnspecEnd,
 	t_chunk,
+	t_longstring, // in case if some vasyan decided to store enormous string (more than 4k symbols - shared_str limit)
+	// Lua types
+	//t_luanil,
+	//t_luatable,
+	//t_luaprimitive,
+	//t_luastorage,
 	t_invalid = u8(-1),
 };
 
@@ -340,7 +337,31 @@ public:
 	virtual ISaveable* MakeCopy() override;
 };
 
+class XRCORE_API CSaveVariableStringLong :
+	public CSaveVariableBase
+{
+	friend struct SSaveVariableGetter;
+	xr_string _value;
+
+protected:
+	virtual void* GetValue() override { return &_value; }
+
+public:
+	CSaveVariableStringLong(const xr_string& Value) : _value(Value.c_str()) {}
+	CSaveVariableStringLong(const shared_str& Value) : _value(Value.c_str()) {}
+	CSaveVariableStringLong(LPCSTR Value) : _value(Value) {}
+
+	virtual ESaveVariableType GetVariableType() override { return ESaveVariableType::t_longstring; }
+	virtual void Write(CMemoryBuffer& Buffer, SSaveTask* Task) override;
+	
+	virtual ISaveable* MakeCopy() override;
+};
+
 struct SSaveVariableGetter {
 	template<typename TType, typename TVarClass>
 	static TType GetValue(ISaveable* Var) { return *((TType*)((TVarClass*)Var)->GetValue()); }
+
+	// dangerous, but made to avoid multiple allocations for huge data (like vasyan str)
+	template<typename TType, typename TVarClass>
+	static TType* GetValuePtr(ISaveable* Var) { return ((TType*)((TVarClass*)Var)->GetValue()); }
 };

@@ -2,6 +2,7 @@
 #include "Concepts.h"
 #include "memory/xrMemory_subst_msvc.h"
 
+class xr_string;
 class shared_str;
 class CSaveChunk;
 
@@ -53,6 +54,9 @@ public:
 	virtual ISaveObject& operator<<(s8& Value) = 0;
 	virtual ISaveObject& operator<<(bool& Value) = 0;
 	virtual ISaveObject& operator<<(shared_str& S) = 0;
+
+	// This made only for serialization of crazy strings from script, and not designed for other purposes 
+	virtual xr_string* SerializeEnourmousString(LPCSTR long_str) = 0; // a.k.a. "Fuck you vasyans!"
 };
 
 class XRCORE_API ISaveObjectStackGuard

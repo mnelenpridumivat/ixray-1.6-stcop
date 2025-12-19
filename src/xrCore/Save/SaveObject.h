@@ -705,6 +705,8 @@ public:
 	virtual ISaveObject& operator<<(bool& Value) override;
 	virtual ISaveObject& operator<<(shared_str& S) override;
 
+	virtual xr_string* SerializeEnourmousString(LPCSTR long_str) override;
+
 	void Write(CMemoryBuffer* buffer, SSaveTask* Task);
 };
 
@@ -733,6 +735,8 @@ public:
 	virtual ISaveObject& operator<<(s8& Value) override;
 	virtual ISaveObject& operator<<(bool& Value) override;
 	virtual ISaveObject& operator<<(shared_str& S) override;
+	
+	virtual xr_string* SerializeEnourmousString(LPCSTR long_str) override;
 
 	void Parse(IReader* stream);
 

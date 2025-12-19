@@ -244,6 +244,27 @@ void CSaveChunk::w_string(shared_str S)
 	}
 }
 
+void CSaveChunk::w_string_long(LPCSTR S)
+{
+#ifndef MASTER_GOLD
+	static bool ignore_always = false;
+	if (!ignore_always) ::Debug.fail(
+		"false",
+		"Fallback for very long string serialization activated! "
+		"Are you OK? Why do you need to save such long string? Usually, this is not OK."
+		"This can lead to save size blow -> players won't be happy. "
+		"If you required to serialize this - please, come to IX-Ray Discord server and tell us the reason - we're very curious about that. "
+		"The save remains valid and you will get this string, but consider to use localization tables for such madness.",
+		DEBUG_INFO, ignore_always);
+#endif
+	if (_currentArrayStack.empty()) {
+		_variables.emplace_back(new CSaveVariableStringLong(S));
+	}
+	else {
+		(_currentArrayStack.top())->AddVariable(new CSaveVariableStringLong(S));
+	}
+}
+
 void CSaveChunk::CopySubchunks(CSaveChunk* Chunk)
 {
 	const auto& OtherSubchunks = Chunk->_subchunks;
@@ -615,9 +636,36 @@ void CSaveChunk::r_string(shared_str& S)
 	else {
 		auto CurrentArray = _currentArrayStack.top();
 		R_ASSERT3(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_string, "Invalid variable type access in chunk", _chunkName.c_str());
-		S = SSaveVariableGetter::GetValue<shared_str, CSaveVariableString>((CSaveVariableBool*)CurrentArray->GetCurrentElement()).c_str();
+		S = SSaveVariableGetter::GetValue<shared_str, CSaveVariableString>(CurrentArray->GetCurrentElement()).c_str();
 		CurrentArray->Next();
 	}
+}
+
+xr_string* CSaveChunk::r_string_long()
+{
+	xr_string* S;
+	if (_currentArrayStack.empty()) {
+		R_ASSERT3(_variables[_currentReadIndex]->GetVariableType() == ESaveVariableType::t_longstring, "Invalid variable type access in chunk", _chunkName.c_str());
+		S = SSaveVariableGetter::GetValuePtr<xr_string, CSaveVariableStringLong>(_variables[_currentReadIndex++]);
+	}
+	else {
+		auto CurrentArray = _currentArrayStack.top();
+		R_ASSERT3(CurrentArray->GetCurrentElement()->GetVariableType() == ESaveVariableType::t_longstring, "Invalid variable type access in chunk", _chunkName.c_str());
+		S = SSaveVariableGetter::GetValuePtr<xr_string, CSaveVariableStringLong>(CurrentArray->GetCurrentElement());
+		CurrentArray->Next();
+	}
+#ifndef MASTER_GOLD
+	static bool ignore_always = false;
+	if (!ignore_always) ::Debug.fail(
+		"false",
+		"Fallback for very long string serialization activated! "
+		"Are you OK? Why do you need to save such long string? Usually, this is not OK."
+		"This can lead to save size blow -> players won't be happy. "
+		"If you required to serialize this - please, come to IX-Ray Discord server and tell us the reason - we're very curious about that. "
+		"The save remains valid and you will get this string, but consider to use localization tables for such madness.",
+		DEBUG_INFO, ignore_always);
+#endif
+	return S;
 }
 
 void CSaveChunk::Parse(IReader* stream)
@@ -902,24 +950,18 @@ void CSaveChunk::ParseRec(IReader* stream, ESaveVariableType type_key)
 			}
 			break;
 		}
-		/*case ESaveVariableType::t_array: {
-			size_t Size;
-			stream->r(&Size, sizeof(size_t));
-			auto Var = new CSaveVariableArray(Size);
-			if (_currentArrayStack.empty()) {
-				_variables.emplace_back(Var);
-			}
-			else {
-				_currentArrayStack.top()->AddVariable(Var);
-			}
-			_currentArrayStack.push(Var);
-			for (u64 i = 0; i < Size; ++i) {
-				stream->r(&type, sizeof(ESaveVariableType));
-				ParseRec(stream, type);
-			}
-			_currentArrayStack.pop();
-			break;
-		}*/
+		case ESaveVariableType::t_longstring: {
+				xr_string Str;
+				stream->r_stringZ(Str);
+				auto Var = new CSaveVariableStringLong(Str);
+				if (_currentArrayStack.empty()) {
+					_variables.emplace_back(Var);
+				}
+				else {
+					_currentArrayStack.top()->AddVariable(Var);
+				}
+				break;
+		}
 		case ESaveVariableType::t_arrayUnspec: {
 			auto Var = new ISaveVariableArray();
 			if (_currentArrayStack.empty()) {

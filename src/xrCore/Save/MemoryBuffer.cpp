@@ -32,10 +32,16 @@ CMemoryBuffer::~CMemoryBuffer()
 
 bool CMemoryBuffer::Write(const void* data, size_t size)
 {
-	VERIFY(size < CMemoryChunk::ChunkSize);
-	if (!Chunks.back()->Write(data, size)) {
-		Chunks.push_back(new CMemoryChunk());
-		Chunks.back()->Write(data, size);
+	u8* Ptr = (u8*)(data);
+	while (size)
+	{
+		size_t ToWrite = std::min(size, CMemoryChunk::ChunkSize - 1);
+		size -= ToWrite;
+		if (!Chunks.back()->Write(Ptr, ToWrite)) {
+			Chunks.push_back(new CMemoryChunk());
+			Chunks.back()->Write(Ptr, ToWrite);
+		}
+		Ptr += ToWrite;
 	}
 	return true;
 }

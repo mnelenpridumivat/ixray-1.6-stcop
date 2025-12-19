@@ -5,6 +5,11 @@
 #include "../xrCore/Save/SaveVariables.h"
 #include "../xrCore/Save/SaveObject.h"
 #include "../../xrGame/xr_time.h"
+#include "lua_ext.h"
+#include "lua.h"
+#include <luabind/luabind.hpp>
+
+#include "script_engine.h"
 
 namespace CSaveChunk_script {
 	bool r_bool(CSaveChunk* Chunk) {
@@ -12,12 +17,6 @@ namespace CSaveChunk_script {
 		Chunk->r_bool(Value);
 		return Value;
 	}
-
-	/*Fvector r_vec3(CSaveChunk* Chunk) {
-		Fvector Value;
-		Chunk->r_vec3(Value);
-		return Value;
-	}*/
 
 	float r_float(CSaveChunk* Chunk) {
 		float Value;
@@ -216,7 +215,28 @@ namespace CSaveObject_script {
 	}
 	
 	LPCSTR s_stringZ(ISaveObject* Obj, LPCSTR Value) {
+		lua_State* L = g_pScriptEngine->lua();
 		VERIFY(Obj);
+		if (Value) // not null
+		{
+			auto size = xr_strlen(Value) + 1; // with 0 at end
+			if (size > shared_str_limit)
+			{
+				// Ты блять "Войну и мир" решил сохранить нахуй!?
+				auto& StrData = *Obj->SerializeEnourmousString(Value);
+				if (!Obj->IsSave())
+				{
+					lua_pushlstring(L, StrData.c_str(), size);
+					size_t lua_len;
+					LPCSTR lua_str = lua_tolstring(L, -1, &lua_len);
+					//lua_pushvalue(L, -1);
+					//int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+					//lua_pop(L, 1);
+					return lua_str;
+				}
+				return Value;
+			}
+		}
 		shared_str Casted;
 		if (Obj->IsSave()) {
 			Casted = Value;
@@ -240,11 +260,7 @@ void SaveSystemScript::script_register(lua_State* L)
 		[
 			class_<ISaveObjectStackHandler>("SaveObjectStackHandler"),
 			class_<ISaveObject>("SaveObject")
-				//.def("BeginChunk", &CSaveObject_script::BeginChunk)
 				.def("HasChunk", &CSaveObject_script::HasChunk)
-				//.def("EndChunk", &CSaveObject_script::EndChunk)
-				//.def("BeginArray", &CSaveObject_script::BeginArray)
-				//.def("EndArray", &CSaveObject_script::EndArray)
 				.def("ForChunk", &CSaveObject_script::ForChunk)
 				.def("ForArray", &CSaveObject_script::ForArray)
 				.def("s_vec3", &CSaveObject_script::s_vec3)

@@ -60,6 +60,7 @@ public:
 	void w_u8(u8 a);
 	void w_s8(s8 a);
 	void w_string(shared_str S);
+	void w_string_long(LPCSTR S);
 	
 	void CopySubchunks(CSaveChunk* Chunk);
 	void AttachSubchunk(CSaveChunk* Chunk); // Make copy of chunk and attach copy as a subchunk
@@ -77,6 +78,7 @@ public:
 	void r_u8(u8& A);
 	void r_s8(s8& A);
 	void r_string(shared_str& S);
+	xr_string* r_string_long(); // the pointer is valid for short time and will be free after load end;
 
 	void Parse(IReader* stream);
 

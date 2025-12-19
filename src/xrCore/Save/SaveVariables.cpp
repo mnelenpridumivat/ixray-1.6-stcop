@@ -217,6 +217,17 @@ ISaveable* CSaveVariableString::MakeCopy()
 	return new CSaveVariableString(_value);
 }
 
+void CSaveVariableStringLong::Write(CMemoryBuffer& Buffer, SSaveTask* Task)
+{
+	Buffer.Write(ESaveVariableType::t_longstring);
+	Buffer.Write(_value);
+}
+
+ISaveable* CSaveVariableStringLong::MakeCopy()
+{
+	return new CSaveVariableStringLong(_value);
+}
+
 ISaveVariableArray::~ISaveVariableArray()
 {
 	for (size_t i = 0; i < _array.size(); ++i) {

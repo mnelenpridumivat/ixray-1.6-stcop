@@ -205,6 +205,12 @@ ISaveObject& CSaveObjectSave::operator<<(shared_str& S)
 	return *this;
 }
 
+xr_string* CSaveObjectSave::SerializeEnourmousString(LPCSTR long_str)
+{
+	GetCurrentChunk()->w_string_long(long_str);
+	return nullptr;
+}
+
 void CSaveObjectSave::Write(CMemoryBuffer* buffer, SSaveTask* Task)
 {
 	_rootChunk->Write(*buffer, Task);
@@ -315,6 +321,11 @@ ISaveObject& CSaveObjectLoad::operator<<(shared_str& S)
 {
 	GetCurrentChunk()->r_string(S);
 	return *this;
+}
+
+xr_string* CSaveObjectLoad::SerializeEnourmousString(LPCSTR long_str)
+{
+	return GetCurrentChunk()->r_string_long();
 }
 
 void CSaveObjectLoad::Parse(IReader* stream)
