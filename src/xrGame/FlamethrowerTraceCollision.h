@@ -34,7 +34,7 @@ namespace FlamethrowerTrace
 		MAX
 	};
 
-	struct STraceConstants
+	/*struct STraceConstants
 	{
 		CManager* Manager = nullptr;
 		float LifeTime = 0.0f;
@@ -52,10 +52,11 @@ namespace FlamethrowerTrace
 	class CTrace
 	{
 		
-	};
+	};*/
 	
 	class CPoint
 	{
+		friend ISaveObject& operator<<(ISaveObject& Object, CPoint& Data);
 
 		struct TraceData {
 			CPoint* TracedObj = nullptr;
@@ -87,7 +88,10 @@ namespace FlamethrowerTrace
 		static BOOL test_callback(const collide::ray_defs& rd, CObject* object, LPVOID params);
 	
 	public:
+		CPoint() = default;
 		CPoint(CManager* Manager);
+
+		void SetManager(CManager* Manager) { VERIFY(!Manager); this->Manager = Manager; }
 
 		void Activate();
 		void Update(float DeltaTime);
@@ -112,10 +116,13 @@ namespace FlamethrowerTrace
 		ETraceState GetState() const { return State; }
 		bool IsCollided() const { return State == ETraceState::AirToGround || State == ETraceState::Ground; }
 	};
+	
+	ISaveObject& operator<<(ISaveObject& Object, CPoint& Data);
 
 	class CCollision :
 		public Feel::Touch
 	{
+		friend ISaveObject& operator<<(ISaveObject& Object, CCollision& Data);
 
 		CManager* Manager;
 		CPoint* AttachPoint;
@@ -158,11 +165,11 @@ namespace FlamethrowerTrace
 		void Update_End(float DeltaTime);
 
 	public:
-
+		CCollision() = default;
 		CCollision(CManager* Manager);
 		virtual ~CCollision();
 
-		void Load(LPCSTR section);
+		void SetManager(CManager* Manager) { VERIFY(!Manager); this->Manager = Manager; }
 
 		inline CManager* GetParent() const { return Manager; }
 		void AttachToPoint(CPoint* point);
@@ -191,6 +198,8 @@ namespace FlamethrowerTrace
 		Fvector GetPosition();
 	};
 	
+	ISaveObject& operator<<(ISaveObject& Object, CCollision& Data);
+	
 	class CManager :
 		public Feel::Touch
 	{
@@ -210,13 +219,15 @@ namespace FlamethrowerTrace
 		//DEFINE_VECTOR(CCollision*, FCollisions, FCollisionsIt);
 	
 		FOverlappedObjects Overlapped;
-		//FCollisionsDeque CollisionsPool;
-		xr_deque<CCollision*> InactiveCollisions;
-		xr_deque<CCollision*> ActiveCollisions;
-		xr_deque<CPoint*> InactivePoints;
-		xr_deque<CPoint*> ActivePoints;
+
+		using CollisionTrace = xr_pair<xr_unique_ptr<CPoint>, xr_unique_ptr<CCollision>>;
+		using CollisionTracePtr = CollisionTrace*;
+		xr_deque<CollisionTracePtr> InactiveTraces;
+		xr_deque<CollisionTracePtr> ActiveTraces;
 	
 		float m_RadiusMax = 0.0f;
+		
+		void SerializeElem(ISaveObject& Object, CollisionTrace& Elem);
 	
 	public:
 	
@@ -235,10 +246,9 @@ namespace FlamethrowerTrace
 
 		void save(NET_Packet& output_packet);
 		void load(IReader& input_packet);
+		void Serialize(ISaveObject& Object);
 
 		void Update(float DeltaTime);
-		void UpdateOverlaps(float DeltaTime);
-		void UpdatePoints(float DeltaTime);
 	
 		void RegisterOverlapped(CCustomMonster* enemy);
 		void UnregisterOverlapped(CCustomMonster* enemy);
@@ -248,11 +258,8 @@ namespace FlamethrowerTrace
 	
 		void OnShootingEnd();
 	
-		CCollision* LaunchTrace(const Fvector& StartPos, const Fvector& StartDir, bool Force = false);
-		CPoint* LaunchPoint();
-		CCollision* LaunchCollision(CPoint* RootPoint);
+		void LaunchTrace(const Fvector& StartPos, const Fvector& StartDir, bool Force = false);
 	
-		//void ExpandCollisions(CCollision* First, CCollision* Second);
 		const shared_str& GetSection() { return CollisionSection; }
 	};
 

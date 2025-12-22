@@ -176,12 +176,12 @@ void CBulletManager::PlayExplodePS( const Fmatrix& xf )
 #ifdef DEBUG
 void CBulletManager::DrawFlamethrowerTrace(FlamethrowerTrace::CManager* manager)
 {
-	for(auto Collision : manager->ActiveCollisions)
+	for(auto Collision : manager->ActiveTraces)
 	{
 		Fmatrix temp;
-		auto r = Collision->GetCurrentRadius();
+		auto r = Collision->second->GetCurrentRadius();
 		temp.scale(r, r, r);
-		temp.c = Collision->GetPosition();
+		temp.c = Collision->first->GetPosition();
 		Level().debug_renderer().draw_ellipse(temp, color_xrgb(255, 0, 0));
 	}
 }

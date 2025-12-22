@@ -557,8 +557,7 @@ void CFlamethrower::UpdateCL()
 
 	if (g_pGameLevel->bReady)
 	{
-		TraceManager->UpdatePoints(dt);
-		TraceManager->UpdateOverlaps(dt);
+		TraceManager->Update(dt);
 	}
 }
 
