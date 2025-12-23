@@ -161,20 +161,22 @@ void CInventory::Take(CGameObject* pObj, bool bNotActivate, bool strict_placemen
 		}
 	}
 
-	if (auto Repacker = pIItem->cast_repacker_interface())
+	if (EngineExternal()[EEngineExternalSystem::EngineAmmoRepacker])
 	{
-		for (auto& elem : m_all)
+		if (auto Repacker = pIItem->cast_repacker_interface())
 		{
-			if (elem->m_section_id != pIItem->m_section_id)
+			for (auto& elem : m_all)
 			{
-				continue;
-			}
-			if (!Repacker->Repack(elem))
-			{
-				return;
+				if (elem->m_section_id != pIItem->m_section_id)
+				{
+					continue;
+				}
+				if (!Repacker->Repack(elem))
+				{
+					return;
+				}
 			}
 		}
-
 	}
 
 	m_all.push_back(pIItem);

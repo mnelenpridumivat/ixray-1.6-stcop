@@ -90,6 +90,7 @@ enum class EEngineExternalSystem : u8
 {
 	AdvancedSerialization,
 	EngineScriptStoryID,
+	EngineAmmoRepacker,
 	Unknown = static_cast<u8>(-1)
 };
 
