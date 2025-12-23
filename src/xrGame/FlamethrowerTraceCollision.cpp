@@ -453,6 +453,8 @@ void FlamethrowerTrace::CTrace::UpdateEnd(float DeltaTime)
 void FlamethrowerTrace::CTrace::Activate()
 {
 	State = ETraceState::Air;
+	CurrentTime = 0.0f;
+	TimeOnCollide = 0.0f;
 	Point.Activate();
 	Collision.Activate();
 }
