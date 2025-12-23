@@ -173,17 +173,51 @@ void CBulletManager::PlayExplodePS( const Fmatrix& xf )
 	GamePersistent().ps_needtoplay.push_back(ps);
 }
 
+// TODO: Reimplement with normal debug draw
+#include "../xrEngine/xr_input.h"
+
+static void dbg_text_renderer(const Fvector& pos, u32 color = color_rgba(0,255,100,255), shared_str str = "+")
+{
+	Fvector4		v_res;
+	Device.mFullTransform.transform(v_res, pos);
+
+	float x = (1.f + v_res.x) / 2.f * (Device.Width);
+	float y = (1.f - v_res.y) / 2.f * (Device.Height);
+
+	if (v_res.z < 0 || v_res.w < 0)
+		return;
+
+	if (v_res.x < -1.f || v_res.x > 1.f || v_res.y < -1.f || v_res.y>1.f)
+		return;
+
+	g_FontManager->pFontSystem->SetAligment(CGameFont::alCenter);
+	g_FontManager->pFontSystem->SetColor(color);
+	g_FontManager->pFontSystem->Out(x, y, "%s", str.c_str());
+}
+
 #ifdef DEBUG
 void CBulletManager::DrawFlamethrowerTrace(FlamethrowerTrace::CManager* manager)
 {
-	for(auto Collision : manager->ActiveTraces)
-	{
-		Fmatrix temp;
-		auto r = Collision->second->GetCurrentRadius();
-		temp.scale(r, r, r);
-		temp.c = Collision->first->GetPosition();
-		Level().debug_renderer().draw_ellipse(temp, color_xrgb(255, 0, 0));
-	}
+	//if (pInput->iGetAsyncKeyState(SDL_SCANCODE_J))
+	//{
+		for(auto Collision : manager->ActiveTraces)
+		{
+			/*Fmatrix temp;
+			auto r = Collision->GetCollision().GetCurrentRadius();
+			temp.scale(r, r, r);
+			temp.c = Collision->GetPoint().GetPosition();
+			Msg("%f, %f, %f", VPUSH(temp.c));
+			Level().debug_renderer().draw_ellipse(temp, color_xrgb(255, 0, 0));*/
+			
+			for (int i = 0; i < 255; ++i)
+			{
+				Fvector pos = Fvector(Collision->GetPoint().GetPosition()).mad(
+					Fvector().random_dir(), Collision->GetCollision().GetCurrentRadius());
+				dbg_text_renderer(pos);
+			}
+		}
+
+	//}
 }
 #endif
 
@@ -201,6 +235,7 @@ void CBulletManager::Clear		()
 {
 	m_Bullets.clear			();
 	m_Events.clear			();
+	FlameManagersToDraw.clear();
 }
 
 void CBulletManager::AddBullet(const Fvector& position,

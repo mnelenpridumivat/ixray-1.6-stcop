@@ -15,54 +15,55 @@
 
 void FlamethrowerTrace::CPoint::UpdateAir(float delta_time)
 {
-	if(!IsCollided())
+	if(!IsCollided() && !fis_zero(delta_time, EPS))
 	{
-		GravityVelocity += GravityAcceleration * delta_time;
+		GravityVelocity += Trace->GetConstants().GravityAcceleration * delta_time;
 		Fvector OldPos = PointPosition;
-		PointPosition = (PointPosition + PointDirection * Velocity * delta_time) - Fvector{0.0f, GravityVelocity* delta_time, 0.0f};
+		PointPosition = (PointPosition + PointDirection * Trace->GetConstants().Velocity * delta_time) - Fvector{0.0f, GravityVelocity* delta_time, 0.0f};
 		PointDirection = (PointPosition - OldPos).GetNormalizedCopy();
 		collide::rq_results storage;
 		collide::ray_defs RD(OldPos, PointPosition, CDB::OPT_FULL_TEST, collide::rqtBoth);
 		TraceData data;
 		data.TracedObj = this;
-		if (Level().ObjectSpace.RayQuery(storage, RD, FlamethrowerTrace::CPoint::hit_callback, &data, FlamethrowerTrace::CPoint::test_callback, nullptr) && !data.Penetrate)
+		if (Level().ObjectSpace.RayQuery(storage, RD, hit_callback, &data, test_callback, nullptr) && !data.Penetrate)
 		{
 			PointPosition = OldPos + PointDirection * data.HitDist;
-			State = ETraceState::AirToGround;
-			TimeOnCollide = CurrentTime;
-			return;
+			//State = ETraceState::AirToGround;
+			//TimeOnCollide = CurrentTime;
+			Collided = true;
+			//return;
 		}
 	}
-	if(CurrentTime >= LifeTime)
+	/*if(CurrentTime >= LifeTime)
 	{
 		TimeOnCollide = CurrentTime;
 		State = ETraceState::End;
-	}
+	}*/
 }
 
 void FlamethrowerTrace::CPoint::UpdateAirToGround(float delta_time)
 {
-	if((TimeOnCollide + RadiusCollidedInterpTime) - CurrentTime <= 0)
+	/*if((TimeOnCollide + RadiusCollidedInterpTime) - CurrentTime <= 0)
 	{
 		State = ETraceState::Ground;
-	}
+	}*/
 }
 
 void FlamethrowerTrace::CPoint::UpdateGround(float delta_time)
 {
-	if(CurrentTime >= LifeTimeCollided)
+	/*if(CurrentTime >= LifeTimeCollided)
 	{
 		TimeOnCollide = CurrentTime;
 		State = ETraceState::End;
-	}
+	}*/
 }
 
 void FlamethrowerTrace::CPoint::UpdateEnd(float delta_time)
 {
-	if( (TimeOnCollide+RadiusCollidedInterpTime)- CurrentTime <= 0)
+	/*if( (TimeOnCollide+RadiusCollidedInterpTime)- CurrentTime <= 0)
 	{
 		//State = ETraceState::Idle;
-	}
+	}*/
 }
 
 BOOL FlamethrowerTrace::CPoint::hit_callback(collide::rq_result& result, LPVOID params)
@@ -93,7 +94,7 @@ BOOL FlamethrowerTrace::CPoint::test_callback(const collide::ray_defs& rd, CObje
 		{
 			return true;
 		}
-		if (entity->ID() == pData->TracedObj->Manager->GetParent()->H_Parent()->ID())
+		if (entity->ID() == pData->TracedObj->Trace->GetConstants().Manager->GetParent()->H_Parent()->ID())
 		{
 			return false;
 		}
@@ -101,24 +102,24 @@ BOOL FlamethrowerTrace::CPoint::test_callback(const collide::ray_defs& rd, CObje
 	return true;
 }
 
-FlamethrowerTrace::CPoint::CPoint(CManager* Manager)
+FlamethrowerTrace::CPoint::CPoint(CTrace& Trace) : Trace(&Trace)
 {
-	this->Manager = Manager;
-	State = ETraceState::Idle;
-	LifeTime = pSettings->r_float(Manager->GetSection(), "LifeTime");
-	LifeTimeCollided = pSettings->r_float(Manager->GetSection(), "LifeTimeCollided");
-	GravityAcceleration = pSettings->r_float(Manager->GetSection(), "GravityAcceleration");
-	RadiusCollidedInterpTime = pSettings->r_float(Manager->GetSection(), "RadiusCollidedInterpTime");
-	Velocity = pSettings->r_float(Manager->GetSection(), "Velocity");
+	//State = ETraceState::Idle;
+	//LifeTime = pSettings->r_float(Manager->GetSection(), "LifeTime");
+	//LifeTimeCollided = pSettings->r_float(Manager->GetSection(), "LifeTimeCollided");
+	//GravityAcceleration = pSettings->r_float(Manager->GetSection(), "GravityAcceleration");
+	//RadiusCollidedInterpTime = pSettings->r_float(Manager->GetSection(), "RadiusCollidedInterpTime");
+	//Velocity = pSettings->r_float(Manager->GetSection(), "Velocity");
 }
 
 void FlamethrowerTrace::CPoint::Activate()
 {
-	State = ETraceState::Air;
-	LastUpdatedPos = PointPosition;
+	//State = ETraceState::Air;
+	//LastUpdatedPos = PointPosition;
+	Collided = false;
 }
 
-void FlamethrowerTrace::CPoint::Update(float DeltaTime)
+/*void FlamethrowerTrace::CPoint::Update(float DeltaTime)
 {
 	VERIFY(State != ETraceState::MAX);
 	switch (State)
@@ -150,7 +151,7 @@ void FlamethrowerTrace::CPoint::Update(float DeltaTime)
 	}
 	LastUpdateTime = CurrentTime;
 	CurrentTime += DeltaTime;
-}
+}*/
 
 bool FlamethrowerTrace::CPoint::VerifySpawnPos(const Fvector& Position, const Fvector& Direction, Fvector& HitPos)
 {
@@ -158,7 +159,7 @@ bool FlamethrowerTrace::CPoint::VerifySpawnPos(const Fvector& Position, const Fv
 	collide::ray_defs RD(Position-Direction, Position, CDB::OPT_FULL_TEST, collide::rqtBoth);
 	TraceData data;
 	data.TracedObj = this;
-	if (Level().ObjectSpace.RayQuery(storage, RD, FlamethrowerTrace::CPoint::hit_callback, &data, FlamethrowerTrace::CPoint::test_callback, nullptr))
+	if (Level().ObjectSpace.RayQuery(storage, RD, hit_callback, &data, test_callback, nullptr))
 	{
 		HitPos = Position+Direction * (data.HitDist - 1.0f);
 		return false;
@@ -171,9 +172,9 @@ void FlamethrowerTrace::CPoint::Deactivate()
 	CurrentTime = 0.0f;
 	GravityVelocity = 0.0f;
 	TimeOnCollide = 0.0f;
-	LastUpdateTime = 0.0f;
+	//LastUpdateTime = 0.0f;
 	PointPosition = {};
-	LastUpdatedPos = {};
+	//LastUpdatedPos = {};
 	PointDirection = {};
 }
 
@@ -181,149 +182,154 @@ ISaveObject& FlamethrowerTrace::operator<<(ISaveObject& Object, CPoint& Data)
 {
 	BEGIN_CHUNK(Object, "CPoint")
 	{
-		Object << Data.State << Data.PointPosition << Data.PointDirection << Data.GravityVelocity << Data.CurrentTime << Data.TimeOnCollide;
+		Object /*<< Data.State*/ << Data.PointPosition << Data.PointDirection << Data.GravityVelocity << Data.CurrentTime << Data.TimeOnCollide;
 	}
 	return Object;
 }
 
-void FlamethrowerTrace::CCollision::Update_Air(float DeltaTime)
+void FlamethrowerTrace::CCollision::UpdateAir(float DeltaTime)
 {
-	float interpTime = std::min(m_current_time / m_RadiusMaxTime, 1.0f);
-	RadiusCurrent = m_RadiusMin + (m_RadiusMax - m_RadiusMin) * interpTime;
-	clamp(RadiusCurrent, m_RadiusMin, m_RadiusMax);
+	float interpTime = std::min(Trace->GetCurrentTime() / Trace->GetConstants().m_RadiusMaxTime, 1.0f);
+	RadiusCurrent = Trace->GetConstants().m_RadiusMin + (Trace->GetConstants().m_RadiusMax - Trace->GetConstants().m_RadiusMin) * interpTime;
+	clamp(RadiusCurrent, Trace->GetConstants().m_RadiusMin, Trace->GetConstants().m_RadiusMax);
 
-	if (!IsCollided()&&AttachPoint->IsCollided())
+	if (!bIsCollided&&AttachPoint->IsCollided())
 	{
-		m_State = ETraceState::AirToGround;
-		VERIFY2(m_RadiusCollided > 0.01, "Too small RadiusCollided in flamethrower config!");
+		//m_State = ETraceState::AirToGround;
+		bIsCollided = true;
+		VERIFY2(Trace->GetConstants().m_RadiusCollided > 0.01, "Too small RadiusCollided in flamethrower config!");
 		RadiusOnCollide = RadiusCurrent;
-		m_time_on_collide = m_current_time;
+		//m_time_on_collide = m_current_time;
 		return;
 	}
-	if(m_current_time >= m_LifeTime)
+	/*if(m_current_time >= m_LifeTime)
 	{
 		m_State = ETraceState::End;
-	}
+	}*/
 }
 
-void FlamethrowerTrace::CCollision::Update_AirToGround(float DeltaTime)
+void FlamethrowerTrace::CCollision::UpdateAirToGround(float DeltaTime)
 {
-	float interpTime = (m_current_time - m_time_on_collide) / m_RadiusCollidedInterpTime;
+	float interpTime = (Trace->GetCurrentTime() - Trace->GetTimeOnCollide()) / Trace->GetConstants().m_RadiusCollidedInterpTime;
 	if(interpTime >= 1.0f)
 	{
-		m_State = ETraceState::Ground;
+		//m_State = ETraceState::Ground;
 		interpTime = 1.0f;
 	}
 	const float AlphaValue = 1.0f -std::pow(1.0f - interpTime, 2.0f);
-	RadiusCurrent = std::max(RadiusOnCollide, AlphaValue * m_RadiusCollided);
+	RadiusCurrent = std::max(RadiusOnCollide, AlphaValue * Trace->GetConstants().m_RadiusCollided);
 }
 
-void FlamethrowerTrace::CCollision::Update_Ground(float DeltaTime)
+void FlamethrowerTrace::CCollision::UpdateGround(float DeltaTime)
 {
-	if (m_current_time >= m_LifeTimeCollidedMax)
+	/*if (m_current_time >= m_LifeTimeCollidedMax)
 	{
 		m_current_time = 0;
 		m_State = ETraceState::End;
-	}
+	}*/
 }
 
-void FlamethrowerTrace::CCollision::Update_End(float DeltaTime)
+void FlamethrowerTrace::CCollision::UpdateEnd(float DeltaTime)
 {
-	const float interpTime = 1.0f - (m_current_time / m_RadiusCollidedInterpTime);
+	/*const float interpTime = 1.0f - (Trace->GetCurrentTime() / m_RadiusCollidedInterpTime);
 	if(interpTime <= 0)
 	{
 		//Deactivate();
 		return;
-	}
+	}*/
 }
 
-FlamethrowerTrace::CCollision::CCollision(FlamethrowerTrace::CManager* Manager) : Manager(Manager)
+FlamethrowerTrace::CCollision::CCollision(CTrace& Trace) : Trace(&Trace)
 {
-	m_RadiusMin = pSettings->r_float(Manager->GetSection(), "RadiusMin");
-	m_RadiusMax = pSettings->r_float(Manager->GetSection(), "RadiusMax");
-	m_RadiusCollided = pSettings->r_float(Manager->GetSection(), "RadiusCollided");
-	m_RadiusCollidedInterpTime = pSettings->r_float(Manager->GetSection(), "RadiusCollidedInterpTime");
-	m_RadiusCollisionCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCoeff");
-	m_RadiusCollisionCollidedCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCollidedCoeff");
-	m_RadiusMaxTime = pSettings->r_float(Manager->GetSection(), "RadiusMaxTime");
-	m_LifeTime = pSettings->r_float(Manager->GetSection(), "LifeTime");
-	m_LifeTimeCollidedMax = pSettings->r_float(Manager->GetSection(), "LifeTimeCollided");
-	m_FlameFadeTime = pSettings->r_float(Manager->GetSection(), "FlameFadeTime");
-	CollidedParticlePivot = pSettings->r_fvector3(Manager->GetSection(), "CollidedParticlePivot");
+	//m_RadiusMin = pSettings->r_float(Manager->GetSection(), "RadiusMin");
+	//m_RadiusMax = pSettings->r_float(Manager->GetSection(), "RadiusMax");
+	//m_RadiusCollided = pSettings->r_float(Manager->GetSection(), "RadiusCollided");
+	//m_RadiusCollidedInterpTime = pSettings->r_float(Manager->GetSection(), "RadiusCollidedInterpTime");
+	//m_RadiusCollisionCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCoeff");
+	//m_RadiusCollisionCollidedCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCollidedCoeff");
+	//m_RadiusMaxTime = pSettings->r_float(Manager->GetSection(), "RadiusMaxTime");
+	//m_LifeTime = pSettings->r_float(Manager->GetSection(), "LifeTime");
+	//m_LifeTimeCollidedMax = pSettings->r_float(Manager->GetSection(), "LifeTimeCollided");
+	//m_FlameFadeTime = pSettings->r_float(Manager->GetSection(), "FlameFadeTime");
+	//CollidedParticlePivot = pSettings->r_fvector3(Manager->GetSection(), "CollidedParticlePivot");
 
 	// flames
-	m_sFlameParticles = pSettings->r_string(Manager->GetSection(), "flame_particles");
-	m_sFlameParticlesGround = pSettings->r_string(Manager->GetSection(), "earth_flame_particles");
-	m_particle_size_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_size_bind");
-	m_particle_alpha_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_alpha_bind");
-	m_particle_size_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_size_bind");
-	m_particle_alpha_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_alpha_bind");
+	//m_sFlameParticles = pSettings->r_string(Manager->GetSection(), "flame_particles");
+	//m_sFlameParticlesGround = pSettings->r_string(Manager->GetSection(), "earth_flame_particles");
+	//m_particle_size_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_size_bind");
+	//m_particle_alpha_air_PE_name = pSettings->r_string(Manager->GetSection(), "air_flame_alpha_bind");
+	//m_particle_size_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_size_bind");
+	//m_particle_alpha_ground_PE_name = pSettings->r_string(Manager->GetSection(), "earth_flame_alpha_bind");
 }
 
 FlamethrowerTrace::CCollision::~CCollision()
 {
-	if (IsActive()) {
+	if (bIsActive) {
 		Deactivate();
 	}
 }
 
-void FlamethrowerTrace::CCollision::AttachToPoint(CPoint* point)
+void FlamethrowerTrace::CCollision::AttachToPoint(CPoint& point)
 {
-	AttachPoint = point;
+	AttachPoint = &point;
 }
 
-inline CFlamethrower* FlamethrowerTrace::CCollision::GetParentWeapon() const
+/*inline CFlamethrower* FlamethrowerTrace::CCollision::GetParentWeapon() const
 {
 	return Manager->GetParent();
-}
+}*/
 
-bool FlamethrowerTrace::CCollision::IsReadyToUpdateCollisions()
+bool FlamethrowerTrace::CCollision::IsReadyToUpdateCollisions() const
 {
 	//return true;
-	if(m_State == ETraceState::Idle)
+	if (!bIsActive)
 	{
-		m_State = ETraceState::Air;
 		return false;
 	}
-	float Dist = GetCurrentRadius()*0.8;
-	if(IsCollided())
+	if(!IsLaunched && bIsActive)
 	{
-		if(m_last_update_time > 0.2)
+		IsLaunched = true;
+		return false;
+	}
+	//float Dist = GetCurrentRadius()*0.8;
+	if(bIsCollided)
+	{
+		/*if(m_last_update_time > 0.2)
 		{
 			m_last_update_time = 0.0f;
 			return true;
-		}
+		}*/
 		return false;
 	}
 	return true;
 }
 
-float FlamethrowerTrace::CCollision::GetCurrentRadius()
+float FlamethrowerTrace::CCollision::GetCurrentRadius() const
 {
 	return RadiusCurrent;
 }
 
-void FlamethrowerTrace::CCollision::SetCurrentLifeTime(const float Time)
+/*void FlamethrowerTrace::CCollision::SetCurrentLifeTime(const float Time)
 {
 	m_current_time = Time;
 	float interpTime = std::min(m_current_time / m_RadiusMaxTime, 1.0f);
 	RadiusCurrent = m_RadiusMin + (m_RadiusMax - m_RadiusMin) * interpTime;
-}
+}*/
 
 void FlamethrowerTrace::CCollision::feel_touch_new(CObject* O)
 {
-	if (m_State == ETraceState::Idle) {
+	if (!bIsActive) {
 		return;
 	}
 	if (CCustomMonster* Casted = smart_cast<CCustomMonster*>(O)) {
-		Manager->RegisterOverlapped(Casted);
+		Trace->GetConstants().Manager->RegisterOverlapped(Casted);
 	}
 }
 
 void FlamethrowerTrace::CCollision::feel_touch_delete(CObject* O)
 {
 	if (CCustomMonster* Casted = smart_cast<CCustomMonster*>(O)) {
-		Manager->UnregisterOverlapped(smart_cast<CCustomMonster*>(O));
+		Trace->GetConstants().Manager->UnregisterOverlapped(smart_cast<CCustomMonster*>(O));
 	}
 }
 
@@ -334,19 +340,23 @@ BOOL FlamethrowerTrace::CCollision::feel_touch_contact(CObject* O)
 
 void FlamethrowerTrace::CCollision::Activate()
 {
-	m_State = ETraceState::Air;
-	RadiusCurrent = m_RadiusMin;
+	//m_State = ETraceState::Air;
+	RadiusCurrent = Trace->GetConstants().m_RadiusMin;
+	IsLaunched = false;
+	bIsActive = true;
+	bIsCollided = false;
 }
 
 void FlamethrowerTrace::CCollision::Deactivate()
 {
-	m_State = ETraceState::Idle;
-	m_current_time = 0.0f;
-	m_time_on_collide = 0.0f;
+	//m_State = ETraceState::Idle;
+	bIsActive = false;
+	//m_current_time = 0.0f;
+	//m_time_on_collide = 0.0f;
 	RadiusOnCollide = 0.0f;
 }
 
-void FlamethrowerTrace::CCollision::Update(float DeltaTime)
+/*void FlamethrowerTrace::CCollision::Update(float DeltaTime)
 {
 	switch (m_State)
 	{
@@ -377,9 +387,9 @@ void FlamethrowerTrace::CCollision::Update(float DeltaTime)
 	m_current_time += DeltaTime;
 	m_last_update_time += DeltaTime;
 
-}
+}*/
 
-Fvector FlamethrowerTrace::CCollision::GetPosition()
+const Fvector& FlamethrowerTrace::CCollision::GetPosition() const
 {
 	return AttachPoint->GetPosition();
 }
@@ -388,21 +398,126 @@ ISaveObject& FlamethrowerTrace::operator<<(ISaveObject& Object, CCollision& Data
 {
 	BEGIN_CHUNK(Object, "CCollision")
 	{
-		Object << Data.m_State << Data.m_current_time << Data.m_time_on_collide << Data.RadiusCurrent << Data.RadiusOnCollide;
+		Object /*<< Data.m_State << Data.m_current_time << Data.m_time_on_collide*/ << Data.RadiusCurrent << Data.RadiusOnCollide;
 	}
 	return Object;
 }
 
-void FlamethrowerTrace::CManager::SerializeElem(ISaveObject& Object, CollisionTrace& Elem)
+void FlamethrowerTrace::CTrace::UpdateAir(float DeltaTime)
+{
+	Point.UpdateAir(DeltaTime);
+	Collision.UpdateAir(DeltaTime);
+	if (Point.IsCollided())
+	{
+		State = ETraceState::AirToGround;
+		TimeOnCollide = CurrentTime;
+		return;
+	}
+	if(CurrentTime >= Constants->LifeTime)
+	{
+		State = ETraceState::End;
+	}
+}
+
+void FlamethrowerTrace::CTrace::UpdateAirToGround(float DeltaTime)
+{
+	Point.UpdateAirToGround(DeltaTime);
+	Collision.UpdateAirToGround(DeltaTime);
+	if((TimeOnCollide + Constants->m_RadiusCollidedInterpTime) - CurrentTime <= 0)
+	{
+		State = ETraceState::Ground;
+	}
+}
+
+void FlamethrowerTrace::CTrace::UpdateGround(float DeltaTime)
+{
+	Point.UpdateGround(DeltaTime);
+	Collision.UpdateGround(DeltaTime);
+	if (CurrentTime >= Constants->LifeTimeCollided)
+	{
+		TimeOnCollide = CurrentTime;
+		State = ETraceState::End;
+	}
+}
+
+void FlamethrowerTrace::CTrace::UpdateEnd(float DeltaTime)
+{
+	Point.UpdateEnd(DeltaTime);
+	Collision.UpdateEnd(DeltaTime);
+	if( (TimeOnCollide+Constants->m_RadiusCollidedInterpTime)- CurrentTime <= 0)
+	{
+		State = ETraceState::Idle;
+	}
+}
+
+void FlamethrowerTrace::CTrace::Activate()
+{
+	State = ETraceState::Air;
+	Point.Activate();
+	Collision.Activate();
+}
+
+void FlamethrowerTrace::CTrace::Deactivate()
+{
+	State = ETraceState::Idle;
+	Point.Deactivate();
+	Collision.Deactivate();
+}
+
+void FlamethrowerTrace::CTrace::Update(float DeltaTime)
+{
+	VERIFY(State != ETraceState::MAX);
+	switch (State)
+	{
+	case ETraceState::Idle:
+		{
+			return;
+		}
+	case ETraceState::Air:
+		{
+			UpdateAir(DeltaTime);
+			break;
+		}
+	case ETraceState::AirToGround:
+		{
+			UpdateAirToGround(DeltaTime);
+			break;
+		}
+	case ETraceState::Ground:
+		{
+			UpdateGround(DeltaTime);
+			break;
+		}
+	case ETraceState::End:
+		{
+			UpdateEnd(DeltaTime);
+			break;
+		}
+	}
+	//LastUpdateTime = CurrentTime;
+	CurrentTime += DeltaTime;
+}
+
+ISaveObject& FlamethrowerTrace::operator<<(ISaveObject& Object, CTrace& Data)
+{
+	BEGIN_CHUNK(Object, "CTrace")
+	{
+		Object << Data.Point << Data.Collision << Data.CurrentTime << Data.TimeOnCollide << Data.State;
+	}
+	return Object;
+}
+
+void FlamethrowerTrace::CManager::SerializeElem(ISaveObject& Object, CTrace& Elem)
 {
 	BEGIN_CHUNK(Object, "CFlamethrowerTrace::ActiveTrace")
 	{
-		Object << Elem.first << Elem.second;
+		Object << Elem;
 		if (!Object.IsSave())
 		{
-			Elem.first->SetManager(this);
+			Elem.SetConstants(Constants);
+			/*Elem.first->SetManager(this);
 			Elem.second->SetManager(this);
-			Elem.second->AttachToPoint(Elem.first.get());
+			Elem.second->AttachToPoint(Elem.first.get());*/
 		}
 	}
 }
@@ -446,11 +561,11 @@ BOOL FlamethrowerTrace::CManager::feel_touch_contact(CObject* O)
 {
 	if (CCustomMonster* enemy = smart_cast<CCustomMonster*>(O)) {
 		for (auto& elem : ActiveTraces) {
-			if (!elem->second->IsActive() || !elem->second->IsReadyToUpdateCollisions()) {
+			if (!elem->GetCollision().IsReadyToUpdateCollisions()) {
 				continue;
 			}
-			float Radius = elem->second->GetCurrentRadius();
-			if (elem->second->GetPosition().distance_to_sqr(enemy->Position()) < Radius*Radius)
+			float Radius = elem->GetCollision().GetCurrentRadius();
+			if (elem->GetCollision().GetPosition().distance_to_sqr(enemy->Position()) < Radius*Radius)
 			{
 				return true;
 			}
@@ -470,12 +585,35 @@ void FlamethrowerTrace::CManager::Load(LPCSTR section)
 	CollisionSection = section;
 	ActiveTraces.clear();
 	InactiveTraces.clear();
+
+	Constants.Manager = this;
+	Constants.LifeTime = pSettings->r_float(section, "LifeTime");
+	Constants.LifeTimeCollided = pSettings->r_float(section, "LifeTimeCollided");
+	Constants.GravityAcceleration = pSettings->r_float(section, "GravityAcceleration");
+	//Constants.m_RadiusCollidedInterpTime = pSettings->r_float(section, "RadiusCollidedInterpTime");
+	Constants.Velocity = pSettings->r_float(section, "Velocity");
+	
+	Constants.m_RadiusMin = pSettings->r_float(section, "RadiusMin");
+	Constants.m_RadiusMax = pSettings->r_float(section, "RadiusMax");
+	Constants.m_RadiusCollided = pSettings->r_float(section, "RadiusCollided");
+	Constants.m_RadiusCollidedInterpTime = pSettings->r_float(section, "RadiusCollidedInterpTime");
+	//Constants.m_RadiusCollisionCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCoeff");
+	//Constants.m_RadiusCollisionCollidedCoeff = pSettings->r_fvector3(Manager->GetSection(), "RadiusCollisionCollidedCoeff");
+	Constants.m_RadiusMaxTime = pSettings->r_float(section, "RadiusMaxTime");
+	//Constants.m_LifeTime = pSettings->r_float(Manager->GetSection(), "LifeTime");
+	//Constants.m_LifeTimeCollidedMax = pSettings->r_float(Manager->GetSection(), "LifeTimeCollided");
+	Constants.m_FlameFadeTime = pSettings->r_float(section, "FlameFadeTime");
+	//Constants.CollidedParticlePivot = pSettings->r_fvector3(Manager->GetSection(), "CollidedParticlePivot");
+
+	Constants.m_sFlameParticles = pSettings->r_string(section, "flame_particles");
+	Constants.m_sFlameParticlesGround = pSettings->r_string(section, "earth_flame_particles");
+	
 	int StartNum = pSettings->r_u16(section, "trace_collision_num_start");
 	for (int i = 0; i < StartNum; ++i) {
-		InactiveTraces.push_back(new CollisionTrace());
-		InactiveTraces.back()->first = xr_make_unique<CPoint>(this);
+		InactiveTraces.push_back(new CTrace(Constants));
+		/*InactiveTraces.back()->first = xr_make_unique<CPoint>(this);
 		InactiveTraces.back()->second = xr_make_unique<CCollision>(this);
-		InactiveTraces.back()->second->AttachToPoint(InactiveTraces.back()->first.get());
+		InactiveTraces.back()->second->AttachToPoint(InactiveTraces.back()->first.get());*/
 	}
 	m_RadiusMax = pSettings->r_float(section, "RadiusMax");
 }
@@ -517,21 +655,24 @@ void FlamethrowerTrace::CManager::Update(float DeltaTime)
 	{
 		CurrentElem = ActiveTraces.front();
 		ActiveTraces.pop_front();
-		CurrentElem->first->Update(DeltaTime);
-		CurrentElem->second->Update(DeltaTime);
-		auto PointActive = CurrentElem->first->IsActive();
+		CurrentElem->Update(DeltaTime);
+		/*CurrentElem->first->Update(DeltaTime);
+		CurrentElem->second->Update(DeltaTime);*/
+		/*auto PointActive = CurrentElem->first->IsActive();
 		auto CollisionActive = CurrentElem->second->IsActive();
 		VERIFY(PointActive && CollisionActive);
-		if(PointActive && CollisionActive)
+		if(PointActive && CollisionActive)*/
+		if (CurrentElem->IsActive())
 		{
-			Center += CurrentElem->second->GetPosition();
+			Center += CurrentElem->GetCollision().GetPosition();
 			++Num;
 			ActiveTraces.push_back(CurrentElem);
 		}
 		else
 		{
-			CurrentElem->first->Deactivate();
-			CurrentElem->second->Deactivate();
+			CurrentElem->Deactivate();
+			/*CurrentElem->first->Deactivate();
+			CurrentElem->second->Deactivate();*/
 			InactiveTraces.push_back(CurrentElem);
 		}
 	} while (CurrentElem != FirstElem);
@@ -542,7 +683,7 @@ void FlamethrowerTrace::CManager::Update(float DeltaTime)
 	}
 	Center /= Num;
 	for (auto& elem : ActiveTraces) {
-		float Dist = Center.distance_to_sqr(elem->second->GetPosition());
+		float Dist = Center.distance_to_sqr(elem->GetCollision().GetPosition());
 		if(Dist > Radius)
 		{
 			Radius = Dist;
@@ -568,17 +709,25 @@ const FlamethrowerTrace::CManager::FOverlappedObjects& FlamethrowerTrace::CManag
 	return Overlapped;
 }
 
+//bool Debug_block_shoot = false;
+
 void FlamethrowerTrace::CManager::OnShootingEnd()
 {
+	//Debug_block_shoot = false;
 	LastLaunched = nullptr;
 }
 
 void FlamethrowerTrace::CManager::LaunchTrace(const Fvector& StartPos, const Fvector& StartDir, bool Force)
 {
+	//if (Debug_block_shoot)
+	//{
+	//	return;
+	//}
+	//Debug_block_shoot = true;
 	// Insert debug trace abort here if needed
 	if(LastLaunched && LastLaunched->IsActive() && !Force)
 	{
-		auto dist = StartPos.distance_to_sqr(LastLaunched->GetPosition());
+		auto dist = StartPos.distance_to_sqr(LastLaunched->GetCollision().GetPosition());
 		auto RadiusSq = m_RadiusMax* m_RadiusMax;
 		Msg("dist [%f], radius sq [%f]", dist, RadiusSq);
 		if(dist <= RadiusSq)
@@ -586,22 +735,23 @@ void FlamethrowerTrace::CManager::LaunchTrace(const Fvector& StartPos, const Fve
 			return;
 		}
 	}
-	CollisionTracePtr FirstTrace;
+	CTrace* FirstTrace;
 	if (InactiveTraces.empty())
 	{
-		FirstTrace = new CollisionTrace;
-		FirstTrace->first = xr_make_unique<CPoint>(this);
+		FirstTrace = new CTrace(Constants);
+		/*FirstTrace->first = xr_make_unique<CPoint>(this);
 		FirstTrace->second = xr_make_unique<CCollision>(this);
-		FirstTrace->second->AttachToPoint(FirstTrace->first.get());
+		FirstTrace->second->AttachToPoint(FirstTrace->first.get());*/
 	} else
 	{
 		FirstTrace = InactiveTraces.front();
 		InactiveTraces.pop_front();
 	}
-	LastLaunched = FirstTrace->first.get();
-	LastLaunched->SetTransform(StartPos, StartDir);
-	FirstTrace->first->Activate();
-	FirstTrace->second->Activate();
+	LastLaunched = FirstTrace;
+	LastLaunched->GetPoint().SetTransform(StartPos, StartDir);
+	FirstTrace->Activate();
+	/*FirstTrace->first->Activate();
+	FirstTrace->second->Activate();*/
 	ActiveTraces.push_back(FirstTrace);
 }
 

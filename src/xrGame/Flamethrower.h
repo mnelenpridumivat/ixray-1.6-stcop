@@ -210,6 +210,6 @@ protected:
 		u16 weapon_id,
 		bool send_hit) override;
 
-	xr_unique_ptr<FlamethrowerTrace::CManager> TraceManager = nullptr;
+	FlamethrowerTrace::CManager TraceManager;
 
 };

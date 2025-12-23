@@ -35,7 +35,7 @@ ENGINE_API  extern float psHUD_FOV_def;
 
 //CUIXml*				pWpnScopeXml = NULL;
 
-CFlamethrower::CFlamethrower(ESoundTypes eSoundType) : CWeapon()
+CFlamethrower::CFlamethrower(ESoundTypes eSoundType) : CWeapon(), TraceManager(this)
 {
 	m_eSoundShow = static_cast<ESoundTypes>(SOUND_TYPE_ITEM_TAKING | eSoundType);
 	m_eSoundHide = static_cast<ESoundTypes>(SOUND_TYPE_ITEM_HIDING | eSoundType);
@@ -55,8 +55,6 @@ CFlamethrower::CFlamethrower(ESoundTypes eSoundType) : CWeapon()
 	m_bUseFiremodeChangeAnim = true;
 
 	m_sSndShotCurrent = nullptr;
-
-	TraceManager = xr_make_unique<FlamethrowerTrace::CManager>(this);
 }
 
 CFlamethrower::~CFlamethrower()
@@ -163,7 +161,7 @@ void CFlamethrower::Load(LPCSTR section)
 	m_dps = pSettings->r_float(section, "dps");
 	m_burn_time = pSettings->r_float(section, "burn_time");
 
-	TraceManager->Load((xr_string(section)+"_trace").c_str());
+	TraceManager.Load((xr_string(section)+"_trace").c_str());
 }
 
 bool CFlamethrower::UseScopeTexture()
@@ -557,7 +555,7 @@ void CFlamethrower::UpdateCL()
 
 	if (g_pGameLevel->bReady)
 	{
-		TraceManager->Update(dt);
+		TraceManager.Update(dt);
 	}
 }
 
@@ -693,7 +691,7 @@ void CFlamethrower::SetDefaults()
 
 void CFlamethrower::OnShot()
 {
-	TraceManager->LaunchTrace(m_vStartPos, m_vStartDir);
+	TraceManager.LaunchTrace(m_vStartPos, m_vStartDir);
 	
 	// Camera	
 	AddShotEffector();
@@ -746,7 +744,7 @@ void CFlamethrower::StopShooting()
 	//switch2_Idle();
 	SwitchState(eIdle);
 
-	TraceManager->OnShootingEnd();
+	TraceManager.OnShootingEnd();
 }
 
 
@@ -1443,7 +1441,7 @@ void CFlamethrower::save(NET_Packet& output_packet)
 	save_data(m_current_charge, output_packet);
 	save_data(m_current_fuel_level, output_packet);
 	save_data(m_fuel_section_name, output_packet);
-	TraceManager->save(output_packet);
+	TraceManager.save(output_packet);
 }
 
 void CFlamethrower::load(IReader& input_packet)
@@ -1454,7 +1452,7 @@ void CFlamethrower::load(IReader& input_packet)
 	load_data(m_current_charge, input_packet);
 	load_data(m_current_fuel_level, input_packet);
 	load_data(m_fuel_section_name, input_packet);
-	TraceManager->load(input_packet);
+	TraceManager.load(input_packet);
 }
 
 void CFlamethrower::Serialize(ISaveObject& Object)
@@ -1462,7 +1460,7 @@ void CFlamethrower::Serialize(ISaveObject& Object)
 	BEGIN_CHUNK(Object, "CFlamethrower")
 	{
 		inherited::Serialize(Object);
-		Object << m_is_overheated << m_overheating_state << m_current_charge << m_current_fuel_level << m_fuel_section_name << *TraceManager.get();
+		Object << m_is_overheated << m_overheating_state << m_current_charge << m_current_fuel_level << m_fuel_section_name << TraceManager;
 	}
 }
 
