@@ -235,7 +235,9 @@ void CBulletManager::Clear		()
 {
 	m_Bullets.clear			();
 	m_Events.clear			();
+#ifdef DEBUG
 	FlameManagersToDraw.clear();
+#endif
 }
 
 void CBulletManager::AddBullet(const Fvector& position,
@@ -1020,12 +1022,12 @@ void CBulletManager::Render	()
 			}
 		}
 	}
-#endif
 		
 	for(auto Manager : FlameManagersToDraw)
 	{
 		DrawFlamethrowerTrace(Manager);
 	}
+#endif
 
 	if(m_Bullets.empty())
 	{
