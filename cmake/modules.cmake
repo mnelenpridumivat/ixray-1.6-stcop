@@ -44,6 +44,4 @@ if(WIN32)
     include("${CMAKE_MODULE_PATHEX}/dirent.cmake")
 endif()
 
-if (IXRAY_EDITORS)
-    include("${CMAKE_MODULE_PATHEX}/FileWatch.cmake")
-endif()
+include("${CMAKE_MODULE_PATHEX}/FileWatch.cmake")
