@@ -596,6 +596,12 @@ void CFlamethrower::state_FireCharge(float dt)
 		clamp(m_current_charge, 0.0f, 1.0f);
 		m_current_fuel_level -= m_fuel_reduce_speed_charge * dt;
 		clamp(m_current_fuel_level, 0.0f, 1.0f);
+		m_overheating_state -= m_overheating_decrease_speed * dt;
+		clamp(m_overheating_state, 0.0f, 1.0f);
+		if (m_overheating_state <= m_overheating_reset_level_max)
+		{
+			m_is_overheated = false;
+		}
 	} else
 	{
 		OnMagazineEmpty();
@@ -640,13 +646,19 @@ void CFlamethrower::state_Fire(float dt)
 		m_vStartDir = d;
 
 		//while (m_current_fuel_level && IsWorking()) {
-			if (CheckForMisfire())
+			if (IsMisfire())
 			{
 				StopShooting();
 				return;
 			}
 			OnShot();
 			m_current_fuel_level -= (m_fuel_reduce_speed_charge + m_fuel_reduce_speed_shoot) * dt;
+			clamp(m_current_fuel_level, 0.0f, 1.0f);
+			m_overheating_state += m_overheating_increase_speed_max * dt;
+			if (m_overheating_state > 1.f)
+			{
+				m_is_overheated = true;
+			}
 			clamp(m_current_fuel_level, 0.0f, 1.0f);
 
 		UpdateSounds();
@@ -667,10 +679,17 @@ void CFlamethrower::state_Idle(float dt)
 {
 	m_current_charge = m_current_charge - m_charge_speed * dt;
 	clamp(m_current_charge, 0.0f, 1.0f);
+	m_overheating_state -= m_overheating_decrease_speed * dt;
+	clamp(m_overheating_state, 0.0f, 1.0f);
+	if (m_overheating_state <= m_overheating_reset_level_max)
+	{
+		m_is_overheated = false;
+	}
 }
 
 void CFlamethrower::state_Misfire(float dt)
 {
+	VERIFY(false);
 	OnEmptyClick();
 	SwitchState(eIdle);
 
