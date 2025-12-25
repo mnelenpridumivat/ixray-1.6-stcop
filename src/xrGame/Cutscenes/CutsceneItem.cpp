@@ -96,7 +96,7 @@ void SCutsceneObjectElement::Update(Fvector Deviation)
     //}
     HudModelKinematics->CalculateBones(true);
     ::Render->set_Transform(&m_transform);
-    ::Render->add_Visual(HudModel, true);
+    ::Render->add_Visual(HudModel, false, true);
 }
 
 #ifndef MASTER_GOLD
