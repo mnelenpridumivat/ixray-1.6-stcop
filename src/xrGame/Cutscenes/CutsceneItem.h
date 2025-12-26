@@ -47,8 +47,6 @@ public:
 
     shared_str AnimName;
     shared_str OnFinishFuncName = "";
-
-    static void OnFinishFunc(CBlend* P);
 };
 
 class CCutsceneItem

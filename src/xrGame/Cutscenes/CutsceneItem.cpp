@@ -54,30 +54,24 @@ void SCutsceneObjectElement::Activate()
         Msg("playing item animation [%s]", AnimName.c_str());
     }
 	R_ASSERT4(M2.valid(), "model has no motion", HudModel->getDebugName().c_str(), AnimName.c_str());
-    u16 pc = HudModelKinematicsAnimated->partitions().count();
-    CBlend* FirstBlend = nullptr;
-    for (u16 pid = 0; pid < pc; ++pid)
+
+    CBlend* B = HudModelKinematicsAnimated->PlayCycle(M2, true, [](CBlend* P)
     {
-        CBlend* B = HudModelKinematicsAnimated->PlayCycle(pid, M2, true);
-        R_ASSERT(B);
-        if (!FirstBlend)
+        auto Self = (SCutsceneObjectElement*)P->CallbackParam;
+        Level().CreateDefferedScriptCallback([Self]()
         {
-            FirstBlend = B;
-        }
-        B->update_callback = false;
-        B->stop_at_end = true;
+            luabind::functor<void> funct;
+            if (ai().script_engine().functor(Self->OnFinishFuncName.c_str(), funct))
+            {
+                funct();
+            }
+        });
+    }, this);
+    //B->update_callback = false;
+    //B->stop_at_end = true;
 #ifndef MASTER_GOLD
-        m_pBlends.push_back(B);
+    m_pBlends.push_back(B);
 #endif
-    }
-    VERIFY(FirstBlend);
-    FirstBlend->Callback = &SCutsceneObjectElement::OnFinishFunc;
-    FirstBlend->CallbackParam = this;
-    // TODO: Fix position for child objects
-    //if (parent)
-    //{
-    //    start_parent_transform = parent->HudModelKinematics->LL_GetTransform(AttachBoneID);
-    //}
 }
 
 void SCutsceneObjectElement::Update(Fvector Deviation)
@@ -176,28 +170,6 @@ void SCutsceneObjectElement::SetBonesWeapon(u16 BoneIDR, u16 BoneIDL)
 {
     BoneL = BoneIDL;
     BoneR = BoneIDR;
-}
-
-void SCutsceneObjectElement::OnFinishFunc(CBlend* P)
-{
-    VERIFY(P);
-    auto Self = (SCutsceneObjectElement*)P->CallbackParam;
-    VERIFY(Self);
-
-    if (Self->OnFinishFuncName.size())
-    {
-        try
-        {
-            luabind::functor<void> funct;
-            if (ai().script_engine().functor(Self->OnFinishFuncName.c_str(), funct))
-            {
-                funct(Self);
-            }
-        } catch(...)
-        {
-            R_ASSERT3(false, "Unable to process OnFinishFunc!", Self->OnFinishFuncName.c_str());
-        }
-    }
 }
 
 CCutsceneItem::~CCutsceneItem()
