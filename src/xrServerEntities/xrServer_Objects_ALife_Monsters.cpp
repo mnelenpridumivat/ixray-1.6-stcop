@@ -590,9 +590,9 @@ void CSE_ALifeTraderAbstract::STATE_Serialize(ISaveObject& Object)
 #ifndef XRGAME_EXPORTS
 		}
 		else {
-			CHARACTER_COMMUNITY_INDEX CommunitiIndex = NO_COMMUNITY_INDEX;
-			CHARACTER_RANK_VALUE Rank = NO_RANK;
-			CHARACTER_REPUTATION_VALUE Reputation = NO_REPUTATION;
+			s32 CommunitiIndex = s32(-1);
+			s32 Rank = type_min(s32);
+			s32 Reputation = type_min(s32);
 			Object << CommunitiIndex << Rank << Reputation;
 		}
 #endif

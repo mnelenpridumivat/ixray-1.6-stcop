@@ -85,7 +85,7 @@ public:
 	virtual void save(NET_Packet& output_packet) override;
 	virtual void load(IReader& input_packet) override;
 	virtual void Serialize(ISaveObject& Object) override;
-	virtual BOOL net_SaveRelevant() override; { return TRUE; }
+	virtual BOOL net_SaveRelevant() override { return TRUE; }
 	virtual void renderable_Render() override;
 	virtual void reload(LPCSTR section) override;
 	virtual void reinit() override;

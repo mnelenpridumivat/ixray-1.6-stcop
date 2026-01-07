@@ -3,7 +3,6 @@
 
 #include "game_news.h"
 #include "encyclopedia_article_defs.h"
-#include "character_info_defs.h"
 #include "relation_registry_defs.h"
 #include "InfoPortionDefs.h"
 #include "../xrCore/_stl_extensions.h"
