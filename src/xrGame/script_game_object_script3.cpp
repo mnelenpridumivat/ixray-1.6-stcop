@@ -340,13 +340,13 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 		.def("buy_supplies",				&CScriptGameObject::buy_supplies)
 		.def("buy_item_condition_factor",	&CScriptGameObject::buy_item_condition_factor)
 
-		.def("barter_buy_condition", (void (CScriptGameObject::*)(CScriptIniFile*, LPCSTR))(&CScriptGameObject::barter_buy_condition))
+		/*.def("barter_buy_condition", (void (CScriptGameObject::*)(CScriptIniFile*, LPCSTR))(&CScriptGameObject::barter_buy_condition))
 		.def("barter_buy_condition", (void (CScriptGameObject::*)(float, float))(&CScriptGameObject::barter_buy_condition))
 		.def("barter_show_condition", &CScriptGameObject::barter_show_condition)
 		.def("barter_sell_condition", (void (CScriptGameObject::*)(CScriptIniFile*, LPCSTR))(&CScriptGameObject::barter_sell_condition))
 		.def("barter_sell_condition", (void (CScriptGameObject::*)(float, float))(&CScriptGameObject::barter_sell_condition))
 		.def("barter_buy_supplies", &CScriptGameObject::barter_buy_supplies)
-		.def("barter_buy_item_condition_factor", &CScriptGameObject::barter_buy_item_condition_factor)
+		.def("barter_buy_item_condition_factor", &CScriptGameObject::barter_buy_item_condition_factor)*/
 
 		.def("sound_prefix",				(LPCSTR (CScriptGameObject::*)() const)(&CScriptGameObject::sound_prefix))
 		.def("sound_prefix",				(void (CScriptGameObject::*)(LPCSTR))(&CScriptGameObject::sound_prefix))

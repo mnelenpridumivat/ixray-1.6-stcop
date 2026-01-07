@@ -205,11 +205,11 @@ public:
 	virtual void SetIcon(const shared_str& iconName, bool is_outfit_icon = false);
 
 	//для работы с relation system
-	u16								object_id	() const;
-	s32		Community	() const {return CharacterInfo().Community().index();};
-	s32			Rank		() const {return CharacterInfo().Rank().value();};
-	s32		Reputation	() const {return CharacterInfo().Reputation().value();};
-	float							Sympathy	() const {return CharacterInfo().Sympathy(); }
+	u16 object_id() const;
+	s32 Community() const {return CharacterInfo().Community().index();}
+	s32 Rank() const {return CharacterInfo().Rank().value();}
+	s32 Reputation() const {return CharacterInfo().Reputation().value();}
+	float Sympathy() const {return CharacterInfo().Sympathy(); }
 
 protected:
 	CCharacterInfo* m_pCharacterInfo = nullptr;
@@ -251,9 +251,7 @@ public:
 
 private:
 	CTradeParameters* m_trade_parameters = nullptr;
-	CTradeParameters* m_barter_parameters = nullptr;
 	CPurchaseList* m_purchase_list = nullptr;
-	CPurchaseList* m_barter_purchase_list = nullptr;
 	bool m_need_osoznanie_mode = false;
 	bool m_isFocusingOnNpc = true;
 	bool m_deadbody_can_take = true;
@@ -265,12 +263,7 @@ public:
 		VERIFY(m_trade_parameters);
 		return *m_trade_parameters;
 	}
-	IC bool can_barter() const;
-	IC CTradeParameters* barter_parameters() const;
-	IC CPurchaseList& trade_purchase_list() const;
-	IC CPurchaseList& barter_purchase_list() const;
 	virtual	LPCSTR trade_section() const;
-	virtual	LPCSTR barter_section() const;
 	float deficit_factor(const shared_str& section) const;
 	void buy_supplies(CInifile& ini_file, LPCSTR section);
 	void barter_buy_supplies(CInifile& ini_file, LPCSTR section);
